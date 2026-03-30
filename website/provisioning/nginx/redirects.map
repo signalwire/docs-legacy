@@ -3128,3 +3128,11 @@
 /voice/tts/openai/ https://signalwire.com/docs/platform/voice/tts/openai;
 /voice/tts/rime https://signalwire.com/docs/platform/voice/tts/rime;
 /voice/tts/rime/ https://signalwire.com/docs/platform/voice/tts/rime;
+
+# ============================================================
+# Catch-all and exclusions
+# ============================================================
+# Exclude /freeswitch paths — served by the FreeSWITCH docs container
+~^/freeswitch 0;
+# Redirect all other unmatched paths to the new docs site
+default https://signalwire.com/docs;
