@@ -722,8 +722,8 @@
 /messaging/getting-started/campaign-registry/registration/ https://signalwire.com/docs/platform/messaging/campaign-registry/registration;
 /messaging/getting-started/how-to-troubleshoot-common-messaging-issues https://signalwire.com/docs;
 /messaging/getting-started/how-to-troubleshoot-common-messaging-issues/ https://signalwire.com/docs;
-/messaging/getting-started/platform-free-trial https://signalwire.com/docs/platform/trial-mode;
-/messaging/getting-started/platform-free-trial/ https://signalwire.com/docs/platform/trial-mode;
+/messaging/getting-started/platform-free-trial https://signalwire.com/docs/platform/messaging/platform-free-trial;
+/messaging/getting-started/platform-free-trial/ https://signalwire.com/docs/platform/messaging/platform-free-trial;
 /messaging/getting-started/receiving-your-first-sms https://signalwire.com/docs/compatibility-api/guides/receive-sms;
 /messaging/getting-started/receiving-your-first-sms/ https://signalwire.com/docs/compatibility-api/guides/receive-sms;
 /messaging/getting-started/sending-your-first-sms https://signalwire.com/docs/compatibility-api/guides/send-sms;
