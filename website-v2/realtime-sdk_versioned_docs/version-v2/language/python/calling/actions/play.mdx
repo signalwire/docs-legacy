@@ -1,0 +1,125 @@
+---
+title: Relay.Calling.PlayAction
+slug: /python/reference/calling/actions/play
+description: The Play Action is used to play audio files on a call.
+toc_max_heading_level: 3
+---
+
+[relay-calling-playpauseresult]: /docs/server-sdk/v2/python/reference/calling/results/play-pause
+[relay-calling-playresult]: /docs/server-sdk/v2/python/reference/calling/results/play
+[relay-calling-playresumeresult]: /docs/server-sdk/v2/python/reference/calling/results/play-resume
+[relay-calling-playvolumeresult]: /docs/server-sdk/v2/python/reference/calling/results/play-volume
+[relay-calling-stopresult]: /docs/server-sdk/v2/python/reference/calling/results/stop
+
+## Relay.Calling.PlayAction
+
+This object returned from one of _asynchronous_ play methods that represents a playing currently active on a call.
+
+### Properties
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `result` | [`Relay.Calling.PlayResult`][relay-calling-playresult] | Final result of playing. |
+| `state` | `string` | Current state of playing. |
+| `completed` | `boolean` | Whether the playing has finished. |
+| `payload` | `dict` | Payload sent to Relay to start playing. |
+| `control_id` | `string` | UUID to identify the playing. |
+
+### Methods
+
+#### pause
+
+Pause the playback immediately.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`coroutine` - Coroutine that will return a [`Relay.Calling.PlayPauseResult`][relay-calling-playpauseresult] object.
+
+**Examples**
+
+Start playing an audio file and pause it after 5 seconds:
+
+```python
+import asyncio # to use sleep
+
+action = await call.play_audio_async('https://cdn.signalwire.com/default-music/welcome.mp3')
+await asyncio.sleep(5)
+pause_result = await action.pause()
+```
+
+#### resume
+
+Resume the playback immediately.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`coroutine` - Coroutine that will return a [`Relay.Calling.PlayResumeResult`][relay-calling-playresumeresult] object.
+
+**Examples**
+
+Start playing an audio file, stop it and then resume it after 5 seconds:
+
+```python
+import asyncio # to use sleep
+
+action = await call.play_audio_async('https://cdn.signalwire.com/default-music/welcome.mp3')
+await asyncio.sleep(5)
+pause_result = await action.pause()
+await asyncio.sleep(5)
+resume_result = await action.resume()
+```
+
+#### stop
+
+Stop the action immediately.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`coroutine` - Coroutine that will return a [`Relay.Calling.StopResult`][relay-calling-stopresult] object.
+
+**Examples**
+
+Play an Mp3 file and stop it after 5 seconds:
+
+```python
+import asyncio # to use sleep
+
+action = await call.play_audio_async('https://cdn.signalwire.com/default-music/welcome.mp3')
+await asyncio.sleep(5)
+await action.stop()
+```
+
+#### volume
+
+Control the volume of the playback.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `volume` | `number` | **required** | Volume value between -40dB and +40dB where 0 is unchanged. |
+
+**Returns**
+
+`coroutine` - Coroutine that will return a [`Relay.Calling.PlayVolumeResult`][relay-calling-playvolumeresult] object.
+
+**Examples**
+
+Start playing an audio file and increase the playback volume:
+
+```python
+action = await call.play_audio_async('https://cdn.signalwire.com/default-music/welcome.mp3')
+result = await action.volume(5.0)
+```

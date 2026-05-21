@@ -1,0 +1,193 @@
+---
+title: Relay.Calling.FaxResult
+slug: /go/reference/calling/results/fax
+description: The result object that is returned when sending or receiving a fax.
+toc_max_heading_level: 3
+---
+
+[receivefax]: /docs/server-sdk/v2/go/reference/calling/call#receivefax
+[relay-event]: /docs/server-sdk/v2/go/reference/event
+[sendfax]: /docs/server-sdk/v2/go/reference/calling/call#sendfax
+
+## Relay.Calling.FaxResult
+
+This object returned from [`faxReceive`][receivefax] and [`faxSend`][sendfax] methods that represents the final result of a sent or received Fax.
+
+### Methods-submenu
+
+### GetDirection
+
+Returns the direction of the fax: `send` or `receive`.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`string` - *send* or *receive*.
+
+**Examples**
+
+> Start faxing and then check the direction.
+
+```go
+call.OnFaxFinished = func(faxAction *signalwire.FaxAction) {
+	faxResult := faxAction.GetResult()
+	signalwire.Log.Info("Direction %d\n", faxResult.Direction)
+	// same as
+	signalwire.Log.Info("Direction %d\n", faxAction.GetDirection())
+}
+ _, err := call.ReceiveFaxAsync()
+if err != nil {
+	signalwire.Log.Error("Error occurred while trying to receive fax\n")
+}
+```
+
+### GetEvent
+
+Returns the last Relay Event arrived for this operation.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+[`Relay.Event`][relay-event] - Last Relay Event.
+
+**Examples**
+
+> Send a document and then inspect the last received Relay event.
+
+```go
+_, err := call.SendFaxAsync()
+if err != nil {
+	signalwire.Log.Error("Error occurred while trying to send fax\n")
+}
+```
+
+### GetDocument
+
+Returns the URL to the document send or received.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`string` - URL to the document.
+
+**Examples**
+
+> Receiving fax and print the URL of the document.
+
+```go
+call.OnFaxFinished = func(faxAction *signalwire.FaxAction) {
+	signalwire.Log.Info("Download Document from %s\n Pages #%d\n", faxAction.GetDocument(), faxAction.GetPages())
+}
+_, err := call.ReceiveFaxAsync()
+if err != nil {
+	signalwire.Log.Error("Error occurred while trying to receive fax\n")
+}
+```
+
+### GetIdentity
+
+Returns the identity sending the fax.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`string` - Identity that sent the document.
+
+**Examples**
+
+> Receiving fax and print the identity.
+
+```go
+_, err := call.SendFaxAsync()
+if err != nil {
+	signalwire.Log.Error("Error occurred while trying to send fax\n")
+}
+```
+
+### GetPages
+
+Returns the number of pages in the document.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`number` - Number of pages.
+
+**Examples**
+
+> Print the number of received pages.
+
+```go
+call.OnFaxFinished = func(faxAction *signalwire.FaxAction) {
+	signalwire.Log.Info("Download Document from %s\n Pages #%d\n", faxAction.GetDocument(), faxAction.GetPages())
+}
+```
+
+### GetRemoteIdentity
+
+Returns the remote identity sent or receiving the Fax.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`string` - The remote identity.
+
+**Examples**
+
+> Receiving fax and print the remote identity.
+
+```go
+_, err := call.SendFaxAsync()
+if err != nil {
+	signalwire.Log.Error("Error occurred while trying to send fax\n")
+}
+```
+
+### GetSuccessful
+
+Return `true` if faxing succeeded, `false` otherwise.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`boolean` - True/False accordingly to the state.
+
+**Examples**
+
+> Start sending a document and then check if it has sent successfully.
+
+```go
+_, err := call.SendFaxAsync()
+if err != nil {
+	signalwire.Log.Error("Error occurred while trying to send fax\n")
+}
+```
+

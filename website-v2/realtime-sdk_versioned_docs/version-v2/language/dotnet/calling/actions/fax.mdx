@@ -1,0 +1,52 @@
+---
+title: FaxAction
+slug: /dotnet/reference/calling/actions/fax
+description: The FaxAction is used to send or receive faxes.
+toc_max_heading_level: 3
+---
+
+[call-1]: /docs/server-sdk/v2/dotnet/reference/calling/call#faxsend
+[call]: /docs/server-sdk/v2/dotnet/reference/calling/call#faxsendasync
+[signalwire-relay-calling-faxresult]: /docs/server-sdk/v2/dotnet/reference/calling/results/fax
+[signalwire-relay-calling-sendfaxpayload]: /docs/server-sdk/v2/dotnet/reference/calling/send-fax-payload
+[signalwire-relay-calling-stopresult]: /docs/server-sdk/v2/dotnet/reference/calling/results/stop
+
+[fax-receive-async]: /docs/server-sdk/v2/dotnet/reference/calling/call#faxreceiveasync
+# SignalWire.Relay.Calling.FaxAction
+
+This object returned from [`FaxReceiveAsync`][fax-receive-async] and [`FaxSendAsync`][call] methods that represents a fax operation that is currently active on a call.
+
+## Properties
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `ControlID` | string | The identifier used to control the operation. |
+| `Result` | [`SignalWire.Relay.Calling.FaxResult`][signalwire-relay-calling-faxresult] | Final result of the fax operation. |
+| `Completed` | bool | Whether the fax operation has completed. |
+| `Payload` | [`SignalWire.Relay.Calling.SendFaxPayload`][signalwire-relay-calling-sendfaxpayload] | Payload sent to [`FaxSend`][call-1] to perform a fax operation. This field will be `null` for receive fax operations. |
+
+## Methods
+
+### Stop
+
+Stop the action immediately.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+[`SignalWire.Relay.Calling.StopResult`][signalwire-relay-calling-stopresult] - The result object to interact with.
+
+**Examples**
+
+> Start listening for faxes and stop it after 5 seconds.
+
+```csharp
+FaxAction actionFax = call.FaxReceiveAsync();
+
+Thread.Sleep(5000);
+
+StopResult resultStop = actionFax.Stop();
+```

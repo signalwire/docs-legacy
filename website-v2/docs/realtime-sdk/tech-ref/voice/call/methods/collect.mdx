@@ -1,0 +1,181 @@
+---
+title: "collect"
+slug: /node/reference/voice/call/collect
+description: collect method for the Call class.
+toc_max_heading_level: 3
+---
+
+[callcollect-events]: /docs/server-sdk/node/reference/voice/call-collect#events
+[callcollect-onstarted]: /docs/server-sdk/node/reference/voice/call-collect#onstarted
+[callcollect]: /docs/server-sdk/node/reference/voice/call-collect
+[collectdigitsconfig]: /docs/server-sdk/node/reference/voice/types#collectdigitsconfig
+[collectspeechconfig]: /docs/server-sdk/node/reference/voice/types#collectspeechconfig
+[promptaudio]: /docs/server-sdk/node/reference/voice/call/prompt-audio
+[promptringtone]: /docs/server-sdk/node/reference/voice/call/prompt-ringtone
+[prompttts]: /docs/server-sdk/node/reference/voice/call/prompt-tts
+[startinput]: /docs/server-sdk/node/reference/voice/call/events#voice_call_oncollectinputstarted
+
+### collect
+
+**collect**(`params`): `Promise`\<[`CallCollect`][callcollect]>
+
+Collect user input. For methods that include a prompt to the user, please see [promptAudio][promptaudio], [promptRingtone][promptringtone], or [promptTTS][prompttts].
+
+#### Parameters {#voice_call_collect_parameters}
+
+<ParamField path="params" type="object" required>
+  Object containing the parameters for collecting user input.
+</ParamField>
+
+<Indent>
+<ParamField path="digits" type="CollectDigitsConfig">
+  Configuration for collecting digits. You must either set this, or `speech`. See [`CollectDigitsConfig`][collectdigitsconfig].
+</ParamField>
+
+<ParamField path="speech" type="CollectSpeechConfig">
+  Configuration for collecting speech. You must either set this, or `digits`. See [`CollectSpeechConfig`][collectspeechconfig].
+</ParamField>
+
+<ParamField path="continuous" type="boolean" default="false">
+  Detect utterances and digits until stopped.
+</ParamField>
+
+<ParamField path="initialTimeout" type="number" default="4">
+  Number of seconds to wait for initial input before giving up. Will be used only when `startInputTimers` is true or when the timer is started manually via the [`startInputTimers`][callcollect] method.
+</ParamField>
+
+<ParamField path="partialResults" type="boolean" default="false">
+  If true, partial result events are fired.
+</ParamField>
+
+<ParamField path="sendStartOfInput" type="boolean" default="false">
+  If true, the [`startOfInput`][startinput] event is fired when input is detected.
+</ParamField>
+
+<ParamField path="startInputTimers" type="boolean" default="false">
+  If true, the `initialTimeout` timer is started.
+</ParamField>
+
+<ParamField path="listen" type="object">
+  Callback to listen for events. List of collect events can be found [here][callcollect-events]. Example event: [`onStarted`][callcollect-onstarted].
+</ParamField>
+</Indent>
+
+#### Returns
+
+`Promise`\<[`CallCollect`][callcollect]>
+
+A promise that resolves to a [`CallCollect`][callcollect] object that you can use to
+view the current state and results of the collect session.
+
+#### Examples
+
+##### Digits Example
+In this example, we collect `digits` from the user and log the result.
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+const voiceClient = client.voice;
+
+await voiceClient.listen({
+  topics: ["office"],
+  onCallReceived: async (call) => {
+    call.answer();
+    console.log("Call received", call.id);
+    let collectResult = await call.collect({
+      digits: {
+        max: 5,
+        digitTimeout: 2,
+        terminators: "#*"
+      }
+    }).onStarted();
+    const { type, digits, terminator } = await collectResult.ended();
+    console.log("Collected", type, digits, terminator);
+    call.hangup();
+  }
+});
+```
+
+##### Speech Example
+In this example, we collect `speech` from the user and log the result.
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+const voiceClient = client.voice;
+
+await voiceClient.listen({
+  topics: ["office"],
+  onCallReceived: async (call) => {
+    call.answer();
+    console.log("Call received", call.id);
+    let collectResult = await call.collect({
+      speech: {
+        endSilenceTimeout: 2,
+        speechTimeout: 10,
+        language: "en-US",
+        hints: ["sales", "support", "representative"]
+      }
+    }).onStarted();
+    const { type, speech } = await collectResult.ended();
+    console.log("Collected", type, speech);
+  }
+});
+```
+
+##### CallCollect Events Example
+In this example we are collecting `digits` and listening for results using the `CallCollect` [Events][callcollect-events]:
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+const voiceClient = client.voice;
+
+// Setup a Voice Client and listen for incoming calls
+await voiceClient.listen({
+  topics: ["office"],
+  onCallReceived: async (call) => {
+    call.answer();
+    console.log("Call received", call.id);
+
+    // Start a call collect session
+    await call.collect({
+      digits: {
+        max: 4,
+        digitTimeout: 10,
+        terminators: "#"
+      },
+      partialResults: true,
+      sendStartOfInput: true,
+      listen: {
+        onStarted: () => {
+          console.log("Collect started");
+        },
+        onInputStarted: (collect) => {
+          console.log("Collect input started:", collect.result);
+        },
+        onUpdated: (collect) => {
+          console.log("Collect updated:", collect.result);
+        },
+        onFailed: (collect) => {
+          console.log("Collect failed:", collect.result);
+        },
+        onEnded: async (collect) => {
+          console.log("Collect ended:", collect.result);
+
+          // Play back the digits collected
+          await call.playTTS({ text: `You entered ${collect.digits}` });
+          call.hangup()
+        }
+      }
+    }).onStarted();
+  }
+});
+```

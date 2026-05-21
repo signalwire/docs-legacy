@@ -1,0 +1,43 @@
+---
+title: "play"
+slug: /node/reference/voice/call/play
+description: play method for the Call class.
+toc_max_heading_level: 3
+---
+
+[callplayback-9]: /docs/server-sdk/v3/node/reference/voice/call-playback
+[voice-call-6]: /docs/server-sdk/v3/node/reference/voice/call/play-audio
+[voice-call-7]: /docs/server-sdk/v3/node/reference/voice/call/play-silence
+[voice-call-8]: /docs/server-sdk/v3/node/reference/voice/call/play-tts
+[voice-call-9]: /docs/server-sdk/v3/node/reference/voice/call/play-ringtone
+[voiceplaylist-4]: /docs/server-sdk/v3/node/reference/voice/playlist
+
+### play
+
+- **play**(`params`): `Promise<CallPlayback>` - See [CallPlayback][callplayback-9] for more details.
+
+Play one or multiple media in a Call and waits until the playing has ended.
+
+The play method is a generic method for all types of media, see [playAudio][voice-call-6], [playSilence][voice-call-7], [playTTS][voice-call-8] or [playRingtone][voice-call-9] for more specific usages.
+
+#### Parameters
+
+| Name     | Type                                   | Description       |
+|:---------|:---------------------------------------|:------------------|
+| `params` | [`VoicePlaylist`][voiceplaylist-4] | A media playlist. |
+
+#### Returns
+
+`Promise<CallPlayback>` - See [CallPlayback][callplayback-9] for more details.
+
+#### Example
+
+```js
+await call.play(
+  new Voice.Playlist({ volume: 1.0 }).add(
+    Voice.Playlist.TTS({
+      text: "Welcome to SignalWire! Please enter your 4 digits PIN",
+    })
+  )
+);
+```

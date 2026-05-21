@@ -1,0 +1,79 @@
+---
+title: "ChatMessage"
+slug: /js/reference/chat/chat-message
+toc_max_heading_level: 3
+---
+
+Represents a message in a chat.
+
+## Constructors
+
+### constructor
+
+• **new ChatMessage**(`payload`)
+
+#### Parameters
+
+<ParamField path="payload" type="ChatMessage" required={true}>
+  Chat message payload
+</ParamField>
+
+## Properties
+
+### channel
+
+Accesses the channel in which this message was sent.
+
+**Syntax:** `ChatMessage.channel()`
+
+**Returns:** `string`
+
+---
+
+### content
+
+Accesses the content of this message. This can be any JSON-serializable object or value.
+
+**Syntax:** `ChatMessage.content()`
+
+**Returns:** `string`
+
+---
+
+### id
+
+Accesses the id of this message.
+
+**Syntax:** `ChatMessage.id()`
+
+**Returns:** `string`
+
+---
+
+### member
+
+Accesses the member which sent this message.
+
+**Syntax:** `ChatMessage.member()`
+
+**Returns:** [`ChatMember`](/docs/browser-sdk/js/reference/chat/chat-member)
+
+---
+
+### meta
+
+Accesses any metadata associated with this message.
+
+**Syntax:** `ChatMessage.meta()`
+
+**Returns:** `any`
+
+---
+
+### publishedAt
+
+Accesses the date and time at which this message was published.
+
+**Syntax:** `ChatMessage.publishedAt()`
+
+**Returns:** `Date`

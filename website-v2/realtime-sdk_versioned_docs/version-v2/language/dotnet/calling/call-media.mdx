@@ -1,0 +1,70 @@
+---
+title: "CallMedia"
+slug: /dotnet/reference/calling/call-media
+toc_max_heading_level: 3
+---
+[call-media-media-type]: /docs/server-sdk/v2/dotnet/reference/calling/call-media-type
+
+# SignalWire.Relay.Calling.CallMedia
+
+This object represents a call media that is being played.
+
+## Constructor
+
+The only constructor is the default constructor, properties should all be assigned by initializer or after construction.
+
+**Parameters**
+
+None
+
+**Examples**
+
+> Basic Example
+
+```csharp
+CallMedia media = new CallMedia
+{
+    Type = CallMedia.MediaType.tts,
+    Parameters = new CallMedia.TTSParams
+    {
+        Text = "I'm a little teapot"
+    }
+};
+```
+
+## Properties
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `Type` | [`SignalWire.Relay.Calling.CallMedia.MediaType`][call-media-media-type] | This is the type of the media. |
+| `Parameters` | object | This is the object that represents the parameters specific to the type, see [`SignalWire.Relay.Calling.CallMedia.MediaType`][call-media-media-type] for more information. |
+
+## Methods
+
+
+## ParametersAs&lt;T&gt;()
+
+This is a helper method to convert the `Parameters` to the real type.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `T` | Type | <span className="required-arg">required</span> | This is the data type for the conversion, see [`SignalWire.Relay.Calling.CallMedia.MediaType`][call-media-media-type] for more information. |
+
+**Returns**
+
+`T` - This is an instance of the data type resulting from the conversion, see [`SignalWire.Relay.Calling.CallMedia.MediaType`][call-media-media-type] for more information.
+
+**Examples**
+
+```csharp
+CallMedia.AudioParams audioParams = media.ParametersAs<CallMedia.AudioParams>();
+CallMedia.TTSParams ttsParams = media.ParametersAs<CallMedia.TTSParams>();
+CallMedia.SilenceParams silenceParams = media.ParametersAs<CallMedia.SilenceParams>();
+CallMedia.RingtoneParams ringtoneParams = media.ParametersAs<CallMedia.RingtoneParams>();
+```
+
+## Events
+
+None

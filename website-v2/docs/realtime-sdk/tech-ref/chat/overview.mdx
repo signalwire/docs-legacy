@@ -1,0 +1,73 @@
+---
+title: "Chat"
+sidebar_label: Overview
+sidebar_position: 0
+keywords:
+  - SignalWire
+  - Realtime SDK
+  - Node.js
+  - chat API
+  - real-time chat
+slug: /node/reference/chat
+description: Access the Chat API for building real-time chat applications. Subscribe to channels, send messages, and track member presence in chat rooms.
+toc_max_heading_level: 3
+---
+
+[chat-client-1]: /docs/server-sdk/node/reference/chat/client/listen
+[chat-client-2]: /docs/server-sdk/node/reference/chat/client
+[chat-client]: /docs/server-sdk/node/reference/chat/client/events
+
+Access the Chat API Consumer. You can instantiate a [Chat.Client][chat-client-2] to subscribe to Chat events. 
+
+<Info>
+For a full list of events that a [Chat.Client][chat-client-2] can subscribe to, refer to [Chat Events][chat-client].
+</Info>
+
+#### Example
+
+The following example shows how to instantiate a [Chat.Client][chat-client-2]
+and [listen][chat-client-1] to the `onMemberJoined` event on the `channel1` channel.
+When a member joins the channel,
+the bot will send a message to the channel with the number of members in the channel and the list of members.
+
+```javascript
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+const chatClient = client.chat;
+
+await chatClient.listen({
+  channels: ["channel1"],
+  onMemberJoined: async (member) => {
+
+    let members = await chatClient.getMembers({
+      channel: member.channel
+    });
+    let chatMessage = `Hello ${member.id}!
+    There are ${members.members.length} members in this channel.
+    The members are: ${members.members.map(m => m.id).join(", ")}`
+
+    await chatClient.publish({
+      channel: member.channel,
+      content: chatMessage
+    })
+  }
+});
+```
+
+---
+
+## **Classes**
+
+<CardGroup cols={2}>
+  <Card title="Client" icon="fa-solid fa-server" href="/docs/server-sdk/node/reference/chat/client">
+    The main Chat client for sending messages, managing members, and subscribing to chat events.
+  </Card>
+  <Card title="ChatMember" icon="fa-solid fa-user" href="/docs/server-sdk/node/reference/chat/chat-member">
+    Represents a member in a chat channel with properties for identity and state.
+  </Card>
+  <Card title="ChatMessage" icon="fa-solid fa-message" href="/docs/server-sdk/node/reference/chat/chat-message">
+    Represents a chat message with content, sender information, and metadata.
+  </Card>
+</CardGroup>

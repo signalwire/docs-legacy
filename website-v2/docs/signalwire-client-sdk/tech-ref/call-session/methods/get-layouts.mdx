@@ -1,0 +1,138 @@
+---
+title: getLayouts
+slug: /call-session/getlayouts
+---
+
+Retrieves a list of available video layouts for the call.
+
+## Signature
+
+```typescript
+getLayouts(): Promise<{ layouts: string[] }>
+```
+
+## Parameters
+
+None
+
+## Returns
+
+**Type:** `Promise<{ layouts: string[] }>`
+
+An object containing an array of layout name strings.
+
+**Common layout names include:**
+- `"grid-responsive"` - Responsive grid layout
+- `"2x1"`, `"3x3"`, `"4x4"`, `"5x5"`, `"6x6"` - Fixed grid layouts
+- `"1x1"` - Single participant layout
+- `"2x2"` - Four participant grid
+
+## Important Notes
+
+**Layout Availability:** The list of available layouts depends on your server configuration and call settings. Common layouts include:
+
+| Layout Name | Description |
+|-------------|-------------|
+| `grid-responsive` | Automatically adjusts grid based on number of participants |
+| `1x1` | Single participant (full screen) |
+| `2x1` | Two participants side by side |
+| `2x2` | Four participants in a 2x2 grid |
+| `3x3` | Nine participants in a 3x3 grid |
+| `4x4` | Sixteen participants in a 4x4 grid |
+| `5x5` | Twenty-five participants in a 5x5 grid |
+| `6x6` | Thirty-six participants in a 6x6 grid |
+
+**Tip:** Use `grid-responsive` for most use cases as it automatically adapts to the number of participants.
+
+**Layout vs Position:**
+- **Layout** - The overall arrangement template (e.g., `3x3` grid)
+- **Position** - Where a specific participant appears within that layout
+
+```typescript
+// Set the layout template
+await call.setLayout({ name: '3x3' })
+
+// Optionally set specific member positions within the layout
+await call.setPositions({
+  positions: {
+    [memberId1]: { x: 0, y: 0 },
+    [memberId2]: { x: 1, y: 0 }
+  }
+})
+```
+
+## Events
+
+While `getLayouts()` doesn't emit events, layout changes emit:
+
+- `layout.changed` - Fired when the call layout changes
+
+```typescript
+call.on('layout.changed', (event) => {
+  console.log('New layout:', event.layout.name)
+  console.log('Layout layers:', event.layout.layers)
+})
+```
+
+## Examples
+
+### Get available layouts
+
+```typescript
+const { layouts } = await call.getLayouts()
+console.log('Available layouts:', layouts)
+// Example output: ["grid-responsive", "2x2", "3x3", "4x4", "6x6"]
+```
+
+### Choose and set a layout
+
+```typescript
+const { layouts } = await call.getLayouts()
+
+if (layouts.includes('grid-responsive')) {
+  await call.setLayout({ name: 'grid-responsive' })
+  console.log('Layout set to grid-responsive')
+}
+```
+
+### Display layout options to user
+
+```typescript
+async function showLayoutOptions() {
+  const { layouts } = await call.getLayouts()
+
+  const select = document.getElementById('layout-select')
+
+  layouts.forEach(layout => {
+    const option = document.createElement('option')
+    option.value = layout
+    option.textContent = layout
+    select.appendChild(option)
+  })
+
+  select.addEventListener('change', async (e) => {
+    const selectedLayout = e.target.value
+    await call.setLayout({ name: selectedLayout })
+  })
+}
+
+showLayoutOptions()
+```
+
+### Validate layout before setting
+
+```typescript
+async function setLayoutSafely(layoutName: string) {
+  const { layouts } = await call.getLayouts()
+
+  if (layouts.includes(layoutName)) {
+    await call.setLayout({ name: layoutName })
+    console.log(`Successfully set layout to: ${layoutName}`)
+  } else {
+    console.error(`Layout "${layoutName}" is not available`)
+    console.log('Available layouts:', layouts)
+  }
+}
+
+setLayoutSafely('4x4')
+```

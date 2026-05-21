@@ -1,0 +1,624 @@
+---
+title: "RoomSessionMember"
+keywords:
+  - SignalWire
+  - Realtime SDK
+  - Node.js
+  - video participant
+  - room member
+slug: /node/reference/video/room-session-member
+sidebar_label: RoomSessionMember
+description: RoomSessionMember reference representing a participant in a video room. Access member properties like audio/video state, name, and metadata.
+toc_max_heading_level: 3
+---
+
+[video-roomsession]: /docs/server-sdk/node/reference/video/room-session
+
+Represents a member of a room session. You receive instances of this type by listening to room events, for example on a [RoomSession][video-roomsession] object.
+
+<Info>
+
+The state of RoomSessionMember objects, for example `member.visible`, is
+immutable. When you receive instances of RoomSessionMember from event
+listeners, the state of the member always refers to that specific point in
+time and remains fixed for the whole lifetime of the object.
+
+</Info>
+
+### Example
+
+Getting a RoomSessionMember instance when a user joins a [RoomSession][video-roomsession]:
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+// Intialize the SignalWire Client
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+// Access the video client from the SignalWire client
+const videoClient = client.video;
+
+// Setup listerner for when a room starts
+await videoClient.listen({
+  onRoomStarted: async (roomsession) => {
+    roomsession.listen({
+      onMemberJoined: (member) => {
+        console.log("RoomSessionMember:", member);
+      },
+    });
+  }
+});
+```
+
+---
+
+## **Properties**
+
+<ParamField path="id" type="string" required>
+  Unique id of this member.
+</ParamField>
+
+<ParamField path="roomId" type="string" required>
+  Id of the room associated to this member.
+</ParamField>
+
+<ParamField path="roomSessionId" type="string" required>
+  Id of the room session associated to this member.
+</ParamField>
+
+<ParamField path="name" type="string" required>
+  Name of this member.
+</ParamField>
+
+<ParamField path="type" type="VideoMemberType" required>
+  Type of this video member. Can be `'member'`, `'screen'`, or `'device'`.
+</ParamField>
+
+<ParamField path="parentId" type="string">
+  Id of the parent video member, if it exists.
+</ParamField>
+
+<ParamField path="requestedPosition" type="VideoPosition" required>
+  Position requested for this member in the layout. This may differ from `currentPosition` if the requested position is not currently available.
+</ParamField>
+
+<ParamField path="currentPosition" type="VideoPosition">
+  Current position of this member in the layout.
+</ParamField>
+
+<ParamField path="meta" type="Record<string, unknown>">
+  Metadata associated to this member.
+</ParamField>
+
+<ParamField path="audioMuted" type="boolean" required>
+  Whether the outbound audio is muted (e.g., from the microphone).
+</ParamField>
+
+<ParamField path="videoMuted" type="boolean" required>
+  Whether the outbound video is muted.
+</ParamField>
+
+<ParamField path="deaf" type="boolean" required>
+  Whether the inbound audio is muted.
+</ParamField>
+
+<ParamField path="visible" type="boolean" required>
+  Whether the member is visible.
+</ParamField>
+
+<ParamField path="inputVolume" type="number" required default="0">
+  Input volume (e.g., of the microphone). Values range from -50 to 50.
+</ParamField>
+
+<ParamField path="outputVolume" type="number" required default="0">
+  Output volume (e.g., of the speaker). Values range from -50 to 50.
+</ParamField>
+
+<ParamField path="inputSensitivity" type="number" required default="30">
+  Input level at which the participant is identified as currently speaking. The scale goes from 0 (lowest sensitivity, essentially muted) to 100 (highest sensitivity).
+</ParamField>
+
+<ParamField path="handraised" type="boolean" required>
+  Whether the member's hand is raised.
+</ParamField>
+
+<ParamField path="talking" type="boolean">
+  Whether the member is currently talking.
+</ParamField>
+
+## **Methods**
+
+### audioMute
+
+▸ **audioMute**(): `Promise<void>`
+
+Mutes the outbound audio for this member (e.g., the one coming from a microphone). The other participants will not hear audio from the muted participant anymore.
+
+#### Returns
+
+`Promise<void>`
+
+#### Example
+
+In this example, we mute the audio of the member when they join the room.
+This example assumes that you already have a [`RoomSession`][video-roomsession] active
+and members are joining the room.
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+// Intialize the SignalWire Client
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+// Access the video client from the SignalWire client
+const videoClient = client.video;
+
+// Setup listerner for when a room starts
+await videoClient.listen({
+  onRoomStarted: async (roomsession) => {
+    roomsession.listen({
+      // Mute the audio of the RoomSession member when they join the room
+      onMemberJoined: async (member) => {
+        await member.audioMute();
+      },
+      onMemberUpdated: async (member) => {
+        console.log("Member Updated:", member.name);
+      }
+    });
+  }
+});
+```
+
+---
+
+### audioUnmute
+
+▸ **audioUnmute**(): `Promise<void>`
+
+Unmutes the outbound audio for this member (e.g., the one coming from a microphone) if it had been previously muted.
+
+#### Returns
+
+`Promise<void>`
+
+#### Example
+
+In this example, we mute the audio of the member when they join the room and
+unmute it after 5 seconds. 
+This example assumes that you already have a [`RoomSession`][video-roomsession] active
+and members are joining the room.
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+// Intialize the SignalWire Client
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+// Access the video client from the SignalWire client
+const videoClient = client.video;
+
+// Setup listerner for when a room starts
+await videoClient.listen({
+  onRoomStarted: async (roomsession) => {
+    roomsession.listen({
+      // Mute the audio of the RoomSession member when they join the room and unmute it after 5 seconds
+      onMemberJoined: async (member) => {
+        await member.audioMute();
+        setTimeout(async () => {
+          await member.audioUnmute();
+        }, 5000);
+      },
+      onMemberUpdated: async (member) => {
+        console.log("Member Updated:", member.name);
+      }
+    });
+  }
+});
+```
+
+---
+
+### remove
+
+▸ **remove**(): `Promise<void>`
+
+Removes this member from the room.
+
+#### Returns
+
+`Promise<void>`
+
+#### Example
+
+In this example, we remove the member from the room when they join the room after 5 seconds.
+This example assumes that you already have a [`RoomSession`][video-roomsession] active
+and members are joining the room.
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+// Intialize the SignalWire Client
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+// Access the video client from the SignalWire client
+const videoClient = client.video;
+
+// Setup listerner for when a room starts
+await videoClient.listen({
+  onRoomStarted: async (roomsession) => {
+    roomsession.listen({
+      // Remove the RoomSession member when they join the room
+      onMemberJoined: async (member) => {
+        setTimeout(async () => {
+          await member.remove();
+        }, 5000);
+      },
+      onMemberUpdated: async (member) => {
+        console.log("Member Updated:", member.name);
+      }
+    });
+  }
+});
+```
+
+---
+
+### setDeaf
+
+▸ **setDeaf**(`value`): `Promise<void>`
+
+Mutes or unmutes the inbound audio for the member (e.g., the one played through this member's speakers). When the inbound audio is muted, the affected participant will not hear audio from the other participants anymore.
+
+#### Parameters
+
+<ParamField path="value" type="boolean" required>
+  Whether to mute the audio.
+</ParamField>
+
+#### Returns
+
+`Promise<void>`
+
+#### Example
+
+In this example, we mute the audio of the member when they join the room.
+This example assumes that you already have a [`RoomSession`][video-roomsession] active
+and members are joining the room.
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+// Intialize the SignalWire Client
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+// Access the video client from the SignalWire client
+const videoClient = client.video;
+
+// Setup listerner for when a room starts
+await videoClient.listen({
+  onRoomStarted: async (roomsession) => {
+    roomsession.listen({
+      // Mute the audio of the RoomSession member when they join the room
+      onMemberJoined: async (member) => {
+        await member.setDeaf(true);
+      },
+      onMemberUpdated: async (member) => {
+        console.log("Member Updated:", member.name);
+      }
+    });
+  }
+});
+```
+
+---
+
+### setInputSensitivity
+
+▸ **setInputSensitivity**(`params`): `Promise<void>`
+
+Sets the input level at which the participant is identified as currently speaking.
+
+#### Parameters
+
+<ParamField path="params" type="object" required>
+  Object containing the parameters of the method.
+</ParamField>
+
+<Indent>
+<ParamField path="value" type="number" required default="30">
+  Desired sensitivity from 0 (lowest sensitivity, essentially muted) to 100 (highest sensitivity).
+</ParamField>
+</Indent>
+
+#### Returns
+
+`Promise<void>`
+
+#### Example
+
+In this example, we set the input sensitivity of the member when they join the room.
+This example assumes that you already have a [`RoomSession`][video-roomsession] active
+and members are joining the room.
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+// Intialize the SignalWire Client
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+// Access the video client from the SignalWire client
+const videoClient = client.video;
+
+// Setup listerner for when a room starts
+await videoClient.listen({
+  onRoomStarted: async (roomsession) => {
+    roomsession.listen({
+      // Set the input sensitivity of the RoomSession member when they join the room
+      onMemberJoined: async (member) => {
+        await member.setInputSensitivity({ value: 80 });
+      },
+      onMemberUpdated: async (member) => {
+        console.log("Member Updated:", member.name);
+      }
+    });
+  }
+});
+```
+
+---
+
+### setInputVolume
+
+▸ **setInputVolume**(`params`): `Promise<void>`
+
+Sets the input volume for the member (e.g., the microphone input level).
+
+#### Parameters
+
+<ParamField path="params" type="object" required>
+  Object containing the parameters of the method.
+</ParamField>
+
+<Indent>
+<ParamField path="volume" type="number" required default="0">
+  Desired volume. Values range from -50 to 50.
+</ParamField>
+</Indent>
+
+#### Returns
+
+`Promise<void>`
+
+#### Example
+
+In this example, we set the input volume of the member when they join the room.
+This example assumes that you already have a [`RoomSession`][video-roomsession] active
+and members are joining the room.
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+// Intialize the SignalWire Client
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+// Access the video client from the SignalWire client
+const videoClient = client.video;
+
+// Setup listerner for when a room starts
+await videoClient.listen({
+  onRoomStarted: async (roomsession) => {
+    roomsession.listen({
+      // Set the input volume of the RoomSession member when they join the room
+      onMemberJoined: async (member) => {
+        await member.setInputVolume({ volume: -10 });
+      },
+      onMemberUpdated: async (member) => {
+        console.log("Member Updated:", member.name);
+      }
+    });
+  }
+});
+```
+
+---
+
+### setOutputVolume
+
+▸ **setOutputVolume**(`params`): `Promise<void>`
+
+Sets the output volume for the member (e.g., the speaker output level).
+
+#### Parameters
+
+<ParamField path="params" type="object" required>
+  Object containing the parameters of the method.
+</ParamField>
+
+<Indent>
+<ParamField path="volume" type="number" required default="0">
+  Desired volume. Values range from -50 to 50.
+</ParamField>
+</Indent>
+
+#### Returns
+
+`Promise<void>`
+
+#### Example
+
+In this example, we set the output volume of the member when they join the room.
+This example assumes that you already have a [`RoomSession`][video-roomsession] active
+and members are joining the room.
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+// Intialize the SignalWire Client
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+// Access the video client from the SignalWire client
+const videoClient = client.video;
+
+// Setup listerner for when a room starts
+await videoClient.listen({
+  onRoomStarted: async (roomsession) => {
+    roomsession.listen({
+      // Set the output volume of the RoomSession member when they join the room
+      onMemberJoined: async (member) => {
+        await member.setOutputVolume({ volume: -10 });
+      },
+      onMemberUpdated: async (member) => {
+        console.log("Member Updated:", member.name);
+      }
+    });
+  }
+});
+```
+
+---
+
+### videoMute
+
+▸ **videoMute**(): `Promise<void>`
+
+Mutes the outbound video for this member (e.g., the one coming from a webcam). Participants will see a mute image instead of the video stream.
+
+#### Returns
+
+`Promise<void>`
+
+#### Example
+
+In this example, we mute the video of the member when they join the room.
+This example assumes that you already have a [`RoomSession`][video-roomsession] active
+and members are joining the room.
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+// Intialize the SignalWire Client
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+// Access the video client from the SignalWire client
+const videoClient = client.video;
+
+// Setup listerner for when a room starts
+await videoClient.listen({
+  
+  onRoomStarted: async (roomsession) => {
+    roomsession.listen({
+      // Mute the video of the RoomSession member when they join the room
+      onMemberJoined: async (member) => {
+        await member.videoMute();
+      },
+      onMemberUpdated: async (member) => {
+        console.log("Member Updated:", member.name);
+      }
+    });
+  }
+});
+```
+
+---
+
+### videoUnmute
+
+▸ **videoUnmute**(): `Promise<void>`
+
+Unmutes the outbound video for this member (e.g., the one coming from a webcam) if it had been previously muted. Participants will start seeing the video stream again.
+
+#### Returns
+
+`Promise<void>`
+
+#### Example
+
+In this example, we mute the video of the member when they join the room and
+unmute it after 5 seconds. This example assumes that you already have a [`RoomSession`][video-roomsession] active
+and members are joining the room.
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+// Intialize the SignalWire Client
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+// Access the video client from the SignalWire client
+const videoClient = client.video;
+
+// Listen for a room to start
+await videoClient.listen({
+
+  onRoomStarted: async (roomsession) => {
+    // Listen for a member to join the room
+    roomsession.listen({
+      onMemberJoined: async (member) => {
+        // Mute the video of the RoomSession member when they join the room
+        await member.videoMute();
+        // Unmute the video of the RoomSession member after 5 seconds
+        setTimeout(async () => {
+          await member.videoUnmute();
+        }, 5000);
+      },
+      onMemberUpdated: async (member) => {
+        console.log("Member Updated:", member.name);
+      }
+    });
+  }
+});
+```
+
+---
+
+### setRaisedHand
+
+▸ **setRaisedHand**(`params`): `Promise<void>`
+
+Sets the raised hand status for this member.
+
+#### Parameters
+
+<ParamField path="params" type="object" required>
+  Object containing the parameters of the method.
+</ParamField>
+
+<Indent>
+<ParamField path="raised" type="boolean" default="true">
+  Whether to raise or lower the hand. If omitted, the hand status is toggled to the opposite of the current status.
+</ParamField>
+</Indent>
+
+#### Returns
+
+`Promise<void>`
+
+#### Example
+
+In this example, we raise the hand of a member when they join the room.
+This example assumes that you already have a [`RoomSession`][video-roomsession] active
+and members are joining the room.
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+// Intialize the SignalWire Client
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+// Access the video client from the SignalWire client
+const videoClient = client.video;
+
+// Setup listerner for when a room starts
+await videoClient.listen({
+  onRoomStarted: async (roomsession) => {
+    roomsession.listen({
+      onMemberJoined: async (member) => {
+        // Raise the hand of the member
+        await member.setRaisedHand({ raised: true });
+      },
+      onMemberUpdated: async (member) => {
+        console.log("Member Updated:", member.name, "Hand Raised:", member.handraised);
+      }
+    });
+  }
+});
+```

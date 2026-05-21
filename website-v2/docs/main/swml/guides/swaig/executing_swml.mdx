@@ -1,0 +1,335 @@
+---
+title: Execute SWML from a function
+slug: /swml/guides/executing-swml
+description: Learn how to execute SWML from a SWAIG function.
+x-custom:
+  tags:
+    - favorite
+    - sdk:swml
+    - product:ai
+    - product:voice
+---
+
+`SWAIG` functions allow you to execute `SWML` from within itself.
+This allows you to create a function that can be used to execute a specific SWML block, that lives outside the
+AI language model. The benefit of this is you can get more granular control over the execution of what happens next after the function
+is triggered while also getting the additional benefits of SignalWire's APIs.
+
+For this example, we will create an AI and who will help assist with transferring the call.
+The AI will ask the user for a destination to transfer to, and then execute a function to
+send an SMS to notify the destination that they have a call coming in, and then transfer the call.
+
+## Enabling SWML execution
+
+The first important step is to make sure our AI is capable of executing SWML in its functions.
+In the [`ai.params`](/docs/swml/reference/ai/params), you will need to set the parameter `swaig_allow_swml` to `true`, to allow SWML execution:
+
+```json
+{
+  "params": {
+    "swaig_allow_swml": true
+  }
+}
+```
+
+## Data map example
+
+In this example, we are using the `data_map` to execute SWML in the `data_map.expressions.output.action`.
+
+### Creating the Function
+
+We will create a function that will send an SMS to the destination number, and then transfer the call to the destination number.
+
+```json
+{
+  "SWAIG": {
+    "functions": [
+      {
+        "function": "transfer",
+        "description": "Get input from user and transfer to a destination department",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "destination": {
+              "type": "string",
+              "description": "The destination to transfer to"
+            }
+          }
+        },
+        "data_map": {
+          "expressions": [
+            {
+              "string": "${args.destination}",
+              "pattern": ".*",
+              "output": {
+                "response": "Transferring call.",
+                "action": [
+                  {
+                    "transfer": true,
+                    "SWML": {
+                      "sections": {
+                        "main": [
+                          {
+                            "send_sms": {
+                              "to_number": "+1XXXXXXXXXX",
+                              "from_number": "+1YYYYYYYYYY",
+                              "body": "Call coming from ${caller_id_num}"
+                            }
+                          },
+                          {
+                            "connect": {
+                              "to": "+1XXXXXXXXXX"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  { "stop": true }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
+```
+<Warning>
+When passing a SWML object that includes a `connect` (or other method that transfers the call) in `output.action[]`, your script must be JSON, and `"transfer": true,` must be included before the SWML in the same action object. Refer to the example above.
+</Warning>
+
+### SWML Execution
+
+We are using the `SWML` action to execute the SWML block that will send the SMS using the 
+[`send_sms`](/docs/swml/reference/send-sms) method 
+and then connect the call to the destination number using the 
+[`connect`](/docs/swml/reference/connect) method.
+
+```json
+{
+  "action": [
+    {
+      "transfer": true,
+      "SWML": {
+        "sections": {
+          "main": [
+            {
+              "send_sms": {
+                "to_number": "+1XXXXXXXXXX",
+                "from_number": "+1YYYYYYYYYY",
+                "body": "Call coming from ${caller_id_num}"
+              }
+            },
+            {
+              "connect": {
+                "to": "+1XXXXXXXXXX"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
+```
+
+### Full Example
+
+```json
+{
+  "sections": {
+    "main": [
+      {
+        "ai": {
+          "prompt": {
+            "text": "Your name is Frank. You help the user with transferring calls.\n## Handling The User\n- You are asked to transfer a call.\n- You ask for the destination.\n- You use the 'transfer' function to transfer the call."
+          },
+          "post_prompt_url": "https://example.com/post_prompt_url",
+          "params": {
+            "swaig_allow_swml": true
+          },
+          "SWAIG": {
+            "functions": [
+              {
+                "function": "transfer",
+                "description": "Get input from user and transfer to a destination department",
+                "parameters": {
+                  "type": "object",
+                  "properties": {
+                    "destination": {
+                      "type": "string",
+                      "description": "The destination to transfer to"
+                    }
+                  }
+                },
+                "data_map": {
+                  "expressions": [
+                    {
+                      "string": "${args.destination}",
+                      "pattern": ".*",
+                      "output": {
+                        "response": "Transferring call.",
+                        "action": [
+                          {
+                            "transfer": true,
+                            "SWML": {
+                              "sections": {
+                                "main": [
+                                  {
+                                    "send_sms": {
+                                      "to_number": "+1XXXXXXXXXX",
+                                      "from_number": "+1YYYYYYYYYY",
+                                      "body": "Call coming from ${caller_id_num}"
+                                    }
+                                  },
+                                  {
+                                    "connect": {
+                                      "to": "+1XXXXXXXXXX"
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          },
+                          { "stop": true }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          "hints": ["transfer"]
+        }
+      }
+    ]
+  }
+}
+```
+
+## Webhook example
+
+In this example, we are using the `function.web_hook_url` to execute SWML.
+
+### Creating the Function
+
+We will create a function that will take the input from the user as an argument (_destination_) and then make a request
+to the `function.web_hook_url`.
+
+```json
+{
+  "SWAIG": {
+    "functions": [
+      {
+        "function": "transfer",
+        "web_hook_url": "https://example.com/transfer",
+        "description": "Get input from user and transfer to a destination department",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "destination": {
+              "type": "string",
+              "description": "The destination to transfer to"
+            }
+          }
+        }
+      }
+    ]
+  }
+}
+```
+
+### SWML Execution
+
+When executing `SWML` while utilizing a `function.web_hook_url`, you will need to provide a response
+from the `function.web_hook_url` that contains the `action` key. In this `action` key
+you will need to provide the `SWML` block that you want to execute.
+
+**Format**:
+
+```json
+{
+  "response": "The response to the AI",
+  "action": ["The SWML block to execute"]
+}
+```
+
+**Webhook Response Example**:
+
+We are using the `SWML` action to execute the SWML block that will send the SMS using the 
+[`send_sms`](/docs/swml/reference/send-sms) method 
+and then connect the call to the destination number using the 
+[`connect`](/docs/swml/reference/connect) method.
+
+```json
+{
+  "response": "Transferring call.",
+  "action": [
+    {
+      "transfer": true,
+      "SWML": {
+        "sections": {
+          "main": [
+            {
+              "send_sms": {
+                "to_number": "+1XXXXXXXXXX",
+                "from_number": "+1YYYYYYYYYY",
+                "body": "Call coming from ${caller_id_num}"
+              }
+            },
+            {
+              "connect": {
+                "to": "+1XXXXXXXXXX"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
+```
+
+### Full Example
+
+```json
+{
+  "sections": {
+    "main": [
+      {
+        "ai": {
+          "prompt": {
+            "text": "Your name is Frank. You help the user with transferring calls.\n## Handling The User\n- You are asked to transfer a call.\n- You ask for the destination.\n- You use the 'transfer' function to transfer the call."
+          },
+          "post_prompt_url": "https://example.com/post_prompt_url",
+          "params": {
+            "swaig_allow_swml": true
+          },
+          "SWAIG": {
+            "functions": [
+              {
+                "function": "transfer",
+                "web_hook_url": "https://example.com/transfer",
+                "description": "Get input from user and transfer to a destination department",
+                "parameters": {
+                  "type": "object",
+                  "properties": {
+                    "destination": {
+                      "type": "string",
+                      "description": "The destination to transfer to"
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          "hints": ["transfer"]
+        }
+      }
+    ]
+  }
+}
+```

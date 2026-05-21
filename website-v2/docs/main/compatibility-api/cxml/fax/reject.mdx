@@ -1,0 +1,73 @@
+---
+title: Reject
+sidebar_label: Reject
+excerpt: ''
+slug: /compatibility-api/cxml/reference/fax/reject
+sidebar_position: 1
+toc_max_heading_level: 3
+---
+
+The `<Reject>` verb tells SignalWire to reject an incoming fax, which results in a status of `canceled`.
+
+## Verb attributes
+
+The `<Reject>` verb does not have any attributes that modify its behavior.
+
+## Examples
+
+### Fax reject
+
+<CodeBlocks>
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+  <Reject/>
+</Response>
+```
+
+```javascript title="Node.js"
+const { RestClient } = require("@signalwire/compatibility-api");
+const response = new RestClient.LaML.FaxResponse();
+
+response.reject();
+console.log(response.toString());
+```
+
+```csharp
+using Twilio.TwiML;
+using System;
+
+
+class Example
+{
+    static void Main()
+    {
+        var response = new FaxResponse();
+        response.Reject();
+
+        Console.WriteLine(response.ToString());;
+    }
+}
+```
+
+```python
+from signalwire.fax_response import FaxResponse, Reject
+
+response = FaxResponse()
+response.reject()
+
+print(response)
+```
+
+```ruby
+require 'signalwire/sdk'
+
+response = Signalwire::Sdk::FaxResponse.new do |response|
+  response.reject
+end
+
+puts response.to_s
+```
+</CodeBlocks>
+
+SignalWire will reject the incoming fax.

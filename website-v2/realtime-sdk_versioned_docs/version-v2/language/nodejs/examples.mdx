@@ -1,0 +1,78 @@
+---
+title: Examples
+slug: /node/reference/examples
+toc_max_heading_level: 3
+---
+Follow the examples to see how's easy to use the Relay SDK to interact with inbound or outbound calls.
+
+### Inbound Calls
+
+> Using RelayConsumer to manage inbound calls from both `home` and `office` contexts. Answer the call, ask the user to enter his PIN and playback the digits he sent if successful.
+
+```javascript
+const { RelayConsumer } = require('@signalwire/node')
+
+const consumer = new RelayConsumer({
+  project: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
+  token: 'PTXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
+  contexts: ['home', 'office'],
+  onIncomingCall: async (call) => {
+    const { successful } = await call.answer()
+    if (!successful) {
+      console.error('Answer Error')
+      return
+    }
+
+    const collect = {
+      type: 'digits',
+      digits_max: 3,
+      text: 'Welcome to SignalWire! Please, enter your 3 digits PIN'
+    }
+    const prompt = await call.promptTTS(collect)
+    if (prompt.successful) {
+      await call.playTTS({ text: `You entered: ${prompt.result}. Thanks and good bye!` })
+    }
+    await call.hangup()
+  }
+})
+
+consumer.run()
+```
+
+### Outbound Calls
+
+> Using RelayConsumer to make a call and ask user to enter the PIN. When the prompt has completed, logs the result.
+
+```javascript
+const { RelayConsumer } = require('@signalwire/node')
+
+const consumer = new RelayConsumer({
+  project: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
+  token: 'PTXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
+  contexts: ['home', 'office'],
+  ready: async (consumer) => {
+    const dialResult = await consumer.client.calling.dial({
+      type: 'phone',
+      from: '+1XXXXXXXXXX', // Must be a number in your SignalWire Space
+      to: '+1YYYYYYYYYY'
+    })
+    const { successful, call } = dialResult
+    if (!successful) {
+      console.error('Dial error..')
+      return
+    }
+
+    const prompt = await call.promptTTS({
+      type: 'digits',
+      digits_max: 3,
+      text: 'Welcome to SignalWire! Enter your 3 digits PIN'
+    })
+
+    if (prompt.successful) {
+      console.log(`User digits: ${prompt.result}`)
+    }
+  }
+})
+
+consumer.run()
+```

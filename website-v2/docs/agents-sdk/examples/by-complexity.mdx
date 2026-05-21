@@ -1,0 +1,809 @@
+---
+title: "By Complexity"
+sidebar_label: "By Complexity"
+slug: /python/guides/by-complexity
+toc_max_heading_level: 3
+---
+
+## Examples by Complexity
+
+Progressive examples from simple to advanced, helping you build increasingly sophisticated agents.
+
+### Beginner Examples
+
+#### Hello World Agent
+
+The simplest possible agent:
+
+```python
+#!/usr/bin/env python3
+## hello_world_agent.py - Simplest possible agent
+from signalwire_agents import AgentBase
+
+agent = AgentBase(name="hello", route="/hello")
+agent.prompt_add_section("Role", "Say hello and have a friendly conversation.")
+agent.add_language("English", "en-US", "rime.spore")
+
+if __name__ == "__main__":
+    agent.run()
+```
+
+#### FAQ Agent
+
+Agent that answers questions from a knowledge base:
+
+```python
+#!/usr/bin/env python3
+## faq_agent.py - Agent with knowledge base
+from signalwire_agents import AgentBase
+
+agent = AgentBase(name="faq", route="/faq")
+agent.prompt_add_section("Role", "Answer questions about our company.")
+agent.prompt_add_section("Information", """
+Our hours are Monday to Friday, 9 AM to 5 PM.
+We are located at 123 Main Street.
+Contact us at support@example.com.
+""")
+agent.add_language("English", "en-US", "rime.spore")
+
+if __name__ == "__main__":
+    agent.run()
+```
+
+#### Greeting Agent
+
+Agent with a custom greeting:
+
+```python
+#!/usr/bin/env python3
+## greeting_agent.py - Agent with custom greeting
+from signalwire_agents import AgentBase
+
+agent = AgentBase(name="greeter", route="/greeter")
+agent.prompt_add_section("Role", "You are a friendly receptionist.")
+agent.prompt_add_section("Greeting", """
+Always start by saying: "Thank you for calling Acme Corporation. How may I help you today?"
+""")
+agent.add_language("English", "en-US", "rime.spore")
+
+if __name__ == "__main__":
+    agent.run()
+```
+
+### Intermediate Examples
+
+#### Account Lookup Agent
+
+Agent with database lookup:
+
+```python
+#!/usr/bin/env python3
+## account_lookup_agent.py - Agent with database lookup
+from signalwire_agents import AgentBase
+from signalwire_agents.core.function_result import SwaigFunctionResult
+
+## Simulated database
+ACCOUNTS = {
+    "12345": {"name": "John Doe", "balance": 150.00, "status": "active"},
+    "67890": {"name": "Jane Smith", "balance": 500.00, "status": "active"},
+}
+
+agent = AgentBase(name="accounts", route="/accounts")
+agent.prompt_add_section("Role", "You help customers check their account status.")
+agent.prompt_add_section("Guidelines", """
+- Always verify the account ID before providing information
+- Be helpful and professional
+- Never share information about other accounts
+""")
+agent.add_language("English", "en-US", "rime.spore")
+
+@agent.tool(description="Look up account information by ID")
+def lookup_account(account_id: str) -> SwaigFunctionResult:
+    account = ACCOUNTS.get(account_id)
+    if account:
+        return SwaigFunctionResult(
+            f"Account for {account['name']}: Status is {account['status']}, "
+            f"balance is ${account['balance']:.2f}"
+        )
+    return SwaigFunctionResult("Account not found. Please check the ID and try again.")
+
+if __name__ == "__main__":
+    agent.run()
+```
+
+#### Appointment Scheduler
+
+Agent that books appointments with confirmation:
+
+```python
+#!/usr/bin/env python3
+## appointment_scheduler_agent.py - Agent that books appointments
+from signalwire_agents import AgentBase
+from signalwire_agents.core.function_result import SwaigFunctionResult
+from datetime import datetime
+
+appointments = []
+
+agent = AgentBase(name="scheduler", route="/scheduler")
+agent.prompt_add_section("Role", "You help customers schedule appointments.")
+agent.prompt_add_section("Guidelines", """
+- Collect customer name, date, and preferred time
+- Confirm all details before booking
+- Send SMS confirmation when booking is complete
+""")
+agent.add_language("English", "en-US", "rime.spore")
+
+@agent.tool(description="Check if a time slot is available")
+def check_availability(date: str, time: str) -> SwaigFunctionResult:
+    # Check against existing appointments
+    for apt in appointments:
+        if apt["date"] == date and apt["time"] == time:
+            return SwaigFunctionResult(f"Sorry, {date} at {time} is not available.")
+    return SwaigFunctionResult(f"{date} at {time} is available.")
+
+@agent.tool(description="Book an appointment")
+def book_appointment(
+    name: str,
+    phone: str,
+    date: str,
+    time: str
+) -> SwaigFunctionResult:
+    appointments.append({
+        "name": name,
+        "phone": phone,
+        "date": date,
+        "time": time,
+        "booked_at": datetime.now().isoformat()
+    })
+    return (
+        SwaigFunctionResult(f"Appointment booked for {name} on {date} at {time}.")
+        .send_sms(
+            to_number=phone,
+            from_number="+15559876543",
+            body=f"Your appointment is confirmed for {date} at {time}."
+        )
+    )
+
+if __name__ == "__main__":
+    agent.run()
+```
+
+#### Department Router
+
+Agent that routes calls to the right department:
+
+```python
+#!/usr/bin/env python3
+## department_router_agent.py - Agent that routes calls
+from signalwire_agents import AgentBase
+from signalwire_agents.core.function_result import SwaigFunctionResult
+
+DEPARTMENTS = {
+    "sales": "+15551001001",
+    "support": "+15551001002",
+    "billing": "+15551001003",
+    "hr": "+15551001004"
+}
+
+agent = AgentBase(name="router", route="/router")
+agent.prompt_add_section("Role", "You are a receptionist routing calls.")
+agent.prompt_add_section("Departments", """
+Available departments:
+
+- Sales: Product inquiries, pricing, quotes
+- Support: Technical help, troubleshooting
+- Billing: Payments, invoices, refunds
+- HR: Employment, benefits, careers
+""")
+agent.add_language("English", "en-US", "rime.spore")
+
+@agent.tool(description="Transfer to a specific department")
+def transfer_to_department(department: str) -> SwaigFunctionResult:
+    dept_lower = department.lower()
+    if dept_lower in DEPARTMENTS:
+        return (
+            SwaigFunctionResult(f"Transferring you to {department} now.")
+            .connect(DEPARTMENTS[dept_lower], final=True)
+        )
+    return SwaigFunctionResult(
+        f"I don't have a {department} department. "
+        "Available departments are: sales, support, billing, and HR."
+    )
+
+if __name__ == "__main__":
+    agent.run()
+```
+
+### Advanced Examples
+
+#### Multi-Skill Agent
+
+Agent combining multiple skills:
+
+```python
+#!/usr/bin/env python3
+## multi_skill_agent.py - Agent with multiple skills
+from signalwire_agents import AgentBase
+from signalwire_agents.core.function_result import SwaigFunctionResult
+
+agent = AgentBase(name="assistant", route="/assistant")
+agent.prompt_add_section("Role", "You are a comprehensive assistant.")
+agent.prompt_add_section("Capabilities", """
+You can:
+
+- Tell the current time and date
+- Search our knowledge base
+- Look up weather information
+- Transfer to support if needed
+""")
+agent.add_language("English", "en-US", "rime.spore")
+
+## Add built-in skills
+agent.add_skill("datetime")
+agent.add_skill("native_vector_search", {
+    "index_path": "./knowledge.swsearch",
+    "tool_name": "search_kb"
+})
+
+## Custom function
+@agent.tool(description="Transfer to human support")
+def transfer_support() -> SwaigFunctionResult:
+    return (
+        SwaigFunctionResult("Connecting you to a support representative.")
+        .connect("+15551234567", final=True)
+    )
+
+if __name__ == "__main__":
+    agent.run()
+```
+
+#### Order Processing Agent
+
+Complete order management system:
+
+```python
+#!/usr/bin/env python3
+## order_processing_agent.py - Complete order management system
+from signalwire_agents import AgentBase
+from signalwire_agents.core.function_result import SwaigFunctionResult
+from datetime import datetime
+import uuid
+
+## Simulated databases
+orders = {}
+products = {
+    "widget": {"price": 29.99, "stock": 100},
+    "gadget": {"price": 49.99, "stock": 50},
+    "device": {"price": 99.99, "stock": 25}
+}
+
+agent = AgentBase(name="orders", route="/orders")
+agent.prompt_add_section("Role", "You help customers with orders.")
+agent.prompt_add_section("Products", """
+Available products:
+
+- Widget: $29.99
+- Gadget: $49.99
+- Device: $99.99
+""")
+agent.prompt_add_section("Guidelines", """
+- Verify product availability before placing orders
+- Collect customer name and phone for orders
+- Confirm order details before finalizing
+- Provide order ID for tracking
+""")
+agent.add_language("English", "en-US", "rime.spore")
+agent.set_global_data({"current_order": None})
+
+@agent.tool(description="Check product availability")
+def check_product(product: str) -> SwaigFunctionResult:
+    prod = products.get(product.lower())
+    if prod:
+        return SwaigFunctionResult(
+            f"{product.title()}: ${prod['price']}, {prod['stock']} in stock."
+        )
+    return SwaigFunctionResult(f"Product '{product}' not found.")
+
+@agent.tool(description="Place an order")
+def place_order(
+    product: str,
+    quantity: int,
+    customer_name: str,
+    customer_phone: str
+) -> SwaigFunctionResult:
+    prod = products.get(product.lower())
+    if not prod:
+        return SwaigFunctionResult(f"Product '{product}' not found.")
+
+    if prod["stock"] < quantity:
+        return SwaigFunctionResult(f"Insufficient stock. Only {prod['stock']} available.")
+
+    order_id = str(uuid.uuid4())[:8].upper()
+    total = prod["price"] * quantity
+
+    orders[order_id] = {
+        "product": product,
+        "quantity": quantity,
+        "total": total,
+        "customer": customer_name,
+        "phone": customer_phone,
+        "status": "confirmed",
+        "created": datetime.now().isoformat()
+    }
+
+    prod["stock"] -= quantity
+
+    return (
+        SwaigFunctionResult(
+            f"Order {order_id} confirmed! {quantity}x {product} for ${total:.2f}."
+        )
+        .update_global_data({"last_order_id": order_id})
+        .send_sms(
+            to_number=customer_phone,
+            from_number="+15559876543",
+            body=f"Order {order_id} confirmed: {quantity}x {product}, ${total:.2f}"
+        )
+    )
+
+@agent.tool(description="Check order status")
+def order_status(order_id: str) -> SwaigFunctionResult:
+    order = orders.get(order_id.upper())
+    if order:
+        return SwaigFunctionResult(
+            f"Order {order_id}: {order['quantity']}x {order['product']}, "
+            f"${order['total']:.2f}, Status: {order['status']}"
+        )
+    return SwaigFunctionResult(f"Order {order_id} not found.")
+
+if __name__ == "__main__":
+    agent.run()
+```
+
+#### Multi-Agent Server
+
+Server hosting multiple specialized agents:
+
+```python
+#!/usr/bin/env python3
+## multi_agent_server.py - Server hosting multiple agents
+from signalwire_agents import AgentBase, AgentServer
+from signalwire_agents.core.function_result import SwaigFunctionResult
+
+
+class SalesAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="sales", route="/sales")
+        self.prompt_add_section("Role", "You are a sales specialist.")
+        self.add_language("English", "en-US", "rime.spore")
+
+    @AgentBase.tool(description="Get product pricing")
+    def get_pricing(self, product: str) -> SwaigFunctionResult:
+        return SwaigFunctionResult(f"Pricing for {product}: Starting at $99.")
+
+
+class SupportAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="support", route="/support")
+        self.prompt_add_section("Role", "You are a support specialist.")
+        self.add_language("English", "en-US", "rime.spore")
+        self.add_skill("native_vector_search", {
+            "index_path": "./support_docs.swsearch"
+        })
+
+    @AgentBase.tool(description="Create support ticket")
+    def create_ticket(self, issue: str) -> SwaigFunctionResult:
+        return SwaigFunctionResult(f"Ticket created for: {issue}")
+
+
+class RouterAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="router", route="/")
+        self.prompt_add_section("Role", "Route callers to the right agent.")
+        self.add_language("English", "en-US", "rime.spore")
+
+    @AgentBase.tool(description="Transfer to sales")
+    def transfer_sales(self) -> SwaigFunctionResult:
+        return SwaigFunctionResult("Transferring to sales.").connect(
+            "https://agent.example.com/sales", final=True
+        )
+
+    @AgentBase.tool(description="Transfer to support")
+    def transfer_support(self) -> SwaigFunctionResult:
+        return SwaigFunctionResult("Transferring to support.").connect(
+            "https://agent.example.com/support", final=True
+        )
+
+
+if __name__ == "__main__":
+    server = AgentServer(host="0.0.0.0", port=8080)
+    server.register(RouterAgent())
+    server.register(SalesAgent())
+    server.register(SupportAgent())
+    server.run()
+```
+
+### Expert Examples
+
+#### Code-Driven LLM Architecture
+
+The most robust agents use **code-driven architecture** where business logic lives in SWAIG functions, not prompts. The LLM becomes a natural language translator while code handles all validation, state, and business rules.
+
+<Frame caption="Code-Driven Approach">
+  <img className="diagram" src={require("@image/agents-sdk-manual/11_02_by-complexity_diagram1.webp").default} alt="Code-Driven Approach." />
+</Frame>
+
+**Core principles:**
+
+| Traditional Approach | Code-Driven Approach |
+|---------------------|----------------------|
+| Rules in prompts | Rules in functions |
+| LLM does math | Code does math |
+| LLM tracks state | Global data tracks state |
+| Hope LLM follows rules | Code enforces rules |
+
+#### Order-Taking Agent (Code-Driven)
+
+Complete example demonstrating code-driven patterns:
+
+```python
+#!/usr/bin/env python3
+## code_driven_order_agent.py - Code-driven LLM architecture example
+from signalwire_agents import AgentBase
+from signalwire_agents.core.function_result import SwaigFunctionResult
+
+## Menu data lives in code, not prompts
+MENU = {
+    "tacos": {
+        "T001": {"name": "Beef Taco", "price": 3.49},
+        "T002": {"name": "Chicken Taco", "price": 3.49},
+        "T003": {"name": "Fish Taco", "price": 4.29},
+    },
+    "sides": {
+        "S001": {"name": "Chips & Salsa", "price": 2.99},
+        "S002": {"name": "Guacamole", "price": 3.49},
+    },
+    "drinks": {
+        "D001": {"name": "Soda", "price": 1.99},
+        "D002": {"name": "Iced Tea", "price": 1.99},
+    },
+    "combos": {
+        "C001": {"name": "Taco Combo", "price": 9.99,
+                 "includes": ["taco", "chips", "drink"], "savings": 1.97},
+    }
+}
+
+## Aliases handle natural speech variations
+MENU_ALIASES = {
+    "D001": ["soda", "coke", "pop", "soft drink"],
+    "S001": ["chips", "chips and salsa", "nachos"],
+}
+
+TAX_RATE = 0.10
+MAX_ITEMS_PER_ADD = 10
+MAX_ORDER_VALUE = 500.00
+
+
+class OrderAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="order-agent", route="/order")
+        self.add_language("English", "en-US", "rime.spore")
+
+        # Minimal prompt - personality only, not rules
+        self.prompt_add_section("Role",
+            "You are a friendly drive-thru order taker. "
+            "Keep responses brief and natural."
+        )
+
+        # State machine controls conversation flow
+        self._setup_contexts()
+
+        # Initialize order state
+        self.set_global_data({
+            "order_state": {
+                "items": [],
+                "subtotal": 0.00,
+                "tax": 0.00,
+                "total": 0.00,
+                "item_count": 0
+            }
+        })
+
+    def _setup_contexts(self):
+        """Define state machine for conversation flow."""
+        contexts = self.define_contexts()
+        ctx = contexts.add_context("default")
+
+        # Greeting state - limited actions
+        ctx.add_step("greeting") \
+            .add_section("Task", "Welcome the customer and take their order.") \
+            .set_functions(["add_item"]) \
+            .set_valid_steps(["taking_order"])
+
+        # Order state - full ordering capabilities
+        ctx.add_step("taking_order") \
+            .add_section("Task", "Continue taking the order.") \
+            .add_bullets("Info", [
+                "Current total: $${global_data.order_state.total}",
+                "Items: ${global_data.order_state.item_count}"
+            ]) \
+            .set_functions(["add_item", "remove_item", "finalize_order"]) \
+            .set_valid_steps(["confirming"])
+
+        # Confirmation state
+        ctx.add_step("confirming") \
+            .add_section("Task", "Confirm the order with the customer.") \
+            .set_functions(["confirm_order", "add_item", "remove_item"]) \
+            .set_valid_steps(["complete"])
+
+    def _find_menu_item(self, item_name):
+        """Find item by name or alias - code handles fuzzy matching."""
+        item_lower = item_name.lower().strip()
+
+        # Check exact matches first
+        for category, items in MENU.items():
+            for sku, data in items.items():
+                if item_lower == data["name"].lower():
+                    return sku, data, category
+
+        # Check aliases
+        for sku, aliases in MENU_ALIASES.items():
+            if item_lower in [a.lower() for a in aliases]:
+                for category, items in MENU.items():
+                    if sku in items:
+                        return sku, items[sku], category
+
+        return None, None, None
+
+    def _calculate_totals(self, items):
+        """Code does all math - LLM never calculates."""
+        subtotal = sum(item["price"] * item["quantity"] for item in items)
+        tax = round(subtotal * TAX_RATE, 2)
+        total = round(subtotal + tax, 2)
+        return subtotal, tax, total
+
+    def _check_combo_opportunity(self, items):
+        """Code detects upsells - no prompt rules needed."""
+        item_names = [i["name"].lower() for i in items]
+        has_taco = any("taco" in n for n in item_names)
+        has_chips = any("chip" in n for n in item_names)
+        has_drink = any(n in ["soda", "iced tea"] for n in item_names)
+
+        # Check if already has combo
+        if any("combo" in n for n in item_names):
+            return None
+
+        if has_taco and has_chips and has_drink:
+            return "Great news! I can upgrade you to a Taco Combo and save you $1.97!"
+        return None
+
+    @AgentBase.tool(
+        name="add_item",
+        description="Add an item to the order",
+        parameters={
+            "type": "object",
+            "properties": {
+                "item_name": {"type": "string", "description": "Name of the menu item"},
+                "quantity": {"type": "integer", "description": "How many (default 1)",
+                            "minimum": 1, "maximum": 10}
+            },
+            "required": ["item_name"]
+        }
+    )
+    def add_item(self, args, raw_data):
+        """Add item - code enforces all limits and rules."""
+        item_name = args.get("item_name", "")
+        quantity = args.get("quantity", 1)
+
+        # Code enforces limits (LLM doesn't need to know)
+        if quantity > MAX_ITEMS_PER_ADD:
+            quantity = MAX_ITEMS_PER_ADD
+
+        # Get order state
+        global_data = raw_data.get("global_data", {})
+        order_state = global_data.get("order_state", {
+            "items": [], "subtotal": 0, "tax": 0, "total": 0, "item_count": 0
+        })
+
+        # Find the item (code handles fuzzy matching)
+        sku, item_data, category = self._find_menu_item(item_name)
+        if not item_data:
+            return SwaigFunctionResult(
+                f"I couldn't find '{item_name}' on the menu. "
+                "We have tacos, chips, guacamole, and drinks."
+            )
+
+        # Check order value limit
+        potential = order_state["subtotal"] + (item_data["price"] * quantity)
+        if potential > MAX_ORDER_VALUE:
+            return SwaigFunctionResult(
+                f"That would exceed our ${MAX_ORDER_VALUE:.2f} order limit."
+            )
+
+        # Add to order
+        order_state["items"].append({
+            "sku": sku,
+            "name": item_data["name"],
+            "quantity": quantity,
+            "price": item_data["price"]
+        })
+        order_state["item_count"] += quantity
+
+        # Code calculates totals (LLM never does math)
+        subtotal, tax, total = self._calculate_totals(order_state["items"])
+        order_state["subtotal"] = subtotal
+        order_state["tax"] = tax
+        order_state["total"] = total
+
+        # Build response that guides LLM behavior
+        response = f"Added {quantity}x {item_data['name']} (${item_data['price']:.2f} each)."
+
+        # Check for upsell (code decides, not LLM)
+        combo_suggestion = self._check_combo_opportunity(order_state["items"])
+        if combo_suggestion:
+            response += f"\n\n{combo_suggestion}"
+
+        # Update state and transition
+        global_data["order_state"] = order_state
+
+        result = SwaigFunctionResult(response)
+        result.update_global_data(global_data)
+        result.swml_change_step("taking_order")
+
+        # Push UI update (frontend stays in sync without LLM)
+        result.swml_user_event({
+            "type": "item_added",
+            "item": {"name": item_data["name"], "quantity": quantity,
+                     "price": item_data["price"]},
+            "total": total
+        })
+
+        return result
+
+    @AgentBase.tool(
+        name="remove_item",
+        description="Remove an item from the order",
+        parameters={
+            "type": "object",
+            "properties": {
+                "item_name": {"type": "string", "description": "Item to remove"},
+                "quantity": {"type": "integer", "description": "How many (-1 for all)"}
+            },
+            "required": ["item_name"]
+        }
+    )
+    def remove_item(self, args, raw_data):
+        """Remove item - code handles all edge cases."""
+        item_name = args.get("item_name", "").lower()
+        quantity = args.get("quantity", 1)
+
+        global_data = raw_data.get("global_data", {})
+        order_state = global_data.get("order_state", {"items": []})
+
+        # Find matching item in order
+        for i, item in enumerate(order_state["items"]):
+            if item_name in item["name"].lower():
+                if quantity == -1 or quantity >= item["quantity"]:
+                    removed = order_state["items"].pop(i)
+                    order_state["item_count"] -= removed["quantity"]
+                else:
+                    item["quantity"] -= quantity
+                    order_state["item_count"] -= quantity
+
+                # Recalculate
+                subtotal, tax, total = self._calculate_totals(order_state["items"])
+                order_state["subtotal"] = subtotal
+                order_state["tax"] = tax
+                order_state["total"] = total
+
+                global_data["order_state"] = order_state
+
+                result = SwaigFunctionResult(f"Removed {item_name} from your order.")
+                result.update_global_data(global_data)
+                return result
+
+        return SwaigFunctionResult(f"I don't see {item_name} in your order.")
+
+    @AgentBase.tool(
+        name="finalize_order",
+        description="Finalize and review the order",
+        parameters={"type": "object", "properties": {}}
+    )
+    def finalize_order(self, args, raw_data):
+        """Finalize - code builds the summary."""
+        global_data = raw_data.get("global_data", {})
+        order_state = global_data.get("order_state", {})
+
+        if not order_state.get("items"):
+            return SwaigFunctionResult("Your order is empty. What can I get you?")
+
+        # Code builds accurate summary (LLM just relays it)
+        items_text = ", ".join(
+            f"{i['quantity']}x {i['name']}" for i in order_state["items"]
+        )
+
+        result = SwaigFunctionResult(
+            f"Your order: {items_text}. "
+            f"Total is ${order_state['total']:.2f} including tax. "
+            "Does that look correct?"
+        )
+        result.swml_change_step("confirming")
+        return result
+
+    @AgentBase.tool(
+        name="confirm_order",
+        description="Confirm the order is complete",
+        parameters={"type": "object", "properties": {}}
+    )
+    def confirm_order(self, args, raw_data):
+        """Confirm - code handles completion."""
+        global_data = raw_data.get("global_data", {})
+        order_state = global_data.get("order_state", {})
+
+        # Generate order number
+        import random
+        order_num = random.randint(100, 999)
+
+        result = SwaigFunctionResult(
+            f"Order #{order_num} confirmed! "
+            f"Your total is ${order_state['total']:.2f}. "
+            "Please pull forward. Thank you!"
+        )
+        result.swml_change_step("complete")
+
+        # Final UI update
+        result.swml_user_event({
+            "type": "order_complete",
+            "order_number": order_num,
+            "total": order_state["total"]
+        })
+
+        return result
+
+
+if __name__ == "__main__":
+    agent = OrderAgent()
+    agent.run()
+```
+
+**Key patterns demonstrated:**
+
+1. **Response-guided behavior**: Functions return text that guides LLM responses. The combo upsell suggestion appears in the response, so the LLM naturally offers it.
+
+2. **Code-enforced limits**: `MAX_ITEMS_PER_ADD` and `MAX_ORDER_VALUE` are enforced in code. The LLM cannot bypass them.
+
+3. **State machine control**: `set_functions()` restricts what the LLM can do in each state. Impossible actions are literally unavailable.
+
+4. **Dynamic prompt injection**: `${global_data.order_state.total}` injects current state into prompts without LLM tracking.
+
+5. **UI synchronization**: `swml_user_event()` pushes updates to frontends in real-time.
+
+6. **Fuzzy input handling**: `_find_menu_item()` handles variations like "coke" → "Soda" without prompt rules.
+
+### Complexity Progression
+
+#### Beginner
+1. Create basic agent with prompt
+2. Add language configuration
+3. Test with swaig-test
+
+#### Intermediate
+4. Add SWAIG functions
+5. Use global data for state
+6. Add skills
+7. Implement call transfers
+
+#### Advanced
+8. Use DataMap for API integration
+9. Implement context workflows
+10. Build multi-agent systems
+11. Deploy to production
+
+#### Expert
+12. Code-driven LLM architecture
+13. State machine conversation control
+14. Response-guided LLM behavior
+15. Real-time UI synchronization
+
+
+
+

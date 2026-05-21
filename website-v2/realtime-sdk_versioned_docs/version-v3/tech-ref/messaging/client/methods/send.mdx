@@ -1,0 +1,50 @@
+---
+title: "send"
+slug: /node/reference/messaging/client/send
+description: send method for the Client class.
+toc_max_heading_level: 3
+---
+
+[messagingsendresult-1]: /docs/server-sdk/v3/node/reference/messaging/messaging-send-result
+
+### send
+
+- **send**(`params`): `Promise<MessagingSendResult>` - See [`MessagingSendResult`][messagingsendresult-1]
+
+Send an outbound SMS or MMS message.
+
+#### Parameters
+
+| Name             | Type       | Description                                                                                                                                       |
+|:-----------------|:-----------|:--------------------------------------------------------------------------------------------------------------------------------------------------|
+| `params`         | `Object`   | -                                                                                                                                                 |
+| `params.body?`   | `string`   | The content of the message. Optional if `media` is present.                                                                                       |
+| `params.topic?`  | `string`   | Inbound events for the message will be received on this topic. If not specified, a `default` topic will be used. Previously known as `"context"`. |
+| `params.from`    | `string`   | The phone number to place the message from. Must be a SignalWire phone number or short code that you own.                                         |
+| `params.media?`  | `string[]` | Array of URLs to send in the message. Optional if `body` is present.                                                                              |
+| `params.region?` | `string`   | Region of the world to originate the message from. A default value is picked based on account preferences or device location.                     |
+| `params.tags?`   | `string[]` | Array of strings to tag the message with for searching in the UI.                                                                                 |
+| `params.to`      | `string`   | The phone number to send to.                                                                                                                      |
+
+#### Returns
+
+`Promise<MessagingSendResult>` - See [`MessagingSendResult`][messagingsendresult-1]
+
+Asynchronously returns a result object.
+
+#### Example
+
+> Send a message.
+
+```js
+try {
+  const sendResult = await client.send({
+    from: "+1xxx",
+    to: "+1yyy",
+    body: "Hello World!",
+  });
+  console.log("Message ID: ", sendResult.messageId);
+} catch (e) {
+  console.error(e.message);
+}
+```

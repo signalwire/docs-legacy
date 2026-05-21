@@ -1,0 +1,34 @@
+<ParamField toc={true} path="prompt.pom" type="object[]" required={true}>
+  An array of objects that defines the prompt object model (POM) for the AI. The POM is a structured data format for organizing and rendering prompts that are clearly structured and easy to understand. By breaking prompts into sections, users can manage each section independently and then combine them into a single cohesive prompt. SignalWire renders the POM into a markdown document before sending it to the LLM. If the `text` parameter is present while using `pom`, the `pom` prompt will be used instead of `text`.
+</ParamField>
+
+<Indent>
+
+<ParamField path="pom[].title" type="string">
+  The title of the section. Will be a heading in the rendered prompt.
+</ParamField>
+
+<ParamField path="pom[].body" type="string">
+  The body of the section. This will be a paragraph in the rendered prompt.
+  Required if `bullets` is not present.
+</ParamField>
+
+<ParamField path="pom[].bullets" type="string[]">
+  An array of strings that represent the bullets of the section.
+  This will be a list of short statements/rules in the rendered prompt.
+  Optional if `body` is present.
+</ParamField>
+
+<ParamField path="pom[].subsections" type="object[]">
+  An array of section objects allowing users to nest sections within sections. Each subsection accepts the same properties as a top-level POM section (`title`, `body`, `bullets`, `numbered`, `numberedBullets`).
+</ParamField>
+
+<ParamField path="pom[].numbered" type="boolean" default="false">
+  If `true`, the section will be numbered in the rendered prompt.
+</ParamField>
+
+<ParamField path="pom[].numberedBullets" type="boolean" default="false">
+  If `true`, the bullets will be numbered in the rendered prompt.
+</ParamField>
+
+</Indent>

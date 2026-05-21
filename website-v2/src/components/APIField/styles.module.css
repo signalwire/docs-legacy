@@ -1,0 +1,194 @@
+/**
+ * APIField component styles
+ * Inspired by Mintlify's ResponseField component
+ */
+
+.apiField {
+  --field-highlight-color: color-mix(in srgb, var(--sw-breeze-color), transparent);
+  padding: 1rem 0.75rem;
+  border-bottom: 1px solid var(--ifm-color-emphasis-200);
+  scroll-margin-top: calc(var(--ifm-navbar-height) + 0.5rem);
+  transition: all 0.2s ease;
+}
+
+.apiField.highlighted {
+  background-color: var(--field-highlight-color);
+}
+
+.apiField:last-child {
+  border-bottom: none;
+}
+
+.deprecatedField {
+  opacity: 0.7;
+}
+
+/* Field Header - contains name, type, and badges */
+.fieldHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+  position: relative;
+}
+
+/* Field Name Container with anchor */
+.fieldNameContainer {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  position: relative;
+}
+
+/* Anchor Link */
+.fieldAnchor {
+  position: absolute;
+  left: -1.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  opacity: 0;
+  color: var(--ifm-color-primary);
+  transition: opacity 0.2s ease;
+  text-decoration: none;
+}
+
+.fieldNameContainer:hover .fieldAnchor,
+.fieldAnchor:focus {
+  opacity: 1;
+}
+
+/* Field Name */
+.fieldName {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--ifm-color-primary);
+  font-family: var(--ifm-font-family-monospace);
+  cursor: pointer;
+}
+
+/* Deprecated name with strikethrough */
+.deprecatedName {
+  text-decoration: line-through;
+  color: var(--ifm-color-emphasis-600);
+}
+
+/* Dot notation parsing styles */
+.fieldNameParent {
+  color: var(--ifm-color-emphasis-600);
+  font-weight: 600;
+  font-size: 1rem;
+  font-family: var(--ifm-font-family-monospace);
+}
+
+.fieldNameSeparator {
+  color: var(--ifm-color-emphasis-600);
+  font-weight: 600;
+  font-size: 1rem;
+  font-family: var(--ifm-font-family-monospace);
+}
+
+.fieldNameProperty {
+  color: var(--ifm-color-primary);
+  font-weight: 600;
+  font-size: 1rem;
+  font-family: var(--ifm-font-family-monospace);
+}
+
+/* Field Type */
+.fieldType {
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.875rem;
+  color: var(--ifm-color-emphasis-700);
+  background-color: var(--ifm-color-emphasis-100);
+  padding: 0.125rem 0.5rem;
+  border-radius: 4px;
+}
+
+/* Badges (required, deprecated) */
+.fieldBadge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.125rem 0.5rem;
+  border-radius: 4px;
+  text-transform: lowercase;
+  background-color: var(--ifm-color-danger-contrast-background);
+  color: var(--ifm-color-danger-contrast-foreground);
+}
+
+.deprecatedBadge {
+  background-color: var(--ifm-color-warning-contrast-background);
+  color: var(--ifm-color-warning-contrast-foreground);
+}
+
+/* Default Value */
+.fieldDefault {
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--ifm-color-emphasis-700);
+}
+
+.defaultLabel {
+  font-weight: 600;
+  margin-right: 0.25rem;
+}
+
+.fieldDefault code {
+  background-color: var(--ifm-color-emphasis-100);
+  padding: 0.125rem 0.375rem;
+  border-radius: 3px;
+  font-size: 0.875rem;
+}
+
+/* Field Description */
+.fieldDescription {
+  color: var(--ifm-color-emphasis-800);
+  font-size: 0.9375rem;
+  line-height: 1.6;
+}
+
+.fieldDescription p:first-child {
+  margin-top: 0;
+}
+
+.fieldDescription p:last-child {
+  margin-bottom: 0;
+}
+
+/* Dark mode adjustments */
+[data-theme="dark"] .apiField {
+  --field-highlight-color: color-mix(in srgb, var(--sw-breeze-color) 18%, transparent);
+}
+
+[data-theme="dark"] .fieldName {
+  color: var(--ifm-color-primary);
+}
+
+[data-theme="dark"] .fieldAnchor {
+  color: var(--ifm-color-primary);
+}
+
+[data-theme="dark"] .fieldType {
+  background-color: var(--ifm-color-emphasis-200);
+  color: var(--ifm-color-emphasis-900);
+}
+
+[data-theme="dark"] .fieldDefault code {
+  background-color: var(--ifm-color-emphasis-200);
+}
+
+[data-theme="dark"] .deprecatedName {
+  color: var(--ifm-color-emphasis-500);
+}
+
+[data-theme="dark"] .fieldNameParent,
+[data-theme="dark"] .fieldNameSeparator {
+  color: var(--ifm-color-emphasis-500);
+}
+
+[data-theme="dark"] .fieldNameProperty {
+  color: var(--ifm-color-primary);
+}

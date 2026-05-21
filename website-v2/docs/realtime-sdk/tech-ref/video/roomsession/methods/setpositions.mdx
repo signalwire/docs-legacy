@@ -1,0 +1,93 @@
+---
+title: "setPositions"
+slug: /node/reference/video/room-session/set-positions
+description: setPositions method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+[link-4]: /docs/server-sdk/node/reference/video/room-session/events#videopositions
+[roomsession-41]: /docs/server-sdk/node/reference/video/room-session
+
+### setPositions
+
+- **setPositions**(`params`): `Promise<void>`
+
+Assigns a position in the layout for multiple members.
+
+#### Parameters
+
+<ParamField path="params" type="object" required>
+  Object containing the parameters of the method.
+</ParamField>
+
+<Indent>
+<ParamField path="positions" type="VideoPositions" required>
+  Mapping of member IDs and positions to assign. See [`VideoPositions`][link-4].
+</ParamField>
+</Indent>
+
+#### Returns
+
+`Promise<void>`
+
+#### Example
+
+In this example, we wait for a room to start and then set the `roomlayout` to `"6x6"`.
+When a second member joins the room, we set the position of all older members to `"off-canvas"`.
+This example assumes that there is a [`RoomSession`][roomsession-41]
+already active and that members are joining the room.
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+// Initialize the SignalWire client
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" });
+
+// Access video client from the main client
+const videoClient = client.video;
+
+// Setup listener for when a room starts
+await videoClient.listen({
+  onRoomStarted: (roomsession) => {
+    console.log("Room started", roomsession.displayName);
+    // Set the 6x6 layout
+    roomsession.setLayout({
+      name: "6x6",
+      positions: {
+        self: 'auto'
+      }
+    });
+    roomsession.listen({
+      onRoomUpdated: (roomsession) => {
+        console.log("Room layout updated", roomsession.layoutName);
+      },
+      onMemberJoined: async (member) => {
+        console.log("Member joined", member.name);
+
+        // Get all members and loop through them ans save all old members to an array
+        const members = await roomsession.getMembers();
+
+        // Create an object to hold all member positions
+        const positions = {
+          ...members.members
+            .filter(memberItem => memberItem.id !== member.id) // Filter out the member with member.id
+            .reduce((acc, memberItem) => {
+              acc[memberItem.id] = 'off-canvas';
+              return acc;
+            }, {})
+        };
+
+        console.log("Updating member positions...")
+        // Update all old members positions to off canvas and the new member to be automatically positioned
+
+        await roomsession.setPositions({
+          positions: positions
+        });
+      },
+      onMemberUpdated: (member) => {
+        console.log(`Member ${member.name} updated`);
+      }
+    })
+  }
+});
+```

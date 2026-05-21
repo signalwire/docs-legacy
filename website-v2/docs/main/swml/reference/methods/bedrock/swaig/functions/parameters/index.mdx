@@ -1,0 +1,679 @@
+---
+slug: /swml/reference/amazon-bedrock/swaig/functions/parameters
+title: parameters
+description: The parameters object for the SWAIG function.
+toc_max_heading_level: 3
+---
+
+The `parameters` object is used to define the input data that will be passed to the function.
+
+## **Properties**
+
+<ParamField path="functions[].parameters" type="object">
+  An object that accepts the following properties.
+</ParamField>
+
+<Indent>
+
+<ParamField path="parameters.type" type="string" required={true}>
+  Defines the top-level type of the parameters. Must be set to `"object"`
+</ParamField>
+
+
+<ParamField path="parameters.properties" type="object" required={true}>
+  An object containing the [properties](#properties) definitions to be passed to the function
+</ParamField>
+
+<Indent>
+
+<ParamField path="properties.{property_name}" type="object" required={true}>
+  The `properties` object defines the input data that will be passed to the function. It supports different types of parameters, each with their own set of configuration options. The property name is a key in the `properties` object that is user-defined. An object with dynamic property names, where:<ul><li>**Keys:** User-defined strings, that set the property name.</li><li>**Values:** Must be one of the valid [schema types](#schema-types). Learn more about valid schema types from the [JSON Schema documentation](https://json-schema.org/understanding-json-schema/reference)</li></ul>
+</ParamField>
+
+
+### Schema Types
+
+Each property in the `properties` object must use one of the following schema types:
+
+<Tabs>
+<TabItem value="string" label="string">
+
+<ParamField path="{property_name}.type" type="string" required={true}>
+  The type of property the AI is passing to the function. Must be set to `"string"`
+</ParamField>
+
+
+<ParamField path="{property_name}.description" type="string">
+  A description of the property
+</ParamField>
+
+
+<ParamField path="{property_name}.enum" type="string[]">
+  An array of strings that are the possible values
+</ParamField>
+
+
+<ParamField path="{property_name}.default" type="string">
+  The default string value
+</ParamField>
+
+
+<ParamField path="{property_name}.pattern" type="string">
+  Regular expression pattern for the string value to match
+</ParamField>
+
+
+<ParamField path="{property_name}.nullable" type="boolean" default="false">
+  Whether the property can be null
+</ParamField>
+
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+parameters:
+  type: object
+  properties:
+    property_name:
+      type: string
+      description: A string value
+      pattern: ^[a-z]+$
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "property_name": {
+        "type": "string",
+        "description": "A string value",
+        "pattern": "^[a-z]+$"
+      }
+    }
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+</TabItem>
+
+<TabItem value="integer" label="integer">
+
+<ParamField path="{property_name}.type" type="string" required={true}>
+  The type of parameter the AI is passing to the function. Must be set to `"integer"`
+</ParamField>
+
+
+<ParamField path="{property_name}.description" type="string">
+  A description of the property
+</ParamField>
+
+
+<ParamField path="{property_name}.enum" type="integer[]">
+  An array of integers that are the possible values
+</ParamField>
+
+
+<ParamField path="{property_name}.default" type="integer">
+  The default integer value
+</ParamField>
+
+
+<ParamField path="{property_name}.nullable" type="boolean" default="false">
+  Whether the property can be null
+</ParamField>
+
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+parameters:
+  type: object
+  properties:
+    property_name:
+      type: integer
+      description: An integer value
+      default: 10
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "property_name": {
+        "type": "integer",
+        "description": "An integer value",
+        "default": 10
+      }
+    }
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+</TabItem>
+
+<TabItem value="number" label="number">
+
+<ParamField path="{property_name}.type" type="string" required={true}>
+  The type of parameter the AI is passing to the function. Must be set to `"number"`
+</ParamField>
+
+
+<ParamField path="{property_name}.description" type="string">
+  A description of the property
+</ParamField>
+
+
+<ParamField path="{property_name}.enum" type="number[]">
+  An array of numbers that are the possible values
+</ParamField>
+
+
+<ParamField path="{property_name}.default" type="number">
+  The default number value
+</ParamField>
+
+
+<ParamField path="{property_name}.nullable" type="boolean" default="false">
+  Whether the property can be null
+</ParamField>
+
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+parameters:
+  type: object
+  properties:
+    property_name:
+      type: number
+      description: A number value
+      default: 10.5
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "property_name": {
+        "type": "number",
+        "description": "A number value",
+        "default": 10.5
+      }
+    }
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+</TabItem>
+
+<TabItem value="boolean" label="boolean">
+
+<ParamField path="{property_name}.type" type="string" required={true}>
+  The type of parameter the AI is passing to the function. Must be set to `"boolean"`
+</ParamField>
+
+
+<ParamField path="{property_name}.description" type="string">
+  A description of the property
+</ParamField>
+
+
+<ParamField path="{property_name}.default" type="boolean">
+  The default boolean value
+</ParamField>
+
+
+<ParamField path="{property_name}.nullable" type="boolean" default="false">
+  Whether the property can be null
+</ParamField>
+
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+parameters:
+  type: object
+  properties:
+    property_name:
+      type: boolean
+      description: A boolean value
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "property_name": {
+        "type": "boolean",
+        "description": "A boolean value"
+      }
+    }
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+</TabItem>
+
+<TabItem value="array" label="array">
+
+<ParamField path="{property_name}.type" type="string" required={true}>
+  The type of parameter(s) the AI is passing to the function. Must be set to `"array"`
+</ParamField>
+
+
+<ParamField path="{property_name}.description" type="string">
+  A description of the property
+</ParamField>
+
+
+<ParamField path="{property_name}.items" type="object" required={true}>
+  An array of items. These items must be one of the valid [schema types](#schema-types)
+</ParamField>
+
+
+<ParamField path="{property_name}.default" type="array">
+  The default array value
+</ParamField>
+
+
+<ParamField path="{property_name}.nullable" type="boolean" default="false">
+  Whether the property can be null
+</ParamField>
+
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+parameters:
+  type: object
+  properties:
+    property_name:
+      type: array
+      description: Array of strings and objects
+      items:
+        - type: string
+          description: A single string value that must be one of the possible values
+          default: "one"
+          enum:
+            - "one"
+            - "two"
+            - "three"
+        - type: object
+          description: An object with a required property, `desired_value`, that must be one of the possible values
+          required:
+            - desired_value
+          properties:
+            desired_value:
+              type: string
+              description: A single string value that must be one of the possible values
+              enum:
+                - "four"
+                - "five"
+                - "six"
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "property_name": {
+        "type": "array",
+        "description": "Array of strings and objects",
+        "items": [
+          {
+            "type": "string",
+            "description": "A single string value that must be one of the possible values",
+            "default": "one",
+            "enum": [
+              "one",
+              "two",
+              "three"
+            ]
+          },
+          {
+            "type": "object",
+            "description": "An object with a required property, `desired_value`, that must be one of the possible values",
+            "required": [
+              "desired_value"
+            ],
+            "properties": {
+              "desired_value": {
+                "type": "string",
+                "description": "A single string value that must be one of the possible values",
+                "enum": [
+                  "four",
+                  "five",
+                  "six"
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+</TabItem>
+
+<TabItem value="object" label="object">
+
+<ParamField path="{property_name}.type" type="string" required={true}>
+  The type of parameter(s) the AI is passing to the function. Must be set to `"object"`
+</ParamField>
+
+
+<ParamField path="{property_name}.description" type="string">
+  A description of the property
+</ParamField>
+
+
+<ParamField path="{property_name}.properties" type="object">
+  An object that contains the [properties](#properties) definitions to be passed to the function.
+</ParamField>
+
+
+<ParamField path="{property_name}.required" type="string[]">
+  The property names that are required for the `properties` object
+</ParamField>
+
+
+<ParamField path="{property_name}.default" type="object">
+  The default object value
+</ParamField>
+
+
+<ParamField path="{property_name}.nullable" type="boolean" default="false">
+  Whether the property can be null
+</ParamField>
+
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+parameters:
+  type: object
+  properties:
+    name:
+      type: string
+      description: The user's name
+    age:
+      type: integer
+      description: The user's age
+    address:
+      type: object
+      description: The user's address
+      properties:
+        street:
+          type: string
+          description: The user's street address
+        city:
+          type: string
+          description: The user's city
+      required:
+        - street
+        - city
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string",
+        "description": "The user's name"
+      },
+      "age": {
+        "type": "integer",
+        "description": "The user's age"
+      },
+      "address": {
+        "type": "object",
+        "description": "The user's address",
+        "properties": {
+          "street": {
+            "type": "string",
+            "description": "The user's street address"
+          },
+          "city": {
+            "type": "string",
+            "description": "The user's city"
+          }
+        },
+        "required": [
+          "street",
+          "city"
+        ]
+      }
+    }
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+</TabItem>
+
+<TabItem value="oneof" label="oneOf">
+
+Specifies that the data must be valid against exactly one of the provided schemas.
+
+<ParamField path="{property_name}.oneOf" type="array" required={true}>
+  An array of schemas where exactly one must be valid.
+</ParamField>
+
+The value must be a valid [schema type](#schema-types)
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+parameters:
+  type: object
+  properties:
+    property_name:
+      oneOf:
+        - type: string
+          description: A string value
+        - type: integer
+          description: An integer value
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "property_name": {
+        "oneOf": [
+          {
+            "type": "string",
+            "description": "A string value"
+          },
+          {
+            "type": "integer",
+            "description": "An integer value"
+          }
+        ]
+      }
+    }
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+</TabItem>
+
+<TabItem value="allof" label="allOf">
+
+Specifies that the data must be valid against all of the provided schemas.
+
+<ParamField path="{property_name}.allOf" type="array" required={true}>
+  An array of schemas where all must be valid.
+</ParamField>
+
+The value must be a valid [schema type](#schema-types)
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+parameters:
+  type: object
+  properties:
+    property_name:
+      allOf:
+        - type: string
+          description: A string value
+        - type: integer
+          description: An integer value
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "property_name": {
+        "allOf": [
+          {
+            "type": "string",
+            "description": "A string value"
+          },
+          {
+            "type": "integer",
+            "description": "An integer value"
+          }
+        ]
+      }
+    }
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+</TabItem>
+
+<TabItem value="anyof" label="anyOf">
+
+Specifies that the data must be valid against at least one of the provided schemas.
+
+<ParamField path="{property_name}.anyOf" type="array" required={true}>
+  An array of schemas where at least one must be valid.
+</ParamField>
+
+The value must be a valid [schema type](#schema-types)
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+parameters:
+  type: object
+  properties:
+    property_name:
+      anyOf:
+        - type: string
+          description: A string value
+        - type: integer
+          description: An integer value
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "property_name": {
+        "anyOf": [
+          {
+            "type": "string",
+            "description": "A string value"
+          },
+          {
+            "type": "integer",
+            "description": "An integer value"
+          }
+        ]
+      }
+    }
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+</TabItem>
+
+<TabItem value="const" label="const">
+
+Specifies an exact value that the data must match.
+
+<ParamField path="{property_name}.const" type="any" required={true}>
+  The value that will be set as a constant value for the property
+</ParamField>
+
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+parameters:
+  type: object
+  properties:
+    property_name:
+      const: "constant_value"
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "property_name": {
+        "const": "constant_value"
+      }
+    }
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+</TabItem>
+
+</Tabs>
+
+</Indent>
+
+
+<ParamField path="parameters.required" type="string[]">
+  Array of required property names from the `properties` object
+</ParamField>
+
+</Indent>

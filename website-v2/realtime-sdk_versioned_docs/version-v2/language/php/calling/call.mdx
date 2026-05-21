@@ -1,0 +1,1974 @@
+---
+title: Relay.Calling.Call
+slug: /php/reference/calling/call
+toc_max_heading_level: 3
+---
+
+[index]: /docs/server-sdk/v2/php/reference/calling#newcall
+[link-10]: #events
+[link-11]: #playaudio
+[link-12]: #playsilence
+[link-13]: #playtts
+[link-14]: #playringtone
+[link-15]: #ringtones
+[link-16]: #promptaudio
+[link-17]: #prompttts
+[link-18]: #promptringtone
+[link-19]: #prompt
+[link-1]: #detectansweringmachine
+[link-20]: #record
+[link-21]: #senddigits
+[link-22]: #tap
+[link-23]: #waitfor
+[link-24]: #detecthuman
+[link-25]: #detectmachine
+[link-2]: #detectansweringmachineasync
+[link-3]: #play
+[link-4]: #connect
+[link-5]: #detectdigit
+[link-6]: #detectfax
+[link-7]: #detect
+[link-8]: #faxreceive
+[link-9]: #faxsend
+[link]: #state-events
+[relay-calling-answerresult]: /docs/server-sdk/v2/php/reference/calling/results/answer
+[relay-calling-call-2]: #
+[relay-calling-connectaction-1]: /docs/server-sdk/v2/php/reference/calling/actions/connect
+[relay-calling-connectresult]: /docs/server-sdk/v2/php/reference/calling/results/connect
+[relay-calling-detectaction-7]: /docs/server-sdk/v2/php/reference/calling/actions/detect
+[relay-calling-detectresult-4]: /docs/server-sdk/v2/php/reference/calling/results/detect
+[relay-calling-detectresult]: /docs/server-sdk/v2/php/reference/calling/results/detect
+[relay-calling-dialresult]: /docs/server-sdk/v2/php/reference/calling/results/dial
+[relay-calling-faxaction-3]: /docs/server-sdk/v2/php/reference/calling/actions/fax
+[relay-calling-faxresult-1]: /docs/server-sdk/v2/php/reference/calling/results/fax
+[relay-calling-hangupresult]: /docs/server-sdk/v2/php/reference/calling/results/hangup
+[relay-calling-playaction-9]: /docs/server-sdk/v2/php/reference/calling/actions/play
+[relay-calling-playresult-4]: /docs/server-sdk/v2/php/reference/calling/results/play
+[relay-calling-promptaction-7]: /docs/server-sdk/v2/php/reference/calling/actions/prompt
+[relay-calling-promptresult-3]: /docs/server-sdk/v2/php/reference/calling/results/prompt
+[relay-calling-recordaction-1]: /docs/server-sdk/v2/php/reference/calling/actions/record
+[relay-calling-recordresult]: /docs/server-sdk/v2/php/reference/calling/results/record
+[relay-calling-senddigitsaction-1]: /docs/server-sdk/v2/php/reference/calling/actions/send-digits
+[relay-calling-senddigitsresult]: /docs/server-sdk/v2/php/reference/calling/results/send-digits
+[relay-calling-tapaction-1]: /docs/server-sdk/v2/php/reference/calling/actions/tap
+[relay-calling-tapresult]: /docs/server-sdk/v2/php/reference/calling/results/tap
+
+All calls in SignalWire have a common generic interface, `Call`. A `Call` is a connection between SignalWire and another device.
+
+## Properties
+
+| Property | Type | Description |
+|----------|------|-----------|
+| `id` | `string` | The unique identifier of the call. |
+| `type` | `string` | The type of call. Only `phone` is currently supported. |
+| `from` | `string` | The phone number that the call is coming from. |
+| `to` | `string` | The phone number you are attempting to call. |
+| `timeout` | `number` | The seconds the call rings before being transferred to voicemail. |
+| `state` | `string` | The current state of the call. See [State Events][link] for all the possible call states. |
+| `prevState` | `string` | The previous state of the call. |
+| `context` | `string` | The context the call belongs to. |
+| `peer` | [`Relay.Calling.Call`][relay-calling-call-2] | The call your original call is connected to. |
+| `active` | `boolean` | Whether the call is active. |
+| `ended` | `boolean` | Whether the call has ended. |
+| `answered` | `boolean` | Whether the call has been answered. |
+| `failed` | `boolean` | Whether the call has failed. |
+| `busy` | `boolean` | Whether the call was busy. |
+
+## Methods
+
+### amd
+
+Alias for [`detectAnsweringMachine`][link-1].
+
+### amdAsync
+
+Alias for [`detectAnsweringMachineAsync`][link-2].
+
+### answer
+
+Answer an inbound call.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`React\Promise\Promise` - Promise object that will be fulfilled with a [`Relay.Calling.AnswerResult`][relay-calling-answerresult] object.
+
+**Examples**
+
+Answer an inbound call and check if it was successful.
+
+```php
+<?php
+
+$call->answer()->done(function($answerResult) {
+
+});
+```
+
+### connect
+
+Attempt to connect an existing call to a new outbound call and waits until one of the remote party picks the call or the connect fails.  
+This method involves complex nested parameters. You can connect to multiple devices in series, parallel, or any combination of both with creative use of the parameters. Series implies one device at a time, while parallel implies multiple devices at the same time.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-----------|
+| `$params` | `array` | **required** | Array with the following properties: |
+| `devices` | `array` | **required** | One or more arrays with the structure below.<br/>_Nested depends on whether to dial in serial or parallel._ |
+| `ringback` | `array` | *optional* | Ringback audio to play to call leg. You can play _audio_, _tts_, _silence_ or _ringtone_. See [`play` media parameter][link-3] for details. |
+
+**Structure of a device:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-----------|
+| `type` | `string` | **required** | The device type. Only `phone` is currently supported. |
+| `from` | `string` | *optional* | The party the call is coming from. <br/>_If not provided, the SDK will use the `from` of the originator call.<br/>Must be a SignalWire number or SIP endpoint that you own._ |
+| `to` | `string` | **required** | The party you are attempting to connect with. |
+| `timeout` | `number` | *optional* | The time, in seconds, the call will ring before going to voicemail. |
+
+**Returns**
+
+`React\Promise\Promise` - Promise object that will be fulfilled with a [`Relay.Calling.ConnectResult`][relay-calling-connectresult] object.
+
+**Examples**
+
+Try connecting by calling `+18991114444` and `+18991114445` in series.
+
+```php
+<?php
+
+$devices = [
+  [ "type" => "phone", "to" => "+18991114444", "timeout" => 30 ],
+  [ "type" => "phone", "to" => "+18991114445", "timeout" => 20 ]
+];
+$call->connect(...$devices)->done(function($connectResult) {
+  if ($connectResult->isSuccessful()) {
+    $remoteCall = $connectResult->getCall();
+  }
+});
+```
+
+Combine serial and parallel calling. Call `+18991114443` first and - if it doesn't answer - try calling in parallel `+18991114444` and `+18991114445`. If none of the devices answer, continue the same process with `+18991114446` and `+18991114447`.
+
+```php
+<?php
+
+$devices = [
+  [ "type" => "phone", "to" => "+18991114443", "timeout" => 30 ],
+  [
+    [ "type" => "phone", "to" => "+18991114444", "timeout" => 30 ],
+    [ "type" => "phone", "to" => "+18991114445", "timeout" => 20 ]
+  ],
+  [
+    [ "type" => "phone", "to" => "+18991114446", "timeout" => 30 ],
+    [ "type" => "phone", "to" => "+18991114447", "timeout" => 20 ]
+  ]
+];
+$call->connect(...$devices)->done(function($connectResult) {
+  if ($connectResult->isSuccessful()) {
+    $remoteCall = $connectResult->getCall();
+  }
+});
+```
+
+Try connecting by calling `+18991114444` and `+18991114445` in series playing the US ringtone.
+
+```php
+<?php
+
+$params = [
+  "devices" => [
+    [ "type" => "phone", "to" => "+18991114444" ],
+    [ "type" => "phone", "to" => "+18991114445" ]
+  ],
+  "ringback" => [ "type" => "ringtone", "name" => "us" ]
+];
+$call->connect(...$devices)->done(function($connectResult) {
+  if ($connectResult->isSuccessful()) {
+    $remoteCall = $connectResult->getCall();
+  }
+});
+```
+
+### connectAsync
+
+Asynchronous version of [`connect`][link-4]. It does not wait the connect to completes or fails but returns a [`Relay.Calling.ConnectAction`][relay-calling-connectaction-1] you can interact with.
+
+**Parameters**
+
+See [`connect`][link-4] for the parameter list.
+
+**Returns**
+
+`React\Promise\Promise` - Promise object that will be fulfilled with a [`Relay.Calling.ConnectAction`][relay-calling-connectaction-1] object.
+
+**Examples**
+
+Trying to connect a call by calling in series `+18991114444` and `+18991114445`.
+
+```php
+<?php
+
+$devices = [
+  [ "type" => "phone", "to" => "+18991114444", "timeout" => 30 ],
+  [ "type" => "phone", "to" => "+18991114445", "timeout" => 20 ]
+];
+$call->connect(...$devices)->done(function($connectAction) {
+  // .. do other important things while Relay try to connect your call..
+
+  // then check whether the action has completed
+  if ($connectAction->isCompleted()) {
+
+  }
+});
+```
+
+### detect
+
+Start a detector on the call and waits until it has finished or failed.
+
+The `detect` method is a generic method for all types of detecting, see [`detectAnsweringMachine`][link-1], [`detectDigit`][link-5] or [`detectFax`][link-6] for more specific usage.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-----------|
+| `$params` | `array` | **required** | Array with the following properties: |
+
+**To detect an answering machine:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-----------|
+| `type` | `string` | **required** | `machine` |
+| `timeout` | `number` | *optional* | Number of seconds to run the detector.<br/>_Defaults to 30.0._ |
+| `wait_for_beep` | `boolean` | *optional* | Whether to wait until the AM is ready for voicemail delivery.<br/>_Defaults to false._ |
+| `initial_timeout` | `number` | *optional* | Number of seconds to wait for initial voice before giving up.<br/>_Defaults to 4.5._ |
+| `end_silence_timeout` | `number` | *optional* | Number of seconds to wait for voice to finish.<br/>_Defaults to 1.0._ |
+| `machine_voice_threshold` | `number` | *optional* | How many seconds of voice to decide is a _machine_.<br/>_Defaults to 1.25._ |
+| `machine_words_threshold` | `number` | *optional* | How many words to count to decide is a _machine_.<br/>_Defaults to 6._ |
+
+**To detect digits:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-----------|
+| `type` | `string` | **required** | `digit` |
+| `timeout` | `number` | *optional* | Number of seconds to run the detector.<br/>_Defaults to 30.0._ |
+| `digits` | `string` | *optional* | The digits to detect.<br/>_Defaults to "0123456789#*"._ |
+
+**To detect a fax:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-----------|
+| `type` | `string` | **required** | `fax` |
+| `timeout` | `number` | *optional* | Number of seconds to run the detector.<br/>_Defaults to 30.0._ |
+| `tone` | `string` | *optional* | The fax tone to detect: `CED` or `CNG`.<br/>_Defaults to "CED"._ |
+
+**Returns**
+
+`React\Promise\Promise` - Promise object that will be fulfilled with a [`Relay.Calling.DetectResult`][relay-calling-detectresult-4] object.
+
+**Examples**
+
+Detect a machine with custom parameters and timeout.
+
+```php
+<?php
+
+$params = [
+  'type' => 'machine',
+  'timeout' => 45,
+  'initial_timeout' => 3.0
+];
+$call->detect($params)->done(function($detectResult) {
+  if ($detectResult->isSuccessful()) {
+    $type = $detectResult->getType(); // machine
+    $result = $detectResult->getResult(); // MACHINE / HUMAN / UNKNOWN
+  }
+});
+```
+
+Detect a Fax setting timeout only.
+
+```php
+<?php
+
+$params = [
+  'type' => 'fax',
+  'timeout' => 45
+];
+$call->detect($params)->done(function($detectResult) {
+  if ($detectResult->isSuccessful()) {
+
+  }
+});
+```
+
+### detectAsync
+
+Asynchronous version of [`detect`][link-7]. It does not wait the detector ends but returns a [`Relay.Calling.DetectAction`][relay-calling-detectaction-7] you can interact with.
+
+**Parameters**
+
+See [`detect`][link-7] for the parameter list.
+
+**Returns**
+
+`React\Promise\Promise` - Promise object that will be fulfilled with a [`Relay.Calling.DetectAction`][relay-calling-detectaction-7] object.
+
+**Examples**
+
+Detect digits using default parameters. Stop the action immediately.
+
+```php
+<?php
+
+$call->on('detect.update', function ($call, $params) {
+  // Handle a detector event here..
+  print_r($params);
+});
+$call->detectAsync([ 'type' => 'digit' ])->done(function ($detectAction) {
+  // Do other things while detector runs and then stop it.
+  if (!$detectAction->isCompleted()) {
+    $detectAction->stop();
+  }
+});
+```
+
+### detectAnsweringMachine
+
+This is a helper function that refines the use of [`detect`][link-7]. The Promise will be resolved with a [`Relay.Calling.DetectResult`][relay-calling-detectresult-4] object as soon as the detector decided _who_ answered the call: `MACHINE`, `HUMAN` or `UNKNOWN`.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-----------|
+| `$params` | `array` | *optional* | Array with the following properties: |
+| `timeout` | `number` | *optional* | Number of seconds to run the detector.<br/>_Defaults to 30.0._ |
+| `wait_for_beep` | `boolean` | *optional* | Whether to wait until the AM is ready for voicemail delivery.<br/>_Defaults to false._ |
+| `initial_timeout` | `number` | *optional* | Number of seconds to wait for initial voice before giving up.<br/>_Defaults to 4.5._ |
+| `end_silence_timeout` | `number` | *optional* | Number of seconds to wait for voice to finish.<br/>_Defaults to 1.0._ |
+| `machine_voice_threshold` | `number` | *optional* | How many seconds of voice to decide is a _machine_.<br/>_Defaults to 1.25._ |
+| `machine_words_threshold` | `number` | *optional* | How many words to count to decide is a _machine_.<br/>_Defaults to 6._ |
+
+**Returns**
+
+`React\Promise\Promise` - Promise object that will be fulfilled with a [`Relay.Calling.DetectResult`][relay-calling-detectresult-4] object.
+
+**Examples**
+
+Perform an AMD and wait until the _machine_ is ready.
+
+```php
+<?php
+
+$params = [
+  'wait_for_beep' => true
+];
+$call->detectAnsweringMachine($params)->done(function($detectResult) {
+  if ($detectResult->isSuccessful()) {
+    $result = $detectResult->getResult(); // MACHINE || HUMAN || UNKNOWN
+  }
+});
+```
+
+### detectAnsweringMachineAsync
+
+Asynchronous version of [`detectAnsweringMachine`][link-1]. It does not wait the detector ends but returns a [`Relay.Calling.DetectAction`][relay-calling-detectaction-7] you can interact with.
+
+**Parameters**
+
+See [`detectAnsweringMachine`][link-1] for the parameter list.
+
+**Returns**
+
+`React\Promise\Promise` - Promise object that will be fulfilled with a [`Relay.Calling.DetectAction`][relay-calling-detectaction-7] object.
+
+**Examples**
+
+Perform an asynchronous AMD on the call. Then stop the action if not completed yet.
+
+```php
+<?php
+
+$call->on('detect.update', function ($call, $params) {
+  // Handle a detector event here..
+  print_r($params);
+});
+$call->detectAnsweringMachineAsync()->done(function ($detectAction) {
+  // Do other things while detector runs and then stop it.
+  if (!$detectAction->isCompleted()) {
+    $detectAction->stop();
+  }
+});
+```
+
+### detectDigit
+
+This is a helper function that refines the use of [`detect`][link-7]. This simplifies detecting _digits_ on a call.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-----------|
+| `$params` | `array` | *optional* | Array with the following properties: |
+| `timeout` | `number` | *optional* | Number of seconds to run the detector.<br/>_Defaults to 30.0._ |
+| `digits` | `string` | *optional* | The digits to detect.<br/>_Defaults to "0123456789#*"._ |
+
+**Returns**
+
+`React\Promise\Promise` - Promise object that will be fulfilled with a [`Relay.Calling.DetectResult`][relay-calling-detectresult-4] object.
+
+**Examples**
+
+Detect digits and then write a log with the result.
+
+```php
+<?php
+
+$call->detectDigit()->done(function($detectResult) {
+  if ($detectResult->isSuccessful()) {
+    echo "Digits detected: " . $detectResult->getResult();
+  }
+});
+```
+
+### detectDigitAsync
+
+Asynchronous version of [`detectDigit`][link-5]. It does not wait the detector ends but returns a [`Relay.Calling.DetectAction`][relay-calling-detectaction-7] you can interact with.
+
+**Parameters**
+
+See [`detectDigit`][link-5] for the parameter list.
+
+**Returns**
+
+`React\Promise\Promise` - Promise object that will be fulfilled with a [`Relay.Calling.DetectAction`][relay-calling-detectaction-7] object.
+
+**Examples**
+
+Detect only `1-3` digits asynchronously.
+
+```php
+<?php
+
+$call->on('detect.update', function ($call, $params) {
+  // Handle a detector event here..
+  print_r($params);
+});
+$call->detectDigitAsync([ 'digits' => '123' ])->done(function ($detectAction) {
+  // Do other things while detector runs and then stop it.
+  if (!$detectAction->isCompleted()) {
+    $detectAction->stop();
+  }
+});
+```
+
+### detectFax
+
+This is a helper function that refines the use of [`detect`][link-7]. This simplifies detecting a _fax_.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-----------|
+| `$params` | `array` | *optional* | Array with the following properties: |
+| `timeout` | `number` | *optional* | Number of seconds to run the detector.<br/>_Defaults to 30.0._ |
+| `tone` | `string` | *optional* | The fax tone to detect: `CED` or `CNG`.<br/>_Defaults to "CED"._ |
+
+**Returns**
+
+`React\Promise\Promise` - Promise object that will be fulfilled with a [`Relay.Calling.DetectResult`][relay-calling-detectresult-4] object.
+
+**Examples**
+
+Detect fax on the current call.
+
+```php
+<?php
+
+$call->detectFax()->done(function($detectResult) {
+  if ($detectResult->isSuccessful()) {
+    // A fax has been detected!
+  }
+});
+```
+
+### detectFaxAsync
+
+Asynchronous version of [`detectFax`][link-6]. It does not wait the detector ends but returns a [`Relay.Calling.DetectAction`][relay-calling-detectaction-7] you can interact with.
+
+**Parameters**
+
+See [`detectFax`][link-6] for the parameter list.
+
+**Returns**
+
+`React\Promise\Promise` - Promise object that will be fulfilled with a [`Relay.Calling.DetectAction`][relay-calling-detectaction-7] object.
+
+**Examples**
+
+Detect fax on the current call. Stop the action immediately.
+
+```php
+<?php
+
+$call->on('detect.update', function ($call, $params) {
+  // Handle a detector event here..
+  print_r($params);
+});
+$call->detectFaxAsync()->done(function ($detectAction) {
+  // Do other things while detector runs and then stop it.
+  if (!$detectAction->isCompleted()) {
+    $detectAction->stop();
+  }
+});
+```
+
+### detectHuman
+
+This is a helper function that refines the use of [`detect`][link-7]. This simplifies detecting a _human_ on the call and is the inverse of [`detectMachine`][link-25].
+
+**Deprecated since**: v2.2 - Use [`detectAnsweringMachine`][link-4] instead.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `$params` | `array` | *optional* | Array with the following properties: |
+| `timeout` | `number` | *optional* | Number of seconds to run the detector.<br/>_Defaults to 30.0._ |
+| `wait_for_beep` | `boolean` | *optional* | Whether to wait until the AM is ready for voicemail delivery.<br/>_Defaults to false._ |
+| `initial_timeout` | `number` | *optional* | Number of seconds to wait for initial voice before giving up.<br/>_Defaults to 4.5._ |
+| `end_silence_timeout` | `number` | *optional* | Number of seconds to wait for voice to finish.<br/>_Defaults to 1.0._ |
+| `machine_voice_threshold` | `number` | *optional* | How many seconds of voice to decide is a _machine_.<br/>_Defaults to 1.25._ |
+| `machine_words_threshold` | `number` | *optional* | How many words to count to decide is a _machine_.<br/>_Defaults to 6._ |
+
+**Returns**
+
+`React\Promise\Promise` - Promise object that will be fulfilled with a [`Relay.Calling.DetectResult`][relay-calling-detectresult] object.
+
+**Examples**
+
+Detect a human on the current call.
+
+```php
+<?php
+
+$call->detectHuman()->done(function($detectResult) {
+  if ($detectResult->isSuccessful()) {
+    // A human has been detected!
+  }
+});
+```
+
+### detectHumanAsync
+
+Asynchronous version of [`detectHuman`][link-24]. It does not wait the detector ends but returns a [`Relay.Calling.DetectAction`][relay-calling-detectaction-7] you can interact with.
+
+**Deprecated since**: v2.2 - Use [`detectAnsweringMachineAsync`][link-1] instead.
+
+**Parameters**
+
+See [`detectHuman`][link-24] for the parameter list.
+
+**Returns**
+
+`React\Promise\Promise` - Promise object that will be fulfilled with a [`Relay.Calling.DetectAction`][relay-calling-detectaction-7] object.
+
+**Examples**
+
+Detect a human on the current call. Stop the action immediately.
+
+```php
+<?php
+
+$call->detectHumanAsync()->done(function ($detectAction) {
+  // For demonstration purposes only..
+  $detectAction->stop();
+});
+```
+
+### detectMachine
+
+This is a helper function that refines the use of [`detect`][link-7]. This simplifies detecting a _machine_ on the call and is the inverse of [`detectHuman`][link-24].
+
+**Deprecated since**: v2.2 - Use [`detectAnsweringMachine`][link-4] instead.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `$params` | `array` | *optional* | Array with the following properties: |
+| `timeout` | `number` | *optional* | Number of seconds to run the detector.<br/>_Defaults to 30.0._ |
+| `wait_for_beep` | `boolean` | *optional* | Whether to wait until the AM is ready for voicemail delivery.<br/>_Defaults to false._ |
+| `initial_timeout` | `number` | *optional* | Number of seconds to wait for initial voice before giving up.<br/>_Defaults to 4.5._ |
+| `end_silence_timeout` | `number` | *optional* | Number of seconds to wait for voice to finish.<br/>_Defaults to 1.0._ |
+| `machine_voice_threshold` | `number` | *optional* | How many seconds of voice to decide is a _machine_.<br/>_Defaults to 1.25._ |
+| `machine_words_threshold` | `number` | *optional* | How many words to count to decide is a _machine_.<br/>_Defaults to 6._ |
+
+**Returns**
+
+`React\Promise\Promise` - Promise object that will be fulfilled with a [`Relay.Calling.DetectResult`][relay-calling-detectresult] object.
+
+**Examples**
+
+Detect a machine on the current call.
+
+```php
+<?php
+
+$call->detectMachine()->done(function($detectResult) {
+  if ($detectResult->isSuccessful()) {
+    // A machine has been detected!
+  }
+});
+```
+
+### detectMachineAsync
+
+Asynchronous version of [`detectMachine`][link-25]. It does not wait the detector ends but returns a [`Relay.Calling.DetectAction`][relay-calling-detectaction-7] you can interact with.
+
+**Deprecated since**: v2.2 - Use [`detectAnsweringMachineAsync`][link-1] instead.
+
+**Parameters**
+
+See [`detectMachine`][link-25] for the parameter list.
+
+**Returns**
+
+`React\Promise\Promise` - Promise object that will be fulfilled with a [`Relay.Calling.DetectAction`][relay-calling-detectaction-7] object.
+
+**Examples**
+
+Detect a machine on the current call. Stop the action immediately.
+
+```php
+<?php
+
+$call->detectMachineAsync()->done(function ($detectAction) {
+  // For demonstration purposes only..
+  $detectAction->stop();
+});
+```
+
+### dial
+
+This will start a call that was created with [`newCall`][index] and waits until the Call has been answered or hung up.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`React\Promise\Promise` - Promise object that will be fulfilled with a [`Relay.Calling.DialResult`][relay-calling-dialresult] object.
+
+**Examples**
+
+```php
+<?php
+
+$call->dial()->done(function($dialResult) {
+
+});
+```
+
+### faxReceive
+
+Prepare the call to receive an inbound fax. It waits until the fax has been received or failed.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`React\Promise\Promise` - Promise object that will be fulfilled with a [`Relay.Calling.FaxResult`][relay-calling-faxresult-1] object.
+
+**Examples**
+
+Receiving a fax on the call and print logs for URL and number of received pages.
+
+```php
+<?php
+
+$call->faxReceive()->done(function($faxResult) {
+  echo 'URL: ' . $faxResult->getDocument() . PHP_EOL;
+  echo 'Total pages: ' . $faxResult->getPages();
+});
+```
+
+### faxReceiveAsync
+
+Asynchronous version of [`faxReceive`][link-8]. It does not wait the fax to be received but returns [`Relay.Calling.FaxAction`][relay-calling-faxaction-3] you can interact with.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`React\Promise\Promise` - Promise object that will be fulfilled with a [`Relay.Calling.FaxAction`][relay-calling-faxaction-3] object.
+
+**Examples**
+
+Trying to receive a fax and then stop it.
+
+```php
+<?php
+
+$call->faxReceiveAsync()->done(function ($faxAction) {
+  // For demonstration purposes only..
+  $faxAction->stop();
+});
+```
+
+### faxSend
+
+Send a fax through the call. It waits until the fax has been sent or failed.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-----------|
+| `$document` | `string` | **required** | Http(s) URL to the document to send.<br/>_PDF format only._ |
+| `$identity` | `string` | *optional* | Identity to display on receiving fax.<br/>_Defaults to SignalWire DID._ |
+| `$header` | `string` | *optional* | Custom string to add to header of each fax page.<br/>_Set to empty string to disable sending any header._ |
+
+**Returns**
+
+`React\Promise\Promise` - Promise object that will be fulfilled with a [`Relay.Calling.FaxResult`][relay-calling-faxresult-1] object.
+
+**Examples**
+
+Sending a fax on the call and print logs the number of sent pages.
+
+```php
+<?php
+
+$call->faxSend('https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', null, 'Custom Header')->done(function($faxResult) {
+  echo "\n URL: " . $faxResult->getDocument();
+  echo "\n Total pages: " . $faxResult->getPages();
+});
+```
+
+### faxSendAsync
+
+Asynchronous version of [`faxSend`][link-9]. It does not wait the fax to be sent but returns a [`Relay.Calling.FaxAction`][relay-calling-faxaction-3] you can interact with.
+
+**Parameters**
+
+See [`faxSend`][link-9] for the parameter list.
+
+**Returns**
+
+`React\Promise\Promise` - Promise object that will be fulfilled with a [`Relay.Calling.FaxAction`][relay-calling-faxaction-3] object.
+
+**Examples**
+
+Trying to send a fax and then stop it.
+
+```php
+<?php
+
+$call->faxSendAsync('https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', null, 'Custom Header')->done(function ($faxAction) {
+  // For demonstration purposes only..
+  $faxAction->stop();
+});
+```
+
+### hangup
+
+Hangup the call.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`React\Promise\Promise` - Promise object that will be fulfilled with a [`Relay.Calling.HangupResult`][relay-calling-hangupresult] object.
+
+**Examples**
+
+Hangup the current call and check if it was successful.
+
+```php
+<?php
+
+$call->hangup()->done(function($hangupResult) {
+  if ($hangupResult->isSuccessful()) {
+
+  }
+});
+```
+
+### on
+
+Attach an event handler for the _event_.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-----------|
+| `$event` | `string` | **required** | Event name. Full list of events [Call Events][link-10] |
+| `$handler` | `callable` | **required** | Handler to call when the event comes. |
+
+**Returns**
+
+[`Relay.Calling.Call`][relay-calling-call-2] - The call object itself.
+
+**Examples**
+
+Subscribe to the `answered` and `ended` events for a given call.
+
+```php
+<?php
+
+$call->on('ended', function($call) {
+  // Call has ended.. cleanup something?
+});
+```
+
+### off
+
+Remove an event handler that were attached with the `on` method. If you don't pass a `$handler`, all listeners for that _event_ will be removed.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-----------|
+| `$event` | `string` | **required** | Event name. Full list of events [Call Events][link-10] |
+| `$handler` | `callable` | *optional* | Handler to remove. <br /> _Note: `$handler` will be removed from the stack by reference so make sure to use the same reference in both `on` and `off` methods._ |
+
+**Returns**
+
+[`Relay.Calling.Call`][relay-calling-call-2] - The call object itself.
+
+**Examples**
+
+Subscribe to the call `ended` state change and then, remove the event handler.
+
+```php
+<?php
+
+$callback = function($call) {
+  // Call has ended.
+};
+
+$call->on('ended', $callback);
+
+// .. later
+$call->off('ended', $callback);
+```
+
+### play
+
+Play one or multiple media in a call and waits until the playing has ended.
+
+The `play` method is a generic method for all types of playing, see [`playAudio`][link-11], [`playSilence`][link-12], [`playTTS`][link-13] or [`playRingtone`][link-14] for more specific usage.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-----------|
+| `$params` | `array` | **required** | Array with the following properties: |
+| `media` | `array` | **required** | List of media elements to play. See below for each type. |
+| `volume` | `number` | *optional* | Volume value between -40dB and +40dB where 0 is unchanged.<br/>_Default is `0`._ |
+
+**To play an audio file:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-----------|
+| `type` | `string` | **required** | `audio` |
+| `url` | `string` | **required** | Http(s) URL to `audio` resource to play. |
+
+**To play a text to speech string:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-----------|
+| `type` | `string` | **required** | `tts` |
+| `text` | `string` | **required** | TTS to play. |
+| `language` | `string` | *optional* | Default to `en-US`. |
+| `gender` | `string` | *optional* | `male` or `female`. Default to `female`. |
+
+**To play silence:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-----------|
+| `type` | `string` | **required** | `silence` |
+| `duration` | `number` | **required** | Seconds of silence to play. |
+
+**To play ringtone:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-----------|
+| `type` | `string` | **required** | `ringtone` |
+| `name` | `string` | **required** | The name of the ringtone. See [ringtones][link-15] for the supported values. |
+| `duration` | `number` | *optional* | Duration of ringtone to play.<br/>_Default to 1 ringtone iteration._ |
+
+**Returns**
+
+`React\Promise\Promise` - Promise object that will be fulfilled with a [`Relay.Calling.PlayResult`][relay-calling-playresult-4] object.
+
+**Examples**
+
+Play multiple media elements in the call.
+
+```php
+<?php
+
+$params = [
+  'media' => [
+    [ "type" => "tts", "text" => "Listen this awesome file!" ],
+    [ "type" => "audio", "url" => "https://example.domain.com/audio.mp3" ],
+    [ "type" => "silence", "duration" => 5 ],
+    [ "type" => "tts", "text" => "Did you like it?" ]
+  ],
+  'volume' => 4.0
+];
+$call->play($params)->done(function ($playResult) {
+  if ($playResult->isSuccessful()) {
+
+  }
+});
+```
+
+### playAsync
+
+Asynchronous version of [`play`][link-3]. It does not wait the _playing_ to completes but returns a [`Relay.Calling.PlayAction`][relay-calling-playaction-9] you can interact with.
+
+**Parameters**
+
+See [`play`][link-3] for the parameter list.
+
+**Returns**
+
+`React\Promise\Promise` - Promise object that will be fulfilled with a [`Relay.Calling.PlayAction`][relay-calling-playaction-9] object.
+
+**Examples**
+
+Play multiple media elements in the call and then stop it.
+
+```php
+<?php
+
+$params = [
+  'media' => [
+    [ "type" => "tts", "text" => "Listen this awesome file!" ],
+    [ "type" => "audio", "url" => "https://example.domain.com/audio.mp3" ],
+    [ "type" => "silence", "duration" => 5 ],
+    [ "type" => "tts", "text" => "Did you like it?" ]
+  ],
+  'volume' => 4.0
+];
+$call->playAsync($params)->done(function ($playAction) {
+  // For demonstration purposes only..
+  $playAction->stop();
+});
+```
+
+### playAudio
+
+This is a helper function that refines the use of [`play`][link-3]. This simplifies playing an audio file.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-----------|
+| `$params` | `array` | **required** | Array with the following properties: |
+| `url` | `string` | **required** | Http(s) URL to audio resource to play. |
+| `volume` | `number` | *optional* | Volume value between -40dB and +40dB where 0 is unchanged.<br/>_Default is `0`._ |
+
+**Returns**
+
+`React\Promise\Promise` - Promise object that will be fulfilled with a [`Relay.Calling.PlayResult`][relay-calling-playresult-4] object.
+
+**Examples**
+
+Play an Mp3 file using the signature with a `string` as parameter.
+
+```php
+<?php
+
+$call->playAudio('https://cdn.signalwire.com/default-music/welcome.mp3')->done(function($playResult) {
+  // interact with $playResult..
+});
+```
+
+Play an Mp3 file setting volume level to 4dB.
+
+```php
+<?php
+
+$params = [
+  'url' => 'https://cdn.signalwire.com/default-music/welcome.mp3',
+  'volume' => 4.0
+];
+$call->playAudio($params)->done(function($playResult) {
+  // interact with $playResult..
+});
+```
+
+### playAudioAsync
+
+Asynchronous version of [`playAudio`][link-11]. It does not wait the _playing_ to completes but returns a [`Relay.Calling.PlayAction`][relay-calling-playaction-9] you can interact with.
+
+**Parameters**
+
+See [`playAudio`][link-11] for the parameter list.
+
+**Returns**
+
+`React\Promise\Promise` - Promise object that will be fulfilled with a [`Relay.Calling.PlayAction`][relay-calling-playaction-9] object.
+
+**Examples**
+
+Play an Mp3 file and stop it after 5 seconds.
+
+```php
+<?php
+
+$call->playAudioAsync('https://cdn.signalwire.com/default-music/welcome.mp3')->done(function($playAction) {
+  // For demonstration purposes only..
+  $playAction->stop();
+});
+```
+
+Play an Mp3 file setting the volume and stop it after 5 seconds.
+
+```php
+<?php
+
+$params = [
+  'url' => 'https://cdn.signalwire.com/default-music/welcome.mp3',
+  'volume' => 4.0
+];
+$call->playAudioAsync($params)->done(function($playAction) {
+  // For demonstration purposes only..
+  $playAction->stop();
+});
+```
+
+### playRingtone
+
+This is a helper function that refines the use of [`play`][link-3]. This simplifies play a ringtone.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-----------|
+| `$params` | `array` | **required** | Array with the following properties: |
+| `name` | `string` | **required** | The name of the ringtone. See [ringtones][link-15] for the supported values. |
+| `duration` | `number` | *optional* | Duration of ringtone to play.<br/>_Default to 1 ringtone iteration._ |
+| `volume` | `number` | *optional* | Volume value between -40dB and +40dB where 0 is unchanged.<br/>_Default is `0`._ |
+
+**Returns**
+
+`React\Promise\Promise` - Promise object that will be fulfilled with a [`Relay.Calling.PlayResult`][relay-calling-playresult-4] object.
+
+**Examples**
+
+Play a single US ringtone.
+
+```php
+<?php
+
+$params = [ 'name' => 'us' ];
+$call->playRingtone($params)->done(function($playResult) {
+  // interact with $playResult..
+});
+```
+
+### playRingtoneAsync
+
+Asynchronous version of [`playRingtone`][link-14]. It does not wait the _playing_ to completes but returns a [`Relay.Calling.PlayAction`][relay-calling-playaction-9] you can interact with.
+
+**Parameters**
+
+See [`playRingtone`][link-14] for the parameter list.
+
+**Returns**
+
+`React\Promise\Promise` - Promise object that will be fulfilled with a [`Relay.Calling.PlayAction`][relay-calling-playaction-9] object.
+
+**Examples**
+
+Play US ringtone for 30 seconds, if _Agent_ is available, stop the play.
+
+```php
+<?php
+
+$params = [ 'name' => 'us', 'duration' => 30 ];
+$call->playRingtoneAsync($params)->done(function($playAction) use ($globalAgent) {
+  // For demonstration purposes only ..
+  if ($globalAgent->isAvailable()) {
+    $playAction->stop();
+  }
+});
+```
+
+### playSilence
+
+This is a helper function that refines the use of [`play`][link-3]. This simplifies playing silence.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-----------|
+| `$duration` | `number` | **required** | Seconds of silence to play. |
+
+**Returns**
+
+`React\Promise\Promise` - Promise object that will be fulfilled with a [`Relay.Calling.PlayResult`][relay-calling-playresult-4] object.
+
+**Examples**
+
+Play silence for 10 seconds.
+
+```php
+<?php
+
+$call->playSilence(10)->done(function($playResult) {
+  // interact with $playResult..
+});
+```
+
+### playSilenceAsync
+
+Asynchronous version of [`playSilence`][link-12]. It does not wait the _playing_ to completes but returns a [`Relay.Calling.PlayAction`][relay-calling-playaction-9] you can interact with.
+
+**Parameters**
+
+See [`playSilence`][link-12] for the parameter list.
+
+**Returns**
+
+`React\Promise\Promise` - Promise object that will be fulfilled with a [`Relay.Calling.PlayAction`][relay-calling-playaction-9] object.
+
+**Examples**
+
+Play silence for 60 seconds, if _Agent_ is available, stop the play.
+
+```php
+<?php
+
+$call->playSilenceAsync(60)->done(function($playAction) use ($globalAgent) {
+  // For demonstration purposes only ..
+  if ($globalAgent->isAvailable()) {
+    $playAction->stop();
+  }
+});
+```
+
+### playTTS
+
+This is a helper function that refines the use of [`play`][link-3]. This simplifies playing TTS.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-----------|
+| `$params` | `array` | **required** | Array with the following properties: |
+| `text` | `string` | **required** | TTS to play. |
+| `language` | `string` | *optional* | Default to `en-US`. |
+| `gender` | `string` | *optional* | `male` or `female`. Default to `female`. |
+| `volume` | `number` | *optional* | Volume value between -40dB and +40dB where 0 is unchanged.<br/>_Default is `0`._ |
+
+**Returns**
+
+`React\Promise\Promise` - Promise object that will be fulfilled with a [`Relay.Calling.PlayResult`][relay-calling-playresult-4] object.
+
+**Examples**
+
+Play TTS.
+
+```php
+<?php
+
+$params = [ 'text' => 'Welcome to SignalWire!' ];
+$call->playTTS($params)->done(function($playResult) {
+  // interact with $playResult..
+});
+```
+
+### playTTSAsync
+
+Asynchronous version of [`playTTS`][link-13]. It does not wait the _playing_ to completes but returns a [`Relay.Calling.PlayAction`][relay-calling-playaction-9] you can interact with.
+
+**Parameters**
+
+See [`playTTS`][link-13] for the parameter list.
+
+**Returns**
+
+`React\Promise\Promise` - Promise object that will be fulfilled with a [`Relay.Calling.PlayAction`][relay-calling-playaction-9] object.
+
+**Examples**
+
+Play TTS and stop it after 5 seconds.
+
+```php
+<?php
+
+$params = [ 'text' => 'Welcome to SignalWire!' ];
+$call->playTTSAsync($params)->done(function($playAction) {
+  // interact with $playAction..
+
+  $playAction->stop();
+});
+```
+
+### prompt
+
+Play one or multiple media while collecting user's input from the call at the same time, such as _digits_ and _speech_.
+
+It waits until the collection succeed or timeout is reached.
+
+The `prompt` method is a generic method, see [`promptAudio`][link-16], [`promptTTS`][link-17] or [`promptRingtone`][link-18] for more specific usage.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-----------|
+| `$collect` | `array` | **required** | Array with the following properties: |
+| `type` | `string` | **required** | `digits`, `speech` or `both`. |
+| `media` | `array` | **required** | List of media elements to play. See [`play`][link-3] for the array structure. |
+| `initial_timeout` | `number` | *optional* | Initial timeout in seconds. <br/>_Default to 4 seconds._ |
+| `volume` | `number` | *optional* | Volume value between -40dB and +40dB where 0 is unchanged.<br/>_Default is `0`._ |
+
+**To collect digits:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-----------|
+| `digits_max` | `number` | **required** | Max digits to collect. |
+| `digits_terminators` | `string` | *optional* | DTMF digits that will end the recording. <br/>_Default not set._ |
+| `digits_timeout` | `number` | *optional* | Timeout in seconds between each digit. |
+
+**To collect speech:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-----------|
+| `end_silence_timeout` | `number` | *optional* | How much silence to wait for end of speech. <br/>_Default to 1 second._ |
+| `speech_timeout` | `number` | *optional* | Maximum time to collect speech. <br/>_Default to 60 seconds._ |
+| `speech_language` | `string` | *optional* | Language to detect. <br/>_Default to `en-US`._ |
+| `speech_hints` | `array` | *optional* | Array of expected phrases to detect. |
+
+**Returns**
+
+`React\Promise\Promise` - Promise object that will be fulfilled with a [`Relay.Calling.PromptResult`][relay-calling-promptresult-3] object.
+
+**Examples**
+
+Ask user to enter their PIN and collect the digits.
+
+```php
+<?php
+
+$mediaToPlay = [
+  ['type' => 'tts', 'text' => 'Welcome at SignalWire. Please, enter your PIN and then # to proceed']
+];
+$collect = [
+  'type' => 'digits',
+  'digits_max' => 4,
+  'digits_terminators' => '#',
+  'media' => $mediaToPlay
+];
+$call->prompt($collect)->done(function($promptResult) {
+  if ($promptResult->isSuccessful()) {
+    $type = $promptResult->getType(); // => digit
+    $pin = $promptResult->getResult(); // => pin entered by the user
+  }
+});
+```
+
+### promptAsync
+
+Asynchronous version of [`prompt`][link-19]. It does not wait the _collection_ to completes but returns a [`Relay.Calling.PromptAction`][relay-calling-promptaction-7] you can interact with.
+
+**Parameters**
+
+See [`prompt`][link-19] for the parameter list.
+
+**Returns**
+
+`React\Promise\Promise` - Promise object that will be fulfilled with a [`Relay.Calling.PromptAction`][relay-calling-promptaction-7] object.
+
+**Examples**
+
+Ask user to enter their PIN and collect the digits.
+
+```php
+<?php
+
+$mediaToPlay = [
+  ['type' => 'tts', 'text' => 'Welcome at SignalWire. Please, enter your PIN and then # to proceed']
+];
+$collect = [
+  'type' => 'digits',
+  'digits_max' => 4,
+  'digits_terminators' => '#',
+  'media' => $mediaToPlay
+];
+$call->promptAsync($collect, $tts)->done(function($promptAction) {
+  // .. do other important things while collecting user digits..
+  if ($promptAction->isCompleted()) {
+    $promptResult = $promptAction->getResult(); // => Relay.Calling.PromptResult Object
+  }
+});
+```
+
+### promptAudio
+
+This is a helper function that refines the use of [`prompt`][link-19].  
+This function simplifies playing an audio file while collecting user's input from the call, such as _digits_ and _speech_.
+
+**Parameters**
+
+You can set all the properties that [`prompt`][link-19] accepts replacing `media` with:
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-----------|
+| `url` | `string` | **required** | Http(s) URL to `audio` resource to play. |
+
+> The SDK will build the media for you.
+
+**Returns**
+
+`React\Promise\Promise` - Promise object that will be fulfilled with a [`Relay.Calling.PromptResult`][relay-calling-promptresult-3] object.
+
+**Examples**
+
+Collect user's digits while playing an Mp3 file.
+
+```php
+<?php
+
+$collect = [
+  'type' => 'digits',
+  'digits_max' => 4,
+  'url' => 'https://cdn.signalwire.com/default-music/welcome.mp3'
+];
+$call->promptAudio($collect)->done(function($promptResult) {
+  if ($promptResult->isSuccessful()) {
+    $type = $promptResult->getType(); // => digit
+    $pin = $promptResult->getResult(); // => pin entered by the user
+  }
+});
+```
+
+### promptAudioAsync
+
+Asynchronous version of [`promptAudio`][link-16]. It does not wait the _collection_ to completes but returns a [`Relay.Calling.PromptAction`][relay-calling-promptaction-7] you can interact with.
+
+**Parameters**
+
+See [`promptAudio`][link-16] for the parameter list.
+
+**Returns**
+
+`React\Promise\Promise` - Promise object that will be fulfilled with a [`Relay.Calling.PromptAction`][relay-calling-promptaction-7] object.
+
+**Examples**
+
+Ask user to enter their PIN and collect the digits.
+
+```php
+<?php
+
+$collect = [
+  'type' => 'digits',
+  'digits_max' => 4,
+  'url' => 'https://cdn.signalwire.com/default-music/welcome.mp3'
+];
+$call->promptAudioAsync($collect)->done(function($promptAction) {
+  // .. do other important things while collecting user digits..
+  if ($promptAction->isCompleted()) {
+    $promptResult = $promptAction->getResult(); // => Relay.Calling.PromptResult Object
+  }
+});
+```
+
+### promptRingtone
+
+This is a helper function that refines the use of [`prompt`][link-19].  
+This function simplifies playing ringtone while collecting user's input from the call, such as _digits_ and _speech_.
+
+**Parameters**
+
+You can set all the properties that [`prompt`][link-19] accepts replacing `media` with:
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-----------|
+| `name` | `string` | **required** | The name of the ringtone. See [ringtones][link-15] for the supported values. |
+| `duration` | `number` | *optional* | Duration of ringtone to play.<br/>_Default to 1 ringtone iteration._ |
+
+**Returns**
+
+`React\Promise\Promise` - Promise object that will be fulfilled with a [`Relay.Calling.PromptResult`][relay-calling-promptresult-3] object.
+
+**Examples**
+
+Play US ringtone for 30 seconds while collect digits.
+
+```php
+<?php
+
+$params = [
+  'type' => 'digits',
+  'digits_max' => 3,
+  'name' => 'us',
+  'duration' => '30'
+];
+$call->promptRingtone($params)->done(function($promptResult) {
+  if ($promptResult->isSuccessful()) {
+    $type = $promptResult->getType(); // => digit
+    $pin = $promptResult->getResult(); // => user's digits
+  }
+});
+```
+
+### promptRingtoneAsync
+
+Asynchronous version of [`promptRingtone`][link-18]. It does not wait the _collection_ to completes but returns a [`Relay.Calling.PromptAction`][relay-calling-promptaction-7] you can interact with.
+
+**Parameters**
+
+See [`promptRingtone`][link-18] for the parameter list.
+
+**Returns**
+
+`React\Promise\Promise` - Promise object that will be fulfilled with a [`Relay.Calling.PromptAction`][relay-calling-promptaction-7] object.
+
+**Examples**
+
+Play US ringtone for 30 seconds while collect digits in asynchronous.
+
+```php
+<?php
+
+$collect = [
+  'type' => 'digits',
+  'digits_max' => 3,
+  'name' => 'us',
+  'duration' => '30'
+];
+$call->promptRingtoneAsync($collect)->done(function($promptAction) {
+  // .. do other important things while collecting user digits..
+
+  if ($promptAction->isCompleted()) {
+    $promptResult = $promptAction->getResult(); // => Relay.Calling.PromptResult Object
+  }
+});
+```
+
+### promptTTS
+
+This is a helper function that refines the use of [`prompt`][link-19].  
+This function simplifies playing TTS while collecting user's input from the call, such as _digits_ and _speech_.
+
+**Parameters**
+
+You can set all the properties that [`prompt`][link-19] accepts replacing `media` with:
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-----------|
+| `text` | `string` | **required** | Text-to-speech string to play. |
+| `language` | `string` | *optional* | Default to `en-US`. |
+| `gender` | `string` | *optional* | `male` or `female`. Default to `female`. |
+
+**Returns**
+
+`React\Promise\Promise` - Promise object that will be fulfilled with a [`Relay.Calling.PromptResult`][relay-calling-promptresult-3] object.
+
+**Examples**
+
+Ask user to enter their PIN and collect the digits.
+
+```php
+<?php
+
+$collect = [
+  'type' => 'digits',
+  'digits_max' => 3,
+  'text' => 'Please, enter your 3 digit PIN.'
+];
+$call->promptTTS($collect)->done(function($promptResult) {
+  if ($promptResult->isSuccessful()) {
+    $type = $promptResult->getType(); // => digit
+    $pin = $promptResult->getResult(); // => pin entered by the user
+  }
+});
+```
+
+### promptTTSAsync
+
+Asynchronous version of [`promptTTS`][link-17]. It does not wait the _collection_ to completes but returns a [`Relay.Calling.PromptAction`][relay-calling-promptaction-7] you can interact with.
+
+**Parameters**
+
+See [`promptTTS`][link-17] for the parameter list.
+
+**Returns**
+
+`React\Promise\Promise` - Promise object that will be fulfilled with a [`Relay.Calling.PromptAction`][relay-calling-promptaction-7] object.
+
+**Examples**
+
+Ask user to enter their PIN and collect the digits.
+
+```php
+<?php
+
+$collect = [
+  'type' => 'digits',
+  'digits_max' => 3,
+  'text' => 'Please, enter your 3 digit PIN.'
+];
+$call->promptTTSAsync($collect)->done(function($promptAction) {
+  // .. do other important things while collecting user digits..
+  if ($promptAction->isCompleted()) {
+    $promptResult = $promptAction->getResult(); // => Relay.Calling.PromptResult Object
+  }
+});
+```
+
+### record
+
+Start recording the call and waits until the recording ends or fails.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-----------|
+| `$params` | `array` | *optional* | Array with the following properties: |
+| `beep` | `boolean` | *optional* | Default to `false`. |
+| `stereo` | `boolean` | *optional* | Default to `false`. |
+| `format` | `string` | *optional* | `mp3` or `wav`. <br/>_Default `mp3`._ |
+| `direction` | `string` | *optional* | `listen`, `speak` or `both`. Default to `speak`. |
+| `initial_timeout` | `number` | *optional* | How long to wait in seconds until something is heard in the recording. Disable with `0`. <br/>_Default `5.0`._ |
+| `end_silence_timeout` | `number` | *optional* | How long to wait in seconds until caller has stopped speaking. Disable with `0`. <br/>_Default `1.0`._ |
+| `terminators` | `string` | *optional* | DTMF digits that will end the recording. <br/>_Default `#*`_. |
+
+**Returns**
+
+`React\Promise\Promise` - Promise object that will be fulfilled with a [`Relay.Calling.RecordResult`][relay-calling-recordresult] object.
+
+**Examples**
+
+Start recording audio in the call for both direction in stereo mode, if successful, grab `url`, `duration` and `size` from the RecordResult object.
+
+```php
+<?php
+
+$params = [
+  'stereo' => true,
+  'direction' => 'both'
+];
+$call->record($params)->done(function($recordResult) {
+  if ($recordResult->isSuccessful()) {
+    $url = $recordResult->getUrl();
+    $duration = $recordResult->getDuration();
+    $size = $recordResult->getSize();
+  }
+});
+```
+
+### recordAsync
+
+Asynchronous version of [`record`][link-20]. It does not wait the end of recording but returns a [`Relay.Calling.RecordAction`][relay-calling-recordaction-1] you can interact with.
+
+**Parameters**
+
+See [`record`][link-20] for the parameter list.
+
+**Returns**
+
+`React\Promise\Promise` - Promise object that will be fulfilled with a [`Relay.Calling.RecordAction`][relay-calling-recordaction-1] object.
+
+**Examples**
+
+Start recording audio in the call for both direction in stereo mode and then stop it using the RecordAction object.
+
+```php
+<?php
+
+$params = [
+  'stereo' => true,
+  'direction' => 'both'
+];
+$call->record($params)->done(function($recordAction) {
+  // For demonstration purposes only ..
+  $recordAction->stop();
+});
+```
+
+### sendDigits
+
+This method sends DTMF digits to the other party on the call. Allowed digits are `1234567890*#ABCD` and `wW` for short and long waits. If any invalid characters are present, the entire operation is rejected.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-----------|
+| `$digits` | `string` | **required** | String of DTMF digits to send. |
+
+**Returns**
+
+`React\Promise\Promise` - Promise object that will be fulfilled with a [`Relay.Calling.SendDigitsResult`][relay-calling-senddigitsresult] object.
+
+**Examples**
+
+Send some digits.
+
+```php
+<?php
+
+$call->sendDigits('123')->done(function($result) {
+  if ($result->isSuccessful()) {
+    // ...
+  }
+});
+```
+
+### sendDigitsAsync
+
+Asynchronous version of [`sendDigits`][link-21]. It does not wait for the sending event to complete, and immediately returns a [`Relay.Calling.SendDigitsAction`][relay-calling-senddigitsaction-1] object you can interact with.
+
+**Parameters**
+
+See [`sendDigits`][link-21] for the parameter list.
+
+**Returns**
+
+`React\Promise\Promise` - Promise object that will be fulfilled with a [`Relay.Calling.SendDigitsAction`][relay-calling-senddigitsaction-1].
+
+**Examples**
+
+Send some digits and then check if the operation is completed using the _SendDigitsAction_ object.
+
+```php
+<?php
+
+$call->sendDigitsAsync('123')->done(function($action) {
+  // ...
+  // Later in the code for demonstration purposes only ..
+  $completed = $action->isCompleted();
+});
+```
+
+### tap
+
+Intercept call media and stream it to the specify endpoint. It waits until the end of the call.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-----------|
+| `$tap` | `array` | **required** | Array with the following properties: |
+| `audio_direction` | `string` | **required** | `listen` what the caller hears, `speak` what the caller says or `both`. |
+| `target_type` | `string` | **required** | Protocol to use: `rtp` or `ws`, defaults to `rtp`. |
+| `target_ptime` | `number` | *optional* | Packetization time in ms. It will be the same as the tapped media if not set. |
+| `codec` | `string` | *optional* | Codec to use. It will be the same as the tapped media if not set. |
+
+**To `tap` through RTP:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-----------|
+| `target_addr` | `string` | **required** | RTP IP v4 address. |
+| `target_port` | `number` | **required** | RTP port. |
+
+**Returns**
+
+`React\Promise\Promise` - Promise object that will be fulfilled with a [`Relay.Calling.TapResult`][relay-calling-tapresult] object.
+
+**Examples**
+
+Tapping audio from the call, if successful, print both source and destination devices from the `TapResult` object.
+
+```php
+<?php
+
+$tap = [
+  'audio_direction' => 'both',
+  'target_type' => 'rtp',
+  'target_addr' => '192.168.1.1',
+  'target_port' => 1234
+];
+$call->tap($tap)->done(function($tapResult) {
+  if ($tapResult->isSuccessful()) {
+    print_r($tapResult->getSourceDevice());
+    print_r($tapResult->getDestinationDevice());
+  }
+});
+```
+
+### tapAsync
+
+Asynchronous version of [`tap`][link-22]. It does not wait the end of tapping but returns a [`Relay.Calling.TapAction`][relay-calling-tapaction-1] you can interact with.
+
+**Parameters**
+
+See [`tap`][link-22] for the parameter list.
+
+**Returns**
+
+`React\Promise\Promise` - Promise object that will be fulfilled with a [`Relay.Calling.TapAction`][relay-calling-tapaction-1] object.
+
+**Examples**
+
+Tapping audio from the call and then stop it using the `TapAction` object.
+
+```php
+<?php
+
+$tap = [
+  'audio_direction' => 'both',
+  'target_type' => 'rtp',
+  'target_addr' => '192.168.1.1',
+  'target_port' => 1234
+];
+$call->tapAsync($tap, $device)->done(function($tapAction) {
+  // ... later in the code to stop tapping..
+  $tapAction->stop();
+});
+```
+
+### waitFor
+
+Wait for specific events on the Call or returns `false` if the Call ends without getting them.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-----------|
+| `event1, event2, ..eventN` | `string or string[]` | **required** | One or more [Call State Events][link] |
+
+**Returns**
+
+`React\Promise\Promise` - Promise object that will be fulfilled with `true` or `false`.
+
+**Examples**
+
+Wait for _ending_ or _ended_ events.
+
+```php
+<?php
+
+$call->waitFor('ending', 'ended')->done(function($success) {
+  if ($success) {
+    // ...
+  }
+});
+```
+
+### waitForAnswered
+
+This is a helper function that refines the use of [`waitFor`][link-23]. This simplifies waiting for the _answered_ state.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`React\Promise\Promise` - Promise object that will be fulfilled with `true` or `false`.
+
+**Examples**
+
+Wait for the _answered_ event.
+
+```php
+<?php
+
+$call->waitForAnswered()->done(function($success) {
+  if ($success) {
+    // ...
+  }
+});
+```
+
+### waitForEnded
+
+This is a helper function that refines the use of [`waitFor`][link-23]. This simplifies waiting for the _ended_ state.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`React\Promise\Promise` - Promise object that will be fulfilled with `true` or `false`.
+
+**Examples**
+
+Wait for the _ended_ event.
+
+```php
+<?php
+
+$call->waitForEnded()->done(function($success) {
+  if ($success) {
+    // ...
+  }
+});
+```
+
+### waitForEnding
+
+This is a helper function that refines the use of [`waitFor`][link-23]. This simplifies waiting for the _ending_ state.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`React\Promise\Promise` - Promise object that will be fulfilled with `true` or `false`.
+
+**Examples**
+
+Wait for the _ending_ event.
+
+```php
+<?php
+
+$call->waitForEnding()->done(function($success) {
+  if ($success) {
+    // ...
+  }
+});
+```
+
+### waitForRinging
+
+This is a helper function that refines the use of [`waitFor`][link-23]. This simplifies waiting for the _ringing_ state.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`React\Promise\Promise` - Promise object that will be fulfilled with `true` or `false`.
+
+**Examples**
+
+Wait for _ending_ or _ended_ events.
+
+```php
+<?php
+
+$call->waitForRinging()->done(function($success) {
+  if ($success) {
+    // ...
+  }
+});
+```
+
+## Events
+
+All these events can be used to track the calls lifecycle and instruct SignalWire on what to do for each different state.
+
+### State Events
+
+To track the state of a call.
+
+| Event | Description |
+|-------|-----------|
+| `stateChange` | Event dispatched when Call state changes. |
+| `created` | The call has been created in Relay. |
+| `ringing` | The call is ringing and has not yet been answered. |
+| `answered` | The call has been picked up. |
+| `ending` | The call is hanging up. |
+| `ended` | The call has ended. |
+
+### Connect Events
+
+To track the connect state of a call.
+
+| Event | Description |
+|-------|-----------|
+| `connect.stateChange` | Event dispatched when the Call `connect` state changes. |
+| `connect.connecting` | Currently calling the phone number(s) to connect. |
+| `connect.connected` | The calls are being connected together. |
+| `connect.failed` | The last call connection attempt failed. |
+| `connect.disconnected` | The call was either never connected or the last call connection completed. |
+
+### Play Events
+
+To track a playback state.
+
+| Event | Description |
+|-------|-----------|
+| `play.stateChange` | Event dispatched when the state of a `playing` changes. |
+| `play.playing` | A playback is playing on the call. |
+| `play.error` | A playback failed to start. |
+| `play.finished` | The playback has ended. |
+
+### Record Events
+
+To track a recording state.
+
+| Event | Description |
+|-------|-----------|
+| `record.stateChange` | Event dispatched when the state of a `recording` changes. |
+| `record.recording` | The call is being recorded. |
+| `record.no_input` | The recording failed due to _no input_. |
+| `record.finished` | The recording has finished. |
+
+### Prompt Events
+
+To track a prompt state.
+
+| Event | Description |
+|-------|-----------|
+| `prompt` | The prompt action on the call has finished. |
+
+### Fax Events
+
+To track a fax state.
+
+| Event | Description |
+|-------|-----------|
+| `fax.error` | Faxing failed. |
+| `fax.finished` | Faxing has finished. |
+| `fax.page` | A fax page has been sent or received. |
+
+### Detect Events
+
+To track a detector state.
+
+| Event | Description |
+|-------|-----------|
+| `detect.error` | The detector has failed. |
+| `detect.finished` | The detector has finished. |
+| `detect.update` | There is a notification from the detector (eg: a new DTMF). |
+
+### Tap Events
+
+To track a tapping state.
+
+| Event | Description |
+|-------|-----------|
+| `tap.tapping` | The tap action has started on the call. |
+| `tap.finished` | Tap has finished. |
+
+### Digits Events
+
+To track a _send digits_ action state.
+
+| Event | Description |
+|-------|-----------|
+| `sendDigits.finished` | Digits have been sent. |
+
+## Ringtones
+
+Here you can find all the accepted values for the ringtone to play, based on short country codes:
+
+| Name | Available Countries |
+|------|-------------------|
+| `name` | _at, au, bg, br, be, ch, cl, cn, cz, de, dk, ee, es, fi, fr, gr, hu, il, in, it, lt, jp, mx, my, nl, no, nz, ph, pl, pt, ru, se, sg, th, uk, us, tw, ve, za_ |

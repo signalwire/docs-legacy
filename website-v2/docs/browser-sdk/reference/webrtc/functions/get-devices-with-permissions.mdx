@@ -1,0 +1,45 @@
+---
+title: "getDevicesWithPermissions"
+slug: /js/reference/webrtc/get-devices-with-permissions
+description: getDevicesWithPermissions function in the WebRTC namespace.
+toc_max_heading_level: 3
+---
+
+### getDevicesWithPermissions
+
+- `Const` **getDevicesWithPermissions**(`kind?`, `fullList?`): `Promise<MediaDeviceInfo[]>` — See [MediaDeviceInfo](https://developer.mozilla.org/en-US/docs/Web/API/mediadeviceinfo) for more details.
+
+<Warning>
+Deprecated. Use [getDevices](/docs/browser-sdk/js/reference/webrtc/get-devices) for better cross-browser compatibility.
+</Warning>
+
+After prompting the user for permission, returns an array of media input and output devices available on this machine. If `kind` is provided, only the devices of the specified kind are returned. Possible values for `kind` are `"camera"`, `"microphone"`, and `"speaker"`, which respectively correspond to [getCameraDevicesWithPermissions](/docs/browser-sdk/js/reference/webrtc/get-camera-devices-with-permissions), [getMicrophoneDevicesWithPermissions](/docs/browser-sdk/js/reference/webrtc/get-microphone-devices-with-permissions), and [getSpeakerDevicesWithPermissions](/docs/browser-sdk/js/reference/webrtc/get-speaker-devices-with-permissions).
+
+#### Parameters
+
+<ParamField path="kind" type="DevicePermissionName" default="undefined">
+  Filter for this device category.
+</ParamField>
+
+<ParamField path="fullList" type="boolean" default="false">
+  By default, only devices for which we have been granted permissions are returned. Pass `true` to obtain a list of devices regardless of permissions. Note that some values such as `name` and `deviceId` could be omitted.
+</ParamField>
+
+#### Returns
+
+`Promise<MediaDeviceInfo[]>`
+
+#### Example
+
+```javascript
+await SignalWire.WebRTC.getDevicesWithPermissions("camera");
+// [
+//   {
+//     "deviceId": "Rug5Bk...4TMhY=",
+//     "kind": "videoinput",
+//     "label": "HD FaceTime Camera",
+//     "groupId": "Su/dzw...ccfnY="
+//   }
+// ]
+```
+

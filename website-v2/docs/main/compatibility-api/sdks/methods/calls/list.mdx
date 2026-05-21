@@ -1,0 +1,64 @@
+---
+slug: /compatibility-api/sdks/reference/calls/list
+title: List
+sidebar_label: List
+toc_max_heading_level: 3
+---
+
+Use this endpoint for the Calls method to list all of the calls that are associated with your account. 
+This will be returned as a list of calls.
+
+<EndpointSchemaSnippet endpoint="GET /Accounts/{AccountSid}/Calls" />
+
+## Request examples
+
+<CodeBlocks>
+```javascript title="Node.js"
+const { RestClient } = require('@signalwire/compatibility-api')
+const client = RestClient('YourProjectID', 'YourAuthToken', { signalwireSpaceUrl: 'example.signalwire.com' })
+
+client.calls.each(calls => console.log(calls.sid));
+```
+```csharp
+using System;
+using System.Collections.Generic;
+using Twilio;
+using Twilio.Rest.Api.V2010.Account;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        TwilioClient.Init("YourProjectID", "YourAuthToken", new Dictionary<string, object> { ["signalwireSpaceUrl"] = "{SPACE}.signalwire.com" });
+
+        var calls = CallResource.Read();
+
+        foreach(var record in calls)
+        {
+           Console.WriteLine(record.Sid);
+        }
+    }
+}
+```
+```python
+from signalwire.rest import Client as signalwire_client
+
+client = signalwire_client("YourProjectID", "YourAuthToken", signalwire_space_url = 'example.signalwire.com')
+
+calls = client.calls.list()
+
+for record in calls:
+    print(record.sid)
+```
+```ruby
+require 'signalwire/sdk'
+
+@client = Signalwire::REST::Client.new 'YourProjectID', 'YourAuthToken', signalwire_space_url: "example.signalwire.com"
+
+calls = @client.calls.list
+
+calls.each do |record|
+  puts record.sid
+end
+```
+</CodeBlocks>

@@ -1,0 +1,63 @@
+---
+slug: /compatibility-api/sdks/reference/incoming-phone-numbers/delete
+title: Delete
+sidebar_label: Delete
+toc_max_heading_level: 3
+---
+
+Use this endpoint for the IncomingPhoneNumber method to delete an IncomingPhoneNumber.
+If the delete is successful, a 204 response, with no body, will be returned.
+
+<EndpointSchemaSnippet endpoint="DELETE /Accounts/{AccountSid}/IncomingPhoneNumbers/{Sid}" selector="request" />
+
+## Request examples
+
+<CodeBlocks>
+```javascript title="Node.js"
+const { RestClient } = require('@signalwire/compatibility-api')
+const client = RestClient('YourProjectID', 'YourAuthToken', { signalwireSpaceUrl: 'example.signalwire.com' })
+
+client.incomingPhoneNumbers('IncomingPhoneNumberSid')
+      .remove()
+      .then(incoming_phone_number => console.log(incoming_phone_number.sid))
+      .done();
+```
+
+```csharp
+using System;
+using System.Collections.Generic;
+using Twilio;
+using Twilio.Rest.Api.V2010.Account;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        TwilioClient.Init("YourProjectID", "YourAuthToken", new Dictionary<string, object> { ["signalwireSpaceUrl"] = "{SPACE}.signalwire.com" });
+
+        IncomingPhoneNumberResource.Delete(pathSid: "IncomingPhoneNumberSid");
+    }
+}
+```
+
+```python
+from signalwire.rest import Client as signalwire_client
+
+client = signalwire_client("YourProjectID", "YourAuthToken", signalwire_space_url = 'example.signalwire.com')
+
+client.incoming_phone_numbers('IncomingPhoneNumberSid').delete()
+```
+
+```ruby
+require 'signalwire/sdk'
+
+@client = Signalwire::REST::Client.new 'YourProjectID', 'YourAuthToken', signalwire_space_url: "example.signalwire.com"
+
+@client.incoming_phone_numbers('IncomingPhoneNumberSid').delete
+```
+
+</CodeBlocks>
+
+## Response
+
+A successful request returns a 204 status code with no body.

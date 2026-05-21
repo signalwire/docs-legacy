@@ -1,0 +1,292 @@
+---
+slug: /swml/guides/request
+title: Send simple HTTP requests
+description: Learn how to use the request method in SWML to send HTTP requests to a web server.
+---
+
+Let us take a deep dive into the [`request`] method. Using this method, you can send HTTP requests to
+a web server open to internet. It is a simple but powerful way to add all kinds of external functionality to
+SWML scripts.
+
+<Tip title="Reference available">
+This is a guide for the [`request`] method.
+The reference for this method can be found in [here][`request`].
+</Tip>
+
+We will start by pulling a random dad joke from the internet and reading it out loud to the user.
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - answer: {}
+    - play:
+        url: 'say:Hello! I can tell you a random dad joke. Please wait a moment.'
+    - request:
+        url: 'https://icanhazdadjoke.com/'
+        method: GET
+        headers:
+          Accept: application/json
+        save_variables: true
+    - play:
+        url: 'say:${request_response.joke}'
+    - hangup: {}
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "answer": {}
+      },
+      {
+        "play": {
+          "url": "say:Hello! I can tell you a random dad joke. Please wait a moment."
+        }
+      },
+      {
+        "request": {
+          "url": "https://icanhazdadjoke.com/",
+          "method": "GET",
+          "headers": {
+            "Accept": "application/json"
+          },
+          "save_variables": true
+        }
+      },
+      {
+        "play": {
+          "url": "say:${request_response.joke}"
+        }
+      },
+      {
+        "hangup": {}
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+The following points should be noted:
+
+1.  After [`answer`]ing the phone call and [`play`]ing a short welcome message, we request
+    a joke from the website [icanhazdadjoke.com](https://icanhazdadjoke.com/).
+
+2.  We specifically state that we want the response to be in JSON format using the [`Accept`] header.
+
+3.  We have set the `save_variables` option to be `true`. SWML can parse the JSON response for you and save all
+    the response objects into a variable named `request_response`.
+4.  The server gives back a JSON object in the form:
+
+    ```json
+    {
+      "id": "HlGlbFdiqjb",
+      "joke": "Why don't eggs tell jokes? They'd crack each other up",
+      "status": 200
+    }
+    ```
+
+    We read aloud the `joke` property of the response JSON using the [`play`] method.
+
+## Sending POST request
+
+Let us send some information to the server using a POST request.
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - answer: {}
+    - prompt:
+        play: 'say: Enter PIN'
+        max_digits: 4
+        terminators: '#'
+    - request:
+        url: 'https://reqres.in/api/users'
+        method: POST
+        save_variables: true
+        body:
+          pin: '${prompt_value}'
+    - play:
+        url: 'say:Pin set to: ${request_response.pin}'
+    - hangup: {}
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "answer": {}
+      },
+      {
+        "prompt": {
+          "play": "say: Enter PIN",
+          "max_digits": 4,
+          "terminators": "#"
+        }
+      },
+      {
+        "request": {
+          "url": "https://reqres.in/api/users",
+          "method": "POST",
+          "save_variables": true,
+          "body": {
+            "pin": "${prompt_value}"
+          }
+        }
+      },
+      {
+        "play": {
+          "url": "say:Pin set to: ${request_response.pin}"
+        }
+      },
+      {
+        "hangup": {}
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+## Using your own server
+
+So far, we have used publicly available test REST API. You can also write your own web server, and
+interact with that using the [`request`] method.
+
+An example server in Flask (Python) and Express (Node.js) is presented below:
+
+<Tabs>
+  <TabItem value="python/flask" label="Python/Flask">
+
+```python
+from flask import Flask, request
+from waitress import serve
+
+app = Flask(__name__)
+
+@app.route("/", methods=['POST'])
+def swml():
+    body = request.get_json(silent=True)
+    print(body)
+
+    # TODO: process body
+    result = body
+    return result
+
+if __name__ == "__main__":
+    serve(app, host='0.0.0.0', port=6000)
+```
+
+  </TabItem>
+  <TabItem value="javascript/express" label="JavaScript/Express">
+
+```javascript
+const express = require("express");
+const app = express();
+
+app.use(express.json());
+
+// note the POST method
+app.post("/", (req, res) => {
+  const body = req.body;
+  console.log(body);
+  // TODO: process body
+  const result = body;
+  res.json(result);
+});
+
+const port = 6000;
+app.listen(port);
+```
+
+  </TabItem>
+</Tabs>
+
+<Tip>
+If you need help opening up this web server from your localhost to the wider internet where SWML
+execution system can find it, consider using a tool like ngrok to expose your localhost.
+</Tip>
+
+Once this web server is up, you can write SWML to access this service.
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - answer: {}
+    - prompt:
+        play: 'say: Enter PIN'
+        max_digits: 4
+        terminators: '#'
+    - request:
+        url: 'https://<uuid>.ngrok-free.dev'
+        method: POST
+        save_variables: true
+        body:
+          pin: '${prompt_value}'
+    - play:
+        url: 'say:Pin set to: ${request_response.pin}'
+    - hangup: {}
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "answer": {}
+      },
+      {
+        "prompt": {
+          "play": "say: Enter PIN",
+          "max_digits": 4,
+          "terminators": "#"
+        }
+      },
+      {
+        "request": {
+          "url": "https://<uuid>.ngrok-free.dev",
+          "method": "POST",
+          "save_variables": true,
+          "body": {
+            "pin": "${prompt_value}"
+          }
+        }
+      },
+      {
+        "play": {
+          "url": "say:Pin set to: ${request_response.pin}"
+        }
+      },
+      {
+        "hangup": {}
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+[`request`]: /docs/swml/reference/request
+[`answer`]: /docs/swml/reference/answer
+[`play`]: /docs/swml/reference/play
+[`accept`]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Accept

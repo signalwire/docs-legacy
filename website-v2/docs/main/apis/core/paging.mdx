@@ -1,0 +1,34 @@
+---
+title: Paging
+slug: /apis/paging
+---
+
+Most top-level API resources support bulk fetching via a list or index method.
+These list endpoints share a common structure to make handling lists, filtering
+and pagination easier to work with.
+
+All list endpoints will return partial "pages" of results. These results will
+also contain meta information about how to get the next page of results, or the
+previous one, or return to the start.
+
+It is **_highly recommended_** to use the `link` values to navigate your list
+results. This will ensure you properly page through all of resources and your
+result set is not affected by new resources being created, or paging scheme
+changing.
+
+**An example of the paging information returned for all index routes.**
+
+```json
+{
+  "links": {
+    "self": "/api/relay/rest/example_url_to_the_current_page",
+    "first": "/api/relay/rest/example_url_to_the_first_page",
+    "next": "/api/relay/rest/example_url_to_the_next_page",
+    "prev": "/api/relay/rest/example_url_to_the_prev_page"
+  },
+  "data" : [
+    { ... },
+    { ... }
+  ]
+}
+```

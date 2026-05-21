@@ -1,0 +1,110 @@
+---
+title: setAudioDirection
+slug: /call-session/setaudiodirection
+---
+
+import APIField from '@site/src/components/APIField';
+
+Sets the direction of the audio track in the WebRTC connection by performing RTC peer renegotiation.
+
+## Signature
+
+```typescript
+call.setAudioDirection(direction: UpdateMediaDirection): Promise<void>
+```
+
+## Parameters
+
+<APIField name="direction" type="UpdateMediaDirection" required>
+  The desired audio direction. Valid values: `'sendrecv'`, `'sendonly'`, `'recvonly'`, `'inactive'`
+</APIField>
+
+**UpdateMediaDirection** values:
+- `'sendrecv'` - Send and receive audio (default, two-way audio)
+- `'sendonly'` - Only send audio, don't receive
+- `'recvonly'` - Only receive audio, don't send
+- `'inactive'` - Neither send nor receive audio
+
+## Returns
+
+**Type:** `Promise<void>`
+
+## Important Notes
+
+**Peer Renegotiation:** This method triggers WebRTC peer renegotiation to update the audio track direction. The connection will temporarily adjust while renegotiating.
+
+**Direction vs Mute:**
+- **Mute** (`audioMute()`): Temporarily stops sending audio, but the track remains active
+- **Direction**: Changes the fundamental audio flow in the WebRTC connection
+
+Use `setAudioDirection()` when you need to:
+- Permanently disable audio sending or receiving
+- Optimize bandwidth by not receiving audio when unnecessary
+- Implement broadcast or listen-only modes
+
+Use `audioMute()`/`audioUnmute()` when you just need to temporarily stop sending audio.
+
+**Video Unaffected:** This method only changes the audio direction. Video direction remains unchanged. To update both, use `updateMedia()`.
+
+## Examples
+
+### Enable Two-Way Audio
+
+```typescript
+await call.setAudioDirection('sendrecv')
+```
+
+### Listen-Only Mode
+
+```typescript
+// Receive audio but don't send
+await call.setAudioDirection('recvonly')
+```
+
+### Broadcast Mode
+
+```typescript
+// Send audio but don't receive
+await call.setAudioDirection('sendonly')
+```
+
+### Disable Audio Completely
+
+```typescript
+// Neither send nor receive audio
+await call.setAudioDirection('inactive')
+```
+
+### Dynamic Audio Control
+
+```typescript
+// Start in listen-only mode
+await call.setAudioDirection('recvonly')
+
+// When user clicks "Speak" button, enable sending
+button.addEventListener('click', async () => {
+  await call.setAudioDirection('sendrecv')
+  console.log('Audio now two-way')
+})
+```
+
+### Push-to-Talk
+
+```typescript
+let isPushed = false
+
+// Default: listen only
+await call.setAudioDirection('recvonly')
+
+// When button is pressed
+button.addEventListener('mousedown', async () => {
+  isPushed = true
+  await call.setAudioDirection('sendrecv')
+})
+
+// When button is released
+button.addEventListener('mouseup', async () => {
+  isPushed = false
+  await call.setAudioDirection('recvonly')
+})
+```

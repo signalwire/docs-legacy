@@ -1,0 +1,158 @@
+---
+title: "Types"
+slug: /node/reference/voice/types
+description: Voice namespace type definitions including SIP headers, codecs, call directions, device types, and voice language options for text-to-speech.
+toc_max_heading_level: 3
+---
+
+[here]: /docs/platform/voice/tts
+[voice-call]: /docs/server-sdk/v3/node/reference/voice/call/tap
+
+Helper types.
+
+### CollectDigitsConfig
+
+A configuration object to specify how to collect digits.
+
+| Name                   | Type     | Description                                                |
+|:-----------------------|:---------|:-----------------------------------------------------------|
+| `digits`               | `Object` | -                                                          |
+| `digits.max`           | `number` | Max number of digits to collect.                           |
+| `digits.digitTimeout?` | `number` | Timeout in seconds between each digit.                     |
+| `digits.terminators?`  | `string` | DTMF digits that will end the collection. Default not set. |
+
+#### Example
+
+```js
+{
+  max: 5,
+  digitTimeout: 3,
+  terminators: "#*"
+}
+```
+
+---
+
+### CollectSpeechConfig
+
+A configuration object to specify how to collect speech.
+
+| Name                        | Type       | Description                                                                                                                                                                                                                                        |
+|:----------------------------|:-----------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `speech`                    | `Object`   | -                                                                                                                                                                                                                                                  |
+| `speech.endSilenceTimeout?` | `number`   | How much silence to wait for end of speech. Default to 1 second.                                                                                                                                                                                   |
+| `speech.speechTimeout?`     | `number`   | Maximum time to collect speech. Default to 60 seconds.                                                                                                                                                                                             |
+| `speech.language?`          | `number`   | Language to detect. Default to `"en-US"`. Supported languages [here][here]                                                                                                                                                  |
+| `speech.hints?`             | `string[]` | Array of expected phrases to detect.                                                                                                                                                                                                               |
+| `speech.model?`             | `string`   | Enable enhanced speech recognition at an additional cost. Accepted values are `enhanced`, `enhanced.phone_call`, or `enhanced.video`. The value `enhanced` will automatically detect whether to optimize with the `phone_call` or `video` setting. |
+
+#### Example
+
+```js
+{
+  endSilenceTimeout: 1,
+  speechTimeout: 60,
+  language: "en-US",
+  hints: ["one", "two", "three", "four", "five"]
+}
+```
+
+---
+
+### SipCodec
+
+A codec for SIP. Possible values are: `"PCMU"`, `"PCMA"`, `"OPUS"`, `"G729"`, `"G722"`, `"VP8"`, `"H264"`.
+
+#### Example
+
+```js
+"OPUS";
+```
+
+---
+
+### SipHeader
+
+A header for SIP. It is an object with the following properties.
+
+#### Properties
+
+| Name    | Type     | Description         |
+|:--------|:---------|:--------------------|
+| `name`  | `string` | Name of the header  |
+| `value` | `string` | Value of the header |
+
+#### Example
+
+```js
+{ name: "X-Header-Name", value: "test" }
+```
+
+---
+
+### RingtoneName
+
+The name of a ringtone. Possible values are: `'at'`, `'au'`, `'bg'`, `'br'`, `'be'`, `'ch'`, `'cl'`, `'cn'`, `'cz'`, `'de'`, `'dk'`, `'ee'`, `'es'`, `'fi'`, `'fr'`, `'gr'`, `'hu'`, `'il'`, `'in'`, `'it'`, `'lt'`, `'jp'`, `'mx'`, `'my'`, `'nl'`, `'no'`, `'nz'`, `'ph'`, `'pl'`, `'pt'`, `'ru'`, `'se'`, `'sg'`, `'th'`, `'uk'`, `'us'`, `'tw'`, `'ve'`, `'za'`.
+
+#### Example
+
+```js
+"it";
+```
+
+---
+
+### TapDevice
+
+A device to use as a destination for [`tap`][voice-call].
+This can be either an RTP device or a WebSocket device.
+
+#### Properties
+
+| Name   | Type              | Description                                                   |
+|:-------|:------------------|:--------------------------------------------------------------|
+| `type` | `"rtp"` \| `"ws"` | Type of this device (RTP or WebSocket).                       |
+| `...`  |                   | See below for the additional properties for each device type. |
+
+**RTP** (`type` = `"rtp"`)
+
+An RTP device has the following properties in addition to the general ones:
+
+| Name    | Type                                            | Description                                                                            |
+|:--------|:------------------------------------------------|:---------------------------------------------------------------------------------------|
+| `addr`  | `string`                                        | RTP IPv4 address.                                                                      |
+| `port`  | `string`                                        | RTP port.                                                                              |
+| `codec` | `"OPUS"` \| `"PCMA"` \| `"PCMU"` \| `undefined` | Optional codec to use. It will be the same as the tapped audio if not set.             |
+| `rate`  | `number?`                                       | Optional sample rate in Hz. It will be the same as the tapped audio if not set.        |
+| `ptime` | `number?`                                       | Optional packetization time in ms. It will be the same as the tapped audio if not set. |
+
+**WebSocket** (`type` = `"ws"`)
+
+A WebSocket device has the following properties in addition to the general ones:
+
+| Name    | Type                                            | Description                                                                     |
+|:--------|:------------------------------------------------|:--------------------------------------------------------------------------------|
+| `uri`   | `string`                                        | Destination URI.                                                                |
+| `codec` | `"OPUS"` \| `"PCMA"` \| `"PCMU"` \| `undefined` | Optional codec to use. It will be the same as the tapped audio if not set.      |
+| `rate`  | `number?`                                       | Optional sample rate in Hz. It will be the same as the tapped audio if not set. |
+
+#### Example
+
+An RTP device:
+
+```js
+{
+  type: "rtp",
+  addr: "192.0.2.1",
+  port: "1234"
+}
+```
+
+A WebSocket device:
+
+```js
+{
+  type: "ws",
+  uri: "wss://example.domain.com/endpoint",
+}
+```

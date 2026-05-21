@@ -1,0 +1,50 @@
+---
+title: Relay.Calling.DetectAction
+slug: /node/reference/calling/actions/detect
+description: The Detect Action is used to detect DTMF, fax tones, or answering machines.
+toc_max_heading_level: 3
+---
+
+[relay-calling-detectresult]: /docs/server-sdk/v2/node/reference/calling/results/detect
+[relay-calling-stopresult]: /docs/server-sdk/v2/node/reference/calling/results/stop
+This object returned from one of the _asynchronous_ detect methods that represents a running detector on the call.
+
+## Properties
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `result` | [`Relay.Calling.DetectResult`][relay-calling-detectresult] | Final detector result |
+| `completed` | `boolean` | Whether the action has finished |
+| `payload` | `object` | Payload sent to Relay to start this detector |
+| `controlId` | `string` | UUID to identify the detector |
+
+## Methods
+
+### stop
+
+Stop the action immediately.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`Promise<StopResult>` - Promise object that will be fulfilled with a [`Relay.Calling.StopResult`][relay-calling-stopresult] object.
+
+**Examples**
+
+> Trying to detect a machine and stop the action after 5 seconds.
+
+```javascript
+async function main() {
+  const detectAction = await call.detectMachineAsync()
+
+  // For demonstration purposes only..
+  setTimeout(async () => {
+    const stopResult = await detectAction.stop()
+  }, 5000)
+}
+
+main().catch(console.error)
+```

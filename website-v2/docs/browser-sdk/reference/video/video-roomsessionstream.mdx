@@ -1,0 +1,60 @@
+---
+title: "RoomSessionStream"
+sidebar_position: 7
+slug: /js/reference/video/room-session-stream
+toc_max_heading_level: 3
+---
+
+Represents a specific stream of a room session. This is an RTMP stream of the
+audio/video content of the room, which will be sent to an external party (e.g.,
+to YouTube).
+
+You can start a stream with [RoomSession.startStream](/docs/browser-sdk/js/reference/video/room-session/start-stream).
+
+## Properties
+
+<ParamField path="duration" type="number">
+  Total seconds of time spent streaming, if available. This is equal to (`endedAt` - `startedAt`).
+</ParamField>
+
+<ParamField path="endedAt" type="Date">
+  End time, if available.
+</ParamField>
+
+<ParamField path="id" type="string" required={true}>
+  The unique id of this stream.
+</ParamField>
+
+<ParamField path="roomSessionId" type="string" required={true}>
+  The id of the room session associated to this stream.
+</ParamField>
+
+<ParamField path="startedAt" type="Date" required={true}>
+  Start time, if available.
+</ParamField>
+
+<ParamField path="state" type='"streaming" | "completed"' required={true}>
+  Current state of the stream.
+</ParamField>
+
+<ParamField path="url" type="string" required={true}>
+  The RTMP URL of the stream.
+</ParamField>
+
+## Methods
+
+### stop
+
+- **stop**(): `Promise<void>`
+
+Stops the stream.
+
+#### Returns
+
+`Promise<void>`
+
+#### Example
+
+```javascript
+await stream.stop();
+```

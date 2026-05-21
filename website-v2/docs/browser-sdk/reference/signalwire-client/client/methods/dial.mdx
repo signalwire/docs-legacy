@@ -1,0 +1,42 @@
+---
+title: "dial"
+slug: /js/reference/signalwire/client/dial
+description: dial method for the SignalWire Client.
+toc_max_heading_level: 3
+---
+
+### dial
+
+- **dial**(`params`): `Promise<Call>`
+
+Dials to the address specified in the `to` parameter, and returns a `Call` object if successful.
+
+#### Parameters
+
+<ParamField path="params" type="object" required={true}>
+  Dial parameters
+</ParamField>
+<Indent>
+  <ParamField path="params.to" type="string" required={true}>
+    The address of the subscriber to dial (like `/private/user1`).
+  </ParamField>
+  <ParamField path="params.rootElement" type="HTMLElement">
+    The HTML container element to inject the Call into.
+  </ParamField>
+  <ParamField path="params.nodeId" type="string">
+    Optional node ID.
+  </ParamField>
+</Indent>
+
+<Tip>
+You can manage the DOM yourself by not specifying a `rootElement` here and using the [`buildVideoElement`](/docs/browser-sdk/js/reference/signalwire/utils#buildvideoelement) function instead.
+</Tip>
+
+Also accepts all [CallOptions](/docs/browser-sdk/js/reference/signalwire/client#calloptions) parameters. Parameters passed when dialing will override any matching parameters passed during [instantiation](/docs/browser-sdk/js/reference/signalwire/client#instantiation).
+
+#### Returns
+
+`Promise<Call>`
+
+A Call object that describes the ongoing call, and provides handles for controlling it.
+

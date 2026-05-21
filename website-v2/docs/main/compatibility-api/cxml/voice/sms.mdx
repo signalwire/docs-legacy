@@ -1,0 +1,289 @@
+---
+title: Sms
+sidebar_label: Sms
+slug: /compatibility-api/cxml/reference/voice/sms
+sidebar_position: 1
+toc_max_heading_level: 3
+---
+
+The `<Sms>` verb sends an SMS message to a phone number during a phone call.
+
+## Verb attributes
+
+<ParamField path="action" type="string">
+  The `action` attribute takes a URL as an argument. After processing the `<Sms>` verb, SignalWire will make a GET or POST request to this URL with the form parameters `SmsStatus` and `SmsSid`. Using an `action` URL, your application can receive synchronous notification that the message was successfully enqueued. If you provide an `action` URL, SignalWire will use the cXML received in your response to the `action` URL request to continue the current call. Any cXML verbs occurring after an `<Sms>` which specifies an `action` attribute are unreachable. If no `action` is provided, `<Sms>` will finish and SignalWire will move on to the next cXML verb in the document. If there is no next verb, SignalWire will end the phone call. Note that this is different from the behavior of `<Record>` and `<Gather>`. `<Sms>` does not make a request to the current document's URL by default if no `action` URL is provided. See [below](#sms_action) for request parameters.
+</ParamField>
+
+<ParamField path="from" type="string">
+  The `from` attribute takes a valid phone number as an argument. This number must be a phone number that you've purchased from or ported to SignalWire. When sending an SMS during an incoming call, `from` defaults to the called party. When sending an SMS during an outgoing call, `from` defaults to the calling party. This number must be an SMS-enabled phone number assigned to your account. If the phone number isn't SMS-enabled, then the `<Sms>` verb will not send an SMS message.
+</ParamField>
+
+<ParamField path="method" type="string" default="POST">
+  The `method` attribute specifies whether the request to action is a `GET` or a `POST`. Valid values are `GET` or `POST`.
+</ParamField>
+
+<ParamField path="statusCallback" type="string">
+  The URL to make requests to for each `statusCallbackEvent` event. See [below](#sms_statusCallback) for request parameters. The `statusCallback` attribute takes a URL as an argument. When the SMS message is actually sent, or if sending fails, SignalWire will make an asynchronous POST request to this URL with the parameters `SmsStatus` and `SmsSid`. Note, `statusCallback` always uses HTTP POST to request the given url.
+</ParamField>
+
+<ParamField path="to" type="string">
+  The `to` attribute takes a valid phone number as a value. SignalWire will send an SMS message to this number. When sending an SMS during an incoming call, `to` defaults to the caller. When sending an SMS during an outgoing call, `to` defaults to the called party. The value of `to` must be a valid phone number. NOTE: sending to short codes is not currently supported. Phone numbers should be formatted with a `+` and country code e.g., `+17275551212` (E.164 format).
+</ParamField>
+
+
+
+
+#### Request parameters for the `action` URL {#sms_action}
+
+The `action` URL request contains the [Standard Request Parameters](/docs/compatibility-api/cxml/reference/voice#request-parameters) as well as:
+
+<ParamField path="SmsSid" type="string">
+  The [SID](/docs/platform/what-is-a-sid) for the Sms message.
+</ParamField>
+
+<ParamField path="SmsStatus" type="string">
+  The current status of the Sms message. This is usually `sending`. But if you provide an invalid number, this is `invalid`.
+</ParamField>
+
+
+
+
+#### Request parameters for `statusCallback` {#sms_statusCallback}
+
+The `statusCallback` request contains the [Standard Request Parameters](/docs/compatibility-api/cxml/reference/voice#request-parameters) as well as:
+
+<ParamField path="SmsSid" type="string">
+  The [SID](/docs/platform/what-is-a-sid) for the Sms message.
+</ParamField>
+
+<ParamField path="SmsStatus" type="string">
+  The current status of the Sms message. Either `sent` or `failed`.
+</ParamField>
+
+## Nouns
+
+The noun of a cXML verb is nested within the verb upon which the verb acts. `<Sms>` has the following nouns:
+
+| Noun | Description |
+|:-----|:------------|
+| `plain text` | The text of the SMS message you want to send. Must be less than 1600 characters. |
+
+## Nesting
+
+No other verbs can be nested within `<Sms>` and you cannot nest `<Sms>` within any other verbs.
+
+## Examples
+
+### Simple SMS sending
+
+<CodeBlocks>
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Say>Our store is located at 123 Easy St.</Say>
+    <Sms>Store Location: 123 Easy St.</Sms>
+</Response>
+```
+
+```javascript title="Node.js"
+const { RestClient } = require("@signalwire/compatibility-api");
+const response = new RestClient.LaML.VoiceResponse();
+
+response.say("Our store is located at 123 Easy St.");
+response.sms("Store Location: 123 Easy St.");
+
+console.log(response.toString());
+```
+
+```csharp
+using System;
+using Twilio.TwiML;
+using Twilio.TwiML.Voice;
+
+
+class Example
+{
+    static void Main()
+    {
+        var response = new VoiceResponse();
+        response.Say("Our store is located at 123 Easy St.");
+        response.Sms("Store Location: 123 Easy St.");
+
+        Console.WriteLine(response.ToString());
+    }
+}
+```
+
+```python
+from signalwire.voice_response import VoiceResponse, Enqueue
+
+response = VoiceResponse()
+response.say('Our store is located at 123 Easy St.')
+response.sms('Store Location: 123 Easy St.')
+
+print(response)
+```
+
+```ruby
+require 'signalwire/sdk'
+
+response =  Signalwire::Sdk::VoiceResponse.new
+response.say(message: 'Our store is located at 123 Easy St.')
+response.sms('Store Location: 123 Easy St.')
+
+puts response
+```
+
+</CodeBlocks>
+
+This is the simplest case for `<Sms>`. SignalWire first tells the caller where the store is located, and then sends the caller an SMS with the location as the message.
+
+### SmsStatus reporting
+
+<CodeBlocks>
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Say>Our store is located at 123 Easy St.</Say>
+    <Sms action="/smsHandler.php" method="POST">
+        Store Location: 123 Easy St.
+    </Sms>
+</Response>
+```
+
+```javascript title="Node.js"
+const { RestClient } = require("@signalwire/compatibility-api");
+const response = new RestClient.LaML.VoiceResponse();
+
+response.say("Our store is located at 123 Easy St.");
+response.sms(
+  {
+    action: "/smsHandler.php",
+    method: "POST",
+  },
+  "Store Location: 123 Easy St."
+);
+
+console.log(response.toString());
+```
+
+```csharp
+using System;
+using Twilio.TwiML;
+using Twilio.TwiML.Voice;
+
+
+class Example
+{
+    static void Main()
+    {
+        var response = new VoiceResponse();
+        response.Say("Our store is located at 123 Easy St.");
+        response.Sms("Store Location: 123 Easy St.",
+            action: new Uri("/smsHandler.php"), method: Twilio.Http.HttpMethod
+            .Post);
+
+        Console.WriteLine(response.ToString());
+    }
+}
+```
+
+```python
+from signalwire.voice_response import VoiceResponse, Enqueue
+
+response = VoiceResponse()
+response.say('Our store is located at 123 Easy St.')
+response.sms(
+    'Store Location: 123 Easy St.', action='/smsHandler.php', method='POST'
+)
+print(response)
+```
+
+```ruby
+require 'signalwire/sdk'
+
+response =  Signalwire::Sdk::VoiceResponse.new
+response.say(message: 'Our store is located at 123 Easy St.')
+response.sms('Store Location: 123 Easy St.', action: '/smsHandler.php',
+                                             method: 'POST')
+
+puts response
+```
+
+</CodeBlocks>
+
+In this use case, we provide `action` URL and `method` attributes. Now when the message is queued for delivery, SignalWire will make a request to the `action` URL passing the parameter `SmsStatus`. If the message is queued and waiting to be sent, `SmsStatus` will have the value `sending`. If an invalid attribute was provided, then `SmsStatus` will be `invalid`.
+
+Your web application can look at the `SmsStatus` parameter and decide what to do next.
+
+If an `action` URL is provided for `<Sms>`, flow of your application will continue with the XML received in response to the `action` request. All verbs remaining in the document are unreachable and ignored.
+
+### statusCallback reporting
+
+<CodeBlocks>
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Say>Our store is located at 123 Easy St.</Say>
+    <Sms statusCallback="/smsHandler.php">Store Location: 123 Easy St.</Sms>
+</Response>
+```
+
+```javascript title="Node.js"
+const { RestClient } = require("@signalwire/compatibility-api");
+const response = new RestClient.LaML.VoiceResponse();
+
+response.say("Our store is located at 123 Easy St.");
+response.sms(
+  {
+    statusCallback: "/smsHandler.php",
+  },
+  "Store Location: 123 Easy St."
+);
+
+console.log(response.toString());
+```
+
+```csharp
+using System;
+using Twilio.TwiML;
+using Twilio.TwiML.Voice;
+
+
+class Example
+{
+    static void Main()
+    {
+        var response = new VoiceResponse();
+        response.Say("Our store is located at 123 Easy St.");
+        response.Sms("Store Location: 123 Easy St.",
+            statusCallback: new Uri("/smsHandler.php"));
+
+        Console.WriteLine(response.ToString());
+    }
+}
+```
+
+```python
+from signalwire.voice_response import VoiceResponse, Enqueue
+
+response = VoiceResponse()
+response.say('Our store is located at 123 Easy St.')
+response.sms('Store Location: 123 Easy St.', status_callback='/smsHandler.php')
+
+print(response)
+```
+
+```ruby
+require 'signalwire/sdk'
+
+response =  Signalwire::Sdk::VoiceResponse.new
+response.say(message: 'Our store is located at 123 Easy St.')
+response.sms('Store Location: 123 Easy St.', status_callback: '/smsHandler.php')
+
+puts response
+```
+
+</CodeBlocks>
+
+In this example we provide a `statusCallback` URL. When the message is finished sending (not just enqueued), SignalWire will asynchronously request the `statusCallback` URL with the parameter `SmsStatus`. If the messages was successfully sent, `SmsStatus` will be `sent`. If the message failed to send, `SmsStatus` will be `failed`.

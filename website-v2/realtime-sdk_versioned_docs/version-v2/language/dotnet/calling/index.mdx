@@ -1,0 +1,76 @@
+---
+title: SignalWire.Relay.CallingAPI
+slug: /dotnet/reference/calling
+toc_max_heading_level: 3
+---
+
+[dialresult]: /docs/server-sdk/v2/dotnet/reference/calling/results/dial
+[phonecall]: /docs/server-sdk/v2/dotnet/reference/calling/call
+This represents the API interface for the Calling Relay Service. This object is used to make requests related to managing end to end calls.
+
+## Methods
+
+### DialPhone
+
+Make an outbound PhoneCall and waits until it has been answered, times out, busy, or some other error occurs.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `to` | string | <span className="required-arg">required</span> | The phone number of the party you are attempting to call. |
+| `from` | string | <span className="required-arg">required</span> | The phone number the call is coming from. <br /> _Must be a SignalWire number or SIP endpoint that you own._ |
+| `timeout` | int | <span className="optional-arg">optional</span> | The time, in seconds, the call will ring before going to voicemail.<br />_Default: 30_ |
+
+**Returns**
+
+[`SignalWire.Relay.Calling.DialResult`][dialresult] - The result object to interact with.
+
+**Examples**
+
+> Make an outbound PhoneCall and obtain the Call object after it was answered.
+
+```csharp
+DialResult resultDial = client.Calling.DialPhone("+1XXXXXXXXXX", "+1YYYYYYYYYY", timeout: 30);
+
+if (resultDial.Successful)
+{
+    // Call has been answered, it is available through resultDial.Call
+}
+```
+
+### NewPhoneCall
+
+Create a new `PhoneCall` object. The call has not started, but you can attach event listeners on it.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `to` | string | <span className="required-arg">required</span> | The phone number of the party you are attempting to call. |
+| `from` | string | <span className="required-arg">required</span> | The phone number the call is coming from. <br /> _Must be a SignalWire number or SIP endpoint that you own._ |
+| `timeout` | int | <span className="optional-arg">optional</span> | The time, in seconds, the call will ring before going to voicemail.<br />_Default: 30_ |
+
+**Returns**
+
+[`SignalWire.Relay.Calling.PhoneCall`][phonecall] - A new call object.
+
+**Examples**
+
+> Create a new PhoneCall object and Dial it.
+
+```csharp
+PhoneCall call = client.Calling.NewPhoneCall("+1XXXXXXXXXX", "+1YYYYYYYYYY", timeout: 30);
+
+call.OnEnded += (a, c, e, p) =>
+{
+    // Call has been ended
+};
+
+DialResult resultDial = call.Dial();
+
+if (resultDial.Successful)
+{
+    call.Hangup();
+}
+```

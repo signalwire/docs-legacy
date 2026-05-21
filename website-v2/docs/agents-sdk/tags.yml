@@ -1,0 +1,15 @@
+agents-sdk:
+  label: Agents SDK
+  description: SignalWire AI Agents SDK
+python:
+  label: Python
+  description: Python programming language
+ai:
+  label: AI
+  description: Artificial Intelligence
+swml:
+  label: SWML
+  description: SignalWire Markup Language
+swaig:
+  label: SWAIG
+  description: SignalWire AI Gateway

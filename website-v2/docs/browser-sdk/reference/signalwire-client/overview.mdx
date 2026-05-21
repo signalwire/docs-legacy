@@ -1,0 +1,269 @@
+---
+title: "SignalWire Client"
+sidebar_label: Overview
+sidebar_position: 0
+slug: /js/reference/signalwire
+toc_max_heading_level: 3
+---
+
+[@signalwire/js]: https://www.npmjs.com/package/@signalwire/js
+[SignalWire Client]: /docs/browser-sdk/js/reference/signalwire/client
+[Authentication]: /docs/browser-sdk/js/reference/signalwire#authentication
+
+The SignalWire client enables the SignalWire's vision for Programmable Unified Communications. It allows a new paradigm in communications, designed to streamline usage and development across all communication types.
+
+The following section details the mechanisms available in the SignalWire browser SDK [@signalwire/js][@signalwire/js] to take advantage of the unified communication architecture.
+
+
+## **Installation**
+
+The SignalWire client is available in the SignalWire Browser SDK [@signalwire/js][@signalwire/js] versions `3.27.0` and later.
+
+If your project uses a package manager, the Browser SDK can be installed like so:
+
+```bash npm2yarn
+npm install @signalwire/js
+```
+
+It is also available through our CDN and can be included directly into the `<head>` section of your webpage.
+
+```html
+<script src="https://cdn.signalwire.com/@signalwire/js"></script>
+```
+
+Once installed, you can take advantage of the new capabilities that the SignalWire client enables by instantiating a [SignalWire Client][SignalWire Client], like so:
+
+```js
+<script type="text/javascript" src="https://cdn.signalwire.com/@signalwire/js"></script>
+<script>
+  async function main() {
+    const client = await SignalWire.SignalWire({
+      token: "<TOKEN>",
+    });
+  }
+</script>
+```
+
+The access token is received after the subscriber completes the OAuth2 flow and successfully logs in. Learn more at the [Authentication][Authentication] section further below.
+
+## **Concepts**
+
+### Resources
+
+Resources are the primary entities for communication within SignalWire.
+Resources include: `Subscribers SWML Scripts`, `SignalWire AI Agents`,
+`Video-Rooms`, `SIP Endpoints`, etc.
+
+### Subscribers
+
+Subscribers represent the end-users within SignalWire.
+They are the endpoints of communication, capable of receiving or
+initiating calls, messages, and other forms of interaction.
+
+SignalWire allows subscribers to switch from one type of communication
+to another. For example, switching from a phone call into a video-room to
+a web-based video call.
+
+You can create Subscribers and Resources in the [Resource section](https://my.signalwire.com/resources)
+of your SignalWire Dashboard, or with a HTTP POST request:
+
+```bash
+curl --location --request POST 'https://spacename.signalwire.com/api/fabric/subscribers' \
+--user "project_id:api key" \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "email": "[the subscriber email]",
+    "password": "[the subscriber password]"
+}'
+```
+
+### Addresses
+
+Each resource and subscriber is uniquely identified by an addresses which can be called,
+sent messages to, or interacted with in some other way.
+
+The address is composed of two parts: "/`context`/`name`"
+
+- **Context**: A identifier that indicates in which context the resource is located.
+- **Name**: The name is the unique identifier for the resource.
+
+For example, the address for a Subscribers resource named Alice in the public context would be /public/Alice.
+
+## **Authentication**
+
+As explained in the [Subscribers](#subscribers) section above, 
+Subscribers represent the end-users within SignalWire, thus usually
+actions are performed on behalf of the subscriber.
+
+So, when using the SignalWire Client, you will need a Subscriber's token to authenticate your requests.
+Usually, that token is obtained when the subscriber logs in using the OAuth2 flow described further below. 
+But your server applications can perform actions on behalf of the subscriber by using getting a token using the REST API.
+
+### REST API Token Authentication
+
+You can obtain authentication tokens directly through the REST API. The following endpoints are available for token generation:
+
+<AccordionGroup>
+  <Accordion title="Create a Guest Token" defaultOpen>
+    Generate a limited-access token for guest access to specific Fabric addresses.
+    <EndpointRequestSnippet endpoint="POST /guests/tokens" />
+  </Accordion>
+  <Accordion title="Create a Subscriber Invite Token">
+    Generate a token to access resources associated with a specific subscriber on behalf of the subscriber.
+    <EndpointRequestSnippet endpoint="POST /subscriber/invites" />
+  </Accordion>
+  <Accordion title="Create a new Subscriber and a Token">
+    Create a new subscriber and get their token in a single request.
+    <EndpointRequestSnippet endpoint="POST /api/fabric/subscribers/tokens" />
+  </Accordion>
+</AccordionGroup>
+
+<Info>
+For browser-based applications, we recommend using the OAuth2 flow to 
+authenticate subscribers and obtain tokens. See 
+[Authenticate subscribers using OAuth2](#authenticate-subscribers-using-oauth2) below for details.
+</Info>
+
+#### Using the Token
+
+The endpoints return a JSON object containing a `token` property. Use this token to initialize the [SignalWire Client][SignalWire Client]:
+
+```js
+import { SignalWire } from "@signalwire/js";
+
+const client = await SignalWire({
+  token: "eyJhbGciOiJIUzI1NiIs..."
+});
+```
+
+
+### Authenticate subscribers using OAuth2
+
+When you create a Subscriber, you assign them a username (email) and a password. These credentials
+can be used authenticate the subscriber using the standard OAuth2 flow with PKCE. For OAuth2, you
+can use tools like [odic-client-ts](https://github.com/authts/oidc-client-ts) or
+[react-native-app-auth](https://github.com/FormidableLabs/react-native-app-auth).
+
+You can also use this [node.js script](https://github.com/signalwire-community/react/tree/main/scripts/refresh-fabric-tokens)
+from [SignalWire Community](https://github.com/signalwire-community) to get a token for a subscriber.
+
+<Info>
+Currently, the only way to get a client ID for the OAuth2 flow is through the SignalWire Support team.
+</Info>
+
+<Tabs>
+<TabItem value="oidc-client-ts" label="oidc-client-ts">
+
+```js
+import { UserManager, WebStorageStateStore } from "oidc-client-ts";
+
+const config = {
+  authority: "x", // dummy authority
+  metadata: {
+    issuer: "https://id.fabric.signalwire.com/",
+    authorization_endpoint: "https://id.fabric.signalwire.com/login/oauth/authorize",
+    token_endpoint: "https://id.fabric.signalwire.com/oauth/token",
+  },
+  client_id: "<Your_Fabric_Client_id>",
+  redirect_uri: "https://redirect_uri",
+  response_type: "code",
+  userStore: new WebStorageStateStore({ store: window.localStorage }),
+};
+
+const userManager = new UserManager(config);
+
+await userManager.signinRedirect();
+```
+
+</TabItem>
+<TabItem value="react-native-app-auth" label="react-native-app-auth">
+
+```js
+import { authorize } from "react-native-app-auth";
+
+const config = {
+  serviceConfiguration: {
+    authorizationEndpoint: "https://id.fabric.signalwire.com/login/oauth/authorize",
+    tokenEndpoint: "https://id.fabric.signalwire.com/oauth/token",
+  },
+
+  clientId: "<Your_Fabric_Client_id>",
+  redirectUrl: "your app's redirect uri",
+  clientAuthMethod: "post",
+};
+
+const result = await authorize(config);
+```
+
+</TabItem>
+</Tabs>
+
+A complete example is presented below.
+Assuming that this page is [`npx serve`d](https://www.npmjs.com/package/serve) at the address `http://localhost:3000`, this script takes the subscriber
+through the OAuth2 login flow, and uses the access token received to fetch the subscriber's registration details from SignalWire.
+
+{/* prettier-ignore */}
+```html title="index.html"
+<html>
+  <head>
+    <style>
+      .loading > button { display: none }
+      .loading::after { content: "Loading..." }
+    </style>
+  </head>
+
+  <body>
+    <div id="container" class="loading">
+      <button onclick="userManager.signinRedirect()">Log In</button>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/oidc-client-ts@3.0.1/dist/browser/oidc-client-ts.min.js"></script>
+    <script src="https://cdn.signalwire.com/@signalwire/js"></script>
+    <script>
+      const container = document.getElementById("container");
+
+      const config = {
+        authority: "x", // dummy authority
+        metadata: {
+          issuer: "https://id.fabric.signalwire.com/",
+          authorization_endpoint: "https://id.fabric.signalwire.com/login/oauth/authorize",
+          token_endpoint: "https://id.fabric.signalwire.com/oauth/token",
+        },
+        client_id: "<Your_Fabric_Client_id>",
+        redirect_uri: "http://localhost:3000", // assuming this page is being served at port 3000 of localhost
+        response_type: "code",
+        userStore: new oidc.WebStorageStateStore({ store: window.localStorage }),
+      };
+
+      const userManager = new oidc.UserManager(config);
+
+      async function checkForRedirect() {
+        try {
+          const user = await userManager.signinRedirectCallback();
+          if (user) {
+            // the oauth flow completed successfully, we can now use subscriber features using the access token.
+            await getSubscriberInfo(user.access_token);
+          }
+        } catch (e) {
+          // signinRedirectCallback failed; login flow hasn't been started yet. We'll show the Login button.
+          container.classList.remove("loading");
+        }
+      }
+
+      async function getSubscriberInfo(token) {
+        const client = await SignalWire.SignalWire({ token });
+        const subInfo = await client.getSubscriberInfo();
+
+        container.classList.remove("loading");
+        container.innerText = `Hello, ${subInfo.first_name}`;
+      }
+
+      // We want to check if the user was redirected here from the subscriber login flow,
+      // or if the came here directly from the browser. If the user came directly from the 
+      // browser, we show a Login button. If they were redirected here, we allow oidc-client-ts
+      // to finish the flow and get the access token.
+      checkForRedirect();
+    </script>
+  </body>
+</html>
+```

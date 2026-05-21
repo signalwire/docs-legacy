@@ -1,0 +1,50 @@
+---
+title: Relay.Messaging
+slug: /node/reference/messaging
+toc_max_heading_level: 3
+---
+[relay-messaging-sendresult]: /docs/server-sdk/v2/node/reference/messaging/send-result
+
+This represents the API interface for the Messaging Relay Service. This object is used to make requests related to managing SMS and MMS messages.
+
+## Methods
+
+### send
+
+Send an outbound SMS or MMS message.
+
+#### Parameters
+
+| Parameter | Type | Default | Description |
+| --------- | ---- | ------- | ----------- |
+| `context` | `string` | **required** | The context to receive inbound events |
+| `from` | `string` | **required** | The phone number to place the message from. Must be a SignalWire phone number or short code that you own |
+| `to` | `string` | **required** | The phone number to send to |
+| `body` | `string` | **required** | The content of the message. Optional if `media` is present |
+| `media` | `string[]` | **required** | Array of URLs to send in the message. Optional if `body` is present |
+| `tags` | `string[]` | optional | Array of strings to tag the message with for searching in the UI |
+
+#### Returns
+
+`Promise<SendResult>` - `Promise` that will be fulfilled with a [`Relay.Messaging.SendResult`][relay-messaging-sendresult] object.
+
+#### Examples
+
+> Send a message in the context _office_.
+
+```javascript
+async function main() {
+  const sendResult = await client.messaging.send({
+    context: 'office',
+    from: '+1XXXXXXXXXX',
+    to: '+1YYYYYYYYYY',
+    body: 'Welcome at SignalWire!'
+  })
+
+  if (sendResult.successful) {
+    console.log('Message ID: ', sendResult.messageId)
+  }
+}
+
+main().catch(console.error)
+```

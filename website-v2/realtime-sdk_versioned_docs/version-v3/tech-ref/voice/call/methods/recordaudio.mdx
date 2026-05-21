@@ -1,0 +1,39 @@
+---
+title: "recordAudio"
+slug: /node/reference/voice/call/record-audio
+description: recordAudio method for the Call class.
+toc_max_heading_level: 3
+---
+
+[callrecording-3]: /docs/server-sdk/v3/node/reference/voice/call-recording
+
+### recordAudio
+
+- **recordAudio**(`params?`): `Promise<CallRecording>` - See [CallRecording][callrecording-3] for more details.
+
+Records the audio from the call.
+
+#### Parameters
+
+| Name                        | Type                                | Description                                                                                                                                             |
+|:----------------------------|:------------------------------------|:--------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `params?`                   | `Object`                            | -                                                                                                                                                       |
+| `params.beep?`              | `boolean`                           | Whether to play a beep. Default is false.                                                                                                               |
+| `params.direction?`         | `"listen"` \| `"speak"` \| `"both"` | Direction to record. Can be `listen` (what the caller hears), `speak` (what the caller says), or `both`. Default is `speak`.                            |
+| `params.endSilenceTimeout?` | `number`                            | How long to wait (in seconds) until the caller has stopped speaking. Disable by passing `0`. Default is `1.0`.                                          |
+| `params.format?`            | `"mp3"` \| `"wav"`                  | Format of the recording. Default is `mp3`.                                                                                                              |
+| `params.initialTimeout?`    | `number`                            | How long to wait (in seconds) until something is heard in the recording. Disable by passing `0`. Default is `5.0`.                                      |
+| `params.inputSensitivity?`  | `number`                            | Controls how sensitive the voice activity detector is to background noise, where `0` is least sensitive and `100` is most sensitive. Default is `44.0`. |
+| `params.stereo?`            | `boolean`                           | Whether to record in stereo mode. Default is `false`.                                                                                                   |
+| `params.terminators?`       | `string`                            | DTMF digits that, when dialed, will end the recording. Default is `#\*`.                                                                                |
+
+#### Returns
+
+`Promise<CallRecording>` - See [CallRecording][callrecording-3] for more details.
+
+#### Example
+
+```js
+const recording = await call.recordAudio({ direction: "both" });
+await recording.stop();
+```

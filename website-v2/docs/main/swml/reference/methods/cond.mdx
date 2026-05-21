@@ -1,0 +1,214 @@
+---
+slug: /swml/reference/cond
+title: cond
+description: Execute a sequence of instructions depending on the value of a JavaScript condition.
+toc_max_heading_level: 3
+---
+
+Execute a sequence of instructions depending on the value of a JavaScript condition.
+
+The `cond` statement expects an array of conditions. Each condition is an object with a `when` and a `then` property, with the
+exception of a single, optional condition with just an `else` property.
+
+## **Properties**
+
+<ParamField path="cond" type="object[]" required={true}>
+  Array of [`when-then`](#when-then-params) and [`else`](#else-params) conditions
+</ParamField>
+
+<Indent>
+
+### **Properties for `when-then` conditions** {#when-then-params}
+
+<ParamField path="cond[].when" type="string" required={true}>
+  The JavaScript condition to act on
+</ParamField>
+
+
+<ParamField path="cond[].then" type="object[]" required={true}>
+  Sequence of [`SWML Methods`](/docs/swml/reference) to execute when the condition evaluates to `true`
+</ParamField>
+
+
+### **Properties for `else` condition** {#else-params}
+
+<ParamField path="cond[].else" type="object[]">
+  Sequence of [`SWML Methods`](/docs/swml/reference) to execute when none of the other conditions evaluate to `true`
+</ParamField>
+
+
+<Warning>
+The JavaScript condition string already has access to all the document variables. Using the variable
+substitution operator (`${var}`) inside this string might result in inconsistent behavior.
+
+```
+❌ when: "${call.type.toLowerCase() == 'sip'}"
+❌ when: "${prompt_value} == 1"
+✅ when: "call.type.toLowerCase() == 'sip'"
+```
+</Warning>
+
+</Indent>
+
+## **Examples**
+
+### Tell the caller what he's calling from
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - cond:
+        - when: call.type.toLowerCase() == 'sip'
+          then:
+            - play:
+                url: "say: You're calling from SIP."
+        - when: call.type.toLowerCase() == 'phone'
+          then:
+            - play:
+                url: "say: You're calling from phone."
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "cond": [
+          {
+            "when": "call.type.toLowerCase() == 'sip'",
+            "then": [
+              {
+                "play": {
+                  "url": "say: You're calling from SIP."
+                }
+              }
+            ]
+          },
+          {
+            "when": "call.type.toLowerCase() == 'phone'",
+            "then": [
+              {
+                "play": {
+                  "url": "say: You're calling from phone."
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+### Perform tasks based on user input
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - prompt:
+        play: >-
+          say: Press 1 to listen to music; 2 to hear your phone number; and
+          anything else to hang up
+    - cond:
+        - when: '${prompt_value} == 1'
+          then:
+            - play:
+                url: 'https://cdn.signalwire.com/swml/April_Kisses.mp3'
+            - execute:
+                dest: main
+        - when: call.type.toLowerCase() == 'phone'
+          then:
+            - transfer:
+                dest: say_phone_number
+            - execute:
+                dest: main
+        - else:
+            - hangup: {}
+  say_phone_number:
+    # The `.split('').join(' ')`` adds a space between each digit of the phone number,
+    # making sure the TTS spells out each digit one by one
+    - play:
+        url: "say: ${call.from.split('').join(' ')}"
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "prompt": {
+          "play": "say: Press 1 to listen to music; 2 to hear your phone number; and anything else to hang up"
+        }
+      },
+      {
+        "cond": [
+          {
+            "when": "${prompt_value} == 1",
+            "then": [
+              {
+                "play": {
+                  "url": "https://cdn.signalwire.com/swml/April_Kisses.mp3"
+                }
+              },
+              {
+                "execute": {
+                  "dest": "main"
+                }
+              }
+            ]
+          },
+          {
+            "when": "call.type.toLowerCase() == 'phone'",
+            "then": [
+              {
+                "transfer": {
+                  "dest": "say_phone_number"
+                }
+              },
+              {
+                "execute": {
+                  "dest": "main"
+                }
+              }
+            ]
+          },
+          {
+            "else": [
+              {
+                "hangup": {}
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "say_phone_number": [
+      {
+        "play": {
+          "url": "say: ${call.from.split('').join(' ')}"
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+## **See Also**
+
+- **[Variables and Expressions](/docs/swml/reference/variables)**: Complete reference for SWML variables, scopes, and using variables in conditional logic
+- **[switch](/docs/swml/reference/switch)**: Alternative conditional logic method

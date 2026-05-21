@@ -1,0 +1,22 @@
+---
+title: DetectResult
+slug: /ruby/reference/calling/results/detect
+description: The DetectResult object is returned when a detect operation is completed.
+toc_max_heading_level: 3
+---
+
+[detect]: /docs/server-sdk/v2/ruby/reference/calling/actions/detect
+[relay-event]: /docs/server-sdk/v2/ruby/reference/event
+
+# Relay::Calling::DetectResult
+
+This object is returned by [`detect`][detect] method and represents the final result of a detect attempt.
+
+## Properties
+
+| Property | Type | Description |
+| :------- | :--- | :---------- |
+| `successful` | Boolean | Whether the detection attempt succeeded. |
+| `event` | [Relay::Event][relay-event] | Last event that completed the operation. |
+| `type` | String | The detector type: `fax`, `machine` or `digit`. |
+| `result` | String | The final detector result. |

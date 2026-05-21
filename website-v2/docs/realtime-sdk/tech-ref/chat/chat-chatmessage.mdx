@@ -1,0 +1,65 @@
+---
+title: "ChatMessage"
+keywords:
+  - SignalWire
+  - Realtime SDK
+  - Node.js
+  - chat message
+  - message object
+slug: /node/reference/chat/chat-message
+sidebar_label: ChatMessage
+description: ChatMessage object representing a message in a chat channel. Access message ID, content, member info, channel, and timestamp properties.
+toc_max_heading_level: 3
+---
+
+[chatmember]: /docs/server-sdk/node/reference/chat/chat-member
+
+Represents a message in a chat.
+
+## **Properties**
+
+<ParamField path="id" type="string" required>
+  The id of this message.
+</ParamField>
+
+<ParamField path="channel" type="string" required>
+  The channel in which the message was sent.
+</ParamField>
+
+<ParamField path="content" type="any" required>
+  The content of this message. This can be any JSON-serializable object or value.
+</ParamField>
+
+<ParamField path="publishedAt" type="Date" required>
+  The date and time at which this message was published.
+</ParamField>
+
+<ParamField path="member" type="ChatMember" required>
+  The member which sent this message. See [`ChatMember`][chatmember].
+</ParamField>
+
+<ParamField path="meta" type="any">
+  Any metadata associated to this message.
+</ParamField>
+
+## **Example**
+
+Listening for messages and accessing `ChatMessage` properties:
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "your-project-id", token: "your-api-token" });
+
+await client.chat.listen({
+  channels: ["my-channel"],
+  onMessageReceived: (message) => {
+    console.log("Message ID:", message.id);
+    console.log("Channel:", message.channel);
+    console.log("Content:", message.content);
+    console.log("Published at:", message.publishedAt);
+    console.log("From member:", message.member.id);
+    console.log("Metadata:", message.meta);
+  }
+});
+```

@@ -1,0 +1,52 @@
+---
+title: TapAction
+slug: /ruby/reference/calling/actions/tap
+description: The TapAction object is returned when starting a tap operation on a call.
+toc_max_heading_level: 3
+---
+
+[call]: /docs/server-sdk/v2/ruby/reference/calling/call#tap_media
+[relay-calling-stopresult]: /docs/server-sdk/v2/ruby/reference/calling/results/stop
+[relay-calling-tapresult]: /docs/server-sdk/v2/ruby/reference/calling/results/tap
+
+# Relay::Calling::TapAction
+
+This object is returned by the _asynchronous_ [`tap_media!`][call] method that represents a running media tap on the call.
+
+Signalwire will send RTP or Websocket Audio (WS or WSS).
+
+## Properties
+
+| Property | Type | Description |
+| :------- | :--- | :---------- |
+| `result` | [`Relay::Calling::TapResult`][relay-calling-tapresult] | Final tap result. |
+| `completed` | Boolean | Whether the action has finished. |
+| `payload` | Hash | Payload sent to Relay to start tapping. |
+| `control_Id` | String | UUID to identify the action. |
+| `source_device` | Hash | Source device sending media. |
+
+## Methods
+
+### stop
+
+Stop the action immediately.
+
+
+
+**Parameters**
+
+None
+
+**Returns**
+
+[`Relay::Calling::StopResult`][relay-calling-stopresult] - A `StopResult` object with a `successful` property.
+
+**Examples**
+
+Tapping audio from the call and then stop it using the `TapAction` object.
+
+```ruby
+action = call.tap_media!(audio_direction: "listen", target_addr: "127.0.0.1", target_port: 1234)
+sleep 5
+action.stop
+```

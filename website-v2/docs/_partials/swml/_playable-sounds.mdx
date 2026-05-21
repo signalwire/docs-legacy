@@ -1,0 +1,29 @@
+**Audio file from a URL**
+
+   To play an audio file from the web, simply list that audio's URL.
+   Specified audio file should be accessible with an HTTP GET request.
+   `HTTP` and `HTTPS` URLs are supported. Authentication can also be set in the url in the format of `username:password@url`.
+
+    Example: `https://cdn.signalwire.com/swml/audio.mp3`
+
+**Ring**
+
+   To play the standard ringtone of a certain country, use `ring:[duration:]<country code>`.
+
+   The total duration can be specified in seconds as an optional second parameter. When left unspecified,
+   it will ring just once. The country code must be specified. It has values like `us` for United States, `it` for Italy.
+   For the list of available country codes, refer to the
+   [supported ringtones](#supported-ring-tones) section below. For example:
+
+   `ring:us` - ring with the US ringtone once
+   `ring:3.2:uk` - ring with the UK ringtone for 3.2 seconds
+
+**Speak using a TTS**
+
+   To speak using a TTS, use `say:<text to speak>`. When using say, you can optionally set `say_voice`, `say_language` and
+   `say_gender` in the [play or prompt properties](#properties). For the list of useable voices and languages,
+   refer to the [supported voices and languages](#supported-voices-and-languages) section below.
+
+**Silence**
+
+   To be silent for a certain duration, use `silence:<duration>`. The duration is in seconds.

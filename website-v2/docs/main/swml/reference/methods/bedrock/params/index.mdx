@@ -1,0 +1,58 @@
+---
+unlisted: false
+hide_title: false
+title: params
+slug: /swml/reference/amazon-bedrock/params
+description: Parameters for the Amazon Bedrock that can customize the agent's behavior.
+toc_max_heading_level: 3
+---
+
+[amazon_bedrock]: /docs/swml/reference/amazon-bedrock
+
+Parameters for AI that can be passed in `amazon_bedrock.params` at the top level of the [`amazon_bedrock` Method][amazon_bedrock].
+
+## **Properties**
+
+<ParamField path="amazon_bedrock.params" type="object">
+  An object that accepts the following properties.
+</ParamField>
+
+<Indent>
+
+<ParamField path="params.attention_timeout" type="integer" default="5000 ms">
+  Amount of time, in ms, to wait before prompting the user to respond. Allowed values: `0` (to disable) or `10,000`-`600,000`.
+</ParamField>
+
+
+<ParamField path="params.inactivity_timeout" type="integer" default="600000 ms">
+  Amount of time, in ms, to wait before exiting the app due to inactivity. Allowed values: `0` (to disable) or `10,000`-`3,600,000`.
+</ParamField>
+
+
+<ParamField path="params.hard_stop_time" type="string">
+  Specifies the maximum duration for the AI Agent to remain active before it exits the session. After the timeout, the AI will stop responding, and will proceed with the next SWML instruction.
+</ParamField>
+
+**Time Format**
+<ul><li>Seconds Format: `30s`</li><li>Minutes Format: `2m`</li><li>Hours Format: `1h`</li><li>Combined Format: `1h45m30s`</li></ul>
+
+<ParamField path="params.hard_stop_prompt" type="string">
+  A final prompt that is fed into the AI when the `hard_stop_time` is reached.
+</ParamField>
+
+
+<ParamField path="params.video_talking_file" type="string">
+  URL of a video file to play when AI is talking. Only works for calls that support video.
+</ParamField>
+
+
+<ParamField path="params.video_idle_file" type="string">
+  URL of a video file to play when AI is idle. Only works for calls that support video.
+</ParamField>
+
+
+<ParamField path="params.video_listening_file" type="string">
+  URL of a video file to play when AI is listening to the user speak. Only works for calls that support video.
+</ParamField>
+
+</Indent>

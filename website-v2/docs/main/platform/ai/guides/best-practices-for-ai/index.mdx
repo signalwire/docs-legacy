@@ -1,0 +1,720 @@
+---
+title: Best practices for creating a SignalWire AI agent
+sidebar_label: Best practices
+slug: /platform/ai/best-practices
+author: Devon White
+x-custom:
+  tags:
+    - getting-started
+    - favorite
+    - sdk:swml
+    - product:ai
+    - product:voice
+description: |
+  This guide offers a detailed overview of best 
+  practices to make sure your SignalWire Agent operates 
+  effectively.
+---
+
+## **Overview**
+
+When designing an AI Agent with SignalWire, it's crucial to achieve a harmonious balance between clarity,
+efficiency, and adaptability.
+The following guide offers a detailed overview of best practices
+to make sure your SignalWire Agent operates effectively and offers a user-friendly experience.
+
+---
+
+## **"End-Pointing" and "Turnaround"**
+
+When using SignalWire products to design interaction between AI systems and humans, 
+you'll likely encounter the important concepts of **"end-pointing"** and **"turnaround."**
+ - **End-pointing, or "end-of-utterance detection"**: this is the AI's ability to detect when a human speaker has finished speaking.
+ - **Turnaround, or "turn-taking":** This refers to the time it takes for the AI to process the human's input and generate a response.
+
+While it might seem ideal for AI to optimize for instant end-pointing and turnaround, this expectation is unrealistic for several reasons:
+
+ - Natural language understanding and processing are complex tasks that require the AI to analyze syntax, semantics, and context of human speech. 
+ This analysis takes time, even if only a fraction of a second.
+ - Real-world communication is often filled with nuances, such as pauses, overlapping speech, and non-verbal cues.
+ These features make it challenging for AI to confidently pinpoint the moment a speaker has finished. 
+ - Generating coherent, contextually appropriate, and nuanced responses takes computational time.
+
+<Warning>
+A sharp increase in interest in AI products has led to a number of new products claiming to offer instantaneous end-pointing and turnaround.
+If an AI agent appears to respond perfectly and immediately in a recorded demo, it may be too good to be true.
+</Warning>
+
+SignalWire AI products include a number of tools designed to help you increase the apparent responsiveness of your AI agents. For example:
+
+ - **Filler words** provide text which the AI can say while processing is taking place.
+ - [**Background audio**](/docs/swml/guides) such as typing noises or office noises can offer immediate feedback to the user.
+
+---
+
+## **Crafting the Initial Prompt for the AI**
+
+The initial prompt sets the tone and context for your AI Agent.
+It's essential to be concise, clear, and relevant.
+
+- **Avoid Over-Prompting:** Overloading the AI with excessive information can muddle its understanding.
+  Instead, furnish it with a brief yet comprehensive overview that defines its role and boundaries.
+- **Stick to Necessities:** Clearly outline the AI's identity and primary responsibilities.
+  This guarantees the AI comprehends its mission and can respond appropriately.
+- **Use Markdown for Structuring the Prompt:** Structuring prompts in [Markdown](https://www.markdownguide.org/basic-syntax/)
+  is highly recommended.
+  It ensures content is organized and legible, both boosting readability and narrowing the AI's interpretation.
+
+### Delving into Prompt Configuration
+
+Understanding the prompt's configuration parameters is key to fine-tuning the AI's responses:
+
+- **Temperature (`temperature`):** Influences the randomness of the AI's output.
+  A value closer to 0 makes the AI's responses more deterministic and focused, while higher values introduce more variety.
+- **Top P (`top_p`):** Another parameter influencing randomness.
+  It dictates how diverse the AI's responses can be.
+  A lower value narrows down the potential responses.
+- **Confidence (`confidence`):** Determines the threshold for speech-detection events.
+  A lower value reduces the pause after user interaction but may lead to false positives.
+- **Presence Penalty (`presence_penalty`):** Dictates the AI's propensity to introduce new topics.
+  A positive value makes the AI more likely to diversify its responses.
+- **Frequency Penalty (`frequency_penalty`):** Influences the AI's tendency to repeat itself.
+  Positive values discourage repetition.
+
+
+<Tabs>
+<TabItem value="yaml" label="YAML">
+
+```yaml
+sections:
+  main:
+    - ai:
+        prompt:
+          text: |
+            Your name is David. You are a virtual assistant that is helping with tree planting
+            and their environmental benefits.
+
+            ## Information on Tree Planting
+            Tree planting is a vital activity that significantly contributes to the environment.
+            Trees absorb CO2, prevent soil erosion, provide habitat for wildlife, and offer many
+            other benefits.
+
+            ## David's Personality and Job Duties
+            Your duties are to help assist users with information related to tree planting.
+            You have a friendly and eco-conscious personality.
+
+            ## Greeting Rules
+            Greet the user and thank them for showing interest in tree planting. Introduce yourself as David.
+            Prefix the greeting with a 'good morning', 'good afternoon', or a 'good evening' depending on the time of day.
+
+          temperature: 0.89
+          top_p: 0.64
+          confidence: 0.5
+```
+
+</TabItem>
+<TabItem value="json" label="JSON">
+
+```json
+{
+  "sections": {
+    "main": [
+      {
+        "ai": {
+          "prompt": {
+            "text": "Your name is David. You are a virtual assistant that is helping with tree planting\nand their environmental benefits.\n\n## Information on Tree Planting\nTree planting is a vital activity that significantly contributes to the environment.\nTrees absorb CO2, prevent soil erosion, provide habitat for wildlife, and offer many\nother benefits.\n\n## David's Personality and Job Duties\nYour duties are to help assist users with information related to tree planting.\nYou have a friendly and eco-conscious personality.\n\n## Greeting Rules\nGreet the user and thank them for showing interest in tree planting. Introduce yourself as David.\nPrefix the greeting with a 'good morning', 'good afternoon', or a 'good evening' depending on the time of day.\n",
+            "temperature": 0.89,
+            "top_p": 0.64,
+            "confidence": 0.5
+          }
+        }
+      }
+    ]
+  }
+}
+```
+
+</TabItem>
+</Tabs>
+
+---
+
+## Dynamic data
+
+For best results, we recommend including dynamic data, 
+such as data returned by 
+[SWAIG functions](#functions),
+at the bottom of your prompt.
+This improves the speed and consistency of LLM results
+due to the way that responses are cached.
+
+For more information, consult 
+[OpenAI's documentation](https://platform.openai.com/docs/guides/prompt-caching)
+on prompt caching.
+
+---
+
+## Exploring Functions in SignalWire AI {#functions}
+
+SignalWire's AI Agent uses functions to neatly store and organize information.
+This way, the AI can easily handle diverse questions without needing long and complicated prompts.
+
+### Employ `data_map` and `webhook_url` for Storing Prompts
+
+Utilizing `data_map` to store specific prompts or text segments is a practical approach.
+It allows you to retrieve them when necessary, promoting a fluid and logical flow of dialogue.
+
+Moreover, SignalWire's AI Agent offers the flexibility to incorporate external logic via the `webhook_url`.
+By pointing the AI to your own webhook, you can harness backend logic to further customize
+and refine the AI's responses based on real-time data or specific conditions.
+
+<Tabs groupId="functions">
+<TabItem value="yaml" label="YAML">
+
+```yaml
+SWAIG:
+  functions:
+    - function: tree_benefits
+      purpose: To share the benefits of planting trees.
+      argument:
+        type: object
+        properties:
+          benefit_type:
+            type: string
+            description: Specific benefit type of tree planting.
+      data_map:
+        expressions:
+          - string: %{lc:args.benefit_type}
+            pattern: carbon
+            output:
+              response: "Trees play a crucial role in absorbing carbon dioxide, thereby helping combat climate change."
+    - function: lookup_tree
+      web_hook_url: https://example.com/webhook_endpoint
+      purpose: To lookup a type of tree.
+      argument:
+        type: object
+        properties:
+          tree_type:
+            type: string
+            description: Type of tree
+```
+
+</TabItem>
+<TabItem value="json" label="JSON">
+
+```json
+{
+  "SWAIG": {
+    "functions": [
+      {
+        "function": "tree_benefits",
+        "purpose": "To share the benefits of planting trees.",
+        "argument": {
+          "type": "object",
+          "properties": {
+            "benefit_type": {
+              "type": "string",
+              "description": "Specific benefit type of tree planting."
+            }
+          }
+        },
+        "data_map": {
+          "expressions": [
+            {
+              "string": "%{lc:args.benefit_type}",
+              "pattern": "carbon",
+              "output": {
+                "response": "Trees play a crucial role in absorbing carbon dioxide, thereby helping combat climate change."
+              }
+            }
+          ]
+        }
+      },
+      {
+        "function": "lookup_tree",
+        "web_hook_url": "https://example.com/webhook_endpoint",
+        "purpose": "To lookup a type of tree.",
+        "argument": {
+          "type": "object",
+          "properties": {
+            "tree_type": {
+              "type": "string",
+              "description": "Type of tree"
+            }
+          }
+        }
+      }
+    ]
+  }
+}
+```
+
+</TabItem>
+</Tabs>
+
+### Optimize Token Usage
+
+By invoking functions to offer specific guidelines when necessary, you utilize tokens more
+efficiently, ensuring both optimal AI performance and cost-effectiveness.
+
+### Elaboration on the Function's Efficacy
+
+- **Dynamic Response Generation:** The `tree_benefits` function is designed to provide tailored responses based on user queries.
+  This is evident from the way the `data_map` is structured.
+  Depending on whether a user asks about the benefits of trees in relation to "carbon", "soil", or "wildlife",
+  the AI will furnish a specific, relevant answer.
+- **Pattern Recognition:** By using the `pattern` keyword within the `data_map`,
+  the function can identify specific keywords or patterns in the user's inquiry.
+  This ensures that the AI's response is not just generic but directly corresponds to the user's query.
+- **Token Efficiency:** Instead of having a lengthy prompt containing all the possible benefits of trees,
+  the function offers a modular approach.
+  It only provides detailed information about a specific benefit when asked,
+  ensuring that tokens (which represent chunks of information the AI can process in a single go) are used judiciously.
+- **Scalability:** With the current structure, adding more benefits or details becomes straightforward.
+  For instance, if in the future there's a need to include benefits related to "air quality" or "shade",
+  it can be seamlessly integrated into the function without overhauling the existing setup.
+- **Enhanced User Engagement:** By furnishing precise, on-demand information,
+  the AI elevates user experience, ensuring interactions are concise and meaningful.
+
+In essence, the `tree_benefits` function exemplifies the power of modular design in AI prompts.
+It showcases how, by intelligently structuring functions, one can create an AI Agent that's both responsive and resource-efficient.
+
+### Utilizing Perl Compatible Regular Expressions (PCRE)
+
+The [PCRE](https://www.pcre.org) is a powerful library
+that provides a set of functions to match patterns using regular expressions.
+In the context of a SignalWire AI Agent, PCRE can be used
+to match specific patterns or keywords in a user's response
+and dictate the AI's subsequent actions.
+
+#### Benefits of Using PCRE in SignalWire AI
+
+- **Flexibility:** PCRE allows for complex pattern matching, enabling the AI to recognize a wide range of user inputs.
+- **Precision:** PCRE ensures that the AI's responses or actions are tailored to the user's specific queries or statements.
+- **Efficiency:** By using regular expressions, developers can write concise patterns
+  that capture a variety of user inputs, reducing the need for long lists of possible phrases or keywords.
+- **Scalability:** As the system grows or changes, patterns can easily be updated or expanded
+  to accommodate new functionalities without overhauling the entire system.
+
+#### Example: Using PCRE to Share Benefits of Planting Trees
+
+Consider the following SignalWire AI configuration that employs PCRE for sharing benefits of planting trees:
+
+<Tabs groupId="PCRE">
+<TabItem value="yaml" label="YAML">
+
+```yaml
+SWAIG:
+  functions:
+    - function: tree_benefits
+      purpose: To share the benefits of planting trees.
+      argument:
+        type: object
+        properties:
+          benefit_type:
+            type: string
+            description: Specific benefit type of tree planting.
+      data_map:
+        expressions:
+          - string: %{lc:args.benefit_type}
+            pattern: /carbon/i
+            output:
+              response: "Trees play a crucial role in absorbing carbon dioxide, thereby helping combat climate change."
+          - string: %{lc:args.benefit_type}
+            pattern: /soil/i
+            output:
+              response: "Trees help prevent soil erosion and improve soil quality, making the land more fertile."
+          - string: %{lc:args.benefit_type}
+            pattern: /wildlife/i
+            output:
+              response: "Trees help wildlife flourish.Many animals also use trees for resting, nesting and for places from which to hunt or capture prey. When the trees mature, animals are able to enjoy delicious fruits and foraging opportunities."
+```
+
+</TabItem>
+<TabItem value="json" label="JSON">
+
+```json
+{
+  "SWAIG": {
+    "functions": [
+      {
+        "function": "tree_benefits",
+        "purpose": "To share the benefits of planting trees.",
+        "argument": {
+          "type": "object",
+          "properties": {
+            "benefit_type": {
+              "type": "string",
+              "description": "Specific benefit type of tree planting."
+            }
+          }
+        },
+        "data_map": {
+          "expressions": [
+            {
+              "string": "%{lc:args.benefit_type}",
+              "pattern": "/carbon/i",
+              "output": {
+                "response": "Trees play a crucial role in absorbing carbon dioxide, thereby helping combat climate change."
+              }
+            },
+            {
+              "string": "%{lc:args.benefit_type}",
+              "pattern": "/soil/i",
+              "output": {
+                "response": "Trees help prevent soil erosion and improve soil quality, making the land more fertile."
+              }
+            },
+            {
+              "string": "%{lc:args.benefit_type}",
+              "pattern": "/wildlife/i",
+              "output": {
+                "response": "Trees help wildlife flourish.Many animals also use trees for resting, nesting and for places from which to hunt or capture prey. When the trees mature, animals are able to enjoy delicious fruits and foraging opportunities."
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
+```
+
+</TabItem>
+</Tabs>
+
+##### Example Overview:
+
+- PCRE patterns like `/carbon/i`, `/soil/i`, and `/wildlife/i` are used to match specific benefit types provided as input.
+- Depending on the matched pattern, the AI provides a relevant response
+  about the benefits of tree planting related to carbon absorption, soil quality, or wildlife support.
+- The `/i` modifier in the patterns makes the regex match case-insensitive, adding flexibility to user input.
+
+---
+
+## **Harnessing the Power of Hints**
+
+Hints serve as beacons, directing the AI's comprehension and making sure it stays relevant to the given context.
+
+- **Keyword Guidance:** Introducing specific keywords as hints can channel the AI's attention.
+  This ensures that the AI resonates with the intended theme.
+- **Example:** For a tree planting and environmental benefits AI,
+  hints like "sapling", "soil", "watering", "benefits", and "environment" are pivotal.
+
+<Tabs groupId="hints">
+<TabItem value="yaml" label="YAML">
+
+```yaml
+hints:
+  - wildlife
+  - carbon
+  - sapling
+  - soil
+  - watering
+  - benefits
+  - environment
+```
+
+</TabItem>
+<TabItem value="json" label="JSON">
+
+```json
+{
+  "hints": [
+    "wildlife",
+    "carbon",
+    "sapling",
+    "soil",
+    "watering",
+    "benefits",
+    "environment"
+  ]
+}
+```
+
+</TabItem>
+</Tabs>
+
+---
+
+## **Staying In Regulation with FCC Guidelines**
+
+The Federal Communications Commission (FCC) has explicitly criminalized <u>**_unsolicited_**</u> robocalls
+that use voices made with artificial intelligence.
+The proposal would outlaw such robocalls under the [`Telephone Consumer Protection Act`](https://www.fcc.gov/sites/default/files/tcpa-rules.pdf), or `TCPA`,
+a 1991 law that regulates automated political and marketing calls made without the receivers’ consent.
+
+This means that any AI Agent that interacts with users must be transparent about its nature and purpose.
+This <u>**_does not_**</u> mean that AI Agents are illegal, but rather that they must be used responsibly and in compliance with the law.
+
+### Key Considerations for FCC Compliance
+
+- **Transparency:** Clearly state that the user is interacting with an AI Agent.
+- **Opt-Out Mechanism:** Provide a simple and straightforward method for users to opt out of the AI interaction.
+- **User Consent:** Ensure that users are aware of the AI's capabilities and have consented to interact with it.
+
+---
+
+## **Other General Best Practices**
+
+- **Regularly Review and Update:** AI, like any other tool, benefits from regular reviews.
+  Periodically assess its performance and make necessary adjustments.
+- **Test with Real Users:** Before deploying, conduct beta testing with real users to gather feedback and identify areas of improvement.
+- **Stay Updated with SignalWire Changes:** AI and associated platforms evolve.
+  Stay updated with SignalWire's documentation and update your AI accordingly.
+- **Monitor Usage Metrics:** Keep an eye on token consumption, user interaction times, and other relevant metrics to optimize performance and manage costs.
+
+---
+
+## **Tree Planting AI Example**
+
+This example illustrates a comprehensive AI virtual assistant configuration, named David,
+designed to guide users on tree planting and its myriad environmental advantages.
+By harnessing structured YAML configurations, the AI Agent functions effectively, ensuring users receive accurate and pertinent information.
+
+<Tabs groupId="example">
+<TabItem value="yaml" label="YAML">
+
+```yaml
+sections:
+  main:
+    - ai:
+        prompt:
+          text: |
+            Your name is David. You are a virtual assistant that is helping with tree planting
+            and their environmental benefits.
+
+
+            ## Information on Tree Planting
+            Tree planting is a vital activity that significantly contributes to the environment.
+            Trees absorb CO2, prevent soil erosion, provide habitat for wildlife, and offer many
+            other benefits.
+
+            ## David's Personality and Job Duties
+            Your duties are to help assist users with information related to tree planting.
+            You have a friendly and eco-conscious personality.
+
+            ## Greeting Rules
+            Greet the user and thank them for showing interest in tree planting. Introduce yourself as David.
+            Prefix the greeting with a 'good morning', 'good afternoon', or a 'good evening' depending on the time of day.
+          temperature: 0.89
+          top_p: 0.64
+          confidence: 0.5
+        post_prompt:
+          text: '## Post Prompt Actions\n\nSummarize the call and provide the summary in a JSON format.'
+          temperature: 0
+          top_p: 1.0
+        post_prompt_url: https://example.site/webhook_url
+        params:
+          direction: inbound
+          swaig_allow_swml: true
+        SWAIG:
+          functions:
+            - function: tree_benefits
+              purpose: To share the benefits of planting trees.
+              argument:
+                type: object
+                properties:
+                  benefit_type:
+                    type: string
+                    description: Specific benefit type of tree planting.
+              data_map:
+                expressions:
+                  - string: %{lc:args.benefit_type}
+                    pattern: /carbon/i
+                    output:
+                      response: "Trees play a crucial role in absorbing carbon dioxide, thereby helping combat climate change."
+                  - string: %{lc:args.benefit_type}
+                    pattern: /soil/i
+                    output:
+                      response: "Trees help prevent soil erosion and improve soil quality, making the land more fertile."
+                  - string: %{lc:args.benefit_type}
+                    pattern: /wildlife/i
+                    output:
+                      response: "Trees help wildlife flourish.Many animals also use trees for resting, nesting and for places from which to hunt or capture prey. When the trees mature, animals are able to enjoy delicious fruits and foraging opportunities."
+            - function: region_specific_trees
+              purpose: To recommend trees suitable for specific regions or climate zones.
+              argument:
+                type: object
+                properties:
+                  region:
+                    type: string
+                    description: The region or climate zone for tree recommendations.
+              data_map:
+                expressions:
+                  - string: %{lc:args.region}
+                    pattern: /tropical/i
+                    output:
+                      response: "For tropical regions, consider planting trees like Mango, Coconut, and Banana."
+                  - string: %{lc:args.region}
+                    pattern: /temperate/i
+                    output:
+                      response: "For temperate zones, Oak, Maple, and Birch trees are great choices."
+            - function: tree_planting_guide
+              purpose: To guide users on the tree planting process.
+              argument:
+                type: object
+                properties:
+                  step:
+                    type: string
+                    description: Specific step or aspect of tree planting.
+              data_map:
+                expressions:
+                  - string: %{lc:args.step}
+                    pattern: /digging/i
+                    output:
+                      response: "Dig a hole that is twice as wide as the tree’s root ball and just as deep. Place the tree in the hole and fill it with soil."
+                  - string: %{lc:args.step}
+                    pattern: /watering/i
+                    output:
+                      response: "Water the tree immediately after planting. Regularly water it, especially during dry periods."
+        hints:
+          - sapling
+          - soil
+          - watering
+          - benefits
+          - environment
+```
+
+</TabItem>
+<TabItem value="json" label="JSON">
+
+```json
+{
+  "sections": {
+    "main": [
+      {
+        "ai": {
+          "prompt": {
+            "text": "Your name is David. You are a virtual assistant that is helping with tree planting\nand their environmental benefits.\n\n\n## Information on Tree Planting\nTree planting is a vital activity that significantly contributes to the environment.\nTrees absorb CO2, prevent soil erosion, provide habitat for wildlife, and offer many\nother benefits.\n\n## David's Personality and Job Duties\nYour duties are to help assist users with information related to tree planting.\nYou have a friendly and eco-conscious personality.\n\n## Greeting Rules\nGreet the user and thank them for showing interest in tree planting. Introduce yourself as David.\nPrefix the greeting with a 'good morning', 'good afternoon', or a 'good evening' depending on the time of day.\n",
+            "temperature": 0.89,
+            "top_p": 0.64,
+            "confidence": 0.5
+          },
+          "post_prompt": {
+            "text": "## Post Prompt Actions\\n\\nSummarize the call and provide the summary in a JSON format.",
+            "temperature": 0,
+            "top_p": 1
+          },
+          "post_prompt_url": "https://example.site/webhook_url",
+          "params": {
+            "direction": "inbound",
+            "swaig_allow_swml": true
+          },
+          "SWAIG": {
+            "functions": [
+              {
+                "function": "tree_benefits",
+                "purpose": "To share the benefits of planting trees.",
+                "argument": {
+                  "type": "object",
+                  "properties": {
+                    "benefit_type": {
+                      "type": "string",
+                      "description": "Specific benefit type of tree planting."
+                    }
+                  }
+                },
+                "data_map": {
+                  "expressions": [
+                    {
+                      "string": "%{lc:args.benefit_type}",
+                      "pattern": "/carbon/i",
+                      "output": {
+                        "response": "Trees play a crucial role in absorbing carbon dioxide, thereby helping combat climate change."
+                      }
+                    },
+                    {
+                      "string": "%{lc:args.benefit_type}",
+                      "pattern": "/soil/i",
+                      "output": {
+                        "response": "Trees help prevent soil erosion and improve soil quality, making the land more fertile."
+                      }
+                    },
+                    {
+                      "string": "%{lc:args.benefit_type}",
+                      "pattern": "/wildlife/i",
+                      "output": {
+                        "response": "Trees help wildlife flourish.Many animals also use trees for resting, nesting and for places from which to hunt or capture prey. When the trees mature, animals are able to enjoy delicious fruits and foraging opportunities."
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "function": "region_specific_trees",
+                "purpose": "To recommend trees suitable for specific regions or climate zones.",
+                "argument": {
+                  "type": "object",
+                  "properties": {
+                    "region": {
+                      "type": "string",
+                      "description": "The region or climate zone for tree recommendations."
+                    }
+                  }
+                },
+                "data_map": {
+                  "expressions": [
+                    {
+                      "string": "%{lc:args.region}",
+                      "pattern": "/tropical/i",
+                      "output": {
+                        "response": "For tropical regions, consider planting trees like Mango, Coconut, and Banana."
+                      }
+                    },
+                    {
+                      "string": "%{lc:args.region}",
+                      "pattern": "/temperate/i",
+                      "output": {
+                        "response": "For temperate zones, Oak, Maple, and Birch trees are great choices."
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "function": "tree_planting_guide",
+                "purpose": "To guide users on the tree planting process.",
+                "argument": {
+                  "type": "object",
+                  "properties": {
+                    "step": {
+                      "type": "string",
+                      "description": "Specific step or aspect of tree planting."
+                    }
+                  }
+                },
+                "data_map": {
+                  "expressions": [
+                    {
+                      "string": "%{lc:args.step}",
+                      "pattern": "/digging/i",
+                      "output": {
+                        "response": "Dig a hole that is twice as wide as the tree’s root ball and just as deep. Place the tree in the hole and fill it with soil."
+                      }
+                    },
+                    {
+                      "string": "%{lc:args.step}",
+                      "pattern": "/watering/i",
+                      "output": {
+                        "response": "Water the tree immediately after planting. Regularly water it, especially during dry periods."
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          "hints": ["sapling", "soil", "watering", "benefits", "environment"]
+        }
+      }
+    ]
+  }
+}
+```
+
+</TabItem>
+</Tabs>
+
+Creating an effective SignalWire AI Agent is a blend of clarity, strategic function utilization, and continuous assessment.
+By adhering to these best practices, you'll ensure that your AI Agent is both efficient and user-friendly.

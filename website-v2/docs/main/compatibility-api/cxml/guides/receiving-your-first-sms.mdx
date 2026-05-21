@@ -1,0 +1,171 @@
+---
+title: Receiving your first SMS
+sidebar_label: Receive SMS
+slug: /compatibility-api/guides/receive-sms
+sidebar_position: 1
+description: Learn how to receive your first SMS using cXML scripts.
+x-custom:
+  tags:
+    - product:messaging
+---
+import ResourceAdmonitionPartial from '@site/docs/_partials/common/dashboard/_resource-admonition.mdx';
+import LegacyInstructionsPartial from '@site/docs/_partials/common/dashboard/_legacy-instructions.mdx';
+import UiAccordionPartial from '@site/docs/_partials/common/dashboard/_ui-accordion.mdx';
+
+
+
+To [send your first SMS](/docs/compatibility-api/guides/send-sms), you needed a
+phone number, API credentials, and a REST API call.
+
+Receiving messages works a bit differently: when using the cXML API,
+you need to prepare an XML file with instructions on what to do after a message
+is received on a given phone number.
+
+<figure>
+  ```mermaid
+  graph LR
+      Sender["Message Sender"]
+
+      subgraph CompanyNumbers["Numbers in Company"]
+          N1["+1 (555) 2011"]
+          N2["+1 (555) 2012"]
+          N3["..."]
+      end
+
+      subgraph XML["cXML response"]
+        C["&lt;?xml&gt;<br>&lt;Response&gt;<br>...<br>&lt;/Response&gt;"]
+      end
+
+      %% Positioning adjustments
+      Sender -- "(1) The user sends a message to a number in your SignalWire Space." --> N1
+      N1 -- "(2) SignalWire fetches the XML bin URL associated with the destination number." --> C
+      C -- "(3) The contents of the XML bin are interpreted and executed." --> N1
+      N1 -- "(4) Any response specified in the XML bin will reach the caller." --> Sender
+  ```
+  <figcaption>
+      Receiving text messages from users using cXML applications.
+  </figcaption>
+</figure>
+
+## Using cXML
+
+Let's write our first cXML script.
+We will host this one on SignalWire, but you can use your own server if you want,
+which allows you to generate scripts dynamically.
+
+<Steps>
+
+### Create a cXML Script
+
+Navigate to the "Resources" tab from the sidebar and create a new Resource.
+There, select the resource type of "Script", and pick "cXML script".
+
+<Frame>
+  ![Create a new cXML script.](@image/dashboard/resources/new-cxml-bin.webp)
+</Frame>
+
+<ResourceAdmonitionPartial />
+
+### Paste the script
+
+There, you can paste the following XML:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Message>Hello from SignalWire!</Message>
+</Response>
+```
+
+This script will reply with a fixed message to any incoming SMS.
+Alternatively, you can forward the message to a different number using this script:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Message to="+1xxxxxxxxxx">
+        You received a message from: {{From}} to SignalWire number: {{To}}.
+        The message is: "{{Body}}"
+    </Message>
+</Response>
+```
+
+Consult the full [cXML technical reference](/docs/compatibility-api/cxml)
+to write more complex scripts.
+
+Copy the Request URL of the script you just created, then read the next section to configure a number to handle messages using that bin.
+
+### Assign a phone number
+
+The last step is connecting a number to the bin.
+If you don't have a phone number yet, make sure to
+[buy one](/docs/platform/phone-numbers).
+You will need at least one number to receive messages.
+
+Navigate to the "Phone Numbers" section of your Dashboard and open the settings for the number you want to configure.
+There, assign the cXML script you just created to handle messages.
+
+<Frame>
+  ![Open the settings for the number.](@image/dashboard/phone-numbers/assign-resource-full.webp)
+</Frame>
+
+### Send a test SMS
+
+Try sending a message to the configured phone number.
+If everything has gone according to plan, after a few seconds you'll receive an automated reply.
+
+### Next steps
+
+We have shown how to receive a text message and perform follow-up actions.
+
+This example used the [Compatibility API](/docs/compatibility-api),
+and in particular [cXML](/docs/compatibility-api/cxml) Scripts,
+to receive a message.
+For more advanced, real-time applications, you'll want to check out our
+[Realtime SDK](/docs/server-sdk/node).
+
+</Steps>
+
+<Info title="Ensure message delivery">
+
+If you are sending messages to the US from a 10DLC number,
+you _must_ register your traffic with the Campaign Registry.
+Otherwise, the carriers will not deliver your messages.
+Please see [**Campaign Registry - Everything You Need To Know**](/docs/platform/messaging/campaign-registry) for more information.
+
+</Info>
+
+---
+
+## In the Legacy Dashboard
+
+No Resources tab? Your SignalWire Space is on the Legacy Dashboard.
+Expand the section below to view this guide's Legacy instructions.
+
+<LegacyInstructionsPartial />
+
+<AccordionGroup>
+
+<Accordion title="cXML Scripts in the Legacy Dashboard" description="Follow these steps if your SignalWire Space is on the Legacy Dashboard">
+
+Follow the above guide, with the following changes:
+
+**Create a cXML Script**
+
+Navigate to the "LaML/cXML" section of your Dashboard and create a new cXML bin with the content above.
+
+<Frame>
+  ![Create a new cXML script.](@image/dashboard/legacy/xml-bins.webp)
+</Frame>
+
+**Assign a phone number**
+
+Open the settings for the number you want to configure.
+Under "Messaging Settings", choose to handle messages using "LaML Webhooks".
+In the dropdown, select the cXML script you just created.
+
+</Accordion>
+
+<UiAccordionPartial />
+
+</AccordionGroup>

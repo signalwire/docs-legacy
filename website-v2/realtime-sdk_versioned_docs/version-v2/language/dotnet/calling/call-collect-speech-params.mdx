@@ -1,0 +1,46 @@
+---
+title: "CallCollect.SpeechParams"
+slug: /dotnet/reference/calling/call-collect-speech-params
+toc_max_heading_level: 3
+---
+
+# SignalWire.Relay.Calling.CallCollect.SpeechParams
+
+This object represents the parameters specific to speech collecting.
+
+## Constructor
+
+The only constructor is the default constructor, properties should all be assigned by initializer or after construction.
+
+**Parameters**
+
+None
+
+**Examples**
+
+> Basic Example
+
+```csharp
+CallCollect collect = new CallCollect
+{
+    Speech = new CallCollect.SpeechParams
+    {
+        // No required parameters
+    }
+};
+```
+
+## Properties
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `SpeechTimeout` | double? | The max duration before terminating if long speech was detected.<br />_Default: 5 seconds_ |
+| `EndSilenceTimeout` | double? | The timeout before terminating prematurely if speech was detected and then stops.<br />_Default: 1 second_ |
+
+## Methods
+
+None
+
+## Events
+
+None

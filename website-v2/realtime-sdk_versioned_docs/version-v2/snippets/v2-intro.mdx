@@ -1,0 +1,33 @@
+<Warning>
+The [RELAY v4](/docs/server-sdk/node) is the most up-to-date version of the Realtime RELAY SDK.
+Consider upgrading to take advantage of the latest features and improvements.
+</Warning>
+
+## About RELAY Realtime SDK v2
+
+The SignalWire Realtime SDK v2 provides multi-language support for building real-time communication applications with persistent WebSocket connections.
+
+### Capabilities
+
+- **Voice (Calling)**: Make and receive calls, control call flow, play audio, record calls, detect answering machines, and implement complex IVR systems
+- **Messaging**: Send and receive SMS/MMS messages with delivery tracking and media support
+- **Tasking**: Queue and process background jobs with reliable delivery
+
+### SDK Components
+
+The SDK provides three components for connecting to RELAY:
+
+- **Consumer**: Long-running process for handling incoming events. Recommended for most use cases.
+- **Task**: Queue jobs for Consumers from short-lived processes (e.g., web requests). Useful when you can't maintain a persistent connection.
+- **Client**: Lower-level connection for outbound-only scripts or when you need custom control over the connection.
+
+### Contexts
+
+RELAY uses **Contexts** to route events to specific consumers. A context is a named string that categorizes requests, allowing you to:
+
+- Write consumers for specific types of calls or messages
+- Scale different workloads independently
+- Separate traffic based on business rules
+
+For example, configure a support phone number with the `support` context and a personal number with `personal` context. RELAY delivers events only to consumers listening for those contexts.
+

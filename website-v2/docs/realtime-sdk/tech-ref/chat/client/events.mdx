@@ -1,0 +1,125 @@
+---
+title: "Events"
+slug: /node/reference/chat/client/events
+description: Events available on the Client class.
+toc_max_heading_level: 3
+---
+
+[chatmember]: /docs/server-sdk/node/reference/chat/chat-member
+[chatmessage]: /docs/server-sdk/node/reference/chat/chat-message
+[getmessages]: /docs/server-sdk/node/reference/chat/client/get-messages
+
+## Events
+
+### onMemberJoined
+
+- **client.chat.listen**(`{ onMemberJoined: Callback }`)
+
+Emitted when a new member joins the chat. Your event handler will be called with an instance of [`ChatMember`][chatmember].
+
+#### Parameters
+
+<ParamField path="member" type="ChatMember" required>
+  The member that joined. See [`ChatMember`][chatmember].
+</ParamField>
+
+### onMemberLeft
+
+- **client.chat.listen**(`{ onMemberLeft: Callback }`)
+
+Emitted when a member leaves the chat. Your event handler will be called with an instance of [`ChatMember`][chatmember].
+
+#### Parameters
+
+<ParamField path="member" type="ChatMember" required>
+  The member that left. See [`ChatMember`][chatmember].
+</ParamField>
+
+### onMemberUpdated
+
+- **client.chat.listen**(`{ onMemberUpdated: Callback }`)
+
+Emitted when a member updates its state. Your event handler will be called with an instance of [`ChatMember`][chatmember].
+
+#### Parameters
+
+<ParamField path="member" type="ChatMember" required>
+  The member that was updated. See [`ChatMember`][chatmember].
+</ParamField>
+
+### onMessageReceived
+
+- **client.chat.listen**(`{ onMessageReceived: Callback}`)
+
+Emitted when a message is received. Your event handler will be called with an instance of [`ChatMessage`][chatmessage].
+
+#### Parameters
+
+<ParamField path="message" type="ChatMessage" required>
+  The message that was received. See [`ChatMessage`][chatmessage].
+</ParamField>
+
+## **Type Aliases**
+
+### ChatMemberEntity
+
+An object representing a Chat Member with only the state properties of [`ChatMember`][chatmember].
+
+#### Properties
+
+- `Readonly` **channel**: `string`
+
+The channel of this member.
+
+- `Readonly` **id**: `string`
+
+The id of this member.
+
+- `Readonly` **state**: `Record<any,any>`
+
+The state of this member.
+
+---
+
+### ChatMessageEntity
+
+An object representing a Chat Message with only the state properties of [`ChatMessage`][chatmessage].
+
+#### Properties
+
+- `Readonly` **content**: `any`
+
+The content of this message.
+
+- `Readonly` **id**: `string`
+
+The id. of this message
+
+- `Readonly` **member**: [`ChatMember`][chatmember]
+
+The member which sent this message.
+
+- `Readonly` **meta?**: `any`
+
+Any metadata associated with this message.
+
+- `Readonly` **publishedAt**: `Date`
+
+The date and time at which this message was published.
+
+---
+
+### PaginationCursor
+
+This is a utility object that aids in pagination.
+It is specifically used in conjunction with the [getMessages][getmessages] method.
+
+#### Properties
+
+- `Readonly` **after?**: `string`
+
+This property signifies the cursor for the subsequent page.
+
+- `Readonly` **before?**: `string`
+
+This property signifies the cursor for the preceding page.

@@ -1,0 +1,289 @@
+---
+title: Bring your own carrier
+slug: /platform/voice/sip/bring-your-own-carrier
+x-custom:
+  ported_from_readme: true
+  tags:
+    - product:voice
+    - product:freeswitch
+description: Bring Your Own Carrier (BYOC) allows SignalWire users to retain their own carriers for connectivity instead of the vendors that we partner with. This allows you to use any carrier you want while still utilizing the **powerful programmatic control** for SIP from SignalWire!
+---
+
+## Overview
+
+Bring Your Own Carrier (BYOC) allows SignalWire users to retain their own carriers for connectivity instead of the vendors that we partner with. This allows you to use any carrier you want while still utilizing the **powerful programmatic control** for SIP from SignalWire!
+
+This might be a good fit for you if:
+
+- You like your current carrier but want to use our APIs to enhance your call flow
+- You want international origination from a country we don't yet support
+- The number cannot be ported into SignalWire
+- You want to keep control of the number rather than port it to SignalWire
+- You want to SIP trunk to/from a SIP Server (such as Kamailio)
+
+## Inbound BYOC
+
+If you would like to do inbound BYOC (i.e. send your carrier traffic to SignalWire), you will need to create a domain application. Domain Apps allow you to send SIP traffic to a custom domain and use SignalWire APIs to manage the incoming request. You can do this under **SIP** -> **Domain Apps** -> **Create a Domain App**, or via the [Domain Apps API](/docs/apis/relay-rest/create-domain-application).
+
+For detailed instructions on how to create a domain application, please follow the [SIP Domain Applications](/docs/platform/voice/sip/domain-applications) guide.
+
+<Warning>
+
+It's VERY important to whitelist the IPs that you want to allow through - if you do not select this option, anyone who has the URL could send traffic to your custom domain app.
+
+</Warning>
+
+### Handling Inbound Calls
+
+#### Using SWML
+
+If you are using SWML to handle incoming calls, you will need to:
+
+1. Go to the settings page for the newly created Domain App, by clicking on the app name in the Domain Apps list.
+2. Set the **HANDLE USING** field to **SWML Script**
+3. Set the **WHEN A CALL COMES IN** field to the URL of your SWML script
+4. Ensure the SWML script is set up to provide instructions on what actions to perform when a call comes in.
+
+
+To address both of the steps above, we will need to [create an SWML script](/docs/swml).
+
+##### Example SWML Script
+
+The following is a simple example of an SWML script that answers the call and plays a TTS message:
+
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - play:
+        url: 'say: Hello, welcome to SignalWire!'
+```
+
+#### Using Call-Flow Builder
+
+If you are using a Call Flow to handle incoming calls, you will need to:
+
+1. Go to the settings page for the newly created Domain App, by clicking on the app name in the Domain Apps list.
+2. Set the **HANDLE USING** field to **A Call Flow**
+3. Set the **WHEN A CALL COMES IN** field to the Call Flow you want to use from the dropdown list.
+4. Ensure the Call Flow is set up to provide instructions on what actions to perform when a call comes in.
+
+
+##### Example Call Flow
+
+In the below example, we have a Call Flow that answers the call and plays a TTS message.
+
+<Frame caption="A Call Flow that answers the call and plays a TTS message">
+![A Call Flow that answers the call and plays a TTS message](@image/call-flow/nodes/handle_call.webp)
+</Frame>
+
+---
+
+#### Using RELAY
+
+To handle incoming calls using a RELAY Application, you will need to:
+
+1. Go to the settings page for the newly created Domain App, by clicking on the app name in the Domain Apps list.
+2. Set the **HANDLE USING** field to **RELAY Application**
+3. Set a topic (V4) or context (V3) in the **WHEN A CALL COMES IN** field. Let's use `office` as an example.
+4. Run code listening for calls on that `office` topic/context and then do something with them.
+
+<Tabs>
+<TabItem value="relay-v3" label="RELAY V3">
+
+  ##### RELAY V3 Example
+
+```javascript
+import { Voice } from "@signalwire/realtime-api";
+
+const client = new Voice.Client({
+  project: "<project-id>",
+  token: "<api-token>",
+  contexts: ["office"],
+});
+
+client.on("call.received", async (call) => {
+  console.log("Got call", call.from, call.to);
+
+  try {
+    await call.answer();
+    console.log("Inbound call answered");
+
+    await call.playTTS({ text: "Hello! This is a test call." });
+  } catch (error) {
+    console.error("Error answering inbound call", error);
+  }
+});
+```
+
+In this example we're creating a Client and tying it to the `office` context.
+Then, we tell it to listen for `call.received` events, and when a new call comes
+in we answer it and say "Hello! This is a test call." to the caller.
+
+</TabItem>
+<TabItem value="relay-v4" label="RELAY V4">
+
+  ##### RELAY V4 Example
+
+```javascript
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({
+  project: "your-project-id",
+  token: "your-api-token",
+  topics: ["office"],
+});
+
+const voiceClient = client.voice;
+
+await voiceClient.listen({
+  topics: ["office"],
+  onCallReceived: async (call) => {
+    console.log("Got call", call.from, call.to);
+
+    try {
+      await call.answer();
+      console.log("Inbound call answered");
+
+      await call.playTTS({ text: "Hello! This is a test call." });
+    } catch (error) {
+      console.error("Error answering inbound call", error);
+    }
+  },
+});
+```
+
+In this example we're creating a Client and tying it to the `office` topic.
+Then, we tell it to listen for `call.received` events, and when a new call comes
+in we answer it and say "Hello! This is a test call." to the caller.
+
+</TabItem>
+</Tabs>
+
+To learn more about what you can do with RELAY, have a look at our [RELAY Realtime SDK documentation](/docs/server-sdk/node).
+
+## Outbound BYOC
+
+If you are using BYOC to do outbound calls from SignalWire, you will need a SIP URL from your carrier that we can use to route calls to the right SIP trunk. Once you have that, you can [create a call using the Calling API](/docs/apis/calling/call-commands) or [Realtime SDK](/docs/server-sdk/node/reference/voice/client/dial) using the SIP URL, SIP username, and SIP password. Let's look at some examples so you can see what we're talking about!
+
+### Outbound Call Examples
+
+#### Using Calling API/SWML
+
+##### Calling API
+
+To create an outbound call using the Calling API with curl, you can use the [Create a Call endpoint](/docs/apis/calling/call-commands) with the following format:
+
+```bash
+curl -L 'https://<YOURSPACENAME>.signalwire.com/api/calling/calls' \
+-H 'Content-Type: application/json' \
+-H 'Accept: application/json' \
+-H 'Authorization: Basic Base64-token-here' \
+--data-raw '{
+  "command": "dial",
+  "params": {
+    "url": "https://example.com/swml",
+    "from": "sip:from-sip@example-112233445566.sip.signalwire.com",
+    "to": "sip:from-sip@example-112233445567.sip.signalwire.com",
+    "caller_id": "+1234567890",
+    "fallback_url": "https://example.com/fallback"
+  }
+}'
+```
+
+In the `params` you can specify a `url` that points to an SWML script, or you can pass a `swml` key with the SWML script directly.
+
+##### SWML
+
+To create an outbound call using SWML, you can use the following format:
+
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - connect:
+        to: "sip:user@domain.com"
+        headers:
+          - name: "x-FROM_NUMBER"
+            value: "%2B123456789"
+```
+
+#### Using Call-Flow Builder
+
+To create an outbound call using a Call Flow, you can use the `Forward to Phone` node to dial out to a SIP endpoint:
+
+<Frame caption="A Call Flow that forwards a call to a SIP endpoint">
+![A Call Flow that forwards a call to a SIP endpoint](@image/call-flow/nodes/forward-from-original-example.webp)
+</Frame>
+
+#### Using RELAY
+
+##### RELAY Realtime SDK
+
+[RELAY Realtime SDK](/docs/server-sdk/v3/node/reference/voice) is our most recent version of RELAY, and dialing out to a SIP endpoint is simpler than ever:
+
+<Tabs>
+<TabItem value="relay-v3" label="RELAY V3">
+
+```javascript
+import { Voice } from "@signalwire/realtime-api";
+
+const client = new Voice.Client({
+  project: "<project-id>",
+  token: "<api-token>",
+  contexts: ["office"],
+});
+
+try {
+  const call = await client.dialSip({
+    from: "sip:xxx@yyy.zz",
+    to: "sip:ppp@qqq.rr",
+    timeout: 30,
+  });
+
+  // TODO: Add code to do something with the call object here
+} catch (e) {
+  console.log("Call not answered.");
+}
+```
+
+</TabItem>
+<TabItem value="relay-v4" label="RELAY V4">
+
+```javascript
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({
+  project: "<project-id>",
+  token: "<api-token>",
+  topics: ["office"],
+});
+
+try {
+  const call = await voiceClient.dialSip({
+    from: "sip:xxx@yyy.zz",
+    to: "sip:ppp@qqq.rr",
+    timeout: 30,
+  });
+
+  // TODO: Add code to do something with the call object here
+} catch (e) {
+  console.log("Call not answered.");
+}
+```
+
+</TabItem>
+
+</Tabs>
+
+
+
+## How to Get Started
+
+If you are interested in BYOC and need additional assistance getting started, reach out to support@signalwire.com! One of our support technicians can make sure everything gets squared away so you can get up and running in no time.
+
+## Sign Up Here
+
+If you would like to test this example out, [create a SignalWire account and Space](https://m.signalwire.com/signups/new?s=1).
+
+Please feel free to reach out to us on our [Community Discord](https://discord.com/invite/F2WNYTNjuF) or create a Support ticket if you need guidance!

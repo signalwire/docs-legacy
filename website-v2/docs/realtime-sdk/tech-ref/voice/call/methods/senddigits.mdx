@@ -1,0 +1,55 @@
+---
+title: "sendDigits"
+slug: /node/reference/voice/call/send-digits
+description: sendDigits method for the Call class.
+toc_max_heading_level: 3
+---
+
+[call]: /docs/server-sdk/node/reference/voice/call
+
+### sendDigits
+
+- **sendDigits**(`digits`): `Promise`\<[`Call`][call]>
+
+Play DTMF digits to the other party on the call.
+
+#### Parameters
+
+<ParamField path="digits" type="string" required>
+  The DTMF digits to send to the other party on the call.
+</ParamField>
+
+#### Returns
+
+`Promise`\<[`Call`][call]>
+
+A promise that resolves to the current `Call` object.
+
+#### Example
+
+In this example, we dial a phone number and send DTMF tones to the other party on the call.
+After the tones are sent, we hangup the call.
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+const voiceClient = client.voice;
+
+// Listen for incoming calls
+await voiceClient.listen({
+  topics: ["office"],
+  onCallReceived: async (call) => {
+    console.log("Call received");
+    // Answer the call
+    call.answer();
+
+    // Send DTMF tones to the Inbound leg of the call
+    await call.sendDigits("123")
+    console.log("DTMF tones sent!");
+    call.hangup();
+
+  }
+});
+```

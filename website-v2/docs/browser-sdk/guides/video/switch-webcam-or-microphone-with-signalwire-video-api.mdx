@@ -1,0 +1,90 @@
+---
+title: Switch devices during calls
+slug: /js/guides/switch-devices
+x-custom:
+  ported_from_readme: true
+  tags:
+    - product:video
+    - language:javascript
+    - sdk:relaybrowser
+sidebar_custom_props:
+  platform: javascript
+toc_max_heading_level: 3
+---
+
+SignalWire Video API allows you to host real-time video calls and conferences on your website. In this guide, we'll learn to allow users to change the camera and microphone that's being used in the call.
+
+## Getting Started
+
+It is very easy to switch between input devices once you have the SDK up and running. However, if you haven't yet set up a video conference project using the Video SDK, you can check out the [Simple Video Demo](/docs/browser-sdk/js/guides/build-a-video-app) guide first.
+
+## Getting a list of supported input devices
+
+First, we want to find out what devices are available as input. Getting the list of media devices is handled by the `WebRTC` object available via `SignalWire.WebRTC` from the SDK. The methods in the `WebRTC` allow you to get the list of microphones, cameras, and speakers.
+
+### Listing webcams
+
+To get the list of connected devices that can be used via the browser, we use
+the `getCameraDevicesWithPermissions()` method in `WebRTC`. The method returns
+an array of
+[InputDeviceInfo](https://developer.mozilla.org/en-US/docs/Web/API/InputDeviceInfo)
+object, each of which have two attributes of interest to us here:
+`InputDeviceInfo.deviceId` and `InputDeviceInfo.label`. The `label` will be used
+to refer to the webcam via the UI, and looks like 'Facetime HD Camera' or 'USB
+camera'. The `deviceId` is used in your code to address a particular device.
+
+```javascript
+const cams = await SignalWire.WebRTC.getCameraDevicesWithPermissions();
+cams.forEach((cam) => {
+  console.log(cam.label, cam.deviceId);
+});
+```
+
+### Listing microphones
+
+Exactly as with `getCameraDevicesWithPermissions()`, we can use the `getMicrophoneDevicesWithPermissions()` to get a list of allowed microphones.
+
+```javascript
+const mics = await SignalWire.WebRTC.getMicrophoneDevicesWithPermissions();
+mics.forEach((mic) => {
+  console.log(mic.label, mic.deviceId);
+});
+```
+
+## Changing webcams and microphones
+
+Once you have set up the video call with `SignalWire.Video.joinRoom()` or
+equivalent methods, we can use `Room.updateCamera()` and
+`Room.updateMicrophone()` to change devices.
+
+As a simplified example:
+
+```javascript
+const roomSession = new SignalWire.Video.RoomSession({
+  token,
+  rootElement: document.getElementById("root"), // an html element to display the video
+  iceGatheringTimeout: 0.01,
+  requestTimeout: 0.01,
+});
+
+try {
+  await roomSession.join();
+} catch (error) {
+  console.error("Error", error);
+}
+
+const cams = await SignalWire.WebRTC.getCameraDevicesWithPermissions();
+const mics = await SignalWire.WebRTC.getMicrophoneDevicesWithPermissions();
+
+// Pick the first camera in the list as the new video input device
+roomSession.updateCamera({
+  deviceId: cams[0].deviceId,
+});
+
+// Pick the first microphone in the list as the new audio input device
+roomSession.updateMicrophone({
+  deviceId: mics[0].deviceId,
+});
+```
+
+_Note that you don't explicitly have to update camera and microphone. SignalWire Video SDK chooses the preferred input devices by default on setup. Only `updateCamera` or `updateMicrophone` when you want to switch to a non-default device._

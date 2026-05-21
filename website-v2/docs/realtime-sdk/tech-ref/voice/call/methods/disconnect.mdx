@@ -1,0 +1,57 @@
+---
+title: "disconnect"
+slug: /node/reference/voice/call/disconnect
+description: disconnect method for the Call class.
+toc_max_heading_level: 3
+---
+
+[connect]: /docs/server-sdk/node/reference/voice/call/connect
+
+### disconnect
+
+- **disconnect**(): `Promise<void>`
+
+Disconnects the [`connected`][connect] peer from the call.
+
+#### Returns
+
+`Promise<void>`
+
+#### Example
+
+In this example, we answer an incoming call and connect the call to a peer call.
+Once connected to the peer, we play a TTS message to the peer and then disconnect the peer.
+Once the peer is disconnected, we play a TTS message to the inbound call leg and then hangup the call.
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+const voiceClient = client.voice;
+
+await voiceClient.listen({
+  topics: ['office'],
+  onCallReceived: async (call) => {
+    // Answer the call
+    call.answer();
+    // Connect call to a new peer
+    let peer = await call.connectPhone({
+      from: call.from,
+      to: "Destination Number Here"
+    })
+    // Play TTS to the peer
+    await peer.playTTS({ text: 'Hello from SignalWire!' });
+    // Disconnect the peer call
+    call.disconnect();
+    await call.playTTS({ text: 'Disconnecting Peer!' });
+    console.log("The Peer and Call have been disconnected, but the calls are still active.")
+    // Hangup the peer call
+    await peer.playTTS({ text: 'Ending Peer Session' });
+    peer.hangup();
+    // Hangup the call
+    await call.playTTS({ text: 'Ending Call Session' });
+    call.hangup();
+  }
+})
+```

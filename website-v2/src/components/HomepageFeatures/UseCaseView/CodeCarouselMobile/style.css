@@ -1,0 +1,8 @@
+.slick-prev:before,
+.slick-next:before {
+  color: var(--ifm-tabs-color-active);
+}
+
+.slick-dots {
+  margin-bottom: 10px;
+}

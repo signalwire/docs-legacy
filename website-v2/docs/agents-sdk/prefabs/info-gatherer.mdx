@@ -1,0 +1,322 @@
+---
+title: "Info Gatherer"
+sidebar_label: "Info Gatherer"
+slug: /python/guides/info-gatherer
+toc_max_heading_level: 3
+---
+
+# Prefab Agents
+
+Prefabs are pre-built agent archetypes for common use cases. Use them directly or extend them to quickly build information gatherers, FAQ bots, surveys, receptionists, and concierges.
+
+## What Are Prefabs?
+
+Prefabs are ready-to-use agent classes that implement common conversational patterns:
+
+| Prefab | Description |
+|--------|-------------|
+| **InfoGatherer** | Collect answers to a series of questions |
+| **FAQBot** | Answer questions from a knowledge base |
+| **Survey** | Conduct automated surveys with validation |
+| **Receptionist** | Greet callers and transfer to departments |
+| **Concierge** | Provide information and booking assistance |
+
+## Why Use Prefabs?
+
+- **Faster Development:** Pre-built conversation flows
+- **Best Practices:** Proven patterns for common scenarios
+- **Extensible:** Inherit and customize as needed
+- **Production-Ready:** Includes validation, error handling, summaries
+
+## Quick Examples
+
+### InfoGatherer
+
+```python
+from signalwire_agents.prefabs import InfoGathererAgent
+
+agent = InfoGathererAgent(
+    questions=[
+        {"key_name": "name", "question_text": "What is your name?"},
+        {"key_name": "email", "question_text": "What is your email?", "confirm": True},
+        {"key_name": "reason", "question_text": "How can I help you?"}
+    ]
+)
+agent.run()
+```
+
+### FAQBot
+
+```python
+from signalwire_agents.prefabs import FAQBotAgent
+
+agent = FAQBotAgent(
+    faqs=[
+        {"question": "What are your hours?", "answer": "We're open 9 AM to 5 PM."},
+        {"question": "Where are you located?", "answer": "123 Main Street, Downtown."}
+    ]
+)
+agent.run()
+```
+
+### Survey
+
+```python
+from signalwire_agents.prefabs import SurveyAgent
+
+agent = SurveyAgent(
+    survey_name="Customer Satisfaction",
+    questions=[
+        {"id": "rating", "text": "Rate your experience?", "type": "rating", "scale": 5},
+        {"id": "feedback", "text": "Any comments?", "type": "open_ended", "required": False}
+    ]
+)
+agent.run()
+```
+
+### Receptionist
+
+```python
+from signalwire_agents.prefabs import ReceptionistAgent
+
+agent = ReceptionistAgent(
+    departments=[
+        {"name": "sales", "description": "Product inquiries", "number": "+15551234567"},
+        {"name": "support", "description": "Technical help", "number": "+15551234568"}
+    ]
+)
+agent.run()
+```
+
+### Concierge
+
+```python
+from signalwire_agents.prefabs import ConciergeAgent
+
+agent = ConciergeAgent(
+    venue_name="Grand Hotel",
+    services=["room service", "spa", "restaurant"],
+    amenities={
+        "pool": {"hours": "7 AM - 10 PM", "location": "2nd Floor"},
+        "gym": {"hours": "24 hours", "location": "3rd Floor"}
+    }
+)
+agent.run()
+```
+
+## Chapter Contents
+
+| Section | Description |
+|---------|-------------|
+| [InfoGatherer](/docs/agents-sdk/python/guides/info-gatherer) | Collect information through questions |
+| [FAQBot](/docs/agents-sdk/python/guides/faq-bot) | Answer frequently asked questions |
+| [Survey](/docs/agents-sdk/python/guides/survey) | Conduct automated surveys |
+| [Receptionist](/docs/agents-sdk/python/guides/receptionist) | Greet and transfer callers |
+| [Concierge](/docs/agents-sdk/python/guides/concierge) | Provide venue information and services |
+
+## Importing Prefabs
+
+```python
+# Import individual prefabs
+from signalwire_agents.prefabs import InfoGathererAgent
+from signalwire_agents.prefabs import FAQBotAgent
+from signalwire_agents.prefabs import SurveyAgent
+from signalwire_agents.prefabs import ReceptionistAgent
+from signalwire_agents.prefabs import ConciergeAgent
+
+# Or import all
+from signalwire_agents.prefabs import (
+    InfoGathererAgent,
+    FAQBotAgent,
+    SurveyAgent,
+    ReceptionistAgent,
+    ConciergeAgent
+)
+```
+
+## Extending Prefabs
+
+All prefabs inherit from `AgentBase`, so you can extend them:
+
+```python
+from signalwire_agents.prefabs import FAQBotAgent
+from signalwire_agents.core.function_result import SwaigFunctionResult
+
+class MyFAQBot(FAQBotAgent):
+    def __init__(self):
+        super().__init__(
+            faqs=[
+                {"question": "What is your return policy?", "answer": "30-day returns."}
+            ]
+        )
+
+        # Add custom prompt sections
+        self.prompt_add_section("Brand", "You represent Acme Corp.")
+
+        # Add custom functions
+        self.define_tool(
+            name="escalate",
+            description="Escalate to human agent",
+            parameters={"type": "object", "properties": {}},
+            handler=self.escalate
+        )
+
+    def escalate(self, args, raw_data):
+        return SwaigFunctionResult("Transferring to agent...").connect("+15551234567")
+```
+
+## Basic Usage
+
+```python
+from signalwire_agents.prefabs import InfoGathererAgent
+
+agent = InfoGathererAgent(
+    questions=[
+        {"key_name": "full_name", "question_text": "What is your full name?"},
+        {"key_name": "email", "question_text": "What is your email address?", "confirm": True},
+        {"key_name": "reason", "question_text": "How can I help you today?"}
+    ]
+)
+
+if __name__ == "__main__":
+    agent.run()
+```
+
+## Question Format
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `key_name` | string | Yes | Identifier for storing the answer |
+| `question_text` | string | Yes | The question to ask the user |
+| `confirm` | boolean | No | If true, confirm answer before next |
+
+## Constructor Parameters
+
+```python
+InfoGathererAgent(
+    questions=None,           # List of question dictionaries
+    name="info_gatherer",     # Agent name
+    route="/info_gatherer",   # HTTP route
+    **kwargs                  # Additional AgentBase arguments
+)
+```
+
+## Flow Diagram
+
+<Frame caption="InfoGatherer Flow">
+  <img className="diagram" src={require("@image/agents-sdk-manual/09_01_info-gatherer_diagram1.webp").default} alt="InfoGatherer Flow." />
+</Frame>
+
+## Built-in Functions
+
+InfoGatherer provides these SWAIG functions automatically:
+
+| Function | Description |
+|----------|-------------|
+| `start_questions` | Begin the question sequence |
+| `submit_answer` | Submit answer and get next question |
+
+## Dynamic Questions
+
+Instead of static questions, use a callback to determine questions at runtime:
+
+```python
+from signalwire_agents.prefabs import InfoGathererAgent
+
+
+def get_questions(query_params, body_params, headers):
+    """Dynamically determine questions based on request"""
+    question_set = query_params.get('type', 'default')
+
+    if question_set == 'support':
+        return [
+            {"key_name": "name", "question_text": "What is your name?"},
+            {"key_name": "issue", "question_text": "Describe your issue."},
+            {"key_name": "urgency", "question_text": "How urgent is this?"}
+        ]
+    else:
+        return [
+            {"key_name": "name", "question_text": "What is your name?"},
+            {"key_name": "message", "question_text": "How can I help?"}
+        ]
+
+
+# Create agent without static questions
+agent = InfoGathererAgent()
+
+# Set the callback for dynamic questions
+agent.set_question_callback(get_questions)
+
+if __name__ == "__main__":
+    agent.run()
+```
+
+## Accessing Collected Data
+
+The collected answers are stored in `global_data`:
+
+```python
+# In a SWAIG function or callback:
+global_data = raw_data.get("global_data", {})
+answers = global_data.get("answers", [])
+
+# answers is a list like:
+# [
+#     {"key_name": "full_name", "answer": "John Doe"},
+#     {"key_name": "email", "answer": "john@example.com"},
+#     {"key_name": "reason", "answer": "Product inquiry"}
+# ]
+```
+
+## Complete Example
+
+```python
+#!/usr/bin/env python3
+# appointment_scheduler.py - Info gatherer for scheduling appointments
+from signalwire_agents.prefabs import InfoGathererAgent
+
+
+agent = InfoGathererAgent(
+    questions=[
+        {"key_name": "name", "question_text": "What is your name?"},
+        {"key_name": "phone", "question_text": "What is your phone number?", "confirm": True},
+        {"key_name": "date", "question_text": "What date would you like to schedule?"},
+        {"key_name": "time", "question_text": "What time works best for you?"},
+        {"key_name": "notes", "question_text": "Any special notes or requests?"}
+    ],
+    name="appointment-scheduler"
+)
+
+# Add custom language
+agent.add_language("English", "en-US", "rime.spore")
+
+# Customize prompt
+agent.prompt_add_section(
+    "Brand",
+    "You are scheduling appointments for Dr. Smith's office."
+)
+
+if __name__ == "__main__":
+    agent.run()
+```
+
+## Best Practices
+
+### Questions
+- Keep questions clear and specific
+- Use confirm=true for critical data (email, phone)
+- Limit to 5-7 questions max per session
+- Order from simple to complex
+
+### key_name Values
+- Use descriptive, unique identifiers
+- snake_case convention recommended
+- Match your backend/database field names
+
+### Dynamic Questions
+- Use callbacks for multi-purpose agents
+- Validate questions in callback
+- Handle errors gracefully
+
+
+

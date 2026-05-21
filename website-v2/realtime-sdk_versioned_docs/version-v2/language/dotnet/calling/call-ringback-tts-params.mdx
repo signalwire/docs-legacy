@@ -1,0 +1,50 @@
+---
+title: "CallRingback.TtsParams"
+slug: /dotnet/reference/calling/call-ringback-tts-params
+toc_max_heading_level: 3
+---
+
+# SignalWire.Relay.Calling.CallRingback.TtsParams
+
+This object represents the parameters specific to tts ringback.
+
+## Constructor
+
+The only constructor is the default constructor, properties should all be assigned by initializer or after construction.
+
+**Parameters**
+
+None
+
+**Examples**
+
+> Basic Example
+
+```csharp
+CallRingback ringback = new CallRingback
+{
+    Type = CallRingback.RingbackType.tts,
+    Parameters = new CallRingback.TTSParams
+    {
+        Gender = "female",
+        Language = "en",
+        Text = "I'm a little teapot"
+    }
+};
+```
+
+## Properties
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `Gender` | string | The gender of the tts engine. |
+| `Language` | string | The language/dialect of the tts engine. |
+| `Text` | string | The verbiage to synthesize with tts engine. |
+
+## Methods
+
+None
+
+## Events
+
+None

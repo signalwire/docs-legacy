@@ -1,0 +1,82 @@
+---
+title: Compatibility API
+description: A drop-in replacement for Twilio's TwiML and REST APIs
+slug: /compatibility-api
+sidebar_position: 0
+---
+
+The SignalWire Compatibility API provides a seamless migration path from Twilio to SignalWire. If you've built applications using Twilio's TwiML, REST API, or helper libraries, you can transition to SignalWire with minimal code changes while gaining access to SignalWire's powerful infrastructure and competitive pricing.
+
+
+## Quick start migration
+
+Migrating from Twilio to SignalWire typically requires just three changes:
+
+<Steps>
+<Step title="Update your credentials">
+Replace your Twilio Account SID and Auth Token with your SignalWire Project ID and API Token from your [SignalWire Dashboard](https://signalwire.com/signin).
+</Step>
+
+<Step title="Change the API endpoint">
+If using the Twilio REST API or SDK, update the base URL from `api.twilio.com` to `your-space.signalwire.com`, where `your-space` is your SignalWire Space name. This is not required if using the SignalWire Compatibility SDK.
+</Step>
+
+<Step title="Update webhook URLs">
+Point your phone number webhooks to your SignalWire Space. Your existing TwiML/cXML response handlers work without modification.
+</Step>
+</Steps>
+
+
+
+## What's included
+
+The Compatibility API provides three main components:
+
+<CardGroup cols={3}>
+  <Card title="cXML" icon="code" href="/docs/compatibility-api/cxml">
+    SignalWire's XML-based language for controlling calls, messages, and faxes â€” directly compatible with Twilio's TwiML.
+  </Card>
+  <Card title="SDKs" icon="cube" href="/docs/compatibility-api/sdks">
+    Helper libraries for generating cXML and making REST API calls in your preferred language.
+  </Card>
+  <Card title="REST API" icon="server" href="/docs/compatibility-api/rest">
+    RESTful endpoints for managing calls, messages, phone numbers, recordings, and more.
+  </Card>
+</CardGroup>
+
+## Migrating from Twilio
+
+You can easily migrate from Twilio with minimal changes. Replace the Twilio client with the SignalWire client and update the `from` number to a valid SignalWire number.
+
+<Warning title="Make sure to change the 'From' number!">
+When migrating to SignalWire, make sure to replace the `from` numbers with a valid SignalWire number.
+</Warning>
+
+```javascript {2-3}
+// Replace these lines:
+const twilio = require('twilio')
+const response = new twilio.twiml.VoiceResponse()
+```
+
+```javascript {2-3}
+// With:
+const { RestClient } = require('@signalwire/compatibility-api')
+const response = new RestClient.LaML.VoiceResponse()
+```
+
+```javascript title="Node.js"
+// Now use response like you did before!
+response.say('Hey, welcome to SignalWire!')
+```
+
+## Supported features
+
+The Compatibility API supports the full range of Twilio-compatible features:
+
+| Category | Features |
+|----------|----------|
+| **Voice** | Inbound/outbound calls, call control, conferencing, queues, recordings, transcriptions |
+| **Messaging** | SMS, MMS, status callbacks |
+| **Fax** | Send and receive faxes |
+| **Phone Numbers** | Purchase, configure, and manage phone numbers |
+| **Applications** | Manage voice and messaging application configurations |

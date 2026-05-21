@@ -1,0 +1,50 @@
+---
+title: "Task"
+sidebar_label: Overview
+sidebar_position: 0
+keywords:
+  - SignalWire
+  - Realtime SDK
+  - Node.js
+  - task API
+  - background jobs
+slug: /node/reference/task
+description: Access the Task API for inter-application communication. Send and receive tasks between different applications using topics for routing.
+toc_max_heading_level: 3
+---
+
+[task-client-1]: /docs/server-sdk/node/reference/task/client
+[task-client]: /docs/server-sdk/node/reference/task/client/events
+
+Access the Task API. You can instantiate a [Task.Client][task-client-1] to receive tasks from a different application. 
+
+<Info>
+Refer to [Task Events][task-client] for the full list of events that a [Task.Client][task-client-1] can subscribe to.
+</Info>
+
+#### **Example**
+
+The following example listens for incoming tasks on the `office` topic and logs the payload to the console.
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here"})
+
+const taskClient = client.task
+
+await taskClient.listen({
+  topics: ['office'],
+  onTaskReceived: (payload) => {
+    console.log('Received task', payload)
+  }
+});
+```
+
+## **Classes**
+
+<CardGroup cols={2}>
+  <Card title="Client" icon="fa-solid fa-server" href="/docs/server-sdk/node/reference/task/client">
+    The main Task client for sending and receiving tasks between applications using topic-based routing.
+  </Card>
+</CardGroup>

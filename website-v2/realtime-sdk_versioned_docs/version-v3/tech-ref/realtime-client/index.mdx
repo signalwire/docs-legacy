@@ -1,0 +1,131 @@
+---
+title: "Realtime Client"
+slug: /node/reference/realtime-client
+description: DEPRECATED - Technical reference for the realtime client.
+toc_max_heading_level: 3
+availability: deprecated
+---
+
+[createclient]: /docs/server-sdk/v3/node#createclient
+[video-client]: /docs/server-sdk/v3/node/reference/video/client
+
+<Warning title="Deprecated">
+
+It's no longer needed to create the client manually. You can use the product constructors, like [Video.Client][video-client], to access the same functionality.
+
+</Warning>
+
+A real-time Client.
+To construct an instance of this class, please use [createClient][createclient].
+
+Example usage:
+
+```typescript
+import { createClient } from "@signalwire/realtime-api";
+
+// Obtain a client:
+const client = await createClient({ project, token });
+
+// Listen on events:
+client.video.on("room.started", async (room) => {});
+
+// Connect:
+await client.connect();
+```
+
+## Properties
+
+## Methods
+
+### ~~connect~~
+
+- **connect**(): `Promise<RealtimeClient>`
+
+Connects this client to the SignalWire network.
+
+As a general best practice, it is suggested to connect the event listeners _before_ connecting the client, so that no events are lost.
+
+#### Returns
+
+`Promise<RealtimeClient>`
+
+Upon connection, asynchronously returns an instance of this same object.
+
+#### Example
+
+```typescript
+const client = await createClient({ project, token });
+client.video.on("room.started", async (roomSession) => {}); // connect events
+await client.connect();
+```
+
+---
+
+### ~~disconnect~~
+
+- **disconnect**(): `void`
+
+Disconnects this client from the SignalWire network.
+
+#### Returns
+
+`void`
+
+---
+
+### ~~off~~
+
+- **off**(`event`, `fn?`)
+
+Remove an event handler.
+
+#### Parameters
+
+| Name    | Type     | Description                                                          |
+| :------ | :------- | :------------------------------------------------------------------- |
+| `event` | `string` | Name of the event.                                                   |
+| `fn?`   | Function | An event handler which had been previously attached.                 |
+
+---
+
+### ~~on~~
+
+- **on**(`event`, `fn`)
+
+Attaches an event handler to the specified event.
+
+#### Parameters
+
+| Name    | Type     | Description                                                          |
+| :------ | :------- | :------------------------------------------------------------------- |
+| `event` | `string` | Name of the event.                                                   |
+| `fn`    | Function | An event handler.                                                    |
+
+---
+
+### ~~once~~
+
+- **once**(`event`, `fn`)
+
+Attaches an event handler to the specified event. The handler will fire only once.
+
+#### Parameters
+
+| Name    | Type     | Description                                                          |
+| :------ | :------- | :------------------------------------------------------------------- |
+| `event` | `string` | Name of the event.                                                   |
+| `fn`    | Function | An event handler.                                                    |
+
+---
+
+### ~~removeAllListeners~~
+
+- **removeAllListeners**(`event?`)
+
+Detaches all event listeners for the specified event.
+
+#### Parameters
+
+| Name     | Type     | Description                                                                                    |
+| :------- | :------- | :--------------------------------------------------------------------------------------------- |
+| `event?` | `string` | Name of the event (leave this undefined to detach listeners for all events).                   |

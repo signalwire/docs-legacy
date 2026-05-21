@@ -1,0 +1,23 @@
+---
+title: TapResult
+slug: /ruby/reference/calling/results/tap
+description: The TapResult object is returned when a tap operation is completed.
+toc_max_heading_level: 3
+---
+
+[relay-event]: /docs/server-sdk/v2/ruby/reference/event
+[tap_media]: /docs/server-sdk/v2/ruby/reference/calling/actions/tap
+
+# Relay::Calling::TapResult
+
+This object is returned by [`tap_media`][tap_media] method and represents the final result of a tap attempt.
+
+## Properties
+
+| Property | Type | Description |
+| :------- | :--- | :---------- |
+| `successful` | Boolean | Whether the call has been connected successfully. |
+| `event` | [Relay::Event][relay-event] | Last event that completed the operation. |
+| `tap_media` | Hash | Object with payload for this `tap_media` action. |
+| `sourceDevice` | Hash | Source device sending media. |
+| `destinationDevice` | Hash | Destination device receiving media. |

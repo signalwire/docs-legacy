@@ -1,0 +1,130 @@
+---
+slug: /compatibility-api/sdks/reference/available-phone-numbers/find-toll-free
+title: Toll-Free
+sidebar_label: Toll-Free
+toc_max_heading_level: 3
+---
+
+Use this endpoint for the AvailablePhoneNumbers method to find available toll-free numbers in the United States.
+
+<EndpointSchemaSnippet endpoint="GET /Accounts/{AccountSid}/AvailablePhoneNumbers/{IsoCountry}/TollFree" />
+
+<EndpointResponseSnippet endpoint="GET /Accounts/{AccountSid}/AvailablePhoneNumbers/{IsoCountry}/TollFree" />
+
+## Request examples
+
+### List toll-free numbers
+
+<CodeBlocks>
+```javascript title="Node.js"
+const { RestClient } = require('@signalwire/compatibility-api')
+const client = RestClient('YourProjectID', 'YourAuthToken', { signalwireSpaceUrl: 'example.signalwire.com' })
+
+client
+  .availablePhoneNumbers('US')
+  .tollFree.list()
+  .then(availablePhoneNumbers => {
+    console.log(availablePhoneNumbers);
+  });
+```
+```csharp
+using System;
+using System.Collections.Generic;
+using Twilio;
+using Twilio.Rest.Api.V2010.Account;
+using Twilio.Rest.Api.V2010.Account.AvailablePhoneNumberCountry;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        TwilioClient.Init("YourProjectID", "YourAuthToken", new Dictionary<string, object> { ["signalwireSpaceUrl"] = "{SPACE}.signalwire.com" });
+
+        var tollFreeAvailableNumbers = TollFreeResource.Read("US");
+
+        Console.WriteLine(tollFreeAvailableNumbers);
+    }
+}
+```
+```python
+from signalwire.rest import Client as signalwire_client
+
+client = signalwire_client("YourProjectID", "YourAuthToken", signalwire_space_url = 'example.signalwire.com')
+
+numbers = client.available_phone_numbers("US") \
+                .toll_free \
+                .list()
+
+print(numbers)
+```
+```ruby
+require 'signalwire/sdk'
+
+@client = Signalwire::REST::Client.new 'YourProjectID', 'YourAuthToken', signalwire_space_url: "example.signalwire.com"
+
+@numbers = @client.api.available_phone_numbers('US').toll_free
+                  .list()
+
+puts @numbers
+```
+</CodeBlocks>
+
+### Find a toll-free number by string
+
+Find all toll-free numbers that contain `WIN`, or `946`. Some examples of this include: **800-338-3946** or **888-946-3456**.
+
+<CodeBlocks>
+```javascript title="Node.js"
+const { RestClient } = require('@signalwire/compatibility-api')
+const client = RestClient('YourProjectID', 'YourAuthToken', { signalwireSpaceUrl: 'example.signalwire.com' })
+
+client
+  .availablePhoneNumbers('US')
+  .tollFree.list({
+    contains: 'WIN',
+  })
+  .then(availablePhoneNumbers => {
+    console.log(availablePhoneNumbers);
+  });
+```
+```csharp
+using System;
+using System.Collections.Generic;
+using Twilio;
+using Twilio.Rest.Api.V2010.Account;
+using Twilio.Rest.Api.V2010.Account.AvailablePhoneNumberCountry;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        TwilioClient.Init("YourProjectID", "YourAuthToken", new Dictionary<string, object> { ["signalwireSpaceUrl"] = "{SPACE}.signalwire.com" });
+
+        var tollFreeAvailableNumbers = TollFreeResource.Read("US", contains: "WIN");
+
+        Console.WriteLine(tollFreeAvailableNumbers);
+    }
+}
+```
+```python
+from signalwire.rest import Client as signalwire_client
+
+client = signalwire_client("YourProjectID", "YourAuthToken", signalwire_space_url = 'example.signalwire.com')
+
+numbers = client.available_phone_numbers("US") \
+                .toll_free \
+                .list(contains="WIN")
+
+print(numbers)
+```
+```ruby
+require 'signalwire/sdk'
+
+@client = Signalwire::REST::Client.new 'YourProjectID', 'YourAuthToken', signalwire_space_url: "example.signalwire.com"
+
+@numbers = @client.api.available_phone_numbers('US').toll_free
+                  .list(contains: 'WIN')
+
+puts @numbers
+```
+</CodeBlocks>

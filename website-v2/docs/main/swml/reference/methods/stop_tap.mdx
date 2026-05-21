@@ -1,0 +1,89 @@
+---
+title: stop_tap
+slug: /swml/reference/stop-tap
+description: Stop an active tap stream.
+toc_max_heading_level: 3
+---
+
+Stop an active tap stream.
+
+<ParamField path="stop_tap" type="object" required={true}>
+  An object that accepts the following properties.
+</ParamField>
+
+
+## **Properties**
+
+<ParamField path="stop_tap.control_id" type="string" default="The last tap started will be stopped">
+  ID of the tap to stop
+</ParamField>
+
+
+## **Variables**
+
+Read by the method:
+
+- **tap_control_id:** (in) Control ID of last tap stream started.
+
+Set by the method:
+
+- **stop_tap_result:** (out) Success or failed.
+
+## **Examples**
+
+### Stop the last call tap
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - stop_tap: {}
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "stop_tap": {}
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+### Stop a specific call tap
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - stop_tap:
+        control_id: my-tap-id
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "stop_tap": {
+          "control_id": "my-tap-id"
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>

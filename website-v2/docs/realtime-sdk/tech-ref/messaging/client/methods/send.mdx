@@ -1,0 +1,79 @@
+---
+title: "send"
+slug: /node/reference/messaging/client/send
+description: send method for the Client class.
+toc_max_heading_level: 3
+---
+
+[messagingsendresult]: /docs/server-sdk/node/reference/messaging/messaging-send-result
+
+### send
+
+- **send**(`params`): `Promise<MessagingSendResult>`
+
+Send an outbound SMS or MMS message.
+
+#### Parameters
+
+<ParamField path="params" type="object" required>
+  Object containing the parameters of the method.
+</ParamField>
+
+<Indent>
+<ParamField path="from" type="string" required>
+  The phone number to place the message from. Must be a SignalWire phone number or short code that you own.
+</ParamField>
+
+<ParamField path="to" type="string" required>
+  The phone number to send to.
+</ParamField>
+
+<ParamField path="body" type="string">
+  The content of the message. Required if `media` is not present.
+</ParamField>
+
+<ParamField path="media" type="string[]">
+  Array of URLs to send in the message. Required if `body` is not present.
+</ParamField>
+
+<ParamField path="topic" type="string">
+  Inbound events for the message will be received on this topic. Previously known as `"context"`.
+</ParamField>
+
+<ParamField path="region" type="string">
+  Region of the world to originate the message from. A default value is picked based on account preferences or device location.
+</ParamField>
+
+<ParamField path="tags" type="string[]">
+  Array of strings to tag the message with for searching in the UI.
+</ParamField>
+</Indent>
+
+#### Returns
+
+`Promise<MessagingSendResult>`
+
+A promise that resolves to a [`MessagingSendResult`][messagingsendresult] object that you can use to view the result of the sent message.
+
+#### Example
+
+In this example, we send an outbound message to a phone number with the content "Hello World!".
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here"})
+
+let messageClient = client.messaging;
+
+try {
+  const sendResult = await messageClient.send({
+    from: "+1xxx",
+    to: "+1yyy",
+    body: "Hello World!"
+  });
+  console.log("Message ID: ", sendResult.messageId);
+} catch (e) {
+  console.error(e.message);
+}
+```

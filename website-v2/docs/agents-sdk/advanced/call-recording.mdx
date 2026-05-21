@@ -1,0 +1,487 @@
+---
+title: "Call Recording"
+sidebar_label: "Call Recording"
+slug: /python/guides/call-recording
+toc_max_heading_level: 3
+---
+
+## Call Recording
+
+Record calls using `record_call()` and `stop_record_call()` methods on SwaigFunctionResult. Supports stereo/mono, multiple formats, and webhook notifications.
+
+Call recording is essential for many business applications: quality assurance, compliance, training, dispute resolution, and analytics. The SDK provides flexible recording options that let you capture exactly what you need while respecting privacy and compliance requirements.
+
+Recording happens server-side on SignalWire's infrastructure, so there's no additional load on your application server. Recordings are stored securely and can be retrieved via webhooks or the SignalWire API.
+
+### When to Record
+
+Common recording use cases:
+
+- **Quality assurance**: Review agent performance and customer interactions
+- **Compliance**: Meet regulatory requirements for financial services, healthcare, etc.
+- **Training**: Build libraries of good (and problematic) call examples
+- **Dispute resolution**: Have an authoritative record of what was said
+- **Analytics**: Feed recordings into speech analytics platforms
+- **Transcription**: Generate text transcripts for search and analysis
+
+### Recording Overview
+
+**`record_call()`**
+- Starts background recording
+- Continues while conversation proceeds
+- Supports stereo (separate channels) or mono
+- Output formats: WAV, MP3, or MP4
+- Direction: speak only, listen only, or both
+
+**`stop_record_call()`**
+- Stops an active recording
+- Uses control_id to target specific recording
+- Recording is automatically stopped on call end
+
+### Basic Recording
+
+```python
+from signalwire_agents import AgentBase
+from signalwire_agents.core.function_result import SwaigFunctionResult
+
+
+class RecordingAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="recording-agent")
+        self.add_language("English", "en-US", "rime.spore")
+
+        self.prompt_add_section(
+            "Role",
+            "You are a customer service agent. "
+            "Start recording when the customer agrees."
+        )
+
+        self.define_tool(
+            name="start_recording",
+            description="Start recording the call with customer consent",
+            parameters={"type": "object", "properties": {}},
+            handler=self.start_recording
+        )
+
+    def start_recording(self, args, raw_data):
+        return (
+            SwaigFunctionResult("Recording has started.")
+            .record_call(
+                control_id="main_recording",
+                stereo=True,
+                format="wav"
+            )
+        )
+
+
+if __name__ == "__main__":
+    agent = RecordingAgent()
+    agent.run()
+```
+
+### Recording Parameters
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `control_id` | str | None | Identifier to stop specific recording |
+| `stereo` | bool | False | True for separate L/R channels |
+| `format` | str | `"wav"` | Output format: "wav", "mp3", or "mp4" |
+| `direction` | str | `"both"` | "speak", "listen", or "both" |
+| `terminators` | str | None | DTMF digits that stop recording |
+| `beep` | bool | False | Play beep before recording |
+| `input_sensitivity` | float | `44.0` | Audio sensitivity threshold |
+| `initial_timeout` | float | `0.0` | Seconds to wait for speech |
+| `end_silence_timeout` | float | `0.0` | Silence duration to auto-stop |
+| `max_length` | float | None | Maximum recording seconds |
+| `status_url` | str | None | Webhook for recording events |
+
+### Stereo vs Mono Recording
+
+The `stereo` parameter determines how audio channels are recorded. This choice significantly affects how you can use the recording afterward.
+
+#### Stereo Recording (stereo=True)
+
+Records caller and agent on separate channels (left and right):
+
+```python
+def start_stereo_recording(self, args, raw_data):
+    return (
+        SwaigFunctionResult("Recording in stereo mode")
+        .record_call(
+            control_id="stereo_rec",
+            stereo=True,  # Caller on left, agent on right
+            format="wav"
+        )
+    )
+```
+
+**When to use stereo:**
+
+- **Speech-to-text transcription**: Most transcription services work better with separated audio, correctly attributing speech to each party
+- **Speaker diarization**: Analysis tools can easily identify who said what
+- **Quality review**: Isolate agent or caller audio for focused review
+- **Training data**: Clean separation for building speech models
+- **Noise analysis**: Identify which side has audio quality issues
+
+**Stereo considerations:**
+
+- Larger file sizes (roughly 2x mono)
+- Requires stereo-capable playback for proper review
+- Some basic media players may only play one channel by default
+
+#### Mono Recording (stereo=False)
+
+Records both parties mixed into a single channel:
+
+```python
+def start_mono_recording(self, args, raw_data):
+    return (
+        SwaigFunctionResult("Recording in mono mode")
+        .record_call(
+            control_id="mono_rec",
+            stereo=False,  # Mixed audio (default)
+            format="mp3"
+        )
+    )
+```
+
+**When to use mono:**
+
+- **Simple archival**: Just need a record of what was said
+- **Storage-constrained environments**: Smaller file sizes
+- **Human playback**: Easier to listen to on any device
+- **Basic compliance**: Where separate channels aren't required
+
+### Direction Options
+
+```python
+## Record only what the AI/agent speaks
+def record_agent_only(self, args, raw_data):
+    return (
+        SwaigFunctionResult("Recording agent audio")
+        .record_call(direction="speak")
+    )
+
+## Record only what the caller says
+def record_caller_only(self, args, raw_data):
+    return (
+        SwaigFunctionResult("Recording caller audio")
+        .record_call(direction="listen")
+    )
+
+## Record both sides (default)
+def record_both(self, args, raw_data):
+    return (
+        SwaigFunctionResult("Recording full conversation")
+        .record_call(direction="both")
+    )
+```
+
+### Recording with Webhook
+
+Receive notifications when recording completes:
+
+```python
+def start_recording_with_callback(self, args, raw_data):
+    return (
+        SwaigFunctionResult("Recording started")
+        .record_call(
+            control_id="webhook_rec",
+            status_url="https://example.com/recording-complete"
+        )
+    )
+```
+
+The webhook receives recording metadata including the URL to download the file.
+
+### Auto-Stop Recording
+
+Configure automatic stop conditions:
+
+```python
+def start_auto_stop_recording(self, args, raw_data):
+    return (
+        SwaigFunctionResult("Recording with auto-stop")
+        .record_call(
+            max_length=300.0,        # Stop after 5 minutes
+            end_silence_timeout=5.0, # Stop after 5 seconds of silence
+            terminators="#"          # Stop if user presses #
+        )
+    )
+```
+
+### Stop Recording
+
+Stop a recording by control_id:
+
+```python
+from signalwire_agents import AgentBase
+from signalwire_agents.core.function_result import SwaigFunctionResult
+
+
+class ControlledRecordingAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="controlled-recording-agent")
+        self.add_language("English", "en-US", "rime.spore")
+
+        self.prompt_add_section(
+            "Role",
+            "You handle call recordings. You can start and stop recording."
+        )
+
+        self._register_functions()
+
+    def _register_functions(self):
+        self.define_tool(
+            name="start_recording",
+            description="Start recording the call",
+            parameters={"type": "object", "properties": {}},
+            handler=self.start_recording
+        )
+
+        self.define_tool(
+            name="stop_recording",
+            description="Stop recording the call",
+            parameters={"type": "object", "properties": {}},
+            handler=self.stop_recording
+        )
+
+    def start_recording(self, args, raw_data):
+        return (
+            SwaigFunctionResult("Recording has started")
+            .record_call(control_id="main")
+        )
+
+    def stop_recording(self, args, raw_data):
+        return (
+            SwaigFunctionResult("Recording has stopped")
+            .stop_record_call(control_id="main")
+        )
+
+
+if __name__ == "__main__":
+    agent = ControlledRecordingAgent()
+    agent.run()
+```
+
+### Recording with Beep
+
+Alert the caller that recording is starting:
+
+```python
+def start_recording_with_beep(self, args, raw_data):
+    return (
+        SwaigFunctionResult("This call will be recorded")
+        .record_call(
+            beep=True,  # Plays a beep before recording starts
+            format="mp3"
+        )
+    )
+```
+
+### Complete Example
+
+```python
+#!/usr/bin/env python3
+## compliance_agent.py - Agent with recording compliance features
+from signalwire_agents import AgentBase
+from signalwire_agents.core.function_result import SwaigFunctionResult
+
+
+class ComplianceAgent(AgentBase):
+    """Agent with full recording compliance features"""
+
+    def __init__(self):
+        super().__init__(name="compliance-agent")
+        self.add_language("English", "en-US", "rime.spore")
+
+        self.prompt_add_section(
+            "Role",
+            "You are a customer service agent. Before recording, you must "
+            "inform the customer and get their verbal consent."
+        )
+
+        self.prompt_add_section(
+            "Recording Policy",
+            """
+            1. Always inform customer: "This call may be recorded for quality purposes."
+            2. Ask for consent: "Do you agree to the recording?"
+            3. Only start recording after explicit "yes" or agreement.
+            4. If customer declines, proceed without recording.
+            """
+        )
+
+        self._register_functions()
+
+    def _register_functions(self):
+        self.define_tool(
+            name="start_compliant_recording",
+            description="Start recording after customer consent is obtained",
+            parameters={"type": "object", "properties": {}},
+            handler=self.start_compliant_recording
+        )
+
+        self.define_tool(
+            name="pause_recording",
+            description="Pause recording for sensitive information",
+            parameters={"type": "object", "properties": {}},
+            handler=self.pause_recording
+        )
+
+        self.define_tool(
+            name="resume_recording",
+            description="Resume recording after sensitive section",
+            parameters={"type": "object", "properties": {}},
+            handler=self.resume_recording
+        )
+
+    def start_compliant_recording(self, args, raw_data):
+        call_id = raw_data.get("call_id", "unknown")
+
+        return (
+            SwaigFunctionResult("Recording has begun. Thank you for your consent.")
+            .record_call(
+                control_id=f"compliance_{call_id}",
+                stereo=True,
+                format="wav",
+                beep=True,
+                status_url="https://example.com/recordings/status"
+            )
+            .update_global_data({"recording_active": True})
+        )
+
+    def pause_recording(self, args, raw_data):
+        call_id = raw_data.get("call_id", "unknown")
+
+        return (
+            SwaigFunctionResult(
+                "Recording paused. You may now provide sensitive information."
+            )
+            .stop_record_call(control_id=f"compliance_{call_id}")
+            .update_global_data({"recording_active": False})
+        )
+
+    def resume_recording(self, args, raw_data):
+        call_id = raw_data.get("call_id", "unknown")
+
+        return (
+            SwaigFunctionResult("Recording resumed.")
+            .record_call(
+                control_id=f"compliance_{call_id}",
+                stereo=True,
+                format="wav"
+            )
+            .update_global_data({"recording_active": True})
+        )
+
+
+if __name__ == "__main__":
+    agent = ComplianceAgent()
+    agent.run()
+```
+
+### Format Comparison
+
+The `format` parameter determines the output file type. Each format has tradeoffs:
+
+| Format | Best For | File Size | Quality | Notes |
+|--------|----------|-----------|---------|-------|
+| `wav` | Transcription, archival | Large | Lossless | Uncompressed, no quality loss |
+| `mp3` | General storage | Small | Lossy | Good compression, widely supported |
+| `mp4` | Video calls | Medium | Lossy | Required for video recording |
+
+**Choosing a format:**
+
+- **wav**: Use when quality matters more than storage. Best for speech analytics, transcription services, and long-term archival where you might need to reprocess later. Files can be 10x larger than MP3.
+
+- **mp3**: Use for general-purpose recording where storage costs matter. Quality is sufficient for human review and most transcription services. Good balance of size and quality.
+
+- **mp4**: Required if you're recording video calls. Contains both audio and video tracks.
+
+### Storage and Retention Considerations
+
+Recordings consume storage and may have regulatory requirements. Plan your retention strategy:
+
+**Storage costs**: A 10-minute mono MP3 recording is roughly 2-3 MB. At scale, this adds up. A business handling 1,000 calls/day generates 60-90 GB/month of recordings.
+
+**Retention policies**:
+- **Financial services**: Often required to retain for 5-7 years
+- **Healthcare (HIPAA)**: Typically 6 years
+- **General business**: 1-2 years is common
+- **Training/QA**: Keep only what's valuable
+
+**Automated cleanup**: Build processes to delete old recordings according to your policy. Don't assume someone will do it manually.
+
+**Access controls**: Recordings may contain sensitive information. Restrict access to those who need it for legitimate business purposes.
+
+### Compliance and Legal Considerations
+
+Recording laws vary by jurisdiction. Understanding your obligations is critical.
+
+#### Consent Requirements
+
+**One-party consent** (e.g., most US states): Only one party needs to know about the recording. The agent itself can be that party, but best practice is still to inform callers.
+
+**Two-party/all-party consent** (e.g., California, many European countries): All parties must consent before recording. You must:
+1. Inform the caller that recording may occur
+2. Obtain explicit consent before starting
+3. Provide an option to decline
+4. Proceed without recording if declined
+
+**Best practice**: Regardless of jurisdiction, always inform callers. It builds trust and protects you legally.
+
+#### Compliance Implementation
+
+```python
+self.prompt_add_section(
+    "Recording Disclosure",
+    """
+    At the start of every call:
+    1. Say: "This call may be recorded for quality and training purposes."
+    2. Ask: "Do you consent to recording?"
+    3. If yes: Call start_recording function
+    4. If no: Say "No problem, I'll proceed without recording" and continue
+    5. NEVER start recording without explicit consent
+    """
+)
+```
+
+#### Sensitive Information
+
+Some information should never be recorded, or recordings should be paused:
+- Credit card numbers (PCI compliance)
+- Social Security numbers
+- Medical information in non-healthcare contexts
+- Passwords or PINs
+
+Use the pause/resume pattern shown in the complete example to handle these situations.
+
+### Recording Best Practices
+
+#### Compliance
+- Always inform callers before recording
+- Obtain consent where legally required
+- Provide option to decline recording
+- Document consent in call logs
+- Pause recording for sensitive information (credit cards, SSN)
+- Know your jurisdiction's consent requirements
+
+#### Technical
+- Use control_id for multiple recordings or pause/resume
+- Use stereo=True for transcription accuracy
+- Use status_url to track recording completion
+- Set max_length to prevent oversized files
+- Handle webhook failures gracefully
+
+#### Storage
+- Use WAV for quality, MP3 for size, MP4 for video
+- Implement retention policies aligned with regulations
+- Secure storage with encryption at rest
+- Restrict access to recordings
+- Build automated cleanup processes
+
+#### Quality
+- Test recording quality in your deployment environment
+- Verify both channels are capturing clearly in stereo mode
+- Monitor for failed recordings via status webhooks
+

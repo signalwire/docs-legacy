@@ -1,0 +1,41 @@
+---
+title: "getRecordings"
+slug: /js/reference/video/room-session/get-recordings
+description: getRecordings method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+### getRecordings
+
+- **getRecordings**(): `Promise<{ recordings: RoomSessionRecording}>` - See [RoomSessionRecording documentation](/docs/browser-sdk/js/reference/video/room-session-recording) for more details.
+
+Obtains a list of recordings for the current room session. To download the actual mp4 file, please use the [REST API](/docs/apis).
+
+#### Returns
+
+`Promise<{ recordings: RoomSessionRecording}>` - See [RoomSessionRecording documentation](/docs/browser-sdk/js/reference/video/room-session-recording) for more details.
+
+#### Permissions
+
+- `room.recording`
+
+You need to specify the permissions when [creating the Video Room Token](/docs/apis/video/create-room-token) on the server side.
+
+#### Example
+
+```javascript
+const recs = await roomSession.getRecordings();
+if (recs.recordings.length > 0) {
+  console.log(recs.recordings[0].id, recs.recordings[0].duration);
+}
+```
+
+From your server, you can obtain the mp4 file using the [REST API](/docs/apis):
+
+```bash
+curl --request GET \
+     --url https://<yourspace>.signalwire.com/api/video/room_recordings/<recording_id> \
+     --header 'Accept: application/json' \
+     --header 'Authorization: Basic <your API token>'
+```
+

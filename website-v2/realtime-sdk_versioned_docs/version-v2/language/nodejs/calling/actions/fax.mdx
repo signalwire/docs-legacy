@@ -1,0 +1,52 @@
+---
+title: Relay.Calling.FaxAction
+slug: /node/reference/calling/actions/fax
+description: The Fax Action is used to send or receive faxes.
+toc_max_heading_level: 3
+---
+
+[faxreceiveasync]: /docs/server-sdk/v2/node/reference/calling/call#faxreceiveasync
+[faxsendasync]: /docs/server-sdk/v2/node/reference/calling/call#faxsendasync
+[relay-calling-faxresult]: /docs/server-sdk/v2/node/reference/calling/results/fax
+[relay-calling-stopresult]: /docs/server-sdk/v2/node/reference/calling/results/stop
+This object returned from [`faxReceiveAsync`][faxreceiveasync] and [`faxSendAsync`][faxsendasync] methods represents a receiving or sending Fax on the call.
+
+## Properties
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `result` | [`Relay.Calling.FaxResult`][relay-calling-faxresult] | Final result for the fax action |
+| `completed` | `boolean` | Whether the action has finished |
+| `payload` | `object` | Payload sent to Relay to start faxing |
+| `controlId` | `string` | UUID to identify the fax action |
+
+## Methods
+
+### stop
+
+Stop the action immediately.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`Promise<StopResult>` - Promise object that will be fulfilled with a [`Relay.Calling.StopResult`][relay-calling-stopresult] object.
+
+**Examples**
+
+> Start sending fax and stop it after 5 seconds.
+
+```javascript
+async function main() {
+  const faxAction = await call.faxSendAsync('https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf')
+
+  // For demonstration purposes only..
+  setTimeout(async () => {
+    const stopResult = await faxAction.stop()
+  }, 5000)
+}
+
+main().catch(console.error)
+```

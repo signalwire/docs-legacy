@@ -1,0 +1,41 @@
+---
+title: "Notifications"
+sidebar_position: 2
+---
+
+# Notifications
+
+If you've initialized the SignalWire Client with a subscriber token, you can opt into receiving notifications 
+whenever that subscriber address is called using WebSockets.
+
+The WebSocket notifications are delivered over the WebSocket connection while your application is active, and you have
+called the [`online()`](/sdks/signalwire-client-sdk/signalwire-client/online) method to opt into receiving them.
+
+## WebSocket Notifications
+
+To receive incoming call notifications over WebSocket, call `client.online()` with an [`incomingCallHandlers`] object:
+
+```javascript
+client.online({
+  incomingCallHandlers: {
+    websocket: (callInvite) => {
+      const callerName = callInvite.invite.details?.caller_id_name;
+      const callerNumber = callInvite.invite.details?.caller_id_number;
+      
+      // to accept:
+      const roomSession = await callInvite.invite.accept(params);
+      
+      // to reject:
+      callInvite.invite.reject();
+    },
+  },
+});
+```
+
+When an incoming call arrives, the `websocket` handler receives a `callInvite` object containing:
+- `callInvite.invite.details` - call and caller information [IncomingInvite](/sdks/signalwire-client-sdk/types#incominginvite)
+- `callInvite.invite.accept()` - accepts the call and returns a [`CallSession`](/sdks/signalwire-client-sdk/call-session)
+- `callInvite.invite.reject()` - rejects the call
+
+[`incomingCallHandlers`]: /sdks/signalwire-client-sdk/types#incomingcallhandlers
+

@@ -1,0 +1,43 @@
+---
+slug: /compatibility-api/sdks/reference/faxes
+title: Faxes
+sidebar_label: Faxes
+toc_max_heading_level: 3
+---
+
+A **Fax** is a fax that has been sent to or received by a SignalWire phone number.
+
+## Properties
+
+<Schema type="Fax" />
+
+## Example object
+
+<SchemaSnippet type="Fax" title="The Fax Object" />
+
+## `Quality`
+
+The `quality` attribute has the following values:
+
+|                                          Value |                                                                                         |
+| ---------------------------------------------: | --------------------------------------------------------------------------------------- |
+|  `standard` | A low quality (204x98) fax resolution. This quality should be supported by all devices. |
+|      `fine` | A medium quality (204x196) fax resolution.                                              |
+| `superfine` | A high quality (204x392) fax resolution.                                                |
+
+## `Status`
+
+The `status` attribute has the following values:
+
+|                                           Value |                                                                            |
+| ----------------------------------------------: | -------------------------------------------------------------------------- |
+|     `queued` | The fax is queued and waiting for processing.                              |
+| `processing` | The fax is being uploaded, downloaded, or converted to a different format. |
+|    `sending` | The fax is being sent.                                                     |
+|  `delivered` | The fax has been successfully sent.                                        |
+|  `receiving` | The fax is being received.                                                 |
+|   `received` | The fax has been successfully received.                                    |
+|  `no-answer` | The fax failed because the recipient didn't pick up.                       |
+|       `busy` | The fax failed because the receiving machine sent back a busy signal.      |
+|     `failed` | The fax failed to send or receive.                                         |
+|   `canceled` | The fax was canceled.                                                      |

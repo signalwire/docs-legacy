@@ -1,0 +1,15 @@
+.icon {
+  height: 1.25rem;
+  width: 1.25rem;
+  transition: all;
+
+  &.open {
+    transform: rotate(90deg);
+    margin-top: -0.25rem;
+    transition-duration: 200ms;
+  }
+
+  &.closed {
+    transition-duration: 75ms;
+  }
+}

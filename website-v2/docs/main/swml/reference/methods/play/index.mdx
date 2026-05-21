@@ -1,0 +1,337 @@
+---
+title: play
+slug: /swml/reference/play
+description: Play file(s), ringtones, speech or silence.
+toc_max_heading_level: 3
+---
+import PlayableSoundsPartial from '@site/docs/_partials/swml/_playable-sounds.mdx';
+import VoiceTablePartial from '@site/docs/_partials/swml/_voice-table.mdx';
+
+
+[statuscallbacks]: #statuscallbacks
+
+Play file(s), ringtones, speech or silence.
+
+## **Properties**
+
+<ParamField path="play" type="object" required={true}>
+  An object that accepts the following properties. Accepts either a single URL or multiple URLs. See [audio source](#audio-source) below.
+</ParamField>
+
+<Indent>
+
+<ParamField path="play.status_url" type="string">
+  HTTP or HTTPS URL to deliver play status events. Learn more about [status callbacks][statuscallbacks].
+</ParamField>
+
+</Indent>
+
+## **Audio source**
+
+The `play` object accepts one of the following properties to specify the audio source:
+
+<Tabs>
+<TabItem value="single-url-(url)" label="Single URL (url)">
+
+<ParamField path="play.url" type="string" required={true}>
+  A single [playable sound](#playable-sounds). Authentication can also be set in the url in the format of `username:password@url`.
+</ParamField>
+
+</TabItem>
+<TabItem value="multiple-urls-(urls)" label="Multiple URLs (urls)">
+
+<ParamField path="play.urls" type="string[]" required={true}>
+  An array of [playable sounds](#playable-sounds). Authentication can also be set in the url in the format of `username:password@url`.
+</ParamField>
+
+</TabItem>
+</Tabs>
+
+## Playable sounds
+
+<PlayableSoundsPartial />
+
+## Variables
+
+Read by the method:
+
+- **`say_voice:`** (in) - Optional voice to use for text to speech.
+- **`say_language:`** (in) - Optional language to use for text to speech.
+- **`say_gender:`** (in) - Optional gender to use for text to speech.
+
+## Possible values for voice, language, and ringtone
+
+<VoiceTablePartial />
+
+## **StatusCallbacks**
+
+A POST request will be sent to `status_url` with a JSON payload like the following:
+
+<ParamField path="event_type" type="string">
+  The type of event. Always `calling.call.play` for this method.
+</ParamField>
+
+
+<ParamField path="event_channel" type="string">
+  The channel for the event, includes the SWML session ID.
+</ParamField>
+
+
+<ParamField path="timestamp" type="number">
+  Unix timestamp (float) when the event was generated.
+</ParamField>
+
+
+<ParamField path="project_id" type="string">
+  The project ID associated with the call.
+</ParamField>
+
+
+<ParamField path="space_id" type="string">
+  The Space ID associated with the call.
+</ParamField>
+
+
+<ParamField path="params" type="object">
+  An object containing playback-specific parameters.
+</ParamField>
+
+<Indent>
+
+<ParamField path="params.call_id" type="string">
+  The call ID.
+</ParamField>
+
+
+<ParamField path="params.node_id" type="string">
+  The node handling the call.
+</ParamField>
+
+
+<ParamField path="params.control_id" type="string">
+  The control ID for this play operation.
+</ParamField>
+
+
+<ParamField path="params.state" type="string">
+  The current playback state. **Valid values:** `playing`, `paused`, `finished`, `error`.
+</ParamField>
+
+</Indent>
+
+### Raw JSON example
+
+```json
+{
+  "event_type": "calling.call.play",
+  "event_channel": "swml:xxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+  "timestamp": 1640000000.123,
+  "project_id": "xxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+  "space_id": "xxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+  "params": {
+    "call_id": "xxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "node_id": "xxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "control_id": "xxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "state": "finished"
+  }
+}
+```
+
+---
+
+## Examples
+
+### Playing a single URL
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - play:
+        url: 'https://cdn.signalwire.com/swml/audio.mp3'
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "play": {
+          "url": "https://cdn.signalwire.com/swml/audio.mp3"
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+### Playing multiple URLs
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - play:
+        urls:
+          - 'https://cdn.signalwire.com/swml/audio.mp3'
+          - 'say: this is something to say'
+          - 'silence: 3.0'
+          - 'ring:10.0:us'
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "play": {
+          "urls": [
+            "https://cdn.signalwire.com/swml/audio.mp3",
+            "say: this is something to say",
+            "silence: 3.0",
+            "ring:10.0:us"
+          ]
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+### Playing multiple URLs with volume adjusted
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - play:
+        volume: 20
+        urls:
+          - 'https://cdn.signalwire.com/swml/audio.mp3'
+          - 'say: this is something to say'
+          - 'silence: 3.0'
+          - 'ring:10.0:us'
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "play": {
+          "volume": 20,
+          "urls": [
+            "https://cdn.signalwire.com/swml/audio.mp3",
+            "say: this is something to say",
+            "silence: 3.0",
+            "ring:10.0:us"
+          ]
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+### Specifying a voice to use for speaking
+
+**Globally**
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - set:
+        say_voice: gcloud.en-US-Neural2-A
+    - play:
+        url: 'say:Hi, do I sound different?'
+    - play:
+        url: 'say:I don''t, do I?'
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "set": {
+          "say_voice": "gcloud.en-US-Neural2-A"
+        }
+      },
+      {
+        "play": {
+          "url": "say:Hi, do I sound different?"
+        }
+      },
+      {
+        "play": {
+          "url": "say:I don't, do I?"
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+**For just one instance**
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - play:
+        url: 'say:Hi, do I sound different?'
+        say_voice: gcloud.en-US-Neural2-A
+    - play:
+        url: 'say:I was down with the flu'
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "play": {
+          "url": "say:Hi, do I sound different?",
+          "say_voice": "gcloud.en-US-Neural2-A"
+        }
+      },
+      {
+        "play": {
+          "url": "say:I was down with the flu"
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>

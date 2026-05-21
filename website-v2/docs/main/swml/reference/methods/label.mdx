@@ -1,0 +1,58 @@
+---
+title: label
+slug: /swml/reference/label
+description: Mark any point of the SWML section with a label.
+toc_max_heading_level: 3
+---
+
+Mark any point of the SWML section with a label so that [`goto`](/docs/swml/reference/goto) can jump to it.
+
+## **Properties**
+
+<ParamField path="label" type="string" required={true}>
+  Mark any point of the SWML section with a label so that `goto` can jump to it.
+</ParamField>
+
+
+## **Examples**
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - label: foo
+    - play:
+        url: 'say: This speech will be repeated 4 times.'
+    - goto:
+        label: foo
+        max: 3
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "label": "foo"
+      },
+      {
+        "play": {
+          "url": "say: This speech will be repeated 4 times."
+        }
+      },
+      {
+        "goto": {
+          "label": "foo",
+          "max": 3
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>

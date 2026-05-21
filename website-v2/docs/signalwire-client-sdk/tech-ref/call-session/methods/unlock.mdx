@@ -1,0 +1,174 @@
+---
+title: unlock
+slug: /call-session/unlock
+---
+
+Unlocks the call to allow new participants to join.
+
+## Signature
+
+```typescript
+unlock(): Promise<void>
+```
+
+## Parameters
+
+None
+
+## Returns
+
+**Type:** `Promise<void>`
+
+## Important Notes
+
+**Permissions:**
+
+Permission requirements vary based on your call configuration.
+- May require `room.unlock` capability
+
+**Unlock Behavior:**
+
+When a call is unlocked:
+- New participants **can** join the call
+- Participants who previously left can rejoin
+- The unlock state persists until explicitly locked again
+
+Unlock does NOT affect:
+- Existing participants (they remain in the call)
+- Screen sharing or other call features
+- Media streams or audio/video
+
+**Checking Lock State:**
+
+Track lock state manually:
+
+```typescript
+let isCallLocked = false
+
+async function lockCall() {
+  await call.lock()
+  isCallLocked = true
+}
+
+async function unlockCall() {
+  await call.unlock()
+  isCallLocked = false
+}
+
+// Check state
+if (!isCallLocked) {
+  console.log('Call is unlocked - new participants can join')
+}
+```
+
+## Events
+
+Lock/unlock operations may trigger room update events:
+
+```typescript
+call.on('room.updated', (event) => {
+  console.log('Room updated, locked state may have changed')
+})
+```
+
+## Examples
+
+### Basic usage
+
+```typescript
+// Unlock the call to allow new participants to join
+await call.unlock()
+console.log('Call is now unlocked')
+```
+
+### Unlock to let someone in
+
+```typescript
+// Temporarily unlock to allow a late participant to join
+async function letParticipantIn() {
+  console.log('Unlocking call for late participant...')
+  await call.unlock()
+
+  // Wait for participant to join (or timeout after 2 minutes)
+  await waitForParticipant(120000)
+
+  // Lock again
+  await call.lock()
+  console.log('Call locked again')
+}
+```
+
+### With error handling
+
+```typescript
+try {
+  await call.unlock()
+  console.log('Call unlocked successfully')
+} catch (error) {
+  console.error('Failed to unlock call:', error)
+}
+```
+
+### UI toggle button
+
+```typescript
+let isLocked = false
+
+async function toggleLock() {
+  try {
+    if (isLocked) {
+      await call.unlock()
+      isLocked = false
+      console.log('Call unlocked')
+    } else {
+      await call.lock()
+      isLocked = true
+      console.log('Call locked')
+    }
+
+    updateLockButtonUI(isLocked)
+  } catch (error) {
+    console.error('Failed to toggle lock:', error)
+  }
+}
+
+function updateLockButtonUI(locked: boolean) {
+  const button = document.getElementById('lock-button')
+  if (button) {
+    button.textContent = locked ? 'Unlock' : 'Lock'
+    button.className = locked ? 'locked' : 'unlocked'
+  }
+}
+```
+
+### Temporary unlock for late arrivals
+
+```typescript
+// Unlock for 5 minutes to allow late arrivals, then lock again
+async function openForLateArrivals() {
+  await call.unlock()
+  console.log('Call unlocked for late arrivals')
+
+  setTimeout(async () => {
+    await call.lock()
+    console.log('Call locked again after grace period')
+  }, 5 * 60 * 1000) // 5 minutes
+}
+```
+
+### Conditional unlock based on capacity
+
+```typescript
+// Unlock if capacity drops below threshold
+const MAX_PARTICIPANTS = 10
+const UNLOCK_THRESHOLD = 7
+
+call.on('member.left', async () => {
+  const { members } = await call.getMembers()
+
+  if (members.length <= UNLOCK_THRESHOLD) {
+    await call.unlock()
+    console.log(`Capacity at ${members.length}/${MAX_PARTICIPANTS} - call unlocked`)
+  }
+})
+```

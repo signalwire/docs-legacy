@@ -1,0 +1,160 @@
+---
+title: Fax Overview
+sidebar_label: Overview
+excerpt: ''
+slug: /compatibility-api/cxml/reference/fax
+sidebar_position: 0
+toc_max_heading_level: 3
+---
+
+Fax cXML is a set of actions defined in an XML document you can use to tell SignalWire what to do when you receive an incoming fax.
+
+## Overview
+
+When a fax is sent to one of your SignalWire phone numbers, SignalWire looks up the Fax cXML document from the URL you configured,
+and reads the instructions you provided to determine what to do.
+
+Fax cXML allows you to control what SignalWire will do when you receive an incoming fax.
+
+## Request
+
+SignalWire makes an HTTP request to your configured endpoint just like a regular web form submission (POST) or page load (GET). The request includes contextual information about the fax, allowing you to respond dynamically and fluidly to the fax to meet the needs of your application.
+
+You can configure the endpoint URL and HTTP Method in your phone number settings panel on your SignalWire Dashboard, or via the REST API.
+
+## Request parameters
+
+SignalWire sends the following parameters, as either URL query parameters or POST parameters, to your endpoint when it receives a fax:
+
+<ParamField path="AccountSid" type="string">
+  The account that the fax was sent from.
+</ParamField>
+
+<ParamField path="ApiVersion" type="string">
+  The version of the SignalWire API.
+</ParamField>
+
+<ParamField path="FaxSid" type="string">
+  A unique identifier for the fax.
+</ParamField>
+
+<ParamField path="From" type="string">
+  The number or SIP URI the fax was sent from.
+</ParamField>
+
+<ParamField path="To" type="string">
+  The number or SIP URI the fax will be sent to.
+</ParamField>
+
+## Responding to SignalWire
+
+An example of a cXML document that receives an incoming fax:
+
+<CodeBlocks>
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+  <Receive action="/fax/received"/>
+</Response>
+```
+
+```javascript title="Node.js"
+const { RestClient } = require("@signalwire/compatibility-api");
+const response = new RestClient.LaML.FaxResponse();
+
+response.receive({ action: "/fax/received" });
+console.log(response.toString());
+```
+
+```csharp
+using Twilio.TwiML;
+using Twilio.TwiML.Fax;
+using System;
+
+
+class Example
+{
+    static void Main()
+    {
+        var response = new FaxResponse();
+        response.Receive(action: "/fax/received"));
+
+        Console.WriteLine(response.ToString());;
+    }
+}
+```
+
+```python
+from signalwire.fax_response import FaxResponse, Receive
+
+response = FaxResponse()
+response.receive(action="/fax/received")
+
+print(response)
+```
+
+```ruby
+require 'signalwire/sdk'
+
+response = Signalwire::Sdk::FaxResponse.new do |response|
+  response.receive(action: "/fax/received")
+end
+
+puts response.to_s
+```
+</CodeBlocks>
+
+When a fax comes into one of your SignalWire phone numbers, SignalWire makes an HTTP request to the URL endpoint you configured for that number. Your response to that request instructs SignalWire on what to do next.
+
+Responses to the HTTP request are in SignalWire cXML. SignalWire starts at the top of your XML document and executes your commands in order, from top to bottom.
+
+<Info title="cXML verbs and their attributes are case-sensitive, so using `<receive>` instead of `<Receive>` will result in an error."/>
+
+### StatusCallback when sending a fax
+
+When sending a fax you can specify a `StatusCallback` URL. If you do so, your specified URL will receive POST requests with the following parameters:
+
+<ParamField path="ErrorCode" type="string">
+  The error code provides more information on a failed fax.
+</ParamField>
+
+<ParamField path="ErrorMessage" type="string">
+  The message explaining the reason for fax failure.
+</ParamField>
+
+<ParamField path="FaxStatus" type="string">
+  The status of the fax.
+</ParamField>
+
+<ParamField path="MediaSid" type="string">
+  The [SID](/docs/platform/what-is-a-sid) that uniquely identifies the fax media.
+</ParamField>
+
+<ParamField path="MediaUrl" type="string">
+  The media URL to request to retrieve incoming media.
+</ParamField>
+
+<ParamField path="NumPages" type="integer">
+  The number of pages received from a successful fax.
+</ParamField>
+
+<ParamField path="OriginalMediaUrl" type="string">
+  The original URL passed when a fax is sent.
+</ParamField>
+
+<ParamField path="RemoteStationId" type="string">
+  The transmitting subscriber identification (TSID) reported by the fax machine that sent in the fax.
+</ParamField>
+
+## Instructions
+
+The following instructions are used to manage faxes:
+
+<CardGroup cols={2}>
+  <Card title="Receive" icon="inbox" href="/docs/compatibility-api/cxml/reference/fax/receive">
+    Receive an incoming fax.
+  </Card>
+  <Card title="Reject" icon="ban" href="/docs/compatibility-api/cxml/reference/fax/reject">
+    Reject an incoming fax.
+  </Card>
+</CardGroup>

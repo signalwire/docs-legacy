@@ -1,0 +1,28 @@
+---
+title: "disconnect"
+slug: /node/reference/realtime-client/disconnect
+description: disconnect method for the Realtime Client.
+toc_max_heading_level: 3
+---
+
+### disconnect
+
+▸ **disconnect**(): `Promise<void>`
+
+Disconnects this client from the SignalWire Realtime API. The client will stop receiving events and you will need to call `connect()` to reconnect.
+
+#### Returns
+
+`Promise<void>` - Resolves when the connection is closed.
+
+#### Example
+
+```javascript
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" });
+
+await client.disconnect().then(() => {
+  console.log("disconnected");
+});
+```

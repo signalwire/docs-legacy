@@ -1,0 +1,36 @@
+---
+title: "startStream"
+slug: /node/reference/video/room-session/start-stream
+description: startStream method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+[roomsessionstream-4]: /docs/server-sdk/v3/node/reference/video/room-session-stream
+
+### startStream
+
+- **startStream**(): `Promise<RoomSessionStream>` - See [RoomSessionStream][roomsessionstream-4] for more details.
+
+Starts streaming the audio/video of this room to an external service. You can
+use the returned [RoomSessionStream][roomsessionstream-4] object to
+interact with the stream.
+
+#### Parameters
+
+| Name         | Type     | Description                                                                                    |
+|:-------------|:---------|:-----------------------------------------------------------------------------------------------|
+| `params`     | `Object` |                                                                                                |
+| `params.url` | `string` | RTMP or RTMPS url. This must be the address of a server accepting incoming RTMP/RTMPS streams. |
+
+#### Returns
+
+`Promise<RoomSessionStream>` - See [RoomSessionStream][roomsessionstream-4] for more details.
+
+#### Example
+
+```javascript
+const stream = await roomSession.startStream({ url: "rtmp://example.com" });
+
+// Stop the stream after 60 seconds
+setTimeout(() => stream.stop(), 60000);
+```

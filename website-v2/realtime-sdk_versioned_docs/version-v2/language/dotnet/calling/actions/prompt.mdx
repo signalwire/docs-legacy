@@ -1,0 +1,101 @@
+---
+title: PromptAction
+slug: /dotnet/reference/calling/actions/prompt
+description: The PromptAction is used to prompt a user for input.
+toc_max_heading_level: 3
+---
+
+[call]: /docs/server-sdk/v2/dotnet/reference/calling/call#prompt
+[signalwire-relay-calling-callcollect]: /docs/server-sdk/v2/dotnet/reference/calling/call-collect
+[signalwire-relay-calling-callmedia]: /docs/server-sdk/v2/dotnet/reference/calling/call-media
+[signalwire-relay-calling-callplaystate]: /docs/server-sdk/v2/dotnet/reference/calling/call-play-state
+[signalwire-relay-calling-promptresult]: /docs/server-sdk/v2/dotnet/reference/calling/results/prompt
+[signalwire-relay-calling-promptvolumeresult]: /docs/server-sdk/v2/dotnet/reference/calling/results/prompt-volume
+[signalwire-relay-calling-stopresult]: /docs/server-sdk/v2/dotnet/reference/calling/results/stop
+
+# SignalWire.Relay.Calling.PromptAction
+
+This object returned from one of _asynchronous_ [`Prompt`][call] methods that represent a prompt operation that is currently active on a call.
+
+## Properties
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `ControlID` | string | The identifier used to control the operation. |
+| `Result` | [`SignalWire.Relay.Calling.PromptResult`][signalwire-relay-calling-promptresult] | Final result of this prompt. |
+| `State` | [`SignalWire.Relay.Calling.CallPlayState`][signalwire-relay-calling-callplaystate] | Current state of the play operation. |
+| `Completed` | bool | Whether the prompt operation has completed. |
+| `PlayPayload` | List&lt;[`SignalWire.Relay.Calling.CallMedia`][signalwire-relay-calling-callmedia]&gt; | Payload sent to Relay to start playing. |
+| `CollectPayload` | [`SignalWire.Relay.Calling.CallCollect`][signalwire-relay-calling-callcollect] | Payload sent to Relay to collect input. |
+
+## Methods
+
+### Stop
+
+Stop the action immediately.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+[`SignalWire.Relay.Calling.StopResult`][signalwire-relay-calling-stopresult] - The result object to interact with.
+
+**Examples**
+
+> Ask user to enter a PIN and stop the action after 5 seconds.
+
+```csharp
+PromptAction actionPrompt = call.PromptTTSAsync(
+    "Welcome to SignalWire! Please enter your PIN",
+    new CallCollect
+    {
+        InitialTimeout = 10,
+        Digits = new CallCollect.DigitsParams
+        {
+            Max = 4,
+            DigitTimeout = 5,
+        }
+    });
+
+Thread.Sleep(5000);
+
+StopResult resultStop = actionPrompt.Stop();
+```
+
+### Volume
+
+Change the volume of the action immediately.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `volume` | double | The volume from -40dB to +40dB where 0 is unchanged.
+
+**Returns**
+
+[`SignalWire.Relay.Calling.PromptVolumeResult`][signalwire-relay-calling-promptvolumeresult] - The result object to interact with.
+
+**Examples**
+
+> Ask user to enter a PIN and change the volume after 1 second.
+
+```csharp
+PromptAction actionPrompt = call.PromptTTSAsync(
+    "Welcome to SignalWire! Please enter your PIN",
+    new CallCollect
+    {
+        InitialTimeout = 10,
+        Digits = new CallCollect.DigitsParams
+        {
+            Max = 4,
+            DigitTimeout = 5,
+        }
+    });
+
+Thread.Sleep(1000);
+
+actionPrompt.Volume(4.0);
+```

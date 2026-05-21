@@ -1,0 +1,246 @@
+---
+unlisted: false
+hide_title: false
+slug: /swml/reference/ai/languages
+title: languages
+description: Configure the spoken language of your AI Agent, as well as the TTS engine, voice, and fillers.
+toc_max_heading_level: 3
+---
+
+[tts-providers]: /docs/platform/voice/tts#providers
+[voices-and-languages]: /docs/platform/voice/tts
+[swaig-functions]: /docs/swml/reference/ai/swaig/functions
+[deepgram-codes]: https://developers.deepgram.com/docs/models-languages-overview#nova-3
+
+Use `ai.languages` to configure the spoken language of your AI Agent, as well as the TTS engine, voice, and fillers.
+
+## **Properties**
+
+<ParamField path="ai.languages" type="object[]">
+  An array of objects that accept the following properties.
+</ParamField>
+
+<Indent>
+
+<ParamField path="languages[].name" type="string" required={true}>
+  Name of the language ("French", "English", etc). This value is used in the system prompt to instruct the LLM what language is being spoken.
+</ParamField>
+
+<ParamField path="languages[].code" type="string" required={true}>
+  Set the language code for ASR (Automatic Speech Recognition) (STT (Speech-to-text)) purposes.
+  By default, SignalWire uses Deepgram's Nova-3 STT engine, so this value should match a code from Deepgram's [Nova-3 language codes table][deepgram-codes].
+<Info> If a different STT model was selected using the [`openai_asr_engine` parameter](/docs/swml/reference/ai/params), you must select a code supported by that engine.</Info>
+</ParamField>
+
+<ParamField path="languages[].voice" type="string" required={true}>
+  String format: `<engine id>.<voice id>`.
+Select engine from `gcloud`, `polly`, `elevenlabs`, or `deepgram`. Select voice from [TTS provider reference][tts-providers].
+For example, `"gcloud.fr-FR-Neural2-B"`.
+See [`voice` usage](#use-voice-strings) for more details.
+</ParamField>
+
+<ParamField path="languages[].emotion" type="string" default="None">
+  Enables emotion for the set TTS engine. This allows the AI to express emotions when speaking. A global emotion or specific emotions for certain topics can be set within the prompt of the AI.
+*Valid values:* `auto`
+<Warning>Only works with `Cartesia` TTS engine.</Warning>
+</ParamField>
+
+<ParamField path="languages[].function_fillers" type="string[]" default="None">
+  An array of strings to be used as fillers in the conversation when the agent is calling a [`SWAIG function`][swaig-functions]. The filler is played asynchronously during the function call.
+</ParamField>
+
+<ParamField path="languages[].model" type="string" default="None">
+  The model to use for the specified TTS engine (e.g. `arcana`). Check the [TTS provider reference][tts-providers] for the available models.
+</ParamField>
+
+<ParamField path="languages[].speech_fillers" type="string[]" default="None">
+  An array of strings to be used as fillers in the conversation. This helps the AI break silence between responses.
+
+<Note>`speech_fillers` are used between every 'turn' taken by the LLM, including at the beginning of the call. For more targed fillers, consider using `function_fillers`.</Note>
+</ParamField>
+
+<ParamField path="languages[].speed" type="string" default="None">
+  The speed to use for the specified TTS engine. This allows the AI to speak at a different speed at different points in the conversation. The speed behavior can be defined in the prompt of the AI.
+*Valid values:* `auto`
+<Warning>Only works with [`Cartesia`](/docs/platform/voice/tts/cartesia) TTS engine.</Warning>
+</ParamField>
+
+<ParamField path="languages[].params" type="object" default="None">
+  TTS engine-specific parameters for this language.
+</ParamField>
+
+<Indent>
+  <ParamField path="params.similarity" type="number" default="0.75">
+    The similarity slider dictates how closely the AI should adhere to the original voice when attempting to replicate it.
+    The higher the similarity, the closer the AI will sound to the original voice.
+    Valid values range from `0.0` to `1.0`.
+    <Info>
+  Only works with the ElevenLabs TTS engine.
+  </Info>
+  </ParamField>
+
+  <ParamField path="params.stability" type="number" default="0.50">
+    The stability slider determines how stable the voice is and the randomness between each generation.
+    Lowering this slider introduces a broader emotional range for the voice.
+    Valid values range from `0.0` to `1.0`.
+    <Info>
+  Only works with the ElevenLabs TTS engine.
+  </Info>
+  </ParamField>
+</Indent>
+
+<ParamField path="languages[].fillers" type="string[]" deprecated={true} default="None">
+  An array of strings to be used as fillers in the conversation and when the agent is calling a [`SWAIG function`][swaig-functions]. **Deprecated**: Use `speech_fillers` and `function_fillers` instead.
+</ParamField>
+
+<ParamField path="languages[].engine" type="string" deprecated={true} default="gcloud">
+  The engine to use for the language. For example, `"elevenlabs"`. **Deprecated.** Set the engine with the [`voice`](#use-voice-strings) parameter.
+</ParamField>
+
+</Indent>
+
+
+## Use `voice` strings
+
+Compose the `voice` string using the `<engine id>.<voice id>` syntax.
+
+First, select your engine using the `gcloud`, `polly`, `elevenlabs`, or `deepgram` identifier. 
+Append a period (`.`), and then the specific voice ID (for example, `en-US-Casual-K`) from the TTS provider. 
+Refer to SignalWire's [Supported Voices and Languages][tts-providers]
+for guides on configuring voice ID strings for each provider.
+
+## **Supported voices and languages**
+
+SignalWire's cloud platform integrates with leading text-to-speech providers.
+For a comprehensive list of supported engines, languages, and voices, refer to our documentation on 
+[Supported Voices and Languages][voices-and-languages].
+
+## **Examples**
+
+### Set a single language
+
+SWML will automatically assign the language (and other required parameters) to the defaults in the above table if left unset.
+This example uses `ai.language` to configure a specific English-speaking voice from ElevenLabs.
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+languages:
+  - name: English
+    code: en-US
+    voice: elevenlabs.rachel
+    speech_fillers:
+      - one moment please,
+      - hmm...
+      - let's see,
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "languages": [
+    {
+      "name": "English",
+      "code": "en-US",
+      "voice": "elevenlabs.rachel",
+      "speech_fillers": [
+        "one moment please,",
+        "hmm...",
+        "let's see,"
+      ]
+    }
+  ]
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+### Set multiple languages
+
+SWML will automatically assign the language (and other required parameters) to the defaults in the above table if left unset.
+This example uses `ai.language` to configure multiple languages using different TTS engines.
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+languages:
+  - name: Mandarin
+    code: cmn-TW
+    voice: gcloud.cmn-TW-Standard-A
+  - name: English
+    code: en-US
+    voice: elevenlabs.rachel
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "languages": [
+    {
+      "name": "Mandarin",
+      "code": "cmn-TW",
+      "voice": "gcloud.cmn-TW-Standard-A"
+    },
+    {
+      "name": "English",
+      "code": "en-US",
+      "voice": "elevenlabs.rachel"
+    }
+  ]
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+### Configure per-language ElevenLabs parameters
+
+Configure different stability and similarity values for each language using `languages[].params`:
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+ai:
+  languages:
+    - name: English
+      code: en-US
+      voice: elevenlabs.josh
+      params:
+        stability: 0.6
+        similarity: 0.8
+    - name: Spanish
+      code: es-ES
+      voice: elevenlabs.maria
+      params:
+        stability: 0.4
+        similarity: 0.9
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "ai": {
+    "languages": [
+      {
+        "name": "English",
+        "code": "en-US",
+        "voice": "elevenlabs.josh",
+        "params": {
+          "stability": 0.6,
+          "similarity": 0.8
+        }
+      },
+      {
+        "name": "Spanish",
+        "code": "es-ES",
+        "voice": "elevenlabs.maria",
+        "params": {
+          "stability": 0.4,
+          "similarity": 0.9
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>

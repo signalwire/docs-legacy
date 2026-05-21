@@ -1,0 +1,315 @@
+---
+title: "Events"
+slug: /node/reference/voice/call/events
+description: Events available on the Call class.
+toc_max_heading_level: 3
+---
+
+[callcollect-6]: /docs/server-sdk/v3/node/reference/voice/call-collect
+[callplayback-12]: /docs/server-sdk/v3/node/reference/voice/call-playback
+[callprompt-11]: /docs/server-sdk/v3/node/reference/voice/call-prompt
+[callrecording-7]: /docs/server-sdk/v3/node/reference/voice/call-recording
+[callstate-6]: /docs/server-sdk/v3/node/reference/voice/call-state
+[calltap-5]: /docs/server-sdk/v3/node/reference/voice/call-tap
+
+## Events
+
+### call.created
+
+- **call.created**(`call`)
+
+A call was created.
+
+#### Parameters
+
+| Name   | Type                           | Description                         |
+|:-------|:-------------------------------|:------------------------------------|
+| `call` | [`CallState`][callstate-6] | A object containing the call state. |
+
+### call.ringing
+
+- **call.ringing**(`call`)
+
+A call is ringing.
+
+#### Parameters
+
+| Name   | Type                           | Description                         |
+|:-------|:-------------------------------|:------------------------------------|
+| `call` | [`CallState`][callstate-6] | A object containing the call state. |
+
+### call.answered
+
+- **call.answered**(`call`)
+
+A call was answered.
+
+#### Parameters
+
+| Name   | Type                           | Description                         |
+|:-------|:-------------------------------|:------------------------------------|
+| `call` | [`CallState`][callstate-6] | A object containing the call state. |
+
+### call.ending
+
+- **call.ending**(`call`)
+
+A call is ending.
+
+#### Parameters
+
+| Name   | Type                           | Description                         |
+|:-------|:-------------------------------|:------------------------------------|
+| `call` | [`CallState`][callstate-6] | A object containing the call state. |
+
+### call.ended
+
+- **call.ended**(`call`)
+
+A call ended.
+
+#### Parameters
+
+| Name   | Type                           | Description                         |
+|:-------|:-------------------------------|:------------------------------------|
+| `call` | [`CallState`][callstate-6] | A object containing the call state. |
+
+### collect.ended
+
+- **collect.ended**(`collect`)
+
+A collect ended.
+
+#### Parameters
+
+| Name      | Type                               | Description       |
+|:----------|:-----------------------------------|:------------------|
+| `collect` | [`CallCollect`][callcollect-6] | A collect object. |
+
+### collect.failed
+
+- **collect.failed**(`collect`)
+
+A collect failed.
+
+#### Parameters
+
+| Name      | Type                               | Description       |
+|:----------|:-----------------------------------|:------------------|
+| `collect` | [`CallCollect`][callcollect-6] | A collect object. |
+
+### collect.startOfInput
+
+- **collect.startOfInput**(`collect`)
+
+User input began in a collect.
+
+#### Parameters
+
+| Name      | Type                               | Description       |
+|:----------|:-----------------------------------|:------------------|
+| `collect` | [`CallCollect`][callcollect-6] | A collect object. |
+
+### collect.started
+
+- **collect.started**(`collect`)
+
+A collect started.
+
+#### Parameters
+
+| Name      | Type                               | Description       |
+|:----------|:-----------------------------------|:------------------|
+| `collect` | [`CallCollect`][callcollect-6] | A collect object. |
+
+### collect.updated
+
+- **collect.updated**(`collect`)
+
+The state of a collect changed.
+
+#### Parameters
+
+| Name      | Type                               | Description       |
+|:----------|:-----------------------------------|:------------------|
+| `collect` | [`CallCollect`][callcollect-6] | A collect object. |
+
+### playback.ended
+
+- **playback.ended**(`playback`)
+
+A playback ended.
+
+#### Parameters
+
+| Name       | Type                                 | Description        |
+|:-----------|:-------------------------------------|:-------------------|
+| `playback` | [`CallPlayback`][callplayback-12] | A playback object. |
+
+---
+
+### playback.started
+
+- **playback.started**(`playback`)
+
+A playback has started.
+
+#### Parameters
+
+| Name       | Type                                 | Description        |
+|:-----------|:-------------------------------------|:-------------------|
+| `playback` | [`CallPlayback`][callplayback-12] | A playback object. |
+
+---
+
+### playback.updated
+
+- **playback.updated**(`playback`)
+
+The state of a playback changed.
+
+#### Parameters
+
+| Name       | Type                                 | Description        |
+|:-----------|:-------------------------------------|:-------------------|
+| `playback` | [`CallPlayback`][callplayback-12] | A playback object. |
+
+---
+
+### prompt.ended
+
+- **prompt.ended**(`prompt`)
+
+A prompt has ended.
+
+#### Parameters
+
+| Name     | Type                             | Description      |
+|:---------|:---------------------------------|:-----------------|
+| `prompt` | [`CallPrompt`][callprompt-11] | A prompt object. |
+
+---
+
+### prompt.failed
+
+- **prompt.failed**(`prompt`)
+
+A prompt has failed.
+
+#### Parameters
+
+| Name     | Type                             | Description      |
+|:---------|:---------------------------------|:-----------------|
+| `prompt` | [`CallPrompt`][callprompt-11] | A prompt object. |
+
+---
+
+### prompt.started
+
+- **prompt.started**(`prompt`)
+
+A prompt started.
+
+#### Parameters
+
+| Name     | Type                             | Description      |
+|:---------|:---------------------------------|:-----------------|
+| `prompt` | [`CallPrompt`][callprompt-11] | A prompt object. |
+
+---
+
+### prompt.updated
+
+- **prompt.updated**(`prompt`)
+
+The state of a prompt changed.
+
+#### Parameters
+
+| Name     | Type                             | Description      |
+|:---------|:---------------------------------|:-----------------|
+| `prompt` | [`CallPrompt`][callprompt-11] | A prompt object. |
+
+---
+
+### recording.ended
+
+- **recording.ended**(`recording`)
+
+A recording ended.
+
+#### Parameters
+
+| Name        | Type                                   | Description         |
+|:------------|:---------------------------------------|:--------------------|
+| `recording` | [`CallRecording`][callrecording-7] | A recording object. |
+
+---
+
+### recording.failed
+
+- **recording.failed**(`recording`)
+
+A recording failed.
+
+#### Parameters
+
+| Name        | Type                                   | Description         |
+|:------------|:---------------------------------------|:--------------------|
+| `recording` | [`CallRecording`][callrecording-7] | A recording object. |
+
+---
+
+### recording.started
+
+- **recording.started**(`recording`)
+
+A recording started.
+
+#### Parameters
+
+| Name        | Type                                   | Description         |
+|:------------|:---------------------------------------|:--------------------|
+| `recording` | [`CallRecording`][callrecording-7] | A recording object. |
+
+---
+
+### recording.updated
+
+- **recording.updated**(`recording`)
+
+The state of a recording changed.
+
+#### Parameters
+
+| Name        | Type                                   | Description         |
+|:------------|:---------------------------------------|:--------------------|
+| `recording` | [`CallRecording`][callrecording-7] | A recording object. |
+
+---
+
+### tap.ended
+
+- **tap.ended**(`tap`)
+
+A tap ended.
+
+#### Parameters
+
+| Name  | Type                       | Description   |
+|:------|:---------------------------|:--------------|
+| `tap` | [`CallTap`][calltap-5] | A tap object. |
+
+---
+
+### tap.started
+
+- **tap.started**(`tap`)
+
+A tap started.
+
+#### Parameters
+
+| Name  | Type                       | Description   |
+|:------|:---------------------------|:--------------|
+| `tap` | [`CallTap`][calltap-5] | A tap object. |

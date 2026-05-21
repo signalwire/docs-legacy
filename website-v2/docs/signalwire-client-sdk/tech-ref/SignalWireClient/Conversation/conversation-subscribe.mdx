@@ -1,0 +1,44 @@
+---
+title: conversation.subscribe
+slug: /signalwire-client/conversation-subscribe
+---
+
+import APIField from '@site/src/components/APIField';
+
+Subscribes to real-time conversation events, allowing you to receive notifications for new messages, participant changes, and other conversation updates.
+
+## How it works
+
+The `conversation.subscribe` method establishes a real-time subscription to conversation events. When events occur (new messages, participants joining/leaving, etc.), your callback function is invoked with event details.
+
+## Parameters
+
+<APIField name="callback" type="ConversationSubscribeCallback" required>
+  Callback function invoked when conversation events occur.
+</APIField>
+
+## Signature
+
+```typescript
+conversation.subscribe(callback: ConversationSubscribeCallback): Promise<ConversationSubscribeResult>
+```
+
+## Returns
+
+**Type:** `Promise<ConversationSubscribeResult>`
+
+Returns a Promise that resolves with subscription details including an unsubscribe method.
+
+## Examples
+
+### Subscribe to conversation events
+
+```typescript
+const subscription = await client.conversation.subscribe((event) => {
+  console.log('Conversation event:', event.type)
+  
+  if (event.type === 'message.created') {
+    console.log('New message:', event.message.content)
+  }
+})
+```

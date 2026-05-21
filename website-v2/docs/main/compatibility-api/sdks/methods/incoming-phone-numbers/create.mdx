@@ -1,0 +1,78 @@
+---
+slug: /compatibility-api/sdks/reference/incoming-phone-numbers/create
+title: Create
+sidebar_label: Create
+toc_max_heading_level: 3
+---
+
+Use this endpoint for the IncomingPhoneNumber method to create an IncomingPhoneNumber.
+
+<EndpointSchemaSnippet endpoint="POST /Accounts/{AccountSid}/IncomingPhoneNumbers" />
+
+## Request examples
+
+<CodeBlocks>    
+
+```javascript title="Node.js"
+const { RestClient } = require('@signalwire/compatibility-api')
+const client = RestClient('YourProjectID', 'YourAuthToken', { signalwireSpaceUrl: 'example.signalwire.com' })
+
+client.incomingPhoneNumbers
+      .create({
+         friendlyName: 'IncomingPhoneNumber1',
+         phoneNumber: '+13103386745'
+       })
+      .then(incoming_phone_number => console.log(incoming_phone_number.sid))
+      .done();
+```
+
+```csharp
+using System;
+using System.Collections.Generic;
+using Twilio;
+using Twilio.Rest.Api.V2010.Account;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        TwilioClient.Init("YourProjectID", "YourAuthToken", new Dictionary<string, object> { ["signalwireSpaceUrl"] = "{SPACE}.signalwire.com" });
+
+        var incomingPhoneNumber = IncomingPhoneNumberResource.Create(
+            friendlyName: "IncomingPhoneNumber1",
+            phoneNumber: new Twilio.Types.PhoneNumber("+13103386745")
+        );
+
+        Console.WriteLine(incomingPhoneNumber.Sid);
+    }
+}
+```
+
+```python
+from signalwire.rest import Client as signalwire_client
+
+client = signalwire_client("YourProjectID", "YourAuthToken", signalwire_space_url = 'example.signalwire.com')
+
+incoming_phone_number = client.incoming_phone_numbers \
+    .create(
+         friendly_name='IncomingPhoneNumber1',
+         phone_number='+13103386745'
+     )
+
+print(incoming_phone_number.sid)
+```
+
+```ruby
+require 'signalwire/sdk'
+
+@client = Signalwire::REST::Client.new 'YourProjectID', 'YourAuthToken', signalwire_space_url: "example.signalwire.com"
+
+incoming_phone_number = @client.incoming_phone_numbers
+  .create(
+     friendly_name: 'IncomingPhoneNumber1',
+     phone_number: '+13103386745'
+   )
+
+puts incoming_phone_number.sid
+```
+</CodeBlocks>

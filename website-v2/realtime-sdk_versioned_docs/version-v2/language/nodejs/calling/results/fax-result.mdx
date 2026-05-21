@@ -1,0 +1,23 @@
+---
+title: Relay.Calling.FaxResult
+slug: /node/reference/calling/results/fax
+description: The result object that is returned when sending or receiving a fax.
+toc_max_heading_level: 3
+---
+
+[faxreceive]: /docs/server-sdk/v2/node/reference/calling/call#faxreceive
+[faxsend]: /docs/server-sdk/v2/node/reference/calling/call#faxsend
+[relay-event]: /docs/server-sdk/v2/node/reference/event
+This object returned from [`faxReceive`][faxreceive] and [`faxSend`][faxsend] methods that represents the final result of a sent or received Fax.
+
+## Properties
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `successful` | `boolean` | Whether the fax has been sent or received successfully |
+| `event` | [`Relay.Event`][relay-event] | Last event that completed the operation |
+| `direction` | `string` | `send` or `receive` |
+| `identity` | `string` | Identity used to send the fax |
+| `remoteIdentity` | `string` | Remote identity |
+| `document` | `string` | Document URL |
+| `pages` | `number` | Number of sent/received pages |

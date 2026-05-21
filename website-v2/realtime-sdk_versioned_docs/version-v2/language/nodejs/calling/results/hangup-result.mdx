@@ -1,0 +1,18 @@
+---
+title: Relay.Calling.HangupResult
+slug: /node/reference/calling/results/hangup
+description: The result object that is returned when hanging up a call.
+toc_max_heading_level: 3
+---
+
+[hangup]: /docs/server-sdk/v2/node/reference/calling/call#hangup
+[relay-event]: /docs/server-sdk/v2/node/reference/event
+This object returned from [`hangup`][hangup] method.
+
+## Properties
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `successful` | `boolean` | Whether the call has been hung up successfully |
+| `event` | [`Relay.Event`][relay-event] | Last event that completed the operation |
+| `reason` | `string` | The hangup reason |

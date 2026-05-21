@@ -1,0 +1,95 @@
+---
+title: "RELAY Realtime SDK v2 vs v3"
+slug: /guides/v2-vs-v3
+toc_max_heading_level: 3
+layout: guide
+---
+
+
+SignalWire has a vision of Software-Defined Telecom which combines the flexibility of the World Wide Web with the power of Bi-Directional Telecommunications. RELAY provides the ability to fully control powerful resources in real-time from the comfort of a simple script.
+
+
+<Info>
+
+While the older versions will still work, if you are just starting out with Voice services, you should begin building with the RELAY Realtime SDK. If you are already using the old version, you should consider upgrading if possible, so that you can take advantage of our most seamless development process yet. For some pointers on migrating, please read our post ["Upgrade Your RELAY Game"](/docs/server-sdk/v3/node).
+
+</Info>
+
+# RELAY Realtime SDK
+
+Install the [RELAY Realtime SDK package](https://www.npmjs.com/package/@signalwire/realtime-api) with npm or yarn:
+
+```bash npm2yarn
+npm install @signalwire/realtime-api@~3
+```
+
+You can then import the package as follows:
+
+```js
+import * as SignalWire from "@signalwire/realtime-api";
+```
+
+The RELAY Realtime SDK has everything you know and love from the original RELAY plus more! With only one SDK you can offer unified communications using:
+
+- [Video](/docs/server-sdk/v3/node/reference/video)
+- [Chat](/docs/server-sdk/v3/node/reference/chat)
+- [Voice](/docs/server-sdk/v3/node/reference/voice)
+- [PubSub](/docs/server-sdk/v3/node/reference/pubsub)
+- [Task](/docs/server-sdk/v3/node/reference/task)
+
+Beyond the expanded communication options, our developers have worked tirelessly to make it possible to do **more** with **more intuitive syntax and fewer lines of code**.
+
+Below is an example of creating a voice call in the RELAY Realtime vs the old RELAY:
+
+<Tabs>
+<TabItem value="relay-realtime-sdk" label="RELAY Realtime SDK">
+
+```js showLineNumbers
+import { Voice } from "@signalwire/realtime-api";
+
+const client = new Voice.Client({
+  project: "<project-id>",
+  token: "<api-token>",
+  contexts: ["office"],
+});
+
+try {
+  const call = await client.dialPhone({
+    from: "+YYYYYYYYYY",
+    to: "+XXXXXXXXXX",
+    timeout: 30,
+  });
+} catch (e) {
+  console.log("Call not answered.");
+}
+```
+
+</TabItem>
+<TabItem value="relay-sdk" label="RELAY SDK">
+
+```js showLineNumbers
+const { RelayConsumer } = require("@signalwire/node");
+
+const consumer = new RelayConsumer({
+  project: "<project-id>",
+  token: "<api-token>",
+  contexts: ["office"],
+  ready: async (consumer) => {
+    const dialResult = await consumer.client.calling.dial({
+      type: "phone",
+      from: "+1XXXXXXXXXX", // Must be a number in your SignalWire Space
+      to: "+1YYYYYYYYYY",
+    });
+    const { successful, call } = dialResult;
+    if (!successful) {
+      console.error("Dial error..");
+      return;
+    }
+  },
+});
+
+consumer.run();
+```
+
+</TabItem>
+</Tabs>

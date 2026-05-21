@@ -1,0 +1,118 @@
+---
+title: Examples
+slug: /dotnet/reference/examples
+toc_max_heading_level: 3
+---
+Follow the examples to see how's easy to use the Relay SDK to interact with inbound or outbound calls.
+
+## Inbound Calls
+
+> Using SignalWire.Relay.Consumer to manage inbound calls from both `home` and `office` contexts. Answer the call, ask the user to enter their PIN and playback the digits sent if successful.
+
+```csharp
+using SignalWire.Relay;
+using SignalWire.Relay.Calling;
+using System;
+using System.Collections.Generic;
+
+namespace Example
+{
+    internal class ExampleConsumer : Consumer
+    {
+        protected override void Setup()
+        {
+            Project = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX";
+            Token = "PTXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
+            Contexts = new List<string> { "home", "office" };
+        }
+
+        // This is executed in a new thread each time, so it is safe to use blocking calls
+        protected override void OnIncomingCall(Call call)
+        {
+            // Answer the incoming call, block until it's answered or an error occurs
+            AnswerResult resultAnswer = call.Answer();
+
+            // Prompt with TTS and collect the PIN, block until it's finished or an error occurs
+            PromptResult resultPrompt = call.PromptTTS(
+                "Welcome to SignalWire! Please enter your PIN",
+                new CallCollect
+                {
+                    InitialTimeout = 10,
+                    Digits = new CallCollect.DigitsParams { Max = 4, DigitTimeout = 5 }
+                });
+
+            if (resultPrompt.Successful)
+            {
+                // Play back what was collected
+                call.PlayTTS("You entered " + resultPrompt.Result + ". Thanks and good bye!");
+            }
+
+            // Hangup
+            call.Hangup();
+        }
+    }
+
+    internal class Program
+    {
+        public static void Main()
+        {
+            new ExampleConsumer().Run();
+        }
+    }
+}
+```
+
+## Outbound Calls
+
+> Make a call and, on `answered`, prompt the user to enter digits.
+
+```csharp
+using SignalWire.Relay;
+using SignalWire.Relay.Calling;
+using System;
+
+namespace Example
+{
+    internal class ExampleConsumer : Consumer
+    {
+        protected override void Setup()
+        {
+            Project = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX";
+            Token = "PTXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
+        }
+
+        protected override void Ready()
+        {
+            // Create a new phone call and dial it immediately, block until it's answered, times out,
+            // busy, or another error occurs
+            DialResult resultDial = Client.Calling.DialPhone("+1XXXXXXXXXX", "+1YYYYYYYYYY");
+
+            // Prompt with TTS and collect the PIN, block until it's finished or an error occurs
+            PromptResult resultPrompt = resultDial.Call.PromptTTS(
+                "Welcome to SignalWire! Please enter your PIN",
+                new CallCollect
+                {
+                    InitialTimeout = 10,
+                    Digits = new CallCollect.DigitsParams { Max = 4, DigitTimeout = 5 }
+                });
+
+            if (resultPrompt.Successful)
+            {
+                // Play back what was collected
+                resultDial.Call.PlayTTS("You entered " + resultPrompt.Result + ". Thanks and good bye!");
+            }
+
+            // Hangup
+            resultDial.Call.Hangup();
+        }
+    }
+
+    internal class Program
+    {
+        public static void Main()
+        {
+            new ExampleConsumer().Run();
+        }
+    }
+}
+```

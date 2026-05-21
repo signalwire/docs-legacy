@@ -1,0 +1,74 @@
+---
+slug: /compatibility-api/sdks/reference/queue-members/list
+title: List
+sidebar_label: List
+toc_max_heading_level: 3
+---
+
+Use this endpoint for the Queue Members method to read all of the queue members that are waiting in a particular queue.
+This will be returned as a list of members.
+
+<EndpointSchemaSnippet endpoint="GET /Accounts/{AccountSid}/Queues/{QueueSid}/Members" />
+
+<EndpointResponseSnippet endpoint="GET /Accounts/{AccountSid}/Queues/{QueueSid}/Members" />
+
+## Request examples
+
+<CodeBlocks>
+
+```javascript title="Node.js"
+const { RestClient } = require('@signalwire/compatibility-api')
+const client = RestClient('YourProjectID', 'YourAuthToken', { signalwireSpaceUrl: 'example.signalwire.com' })
+
+client.queues('QueueSid')
+      .members
+      .each(members => console.log(members.callSid));
+```
+
+```csharp
+using System;
+using System.Collections.Generic;
+using Twilio;
+using Twilio.Rest.Api.V2010.Account.Queue;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        TwilioClient.Init("YourProjectID", "YourAuthToken", new Dictionary<string, object> { ["signalwireSpaceUrl"] = "{SPACE}.signalwire.com" });
+
+        var members = MemberResource.Read(
+            pathQueueSid: "QueueSid"
+        );
+
+        foreach(var record in members)
+        {
+           Console.WriteLine(record.CallSid);
+        }
+    }
+}
+```
+
+```python
+from signalwire.rest import Client as signalwire_client
+
+client = signalwire_client("YourProjectID", "YourAuthToken", signalwire_space_url = 'example.signalwire.com')
+
+members = client.queues('QueueSid').members.list()
+
+for record in members:
+    print(record.call_sid)
+```
+
+```ruby
+require 'signalwire/sdk'
+
+@client = Signalwire::REST::Client.new 'YourProjectID', 'YourAuthToken', signalwire_space_url: "example.signalwire.com"
+
+members = @client.queues('QueueSid').members.list
+
+members.each do |record|
+  puts record.call_sid
+end
+```
+</CodeBlocks>

@@ -1,0 +1,47 @@
+---
+title: "CallRecord"
+slug: /dotnet/reference/calling/call-record
+toc_max_heading_level: 3
+---
+[call-record-audio-params]: /docs/server-sdk/v2/dotnet/reference/calling/call-record-audio-params
+
+# SignalWire.Relay.Calling.CallRecord
+
+This object represents call recording that is being handled, multiple things may be recorded in the same recording in the future, but currently only audio is available.
+It is also possible to start multiple different recordings at the same time.
+
+## Constructor
+
+The only constructor is the default constructor, properties should all be assigned by initializer or after construction.
+
+**Parameters**
+
+None
+
+**Examples**
+
+> Basic Example
+
+```csharp
+CallRecord record = new CallRecord
+{
+    Audio = new CallRecord.AudioParams
+    {
+        // Use default audio recording parameters
+    }
+};
+```
+
+## Properties
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `Audio` | [`SignalWire.Relay.Calling.CallRecord.AudioParams`][call-record-audio-params] | This object contains configuration for recording audio. |
+
+## Methods
+
+None
+
+## Events
+
+None

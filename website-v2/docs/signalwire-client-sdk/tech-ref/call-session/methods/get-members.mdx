@@ -1,0 +1,148 @@
+---
+title: getMembers
+slug: /call-session/getmembers
+---
+
+Retrieves a list of all participants currently in the call.
+
+## Signature
+
+```typescript
+getMembers(): Promise<{ members: VideoMemberEntity[] }>
+```
+
+## Parameters
+
+None
+
+## Returns
+
+**Type:** `Promise<{ members: VideoMemberEntity[] }>`
+
+An object containing an array of member objects with properties including:
+- `id` - Unique member ID
+- `name` - Member display name
+- `audioMuted` - Whether audio is muted
+- `videoMuted` - Whether video is muted
+- `deaf` - Whether incoming audio is muted
+- `talking` - Whether member is currently talking
+- `handraised` - Whether hand is raised
+- `visible` - Whether member is visible in layout
+- `inputVolume`, `outputVolume`, `inputSensitivity` - Audio settings
+- And more
+
+## Important Notes
+
+**Real-time Updates:** `getMembers()` returns a snapshot of members at the time it's called. For real-time updates, listen to member events:
+
+```typescript
+call.on('member.joined', (event) => {
+  console.log('Member joined:', event.member.name)
+})
+
+call.on('member.left', (event) => {
+  console.log('Member left:', event.member.id)
+})
+
+call.on('member.updated', (event) => {
+  console.log('Member updated:', event.member.name)
+})
+```
+
+**Getting Your Own Member:** Your own member is included in the members array:
+
+```typescript
+const { members } = await call.getMembers()
+const me = members.find(m => m.id === call.memberId)
+
+if (me) {
+  console.log('My name:', me.name)
+  console.log('Am I muted?', me.audioMuted)
+}
+```
+
+## Events
+
+Several events involve member information:
+- `member.joined` - New member joined the call
+- `member.left` - Member left the call
+- `member.updated` - Member state changed
+- `member.updated.audioMuted` - Audio mute state changed
+- `member.updated.videoMuted` - Video mute state changed
+- `member.talking` - Member started or stopped talking
+- `memberList.updated` - Batch update of multiple members
+
+## Examples
+
+### Get all members
+
+```typescript
+const { members } = await call.getMembers()
+console.log(`There are ${members.length} participants in the call`)
+
+members.forEach(member => {
+  console.log(`Member: ${member.name} (ID: ${member.id})`)
+})
+```
+
+### Find a specific member
+
+```typescript
+const { members} = await call.getMembers()
+
+const john = members.find(m => m.name === 'John Doe')
+
+if (john) {
+  console.log('John is in the call')
+  console.log('Audio muted:', john.audioMuted)
+  console.log('Video muted:', john.videoMuted)
+}
+```
+
+### Control another member
+
+```typescript
+const { members } = await call.getMembers()
+const targetMember = members.find(m => m.name === 'Jane Smith')
+
+if (targetMember) {
+  await call.audioMute({ memberId: targetMember.id })
+  console.log(`Muted ${targetMember.name}`)
+}
+```
+
+### Filter members by state
+
+```typescript
+const { members } = await call.getMembers()
+
+// Find who's talking
+const talking = members.filter(m => m.talking)
+console.log('Currently talking:', talking.map(m => m.name))
+
+// Find who has video muted
+const videoMuted = members.filter(m => m.videoMuted)
+console.log('Video muted:', videoMuted.map(m => m.name))
+
+// Find who has hand raised
+const handsRaised = members.filter(m => m.handraised)
+console.log('Hands raised:', handsRaised.map(m => m.name))
+```
+
+### Track member count
+
+```typescript
+async function updateMemberCount() {
+  const { members } = await call.getMembers()
+  const count = members.length
+
+  document.getElementById('member-count').textContent = `${count} participant${count !== 1 ? 's' : ''}`
+}
+
+// Update on member changes
+call.on('member.joined', updateMemberCount)
+call.on('member.left', updateMemberCount)
+
+// Initial update
+updateMemberCount()
+```

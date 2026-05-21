@@ -1,0 +1,30 @@
+---
+title: "sendDigits"
+slug: /node/reference/voice/call/send-digits
+description: sendDigits method for the Call class.
+toc_max_heading_level: 3
+---
+
+[call-19]: /docs/server-sdk/v3/node/reference/voice/call
+
+### sendDigits
+
+- **sendDigits**(`digits`): `Promise<Call>` - See [Call][call-19] for more details.
+
+Play DTMF digits to the other party on the call.
+
+#### Parameters
+
+| Name     | Type     |
+|:---------|:---------|
+| `digits` | `string` |
+
+#### Returns
+
+`Promise<Call>` - See [Call][call-19] for more details.
+
+#### Example
+
+```js
+await call.sendDigits("123");
+```

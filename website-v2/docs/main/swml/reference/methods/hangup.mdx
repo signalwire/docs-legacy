@@ -1,0 +1,84 @@
+---
+title: hangup
+slug: /swml/reference/hangup
+description: Ends the call.
+toc_max_heading_level: 3
+---
+
+End the call with an optional reason.
+
+## **Properties**
+
+<ParamField path="hangup" type="object" required={true}>
+  An object that accepts the following properties.
+</ParamField>
+
+**hangup.reason**
+  The reason for hanging up the call.
+
+## **Examples**
+
+### No parameters
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - answer: {}
+    - hangup: {}
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "answer": {}
+      },
+      {
+        "hangup": {}
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+### Set a hangup reason
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - answer: {}
+    - hangup:
+        reason: "busy"
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "answer": {}
+      },
+      {
+        "hangup": {
+          "reason": "busy"
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>

@@ -1,0 +1,270 @@
+---
+title: "Production"
+sidebar_label: "Production"
+slug: /python/guides/production
+toc_max_heading_level: 3
+---
+
+## Production Deployment
+
+Deploy agents to production with proper SSL, authentication, monitoring, and scaling. Use uvicorn workers, nginx reverse proxy, and systemd for process management.
+
+### Production Checklist
+
+#### Security
+- HTTPS enabled with valid certificates
+- Basic authentication configured
+- Firewall rules in place
+- No secrets in code or logs
+
+#### Reliability
+- Process manager (systemd/supervisor)
+- Health checks configured
+- Logging to persistent storage
+- Error monitoring/alerting
+
+#### Performance
+- Multiple workers for concurrency
+- Reverse proxy (nginx) for SSL termination
+- Load balancing if needed
+
+### Environment Variables
+
+```bash
+## Authentication (required for production)
+export SWML_BASIC_AUTH_USER="your-username"
+export SWML_BASIC_AUTH_PASSWORD="your-secure-password"
+
+## SSL Configuration
+export SWML_SSL_ENABLED="true"
+export SWML_SSL_CERT_PATH="/etc/ssl/certs/agent.crt"
+export SWML_SSL_KEY_PATH="/etc/ssl/private/agent.key"
+
+## Domain configuration
+export SWML_DOMAIN="agent.example.com"
+
+## Proxy URL (if behind load balancer/reverse proxy)
+export SWML_PROXY_URL_BASE="https://agent.example.com"
+```
+
+### Running with Uvicorn Workers
+
+For production, run with multiple workers:
+
+```bash
+## Run with 4 workers
+uvicorn my_agent:app --host 0.0.0.0 --port 3000 --workers 4
+```
+
+Create an entry point module:
+
+```python
+## app.py
+from my_agent import MyAgent
+
+agent = MyAgent()
+app = agent._app
+```
+
+### Systemd Service
+
+Create `/etc/systemd/system/signalwire-agent.service`:
+
+```ini
+[Unit]
+Description=SignalWire AI Agent
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/opt/agent
+Environment="PATH=/opt/agent/venv/bin"
+Environment="SWML_BASIC_AUTH_USER=your-username"
+Environment="SWML_BASIC_AUTH_PASSWORD=your-password"
+ExecStart=/opt/agent/venv/bin/uvicorn app:app --host 127.0.0.1 --port 3000 --workers 4
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Enable and start:
+
+```bash
+sudo systemctl enable signalwire-agent
+sudo systemctl start signalwire-agent
+sudo systemctl status signalwire-agent
+```
+
+### Nginx Reverse Proxy
+
+```nginx
+## /etc/nginx/sites-available/agent
+server {
+    listen 443 ssl http2;
+    server_name agent.example.com;
+
+    ssl_certificate /etc/ssl/certs/agent.crt;
+    ssl_certificate_key /etc/ssl/private/agent.key;
+
+    location / {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_read_timeout 300s;
+        proxy_connect_timeout 75s;
+    }
+}
+
+server {
+    listen 80;
+    server_name agent.example.com;
+    return 301 https://$server_name$request_uri;
+}
+```
+
+Enable the site:
+
+```bash
+sudo ln -s /etc/nginx/sites-available/agent /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl reload nginx
+```
+
+### Production Architecture
+
+<Frame caption="Production Architecture">
+  <img className="diagram" src={require("@image/agents-sdk-manual/07_02_production_diagram1.webp").default} alt="Production Architecture." />
+</Frame>
+
+### SSL Configuration
+
+#### Using Environment Variables
+
+```bash
+export SWML_SSL_ENABLED="true"
+export SWML_SSL_CERT_PATH="/path/to/cert.pem"
+export SWML_SSL_KEY_PATH="/path/to/key.pem"
+```
+
+#### Let's Encrypt with Certbot
+
+```bash
+## Install certbot
+sudo apt install certbot python3-certbot-nginx
+
+## Get certificate
+sudo certbot --nginx -d agent.example.com
+
+## Auto-renewal is configured automatically
+```
+
+### Health Checks
+
+For AgentServer deployments:
+
+```bash
+## Health check endpoint
+curl https://agent.example.com/health
+```
+
+Response:
+
+```json
+{
+    "status": "ok",
+    "agents": 1,
+    "routes": ["/"]
+}
+```
+
+For load balancers, use this endpoint to verify agent availability.
+
+### Logging Configuration
+
+```python
+import logging
+
+## Configure logging for production
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler('/var/log/agent/agent.log'),
+        logging.StreamHandler()
+    ]
+)
+```
+
+Or use environment variable:
+
+```bash
+export SIGNALWIRE_LOG_MODE=default
+```
+
+### Monitoring
+
+#### Prometheus Metrics
+
+Add custom metrics to your agent:
+
+```python
+from prometheus_client import Counter, Histogram, start_http_server
+
+## Start metrics server on port 9090
+start_http_server(9090)
+
+## Define metrics
+call_counter = Counter('agent_calls_total', 'Total calls handled')
+call_duration = Histogram('agent_call_duration_seconds', 'Call duration')
+```
+
+#### External Monitoring
+
+- **Uptime monitoring**: Monitor the health endpoint
+- **Log aggregation**: Ship logs to ELK, Datadog, or similar
+- **APM**: Use Application Performance Monitoring tools
+
+### Scaling Considerations
+
+#### Vertical Scaling
+- Increase uvicorn workers (`--workers N`)
+- Use larger server instances
+- Optimize agent code and external calls
+
+#### Horizontal Scaling
+- Multiple server instances behind load balancer
+- Stateless agent design
+- Shared session storage (Redis) if needed
+
+#### Serverless
+- Auto-scaling with Lambda/Cloud Functions
+- Pay per invocation
+- No server management
+
+### Security Best Practices
+
+**DO:**
+- Use HTTPS everywhere
+- Set strong basic auth credentials
+- Use environment variables for secrets
+- Enable firewall and limit access
+- Regularly update dependencies
+- Monitor for suspicious activity
+
+**DON'T:**
+- Expose debug endpoints in production
+- Log sensitive data
+- Use default credentials
+- Disable SSL verification
+- Run as root user
+
+
+

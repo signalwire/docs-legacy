@@ -1,0 +1,178 @@
+---
+author: Len Graham
+coauthor: Devon White
+title: Adding AI capabilities to FreeSWITCH
+description: Learn how to add an AI agent to your FreeSWITCH instance to handle your calls.
+slug: /platform/freeswitch/add-ai-to-freeswitch
+x-custom:
+  tags:
+    - product:freeswitch
+    - favorite
+    - product:ai
+    - product:voice
+---
+
+Did you know you can add an AI agent to your FreeSWITCH instance to handle your calls?
+In this guide, we’ll walk through an example code snippet for bridging a FreeSWITCH dialplan to a [SignalWire AI Agent](https://signalwire.com/products/ai-agent).
+This will allow an AI agent to take over the call as a virtual assistant or an IVR replacement,
+which is especially useful if you’re receiving many calls at once.
+
+## **What is the SignalWire AI Agent?**
+
+SignalWire’s AI Agent is a low-code voice agent you can build using [plain-text instructions](https://signalwire.com/blogs/product/tips-for-building-ai-agent).
+Personality, skills, and areas of expertise can all be customized in a [simple drag-and-drop interface](https://signalwire.com/blogs/product/build-your-own-voice-agent).
+You can also code your own if you want it to [perform more complex functions](https://signalwire.com/blogs/developers/using-signalwire-ai-agent-to-create-a-surveybot).
+
+You can use an AI agent as a [virtual receptionist](https://signalwire.com/blogs/product/ai-agent-examples) for your business,
+or as your own personal AI assistant. With the power of AI, the agent does not require pre-recorded messages or
+even text-to-speech prompts - it’s smart enough to engage in conversation with callers based on plain language instructions.
+
+---
+
+## **SIP Domain Application**
+
+Once you have created your AI agent, we can now assign the agent to a SIP domain application in your SignalWire dashboard.
+This will allow us to bridge the FreeSWITCH dialplan to the AI agent, so that the AI agent can take over the call.
+
+SIP domain applications can be created from your space dashboard. Please follow our [SIP domain applications introduction](/docs/platform/voice/sip/domain-applications)
+to follow a detailed guide on creating them.
+
+### Configuring the SIP Domain Application With Your AI Agent
+
+Once you have created your domain application, you can now configure it to
+handle calls with your AI agent. In the `Domain Apps` page, click on the
+`Edit` button or the name for the domain application you want to configure.
+
+
+
+
+In the `Edit Domain App` page, you can configure the domain application to
+handle incoming calls with your AI agent resource. Click on the `Handle Using` select box
+and choose `an AI Agent`. Then under the `When a Call Comes In` section, select the AI agent
+you want to use for the domain application.
+
+<Tip>
+For more complex AI use-cases, you might want to consider using [SignalWire Markup Language (SWML)](/docs/swml).
+You can use a SWML script resource to define the AI agent's behavior.
+</Tip>
+
+<Frame caption="Assign an AI Agent to handle SIP domain application's incoming calls">
+
+![The Domain Applications page of the SignalWire dashboard with "Handle Incoming Calls" section selecting AI Agent](@image/dashboard/sip/sip-domain-apps-ai-agent.webp)
+
+</Frame>
+
+---
+
+## **FreeSWITCH Dialplan Configuration**
+
+Now that we have configured our AI agent in the SignalWire dashboard, we can now bridge the FreeSWITCH dialplan to the AI agent.
+
+We'll break down the components of the following code snippet:
+
+```xml
+<extension name="testing_ai" continue="false" uuid="6d0ecaef-9049-4920-8d1a-fc97ff4731f0">
+	<condition field="destination_number" expression="^55555$">
+		<action application="ring_ready" data=""/>
+		<action application="answer" data=""/>
+		<action application="sleep" data="500"/>
+		<action application="set" data="hangup_after_bridge=true"/>
+		<action application="set" data="ringback=local_stream://default"/>
+		<action application="bridge" data="sofia/external/FreeSWITCH_AI@dev-freeswitch-ai.dapp.swire.io;transport=tcp"/>
+	</condition>
+</extension>
+```
+
+In the bridge, be sure to replace `FreeSWITCH_AI@dev-freeswitch-ai.dapp.swire.io` with your SignalWire domain app SIP address.
+
+### Dialplan Details
+
+The given dialplan defines an extension within a FreeSWITCH configuration file. Let's break
+down its components for a clearer understanding:
+
+#### `<extension>`
+
+```xml
+<extension name="testing_ai" continue="false" uuid="6d0ecaef-9049-4920-8d1a-fc97ff4731f0">
+```
+
+- `name="testing_ai"`: The name of the extension. This is a unique identifier for the extension.
+- `continue="false"`: Indicates whether FreeSWITCH should continue processing more extensions
+if this extension is executed. false means no further extensions will be processed.
+- `uuid="6d0ecaef-9049-4920-8d1a-fc97ff4731f0"`: A unique identifier for this specific extension instance.
+
+#### `<condition>`
+
+```xml
+<condition field="destination_number" expression="^55555$">
+```
+
+- `field="destination_number"`: This specifies that the condition is based on the destination number of the call.
+- `expression="^55555$"`: A regular expression that matches the number 55555. Only calls to this
+exact number will trigger the actions defined in this extension.
+
+#### `<action>`
+
+Each `<action>` element represents a step in the call handling process. This configuration is particularly
+useful for setting up specialized call routing and handling behaviors in FreeSWITCH.
+
+This block provides a detailed breakdown of the extension, condition, and actions within the provided FreeSWITCH dialplan configuration.
+
+The actions are executed sequentially when the condition is met:
+
+##### ring_ready
+
+Sends a ringing signal to the caller, indicating that the call is being processed but not yet answered.
+
+```xml
+<action application="ring_ready" data=""/>
+```
+
+##### answer
+
+Answers the call.
+
+```xml
+<action application="answer" data=""/>
+```
+
+##### sleep
+
+Pauses the call processing for 500 milliseconds.
+
+```xml
+<action application="sleep" data="500"/>
+```
+
+##### Set hangup_after_bridge
+
+Sets a variable `hangup_after_bridge` to `true`, which means the call will be hung up immediately
+after the bridge application completes its execution.
+
+```xml
+<action application="set" data="hangup_after_bridge=true"/>
+```
+
+##### Set ringback
+
+Sets the ringback tone to be played to the caller. In this case, it uses a default local stream.
+
+```xml
+<action application="set" data="ringback=local_stream://default"/>
+```
+
+##### bridge
+
+Bridges the call to the SignalWire SIP URI `FreeSWITCH_AI@dev-freeswitch-ai.dapp.swire.io` using
+the TCP transport. This effectively forwards the call to the specified SIP address
+
+```xml
+ <action application="bridge" data="sofia/external/FreeSWITCH_AI@dev-freeswitch-ai.dapp.swire.io;transport=tcp"/>
+```
+
+
+
+
+
+
+

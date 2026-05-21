@@ -1,0 +1,37 @@
+---
+title: "setMeta"
+slug: /js/reference/video/room-session/set-meta
+description: setMeta method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+### setMeta
+
+- **setMeta**(`meta`): `Promise<void>`
+
+Assigns custom metadata to the RoomSession. You can use this to store metadata whose meaning is entirely defined by your application.
+
+Note that calling this method overwrites any metadata that had been previously set on this RoomSession.
+
+#### Parameters
+
+<ParamField path="meta" type="Record<string, unknown>">
+  The medatada object to assign to the RoomSession.
+</ParamField>
+
+#### Returns
+
+`Promise<void>`
+
+#### Permissions
+
+- `room.set_meta`
+
+You need to specify the permissions when [creating the Video Room Token](/docs/apis/video/create-room-token) on the server side.
+
+#### Example
+
+```js
+await roomSession.setMeta({ foo: "bar" });
+```
+

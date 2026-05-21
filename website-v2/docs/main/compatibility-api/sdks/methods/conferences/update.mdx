@@ -1,0 +1,123 @@
+---
+slug: /compatibility-api/sdks/reference/conferences/update
+title: Update
+sidebar_label: Update
+toc_max_heading_level: 3
+---
+
+Use this endpoint for the Conference method to modify the properties of a conference.
+
+<EndpointSchemaSnippet endpoint="POST /Accounts/{AccountSid}/Conferences/{Sid}" />
+
+## Request examples
+
+### Update a conference
+
+<CodeBlocks>
+```javascript title="Node.js"
+const { RestClient } = require('@signalwire/compatibility-api')
+const client = RestClient('YourProjectID', 'YourAuthToken', { signalwireSpaceUrl: 'example.signalwire.com' })
+
+client.conferences('Sid')
+      .update()
+      .then(conference => console.log(conference.friendlyName))
+      .done();
+```
+```csharp
+using System;
+using System.Collections.Generic;
+using Twilio;
+using Twilio.Rest.Api.V2010.Account;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        TwilioClient.Init("YourProjectID", "YourAuthToken", new Dictionary<string, object> { ["signalwireSpaceUrl"] = "{SPACE}.signalwire.com" });
+
+        var conference = ConferenceResource.Update(
+            pathSid: "Sid"
+        );
+
+        Console.WriteLine(conference.FriendlyName);
+    }
+}
+```
+```python
+from signalwire.rest import Client as signalwire_client
+
+client = signalwire_client("YourProjectID", "YourAuthToken", signalwire_space_url = 'example.signalwire.com')
+
+conference = client.conferences('Sid') \
+                   .update()
+
+print(conference.friendly_name)
+```
+```ruby
+require 'signalwire/sdk'
+
+@client = Signalwire::REST::Client.new 'YourProjectID', 'YourAuthToken', signalwire_space_url: "example.signalwire.com"
+
+conference = @client.conferences('Sid')
+                    .update()
+
+puts conference.friendly_name
+```
+</CodeBlocks>
+
+### Terminate a conference
+
+End an active conference call by setting the status to `completed`.
+
+<CodeBlocks>
+```javascript title="Node.js"
+const { RestClient } = require('@signalwire/compatibility-api')
+const client = RestClient('YourProjectID', 'YourAuthToken', { signalwireSpaceUrl: 'example.signalwire.com' })
+
+client.conferences('Sid')
+      .update({status: 'completed'})
+      .then(conference => console.log(conference.friendlyName))
+      .done();
+```
+```csharp
+using System;
+using System.Collections.Generic;
+using Twilio;
+using Twilio.Rest.Api.V2010.Account;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        TwilioClient.Init("YourProjectID", "YourAuthToken", new Dictionary<string, object> { ["signalwireSpaceUrl"] = "{SPACE}.signalwire.com" });
+
+        var conference = ConferenceResource.Update(
+            status: ConferenceResource.UpdateStatusEnum.Completed,
+            pathSid: "Sid"
+        );
+
+        Console.WriteLine(conference.FriendlyName);
+    }
+}
+```
+```python
+from signalwire.rest import Client as signalwire_client
+
+client = signalwire_client("YourProjectID", "YourAuthToken", signalwire_space_url = 'example.signalwire.com')
+
+conference = client.conferences('Sid') \
+                   .update(status='completed')
+
+print(conference.friendly_name)
+```
+```ruby
+require 'signalwire/sdk'
+
+@client = Signalwire::REST::Client.new 'YourProjectID', 'YourAuthToken', signalwire_space_url: "example.signalwire.com"
+
+conference = @client.conferences('Sid')
+                    .update(status: 'completed')
+
+puts conference.friendly_name
+```
+</CodeBlocks>

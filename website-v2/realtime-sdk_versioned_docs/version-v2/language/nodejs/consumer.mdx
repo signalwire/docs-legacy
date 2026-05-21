@@ -1,0 +1,227 @@
+---
+title: Relay.Consumer
+slug: /node/reference/consumer
+toc_max_heading_level: 3
+---
+
+[relay-calling-call]: /docs/server-sdk/v2/node/reference/calling/call
+[relay-client]: /docs/server-sdk/v2/node/reference/relay-client
+[relay-messaging-message]: /docs/server-sdk/v2/node/reference/messaging/message
+[relay-task]: /docs/server-sdk/v2/node/reference/task
+A RELAY Consumer is a simple Node object that runs in its own process along side your application to handle calling and messaging events in realtime. RELAY Consumers abstract all the setup of connecting to RELAY and automatically dispatch workers to handle requests. Consumers will receive requests and delegate them to their own worker thread, allowing you to focus on your business logic without having to worry about multi-threading or blocking, everything just works. Think of RELAY Consumers like a background worker system for all your calling and messaging needs.
+
+## Creating Consumers
+
+A RELAY Consumer is a simple object, customized by specifying contexts and event handlers to respond to incoming events.
+
+A consumer has 2 required properties: `project`, `token`, and usually requires at least one `contexts` for incoming events. Project and Token are used to authenticate your Consumer to your SignalWire account. Contexts are a list of contexts you want this Consumer to listen for.
+
+```javascript
+const { RelayConsumer } = require('@signalwire/node')
+
+const consumer = new RelayConsumer({
+  project: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
+  token: 'PTXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
+  contexts: ['default'],
+  onIncomingCall: async (call) => {
+    await call.answer()
+    await call.playTTS({ text: 'Welcome to SignalWire!' })
+  }
+})
+
+consumer.run()
+```
+
+## Initializing Consumers
+
+You can optionally add a `setup` method if you need to do any initialization work before processing messages. This is useful to do any one-off work that you wouldn't want to do for each and every event, such as setting up logging or connecting to a datastore.
+
+```javascript
+const { RelayConsumer } = require('@signalwire/node')
+
+const consumer = new RelayConsumer({
+  project: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
+  token: 'PTXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
+  contexts: ['default'],
+  setup: (consumer) => {
+    // Initialize anything you'd like available for all events.
+    // Like logging, database connections, etc.
+  },
+  onIncomingCall: async (call) => {
+    await call.answer()
+    await call.playTTS({ text: 'Welcome to SignalWire!' })
+  }
+})
+
+consumer.run()
+```
+
+## Properties
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `client` | [`Relay.Client`][relay-client] | The underlying Relay client object |
+
+<Note>
+You can access the properties from every Consumer methods using `this` keyword only if you are using `functions` instead of `arrow functions`.
+</Note>
+
+## Event Handlers
+
+Event handlers are where you will write most of your code. They are executed when your consumer receives a matching event for the contexts specified by your Consumer.
+
+### ready
+
+Executed once your Consumer is connected to RELAY and the session has been established. It passes in the Consumer object itself.
+
+```javascript
+const { RelayConsumer } = require('@signalwire/node')
+
+const consumer = new RelayConsumer({
+  project: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
+  token: 'PTXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
+  contexts: ['default'],
+  ready: async (consumer) => {
+    const { client } = consumer
+    const { successful, call } = await client.calling.dial({
+      type: 'phone',
+      from: '+1XXXXXXXXXX',
+      to: '+1YYYYYYYYYY',
+      timeout: 30
+    })
+
+    if (successful) {
+      // Use call ...
+    }
+  }
+})
+
+consumer.run()
+```
+
+### onIncomingCall
+
+Executed when you receive an inbound call, passes in the inbound [`Call`][relay-calling-call] object.
+
+```javascript
+const { RelayConsumer } = require('@signalwire/node')
+
+const consumer = new RelayConsumer({
+  project: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
+  token: 'PTXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
+  contexts: ['default'],
+  onIncomingCall: async (call) => {
+    await call.answer()
+    await call.playTTS({ text: 'Welcome to SignalWire!' })
+  }
+})
+
+consumer.run()
+```
+
+### onTask
+
+Executed with your message sent through a [`Relay.Task`][relay-task].
+
+```javascript
+const { RelayConsumer } = require('@signalwire/node')
+
+const consumer = new RelayConsumer({
+  project: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
+  token: 'PTXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
+  contexts: ['default'],
+  onTask: async (message) => {
+    console.log('Inbound task', message)
+    // ..Use your own 'message' sent in the context "default" from a Relay.Task
+  }
+})
+
+consumer.run()
+```
+
+### onIncomingMessage
+
+Executed when you receive an inbound SMS or MMS, passes in the inbound [`Message`][relay-messaging-message] object.
+
+```javascript
+const { RelayConsumer } = require('@signalwire/node')
+
+const consumer = new RelayConsumer({
+  project: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
+  token: 'PTXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
+  contexts: ['default'],
+  onIncomingMessage: async (message) => {
+    // Handle the inbound message here..
+    console.log('Received message', message.id, message.context)
+  }
+})
+
+consumer.run()
+```
+
+### onMessageStateChange
+
+Executed when a message state changes, passes in the inbound [`Message`][relay-messaging-message] object.
+
+```javascript
+const { RelayConsumer } = require('@signalwire/node')
+
+const consumer = new RelayConsumer({
+  project: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
+  token: 'PTXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
+  contexts: ['default'],
+  ready: async ({ client }) => {
+    // Once the Consumer is ready send an SMS
+    const params = {
+      context: 'office',
+      from: '+1yyy',
+      to: '+1xxx',
+      body: 'Welcome at SignalWire!' }
+    const { successful, messageId } = await client.messaging.send(params)
+    if (successful) {
+      console.log('Message ID: ', messageId)
+    } else {
+      console.error('Error sending the SMS')
+    }
+  },
+  onMessageStateChange: async (message) => {
+    // Keep track of your SMS state changes..
+    console.log('Message state change', message.id, message.state)
+  }
+})
+
+consumer.run()
+```
+
+## Cleaning Up on Exit
+
+When a RELAY Consumer shuts down, you have the opportunity to clean up any resources held by the consumer. For example, you could close any open files, network connections, or send a notification to your monitoring service.
+
+Just implement a `teardown` method in your consumer and it will be called during the shutdown procedure.
+
+```javascript
+const { RelayConsumer } = require('@signalwire/node')
+
+const consumer = new RelayConsumer({
+  project: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
+  token: 'PTXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
+  contexts: ['default'],
+  onIncomingCall: async (call) => {
+    await call.answer()
+    await call.playTTS({ text: 'Welcome to SignalWire!' })
+  },
+  teardown: () => {
+    // Clean up any resources when exiting.
+  },
+})
+
+consumer.run()
+```
+
+## Running Consumers
+
+Running a consumer is just like running any Node.js script, simply execute the script as a separate process and ensure you have `.run()` at the end of your script. The process will stay up until you shut it down.
+
+## Shutting Down Consumers
+
+In order to gracefully shut down a RELAY consumer process, send it the `SIGTERM` signal. Most process supervisors such as Runit, Docker and Kubernetes send this signal when shutting down a process, so using those systems will make things easier.

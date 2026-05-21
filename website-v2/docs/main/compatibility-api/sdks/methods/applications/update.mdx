@@ -1,0 +1,132 @@
+---
+slug: /compatibility-api/sdks/reference/applications/update
+title: Update
+sidebar_label: Update
+toc_max_heading_level: 3
+---
+
+Use this endpoint for the Applications method to modify the properties of an application.
+
+<EndpointSchemaSnippet endpoint="POST /Accounts/{AccountSid}/Applications/{Sid}" />
+
+## Request examples
+
+### Update an application
+
+<CodeBlocks>
+```javascript title="Node.js"
+const { RestClient } = require('@signalwire/compatibility-api')
+const client = RestClient('YourProjectID', 'YourAuthToken', { signalwireSpaceUrl: 'example.signalwire.com' })
+
+client.applications('Sid')
+      .update({smsUrl: 'http://your-application.com/docs/sms.xml'})
+      .then(application => console.log(application.friendlyName))
+      .done();
+```
+```csharp
+using System;
+using System.Collections.Generic;
+using Twilio;
+using Twilio.Rest.Api.V2010.Account;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        TwilioClient.Init("YourProjectID", "YourAuthToken", new Dictionary<string, object> { ["signalwireSpaceUrl"] = "{SPACE}.signalwire.com" });
+
+        var application = ApplicationResource.Update(
+            smsUrl: new Uri("http://your-application.com/docs/sms.xml"),
+            pathSid: "Sid"
+        );
+
+        Console.WriteLine(application.FriendlyName);
+    }
+}
+```
+```python
+from signalwire.rest import Client as signalwire_client
+
+client = signalwire_client("YourProjectID", "YourAuthToken", signalwire_space_url = 'example.signalwire.com')
+
+application = client.applications('Sid') \
+                    .update(sms_url='http://your-application.com/docs/sms.xml')
+
+print(application.friendly_name)
+```
+```ruby
+require 'signalwire/sdk'
+
+@client = Signalwire::REST::Client.new 'YourProjectID', 'YourAuthToken', signalwire_space_url: "example.signalwire.com"
+
+application = @client.applications('Sid')
+                     .update(
+                        sms_url: 'http://your-application.com/docs/sms.xml'
+                      )
+
+puts application.friendly_name
+```
+</CodeBlocks>
+
+### Update an application's VoiceUrl
+
+Update the URL that SignalWire will request when a call to your account is received.
+
+<CodeBlocks>
+```javascript title="Node.js"
+const { RestClient } = require('@signalwire/compatibility-api')
+const client = RestClient('YourProjectID', 'YourAuthToken', { signalwireSpaceUrl: 'example.signalwire.com' })
+
+client.applications('Sid')
+      .update({
+         voiceUrl: 'http://your-application.com/docs/voice.xml'
+       })
+      .then(application => console.log(application.friendlyName))
+      .done();
+```
+```csharp
+using System;
+using System.Collections.Generic;
+using Twilio;
+using Twilio.Rest.Api.V2010.Account;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        TwilioClient.Init("YourProjectID", "YourAuthToken", new Dictionary<string, object> { ["signalwireSpaceUrl"] = "{SPACE}.signalwire.com" });
+
+        var application = ApplicationResource.Update(
+            voiceUrl: new Uri("http://your-application.com/docs/voice.xml"),
+            pathSid: "Sid"
+        );
+
+        Console.WriteLine(application.FriendlyName);
+    }
+}
+```
+```python
+from signalwire.rest import Client as signalwire_client
+
+client = signalwire_client("YourProjectID", "YourAuthToken", signalwire_space_url = 'example.signalwire.com')
+
+application = client.applications('Sid') \
+                    .update(
+                         voice_url='http://your-application.com/docs/voice.xml'
+                     )
+
+print(application.friendly_name)
+```
+```ruby
+require 'signalwire/sdk'
+
+@client = Signalwire::REST::Client.new 'YourProjectID', 'YourAuthToken', signalwire_space_url: "example.signalwire.com"
+
+application = @client.applications('Sid')
+                     .update(
+                        voice_url: 'http://your-application.com/docs/voice.xml'
+                      )
+
+puts application.friendly_name
+```
+</CodeBlocks>

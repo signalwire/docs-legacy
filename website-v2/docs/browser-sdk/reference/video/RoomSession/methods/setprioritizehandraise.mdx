@@ -1,0 +1,36 @@
+---
+title: "setPrioritizeHandraise"
+slug: /js/reference/video/room-session/set-prioritize-handraise
+description: setPrioritizeHandraise method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+### setPrioritizeHandraise
+
+- **setPrioritizeHandraise**(`params`): `Promise<boolean>`
+
+Sets whether to prioritize hand-raise's or not.
+
+#### Parameters
+
+<ParamField path="param" type="boolean">
+  Whether to raise or lower the hand. Default: `true`. If omitted, the hand status is toggled to the opposite of the current status.
+</ParamField>
+
+#### Permissions
+
+- `video.prioritize_handraise`
+
+You need to specify the permissions when [creating the Video Room Token](/docs/apis/video/create-room-token) on the server side.
+
+
+#### Returns
+
+`Promise<boolean>`
+
+#### Example
+
+```javascript
+await room.setPrioritizeHandraise(false)
+```
+

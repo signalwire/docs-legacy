@@ -1,0 +1,52 @@
+---
+title: "dial"
+slug: /node/reference/voice/client/dial
+description: dial method for the Client class.
+toc_max_heading_level: 3
+---
+
+[call-5]: /docs/server-sdk/v3/node/reference/voice/call
+[link-1]: /docs/server-sdk/v3/node/reference/voice/client/dial-phone
+[link-2]: /docs/server-sdk/v3/node/reference/voice/client/dial-sip
+[voicedevicebuilder-1]: /docs/server-sdk/v3/node/reference/voice/device-builder
+[voicedevicebuilder]: /docs/server-sdk/v3/node/reference/voice/device-builder
+
+### dial
+
+- **dial**(`dialer`): `Promise<Call>` - See [Call][call-5] for more details.
+
+Makes an outbound Call and waits until it has been answered or hung up. This is an advanced method that lets you call multiple devices in parallel or series: for simpler use cases, see [dialPhone][link-1] and [dialSip][link-2].
+
+With this method you can specify a configuration of devices to call in series and/or in parallel: as soon as one device answers the call, the returned promise is resolved. You specify a configuration through a [VoiceDeviceBuilder][voicedevicebuilder] object.
+
+#### Parameters
+
+| Name     | Type                                             | Description                                |
+| :------- | :----------------------------------------------- | :----------------------------------------- |
+| `dialer` | [`VoiceDeviceBuilder`][voicedevicebuilder-1] | The Dialer specifying the devices to call. |
+
+#### Returns
+
+`Promise<Call>` - See [Call][call-5] for more details.
+
+A call object.
+
+#### Example
+
+Calls a phone number. If the number doesn't answer within 30 seconds, calls two different SIP endpoints in parallel.
+
+```js
+const devices = new Voice.DeviceBuilder()
+  .add(Voice.DeviceBuilder.Phone({ from: "+XXXXXX", to: "+YYYYYY", timeout: 30 }))
+  .add([
+    Voice.DeviceBuilder.Sip({ from: "sip:aaa@bbb.cc", to: "sip:xxx@yyy.zz" }),
+    Voice.DeviceBuilder.Sip({ from: "sip:aaa@bbb.cc", to: "sip:ppp@qqq.rr" }),
+  ]);
+
+try {
+  const call = await client.dial(devices);
+  console.log("Call answered");
+} catch (e) {
+  console.log("Call not answered");
+}
+```

@@ -1,0 +1,200 @@
+---
+title: videoMute
+slug: /call-session/videomute
+---
+
+import APIField from '@site/src/components/APIField';
+
+Mutes the video for yourself or another participant in the call.
+
+## Parameters
+
+<APIField name="params" type="MemberCommandParams">
+  Configuration for the mute operation.
+</APIField>
+
+<APIField name="params.memberId" type="string" default="Your member ID">
+  Member to mute. Omit to mute your own video, provide specific ID to mute another member.
+</APIField>
+
+## Signature
+
+```typescript
+videoMute(params?: MemberCommandParams): Promise<void>
+```
+
+## Returns
+
+**Type:** `Promise<void>`
+
+## Permissions
+
+- **Mute yourself:** Requires `call.capabilities.self.muteVideo.on`
+- **Mute another member:** Requires `call.capabilities.member.muteVideo.on`
+
+## Events
+
+- `member.updated` - General member update event
+- `member.updated.videoMuted` - Specific event for video mute state change
+
+## Important Notes
+
+**Member Targeting:**
+
+The `memberId` parameter follows the standard member targeting pattern:
+- **No parameter** - Mutes your own video
+- **Specific member ID** - Mutes that member's video (requires permission)
+
+```typescript
+// Mute your own video
+await call.videoMute()
+
+// Mute a specific member's video
+await call.videoMute({ memberId: 'de550c0c-3fac-4efd-b06f-b5b8614b8966' })
+```
+
+**Visual Effect:**
+
+When video is muted, participants will see a placeholder image instead of the video stream.
+
+## Examples
+
+### Mute your own video
+
+```typescript
+// Mute your own video
+await call.videoMute()
+console.log('Your video is now muted')
+```
+
+### Mute another participant's video
+
+```typescript
+// Get the list of members
+const { members } = await call.getMembers()
+
+// Find a specific member
+const member = members.find(m => m.name === 'John Doe')
+
+if (member) {
+  // Mute that member's video (requires permission)
+  await call.videoMute({ memberId: member.id })
+  console.log(`Muted ${member.name}'s video`)
+}
+```
+
+### Toggle video on/off
+
+```typescript
+let isVideoMuted = false
+
+async function toggleVideo() {
+  if (isVideoMuted) {
+    await call.videoUnmute()
+    console.log('Video enabled')
+  } else {
+    await call.videoMute()
+    console.log('Video disabled')
+  }
+  isVideoMuted = !isVideoMuted
+}
+
+// Toggle video
+toggleVideo()
+```
+
+### With event listeners
+
+```typescript
+// Listen for video mute events
+call.on('member.updated.videoMuted', (event) => {
+  const status = event.member.video_muted ? 'muted' : 'unmuted'
+  console.log(`Member ${event.member.id} video is ${status}`)
+})
+
+// Mute your video
+await call.videoMute()
+```
+
+### Check capabilities before muting
+
+```typescript
+// Check if you can mute your own video
+if (call.capabilities?.self.muteVideo.on) {
+  await call.videoMute()
+  console.log('Successfully muted your video')
+} else {
+  console.log('You do not have permission to mute your video')
+}
+
+// Check if you can mute other members' video
+if (call.capabilities?.member.muteVideo.on) {
+  await call.videoMute({ memberId: 'member-id' })
+  console.log('Successfully muted member video')
+} else {
+  console.log('You do not have permission to mute other members')
+}
+```
+
+### Provide UI feedback
+
+```typescript
+const videoButton = document.getElementById('video-btn')
+
+videoButton.addEventListener('click', async () => {
+  const isVideoMuted = videoButton.classList.contains('muted')
+
+  try {
+    if (isVideoMuted) {
+      await call.videoUnmute()
+      videoButton.textContent = 'Stop Video'
+      videoButton.classList.remove('muted')
+    } else {
+      await call.videoMute()
+      videoButton.textContent = 'Start Video'
+      videoButton.classList.add('muted')
+    }
+  } catch (error) {
+    console.error('Failed to toggle video:', error)
+  }
+})
+```
+
+### Track video state
+
+```typescript
+let isVideoMuted = false
+
+call.on('member.updated.videoMuted', (event) => {
+  if (event.member.id === call.memberId) {
+    isVideoMuted = event.member.video_muted
+    updateVideoUI(isVideoMuted)
+  }
+})
+
+function updateVideoUI(muted) {
+  const button = document.getElementById('video-btn')
+  button.textContent = muted ? 'Start Video' : 'Stop Video'
+  button.classList.toggle('muted', muted)
+}
+```
+
+### Handle video element visibility
+
+```typescript
+call.on('member.updated.videoMuted', (event) => {
+  const videoElement = document.getElementById(`video-${event.member.id}`)
+
+  if (videoElement) {
+    if (event.member.video_muted) {
+      // Show placeholder when video is muted
+      videoElement.style.display = 'none'
+      showPlaceholder(event.member.id)
+    } else {
+      // Show video when unmuted
+      videoElement.style.display = 'block'
+      hidePlaceholder(event.member.id)
+    }
+  }
+})
+```

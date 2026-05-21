@@ -1,0 +1,250 @@
+---
+title: "CallRecording"
+keywords:
+  - SignalWire
+  - Realtime SDK
+  - Node.js
+  - call recording
+  - record call
+  - audio recording
+slug: /node/reference/voice/call-recording
+sidebar_label: CallRecording
+description: CallRecording object reference for recording voice calls. Control recordings with pause, resume, and stop methods. Access recording URLs and metadata.
+toc_max_heading_level: 3
+---
+
+[callrecording]: #
+[record]: /docs/server-sdk/node/reference/voice/call/record
+[recordAudio]: /docs/server-sdk/node/reference/voice/call/record-audio
+
+Represents a recording of a call.
+
+Obtain instances of this class by starting a Recording with one of the following methods:
+
+- [`Call.record`][record]
+- [`Call.recordAudio`][recordAudio]
+
+#### Example
+
+Record the audio of the call as soon as the other party answers the phone. We
+also print the ID of the recording and, when the call ends, the URL (which can be used
+to download the recording).
+
+```js
+import { SignalWire, Voice } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+const call = await client.voice.dialPhone({
+  from: "+YYYYYYYYYY",
+  to: "+XXXXXXXXXX",
+});
+
+await call.playTTS({ text: "This call will be recorded." });
+
+// Start recording
+await call.recordAudio({
+  direction: "both",
+  endSilenceTimeout: 0,
+  terminators: "",
+  listen: {
+  onStarted: async (recording) => {
+      console.log("Recording started", recording.state);
+      call.playTTS({
+        text: "This is a recording test."
+      });
+
+      // Wait 5 seconds
+      setTimeout(async () => {
+      // Stop recording
+      await recording.stop();
+      }, 5000);
+
+  },
+  onEnded: async (recording) => {
+      console.log("Recording ended", recording.state);
+      call.hangup();
+    }
+  }
+}).onStarted();
+```
+
+## **Properties**
+
+<ParamField path="id" type="string">
+  The unique ID for this recording.
+</ParamField>
+
+<ParamField path="state" type='"recording" | "paused" | "finished" | "no_input"'>
+  The current state of the recording.
+</ParamField>
+
+<ParamField path="url" type="string | undefined">
+  The URL to download the recording. Available after the recording has ended.
+</ParamField>
+
+<ParamField path="size" type="number | undefined">
+  The size of the recording file in bytes. Available after the recording has ended.
+</ParamField>
+
+<ParamField path="duration" type="number | undefined">
+  The duration of the recording in seconds. Available after the recording has ended.
+</ParamField>
+
+<ParamField path="hasEnded" type="boolean">
+  Whether the recording has ended. Returns `true` if the state is `"finished"` or `"no_input"`.
+</ParamField>
+
+## **Methods**
+
+### pause
+
+- **pause**(`behavior?`): `Promise`\<[`CallRecording`][callrecording]>
+
+Pauses the recording.
+
+#### Parameters
+
+<ParamField path="behavior" type='"skip" | "silence"' default='"silence"'>
+  **skip**: Does not record during the pause period. **silence**: Replaces the actual audio of the call with silence during the pause period.
+</ParamField>
+
+#### Returns
+
+`Promise`\<[`CallRecording`][callrecording]>
+
+A promise that resolves to the [`CallRecording`][callrecording] when the recording is paused.
+
+#### Example
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "your-project-id", token: "your-api-token" });
+
+const call = await client.voice.dialPhone({
+  from: "+1xxxxxxxxxx",
+  to: "+1yyyyyyyyyy",
+  timeout: 30
+});
+
+const recording = await call.recordAudio({ direction: "both" }).onStarted();
+// Pause recording (e.g., during sensitive information)
+await recording.pause("skip");
+```
+
+---
+
+### resume
+
+- **resume**(): `Promise`\<[`CallRecording`][callrecording]>
+
+Resumes the recording.
+
+#### Returns
+
+`Promise`\<[`CallRecording`][callrecording]>
+
+A promise that resolves to the [`CallRecording`][callrecording] when the recording is resumed.
+
+#### Example
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "your-project-id", token: "your-api-token" });
+
+const call = await client.voice.dialPhone({
+  from: "+1xxxxxxxxxx",
+  to: "+1yyyyyyyyyy",
+  timeout: 30
+});
+
+const recording = await call.recordAudio({ direction: "both" }).onStarted();
+await recording.pause();
+// Resume recording after sensitive information is done
+await recording.resume();
+```
+
+### stop
+
+- **stop**(): `Promise`\<[`CallRecording`][callrecording]>
+
+Stops the recording.
+
+#### Returns
+
+`Promise`\<[`CallRecording`][callrecording]>
+
+A promise that resolves to the [`CallRecording`][callrecording] when the recording is stopped.
+
+#### Example
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "your-project-id", token: "your-api-token" });
+
+const call = await client.voice.dialPhone({
+  from: "+1xxxxxxxxxx",
+  to: "+1yyyyyyyyyy",
+  timeout: 30
+});
+
+const recording = await call.recordAudio({ direction: "both" }).onStarted();
+console.log("Recording started with ID:", recording.id);
+
+// Stop recording after some time
+await recording.stop();
+console.log("Recording URL:", recording.url);
+```
+
+## **Events**
+
+### onStarted
+
+- **CallRecording.listen**(`{ onStarted: Callback }}`)
+
+Emitted when the recording starts. Your event handler will receive the instance of [`CallRecording`][callrecording].
+
+#### Parameters
+
+<ParamField path="recording" type="CallRecording" required>
+  The instance of [`CallRecording`][callrecording] that started.
+</ParamField>
+
+### onUpdated
+
+▸ **CallRecording.listen**(`{ onUpdated: Callback }}`)
+
+Emitted when the recording is updated. Your event handler will receive the instance of [`CallRecording`][callrecording].
+
+#### Parameters
+
+<ParamField path="recording" type="CallRecording" required>
+  The instance of [`CallRecording`][callrecording] that was updated.
+</ParamField>
+
+### onFailed
+
+- **CallRecording.listen**(`{ onFailed: Callback }}`)
+
+Emitted when the recording fails to start. Your event handler will receive the instance of [`CallRecording`][callrecording].
+
+#### Parameters
+
+<ParamField path="recording" type="CallRecording" required>
+  The instance of [`CallRecording`][callrecording] that failed.
+</ParamField>
+
+### onEnded
+
+- **CallRecording.listen**(`{ onEnded: Callback }}`)
+
+Emitted when the recording ends. Your event handler will receive the instance of [`CallRecording`][callrecording].
+
+#### Parameters
+
+<ParamField path="recording" type="CallRecording" required>
+  The instance of [`CallRecording`][callrecording] that ended.
+</ParamField>

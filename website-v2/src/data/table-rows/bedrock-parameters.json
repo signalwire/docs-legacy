@@ -1,0 +1,77 @@
+{
+  "columns": ["Parameter", "Type", "Default", "Description"],
+  "align": "left",
+  "rows": [
+    {
+      "id": "model-id",
+      "parameter": "`model_id`",
+      "type": "`string`",
+      "default": "-",
+      "required": "required",
+      "url": "https://docs.aws.amazon.com/bedrock/latest/userguide/model-ids.html",
+      "description": "The Amazon Bedrock model identifier to use for AI processing. See [AWS Documentation](https://docs.aws.amazon.com/bedrock/latest/userguide/models-supported.html) for supported models. Available models include `anthropic.claude-v2`, `amazon.titan-text-express-v1`, and `ai21.j2-ultra-v1`."
+    },
+    {
+      "id": "region",
+      "parameter": "`region`",
+      "type": "`string`", 
+      "default": "`us-east-1`",
+      "required": "optional",
+      "url": "https://docs.aws.amazon.com/general/latest/gr/bedrock.html",
+      "description": "The AWS region where the Bedrock service is located. Must be a region that supports **Amazon Bedrock**. Supported regions include `us-east-1`, `us-west-2`, `eu-west-1`, and `ap-southeast-1`."
+    },
+    {
+      "id": "access-key-id",
+      "parameter": "`access_key_id`",
+      "type": "`string`",
+      "default": "-",
+      "required": "required",
+      "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html",
+      "description": "AWS access key ID for authentication. Required for `AWS IAM` authentication. **Security Note:** Never expose access keys in client-side code or commit them to version control."
+    },
+    {
+      "id": "secret-access-key", 
+      "parameter": "`secret_access_key`",
+      "type": "`string`",
+      "default": "-",
+      "required": "required",
+      "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html",
+      "description": "AWS secret access key for authentication. **Keep this secure** and never expose in client-side code. Consider using [IAM roles](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles.html) instead of access keys when possible."
+    },
+    {
+      "id": "session-token",
+      "parameter": "`session_token`",
+      "type": "`string`",
+      "default": "-",
+      "required": "conditional",
+      "description": "AWS session token. Required when using **temporary credentials** or `STS` authentication. Only needed for temporary credentials or when assuming roles."
+    },
+    {
+      "id": "max-tokens",
+      "parameter": "`max_tokens`",
+      "type": "`number`",
+      "default": "`1000`",
+      "required": "optional",
+      "url": "https://docs.aws.amazon.com/bedrock/latest/userguide/model-parameters.html",
+      "description": "Maximum number of tokens to generate in the response. Higher values allow longer responses but increase cost. Typical range is `100` to `4000` depending on the model."
+    },
+    {
+      "id": "temperature",
+      "parameter": "`temperature`",
+      "type": "`number`",
+      "default": "`0.7`",
+      "required": "optional",
+      "url": "https://docs.aws.amazon.com/bedrock/latest/userguide/model-parameters.html",
+      "description": "Controls randomness in the model's output. Range: `0.0` to `1.0`. Lower values (`0.1-0.3`) are more deterministic, higher values (`0.7-0.9`) are more creative. Use `0.7` as a good starting point."
+    },
+    {
+      "id": "top-p",
+      "parameter": "`top_p`",
+      "type": "`number`",
+      "default": "`0.9`",
+      "required": "optional",
+      "url": "https://docs.aws.amazon.com/bedrock/latest/userguide/model-parameters.html",
+      "description": "Nucleus sampling parameter for controlling diversity. Range: `0.0` to `1.0`. Use **either** `temperature` or `top_p`, not both. Lower values (`0.1-0.5`) focus on more likely tokens."
+    }
+  ]
+}

@@ -1,0 +1,109 @@
+---
+title: Azure
+description: Learn how to use Azure TTS voices on the SignalWire platform.
+slug: /platform/voice/tts/azure
+---
+
+Microsoft's Azure platform offers an impressive array of high-quality, multilingual voices in its Neural model.
+
+## Voices
+
+<CardGroup cols={2}>
+  <Card title="Voices" href="https://learn.microsoft.com/en-us/azure/ai-services/speech-service/language-support?tabs=tts">
+    Browse the complete list of Azure Neural voices in Microsoft's official documentation.
+  </Card>
+  <Card title="Voice gallery" href="https://speech.microsoft.com/portal/voicegallery">
+    Listen to audio samples and preview voices in Azure's interactive voice gallery.
+  </Card>
+</CardGroup>
+
+## Usage
+
+Azure voice IDs conform to the following format:
+
+```
+azure.<voice>
+```
+
+Where `<voice>` is the full Azure voice code (e.g., `en-US-AvaNeural`).
+
+**Examples:**
+```
+azure.en-US-AvaNeural
+azure.en-GB-SoniaNeural
+azure.de-DE-KatjaNeural
+azure.es-ES-ElviraNeural
+```
+
+**Note:** Azure voice IDs already include language information, so no additional language parameter is needed.
+
+## Languages
+
+Azure Neural voices are interchangeably compatible with all supported languages.
+Rather than setting language with the language `code`,
+simply provide input text in the desired language.
+
+Consult the Azure
+[supported languages resource](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/language-support?tabs=tts)
+for an up-to-date list of supported languages.
+
+## SSML support
+
+Azure voices support [Speech Synthesis Markup Language (SSML)](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/speech-synthesis-markup) for advanced control over:
+
+- Prosody (pitch, rate, volume)
+- Emphasis and breaks
+- Phonetic pronunciation
+- Multi-language content
+
+Consult Azure's [SSML documentation](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/speech-synthesis-markup) for detailed usage instructions.
+
+---
+
+## Examples
+
+Learn how to use Azure voices on the SignalWire platform.
+
+<Tabs>
+<TabItem value="swml" label="SWML">
+Use the
+[**`languages`**](/docs/swml/reference/ai/languages#use-voice-strings)
+SWML method to set one or more voices for an [AI agent](/docs/swml/reference/ai).
+```yaml
+version: 1.0.0
+sections:
+  main:
+  - ai:
+      prompt:
+        text: Have an open-ended conversation about flowers.
+      languages:
+        - name: English
+          code: en-US
+          voice: azure.en-US-AvaNeural
+```
+Alternatively, use the [**`say_voice`** parameter](/docs/swml/reference/play#variables)
+of the [**`play`**](/docs/swml/reference/play)
+SWML method to select a voice for basic TTS.
+```yaml
+version: 1.0.0
+sections:
+  main:
+  - set:
+      say_voice: "azure.en-US-AvaNeural"
+  - play: "say:Greetings. This is the Ava voice from Microsoft Azure's Neural text-to-speech model."
+```
+</TabItem>
+<TabItem value="relay-realtime-sdk" label="RELAY Realtime SDK">
+```javascript
+// This example uses the Node.js SDK for SignalWire's RELAY Realtime API.
+const playback = await call.playTTS({
+    text: "Greetings. This is the Ava voice from Microsoft Azure's Neural text-to-speech model.",
+    voice: "azure.en-US-AvaNeural",
+});
+await playback.ended();
+```
+</TabItem>
+<TabItem value="call-flow-builder" label="Call Flow Builder">
+Azure voices are not yet supported in Call Flow Builder.
+</TabItem>
+</Tabs>

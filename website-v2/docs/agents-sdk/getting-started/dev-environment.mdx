@@ -1,0 +1,480 @@
+---
+title: "Dev Environment"
+sidebar_label: "Dev Environment"
+slug: /python/guides/dev-environment
+toc_max_heading_level: 3
+---
+
+## Development Environment Setup
+
+Configure a professional development environment for building SignalWire agents with proper project structure, environment variables, and debugging tools.
+
+### Recommended Project Structure
+
+<Files>
+  <Folder name="my-agent-project" defaultOpen>
+    <Folder name="venv" comment="Virtual environment" />
+    <Folder name="agents" defaultOpen comment="Your agent modules">
+      <File name="__init__.py" />
+      <File name="customer_service.py" />
+      <File name="support_agent.py" />
+    </Folder>
+    <Folder name="skills" comment="Custom skills (optional)">
+      <Folder name="my_custom_skill" defaultOpen>
+        <File name="__init__.py" />
+        <File name="skill.py" />
+      </Folder>
+    </Folder>
+    <Folder name="tests" comment="Test files">
+      <File name="__init__.py" />
+      <File name="test_agents.py" />
+    </Folder>
+    <File name=".env" comment="Environment variables (not in git)" />
+    <File name=".env.example" comment="Example env file (in git)" />
+    <File name=".gitignore" />
+    <File name="requirements.txt" />
+    <File name="main.py" comment="Entry point" />
+  </Folder>
+</Files>
+
+### Create the Project
+
+```bash
+## Create project directory
+mkdir my-agent-project
+cd my-agent-project
+
+## Create virtual environment
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+
+## Install dependencies
+pip install signalwire-agents
+
+## Create directory structure
+mkdir -p agents skills tests
+
+## Create initial files
+touch agents/__init__.py
+touch tests/__init__.py
+touch .env .env.example .gitignore requirements.txt main.py
+```
+
+### Environment Variables
+
+Create a `.env` file for configuration:
+
+```bash
+## .env - DO NOT COMMIT THIS FILE
+
+## Authentication
+## These set your agent's basic auth credentials.
+## If not set, SDK uses username "signalwire" with an auto-generated
+## password that changes on every invocation (printed to console).
+SWML_BASIC_AUTH_USER=my_username
+SWML_BASIC_AUTH_PASSWORD=my_secure_password_here
+
+## Server Configuration
+SWML_PROXY_URL_BASE=https://my-agent.ngrok.io
+
+## SSL (optional, for production)
+SWML_SSL_ENABLED=false
+SWML_SSL_CERT_PATH=
+SWML_SSL_KEY_PATH=
+
+## Skill API Keys (as needed)
+GOOGLE_API_KEY=your_google_api_key
+GOOGLE_CX_ID=your_custom_search_id
+WEATHER_API_KEY=your_weather_api_key
+
+## Logging
+SIGNALWIRE_LOG_MODE=default
+```
+
+**Important**: The `SWML_BASIC_AUTH_USER` and `SWML_BASIC_AUTH_PASSWORD` environment variables let you set stable credentials for your agent. Without these:
+
+- Username defaults to `signalwire`
+- Password is randomly generated on each startup
+- The generated password is printed to the console
+
+For development, you can leave these unset and use the printed credentials. For production, always set explicit values.
+
+Create `.env.example` as a template (safe to commit):
+
+```bash
+## .env.example - Template for environment variables
+
+## Authentication (optional - SDK generates credentials if not set)
+SWML_BASIC_AUTH_USER=
+SWML_BASIC_AUTH_PASSWORD=
+
+## Server Configuration
+SWML_PROXY_URL_BASE=
+
+## Skill API Keys
+GOOGLE_API_KEY=
+WEATHER_API_KEY=
+```
+
+### Loading Environment Variables
+
+Install python-dotenv:
+
+```bash
+pip install python-dotenv
+```
+
+Load in your agent:
+
+```python
+#!/usr/bin/env python3
+## main.py - Main entry point with environment loading
+"""Main entry point with environment loading."""
+
+import os
+from dotenv import load_dotenv
+
+## Load environment variables from .env file
+load_dotenv()
+
+from agents.customer_service import CustomerServiceAgent
+
+
+def main():
+    agent = CustomerServiceAgent()
+
+    # Use environment variables
+    host = os.getenv("AGENT_HOST", "0.0.0.0")
+    port = int(os.getenv("AGENT_PORT", "3000"))
+
+    print(f"Starting agent on {host}:{port}")
+    agent.run(host=host, port=port)
+
+
+if __name__ == "__main__":
+    main()
+```
+
+### The .gitignore File
+
+```gitignore
+## Virtual environment
+venv/
+.venv/
+env/
+
+## Environment variables
+.env
+.env.local
+.env.*.local
+
+## Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+
+## IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+## Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+## Logs
+*.log
+
+## OS
+.DS_Store
+Thumbs.db
+```
+
+### Requirements File
+
+Create `requirements.txt`:
+
+```
+signalwire-agents>=1.0.15
+python-dotenv>=1.0.0
+```
+
+Or generate from current environment:
+
+```bash
+pip freeze > requirements.txt
+```
+
+### IDE Configuration
+
+#### VS Code
+
+Create `.vscode/settings.json`:
+
+```json
+{
+    "python.defaultInterpreterPath": "${workspaceFolder}/venv/bin/python",
+    "python.envFile": "${workspaceFolder}/.env",
+    "python.testing.pytestEnabled": true,
+    "python.testing.pytestArgs": ["tests"],
+    "editor.formatOnSave": true,
+    "python.formatting.provider": "black"
+}
+```
+
+Create `.vscode/launch.json` for debugging:
+
+```json
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Run Agent",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "console": "integratedTerminal",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "name": "Run Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "name": "Test Agent with swaig-test",
+            "type": "python",
+            "request": "launch",
+            "module": "signalwire_agents.cli.test_swaig",
+            "args": ["${file}", "--dump-swml"],
+            "console": "integratedTerminal"
+        }
+    ]
+}
+```
+
+#### PyCharm
+
+1. Open Settings → Project → Python Interpreter
+2. Select your virtual environment
+3. Go to Run → Edit Configurations
+4. Create a Python configuration:
+   - Script path: `main.py`
+   - Working directory: Project root
+   - Environment variables: Load from `.env`
+
+### Using swaig-test for Development
+
+The `swaig-test` CLI is essential for development:
+
+```bash
+## View SWML output (formatted)
+swaig-test agents/customer_service.py --dump-swml
+
+## View raw SWML JSON
+swaig-test agents/customer_service.py --dump-swml --raw
+
+## List all registered functions
+swaig-test agents/customer_service.py --list-tools
+
+## Execute a specific function
+swaig-test agents/customer_service.py --exec get_customer --customer_id 12345
+
+## Simulate serverless environment
+swaig-test agents/customer_service.py --simulate-serverless lambda --dump-swml
+```
+
+### Development Workflow
+
+**1. Edit Code**
+
+Modify your agent in `agents/`.
+
+**2. Quick Test**
+- `swaig-test agents/my_agent.py --dump-swml`
+- Verify SWML looks correct
+
+**3. Function Test**
+- `swaig-test agents/my_agent.py --exec my_function --arg value`
+- Verify function returns expected result
+
+**4. Run Server**
+- `python main.py`
+- `curl http://localhost:3000/`
+
+**5. Integration Test**
+- Start ngrok (see next section)
+- Configure SignalWire webhook
+- Make test call
+
+### Sample Agent Module
+
+```python
+#!/usr/bin/env python3
+## customer_service.py - Customer service agent
+"""
+Customer Service Agent
+
+A production-ready customer service agent template.
+"""
+
+import os
+from signalwire_agents import AgentBase, SwaigFunctionResult
+
+
+class CustomerServiceAgent(AgentBase):
+    """Customer service voice AI agent."""
+
+    def __init__(self):
+        super().__init__(
+            name="customer-service",
+            route="/",
+            host="0.0.0.0",
+            port=int(os.getenv("AGENT_PORT", "3000"))
+        )
+
+        self._configure_voice()
+        self._configure_prompts()
+        self._configure_functions()
+
+    def _configure_voice(self):
+        """Set up voice and language."""
+        self.add_language("English", "en-US", "rime.spore")
+
+        self.set_params({
+            "end_of_speech_timeout": 500,
+            "attention_timeout": 15000,
+        })
+
+        self.add_hints([
+            "account",
+            "billing",
+            "support",
+            "representative"
+        ])
+
+    def _configure_prompts(self):
+        """Set up AI prompts."""
+        self.prompt_add_section(
+            "Role",
+            "You are a helpful customer service representative for Acme Corp. "
+            "Help customers with their questions about accounts, billing, and products."
+        )
+
+        self.prompt_add_section(
+            "Guidelines",
+            body="Follow these guidelines:",
+            bullets=[
+                "Be professional and courteous",
+                "Ask clarifying questions when needed",
+                "Offer to transfer to a human if you cannot help",
+                "Keep responses concise"
+            ]
+        )
+
+    def _configure_functions(self):
+        """Register SWAIG functions."""
+        self.define_tool(
+            name="lookup_account",
+            description="Look up a customer account by phone number or account ID",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "identifier": {
+                        "type": "string",
+                        "description": "Phone number or account ID"
+                    }
+                },
+                "required": ["identifier"]
+            },
+            handler=self.lookup_account
+        )
+
+        self.define_tool(
+            name="transfer_to_human",
+            description="Transfer the call to a human representative",
+            parameters={"type": "object", "properties": {}},
+            handler=self.transfer_to_human
+        )
+
+    def lookup_account(self, args, raw_data):
+        """Look up account information."""
+        identifier = args.get("identifier", "")
+
+        # In production, query your database here
+        return SwaigFunctionResult(
+            f"Found account for {identifier}: Status is Active, Balance is $0.00"
+        )
+
+    def transfer_to_human(self, args, raw_data):
+        """Transfer to human support."""
+        return SwaigFunctionResult(
+            "Transferring you to a human representative now."
+        ).connect("+15551234567", final=True, from_addr="+15559876543")
+
+
+## Allow running directly for testing
+if __name__ == "__main__":
+    agent = CustomerServiceAgent()
+    agent.run()
+```
+
+### Testing Your Agent
+
+```python
+#!/usr/bin/env python3
+## test_agents.py - Tests for agents
+"""Tests for agents."""
+
+import pytest
+from agents.customer_service import CustomerServiceAgent
+
+
+class TestCustomerServiceAgent:
+    """Test customer service agent."""
+
+    def setup_method(self):
+        """Set up test fixtures."""
+        self.agent = CustomerServiceAgent()
+
+    def test_agent_name(self):
+        """Test agent has correct name."""
+        assert self.agent.name == "customer-service"
+
+    def test_lookup_account(self):
+        """Test account lookup function."""
+        result = self.agent.lookup_account(
+            {"identifier": "12345"},
+            {}
+        )
+        assert "Found account" in result
+
+    def test_has_functions(self):
+        """Test agent has expected functions."""
+        functions = self.agent._tool_registry.get_function_names()
+        assert "lookup_account" in functions
+        assert "transfer_to_human" in functions
+```
+
+Run tests:
+
+```bash
+pytest tests/ -v
+```
+
+### Next Steps
+
+Your development environment is ready. Now let's expose your agent to the internet so SignalWire can reach it.
+
+

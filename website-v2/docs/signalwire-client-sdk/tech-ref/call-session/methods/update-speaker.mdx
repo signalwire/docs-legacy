@@ -1,0 +1,218 @@
+---
+title: updateSpeaker
+slug: /call-session/updatespeaker
+---
+
+import APIField from '@site/src/components/APIField';
+
+Updates the audio output device (speaker) used for playing remote audio from the call.
+
+## Parameters
+
+<APIField name="deviceId" type="string" required>
+  The ID of the speaker device to use.
+</APIField>
+
+## Signature
+
+```typescript
+call.updateSpeaker({ deviceId }: { deviceId: string }): Promise<undefined>
+```
+
+## Returns
+
+**Type:** `Promise<undefined>`
+
+## Examples
+
+### Switch to Specific Speaker
+
+```typescript
+// Get available audio output devices
+const devices = await navigator.mediaDevices.enumerateDevices()
+const speakers = devices.filter(d => d.kind === 'audiooutput')
+
+// Switch to a specific speaker
+await call.updateSpeaker({
+  deviceId: speakers[1].deviceId
+})
+```
+
+### Switch to Default Speaker
+
+```typescript
+await call.updateSpeaker({
+  deviceId: 'default'
+})
+```
+
+### Dynamic Speaker Selection
+
+```typescript
+async function selectSpeaker() {
+  const devices = await navigator.mediaDevices.enumerateDevices()
+  const speakers = devices.filter(d => d.kind === 'audiooutput')
+
+  // Show dropdown to user
+  const selectedId = await showSpeakerDropdown(speakers)
+
+  // Update to selected speaker
+  await call.updateSpeaker({ deviceId: selectedId })
+}
+```
+
+### Listen for Speaker Changes
+
+```typescript
+// The updateSpeaker method triggers a 'speaker.updated' event
+call.on('speaker.updated', (data) => {
+  console.log('Speaker changed from:', data.previous)
+  console.log('Speaker changed to:', data.current)
+  console.log('New device ID:', data.current.deviceId)
+  console.log('New device label:', data.current.label)
+})
+
+// Update speaker
+await call.updateSpeaker({ deviceId: newDeviceId })
+```
+
+### Speaker Selection UI
+
+```typescript
+async function buildSpeakerSelector() {
+  const devices = await navigator.mediaDevices.enumerateDevices()
+  const speakers = devices.filter(d => d.kind === 'audiooutput')
+
+  const select = document.createElement('select')
+
+  speakers.forEach(speaker => {
+    const option = document.createElement('option')
+    option.value = speaker.deviceId
+    option.text = speaker.label || `Speaker ${speaker.deviceId.substring(0, 5)}`
+    select.appendChild(option)
+  })
+
+  select.addEventListener('change', async (e) => {
+    await call.updateSpeaker({ deviceId: e.target.value })
+  })
+
+  return select
+}
+```
+
+### React Speaker Selector
+
+```typescript
+function SpeakerSelector({ call }) {
+  const [speakers, setSpeakers] = useState([])
+  const [currentSpeaker, setCurrentSpeaker] = useState('')
+
+  useEffect(() => {
+    async function loadSpeakers() {
+      const devices = await navigator.mediaDevices.enumerateDevices()
+      const outputs = devices.filter(d => d.kind === 'audiooutput')
+      setSpeakers(outputs)
+    }
+
+    loadSpeakers()
+
+    call.on('speaker.updated', (data) => {
+      setCurrentSpeaker(data.current.deviceId)
+    })
+  }, [call])
+
+  async function handleChange(e) {
+    await call.updateSpeaker({ deviceId: e.target.value })
+  }
+
+  return (
+    <select value={currentSpeaker} onChange={handleChange}>
+      {speakers.map(speaker => (
+        <option key={speaker.deviceId} value={speaker.deviceId}>
+          {speaker.label}
+        </option>
+      ))}
+    </select>
+  )
+}
+```
+
+## Events
+
+### speaker.updated
+
+Fired when the speaker device changes.
+
+```typescript
+call.on('speaker.updated', (params) => {
+  console.log('Previous speaker:', params.previous.deviceId, params.previous.label)
+  console.log('Current speaker:', params.current.deviceId, params.current.label)
+})
+```
+
+**Parameters:**
+
+<APIField name="previous.deviceId" type="string">
+  Previous speaker device ID.
+</APIField>
+
+<APIField name="previous.label" type="string">
+  Previous speaker device label.
+</APIField>
+
+<APIField name="current.deviceId" type="string">
+  New speaker device ID.
+</APIField>
+
+<APIField name="current.label" type="string">
+  New speaker device label.
+</APIField>
+
+### speaker.disconnected
+
+Fired when the current speaker is physically disconnected.
+
+```typescript
+call.on('speaker.disconnected', (params) => {
+  console.log('Speaker disconnected:', params.deviceId, params.label)
+})
+```
+
+**Parameters:**
+
+<APIField name="deviceId" type="string">
+  Disconnected speaker device ID.
+</APIField>
+
+<APIField name="label" type="string">
+  Disconnected speaker device label.
+</APIField>
+
+## Important Notes
+
+**Browser Support:** Changing audio output device requires:
+- Modern browsers with `setSinkId()` support (Chrome, Edge, Opera)
+- Firefox and Safari have limited support
+- The method may not work in all browsers
+
+Check support with:
+```typescript
+const supportsSetSinkId = 'setSinkId' in HTMLMediaElement.prototype
+if (!supportsSetSinkId) {
+  console.warn('Browser does not support speaker selection')
+}
+```
+
+**Events Emitted:** Calling this method triggers events:
+- `speaker.updated` - When speaker successfully changes
+- `speaker.disconnected` - When current speaker is physically disconnected
+
+**Automatic Fallback:** If the currently selected speaker is disconnected (unplugged), the OS and SDK automatically fall back to the default speaker, and a `speaker.updated` event is emitted.
+
+**Device IDs:** Speaker device IDs can be obtained from:
+```typescript
+const devices = await navigator.mediaDevices.enumerateDevices()
+const audioOutputs = devices.filter(d => d.kind === 'audiooutput')
+```
+
+**Permissions:** Unlike camera and microphone, speaker selection typically doesn't require explicit user permission. However, device enumeration (getting device labels) may require media permissions.

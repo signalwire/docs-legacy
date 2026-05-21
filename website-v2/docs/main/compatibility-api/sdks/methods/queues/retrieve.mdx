@@ -1,0 +1,60 @@
+---
+slug: /compatibility-api/sdks/reference/queues/retrieve
+title: Retrieve
+sidebar_label: Retrieve
+toc_max_heading_level: 3
+---
+
+Use this endpoint for the Queues method to retrieve a single call queue.
+
+<EndpointSchemaSnippet endpoint="GET /Accounts/{AccountSid}/Queues/{Sid}" />
+
+## Request examples
+
+<CodeBlocks>
+```javascript title="Node.js"
+const { RestClient } = require('@signalwire/compatibility-api')
+const client = RestClient('YourProjectID', 'YourAuthToken', { signalwireSpaceUrl: 'example.signalwire.com' })
+
+client.queues('QueueSid')
+      .fetch()
+      .then(queue => console.log(queue.friendlyName))
+      .done();
+```
+```csharp
+using System;
+using System.Collections.Generic;
+using Twilio;
+using Twilio.Rest.Api.V2010.Account;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        TwilioClient.Init("YourProjectID", "YourAuthToken", new Dictionary<string, object> { ["signalwireSpaceUrl"] = "{SPACE}.signalwire.com" });
+
+        var queue = QueueResource.Fetch(pathSid: "QueueSid");
+
+        Console.WriteLine(queue.FriendlyName);
+    }
+}
+```
+```python
+from signalwire.rest import Client as signalwire_client
+
+client = signalwire_client("YourProjectID", "YourAuthToken", signalwire_space_url = 'example.signalwire.com')
+
+queue = client.queues('QueueSid').fetch()
+
+print(queue.friendly_name)
+```
+```ruby
+require 'signalwire/sdk'
+
+@client = Signalwire::REST::Client.new 'YourProjectID', 'YourAuthToken', signalwire_space_url: "example.signalwire.com"
+
+queue = @client.queues('QueueSid').fetch
+
+puts queue.friendly_name
+```
+</CodeBlocks>

@@ -1,0 +1,69 @@
+---
+title: send_digits
+slug: /swml/reference/send-digits
+description: Send digit presses as DTMF tones.
+toc_max_heading_level: 3
+---
+
+Send digit presses as DTMF tones.
+
+<ParamField path="send_digits" type="object" required={true}>
+  An object that accepts the following properties.
+</ParamField>
+
+
+## **Properties**
+
+<ParamField path="send_digits.digits" type="string" required={true}>
+  The digits to send. Valid values are `0123456789*#ABCDWw`. Character `W` is a 1 second delay, and `w` is a 500 ms delay.
+</ParamField>
+
+
+## **Variables**
+
+Set by the method:
+
+- **send_digits_result:** (out) `success` | `failed`
+
+## **Examples**
+
+### Send digits
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - answer: {}
+    - send_digits:
+        digits: '012345'
+    - play:
+        url: 'say: ${send_digits_result}'
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "answer": {}
+      },
+      {
+        "send_digits": {
+          "digits": "012345"
+        }
+      },
+      {
+        "play": {
+          "url": "say: ${send_digits_result}"
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>

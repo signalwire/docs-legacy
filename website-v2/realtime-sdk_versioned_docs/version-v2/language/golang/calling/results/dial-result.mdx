@@ -1,0 +1,50 @@
+---
+title: Relay.Calling.DialResult
+slug: /go/reference/calling/results/dial
+description: The result object that is returned when dialing a call.
+toc_max_heading_level: 3
+---
+
+[link-1]: /docs/server-sdk/v2/go/reference/calling/call#dial
+[link]: /docs/server-sdk/v2/go/reference/calling#dial
+
+## Relay.Calling.DialResult
+
+This object returned from [`Calling dial`][link] and [`Call dial`][link-1] methods.
+
+## Methods-submenu
+
+### GetSuccessful
+
+Return `true` if the call was picked up by the remote party, `false` otherwise.
+
+**Parameters**
+
+Return `true` if the call was picked up by the remote party, `false` otherwise.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`boolean` - Whether the call has been answered.
+
+**Examples**
+
+> Start an outbound Call and then check if the `dial` has completed successfully.
+
+```go
+
+	newCall := consumer.Client.Calling.NewCall(fromNumber, toNumber)
+	resultDial := consumer.Client.Calling.Dial(newCall)
+	if !resultDial.GetSuccessful() {
+		if err := consumer.Stop(); err != nil {
+			signalwire.Log.Error("Error occurred while trying to stop Consumer")
+		}
+		
+		return
+	}
+
+```

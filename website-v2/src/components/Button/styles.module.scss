@@ -1,0 +1,44 @@
+.button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-decoration: none;
+  cursor: pointer;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  color: var(--ifm-font-color-base);
+  background: transparent;
+  transition: background 0.2s, color 0.2s;
+
+  &:hover {
+    text-decoration: none;
+    background: var(--ifm-color-emphasis-100);
+  }
+}
+
+.primary {
+  background: var(--ifm-color-primary);
+  color: #fff;
+  border-color: var(--ifm-color-primary);
+
+  &:hover {
+    background: var(--ifm-color-primary-dark);
+    color: #fff;
+  }
+}
+
+.secondary {
+  background: var(--ifm-color-emphasis-100);
+  border-color: var(--ifm-color-emphasis-300);
+
+  &:hover {
+    background: var(--ifm-color-emphasis-200);
+  }
+}
+
+.icon {
+  font-size: 1rem;
+}

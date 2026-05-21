@@ -1,0 +1,364 @@
+---
+title: "Ai Parameters"
+sidebar_label: "Ai Parameters"
+slug: /python/reference/ai-parameters-reference
+toc_max_heading_level: 3
+---
+
+# Appendix
+
+Reference materials, patterns, best practices, and troubleshooting guides for the SignalWire Agents SDK.
+
+## About This Chapter
+
+This appendix provides supplementary reference materials to support your development with the SignalWire Agents SDK.
+
+| Section | Description |
+|---------|-------------|
+| AI Parameters | Complete reference for all AI model parameters |
+| Design Patterns | Common architectural patterns and solutions |
+| Best Practices | Guidelines for production-quality agents |
+| Troubleshooting | Common issues and their solutions |
+| Migration Guide | Upgrading between SDK versions |
+| Changelog | Version history and release notes |
+
+## Quick Reference
+
+| Task | See Section |
+|------|-------------|
+| Configure AI model behavior | AI Parameters → LLM Parameters |
+| Set speech recognition | AI Parameters → ASR Parameters |
+| Adjust timing/timeouts | AI Parameters → Timing Parameters |
+| Implement common patterns | Design Patterns |
+| Optimize for production | Best Practices |
+| Debug agent issues | Troubleshooting |
+| Upgrade SDK version | Migration Guide |
+
+## Chapter Contents
+
+| Section | Description |
+|---------|-------------|
+| [AI Parameters](/docs/agents-sdk/python/reference/ai-parameters-reference) | Complete AI parameter reference |
+| [Design Patterns](/docs/agents-sdk/python/reference/patterns) | Common architectural patterns |
+| [Best Practices](/docs/agents-sdk/python/reference/best-practices) | Production guidelines |
+| [Troubleshooting](/docs/agents-sdk/python/reference/troubleshooting) | Common issues and solutions |
+| [Migration Guide](/docs/agents-sdk/python/reference/migration) | Version upgrade guide |
+| [Changelog](/docs/agents-sdk/python/reference/changelog) | Version history |
+
+## Overview
+
+| Category | Description | Where to Set |
+|----------|-------------|--------------|
+| LLM API | Model behavior (temperature, etc.) | prompt/post_prompt |
+| ASR | Speech recognition settings | prompt or params |
+| Timing | Timeouts and delays | params |
+| Behavior | Agent behavior toggles | params |
+| Interrupt | Interruption handling | params |
+| Audio | Volume and background audio | params |
+| Video | Video display options | params |
+
+## Setting Parameters in Python
+
+```python
+from signalwire_agents import AgentBase
+
+agent = AgentBase(name="assistant", route="/assistant")
+
+# Set AI parameters
+agent.set_params({
+    "temperature": 0.7,
+    "confidence": 0.6,
+    "end_of_speech_timeout": 2000,
+    "attention_timeout": 10000
+})
+```
+
+## LLM API Parameters
+
+These parameters control the AI model's behavior. Set in `prompt` or `post_prompt` sections.
+
+| Parameter | Type | Range | Default | Description |
+|-----------|------|-------|---------|-------------|
+| temperature | number | 0.0 - 2.0 | 0.3 | Output randomness |
+| top_p | number | 0.0 - 1.0 | 1.0 | Nucleus sampling |
+| frequency_penalty | number | -2.0 - 2.0 | 0.1 | Repeat penalty |
+| presence_penalty | number | -2.0 - 2.0 | 0.1 | New topic bonus |
+| max_tokens | integer | 1 - 16385 | 256 | Max response size |
+| max_completion_tokens | integer | 1 - 2048 | 256 | For o1-style models |
+| reasoning_effort | string | - | "low" | o1 reasoning level |
+| verbosity | string | - | "low" | Response length |
+
+### Temperature
+
+Controls randomness in output generation:
+
+- **0.0**: Deterministic, consistent responses
+- **0.3** (default): Balanced creativity
+- **1.0+**: More creative, less predictable
+
+### Reasoning Effort
+
+For o1-style models only:
+
+- `"low"`: Quick responses
+- `"medium"`: Balanced reasoning
+- `"high"`: Deep analysis
+
+## ASR (Speech Recognition) Parameters
+
+Control automatic speech recognition behavior.
+
+| Parameter | Type | Range | Default | Description |
+|-----------|------|-------|---------|-------------|
+| energy_level | number | 0 - 100 | 52 | Minimum audio (dB) |
+| asr_smart_format | boolean | - | false | Smart formatting |
+| asr_diarize | boolean | - | false | Speaker detection |
+| asr_speaker_affinity | boolean | - | false | Speaker tracking |
+
+
+## Timing Parameters
+
+Control various timeouts and timing behaviors.
+
+| Parameter | Type | Range | Default | Description |
+|-----------|------|-------|---------|-------------|
+| end_of_speech_timeout | integer | 250 - 10000 | 700 | End silence (ms) |
+| first_word_timeout | integer | - | 1000 | First word wait (ms) |
+| speech_timeout | integer | - | 60000 | Max speech (ms) |
+| speech_event_timeout | integer | - | 1400 | Event wait (ms) |
+| turn_detection_timeout | integer | - | 250 | Turn detection (ms) |
+| attention_timeout | integer | 0 - 600000 | 5000 | Idle prompt (ms) |
+| outbound_attention_timeout | integer | 10000 - 600000 | 120000 | Outbound (ms) |
+| inactivity_timeout | integer | 10000 - 3600000 | 600000 | Exit delay (ms) |
+| digit_timeout | integer | - | 3000 | DTMF wait (ms) |
+| initial_sleep_ms | integer | - | 0 | Start delay (ms) |
+| transparent_barge_max_time | integer | 0 - 60000 | 3000 | Barge time (ms) |
+
+### Key Timeouts
+
+- **end_of_speech_timeout**: Milliseconds of silence to detect end of speech
+- **attention_timeout**: How long to wait before prompting user (0 disables)
+- **inactivity_timeout**: How long before auto-hangup (default 10 minutes)
+
+### Hard Stop Time
+
+```python
+# Time expression format
+agent.set_params({
+    "hard_stop_time": "5m",      # 5 minutes
+    "hard_stop_time": "1h30m",   # 1 hour 30 minutes
+    "hard_stop_prompt": "We need to wrap up now."
+})
+```
+
+## Behavior Parameters
+
+Control various AI agent behaviors.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| direction | string | natural | Force inbound/outbound |
+| wait_for_user | boolean | false | Wait before speaking |
+| conscience | boolean/str | true | Safety enforcement |
+| strict_mode | boolean/str | - | Alias for conscience |
+| transparent_barge | boolean | true | Transparent barge mode |
+| enable_pause | boolean | false | Allow pausing |
+| start_paused | boolean | false | Start paused |
+| speak_when_spoken_to | boolean | false | Only respond when spoken to |
+| enable_turn_detection | boolean | varies | Turn detection |
+| enable_vision | boolean | false | Vision/video AI |
+| enable_thinking | boolean | false | Complex reasoning |
+| save_conversation | boolean | false | Save summary |
+| persist_global_data | boolean | true | Persist data |
+| transfer_summary | boolean | false | Summary on transfer |
+
+
+## SWAIG Control Parameters
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| swaig_allow_swml | boolean | true | Allow SWML returns |
+| swaig_allow_settings | boolean | true | Allow settings mods |
+| swaig_post_conversation | boolean | false | Post conversation |
+| swaig_set_global_data | boolean | true | Allow global data |
+| hold_on_process | boolean | false | Hold during process |
+| barge_functions | boolean | true | Allow function barge |
+| function_wait_for_talking | boolean | false | Wait for speech |
+| functions_on_no_response | boolean | false | Run on no response |
+| functions_on_speaker_timeout | boolean | true | Run on timeout |
+
+## Interrupt Parameters
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| acknowledge_interruptions | boolean | false | Acknowledge interrupts |
+| interrupt_prompt | string | - | Custom interrupt message |
+| interrupt_on_noise | boolean | false | Allow noise interrupts |
+| max_interrupts | integer | 0 | Max before interrupt_prompt |
+| barge_min_words | integer | 0 | Min words before barge allowed |
+
+## Debug Parameters
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| debug_webhook_url | string | - | URL to send debug data |
+| debug_webhook_level | integer | 1 | Debug verbosity (0-2) |
+| audible_debug | boolean | false | Enable audible debugging |
+| audible_latency | boolean | false | Make latency audible |
+| verbose_logs | boolean | false | Enable verbose logging |
+
+
+## Audio Parameters
+
+| Parameter | Type | Range | Default | Description |
+|-----------|------|-------|---------|-------------|
+| ai_volume | integer | -50 - 50 | 0 | AI voice volume |
+| background_file | string | - | - | Background audio URL |
+| background_file_volume | integer | -50 - 50 | 0 | Background volume |
+| background_file_loops | integer | - | -1 | Loop count (-1=infinite) |
+| hold_music | string | - | - | Hold audio/tone |
+| max_emotion | integer | 1 - 30 | 30 | TTS emotion level |
+
+### Hold Music with Tone
+
+```python
+# Use tone generator
+agent.set_params({
+    "hold_music": "tone:440"  # 440Hz tone
+})
+
+# Use audio file
+agent.set_params({
+    "hold_music": "https://example.com/hold-music.mp3"
+})
+```
+
+## Video Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| video_talking_file | string | Video when AI is talking |
+| video_idle_file | string | Video when AI is idle |
+| video_listening_file | string | Video when AI is listening |
+
+## String Parameters
+
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| local_tz | "US/Central" | Timezone for agent |
+| conversation_id | - | ID for cross-call persistence |
+| digit_terminators | - | DTMF end characters (e.g., "#") |
+| barge_match_string | - | Barge pattern matching |
+| tts_number_format | "international" | Phone format: national/intl |
+| ai_model | "gpt-4o-mini" | AI model to use |
+| thinking_model | - | Model for thinking mode |
+| vision_model | - | Model for vision |
+| pom_format | "markdown" | Prompt format: markdown/xml |
+| attention_timeout_prompt | - | Custom attention prompt |
+| hard_stop_prompt | - | Prompt at hard stop time |
+| static_greeting | - | Pre-recorded greeting |
+| summary_mode | - | string/og/function |
+
+
+## VAD Configuration
+
+Voice Activity Detection uses a string format: `silero_thresh:frame_ms`
+
+```python
+agent.set_params({
+    "vad_config": "0.5:30"  # threshold 0.5, 30ms frames
+})
+```
+
+## Post-Prompt Parameter Defaults
+
+Parameters have different defaults in `post_prompt` for more deterministic summaries:
+
+| Parameter | Prompt Default | Post-Prompt Default | Reason |
+|-----------|---------------|---------------------|--------|
+| temperature | 0.3 | 0.0 | Deterministic |
+| frequency_penalty | 0.1 | 0.0 | No penalty |
+| presence_penalty | 0.1 | 0.0 | No penalty |
+
+## Model-Specific Overrides
+
+Different models support different parameters:
+
+| Model Type | Supported Parameters |
+|------------|---------------------|
+| OpenAI | frequency_penalty, presence_penalty, max_tokens, top_p |
+| Bedrock Claude | max_completion_tokens instead of max_tokens |
+| o1-style | reasoning_effort, max_completion_tokens |
+
+## Complete Example
+
+```python
+#!/usr/bin/env python3
+# configured_agent.py - Agent with all AI parameters configured
+from signalwire_agents import AgentBase
+
+agent = AgentBase(name="configured", route="/configured")
+agent.prompt_add_section("Role", "You are a customer service agent.")
+agent.add_language("English", "en-US", "rime.spore")
+
+# Configure all parameters
+agent.set_params({
+    # LLM settings
+    "max_tokens": 300,
+
+    # Timing
+    "end_of_speech_timeout": 1500,
+    "attention_timeout": 8000,
+    "inactivity_timeout": 300000,
+
+    # Behavior
+    "wait_for_user": False,
+    "conscience": True,
+    "local_tz": "America/New_York",
+
+    # Audio
+    "background_file": "https://example.com/ambient.mp3",
+    "background_file_volume": -30
+})
+
+if __name__ == "__main__":
+    agent.run()
+```
+
+## SWML Example
+
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [{
+      "ai": {
+        "params": {
+          "end_of_speech_timeout": 2000,
+          "attention_timeout": 10000,
+          "inactivity_timeout": 600000,
+          "wait_for_user": false,
+          "conscience": true,
+          "local_tz": "America/Chicago",
+          "background_file": "https://example.com/music.mp3",
+          "background_file_volume": -25
+        },
+        "prompt": {
+          "temperature": 0.3,
+          "top_p": 1.0,
+          "frequency_penalty": 0.1,
+          "presence_penalty": 0.1,
+          "text": "You are a helpful assistant."
+        },
+        "post_prompt": {
+          "temperature": 0.0,
+          "frequency_penalty": 0.0,
+          "presence_penalty": 0.0,
+          "text": "Summarize the conversation."
+        }
+      }
+    }]
+  }
+}
+```
+

@@ -1,0 +1,213 @@
+---
+title: "CallDetect"
+keywords:
+  - SignalWire
+  - Realtime SDK
+  - Node.js
+  - answering machine detection
+  - AMD
+  - fax detection
+  - call screening
+slug: /node/reference/voice/call-detect
+sidebar_label: CallDetect
+description: CallDetect object reference for detecting call conditions including answering machines, fax tones, and DTMF digits during voice calls.
+toc_max_heading_level: 3
+---
+
+[amd]: /docs/server-sdk/node/reference/voice/call/amd
+[calldetect]: #
+[detect]: /docs/server-sdk/node/reference/voice/call/detect
+[detectAnsweringMachine]: /docs/server-sdk/node/reference/voice/call/detect-answering-machine
+[detectDigit]: /docs/server-sdk/node/reference/voice/call/detect-digit
+[detectFax]: /docs/server-sdk/node/reference/voice/call/detect-fax
+
+Represents a current or past detecting session in a call.
+
+Obtain instances of this class by starting a Detect session with one of the following methods:
+
+- [`Call.detect`][detect]
+- [`Call.detectAnsweringMachine`][detectAnsweringMachine]
+- [`Call.detectDigit`][detectDigit]
+- [`Call.detectFax`][detectFax]
+
+## **Example**
+
+Detecting answering machines and handling the result:
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "your-project-id", token: "your-api-token" });
+
+const call = await client.voice.dialPhone({
+  from: "+1xxxxxxxxxx",
+  to: "+1yyyyyyyyyy",
+  timeout: 30
+});
+
+// Start answering machine detection with event listeners
+const detect = await call.detectAnsweringMachine({
+  timeout: 30,
+  initialTimeout: 4,
+  endSilenceTimeout: 1,
+  machineReadyTimeout: 3,
+  waitForBeep: true,
+  listen: {
+    onStarted: () => console.log("AMD detection started"),
+    onUpdated: (detect) => {
+      console.log("Detection update:", detect.result);
+
+      if (detect.result === "HUMAN") {
+        console.log("Human answered - connecting to agent");
+      } else if (detect.result === "MACHINE") {
+        console.log("Machine detected - waiting for beep");
+      } else if (detect.result === "READY") {
+        console.log("Machine ready for message - leaving voicemail");
+        call.playTTS({ text: "Hello, this is a message from SignalWire." });
+      }
+    },
+    onEnded: (detect) => {
+      console.log("Detection ended with result:", detect.result);
+    }
+  }
+}).onStarted();
+
+// Wait for detection to complete
+await detect.ended();
+console.log("Final result:", detect.result, "Type:", detect.type);
+```
+
+Detecting DTMF digits:
+
+```js
+// Detect specific digits pressed during a call
+const detect = await call.detectDigit({
+  digits: "0123456789#*",
+  timeout: 30,
+  listen: {
+    onUpdated: (detect) => {
+      console.log("Digit detected:", detect.result);
+    }
+  }
+}).onStarted();
+```
+
+Detecting fax tones:
+
+```js
+// Detect if the call is a fax machine
+const detect = await call.detectFax({
+  tone: "CED",  // or "CNG"
+  timeout: 30,
+  listen: {
+    onUpdated: (detect) => {
+      console.log("Fax tone detected:", detect.result);
+    }
+  }
+}).onStarted();
+```
+
+## **Properties**
+
+<ParamField path="id" type="string">
+  The unique ID for this detecting session.
+</ParamField>
+
+<ParamField path="type" type='"machine" | "digit" | "fax" | "beep"'>
+  The type of this detecting session.
+</ParamField>
+
+<ParamField path="result" type="string">
+  The result of the detecting session. The possible values depend on the detection type:
+
+| Detect Type                                                       | Event Values                                                                                                                                                                                                                                                                                                                                                                                                           |
+| :---------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`amd`][amd] \| [`detectAnsweringMachine`][detectAnsweringMachine] | **MACHINE**: Machine detected, **HUMAN**: Human detected (final event), **UNKNOWN**: Unknown detection, **READY**: Machine is ready for voicemail delivery (final event if `detect_interruptions=false` or `beep=true`), **NOT_READY**: Machine voicemail has restarted, interrupting voicemail delivery (only fired if `detect_interruptions=true`) |
+| [`detectDigit`][detectDigit]                                       | Possible digits detected: `0 1 2 3 4 5 6 7 8 9 # *`                                                                                                                                                                                                                                                                                                                                                                    |
+| [`detectFax`][detectFax]                                           | **CED**: called station fax tone, **CNG**: calling station fax tone                                                                                                                                                                                                                                                                                                                                           |
+</ParamField>
+
+<ParamField path="hasEnded" type="boolean">
+  Whether the detection has ended. Returns `true` if the detection is finished.
+</ParamField>
+
+## **Methods**
+
+### ended
+
+- **ended**(): `Promise`\<[`CallDetect`][calldetect]>
+
+Returns a promise which will get resolved only after the detecting session is completed.
+
+#### Returns
+
+`Promise`\<[`CallDetect`][calldetect]> - See [`CallDetect`][calldetect] for more details.
+
+#### Example
+
+```js
+const detect = await call.detectDigit();
+const result = await detect.ended();
+
+console.log("Detect result:", result.type);
+```
+
+---
+
+### stop
+
+- **stop**(): `Promise`\<[`CallDetect`][calldetect]>
+
+Stops the detect session.
+
+#### Returns
+
+`Promise`\<[`CallDetect`][calldetect]> - See [`CallDetect`][calldetect] for more details.
+
+#### Example
+
+```js
+const detect = await call.detectDigit();
+await detect.stop();
+```
+
+---
+
+## **Events**
+
+### onStarted
+
+- **CallDetect.listen**(`{ onStarted: Callback }}`)
+
+Emitted when the detecting session has started. Your event handler will be called with an instance of [`CallDetect`][calldetect].
+
+#### Parameters
+
+<ParamField path="detect" type="CallDetect" required>
+  The detecting session that has started. See [`CallDetect`][calldetect].
+</ParamField>
+
+### onUpdated
+
+- **CallDetect.listen**(`{ onUpdated: Callback }}`)
+
+Emitted when the detecting session has been updated. Your event handler will be called with an instance of [`CallDetect`][calldetect].
+
+#### Parameters
+
+<ParamField path="detect" type="CallDetect" required>
+  The detecting session that has updated. See [`CallDetect`][calldetect].
+</ParamField>
+
+### onEnded
+
+- **CallDetect.listen**(`{ onEnded: Callback }}`)
+
+Emitted when the detecting session has ended. Your event handler will be called with an instance of [`CallDetect`][calldetect].
+
+#### Parameters
+
+<ParamField path="detect" type="CallDetect" required>
+  The detecting session that has ended. See [`CallDetect`][calldetect].
+</ParamField>
+

@@ -1,0 +1,31 @@
+---
+title: "removeMember"
+slug: /node/reference/video/room-session/remove-member
+description: removeMember method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+
+### removeMember
+
+- **removeMember**(`params`): `Promise<void>`
+
+Removes a specific participant from the room.
+
+#### Parameters
+
+| Name              | Type     | Description                 |
+|:------------------|:---------|:----------------------------|
+| `params`          | `Object` | -                           |
+| `params.memberId` | `string` | Id of the member to remove. |
+
+#### Returns
+
+`Promise<void>`
+
+#### Example
+
+```typescript
+const id = "de550c0c-3fac-4efd-b06f-b5b8614b8966"; // you can get this from getMembers()
+await roomSession.removeMember({ memberId: id });
+```

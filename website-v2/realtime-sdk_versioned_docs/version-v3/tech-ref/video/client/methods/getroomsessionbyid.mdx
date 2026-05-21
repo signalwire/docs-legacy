@@ -1,0 +1,31 @@
+---
+title: "getRoomSessionById"
+slug: /node/reference/video/client/get-room-session-by-id
+description: getRoomSessionById method for the Video Client class.
+toc_max_heading_level: 3
+---
+
+[roomsession]: /docs/server-sdk/v3/node/reference/video/room-session
+
+### getRoomSessionById
+
+- **getRoomSessionById**(`id`): `Promise<{roomSessions: RoomSession[] }>` - See [RoomSession][roomsession] for more details.
+
+Returns a room session given its id. Only in-progress room sessions are currently returned.
+
+#### Parameters
+
+| Name | Type     | Description             |
+|:-----|:---------|:------------------------|
+| `id` | `string` | Id of the room session. |
+
+#### Example
+
+```typescript
+const video = new Video.Client({
+  project: "<project-id>",
+  token: "<project-token>",
+});
+
+const { roomSession } = await video.getRoomSessionById();
+```

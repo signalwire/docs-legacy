@@ -1,0 +1,391 @@
+---
+title: AI platform
+slug: /platform/ai/capabilities
+description: Learn about the capabilities of SignalWire's AI platform, including natural language processing, voice technology, business applications, advanced features, multi-channel intelligence, real-time analytics, and security.
+---
+
+## Introduction
+
+SignalWire's AI platform is a unified system for building and deploying conversational AI solutions.
+The platform delivers a comprehensive suite of capabilities that work together seamlessly. 
+At its core, it provides a single platform for orchestrating voice, video, and messaging channels, complemented by native integrations
+with leading LLM, Text-to-Speech, and Speech-to-Text providers. The system is built on serverless functions that execute with minimal
+latency during live conversations, supported by a multi-threaded architecture for parallel, asynchronous function execution. 
+With a global edge network featuring points of presence in every major region and enterprise-grade security, compliance, logging and analytics,
+the platform ensures reliable and secure operations worldwide.
+
+---
+
+## Core capabilities
+
+### Voice technology
+
+SignalWire's voice technology provides comprehensive control over how your AI agents sound and understand speech. 
+The platform enables you to select from multiple Text-to-Speech providers and fine-tune voice parameters to perfectly match your brand identity.
+Natural speech <Tooltip tip="A user can define what words or phrases to say during pauses in the conversation. These pauses can occur from function calls or speech down time.">fillers</Tooltip>
+maintain smooth conversation flow during processing pauses, while real-time audio processing handles noise filtering and accent variations
+with precision.
+
+### Conversation intelligence
+
+SignalWire AI revolutionizes how agents handle complex conversations. Unlike traditional IVR systems that follow rigid
+decision trees, our AI agents operate with natural fluidity. They excel at maintaining their assigned role while juggling multiple
+conversation threads, seamlessly interfacing with backend systems without breaking natural dialogue flow. 
+Perhaps most importantly, they can handle unexpected topic changes without losing context, ensuring a more human-like interaction.
+
+The below diagrams illustrate how a customer might schedule a medical appointment using a conventional IVR ("interactive voice response", left), compared to using a SignalWire AI Agent (right).
+
+
+<Tabs>
+<TabItem value="traditional-ivr-flow" label="Traditional IVR Flow">
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant C as Customer
+    participant I as IVR System
+    C->>I: Calls clinic
+    Note over I: Start Input Collection
+    I->>C: "Press or say 1 for appointments, 2 for billing..."
+    C->>I: Presses or says "1"
+    Note over I: End Input Collection<br/>Selected: Appointments Menu<br/>Start Input Collection
+    I->>C: "Press or say 1 for new appointment, 2 to modify..."
+    C->>I: Presses or says "1"
+    Note over I: End Input Collection<br/>Selected: New Appointment Flow<br/>Start Input Collection
+    I->>C: "Press or say 1 for general, 2 for specialist..."
+    C->>I: Presses or says "2"
+    Note over I: End Input Collection<br/>Selected: Specialist Menu<br/>Start Input Collection
+    I->>C: "Press or say 1 for cardiology, 2 for dermatology..."
+    C->>I: Presses or says "1"
+    Note over I: End Input Collection<br/>Selected: Cardiology Scheduling<br/>Start Input Collection
+    I->>C: "Press or say 1 for morning slots, 2 for afternoon..."
+    C->>I: Presses or says "1"
+    Note over I: End Input Collection<br/>Selected: Morning Slots<br/>Start Input Collection
+    I->>C: "For next Tuesday at 9AM, press or say 1. For Thursday at 10AM, press or say 2..."
+    C->>I: Presses or says "1"
+    Note over I: End Input Collection<br/>Selected: Tuesday 9AM<br/>Start Input Collection
+    I->>C: "For cancellation policy, press 1. To confirm appointment, press 2..."
+    C->>I: Presses or says "1"
+    Note over I: End Input Collection<br/>Selected: Cancellation Policy
+    I->>C: "You may cancel up to 24 hours before your appointment."
+    Note over I: Start Input Collection
+    I->>C: "To confirm appointment, press 1. To start over, press 2..."
+    C->>I: Presses or says "1"
+    Note over I: End Input Collection<br/>Appointment Confirmed
+    I->>C: "Your appointment is scheduled for Tuesday at 9AM with Dr. Smith."
+    Note over C,I: 9 menu selections - Each question requires new menu - Linear path only - Inflexible conversation
+```
+
+</TabItem>
+<TabItem value="ai-ivr-flow" label="AI IVR Flow">
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant C as Customer
+    participant A as AI Agent
+    C->>A: Calls clinic
+    Note over A: Understands natural speech
+    A->>C: "Hello, how can I help you today?"
+    C->>A: "I need to schedule a cardiology appointment"
+    Note over A: Instantly identifies:<br/>1. Appointment scheduling<br/>2. Specialist type<br/>3. New appointment
+    A->>C: "I can help you schedule that. Would you prefer morning or afternoon appointments?"
+    C->>A: "Morning would be better"
+    Note over A: Processes multiple criteria:<br/>1. Time preference<br/>2. Available slots<br/>3. Doctor availability
+    A->>C: "I have morning slots available with Dr. Smith next Tuesday at 9AM or Thursday at 10AM"
+    C->>A: "What's the cancellation policy?"
+    Note over A: Handles context switch<br/>while maintaining booking flow
+    A->>C: "You can cancel up to 24 hours before your appointment. Would you like one of those morning slots?"
+    C->>A: "Yes, I'll take Tuesday at 9AM"
+    Note over A: Completes booking while<br/>maintaining conversation context
+    A->>C: "Perfect, I've scheduled your cardiology appointment for Tuesday at 9AM with Dr. Smith"
+    Note over C,A: 5 natural exchanges<br/>Handles multiple inputs per turn<br/>Allows questions mid-flow - flexible conversation.
+```
+
+</TabItem>
+</Tabs>
+
+
+For example, when a caller asks "What about the premium version?", the AI understands this refers to a product discussed
+earlier in the conversation. This context awareness extends across different topics and requests within the same interaction, allowing for natural conversation
+flows like:
+
+"I'd like to schedule an appointment" → "What time works for you?" → "Actually, before we do that, what's your cancellation policy?"
+
+The AI handles these context switches seamlessly while maintaining the original intent to schedule an appointment.
+
+### Dynamic context switching
+
+One powerful way to structure conversations is through <Tooltip tip="Contexts are specialized topics or roles that an AI agent can handle. Each context has its own specialized prompt, fresh conversation memory, and its own steps to follow through the conversation.">
+contexts</Tooltip>. Instead of transferring callers between departments like a traditional system, your AI agent can switch context internally
+to handle different topics & requests within the same conversation.
+
+Each context operates as an independent entity with its own specialized prompt, fresh conversation memory, 
+and focused expertise in areas such as technical support, billing, or sales. This independence is maintained through strict information
+boundaries that ensure clear separation between different roles.
+
+This sophisticated approach enables several key benefits. The system can intelligently route each task to the most appropriate specialized context
+while controlling information flow between contexts. It maintains natural conversation flow during role transitions and implements
+robust security boundaries for sensitive operations. The result is a system that delivers specialized knowledge within appropriate contexts,
+prevents information bleed between different roles, and maintains clear compliance and security boundaries while delivering purpose-built
+responses for each domain.
+
+For example, when a customer moves from technical support to billing questions, the AI swaps context to focus solely on financial
+matters, leaving technical details in the previous context. This isolation maintains security while ensuring each
+interaction benefits from specialized expertise.
+
+Below is an example of a context switch in a customer support scenario for both a traditional IVR and a SignalWire AI Agent.
+
+<Tabs>
+<TabItem value="traditional-support-flow" label="Traditional Support Flow">
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant C as Customer
+    participant G as General Support
+    participant T as Technical Support
+    participant B as Billing Team
+
+    C->>G: "I need account help"
+    G->>C: "I can assist with basic account questions"
+    C->>G: "I'm seeing API errors"
+    G->>C: "Let me transfer you to technical support"
+    Note over G,T: Customer waits in new queue
+    C->>T: "I'm having API issues"
+    T->>C: "I can help with technical problems"
+    C->>T: "What about my invoice?"
+    T->>C: "Let me transfer you to billing"
+    Note over T,B: Customer waits again
+    C->>B: "About my invoice..."
+    Note over C,B: Customer repeats information
+```
+
+</TabItem>
+<TabItem value="signalwire-ai-flow" label="SignalWire AI Flow">
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant C as Customer
+    participant A as AI Agent
+
+    Note over A: Support Context<br/>Prompt: General inquiries instructions
+    C->>A: "I need help with my account"
+    A->>C: "I can help with account-related questions"
+    C->>A: "I'm getting API errors"
+    Note over A: New Context<br/>Prompt: Technical support instructions
+    A->>C: "Let me check your API logs..."
+    C->>A: "What about my invoice?"
+    Note over A: New Context<br/>Prompt: Billing support instructions
+    A->>C: "I see your billing history..."
+    Note over C,A: Each topic creates a fresh agent<br/>with specialized knowledge
+```
+
+</TabItem>
+</Tabs>
+
+
+### Real-time analytics and monitoring
+
+The platform provides comprehensive analytics to understand and optimize your AI agents' performance. 
+It continuously captures vital metrics including conversation flow and role adherence, speech recognition accuracy, response timing and latency,
+voice quality metrics, and integration performance. This wealth of data flows through a robust webhook system that enables
+real-time conversation monitoring, performance metric tracking, human supervision when needed, and ongoing agent behavior optimization.
+
+Here's how this works in a customer support scenario:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant C as Customer
+    participant A as AI Agent
+    participant W as Webhook
+
+    C->>A: Asks about product return
+    Note over A: Processes request
+    A->>W: Sends interaction data
+    Note over W: Analytics Processing
+    A->>C: Responds to customer
+    Note over W: Real-time updates:<br/>- Speech confidence: 0.876<br/>- Response time: 850ms<br/>- Language: en-US
+```
+
+#### Webhook data and metrics
+
+Here's an example of the data you receive during an AI interaction:
+
+```json
+{
+  "call_info": {
+    "project_id": "b08dacad...",
+    "content_type": "text/json",
+    "call_id": "b3f4e4e1..."
+  },
+  "conversation_add": {
+    "role": "assistant",
+    "content": "...",
+    "lang": "en-US",
+    "tokens": 53,
+    "latency": 836,
+    "utterance_latency": 934,
+    "audio_latency": 1106
+  },
+  "webhook_reply": {
+    "status": "OK",
+    "request_id": "341de258...",
+    "parameters": {
+      "query": "...",
+    },
+    "data": {...}
+  }
+}
+```
+
+
+#### Management tools
+
+The real-time data enables powerful management capabilities across three key areas:
+
+- **Live Monitoring and Supervision:**
+The platform provides comprehensive real-time monitoring of high-value interactions, with intelligent alerting for critical situations and seamless intervention capabilities when human assistance is required.
+
+- **Performance Optimization:**
+Continuous performance improvement is achieved through AI behavior adjustments based on metrics, dynamic routing rule updates, and refined response pattern optimization.
+
+- **Quality Assurance:**
+The system maintains high service standards by quickly identifying and resolving issues, ensuring compliance requirements are met, and maintaining consistent service quality metrics.
+
+
+---
+
+## Integration & architecture
+
+### External service integration
+
+SignalWire AI connects with your business systems through its function framework. When your agent needs to perform an action - like checking inventory or booking an appointment - it can call functions that interact with your databases and services while keeping the conversation natural.
+
+Here's an example of scheduling a meeting:
+
+```mermaid
+sequenceDiagram
+            autonumber
+            
+            participant Customer
+            participant AI
+            participant Functions
+            participant CalAPI as Calendar API
+            participant SMS
+
+            %% Initial Request
+            Customer->>+AI: I need to schedule a meeting with the sales team
+            Note right of AI: Detects scheduling intent
+            AI-->>AI: Identifies scheduling need
+            AI->>-Customer: I can help. When is best for you next week?
+            
+            %% Time Selection
+            Customer->>+AI: Tuesday afternoon would be great
+            
+            %% Availability Check
+            Note over AI,CalAPI: Checking team availability
+            AI->>+Functions: check_team_availability()
+            Functions->>+CalAPI: Query sales team calendar
+            CalAPI-->>-Functions: Return available slots
+            Functions-->>-AI: Provide available times
+            
+            AI->>-Customer: The sales team is free at 2 PM or 4 PM on Tuesday
+            Customer->>+AI: 2 PM works perfectly
+            
+            %% Meeting Setup
+            Note over AI,CalAPI: Scheduling the meeting
+            AI->>+Functions: schedule_meeting()
+            Functions->>+CalAPI: Create event and send invites
+            CalAPI-->>-Functions: Confirm booking and invites sent
+            
+            %% Notifications
+            Note over Functions,SMS: Sending notifications
+            Functions->>Functions: Trigger SMS notification
+            Functions->>+SMS: Send confirmation text
+            SMS-->>-Functions: Confirm delivery status
+            
+            Functions-->>-AI: Confirm meeting setup
+            AI->>-Customer: Meeting scheduled for Tuesday at 2 PM
+            Note over Customer,AI: You'll receive a calendar invite and a confirmation SMS
+```
+
+The process works like this:
+
+1. Your agent recognizes when a request needs external data or actions
+2. It calls the appropriate function
+3. The function handles the technical work with your systems
+4. Your agent incorporates the results naturally into the conversation
+
+This lets you automate complex processes without exposing the technical details to your users.
+
+### SignalWire's RAG stack integration - Datasphere
+
+[Datasphere](/docs/apis/datasphere/list-documents) serves as SignalWire's built-in knowledge integration system, providing AI agents with seamless access to your organization's information.
+The system excels at finding and utilizing relevant information during conversations, ensuring responses remain accurate and current by drawing from your latest documentation. 
+Every answer is backed by official documentation, providing confidence and reliability in every interaction.
+
+Here's an example of how it works in practice:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Customer
+    participant AI
+    participant Datasphere
+    participant KB as Knowledge Base
+
+    Customer->>AI: "What's covered under my maternity benefits?"
+    AI->>Datasphere: Semantic search for maternity coverage
+    Datasphere->>KB: Query vectorized policy documents
+    KB-->>Datasphere: Return relevant policy sections
+    Datasphere-->>AI: Contextualized coverage details
+    AI->>Customer: Explains specific maternity benefits and coverage limits
+    Customer->>AI: "And what about prenatal care visits?"
+    Note over AI,Datasphere: Maintains context of maternity discussion
+    AI->>Datasphere: Search for prenatal care coverage
+    Datasphere->>KB: Query with maternity context
+    KB-->>Datasphere: Return relevant prenatal care policies
+    Datasphere-->>AI: Contextualized prenatal care info
+    AI->>Customer: Details prenatal visit coverage within maternity benefits
+```
+
+The system offers several key advantages:
+
+- **Always Current:** Your agents automatically use the latest information as you update your documentation
+
+- **Smart Information Use:** 
+  - Combines conversation context with document searches
+  - References specific sources
+  - Maintains natural dialogue while using detailed info
+
+- **Flexible Organization:**
+  - Tag documents for easy finding
+  - Choose how to break up information
+  - Search using natural language
+
+- **High Accuracy:**
+  - Grounds responses in your actual documents
+  - Provides sources for information
+  - Keeps responses consistent
+
+
+---
+
+## Real-world applications
+
+### Customer service
+
+SignalWire AI transforms the customer service experience by creating intelligent agents that deliver comprehensive support capabilities. These agents are designed to handle complex, multi-step inquiries while maintaining contextual awareness throughout the conversation. They seamlessly integrate with your knowledge base to provide accurate, consistent answers and can connect to your backend systems for real-time problem resolution. When situations require human expertise, the system smoothly facilitates transfers to human agents, ensuring no context is lost in the process.
+
+### Process automation
+
+The platform excels at automating multi-step processes while maintaining natural, fluid interactions. In appointment scheduling scenarios, for example, the AI demonstrates sophisticated capabilities in understanding complex time and date requests, managing multiple calendar systems simultaneously, and handling schedule conflicts with grace. The system proactively sends confirmations and can accommodate changes when needed, all while maintaining a natural conversation flow that feels effortless to the user.
+
+---
+
+## Security and compliance
+
+SignalWire's AI platform incorporates a comprehensive security framework that includes encrypted communications, sophisticated PII detection and protection mechanisms, and dedicated compliance tools for HIPAA and GDPR requirements. The system maintains detailed audit logging capabilities and granular access controls and permissions, enabling you to automate sensitive communications while maintaining strict regulatory compliance.

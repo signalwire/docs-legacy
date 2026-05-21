@@ -1,0 +1,40 @@
+.dropdownArrow {
+  margin-left: calc(var(--ifm-spacing-horizontal) * 0.5);
+  display: inline-block;
+  transition: transform 0.2s ease-in-out;
+}
+
+.dropdownArrowOpen {
+  transform: rotate(180deg);
+}
+
+.sectionTitle {
+  font-weight: bold;
+  color: var(--ifm-color-emphasis-700);
+  display: block;
+}
+
+.menuSeparator {
+  border-bottom: 1px solid var(--ifm-color-emphasis-300);
+  margin: 0.5rem 0;
+  padding: 0;
+}
+
+/* Menu container - matches Docusaurus/Infima pattern exactly */
+.menuContainer {
+  display: flex;
+  transform: translateZ(0);
+  transition: transform var(--ifm-transition-fast) ease-in-out;
+}
+
+/* When showing secondary navbar - slide container left */
+.menuContainer.showSecondary {
+  transform: translate3d(-100%, 0, 0);
+}
+
+/* Each panel - matches Docusaurus/Infima pattern */
+.menuPanel {
+  flex-shrink: 0;
+  width: 100%;
+  padding: 0.5rem;
+}

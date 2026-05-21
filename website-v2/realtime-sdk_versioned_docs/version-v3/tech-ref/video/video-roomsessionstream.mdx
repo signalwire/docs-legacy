@@ -1,0 +1,89 @@
+---
+title: "RoomSessionStream"
+slug: /node/reference/video/room-session-stream
+sidebar_label: RoomSessionStream
+description: RoomSessionStream reference for managing RTMP streams from video rooms. Stream room audio/video content to external platforms like YouTube.
+toc_max_heading_level: 3
+---
+
+[video-roomsession]: /docs/server-sdk/v3/node/reference/video/room-session/start-stream
+
+Represents a specific stream of a room session. This is an RTMP stream of the
+audio/video content of the room, which will be sent to an external party (e.g.,
+to YouTube).
+
+You can start a stream with [RoomSession.startStream][video-roomsession].
+
+## Properties
+
+### duration
+
+- `Optional` **duration**: `number`
+
+Total seconds of time spent streaming, if available. This is equal to (`endedAt` - `startedAt`).
+
+---
+
+### endedAt
+
+- `Optional` **endedAt**: `Date`
+
+End time, if available.
+
+---
+
+### id
+
+- **id**: `string`
+
+The unique id of this stream.
+
+---
+
+### roomSessionId
+
+- **roomSessionId**: `string`
+
+The id of the room session associated to this stream.
+
+---
+
+### startedAt
+
+- **startedAt**: `Date`
+
+Start time, if available.
+
+---
+
+### state
+
+- **state**: `"streaming"` \| `"completed"`
+
+Current state of the stream.
+
+---
+
+### url
+
+- **url**: `string`
+
+The RTMP URL of the stream.
+
+## Methods
+
+### stop
+
+- **stop**(): `Promise<void>`
+
+Stops the stream.
+
+#### Returns
+
+`Promise<void>`
+
+#### Example
+
+```javascript
+await stream.stop();
+```

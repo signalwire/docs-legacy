@@ -1,0 +1,287 @@
+---
+title: Call
+availability: deprecated
+toc_max_heading_level: 3
+slug: /js/reference/call
+---
+
+A Call represents a one-to-one call with another browser, a SIP endpoint, or even a phone number. The Call object supports both audio and video.
+
+## Properties
+
+| Name | Type | Description |
+| ---: | --- | --- |
+| `id` | `string` | The identifier of the call. |
+| `direction` | `string` | The direction of the call. Can be either `inbound` or `outbound`. |
+| `state` | `string` | The state of the call. See [State](#state) for all the possible call states. |
+| `prevState` | `string` | The previous state of the call. See [State](#state) for all the possible call states. |
+| `localStream` | `MediaStream` | The local stream of the call. This can be used in a video/audio element to play the local media. |
+| `remoteStream` | `MediaStream` | The remote stream of the call. This can be used in a video/audio element to play the remote media. |
+
+## State
+
+The `state` and `prevState` properties of a Call have the following values:
+
+| Value | Description |
+| ---: | ----------- |
+| `new` <span className="optional-arg"></span> | New Call has been created in the client. |
+| `trying` <span className="optional-arg"></span> | You are attempting to call someone. |
+| `requesting` <span className="optional-arg"></span> | Your outbound call is being sent to the server. |
+| `recovering` <span className="optional-arg"></span> | Your previous call is recovering after the page refresh. If you refresh the page during a call, you will automatically be joined with the latest call. |
+| `ringing` <span className="optional-arg"></span> | Someone is attempting to call you. |
+| `answering` <span className="optional-arg"></span> | You are attempting to answer the inbound Call. |
+| `early` <span className="optional-arg"></span> | You received the media before the Call has been answered. |
+| `active` <span className="optional-arg"></span> | Call has become active. |
+| `held` <span className="optional-arg"></span> | Call has been held. |
+| `hangup` <span className="optional-arg"></span> | Call has ended. |
+| `destroy` <span className="optional-arg"></span> | Call has been destroyed. |
+| `purge` <span className="optional-arg"></span> | Call has been purged. |
+
+## Methods
+
+### answer
+
+Start the process to answer the incoming Call.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`None`
+
+**Example**
+
+```javascript
+call.answer()
+```
+
+### deaf
+
+Turn off the audio input track.
+
+
+**Example**
+
+```javascript
+call.deaf()
+```
+
+### dtmf
+
+Send a Dual Tone Multi Frequency (DTMF) string to RELAY.
+
+**Parameters**
+
+| Name | Type | Required | Description |
+| -: | - | - | - |
+| `string` | `string` | <span className="required-arg">required</span> | `DTMF` to send. |
+
+**Returns**
+
+`None`
+
+**Examples**
+
+```javascript
+call.dtmf('0')
+```
+
+### hangup
+
+Hangs up the call.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`None`
+
+**Examples**
+
+```javascript
+call.hangup()
+```
+
+### hold
+
+Holds the call.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`None`
+
+**Examples**
+
+```javascript
+call.hold()
+```
+
+### muteAudio
+
+Turn off the audio output track.
+
+
+**Example**
+
+```javascript
+call.muteAudio()
+```
+
+### muteVideo
+
+Turn off the video output track.
+
+
+**Example**
+
+```javascript
+call.muteVideo()
+```
+
+### setAudioInDevice
+
+Change the audio input device used for the Call.
+
+
+**Example**
+
+```javascript
+// within an async function ..
+const success = await call.setAudioInDevice('d346d0f78627e3b808cdf0c2bc0b25b4539848ecf852ff03df5ac7545f4f5398')
+if (success) {
+  // The Call audio input has been set to the device 'd346d0f78627e3b808cdf0c2bc0b25b4539848ecf852ff03df5ac7545f4f5398'
+} else {
+  // The browser does not support the .setSinkId() API..
+}
+```
+
+### setAudioOutDevice
+
+Change the audio output device used for the Call.
+
+**Example**
+
+```javascript
+// within an async function ..
+const success = await call.setAudioOutDevice('d346d0f78627e3b808cdf0c2bc0b25b4539848ecf852ff03df5ac7545f4f5398')
+if (success) {
+  // The Call audio has been redirect to the device 'd346d0f78627e3b808cdf0c2bc0b25b4539848ecf852ff03df5ac7545f4f5398'
+} else {
+  // The browser does not support the .setSinkId() API..
+}
+```
+
+### setVideoDevice
+
+Change the video output device used for the Call.
+
+
+**Example**
+
+```javascript
+// within an async function ..
+const success = await call.setVideoDevice('d346d0f78627e3b808cdf0c2bc0b25b4539848ecf852ff03df5ac7545f4f5398')
+if (success) {
+  // The Call video has been redirect to the device 'd346d0f78627e3b808cdf0c2bc0b25b4539848ecf852ff03df5ac7545f4f5398'
+} else {
+  // The browser does not support the .setSinkId() API..
+}
+```
+
+### toggleAudioMute
+
+Toggle the audio output track.
+
+
+**Example**
+
+```javascript
+call.toggleAudioMute()
+```
+
+### toggleHold
+
+Toggles the hold state of the call.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`None`
+
+**Examples**
+
+```javascript
+call.toggleHold()
+```
+
+### toggleVideoMute
+
+Toggle the video output track.
+
+**Example**
+
+```javascript
+call.toggleVideoMute()
+```
+
+### undeaf
+
+Turn on the audio input track.
+
+**Example**
+
+```javascript
+call.undeaf()
+```
+
+### unhold
+
+Un-holds the call.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`None`
+
+**Examples**
+
+```javascript
+call.unhold()
+```
+
+### unmuteAudio
+
+Turn on the audio output track.
+
+**Example**
+
+```javascript
+call.unmuteAudio()
+```
+
+### unmuteVideo
+
+Turn on the video output track.
+
+**Example**
+
+```javascript
+call.unmuteVideo()
+```

@@ -1,0 +1,437 @@
+---
+title: "Types"
+keywords:
+  - SignalWire
+  - Realtime SDK
+  - Node.js
+  - voice types
+  - TypeScript types
+slug: /node/reference/voice/types
+description: Voice namespace type definitions including SIP headers, codecs, call directions, device types, and voice language options for text-to-speech.
+toc_max_heading_level: 3
+---
+
+[callstate]: /docs/server-sdk/node/reference/voice/call-state
+[devicebuilder-add]: /docs/server-sdk/node/reference/voice/device-builder#add
+[devicebuilder-phone]: /docs/server-sdk/node/reference/voice/device-builder#phone
+[devicebuilder-sip]: /docs/server-sdk/node/reference/voice/device-builder#sip
+[here]: /docs/platform/voice/tts
+[sipcodec]: #sipcodec
+[sipheader]: #sipheader
+[voice-call]: /docs/server-sdk/node/reference/voice/call/tap
+
+Helper types.
+
+### CollectDigitsConfig
+
+A configuration object to specify how to collect digits.
+
+<ParamField path="digits" type="object" required>
+  Object containing the digit collection configuration.
+</ParamField>
+
+<Indent>
+<ParamField path="max" type="number" required>
+  Max number of digits to collect.
+</ParamField>
+
+<ParamField path="digitTimeout" type="number" default="5.0">
+  Timeout in seconds between each digit.
+</ParamField>
+
+<ParamField path="terminators" type="string">
+  DTMF digits that will end the collection.
+</ParamField>
+</Indent>
+
+#### Example
+
+Collecting digits using `call.collect()`:
+
+```js
+const collectObj = await call.collect({
+  digits: {
+    max: 4,
+    digitTimeout: 5,
+    terminators: "#"
+  }
+});
+const { digits, terminator } = await collectObj.ended();
+```
+
+Prompting for digits with TTS using `call.promptTTS()`:
+
+```js
+const prompt = await call.promptTTS({
+  text: "Please enter your 4-digit PIN",
+  digits: {
+    max: 4,
+    digitTimeout: 5,
+    terminators: "#*"
+  }
+});
+const { type, digits, terminator } = await prompt.ended();
+```
+
+---
+
+### CollectSpeechConfig
+
+A configuration object to specify how to collect speech.
+
+<ParamField path="speech" type="object" required>
+  Object containing the speech collection configuration.
+</ParamField>
+
+<Indent>
+<ParamField path="endSilenceTimeout" type="number" default="1.0">
+  How much silence to wait for end of speech in seconds.
+</ParamField>
+
+<ParamField path="speechTimeout" type="number" default="60">
+  Maximum time to collect speech in seconds.
+</ParamField>
+
+<ParamField path="language" type="string" default='"en-US"'>
+  Language to detect. Supported languages [here][here].
+</ParamField>
+
+<ParamField path="hints" type="string[]">
+  Array of expected phrases to detect.
+</ParamField>
+
+<ParamField path="model" type="string">
+  Enable enhanced speech recognition at an additional cost. Accepted values are `enhanced`, `enhanced.phone_call`, or `enhanced.video`. The value `enhanced` will automatically detect whether to optimize with the `phone_call` or `video` setting.
+</ParamField>
+</Indent>
+
+#### Example
+
+Collecting speech using `call.collect()`:
+
+```js
+const collectObj = await call.collect({
+  speech: {
+    endSilenceTimeout: 2,
+    speechTimeout: 30,
+    language: "en-US",
+    hints: ["yes", "no", "maybe"]
+  }
+});
+const { speech, text } = await collectObj.ended();
+```
+
+Prompting for speech with TTS using `call.promptTTS()`:
+
+```js
+const prompt = await call.promptTTS({
+  text: "Please say yes or no",
+  speech: {
+    endSilenceTimeout: 1,
+    speechTimeout: 60,
+    language: "en-US",
+    hints: ["yes", "no"]
+  }
+});
+const { type, text } = await prompt.ended();
+```
+
+---
+
+### SipCodec
+
+A codec for SIP. Possible values are: `"PCMU"`, `"PCMA"`, `"OPUS"`, `"G729"`, `"G722"`, `"VP8"`, `"H264"`.
+
+#### Example
+
+Using codecs when dialing a SIP endpoint with `Voice.DeviceBuilder.Sip()`:
+
+```js
+import { Voice } from "@signalwire/realtime-api";
+
+const devices = new Voice.DeviceBuilder().add(
+  Voice.DeviceBuilder.Sip({
+    from: "sip:user1@domain.com",
+    to: "sip:user2@domain.com",
+    codecs: ["OPUS", "PCMU"]
+  })
+);
+
+const call = await client.voice.dial({ devices });
+```
+
+---
+
+### SipHeader
+
+A header for SIP. It is an object with the following properties.
+
+#### Properties
+
+<ParamField path="name" type="string" required>
+  Name of the header.
+</ParamField>
+
+<ParamField path="value" type="string" required>
+  Value of the header.
+</ParamField>
+
+#### Example
+
+Using custom headers when dialing a SIP endpoint with `Voice.DeviceBuilder.Sip()`:
+
+```js
+import { Voice } from "@signalwire/realtime-api";
+
+const devices = new Voice.DeviceBuilder().add(
+  Voice.DeviceBuilder.Sip({
+    from: "sip:user1@domain.com",
+    to: "sip:user2@domain.com",
+    headers: [
+      { name: "X-Custom-Header", value: "my-value" },
+      { name: "X-Account-ID", value: "12345" }
+    ]
+  })
+);
+
+const call = await client.voice.dial({ devices });
+```
+
+---
+
+### RingtoneName
+
+The name of a ringtone, based on country-specific ring patterns.
+
+| Value | Country |
+|:------|:--------|
+| `at` | Austria |
+| `au` | Australia |
+| `be` | Belgium |
+| `bg` | Bulgaria |
+| `br` | Brazil |
+| `ch` | Switzerland |
+| `cl` | Chile |
+| `cn` | China |
+| `cz` | Czech Republic |
+| `de` | Germany |
+| `dk` | Denmark |
+| `ee` | Estonia |
+| `es` | Spain |
+| `fi` | Finland |
+| `fr` | France |
+| `gr` | Greece |
+| `hu` | Hungary |
+| `il` | Israel |
+| `in` | India |
+| `it` | Italy |
+| `jp` | Japan |
+| `lt` | Lithuania |
+| `mx` | Mexico |
+| `my` | Malaysia |
+| `nl` | Netherlands |
+| `no` | Norway |
+| `nz` | New Zealand |
+| `ph` | Philippines |
+| `pl` | Poland |
+| `pt` | Portugal |
+| `ru` | Russia |
+| `se` | Sweden |
+| `sg` | Singapore |
+| `th` | Thailand |
+| `tw` | Taiwan |
+| `uk` | United Kingdom |
+| `us` | United States |
+| `ve` | Venezuela |
+| `za` | South Africa |
+
+#### Example
+
+Playing a ringtone with `Voice.Playlist.Ringtone()`:
+
+```js
+import { Voice } from "@signalwire/realtime-api";
+
+const playlist = new Voice.Playlist()
+  .add(Voice.Playlist.Ringtone({ name: "us", duration: 10 }));
+
+await call.play(playlist);
+```
+
+Prompting with a ringtone using `call.promptRingtone()`:
+
+```js
+const prompt = await call.promptRingtone({
+  name: "it",
+  duration: 10,
+  digits: {
+    max: 1,
+    digitTimeout: 5
+  }
+});
+const { digits } = await prompt.ended();
+```
+
+---
+
+### VoiceCallPhoneParams
+
+A device configuration object for calling a phone number. Returned by [`Voice.DeviceBuilder.Phone()`][devicebuilder-phone] and passed to [`DeviceBuilder.add()`][devicebuilder-add].
+
+#### Properties
+
+<ParamField path="type" type='"phone"' required>
+  The device type. Always `"phone"` for phone devices.
+</ParamField>
+
+<ParamField path="to" type="string" required>
+  Number to call, in E.164 format.
+</ParamField>
+
+<ParamField path="from" type="string">
+  SignalWire number to use to initiate the call, in E.164 format.
+</ParamField>
+
+<ParamField path="timeout" type="number" default="30">
+  Time to wait for the call to be answered, in seconds.
+</ParamField>
+
+<ParamField path="callStateUrl" type="string">
+  Webhook URL to which SignalWire will send call status change notifications. See [`CallState`][callstate].
+</ParamField>
+
+<ParamField path="callStateEvents" type="string[]" default='["ended"]'>
+  Array of event names to be notified about. Allowed values are `created`, `ringing`, `answered`, and `ended`.
+</ParamField>
+
+### VoiceCallSipParams
+
+A device configuration object for calling a SIP endpoint. Returned by [`Voice.DeviceBuilder.Sip()`][devicebuilder-sip] and passed to [`DeviceBuilder.add()`][devicebuilder-add].
+
+#### Properties
+
+<ParamField path="type" type='"sip"' required>
+  The device type. Always `"sip"` for SIP devices.
+</ParamField>
+
+<ParamField path="to" type="string" required>
+  SIP endpoint URI to call.
+</ParamField>
+
+<ParamField path="from" type="string" required>
+  SIP endpoint URI to use to initiate the call.
+</ParamField>
+
+<ParamField path="timeout" type="number" default="30">
+  Time to wait for the call to be answered, in seconds.
+</ParamField>
+
+<ParamField path="codecs" type="SipCodec[]">
+  Array of desired codecs in order of preference. See [`SipCodec`][sipcodec].
+</ParamField>
+
+<ParamField path="headers" type="SipHeader[]">
+  Array of headers. Must be X- headers only. See [`SipHeader`][sipheader].
+</ParamField>
+
+<ParamField path="callStateUrl" type="string">
+  Webhook URL to which SignalWire will send call status change notifications. See [`CallState`][callstate].
+</ParamField>
+
+<ParamField path="callStateEvents" type="string[]" default='["ended"]'>
+  Array of event names to be notified about. Allowed values are `created`, `ringing`, `answered`, and `ended`.
+</ParamField>
+
+<ParamField path="webrtcMedia" type="boolean">
+  Whether to use WebRTC media.
+</ParamField>
+
+<ParamField path="sessionTimeout" type="number">
+  Session timeout in seconds.
+</ParamField>
+
+### TapDevice
+
+A device to use as a destination for [`tap`][voice-call].
+This can be either an RTP device or a WebSocket device.
+
+#### Properties
+
+<ParamField path="type" type='"rtp" | "ws"' required>
+  Type of this device (RTP or WebSocket).
+</ParamField>
+
+**RTP** (`type` = `"rtp"`)
+
+An RTP device has the following properties in addition to the general ones:
+
+<ParamField path="addr" type="string" required>
+  RTP IPv4 address.
+</ParamField>
+
+<ParamField path="port" type="string" required>
+  RTP port.
+</ParamField>
+
+<ParamField path="codec" type='"OPUS" | "PCMA" | "PCMU"'>
+  Optional codec to use. It will be the same as the tapped audio if not set.
+</ParamField>
+
+<ParamField path="rate" type="number">
+  Optional sample rate in Hz. It will be the same as the tapped audio if not set.
+</ParamField>
+
+<ParamField path="ptime" type="number">
+  Optional packetization time in milliseconds. It will be the same as the tapped audio if not set.
+</ParamField>
+
+**WebSocket** (`type` = `"ws"`)
+
+A WebSocket device has the following properties in addition to the general ones:
+
+<ParamField path="uri" type="string" required>
+  Destination URI.
+</ParamField>
+
+<ParamField path="codec" type='"OPUS" | "PCMA" | "PCMU"'>
+  Optional codec to use. It will be the same as the tapped audio if not set.
+</ParamField>
+
+<ParamField path="rate" type="number">
+  Optional sample rate in Hz. It will be the same as the tapped audio if not set.
+</ParamField>
+
+#### Example
+
+Tapping audio to a WebSocket endpoint using `call.tapAudio()`:
+
+```js
+const tap = await call.tapAudio({
+  direction: "both",
+  device: {
+    type: "ws",
+    uri: "wss://example.domain.com/endpoint"
+  }
+});
+
+// Stop the tap when done
+await tap.stop();
+```
+
+Tapping audio to an RTP endpoint using `call.tap()`:
+
+```js
+const tap = await call.tap({
+  audio: {
+    direction: "speak"
+  },
+  device: {
+    type: "rtp",
+    addr: "192.0.2.1",
+    port: "1234",
+    codec: "PCMU"
+  }
+});
+
+await tap.stop();
+```

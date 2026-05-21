@@ -1,0 +1,23 @@
+---
+title: "unlock"
+slug: /node/reference/video/room-session/unlock
+description: unlock method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+
+### unlock
+
+- **unlock**(`params`): `Promise<void>`
+
+Unlocks the room if it had been previously locked. This allows new participants to join the room.
+
+#### Returns
+
+`Promise<void>`
+
+#### Example
+
+```javascript
+await roomSession.unlock();
+```

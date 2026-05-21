@@ -1,0 +1,58 @@
+---
+title: "Chat Client"
+sidebar_label: Client
+slug: /node/reference/chat/client
+description: Chat Client reference for chat messaging.
+sidebar_position: 1
+toc_max_heading_level: 3
+---
+
+[events]: /docs/server-sdk/v3/node/reference/chat/client/events
+
+The Chat Client enables real-time messaging between users. It connects to SignalWire and allows you to subscribe to channels, publish messages, and track channel members.
+
+```javascript
+import { Chat } from "@signalwire/realtime-api";
+
+const chatClient = new Chat.Client({
+  project: "<project-id>",
+  token: "<api-token>",
+});
+```
+
+After instantiating, call `subscribe()` to join channels, then use `publish()` to send messages and listen for the `message` event to receive them. See [Events][events] for all available events.
+
+## Constructor
+
+▸ **new Chat.Client**(`opts`): `Chat.Client`
+
+Creates a new Chat Client instance.
+
+#### Parameters
+
+| Name | Type | Description |
+|:-----|:-----|:------------|
+| `opts.project` | `string` | **Required.** SignalWire project ID. |
+| `opts.token` | `string` | **Required.** SignalWire API token. |
+| `opts.debug.logWsTraffic?` | `boolean` | Log WebSocket traffic for debugging. Default: `false`. |
+
+## Examples
+
+### Subscribing to channels
+
+```javascript
+await chatClient.subscribe(["general", "support"]);
+
+chatClient.on("message", (message) => {
+  console.log(`${message.channel}: ${message.content}`);
+});
+```
+
+### Publishing messages
+
+```javascript
+await chatClient.publish({
+  channel: "general",
+  content: "Hello, world!",
+});
+```

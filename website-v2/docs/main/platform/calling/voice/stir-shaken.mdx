@@ -1,0 +1,58 @@
+---
+title: STIR/SHAKEN
+description: Since its inception, spammers, spoofers, and supervillains have
+  attacked the telephony industry. STIR/SHAKEN is a protocol that aims to solve
+  this problem through caller verification. Read along to find out what
+  STIR/SHAKEN is and SignalWire's part in this all.
+slug: /platform/voice/stir-shaken
+x-custom:
+  ported_from_readme: true
+---
+
+## What is STIR/SHAKEN?
+
+STIR/SHAKEN is a VoIP technology framework designed to reduce fraudulent robocalls and illegal phone number spoofing. 
+In short, this is accomplished through the creation of complex **tokens** that verify the caller's identity before the destination phone even starts ringing. 
+STIR is an internet regulatory group and stands for **S**ecure **T**elephony **I**dentity **R**evisited. 
+SHAKEN stands for **S**ecure **H**andling of **A**sserted information using to**KEN**s, and is the method by which the STIR regulations are being put into practice. 
+
+Not only does this acronym make you want to watch a James Bond film, it describes this framework quite well. 
+Let’s discuss the token aspect and STIR/SHAKEN. 
+Similar to how you would use a passport as a higher form of identity for travel, a call uses a **PASSporT** for increased verification as well. 
+PASSporT is an encryption token transported by SIP identity headers and SSL certificates, which is then set off to other service providers or certificate authorities to ensure that the caller is truly who they say they are.
+
+These tokens are categorized into three tiers (A, B, and C) based upon their trust level. 
+These are referred to as **attestation levels**. 
+Callers with higher credibility may qualify for level A attestation whereas callers with less credibility will fall lower in the tiers depending on the provider's knowledge of the customer, use case, and phone number used.
+
+When receiving a call protected with STIR/SHAKEN you can examine the encryption token and determine the amount of trust you should assign to the displayed Caller ID. 
+Robocallers would need to properly identify themselves to be considered trusted, thereby removing much of the motivation to make robocalls in the first place!
+
+## Is SignalWire STIR/ SHAKEN compliant?
+
+Yes, SignalWire is STIR/ SHAKEN compliant!
+
+### Attestation levels
+
+By default, all outbound calls from phone numbers bought on the SignalWire platform receive attestation level **C**.
+Levels **A** and **B** attestation require a vetting process.
+For more information regarding attestation and our vetting process, please create a [support ticket](https://support.signalwire.com/) with us.
+
+The FCC required that providers lay out their plan of attack through the [Robocall Mitigation Database](https://fccprod.servicenowservices.com/rmd?id=rmd_welcome) back in April of 2021 and as of June 30th, 2021, the FCC required all providers to implement STIR/ SHAKEN within their networks. 
+Although the telecommunication laws are in place through the FCC for providers, the implementation for carriers has been a lot more gradual.
+
+## Robocalling battle plan
+
+Until the day comes that we are not reminded daily of our vehicle's extended warranty, it is obvious that call verification politics are going to remain commonplace and will not be going away anytime soon. 
+
+This is why SignalWire sponsored the creation of debatably the first [open source implementation of STIR/SHAKEN](https://github.com/signalwire/libstirshaken) under the FreeSWITCH project. 
+The goal of this library was to begin the process of normalizing caller verification by placing it directly into the hands of developers. 
+This library allows for simpler and more cost-efficient creation of security certificates so you can transform your stack into a scalable robo-killing environment.
+
+So call your politicians, complain to your carriers, and spread the word for increased robo-call prevention because redefining the telecommunications space for the better is what being a member of the SignalWire community is all about.
+
+## Additional resources
+
+- [STIR/ SHAKEN Open Source GitHub](https://github.com/signalwire/libstirshaken)
+- [SignalWire Blog: Robo-calls finally meet their Robocop: libstirshaken](https://signalwire.com/blogs/industry/robo-calls-meet-robocop-libstirshaken)
+- [SignalWire Blog: Stop spoofed robocalls with libstirshaken](https://signalwire.com/blogs/product/verifying-caller-id-stir-shaken)

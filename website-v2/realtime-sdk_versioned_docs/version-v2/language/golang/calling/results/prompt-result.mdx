@@ -1,0 +1,166 @@
+---
+title: Relay.Calling.PromptResult
+slug: /go/reference/calling/results/prompt
+description: The result object that is returned when prompting a call.
+toc_max_heading_level: 3
+---
+
+[relay-event]: /docs/server-sdk/v2/go/reference/event
+
+## Relay.Calling.PromptResult
+
+This object returned from one of _synchronous_ prompt methods that represents the final result of a prompting attempt.
+
+## Methods-submenu
+
+### GetConfidence
+
+In a `prompt` action of type `speech`, it returns the confidence of the result.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`number` - Confidence of the result on a `speech` prompt.
+
+**Examples**
+
+> Start prompt and then check the result confidence.
+
+```go
+promptAction, err := resultDial.Call.PromptAsync(&play, &collect)
+for {
+    time.Sleep(1 * time.Second)
+    if promptAction.GetCompleted() {
+        break
+    }
+}
+myResult := promptAction.GetResultType()
+switch myResult {
+case signalwire.CollectResultSpeech:
+        signalwire.Log.Info("Speech text: \"%s\" Confidence: %f\n", promptAction.GetCollectResult(), promptAction.GetConfidence())
+case signalwire.CollectResultDigit:
+        signalwire.Log.Info("Digits: \"%s\" Terminator: %s\n", promptAction.GetCollectResult(), promptAction.GetTerminator())
+default:
+        signalwire.Log.Info("Result was: %s\n", myResult.String())
+}
+```
+
+### GetEvent
+
+Returns the last Relay Event arrived for this operation.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+[`Relay.Event`][relay-event] - Last Relay Event.
+
+**Examples**
+
+> Stop the prompt and then inspect last Relay event payload.
+
+```go
+promptAction.Stop()
+lastEvent := promptAction.GetEvent()
+
+ev := struct {
+	Params *json.RawMessage `json:"params"`
+}{Params: lastEvent}
+
+b, err := json.MarshalIndent(&ev, "", "\t")
+if err != nil {
+	signalwire.Log.Error("error:", err)
+}
+signalwire.Log.Info("Last event: %s\n", b)
+```
+
+### GetResult
+
+Returns the user's input in a prompt attempt. Could be both from `speech` or `digits` type.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+signalwire.CollectResult
+
+**Examples**
+
+> Show CollectResult.
+
+```go
+myResult := promptAction.GetResultType()
+switch myResult {
+case signalwire.CollectResultSpeech:
+        signalwire.Log.Info("Result: \"%v\" Confidence: %f\n", promptAction.GetResult(), promptAction.GetConfidence())
+case signalwire.CollectResultDigit:
+        signalwire.Log.Info("Result: \"%v\" Terminator: %s\n", promptAction.GetResult(), promptAction.GetTerminator())
+default:
+}
+```
+
+### GetTerminator
+
+In a `prompt` action of type `digits`, it returns the digit that has terminated the attempt.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`string` - Digit that has terminated the prompt attempt.
+
+**Examples**
+
+> Show the terminator digit.
+
+```go
+myResult := promptAction.GetResultType()
+switch myResult {
+case signalwire.CollectResultSpeech:
+        signalwire.Log.Info("Result: \"%v\" Confidence: %f\n", promptAction.GetResult(), promptAction.GetConfidence())
+case signalwire.CollectResultDigit:
+        signalwire.Log.Info("Result: \"%v\" Terminator: %s\n", promptAction.GetResult(), promptAction.GetTerminator())
+default:
+}
+```
+
+### GetSuccessful
+
+Return `true` if the prompt attempt succeeded, `false` otherwise.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`boolean` - True/False accordingly to the state.
+
+**Examples**
+
+> Start the prompt and then check if it has ended successfully.
+
+```go
+promptAction, err := resultDial.Call.PromptAsync(&play, &collect)
+for {
+	time.Sleep(1 * time.Second)
+	if promptAction.GetCompleted() {
+		break
+	}
+}
+signalwire.Log.Info("Success: %v\n",  promptAction.GetSuccessful())
+```

@@ -1,0 +1,24 @@
+---
+title: FaxResult
+slug: /ruby/reference/calling/results/fax
+description: The FaxResult object is returned when a fax operation is completed.
+toc_max_heading_level: 3
+---
+
+[relay-event]: /docs/server-sdk/v2/ruby/reference/event
+
+# Relay::Calling::FaxResult
+
+This object is returned from the `fax_send` and `fax_receive` method and represents the final result of a sent or received Fax.
+
+## Properties
+
+| Property | Type | Description |
+| :------- | :--- | :---------- |
+| `successful` | Boolean | Whether the fax has been sent or received successfully. |
+| `event` | [Relay::Event][relay-event] | Last event that completed the operation. |
+| `direction` | String | `send` or `receive`. |
+| `identity` | String | Identity used to send the fax. |
+| `remoteIdentity` | String | Remote identity. |
+| `document` | String | Document URL. |
+| `pages` | Numeric | Number of sent/received pages. |

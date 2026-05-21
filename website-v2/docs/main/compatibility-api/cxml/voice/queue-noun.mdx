@@ -1,0 +1,157 @@
+---
+title: Queue
+sidebar_label: Queue
+slug: /compatibility-api/cxml/reference/voice/queue
+sidebar_position: 1
+toc_max_heading_level: 3
+---
+
+[`<Dial>`](/docs/compatibility-api/cxml/reference/voice/dial) verb's `<Queue>` noun specifies what queue to dial.
+
+## Noun attributes
+
+<ParamField path="method" type="string" default="POST">
+  The `method` attribute specifies whether the request to action is a `GET` or a `POST`. Valid values are `GET` or `POST`.
+</ParamField>
+
+<ParamField path="url" type="string">
+  A specified URL for a document that runs on the caller's end before the call is connected. This allows the caller to inform the dialed number that the call will be connected to an agent or that the call may be monitored or recorded. See [below](#queue_Url) for request parameters.
+</ParamField>
+
+
+#### Request parameters for `url` {#queue_Url}
+
+The `url` request contains the [Standard Request Parameters](/docs/compatibility-api/cxml/reference/voice#request-parameters) as well as:
+
+<ParamField path="CallSid" type="string">
+  The unique identifier for the dequeued call.
+</ParamField>
+
+<ParamField path="DequeingCallSid" type="string">
+  The unique identifier for the call dequeueing the caller.
+</ParamField>
+
+<ParamField path="QueueSid" type="string">
+  The unique identifier for the Queue.
+</ParamField>
+
+<ParamField path="QueueTime" type="string">
+  The time, in seconds, spent waiting in a queue.
+</ParamField>
+
+## Examples
+
+### Dialing a queue
+
+<CodeBlocks>
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Dial>
+        <Queue url="https://example.com/about_to_connect.xml">support</Queue>
+    </Dial>
+</Response>
+```
+```javascript title="Node.js"
+const { RestClient } = require("@signalwire/compatibility-api");
+const response = new RestClient.LaML.VoiceResponse();
+
+dial = response.dial();
+dial.queue({ url: "https://example.com/about_to_connect.xml" }, "support");
+console.log(response.toString());
+```
+```csharp
+using Twilio.TwiML;
+using Twilio.TwiML.Voice;
+using System;
+
+class Example
+{
+    static void Main()
+    {
+        var response = new VoiceResponse();
+        var dial = new Dial();
+        dial.Queue("support", url: new Uri("https://example.com/about_to_connect.xml"));
+
+        response.Append(dial);
+        Console.WriteLine(response.ToString());;
+    }
+}
+```
+```python
+from signalwire.voice_response import VoiceResponse, Dial, Queue
+
+response = VoiceResponse()
+dial = Dial()
+dial.queue('support', url='https://example.com/about_to_connect.xml')
+response.append(dial)
+
+print(response)
+```
+```ruby
+require 'signalwire/sdk'
+
+response = Signalwire::Sdk::VoiceResponse.new do |response|
+  response.dial do |dial|
+    dial.queue('support', url: 'https://example.com/about_to_connect.xml')
+  end
+end
+
+puts response.to_s
+```
+</CodeBlocks>
+
+This is an example of a caller in the 'support' queue waiting to be dequeued.
+
+### Bridging out of a queue
+
+<CodeBlocks>
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Say>You will now be connected to an agent.</Say>
+</Response>
+```
+```javascript title="Node.js"
+const { RestClient } = require("@signalwire/compatibility-api");
+const response = new RestClient.LaML.VoiceResponse();
+
+response.say("You will now be connected to an agent.");
+console.log(response.toString());
+```
+```csharp
+using Twilio.TwiML;
+using System;
+
+
+class Example
+{
+    static void Main()
+    {
+        var response = new VoiceResponse();
+        response.Say("You will now be connected to an agent.");
+
+        Console.WriteLine(response.ToString());;
+    }
+}
+```
+```python
+from signalwire.voice_response import VoiceResponse, Say
+
+response = VoiceResponse()
+response.say('You will now be connected to an agent.')
+
+print(response)
+```
+```ruby
+require 'signalwire/sdk'
+
+response = Signalwire::Sdk::VoiceResponse.new do |response|
+  response.say(message: 'You will now be connected to an agent.')
+end
+
+puts response.to_s
+```
+</CodeBlocks>
+
+Once a caller is first in line in the queue and ready to be bridged, they will be informed of the connection to an agent.

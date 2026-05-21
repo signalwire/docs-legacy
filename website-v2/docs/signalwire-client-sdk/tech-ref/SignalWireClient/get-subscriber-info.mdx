@@ -1,0 +1,43 @@
+---
+title: getSubscriberInfo
+slug: /signalwire-client/get-subscriber-info
+---
+
+import APIField from '@site/src/components/APIField';
+
+The `getSubscriberInfo` method queries the SignalWire platform for detailed information about the authenticated subscriber. 
+This includes all the details filled in while creating the subscriber from the Dashboard or the
+[Create Subscriber REST API](/apis/fabric/subscribers-create)).
+
+This includes the subscriber's name, email, country, region, job and whatever other fields are filled in.
+
+In addition, it includes the subscriber's push notification key (if any) and their addresses.
+
+For full type information of the response, see the [`GetSubscriberInfoResponse`](../Types/index.mdx#getsubscriberinforesponse) type.
+
+## Parameters
+
+None
+
+## Signature
+
+```typescript
+getSubscriberInfo(): Promise<GetSubscriberInfoResponse>
+```
+
+## Returns
+
+**Type:** `Promise<`[`GetSubscriberInfoResponse`](../Types/index.mdx#getsubscriberinforesponse)`>`
+
+Returns a Promise that resolves with subscriber information including capabilities and permissions.
+
+## Examples
+
+### Get basic subscriber info
+
+```typescript
+const info = await client.getSubscriberInfo()
+
+console.log('Subscriber ID:', info.id)
+console.log('Display name:', info.displayName)
+```

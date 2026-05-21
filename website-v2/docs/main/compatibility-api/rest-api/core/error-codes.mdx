@@ -1,0 +1,763 @@
+---
+title: Error codes
+slug: /compatibility-api/rest/error-codes
+---
+
+The API defines error codes to convey information about possible issues.
+Below is a list of all error codes as well as possible causes for the error code to appear.
+
+## Errors
+
+<ParamField path="4000" type="Error">
+
+- The provided list of capabilities contains invalid capabilities for the phone number
+- The capabilities for the phone number are missing
+</ParamField>
+
+
+<ParamField path="4001" type="Error">
+
+- The fee for the operation you are trying to perform costs more than the available balance
+</ParamField>
+
+<ParamField path="10000" type="Error">
+
+- The argument passed is invalid
+- An attempt was made to cancel an in-progress call
+- An attempt was made to update a completed call
+- An attempt was made to update a conference or conference participant for a completed conference
+- An attempt was made to cancel an in-progress or finished fax
+- A required argument was left blank
+- An attempt was made to redact a message that is still in-progress
+</ParamField>
+
+
+<ParamField path="10001" type="Error">
+
+- The operation attempted is not enabled on the Space
+</ParamField>
+
+
+<ParamField path="10003" type="Error">
+
+- The permissions passed for the API token contain invalid selections
+</ParamField>
+
+
+<ParamField path="10004" type="Error">
+
+- The subproject ID passed does not belong to the project used to authenticate the request
+</ParamField>
+
+
+<ParamField path="11100" type="Error">
+
+- The URL passed to update the queue member is invalid
+</ParamField>
+
+
+<ParamField path="11200" type="Error">
+
+- The attempt to deliver a webhook to your server timed out
+</ParamField>
+
+
+<ParamField path="11210" type="Error">
+
+- DNS resolution failure due to bad hostname
+</ParamField>
+
+
+<ParamField path="11215" type="Error">
+
+- Redirected too many times
+</ParamField>
+
+
+<ParamField path="11217" type="Error">
+
+- The attempt to deliver a webhook to your server responded with a 4xx or 5xx status code
+</ParamField>
+
+
+<ParamField path="11220" type="Error">
+
+- An error occurred during the SSL/TLS handshake
+</ParamField>
+
+
+<ParamField path="11251" type="Error">
+
+- There was a fatal protocol violation
+</ParamField>
+
+
+<ParamField path="11300" type="Error">
+
+- HTTP version not supported
+</ParamField>
+
+
+<ParamField path="11750" type="Error">
+
+- The provided response body is too large
+</ParamField>
+
+
+<ParamField path="11751" type="Error">
+
+- The total size of the media message request exceeds the maximum size limit
+</ParamField>
+
+
+<ParamField path="12100" type="Error">
+
+- Your CXML document failed to parse. There could be a leading space, a missing or unclosed element, or incorrect attribute
+</ParamField>
+
+
+<ParamField path="12300" type="Error">
+
+- The content type of the provided URL is invalid
+</ParamField>
+
+
+<ParamField path="13221" type="Error">
+
+- The HTTP method attribute is invalid - it can only be 'GET' or 'POST'
+</ParamField>
+
+
+<ParamField path="13222" type="Error">
+
+- The attribute in sendDigits includes an invalid character. It may only contain '0123456789ABCD*#wW'
+</ParamField>
+
+
+<ParamField path="13621" type="Error">
+
+- The provided event is not a valid recording callback event
+</ParamField>
+
+
+<ParamField path="13699" type="Error">
+
+- The provided trim value for the recording is invalid
+</ParamField>
+
+
+<ParamField path="16002" type="Error">
+
+- The provided conference attributes are invalid
+- The required conference attributes are missing
+- The participant to be coached is not in the provided conference
+</ParamField>
+
+
+<ParamField path="20001" type="Error">
+
+- An unknown error occurred
+</ParamField>
+
+
+<ParamField path="20002" type="Error">
+
+- The friendly name is missing
+- The friendly name must be between 1 and 64 characters long
+- The friendly name is invalid
+</ParamField>
+
+
+<ParamField path="20003" type="Error">
+
+- There was an authentication error or API access is blocked for this feature
+</ParamField>
+
+
+<ParamField path="20009" type="Error">
+
+- An attempt was made to delete a call that is not finished
+- An attempt was made to delete a fax that is not finished
+- An attempt was made to delete a message that is in-progress
+- An attempt was made to delete media for a message that is in-progress
+</ParamField>
+
+
+<ParamField path="20010" type="Error">
+
+- The action you are attempting to perform is disabled for the account
+</ParamField>
+
+
+<ParamField path="20404" type="Error">
+
+- The resource you are trying to access does not exist
+</ParamField>
+
+
+<ParamField path="20422" type="Error">
+
+- The passed document is not a valid CXML document. The CXML document is missing a content type header or contains an invalid parameter/value
+</ParamField>
+
+
+<ParamField path="20429" type="Error">
+
+- There were too many requests or throughput was exceeded
+</ParamField>
+
+
+<ParamField path="20504" type="Error">
+
+- An internal error occurred
+</ParamField>
+
+
+<ParamField path="21205" type="Error">
+
+- A phone call was attempted without a CXML URL or ApplicationSid
+</ParamField>
+
+
+<ParamField path="21208" type="Error">
+
+- The provided Timeout parameter was invalid
+- The provided Timeout parameter was not a positive whole integer
+</ParamField>
+
+
+<ParamField path="21209" type="Error">
+
+- The Method parameter provided was not GET or POST
+
+- The passed mode was not valid for the phone number
+</ParamField>
+
+
+<ParamField path="21210" type="Error">
+
+- The From number provided was not a purchased or verified number in your project
+- The From number provided was not a purchased number in your project
+- An outbound message was attempted where the From number provided was a verified caller ID
+</ParamField>
+
+
+<ParamField path="21211" type="Error">
+
+- The 'To' number provided was missing
+- The 'To' number provided has an invalid format
+</ParamField>
+
+
+<ParamField path="21212" type="Error">
+
+- The From number provided was not E164 while dialing to a phone number
+- The From number provided must be an E164 number, caller ID string, or SIP URI
+- The From number provided must be an E164 number or client identifier
+- The From number provided has invalid format
+</ParamField>
+
+
+<ParamField path="21213" type="Error">
+
+- An outbound call was attempted without a From number
+</ParamField>
+
+
+<ParamField path="21217" type="Error">
+
+- The To phone number provided does not appear to be valid
+</ParamField>
+
+
+<ParamField path="21218" type="Error">
+
+- The provided ApplicationSid is invalid
+- The provided ApplicationSid does not exist
+</ParamField>
+
+
+<ParamField path="21219" type="Error">
+
+- The account limitations for this feature have been exceeded
+- The 'To' phone number is not a verified caller ID and the account is in Trial mode
+- The 'To' phone number is not a verified caller ID as required for Platform Free Trial messaging
+</ParamField>
+
+
+
+<ParamField path="21220" type="Error">
+
+- The call cannot be redirected if it is not in-progress
+- A stream cannot be started for a call or conference in the current state
+- A recording cannot be started for a call that is not in-progress
+</ParamField>
+
+
+<ParamField path="21234" type="Error">
+
+- The AMD parameters provided are not valid
+</ParamField>
+
+
+<ParamField path="21262" type="Error">
+
+- The AMD status callback URL is missing
+</ParamField>
+
+
+<ParamField path="21401" type="Error">
+
+- The phone number you're attempting to purchase has an invalid format
+</ParamField>
+
+
+<ParamField path="21402" type="Error">
+
+- The URL is not valid
+- The URL is not a fully qualified URL
+</ParamField>
+
+
+<ParamField path="21408" type="Error">
+
+- The callback URL is not set
+</ParamField>
+
+
+<ParamField path="21420" type="Error">
+
+- The passed VoiceApplicationSid or SmsApplicationSid could not be found
+</ParamField>
+
+
+<ParamField path="21421" type="Error">
+
+- An area code or number must be provided to purchase a number
+</ParamField>
+
+
+<ParamField path="21451" type="Error">
+
+- The area code is not formatted correctly
+</ParamField>
+
+
+<ParamField path="21456" type="Error">
+
+- The supplied callback URL is not valid
+</ParamField>
+
+
+<ParamField path="21475" type="Error">
+
+- An attempt was made to update a conference with an invalid status
+</ParamField>
+
+
+<ParamField path="21481" type="Error">
+
+- The page token supplied was invalid
+</ParamField>
+
+
+
+<ParamField path="21601" type="Error">
+
+- The phone number is not a valid SMS or MMS capable number
+- The phone number is not a voice capable number
+- The phone number is not a fax capable number
+</ParamField>
+
+
+<ParamField path="21602" type="Error">
+
+- An attempt was made to send a message without a media URL or text body
+</ParamField>
+
+
+<ParamField path="21603" type="Error">
+
+- The format of the 'To' or 'From' is invalid
+- The 'From' number is missing
+- The 'To' number has invalid format
+- The 'To' number is missing
+</ParamField>
+
+
+<ParamField path="21604" type="Error">
+
+- The 'To' number is required to send a message
+</ParamField>
+
+
+<ParamField path="21606" type="Error">
+
+- The 'To' number provided is not a mobile number
+</ParamField>
+
+
+<ParamField path="21610" type="Error">
+
+- The message was blocked by the user or sent from a blacklisted number
+</ParamField>
+
+
+<ParamField path="21611" type="Error">
+
+- The 'From' number has exceeded the maximum number of queued calls, messages, or faxes for the account
+</ParamField>
+
+
+<ParamField path="21612" type="Error">
+
+- The Media provided is not supported
+</ParamField>
+
+
+<ParamField path="21614" type="Error">
+
+- The 'To' number is not a valid mobile number
+</ParamField>
+
+
+<ParamField path="21617" type="Error">
+
+- The concatenated message body exceeds the allowed character limit
+</ParamField>
+
+
+<ParamField path="21620" type="Error">
+
+- The media URL(s) provided is/was invalid
+- The URL must be HTTP or HTTPS
+</ParamField>
+
+
+<ParamField path="21623" type="Error">
+
+- The number of media files exceeds the allowed limit
+</ParamField>
+
+
+<ParamField path="21624" type="Error">
+
+- The validity period provided is invalid
+</ParamField>
+
+
+
+<ParamField path="21626" type="Error">
+
+- The callback event is not valid
+</ParamField>
+
+
+<ParamField path="21628" type="Error">
+
+- The E911 address provided is invalid for this phone number
+</ParamField>
+
+
+<ParamField path="21701" type="Error">
+
+- The number group provided is invalid or unrecognized
+</ParamField>
+
+
+<ParamField path="21703" type="Error">
+
+- The number group provided does not have a phone number in the group capable of the operation you are attempting
+</ParamField>
+
+
+<ParamField path="21705" type="Error">
+
+- The message was attempted without a From number or Number Group
+</ParamField>
+
+
+<ParamField path="21717" type="Error">
+
+- The 'From' number must belong to an active campaign
+</ParamField>
+
+
+<ParamField path="22109" type="Error">
+
+- The E911 address ID provided is not valid
+</ParamField>
+
+
+<ParamField path="22121" type="Error">
+
+- This number was purchased too recently to release
+</ParamField>
+
+
+<ParamField path="30001" type="Error">
+
+- The validity period for the message was exceeded
+</ParamField>
+
+
+#### 30002 {#30002}
+
+<ParamField path="30002" type="Error">
+
+- The account balance is insufficient to send the message
+- The account balance is insufficient for the operation you are attempting
+</ParamField>
+
+
+#### 30003 {#30003}
+
+<ParamField path="30003" type="Error">
+
+- The message was attempted but the destination handset is not reachable
+</ParamField>
+
+
+<ParamField path="30004" type="Error">
+
+- The message was attempted but blocked by the destination carrier
+</ParamField>
+
+
+#### 30005 {#30005}
+
+<ParamField path="30005" type="Error">
+
+- The message was attempted but the destination handset is unknown
+</ParamField>
+
+
+#### 30006 {#30006}
+
+<ParamField path="30006" type="Error">
+
+- The message could not be routed to the destination handset
+</ParamField>
+
+
+#### 30007 {#30007}
+
+<ParamField path="30007" type="Error">
+
+- The message was flagged as a carrier violation
+- The message was filtered due to disallowed content
+</ParamField>
+
+
+#### 30008 {#30008}
+
+<ParamField path="30008" type="Error">
+
+- The message failed due to an unknown upstream error
+</ParamField>
+
+
+<ParamField path="30009" type="Error">
+
+- The message's validity period has expired at the carrier
+</ParamField>
+
+
+<ParamField path="30010" type="Error">
+
+- The max price was exceeded by the cost of the message
+- The max price was exceeded by the cost of the call
+</ParamField>
+
+
+#### 30022 {#30022}
+
+<ParamField path="30022" type="Error">
+
+- The US A2P 10DLC messaging rate limits were exceeded
+</ParamField>
+
+
+<ParamField path="30027" type="Error">
+
+- The US A2P 10DLC T-Mobile Daily Message Limit was reached
+</ParamField>
+
+
+
+<ParamField path="31003" type="Error">
+
+- The request resulted in a connection timeout
+</ParamField>
+
+
+<ParamField path="31922" type="Error">
+
+- The websocket URL provided for the stream is invalid
+- The websocket URL schema is not WSS
+- The websocket URL has a trailing whitespace
+- The websocket URL has an embedded whitespace
+</ParamField>
+
+
+<ParamField path="32009" type="Error">
+
+- The SIP domain dialed is not a registered endpoint
+</ParamField>
+
+
+<ParamField path="35125" type="Error">
+
+- The PFT Campaign daily message cap has been met
+- The sole proprietor campaign daily message cap has been met
+</ParamField>
+
+
+<ParamField path="50509" type="Error">
+
+- The redacted message body must be empty
+- An attempt to redact the message by passing a different body was made
+</ParamField>
+
+
+<ParamField path="53603" type="Error">
+
+- The URL returned an HTTP redirect
+- The URL exceeded the max amount of HTTP redirects
+- There was an internal failure while attempting to process the media
+</ParamField>
+
+
+<ParamField path="54453" type="Error">
+
+- The PageToken provided is invalid or missing
+- A PageToken must be included if your Page value is larger than 0
+</ParamField>
+
+
+<ParamField path="54454" type="Error">
+
+- The page size provided is invalid
+</ParamField>
+
+
+<ParamField path="63011" type="Error">
+
+- The message could not be delivered to the carrier
+</ParamField>
+
+
+<ParamField path="63019" type="Error">
+
+- The media could not be downloaded
+</ParamField>
+
+
+<ParamField path="90000" type="Error">
+
+- The wildcard is invalid while searching for available numbers
+- The format for the argument provided is invalid
+- The supplied parameter is unsupported
+- The supplied parameter can only be used in combination with InRegion
+- The E911 address cannot be set on creation - update the record after it is created
+- The specified capability could not be restricted on purchase
+</ParamField>
+
+
+## Warnings
+
+<ParamField path="13000" type="Warning">
+
+- The Conference noun cannot be mixed with Number nouns
+- The Conference noun can only be used once inside a Dial verb
+</ParamField>
+
+
+<ParamField path="13215" type="Warning">
+
+- The Dial noun has an invalid nested element
+- The only valid nested element for Dial is Number
+- The Dial noun includes too many nouns
+- The Refer noun has an invalid nested element
+- No verbs can be nested within Refer, and Refer cannot be nested in any other verbs
+</ParamField>
+
+
+<ParamField path="13223" type="Warning">
+
+- The phone number in Dial is not formatted correctly. It must be E164
+- The phone number in Dial is missing
+- You are attempting to Dial something that is not a phone number
+</ParamField>
+
+
+<ParamField path="13238" type="Warning">
+
+- There was an invalid Verb provided in the CXML executed by the waitUrl, holdUrl, or announceUrl
+- The executed CXML contains Dial, Gather, Hangup, or Record - these are not allowed
+</ParamField>
+
+
+<ParamField path="13243" type="Warning">
+
+- The provided SIP URI is formatted incorrectly
+</ParamField>
+
+
+<ParamField path="13254" type="Warning">
+
+- The SIP URI provided for Dial -> SIP is missing
+- The SIP URI provided for Dial -> SIP is not a public IP address
+- The SIP URI provided for Dial -> SIP does not resolve
+</ParamField>
+
+
+<ParamField path="13420" type="Warning">
+
+- The URL provided for Play does not return audio
+- The URL provided for Play has an invalid content type
+</ParamField>
+
+
+<ParamField path="13750" type="Warning">
+
+- The verb provided is not currently supported by the API version or your Space
+</ParamField>
+
+
+<ParamField path="13801" type="Warning">
+
+- The Refer verb was used on a non SIP call leg
+</ParamField>
+
+
+<ParamField path="14204" type="Warning">
+
+- The queue name is too short
+- The queue is missing in the attempt to Enqueue
+</ParamField>
+
+
+<ParamField path="21201" type="Warning">
+
+- The outbound phone call request was missing a 'To' number
+</ParamField>
+
+
+<ParamField path="21455" type="Warning">
+
+- The URL given to Play is not valid
+</ParamField>
+
+
+<ParamField path="32110" type="Warning">
+
+- The SIP URI provided is invalid
+- The Refer verb contains an invalid SIP URI
+</ParamField>
+
+
+<ParamField path="53404" type="Warning">
+
+- The supplied codecs are unsupported or invalid
+</ParamField>

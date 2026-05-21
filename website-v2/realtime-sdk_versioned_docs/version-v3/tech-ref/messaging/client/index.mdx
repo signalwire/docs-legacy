@@ -1,0 +1,60 @@
+---
+title: "Messaging Client"
+sidebar_label: Client
+slug: /node/reference/messaging/client
+description: Messaging Client reference for sending and receiving messages.
+sidebar_position: 1
+toc_max_heading_level: 3
+---
+
+[events]: /docs/server-sdk/v3/node/reference/messaging/client/events
+[send]: /docs/server-sdk/v3/node/reference/messaging/client/send
+
+The Messaging Client enables sending and receiving SMS and MMS messages. It connects to SignalWire and listens on one or more topics for incoming message events.
+
+```javascript
+import { Messaging } from "@signalwire/realtime-api";
+
+const client = new Messaging.Client({
+  project: "<project-id>",
+  token: "<api-token>",
+  topics: ["office"],
+});
+```
+
+Once instantiated, use [`send`][send] to send outbound messages, or listen for the `message.received` event to handle inbound messages. See [Events][events] for all available events.
+
+## Constructor
+
+▸ **new Messaging.Client**(`opts`): `Messaging.Client`
+
+Creates a new Messaging Client instance.
+
+#### Parameters
+
+| Name | Type | Description |
+|:-----|:-----|:------------|
+| `opts.project` | `string` | **Required.** SignalWire project ID. |
+| `opts.token` | `string` | **Required.** SignalWire API token. |
+| `opts.topics` | `string[]` | **Required.** Topics to listen on for inbound messages (e.g., `["office", "support"]`). |
+| `opts.debug.logWsTraffic?` | `boolean` | Log WebSocket traffic for debugging. Default: `false`. |
+
+## Examples
+
+### Receiving messages
+
+```javascript
+client.on("message.received", (message) => {
+  console.log("From:", message.from, "Body:", message.body);
+});
+```
+
+### Sending messages
+
+```javascript
+await client.send({
+  from: "+15551234567",
+  to: "+15559876543",
+  body: "Hello from SignalWire!",
+});
+```

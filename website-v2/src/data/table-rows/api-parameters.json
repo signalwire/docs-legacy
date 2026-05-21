@@ -1,0 +1,46 @@
+{
+  "columns": ["Name", "Type", "Default", "Description"],
+  "align": "left",
+  "rows": [
+    {
+      "id": "replace-param",
+      "name": "replace",
+      "type": "string",
+      "default": "-",
+      "required": "required",
+      "description": "The expression to replace."
+    },
+    {
+      "id": "with-param",
+      "name": "with",
+      "type": "string",
+      "default": "-",
+      "required": "required",
+      "description": "The phonetic spelling of the expression."
+    },
+    {
+      "id": "ignore-case-param",
+      "name": "ignore_case",
+      "type": "boolean",
+      "default": "true",
+      "required": "optional",
+      "description": "Whether the pronunciation replacement should ignore case."
+    },
+    {
+      "id": "max-length-param",
+      "name": "max_length",
+      "type": "number",
+      "default": "100",
+      "required": "conditional",
+      "description": "Maximum length of the replacement text. Required when using custom replacements."
+    },
+    {
+      "id": "timeout-param",
+      "name": "timeout",
+      "type": "number",
+      "default": "5000",
+      "required": "optional",
+      "description": "Request timeout in milliseconds."
+    }
+  ]
+}

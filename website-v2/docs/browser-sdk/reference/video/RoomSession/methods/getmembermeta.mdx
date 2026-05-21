@@ -1,0 +1,36 @@
+---
+title: "getMemberMeta"
+slug: /js/reference/video/room-session/get-member-meta
+description: getMemberMeta method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+### getMemberMeta
+
+- **getMemberMeta**(): `Promise<{ meta: Object }>`
+
+Returns the metadata assigned to the specified member.
+
+#### Parameters
+
+<ParamField path="params" type="object" required={false}>
+  Object containing the parameters of the method.
+</ParamField>
+
+<Indent>
+<ParamField path="memberId" type="string" required={false}>
+  Id of the member for which to obtain the metadata. If omitted, refers to the current member.
+</ParamField>
+</Indent>
+
+#### Returns
+
+`Promise<{ meta: Object }>`
+
+#### Example
+
+```javascript
+const { meta } = await roomSession.getMemberMeta();
+console.log(meta);
+```
+

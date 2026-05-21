@@ -1,0 +1,38 @@
+---
+title: "Task Client"
+sidebar_label: Client
+slug: /node/reference/task/client
+description: Task Client reference for task management.
+toc_max_heading_level: 3
+---
+
+[events]: /docs/server-sdk/node/reference/task/client/events
+[listen]: /docs/server-sdk/node/reference/task/client/listen
+[task-send]: /docs/server-sdk/node/reference/task/client/send
+[signalwire-realtime-client]: /docs/server-sdk/node/reference/realtime-client
+
+The Task Client enables server-side task processing. Access it via the `task` property on a [`SignalWire Client`][signalwire-realtime-client].
+
+```javascript
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "<project-id>", token: "<api-token>" });
+const taskClient = client.task;
+```
+
+Use [`listen`][listen] to receive tasks sent via [`Task.send`][task-send] from client applications. See [Events][events] for all available events.
+
+## Examples
+
+### Receiving tasks
+
+```javascript
+await taskClient.listen({
+  topics: ["jobs"],
+  onTaskReceived: (payload) => {
+    console.log("Task received:", payload);
+    // Process the task data...
+  }
+});
+```
+

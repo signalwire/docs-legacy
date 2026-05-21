@@ -1,0 +1,338 @@
+---
+title: enter_queue
+slug: /swml/reference/enter-queue
+description: Place the call in a queue.
+toc_max_heading_level: 3
+---
+
+Place the current call in a named queue where it will wait to be connected to an available agent or resource.
+While waiting, callers will hear music or custom audio. 
+When an agent connects to the queue (using the [`connect`](/docs/swml/reference/connect) method), the caller and agent are bridged together.
+After the bridge completes (when the agent or caller hangs up), execution continues with the SWML script specified in `transfer_after_bridge`.
+
+## **Properties**
+
+<ParamField path="enter_queue" type="object" required={true}>
+  An object that accepts the following properties.
+</ParamField>
+
+<Indent>
+
+<ParamField path="enter_queue.queue_name" type="string" required={true}>
+  Name of the queue to enter. If a queue with this name does not exist, it will be automatically created.
+</ParamField>
+
+
+<ParamField path="enter_queue.transfer_after_bridge" type="string" required={true}>
+  SWML to execute after the bridge completes (when the agent or caller hangs up). This defines what should happen after the call is connected to an agent and the bridge ends.
+  
+  Can be either:
+  - A URL (http or https) that returns a SWML document
+  - An inline SWML document (as a JSON string)
+</ParamField>
+
+
+<ParamField path="enter_queue.status_url" type="string">
+  HTTP or HTTPS URL to deliver queue status events. Status events will be sent via HTTP POST requests. See [Queue Status Callbacks](#queue-status-callbacks) for event details.
+</ParamField>
+
+
+<ParamField path="enter_queue.wait_url" type="string">
+  URL for media to play while waiting in the queue. The file will be fetched using an HTTP GET request. Supported audio formats include:
+  - `WAV` (audio/wav, audio/wave, audio/x-wav)
+  - `MP3` (audio/mpeg)
+  - `AIFF` (audio/aiff, audio/x-aifc, audio/x-aiff)
+  - `GSM` (audio/x-gsm, audio/gsm)
+  - `μ-law` (audio/ulaw)
+  
+  Default hold music will be played if not set.
+</ParamField>
+
+
+<ParamField path="enter_queue.wait_time" type="integer" default="3600">
+  Maximum time in seconds to wait in the queue before timeout.
+</ParamField>
+
+</Indent>
+
+## **Queue Status Callbacks**
+
+When you provide a `status_url`, SignalWire will send HTTP POST requests to that URL for the following queue events.
+
+### Event Object Structure
+
+<ParamField path="event_type" type="string">
+  The type of event that is being reported. Will always be `calling.call.queue` for queue events.
+</ParamField>
+
+
+<ParamField path="event_channel" type="string">
+  The SWML channel identifier for the call (format: `swml:{uuid}`).
+</ParamField>
+
+
+<ParamField path="timestamp" type="number">
+  Unix timestamp with microsecond precision indicating when the event occurred.
+</ParamField>
+
+
+<ParamField path="project_id" type="string">
+  The SignalWire project ID (UUID format).
+</ParamField>
+
+
+<ParamField path="space_id" type="string">
+  The SignalWire Space ID (UUID format).
+</ParamField>
+
+
+<ParamField path="params" type="object">
+  An object containing the event-specific parameters.
+</ParamField>
+
+<Indent>
+
+<ParamField path="params.status" type="string">
+  The event type identifier.
+</ParamField>
+
+  **Possible Values**: 
+  - `enqueue` - Caller added to queue
+  - `leave` - Caller left without being bridged
+  - `dequeue` - Caller pulled from queue and bridged
+
+<ParamField path="params.id" type="string">
+  Unique queue entry identifier (UUID format).
+</ParamField>
+
+
+<ParamField path="params.name" type="string">
+  The name of the queue.
+</ParamField>
+
+
+<ParamField path="params.position" type="integer">
+  The caller's position in the queue. Set to `0` when dequeued.
+</ParamField>
+
+
+<ParamField path="params.size" type="integer">
+  The total number of callers in the queue. Set to `0` when dequeued.
+</ParamField>
+
+
+<ParamField path="params.avg_time" type="integer">
+  Average wait time in the queue (in seconds).
+</ParamField>
+
+
+<ParamField path="params.enqueue_ts" type="integer">
+  Unix timestamp in microseconds when the caller entered the queue. Set to `0` in `dequeue` events.
+</ParamField>
+
+
+<ParamField path="params.dequeue_ts" type="integer">
+  Unix timestamp in microseconds when the caller was dequeued. Set to `0` in `enqueue` and `leave` events, populated in `dequeue` events.
+</ParamField>
+
+
+<ParamField path="params.leave_ts" type="integer">
+  Unix timestamp in microseconds when the caller left the queue. Set to `0` in `enqueue` and `dequeue` events, populated in `leave` events.
+</ParamField>
+
+
+<ParamField path="params.status_url" type="string">
+  The callback URL that was configured for status events.
+</ParamField>
+
+
+<ParamField path="params.control_id" type="string">
+  Control identifier (UUID format). Present in `enqueue` and `leave` events. May be `null` in `dequeue` events.
+</ParamField>
+
+
+<ParamField path="params.call_id" type="string">
+  The call identifier (UUID format).
+</ParamField>
+
+
+<ParamField path="params.node_id" type="string">
+  The node identifier where the call is being processed (format: `{uuid}@{region}`).
+</ParamField>
+
+</Indent>
+
+### Event Examples
+
+#### `enqueue` Event
+
+Sent when a caller is added to the queue.
+
+```json
+{
+  "event_type": "calling.call.queue",
+  "event_channel": "swml:a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
+  "timestamp": 1762966696.218623,
+  "project_id": "f8e7d6c5-b4a3-4210-9876-543210fedcba",
+  "space_id": "1a2b3c4d-5e6f-4789-abcd-ef0123456789",
+  "params": {
+    "status": "enqueue",
+    "id": "9f8e7d6c-5b4a-4321-9876-543210fedcba",
+    "name": "support_queue",
+    "position": 1,
+    "size": 1,
+    "avg_time": 0,
+    "enqueue_ts": 1762966696203260,
+    "dequeue_ts": 0,
+    "leave_ts": 0,
+    "status_url": "https://example.com/queue-status",
+    "control_id": "7a6b5c4d-3e2f-4123-8765-432109876543",
+    "call_id": "5d4c3b2a-1f0e-4321-9abc-def012345678",
+    "node_id": "2b3c4d5e-6f7a-4890-bcde-f01234567890@us-east"
+  }
+}
+```
+
+#### `leave` Event
+
+Sent when a caller leaves the queue without being bridged to another call (e.g., timeout, hangup).
+
+```json
+{
+  "event_type": "calling.call.queue",
+  "event_channel": "swml:3c4d5e6f-7a8b-4910-cdef-012345678901",
+  "timestamp": 1762966720.978854,
+  "project_id": "f8e7d6c5-b4a3-4210-9876-543210fedcba",
+  "space_id": "1a2b3c4d-5e6f-4789-abcd-ef0123456789",
+  "params": {
+    "status": "leave",
+    "id": "9f8e7d6c-5b4a-4321-9876-543210fedcba",
+    "name": "support_queue",
+    "position": 1,
+    "size": 1,
+    "avg_time": 0,
+    "enqueue_ts": 1762966719450020,
+    "dequeue_ts": 0,
+    "leave_ts": 1762966720943789,
+    "status_url": "https://example.com/queue-status",
+    "control_id": "8b7a6c5d-4e3f-4234-9876-543210987654",
+    "call_id": "6e5d4c3b-2a1f-4432-abcd-ef0123456789",
+    "node_id": "4d5e6f7a-8b9c-4a01-def0-123456789012@us-east"
+  }
+}
+```
+
+#### `dequeue` Event
+
+Sent when a caller is pulled out of the queue and bridged with another caller.
+
+```json
+{
+  "event_type": "calling.call.queue",
+  "event_channel": "swml:a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
+  "timestamp": 1762966703.409084,
+  "project_id": "f8e7d6c5-b4a3-4210-9876-543210fedcba",
+  "space_id": "1a2b3c4d-5e6f-4789-abcd-ef0123456789",
+  "params": {
+    "status": "dequeue",
+    "id": "9f8e7d6c-5b4a-4321-9876-543210fedcba",
+    "name": "support_queue",
+    "position": 0,
+    "size": 0,
+    "avg_time": 0,
+    "enqueue_ts": 0,
+    "dequeue_ts": 1762966703217168,
+    "leave_ts": 0,
+    "status_url": "https://example.com/queue-status",
+    "control_id": null,
+    "call_id": "5d4c3b2a-1f0e-4321-9abc-def012345678",
+    "node_id": "2b3c4d5e-6f7a-4890-bcde-f01234567890@us-east"
+  }
+}
+```
+
+## **Variables**
+
+Set by the method:
+
+- **queue_result:** (out) The result of the queue operation. **Possible Values**:
+  - `entering` - Call is entering the queue
+  - `connecting` - Call is in the process of connecting to an agent
+  - `connected` - Successfully connected to an agent
+  - `leaving` - Call is leaving the queue
+  - `timeout` - Waited too long and timed out
+  - `hangup` - Caller hung up while waiting
+  - `failed` - Queue operation failed due to an error
+- **wait_time:** (out) Time in seconds the caller waited in the queue. Set to -1 if not available.
+- **entry_position:** (out) The caller's position in the queue when they entered. Set to -1 if not available.
+- **entry_size:** (out) The total size of the queue when the caller entered. Set to -1 if not available.
+
+## **Examples**
+
+### Basic Queue
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - enter_queue:
+        queue_name: "my_queue"
+        transfer_after_bridge: "https://example.com/post-call-swml"
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "enter_queue": {
+          "queue_name": "my_queue",
+          "transfer_after_bridge": "https://example.com/post-call-swml"
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+### Queue with Status Callback
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - enter_queue:
+        queue_name: "sales_queue"
+        status_url: "https://example.com/queue-status"
+        wait_time: 1800
+        transfer_after_bridge: "https://example.com/post-call-swml"
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "enter_queue": {
+          "queue_name": "sales_queue",
+          "status_url": "https://example.com/queue-status",
+          "wait_time": 1800,
+          "transfer_after_bridge": "https://example.com/post-call-swml"
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>

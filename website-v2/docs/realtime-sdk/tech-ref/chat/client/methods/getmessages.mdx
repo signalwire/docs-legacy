@@ -1,0 +1,71 @@
+---
+title: "getMessages"
+slug: /node/reference/chat/client/get-messages
+description: getMessages method for the Client class.
+toc_max_heading_level: 3
+---
+
+[paginationcursor]: /docs/server-sdk/node/reference/chat/client/events#paginationcursor
+
+### getMessages
+
+- **getMessages**(`params`): `Promise<{ cursor: PaginationCursor, messages: ChatMessageEntity[] }>`
+
+Returns the list of messages that were sent to the specified channel.
+
+#### Parameters
+
+<ParamField path="params" type="object" required>
+  Object containing the parameters of the method.
+</ParamField>
+
+<Indent>
+<ParamField path="channel" type="string" required>
+  Channel for which to retrieve the messages.
+</ParamField>
+
+<ParamField path="cursor" type="PaginationCursor">
+  Cursor for pagination. See [`PaginationCursor`][paginationcursor].
+</ParamField>
+</Indent>
+
+#### Returns
+
+`Promise<{ cursor: PaginationCursor, messages: ChatMessageEntity[] }>`
+
+A promise that resolves to an object containing the list of messages that were sent to the specified channel.
+
+#### Example
+
+In this example, we fetch all the messages sent in the channel `channel1` and print them to the console.
+We use the cursor to fetch the next set of messages until the cursor is null, indicating that there are no more messages to fetch.
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+const chatClient = client.chat;
+
+let pageNumber = 1;
+let cursor = null;
+
+while (true) {
+  const m = await chatClient.getMessages({
+    channel: "channel1",
+    cursor: cursor ? { after: cursor } : undefined
+  });
+
+  console.log(`Page ${pageNumber}: fetched ${m.messages.length} messages
+  ${JSON.stringify(m.messages, null, 2)}`);
+
+  // Check if 'after' is null, indicating no more messages to fetch
+  if (!m.cursor.after) {
+    console.log("No more messages");
+    break;
+  }
+  // Update the cursor to fetch next set of messages
+  cursor = m.cursor.after;
+  pageNumber++;
+}
+```

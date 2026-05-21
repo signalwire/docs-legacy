@@ -1,0 +1,121 @@
+---
+title: "recordAudio"
+slug: /node/reference/voice/call/record-audio
+description: recordAudio method for the Call class.
+toc_max_heading_level: 3
+---
+
+[callrecording-onstarted]: /docs/server-sdk/node/reference/voice/call-recording#onstarted
+[callrecording]: /docs/server-sdk/node/reference/voice/call-recording
+
+### recordAudio {#voice_call_record_audio}
+
+- **recordAudio**(`params?`): `Promise`\<[`CallRecording`][callrecording]>
+
+Records the audio from the call.
+
+#### Parameters
+
+<ParamField path="params" type="object">
+  Object containing the parameters for recording audio.
+</ParamField>
+
+<Indent>
+<ParamField path="beep" type="boolean" default="false">
+  Whether to play a beep before recording.
+</ParamField>
+
+<ParamField path="format" type='"mp3" | "wav"' default="mp3">
+  Format of the recording.
+</ParamField>
+
+<ParamField path="stereo" type="boolean" default="false">
+  Whether to record in stereo mode.
+</ParamField>
+
+<ParamField path="direction" type='"listen" | "speak" | "both"' default="speak">
+  Direction to record. Can be `listen` (what the caller hears), `speak` (what the caller says), or `both`.
+</ParamField>
+
+<ParamField path="initialTimeout" type="number" default="5.0">
+  How long to wait (in seconds) until something is heard in the recording. Disable by passing `0`.
+</ParamField>
+
+<ParamField path="endSilenceTimeout" type="number" default="1.0">
+  How long to wait (in seconds) until the caller has stopped speaking. Disable by passing `0`.
+</ParamField>
+
+<ParamField path="terminators" type="string" default="#*">
+  DTMF digits that, when dialed, will end the recording.
+</ParamField>
+
+<ParamField path="inputSensitivity" type="number" default="44">
+  Controls how sensitive the voice activity detector is to background noise, where `0` is least sensitive (hear nothing) and `100` is most sensitive (hear everything).
+</ParamField>
+
+<ParamField path="listen" type="object">
+  Callback to listen for events. List of recording events can be found [here][callrecording]. Example event: [`onStarted`][callrecording-onstarted].
+</ParamField>
+</Indent>
+
+#### Returns
+
+`Promise`\<[`CallRecording`][callrecording]>
+
+A promise that resolves to a [`CallRecording`][callrecording] object that you can use to
+view the current state and results of the `recording` session.
+
+#### Example
+
+In this example, we dial a phone number and record the call audio.
+During the recording, we play a TTS message. Once the TTS message is finished, we hangup the call
+and print the URL of the recording to console.
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+const voiceClient = client.voice;
+
+// Listen for incoming calls
+await voiceClient.listen({
+
+  topics: ["office"],
+  onCallReceived: async (call) => {
+    console.log("Call received");
+    // Answer the call
+    call.answer();
+
+    await call.recordAudio({
+      beep: true,
+      format: "mp3",
+      direction: "both",
+      initialTimeout: 0,
+      endSilenceTimeout: 0,
+      terminators: "#",
+      stereo: true,
+      listen: {
+        onStarted: async (recording) => {
+          console.log("Recording started");
+          await call.playTTS({
+            text: "This is a call recording test.",
+        });
+          // Stop the recording after the TTS is played
+          recording.stop();
+        },
+        onFailed: () => {
+          console.log("Recording failed");
+        },
+        onUpdated: (recording) => {
+          console.log("Recording updated", recording.state);
+        },
+        onEnded: (recording) => {
+          console.log("Recording ended", recording.url, recording.state);
+          call.hangup();
+        },
+      }
+    }).onStarted();
+  }
+});
+```

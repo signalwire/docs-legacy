@@ -1,0 +1,202 @@
+---
+title: RELAY Consumer
+slug: /ruby/reference/consumer
+toc_max_heading_level: 3
+---
+
+[call]: /docs/server-sdk/v2/ruby/reference/calling/call
+[index]: /docs/server-sdk/v2/ruby/reference#contexts
+[message-1]: /docs/server-sdk/v2/ruby/reference/messaging/message
+[relay-task]: /docs/server-sdk/v2/ruby/reference/task
+
+A RELAY Consumer is a simple object that runs in its own process along side your application to handle calling and messaging events in realtime. RELAY Consumers abstract all the setup of connecting to RELAY and automatically dispatch workers to handle requests. Consumers will receive requests and delegate them to their own worker thread, allowing you to focus on your business logic without having to worry about multi-threading or blocking, everything just works. Think of RELAY Consumers like a background worker system for all your calling and messaging needs.
+
+## Authenticating a consumer
+
+Authentication requires a SignalWire project ID and a token. You can generate one from your dashboard.
+
+The values can be passed in either as the `project` and `token` parameters to the constructor, or by setting the `SIGNALWIRE_PROJECT_KEY` and `SIGNALWIRE_TOKEN` environment variables.
+
+An example using constructor parameters:
+
+```ruby
+class MyConsumer < Signalwire::Relay::Consumer
+  contexts ['incoming']
+
+  def on_incoming_call(call)
+    call.answer
+    call.play_tts 'this consumer uses constructor parameters'
+
+    call.hangup
+  end
+end
+
+MyConsumer.new(project: 'your-project-key', token: 'your-project-token').run
+```
+
+## Consumer Contexts
+
+A RELAY Consumer is a simple object, customized by specifying contexts and event handlers to respond to incoming events.
+
+A consumer usually requires at least one `contexts` for incoming events. Contexts are a list of contexts you want this Consumer to listen for. [Learn more about Contexts][index].
+
+```ruby
+class MyConsumer < Signalwire::Relay::Consumer
+  contexts ['incoming']
+
+  def on_incoming_call(call)
+    call.answer
+    call.play_tts 'the quick brown fox jumps over the lazy dog'
+
+    call.hangup
+  end
+end
+
+MyConsumer.new.run
+```
+
+## Initializing Consumers
+
+You can optionally define a `setup` method if you need to do any initialization work before processing messages. This is useful to do any one-off work that you wouldn't want to do for each and every event, such as setting up logging or connecting to a datastore.
+
+```ruby
+class MyConsumer < Signalwire::Relay::Consumer
+  contexts ['incoming']
+
+  def setup
+    SomeDatabase.connect
+  end
+
+  def on_incoming_call(call)
+    call.answer
+    call.play_tts 'the quick brown fox jumps over the lazy dog'
+
+    call.hangup
+  end
+end
+
+MyConsumer.new.run
+```
+
+## Event Handlers
+
+Event handlers are where you will write most of your code. They are executed when your consumer receives a matching event for the contexts specified by your Consumer.
+
+### on_incoming_call
+
+Executed when you receive an inbound call, passes in the inbound [`Call`][call] object.
+
+```ruby
+class MyConsumer < Signalwire::Relay::Consumer
+  contexts ['incoming']
+
+  def on_incoming_call(call)
+    call.answer
+    call.play_tts 'the quick brown fox jumps over the lazy dog'
+
+    call.hangup
+  end
+end
+
+MyConsumer.new.run
+```
+
+### ready
+
+This method is executed when the Consumer has connected and is ready to make RELAY requests.
+
+```ruby
+require 'signalwire'
+
+class MyConsumer < Signalwire::Relay::Consumer
+  def ready
+    logger.debug "The consumer is ready to execute actions now"
+    # Send an SMS on ready
+    result = client.messaging.send(from: "+1XXXXXXXXXX", to: "+1YYYYYYYYYY", context: 'incoming', body: 'Hello from SignalWire!')
+    logger.debug "message id #{result.message_id} was successfully sent" if result.successful
+  end
+end
+
+MyConsumer.new.run
+```
+
+### on_task
+
+Receives your message sent through a [`Relay::Task`][relay-task].
+
+```ruby
+require 'signalwire'
+
+class MyConsumer < Signalwire::Relay::Consumer
+  contexts ['incoming']
+
+  def on_task(task)
+    logger.debug "Received #{task.message}"
+  end
+end
+
+MyConsumer.new.run
+```
+
+### on_incoming_message
+
+This method is executed when the consumer receives an inbound text message on one of the subscribed contexts. Receives a [`Message`][message-1] object as a parameter.
+
+```ruby
+class MessageReceiveConsumer < Signalwire::Relay::Consumer
+  contexts ['office']
+
+  def on_incoming_message(message)
+    logger.info "Received message from #{message.from}: #{message.body}"
+  end
+end
+
+MessageReceiveConsumer.new.run
+```
+
+### on_message_state_change
+
+Executed when a message state changes in a context the consumer is subscribed to. Receives a [`Message`][message-1] object as a parameter.
+
+```ruby
+class MessageSendConsumer < Signalwire::Relay::Consumer
+  def on_message_state_change(message)
+    logger.debug "message id #{message.id} now has state #{message.state}"
+  end
+end
+
+MessageSendConsumer.new.run
+```
+
+## Cleaning Up on Exit
+
+When a RELAY Consumer shuts down, you have the opportunity to clean up any resources held by the consumer. For example, you could close any open files, network connections, or send a notification to your monitoring service.
+
+Just implement a `teardown` method in your consumer and it will be called during the shutdown procedure.
+
+```ruby
+class MyConsumer < Signalwire::Relay::Consumer
+  contexts ['incoming']
+
+  def teardown
+    SomeDatabase.disconnect
+  end
+
+  def on_incoming_call(call)
+    call.answer
+    call.play_tts 'the quick brown fox jumps over the lazy dog'
+
+    call.hangup
+  end
+end
+
+MyConsumer.new.run
+```
+
+## Running Consumers
+
+Running a consumer is just like running any Ruby script, simply execute the script as a separate process and call `run` to start it. The process will stay up until you shut it down.
+
+## Shutting Down Consumers
+
+In order to gracefully shut down a RELAY consumer process, send it the `SIGTERM` signal. Most process supervisors such as Runit, Docker and Kubernetes send this signal when shutting down a process.

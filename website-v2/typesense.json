@@ -1,0 +1,558 @@
+{
+  "index_name": "signalwire-docs",
+  "start_urls": [
+    {
+      "url": "https://developer.signalwire.com/ai",
+      "selectors_key": "ai-core",
+      "tags": ["ai", "core-guide"],
+      "priority": 1.2
+    },
+    {
+      "url": "https://developer.signalwire.com/swml/guides/ai",
+      "selectors_key": "ai-guides",
+      "tags": ["ai"],
+      "priority": 1.1
+    },
+    {
+      "url": "https://developer.signalwire.com/swml",
+      "selectors_key": "swml-core",
+      "tags": ["swml", "core-guide"],
+      "priority": 1.0
+    },
+    {
+      "url": "https://developer.signalwire.com/compatibility-api/cxml",
+      "selectors_key": "cxml-core",
+      "tags": ["cxml", "core-guide"],
+      "priority": 1.0
+    },
+    {
+      "url": "https://developer.signalwire.com/compatibility-api",
+      "selectors_key": "compatibility-api-core",
+      "tags": ["compatibility-api", "core-guide"],
+      "priority": 1.0
+    },
+    {
+      "url": "https://developer.signalwire.com/voice",
+      "selectors_key": "voice-core",
+      "tags": ["voice", "core-guide"],
+      "priority": 1.0
+    },
+    {
+      "url": "https://developer.signalwire.com/video",
+      "selectors_key": "video-core",
+      "tags": ["video", "core-guide"],
+      "priority": 1.0
+    },
+    {
+      "url": "https://developer.signalwire.com/fax",
+      "selectors_key": "fax-core",
+      "tags": ["fax", "core-guide"],
+      "priority": 1.0
+    },
+    {
+      "url": "https://developer.signalwire.com/messaging",
+      "selectors_key": "sms-core",
+      "tags": ["sms", "core-guide"],
+      "priority": 1.0
+    },
+    {
+      "url": "https://developer.signalwire.com/chat",
+      "selectors_key": "chat-core",
+      "tags": ["chat", "core-guide"],
+      "priority": 1.0
+    },
+    {
+      "url": "https://developer.signalwire.com/platform",
+      "selectors_key": "platform-core",
+      "tags": ["platform", "core-guide"],
+      "priority": 1.0
+    },
+    {
+      "url": "https://developer.signalwire.com/tools",
+      "selectors_key": "tools-core",
+      "tags": ["tools", "core-guide"],
+      "priority": 0.9
+    },
+    {
+      "url": "https://developer.signalwire.com/sdks/browser-sdk",
+      "selectors_key": "relay-browser-sdk",
+      "tags": ["sdk", "browser"],
+      "priority": 0.9
+    },
+    {
+      "url": "https://developer.signalwire.com/sdks/realtime-sdk",
+      "selectors_key": "relay-realtime-sdk",
+      "tags": ["sdk", "realtime"],
+      "priority": 0.9
+    },
+    {
+      "url": "https://developer.signalwire.com/blog",
+      "selectors_key": "blog-core",
+      "tags": ["blog"],
+      "priority": 0.8
+    },
+    {
+      "url": "https://developer.signalwire.com/call-flow-builder",
+      "selectors_key": "call-flow-builder-core",
+      "tags": ["call-flow-builder", "tools"],
+      "priority": 0.9
+    },
+    {
+      "url": "https://developer.signalwire.com/cantina",
+      "selectors_key": "cantina-core",
+      "tags": ["cantina"],
+      "priority": 0.8
+    },
+    {
+      "url": "https://developer.signalwire.com/cluecon-2024",
+      "selectors_key": "cluecon-core",
+      "tags": ["cluecon", "events"],
+      "priority": 0.8
+    },
+    {
+      "url": "https://developer.signalwire.com/demos",
+      "selectors_key": "demos-core",
+      "tags": ["demos"],
+      "priority": 0.8
+    },
+    {
+      "url": "https://developer.signalwire.com/events",
+      "selectors_key": "events-core",
+      "tags": ["events"],
+      "priority": 0.8
+    },
+    {
+      "url": "https://developer.signalwire.com/guides",
+      "selectors_key": "guides-core",
+      "tags": ["guides"],
+      "priority": 0.9
+    },
+    {
+      "url": "https://developer.signalwire.com/livewire",
+      "selectors_key": "livewire-core",
+      "tags": ["livewire"],
+      "priority": 0.9
+    },
+    {
+      "url": "https://developer.signalwire.com/page",
+      "selectors_key": "page-core",
+      "tags": ["page"],
+      "priority": 0.7
+    },
+    {
+      "url": "https://developer.signalwire.com/rest",
+      "selectors_key": "rest-core",
+      "tags": ["rest", "api"],
+      "priority": 0.9
+    },
+    {
+      "url": "https://developer.signalwire.com/sdks",
+      "selectors_key": "sdks-core",
+      "tags": ["sdks"],
+      "priority": 0.9
+    },
+    {
+      "url": "https://developer.signalwire.com/tags",
+      "selectors_key": "tags-core",
+      "tags": ["tags"],
+      "priority": 0.7
+    }
+  ],
+  "stop_urls": [
+    "https://developer.signalwire.com/freeswitch",
+    "https://developer.signalwire.com/freeswitch/.*?",
+    "https://developer.signalwire.com/$",
+    "https://developer.signalwire.com/ai/$",
+    "https://developer.signalwire.com/voice/$",
+    "https://developer.signalwire.com/video/$",
+    "https://developer.signalwire.com/messaging/$",
+    "https://developer.signalwire.com/events/$",
+    "https://developer.signalwire.com/livewire/$",
+    "https://developer.signalwire.com/page/$",
+    "https://developer.signalwire.com/tags/$"
+  ],
+  "sitemap_urls": ["https://developer.signalwire.com/sitemap.xml"],
+  "sitemap_alternate_links": true,
+  "selectors": {
+    "ai-core": {
+      "lvl0": {
+        "selector": "//nav[contains(@class, 'navbar')]//a[contains(@class, 'navbar__link--active')]/text()",
+        "type": "xpath",
+        "global": true,
+        "default_value": "AI Documentation"
+      },
+      "lvl1": "article h1",
+      "lvl2": "article h2",
+      "lvl3": "article h3",
+      "lvl4": "article h4",
+      "text": "article p, article li"
+    },
+    "ai-guides": {
+      "lvl0": {
+        "selector": "//nav[contains(@class, 'navbar')]//a[contains(@class, 'navbar__link--active')]/text()",
+        "type": "xpath",
+        "global": true,
+        "default_value": "AI Guides"
+      },
+      "lvl1": "article h1",
+      "lvl2": "article h2",
+      "lvl3": "article h3",
+      "lvl4": "article h4",
+      "text": "article p, article li"
+    },
+    "voice-core": {
+      "lvl0": {
+        "selector": "//nav[contains(@class, 'navbar')]//a[contains(@class, 'navbar__link--active')]/text()",
+        "type": "xpath",
+        "global": true,
+        "default_value": "Voice Documentation"
+      },
+      "lvl1": "article h1",
+      "lvl2": "article h2",
+      "lvl3": "article h3",
+      "lvl4": "article h4",
+      "text": "article p, article li"
+    },
+    "video-core": {
+      "lvl0": {
+        "selector": "//nav[contains(@class, 'navbar')]//a[contains(@class, 'navbar__link--active')]/text()",
+        "type": "xpath",
+        "global": true,
+        "default_value": "Video Documentation"
+      },
+      "lvl1": "article h1",
+      "lvl2": "article h2",
+      "lvl3": "article h3",
+      "lvl4": "article h4",
+      "text": "article p, article li"
+    },
+    "fax-core": {
+      "lvl0": {
+        "selector": "//nav[contains(@class, 'navbar')]//a[contains(@class, 'navbar__link--active')]/text()",
+        "type": "xpath",
+        "global": true,
+        "default_value": "Fax Documentation"
+      },
+      "lvl1": "article h1",
+      "lvl2": "article h2",
+      "lvl3": "article h3",
+      "lvl4": "article h4",
+      "text": "article p, article li"
+    },
+    "sms-core": {
+      "lvl0": {
+        "selector": "//nav[contains(@class, 'navbar')]//a[contains(@class, 'navbar__link--active')]/text()",
+        "type": "xpath",
+        "global": true,
+        "default_value": "SMS Documentation"
+      },
+      "lvl1": "article h1",
+      "lvl2": "article h2",
+      "lvl3": "article h3",
+      "lvl4": "article h4",
+      "text": "article p, article li"
+    },
+    "chat-core": {
+      "lvl0": {
+        "selector": "//nav[contains(@class, 'navbar')]//a[contains(@class, 'navbar__link--active')]/text()",
+        "type": "xpath",
+        "global": true,
+        "default_value": "Chat Documentation"
+      },
+      "lvl1": "article h1",
+      "lvl2": "article h2",
+      "lvl3": "article h3",
+      "lvl4": "article h4",
+      "text": "article p, article li"
+    },
+    "platform-core": {
+      "lvl0": {
+        "selector": "//nav[contains(@class, 'navbar')]//a[contains(@class, 'navbar__link--active')]/text()",
+        "type": "xpath",
+        "global": true,
+        "default_value": "Platform Documentation"
+      },
+      "lvl1": "article h1",
+      "lvl2": "article h2",
+      "lvl3": "article h3",
+      "lvl4": "article h4",
+      "text": "article p, article li"
+    },
+    "tools-core": {
+      "lvl0": {
+        "selector": "//nav[contains(@class, 'navbar')]//a[contains(@class, 'navbar__link--active')]/text()",
+        "type": "xpath",
+        "global": true,
+        "default_value": "Tools Documentation"
+      },
+      "lvl1": "article h1",
+      "lvl2": "article h2",
+      "lvl3": "article h3",
+      "lvl4": "article h4",
+      "text": "article p, article li"
+    },
+    "browser-sdk": {
+      "lvl0": {
+        "selector": "//nav[contains(@class, 'navbar')]//a[contains(@class, 'navbar__link--active')]/text()",
+        "type": "xpath",
+        "global": true,
+        "default_value": "Browser SDK"
+      },
+      "lvl1": "article h1",
+      "lvl2": "article h2",
+      "lvl3": "article h3",
+      "lvl4": "article h4",
+      "text": "article p, article li, article code"
+    },
+    "realtime-sdk": {
+      "lvl0": {
+        "selector": "//nav[contains(@class, 'navbar')]//a[contains(@class, 'navbar__link--active')]/text()",
+        "type": "xpath",
+        "global": true,
+        "default_value": "Realtime SDK"
+      },
+      "lvl1": "article h1",
+      "lvl2": "article h2",
+      "lvl3": "article h3",
+      "lvl4": "article h4",
+      "text": "article p, article li, article code"
+    },
+    "swml-core": {
+      "lvl0": {
+        "selector": "//nav[contains(@class, 'navbar')]//a[contains(@class, 'navbar__link--active')]/text()",
+        "type": "xpath",
+        "global": true,
+        "default_value": "SWML Documentation"
+      },
+      "lvl1": "article h1",
+      "lvl2": "article h2",
+      "lvl3": "article h3",
+      "lvl4": "article h4",
+      "text": "article p, article li, article code"
+    },
+    "compatibility-api-core": {
+      "lvl0": {
+        "selector": "//nav[contains(@class, 'navbar')]//a[contains(@class, 'navbar__link--active')]/text()",
+        "type": "xpath",
+        "global": true,
+        "default_value": "Compatibility API"
+      },
+      "lvl1": "article h1",
+      "lvl2": "article h2",
+      "lvl3": "article h3",
+      "lvl4": "article h4",
+      "text": "article p, article li, article code"
+    },
+    "cxml-core": {
+      "lvl0": {
+        "selector": "//nav[contains(@class, 'navbar')]//a[contains(@class, 'navbar__link--active')]/text()",
+        "type": "xpath",
+        "global": true,
+        "default_value": "CXML Documentation"
+      },
+      "lvl1": "article h1",
+      "lvl2": "article h2",
+      "lvl3": "article h3",
+      "lvl4": "article h4",
+      "text": "article p, article li, article code"
+    },
+    "blog-core": {
+      "lvl0": {
+        "selector": "//nav[contains(@class, 'navbar')]//a[contains(@class, 'navbar__link--active')]/text()",
+        "type": "xpath",
+        "global": true,
+        "default_value": "Blog"
+      },
+      "lvl1": "article h1",
+      "lvl2": "article h2",
+      "lvl3": "article h3",
+      "lvl4": "article h4",
+      "text": "article p, article li"
+    },
+    "call-flow-builder-core": {
+      "lvl0": {
+        "selector": "//nav[contains(@class, 'navbar')]//a[contains(@class, 'navbar__link--active')]/text()",
+        "type": "xpath",
+        "global": true,
+        "default_value": "Call Flow Builder"
+      },
+      "lvl1": "article h1",
+      "lvl2": "article h2",
+      "lvl3": "article h3",
+      "lvl4": "article h4",
+      "text": "article p, article li"
+    },
+    "cantina-core": {
+      "lvl0": {
+        "selector": "//nav[contains(@class, 'navbar')]//a[contains(@class, 'navbar__link--active')]/text()",
+        "type": "xpath",
+        "global": true,
+        "default_value": "Cantina"
+      },
+      "lvl1": "article h1",
+      "lvl2": "article h2",
+      "lvl3": "article h3",
+      "lvl4": "article h4",
+      "text": "article p, article li"
+    },
+    "cluecon-core": {
+      "lvl0": {
+        "selector": "//nav[contains(@class, 'navbar')]//a[contains(@class, 'navbar__link--active')]/text()",
+        "type": "xpath",
+        "global": true,
+        "default_value": "ClueCon 2024"
+      },
+      "lvl1": "article h1",
+      "lvl2": "article h2",
+      "lvl3": "article h3",
+      "lvl4": "article h4",
+      "text": "article p, article li"
+    },
+    "demos-core": {
+      "lvl0": {
+        "selector": "//nav[contains(@class, 'navbar')]//a[contains(@class, 'navbar__link--active')]/text()",
+        "type": "xpath",
+        "global": true,
+        "default_value": "Demos"
+      },
+      "lvl1": "article h1",
+      "lvl2": "article h2",
+      "lvl3": "article h3",
+      "lvl4": "article h4",
+      "text": "article p, article li"
+    },
+    "events-core": {
+      "lvl0": {
+        "selector": "//nav[contains(@class, 'navbar')]//a[contains(@class, 'navbar__link--active')]/text()",
+        "type": "xpath",
+        "global": true,
+        "default_value": "Events"
+      },
+      "lvl1": "article h1",
+      "lvl2": "article h2",
+      "lvl3": "article h3",
+      "lvl4": "article h4",
+      "text": "article p, article li"
+    },
+    "guides-core": {
+      "lvl0": {
+        "selector": "//nav[contains(@class, 'navbar')]//a[contains(@class, 'navbar__link--active')]/text()",
+        "type": "xpath",
+        "global": true,
+        "default_value": "Guides"
+      },
+      "lvl1": "article h1",
+      "lvl2": "article h2",
+      "lvl3": "article h3",
+      "lvl4": "article h4",
+      "text": "article p, article li"
+    },
+    "page-core": {
+      "lvl0": {
+        "selector": "//nav[contains(@class, 'navbar')]//a[contains(@class, 'navbar__link--active')]/text()",
+        "type": "xpath",
+        "global": true,
+        "default_value": "Page"
+      },
+      "lvl1": "article h1",
+      "lvl2": "article h2",
+      "lvl3": "article h3",
+      "lvl4": "article h4",
+      "text": "article p, article li"
+    },
+    "rest-core": {
+      "lvl0": {
+        "selector": "//nav[contains(@class, 'navbar')]//a[contains(@class, 'navbar__link--active')]/text()",
+        "type": "xpath",
+        "global": true,
+        "default_value": "REST API"
+      },
+      "lvl1": "article h1",
+      "lvl2": "article h2",
+      "lvl3": "article h3",
+      "lvl4": "article h4",
+      "text": "article p, article li, article code"
+    },
+    "sdks-core": {
+      "lvl0": {
+        "selector": "//nav[contains(@class, 'navbar')]//a[contains(@class, 'navbar__link--active')]/text()",
+        "type": "xpath",
+        "global": true,
+        "default_value": "SDKs"
+      },
+      "lvl1": "article h1",
+      "lvl2": "article h2",
+      "lvl3": "article h3",
+      "lvl4": "article h4",
+      "text": "article p, article li, article code"
+    },
+    "tags-core": {
+      "lvl0": {
+        "selector": "//nav[contains(@class, 'navbar')]//a[contains(@class, 'navbar__link--active')]/text()",
+        "type": "xpath",
+        "global": true,
+        "default_value": "Tags"
+      },
+      "lvl1": "article h1",
+      "lvl2": "article h2",
+      "lvl3": "article h3",
+      "lvl4": "article h4",
+      "text": "article p, article li"
+    }
+  },
+  "strip_chars": " .,;:#",
+  "custom_settings": {
+    "field_definitions": [
+      { "name": "anchor", "type": "string", "optional": true },
+      { "name": "content", "type": "string", "optional": true },
+      { "name": "url", "type": "string", "facet": true },
+      { "name": "url_without_anchor", "type": "string", "facet": true, "optional": true },
+      { "name": "version", "type": "string[]", "facet": true, "optional": true },
+      { "name": "hierarchy.lvl0", "type": "string", "facet": true, "optional": true },
+      { "name": "hierarchy.lvl1", "type": "string", "facet": true, "optional": true },
+      { "name": "hierarchy.lvl2", "type": "string", "facet": true, "optional": true },
+      { "name": "hierarchy.lvl3", "type": "string", "facet": true, "optional": true },
+      { "name": "hierarchy.lvl4", "type": "string", "facet": true, "optional": true },
+      { "name": "hierarchy.lvl5", "type": "string", "facet": true, "optional": true },
+      { "name": "hierarchy.lvl6", "type": "string", "facet": true, "optional": true },
+      { "name": "type", "type": "string", "facet": true, "optional": true },
+      { "name": ".*_tag", "type": "string", "facet": true, "optional": true },
+      { "name": "language", "type": "string", "facet": true, "optional": true },
+      { "name": "tags", "type": "string[]", "facet": true, "optional": true },
+      { "name": "item_priority", "type": "int64" },
+      {
+        "name": "embedding",
+        "type": "float[]",
+        "embed": {
+          "from": [
+            "content",
+            "hierarchy.lvl0",
+            "hierarchy.lvl1",
+            "hierarchy.lvl2",
+            "hierarchy.lvl3",
+            "hierarchy.lvl4",
+            "hierarchy.lvl5",
+            "hierarchy.lvl6",
+            "tags"
+          ],
+          "model_config": {
+            "model_name": "ts/all-MiniLM-L12-v2"
+          }
+        }
+      }
+    ],
+    "separatorsToIndex": "_",
+    "symbols_to_index": ["<", ">"],
+    "attributesForFaceting": ["language", "version", "type", "docusaurus_tag", "tags"],
+    "attributesToRetrieve": [
+      "hierarchy",
+      "content",
+      "anchor",
+      "url",
+      "url_without_anchor",
+      "type",
+      "tags"
+    ]
+  },
+  "conversation_id": ["833762294"]
+}

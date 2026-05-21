@@ -1,0 +1,63 @@
+---
+title: unregisterDevice
+slug: /signalwire-client/unregister-device
+---
+
+import APIField from '@site/src/components/APIField';
+
+Unregisters a device from push notifications, stopping the delivery of push notifications for calls and messages.
+
+## How it works
+
+The `unregisterDevice` method removes your device from SignalWire's push notification system using the device ID that was returned during registration. After unregistering, your device will no longer receive push notifications for incoming calls or messages.
+
+## Parameters
+
+<APIField name="options" type="object" required>
+  Configuration for device unregistration.
+</APIField>
+
+<APIField name="options.id" type="string" required>
+  The ID of the device that you need to unregister. This ID is returned when registering the device.
+</APIField>
+
+## Signature
+
+```typescript
+unregisterDevice(options: { id: string }): Promise<{}>
+```
+
+## Returns
+
+**Type:** `Promise<{}>`
+
+Returns a Promise that resolves to an empty object when successful. Throws an error if unsuccessful.
+
+## Examples
+
+### Unregister a device
+
+```typescript
+const device = await client.registerDevice({
+  deviceToken: 'device-token',
+  deviceType: 'iOS'
+})
+
+await AsyncStorage.setItem('@signalwire_device_id', device.id)
+
+await client.unregisterDevice({ id: device.id })
+```
+
+### Unregister on logout
+
+```typescript
+async function logout() {
+  const deviceId = await AsyncStorage.getItem('@signalwire_device_id')
+  
+  if (deviceId) {
+    await client.unregisterDevice({ id: deviceId })
+    await AsyncStorage.removeItem('@signalwire_device_id')
+    await AsyncStorage.removeItem('@signalwire_push_notification_key')
+  }
+}
+```

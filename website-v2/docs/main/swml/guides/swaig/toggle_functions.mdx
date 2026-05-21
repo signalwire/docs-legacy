@@ -1,0 +1,252 @@
+---
+title: Enable functions dynamically
+slug: /swml/guides/toggle-functions
+description: Learn how to use `toggle_functions` to toggle functions on and off.
+x-custom:
+  tags:
+    - sdk:swml
+    - product:ai
+    - product:voice
+---
+
+In this example, the `transfer` function is toggled off from the start. The AI agent will toggle this
+function on after the `get_joke` function is called and will also toggle the `get_joke` function off. This creates a scenario where a user can only
+be transferred after hearing a joke from the AI, and can only request one joke. The AI agent will then match the transfer destination
+based on the user's input, with the `meta_data` table serving as a directory for the transfer destinations.
+If no match is found, the AI agent will fall back to the `".*"` expression, which will inform the user
+that the transfer was unsuccessful and requires a valid input.
+
+## `transfer` function
+
+```json
+{
+  "SWAIG": {
+    "functions": [
+      {
+        "function": "transfer",
+        "active": "false",
+        "description": "use to transfer to a target",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "target": {
+              "description": "the target to transfer to",
+              "type": "string"
+            }
+          }
+        },
+        "data_map": {
+          "expressions": [
+            {
+              "pattern": "\\w+",
+              "string": "${meta_data.table.${lc:args.target}}",
+              "output": {
+                "action": [
+                  { "say": "Please stand by while I connect your call." },
+                  {
+                    "transfer": true,
+                    "SWML": {
+                      "version": "1.0.0",
+                      "sections": {
+                        "main": [
+                          {
+                            "connect": {
+                              "to": "${meta_data.table.${lc:args.target}}"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  { "stop": true }
+                ],
+                "response": "transferred, the call has ended."
+              }
+            },
+            {
+              "string": "${args.target}",
+              "pattern": ".*",
+              "output": {
+                "response": "I'm sorry, I was unable to transfer your call to ${input.args.target}."
+              }
+            }
+          ]
+        },
+        "meta_data": {
+          "table": {
+            "support": "+1XXXXXXXXXX",
+            "sales": "+1YYYYYYYYYY"
+          }
+        }
+      }
+    ]
+  }
+}
+```
+<Warning>
+When passing a SWML object that includes a `connect` (or other method that transfers the call) in `output.action[]`, your script must be JSON, and `"transfer": true,` must be included before the SWML in the same action object. Refer to the example above.
+</Warning>
+
+We set the function to being toggled off with the following line:
+
+```yaml
+active: "false"
+```
+---
+
+## `get_joke` function
+
+```json
+{
+  "function": "get_joke",
+  "description": "use to get a joke",
+  "data_map": {
+    "webhooks": [
+      {
+        "url": "https://example.com/v1/${args.type}",
+        "headers": {
+          "X-Api-Key": "api-token-here"
+        },
+        "method": "GET",
+        "output": {
+          "response": "Tell the user: ${array[0].joke}.",
+          "action": [
+            {
+              "toggle_functions": [
+                { "active": true, "function": "transfer" },
+                { "active": false, "function": "get_joke" }
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
+```
+
+In the above function, we set the `transfer` function to be toggled on.
+Now when a user asks to be transferred, the AI agent will now be able to do so because the `transfer` function is toggled on.
+Additionally, the `get_joke` function is toggled off, so the user will not be able to request another joke.
+
+```json
+{
+  "toggle_functions": [
+    { "active": true, "function": "transfer" },
+    { "active": false, "function": "get_joke" }
+  ]
+}
+```
+
+## Full example
+
+```json
+{
+  "sections": {
+    "main": [
+      {
+        "ai": {
+          "prompt": {
+            "text": "Your name is Frank. You help transfer to the right department. Use the 'get_joke' function to get a joke.\n\n# Greetings\nGreet the user, and inform them that your name is Frank and you can help assist them in transferring the call to Support or Sales. However, let them know the only way to be transferred is to hear a joke.\n\n# Rules\nA user cannot be transferred until they have asked for at least one joke throughout the call. When a user is able to be transferred, use the 'transfer' function. Only provide one joke to the user, if the user asks for more jokes after the first one, tell them you are no longer giving out jokes, but can help with transferring the call to a different department."
+          },
+          "post_prompt": "Summarize the call as a json object",
+          "post_prompt_url": "https://example.com/post_prompt",
+          "SWAIG": {
+            "functions": [
+              {
+                "function": "transfer",
+                "active": "false",
+                "description": "use to transfer to a target",
+                "parameters": {
+                  "type": "object",
+                  "properties": {
+                    "target": {
+                      "description": "the target to transfer to",
+                      "type": "string"
+                    }
+                  }
+                },
+                "data_map": {
+                  "expressions": [
+                    {
+                      "pattern": "\\w+",
+                      "string": "${meta_data.table.${lc:args.target}}",
+                      "output": {
+                        "action": [
+                          { "say": "Please stand by while I connect your call." },
+                          {
+                            "transfer": true,
+                            "SWML": {
+                              "version": "1.0.0",
+                              "sections": {
+                                "main": [
+                                  {
+                                    "connect": {
+                                      "to": "${meta_data.table.${lc:args.target}}"
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          },
+                          { "stop": true }
+                        ],
+                        "response": "transferred, the call has ended."
+                      }
+                    },
+                    {
+                      "string": "${args.target}",
+                      "pattern": ".*",
+                      "output": {
+                        "response": "I'm sorry, I was unable to transfer your call to ${input.args.target}."
+                      }
+                    }
+                  ]
+                },
+                "meta_data": {
+                  "table": {
+                    "support": "+1XXXXXXXXXX",
+                    "sales": "+1YYYYYYYYY"
+                  }
+                }
+              },
+              {
+                "function": "get_joke",
+                "description": "used to get a joke",
+                "parameters": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "description": "must either be 'jokes' or 'dadjokes'"
+                    }
+                  }
+                },
+                "data_map": {
+                  "webhooks": [
+                    {
+                      "url": "https://example.com/secret_bank?name=${lc:args.type}",
+                      "method": "GET",
+                      "output": {
+                        "response": "Tell the user: ${array[0].joke}.",
+                        "action": [
+                          {
+                            "toggle_functions": [
+                              { "active": true, "function": "transfer" },
+                              { "active": false, "function": "get_joke" }
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}
+```

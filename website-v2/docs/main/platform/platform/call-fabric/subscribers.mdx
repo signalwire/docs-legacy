@@ -1,0 +1,333 @@
+---
+title: Subscribers
+description: The foundation of user management in Call Fabric
+
+slug: /platform/subscribers
+---
+
+[resources]: /docs/platform/resources
+[create-subscribers]: /docs/platform/resources#create
+[resource-addresses]: /docs/platform/addresses
+[browser-sdk]: /docs/browser-sdk/js
+[rest-api]: /docs/apis
+
+
+## What are subscribers?
+
+Subscribers are the core [Resources][resources] in SignalWire's Call Fabric platform that represent users 
+in your communication system. More than just a simple user account, Subscribers provide a complete user 
+management solution with built-in authentication, communication endpoints, and billing integration.
+
+Subscribers represent users in your communication system with enterprise-grade capabilities built-in.
+They embody SignalWire's approach to **Programmable Unified Communications (PUC)**, enabling you to onboard 
+and manage users at scale without building complex infrastructure from scratch.
+
+## What's included
+
+Every Subscriber comes with four core components that work together to provide a complete user management solution:
+
+<CardGroup cols={3}>
+  <Card title="Identity & authentication" icon="solid shield-halved">
+    Secure user management with industry-standard credential storage for usernames and passwords. Extensible profile system for names,
+    emails, company details, timezones, and locations.
+  </Card>
+  <Card title="Communication endpoints" icon="solid phone-volume">
+    Multi-channel connectivity with private Call Fabric address for internal communication plus public phone numbers for external calls.
+    Full SIP, WebRTC, and PSTN support.
+  </Card>
+  <Card title="Flexible configuration" icon="solid gear">
+    Customizable codec settings, encryption options, and SIP/WebRTC protocols. Configurable communication
+    preferences and routing rules.
+  </Card>
+</CardGroup>
+
+
+## How it works
+
+Subscribers are built on three core technical systems:
+
+### Resource addressing
+
+Subscribers use Call Fabric's unified addressing system for consistent identification across all platform 
+[Resources][resources]. Each Subscriber is uniquely identified by an address in the format `/<Context>/<Name>`.
+
+**Addresses make Subscribers directly callable.** When a call is placed to a Subscriber's address, Call Fabric 
+automatically routes the call directly to that Subscriber. This enables seamless peer-to-peer communication 
+without complex routing configuration.
+
+**Common address examples:**
+
+| Address | Description |
+| :------ | :---------- |
+| `/private/john-doe` | Direct dial to John's devices |
+| `/public/support-agent` | Publicly accessible support line |
+| `/private/jane?channel=video` | Video call to Jane |
+
+**How direct calling works:**
+- When someone calls `/private/john-doe`, the call rings John's registered device
+- The Subscriber can answer on any device (mobile app, web browser, desk phone)
+- Call Fabric handles device registration, presence, and simultaneous ring automatically
+
+Subscribers default to `private` context for security, with optional public aliases for external access.
+Learn more about [Resource Addresses][resource-addresses], including contexts, naming conventions, and advanced routing options.
+
+### Authentication system
+
+Multiple token types provide flexible security and integration options:
+
+<CardGroup cols={2}>
+  <Card
+    title="Subscriber Tokens"
+    icon="solid key"
+    href="/docs/apis/fabric/subscriber-tokens-create"
+  >
+    **Standard user authentication**
+
+    For End Users: Issued during login, provide access to user-specific resources. Perfect for web and mobile app authentication flows.
+  </Card>
+
+  <Card
+    title="Guest Tokens"
+    icon="solid user-clock"
+    href="/docs/apis/fabric/guest-tokens-create"
+  >
+    **Temporary guest access**
+
+    For Guest Users: Allows Subscribers to create guest tokens that provide temporary access to specific Resource addresses. The guest token creates a temporary subscriber with limited permissions to access only the specified `allowed_address`.
+  </Card>
+
+  <Card
+    title="Invite Tokens"
+    icon="solid envelope-open-text"
+    href="/docs/apis/fabric/invite-tokens-create"
+  >
+    **Client-side API access**
+
+    For Client Applications: Creates a Subscriber Invite Token that enables client-side bearer token authentication for API calls.
+  </Card>
+
+  <Card
+    title="Refresh Tokens"
+    icon="solid arrows-rotate"
+    href="/docs/apis/fabric/refresh-tokens-create"
+  >
+    **Session management**
+
+    For Seamless Experience: Handle automatic token renewal and session management without frequent re-authentication.
+  </Card>
+</CardGroup>
+
+### API management
+
+Complete REST API with full CRUD operations for programmatic control:
+
+<CardGroup cols={2}>
+  <Card
+    title="Create Subscriber"
+    icon="solid user-plus"
+    href="/docs/apis/fabric/subscribers-create"
+  >
+    **Create new subscribers**
+
+    Individual or bulk creation with profile data, credentials, and configuration settings.
+  </Card>
+
+  <Card
+    title="Retrieve Subscriber"
+    icon="solid user"
+    href="/docs/apis/fabric/subscribers-get"
+  >
+    **Get subscriber details**
+
+    Fetch individual Subscriber information, settings, and current status.
+  </Card>
+
+  <Card
+    title="Update Subscriber"
+    icon="solid user-pen"
+    href="/docs/apis/fabric/subscribers-update"
+  >
+    **Modify subscriber data**
+
+    Update profile information, settings, credentials, and configuration options.
+  </Card>
+
+  <Card
+    title="Remove Subscriber"
+    icon="solid user-minus"
+    href="/docs/apis/fabric/subscribers-delete"
+  >
+    **Delete subscribers**
+
+    Remove Subscribers and associated data with proper cleanup and notifications.
+  </Card>
+</CardGroup>
+
+Bulk operations handle large user populations efficiently, while webhooks provide real-time notifications for lifecycle events,
+authentication, and communication activities.
+
+## Integration example
+
+Here's how Subscribers work in practice with the [Browser SDK][browser-sdk]:
+
+<Tabs>
+  <TabItem value="authentication" label="Authentication">
+    ```javascript
+    import { SignalWire } from "@signalwire/js";
+
+    // Initialize the client with your token
+    const client = await SignalWire({
+      token: "<TOKEN>"  // Replace with your actual token
+    });
+
+    // Client is now ready to make and receive calls
+    console.log("SignalWire client initialized");
+    ```
+  </TabItem>
+
+  <TabItem value="making-calls" label="Making calls">
+    ```javascript
+    import { SignalWire } from "@signalwire/js";
+
+    // Initialize the client
+    const client = await SignalWire({
+      token: "<TOKEN>"
+    });
+
+    // Make a call to another subscriber
+    const call = await client.dial({
+      to: "/private/jane-doe",
+      rootElement: document.getElementById("videoContainer")
+    });
+
+    // Handle call events
+    call.on("call.state", (state) => {
+      console.log("Call state:", state);
+    });
+    ```
+  </TabItem>
+
+  <TabItem value="receiving-calls" label="Receiving calls">
+    ```javascript
+    import { SignalWire } from "@signalwire/js";
+
+    // Define the incoming call handler
+    const handleIncomingCall = async (notification) => {
+      const { invite } = notification;
+      console.log("Incoming call from:", invite.from);
+      
+      // Accept the call
+      const call = await invite.accept({
+        rootElement: document.getElementById("videoContainer")
+      });
+    };
+
+    // Initialize the client with the handler
+    const client = await SignalWire({
+      token: "<TOKEN>",
+      incomingCallHandlers: {
+        all: handleIncomingCall
+      }
+    });
+    ```
+  </TabItem>
+</Tabs>
+
+### Common use patterns
+
+- **Peer-to-peer calling**: Direct subscriber-to-subscriber calls using private addresses like `/private/john-doe`
+- **Conference rooms**: Multiple subscribers joining shared resources like `/public/team-meeting`
+- **AI agent interaction**: Subscribers calling AI agents at addresses like `/public/support-ai`
+- **PSTN & SIP calling**: Ability to call PSTN and SIP destinations directly from Subscriber applications
+
+## Common use cases
+
+These technical patterns enable real-world applications across industries:
+
+<CardGroup cols={3}>
+  <Card
+    title="Contact centers"
+    icon="solid headset"
+  >
+    **Agent management made simple**
+
+    Secure agent onboarding, real-time presence tracking, call routing with queues, and conference
+    bridge integration.
+  </Card>
+
+  <Card
+    title="Business phone systems"
+    icon="solid phone"
+  >
+    **Enterprise communication**
+
+    Complete UCaaS/VoIP platforms with call routing, advanced features, multi-channel support, and user
+    lifecycle management.
+  </Card>
+
+  <Card
+    title="Video platforms"
+    icon="solid video"
+  >
+    **Personalized video experiences**
+
+    User authentication, cross-platform compatibility, meeting management, and comprehensive usage analytics.
+  </Card>
+</CardGroup>
+
+
+## Value proposition & pricing
+
+<Tip>
+**$3/user/month** - No setup fees, hidden costs, or complex calculations. Includes complete user management, authentication,
+multi-channel communication, and enterprise-grade security.
+</Tip>
+
+### Why choose subscribers?
+
+At **$3/user/month**, Subscribers provide a complete user management solution with built-in infrastructure:
+
+<CardGroup cols={2}>
+  <Card title="Complete infrastructure" icon="solid gauge-high">
+    User management, authentication, billing systems, and communication infrastructure included.
+    Production-ready capabilities without custom development.
+  </Card>
+  <Card title="Enterprise-grade security" icon="solid lock">
+    Built-in security controls and compliance features. Industry-standard authentication and
+    encryption without additional implementation.
+  </Card>
+  <Card title="Predictable scaling" icon="solid arrow-trend-up">
+    Fixed per-user pricing with no hidden costs. Infrastructure automatically scales
+    without rearchitecting your application.
+  </Card>
+  <Card title="Developer-first integration" icon="solid code">
+    Complete REST APIs, SDKs, and comprehensive documentation. Straightforward integration
+    with existing systems using standard protocols.
+  </Card>
+</CardGroup>
+
+## Get started
+
+Ready to implement Subscribers? Follow these steps:
+
+<Steps>
+
+### Create your first subscriber
+
+Navigate to the [SignalWire Dashboard][create-subscribers] and create your first Subscriber through the Resources section. This establishes your user entity and generates authentication credentials.
+
+### Configure user profile
+
+Set up credentials, contact information, and Resource addresses. Configure timezone, location, and other 
+profile details for cross-channel communication.
+
+### Set security context
+
+Configure private and public contexts based on your security needs. Determine which Subscribers need 
+public aliases and establish access controls.
+
+### Implementation
+
+Use the [Browser SDK][browser-sdk] or [REST API][rest-api] to connect your application with Subscriber authentication. Implement token management and session handling.
+
+</Steps>

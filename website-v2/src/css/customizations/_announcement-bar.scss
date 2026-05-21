@@ -1,0 +1,16 @@
+/**
+ * Announcement Bar Theme Customization
+ * Uses Docusaurus's built-in CSS variables for theming
+ */
+
+// Override Docusaurus's default announcement bar variables
+:root {
+  --ifm-color-info-contrast-background: #f6f8fa;
+  --ifm-color-info-contrast-foreground: #1c1e21;
+}
+
+:root[data-theme="dark"] {
+  --ifm-color-info-contrast-background: #2f3349;
+  --ifm-color-info-contrast-foreground: #ffffff;
+}
+

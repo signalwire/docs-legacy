@@ -1,0 +1,85 @@
+---
+title: "ChatMessage"
+slug: /node/reference/chat/chat-message
+sidebar_label: ChatMessage
+description: ChatMessage object representing a message in a chat channel. Access message ID, content, member info, channel, and timestamp properties.
+toc_max_heading_level: 3
+---
+
+[chat-chatmember]: /docs/server-sdk/v3/node/reference/chat/chat-member
+
+Represents a message in a chat.
+
+## Constructors
+
+### constructor
+
+• **new ChatMessage**(`payload`)
+
+#### Parameters
+
+| Name      | Type          |
+| :-------- | :------------ |
+| `payload` | `ChatMessage` |
+
+## Properties
+
+### channel
+
+The channel in which this message was sent.
+
+**Syntax:** `ChatMessage.channel()`
+
+**Returns:** `string`
+
+---
+
+### content
+
+The content of this message. This can be any JSON-serializable object or value.
+
+#### Returns
+
+**Syntax:** `ChatMessage.content()`
+
+**Returns:** `any`
+
+---
+
+### id
+
+The id of this message.
+
+**Syntax:** `ChatMessage.id()`
+
+**Returns:** `string`
+
+---
+
+### member
+
+The member which sent this message.
+
+**Syntax:** `ChatMessage.member()`
+
+**Returns:** [`ChatMember`][chat-chatmember]
+
+---
+
+### meta
+
+Any metadata associated to this message.
+
+**Syntax:** `ChatMessage.meta()`
+
+**Returns:** `any`
+
+---
+
+### publishedAt
+
+The date and time at which this message was published.
+
+**Syntax:** `ChatMessage.publishedAt()`
+
+**Returns:** `Date`

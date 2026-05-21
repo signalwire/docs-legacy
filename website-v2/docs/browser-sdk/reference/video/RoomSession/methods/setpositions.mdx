@@ -1,0 +1,46 @@
+---
+title: "setPositions"
+slug: /js/reference/video/room-session/set-positions
+description: setPositions method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+### setPositions
+
+- **setPositions**(`params`): `Promise<void>`
+
+Assigns a position in the layout for multiple members.
+
+#### Parameters
+
+<ParamField path="params" type="object">
+  Object containing the parameters of the method.
+</ParamField>
+
+<Indent>
+<ParamField path="positions" type="VideoPositions">
+  Mapping of member IDs and positions to assign.
+</ParamField>
+</Indent>
+
+#### Returns
+
+`Promise<void>`
+
+#### Permissions
+
+- `room.set_position`
+
+You need to specify the permissions when [creating the Video Room Token](/docs/apis/video/create-room-token) on the server side.
+
+#### Example
+
+```js
+await roomSession.setPositions({
+  positions: {
+    "1bf4d4fb-a3e4-4d46-80a8-3ebfdceb2a60": "reserved-1",
+    "e0c5be44-d6c7-438f-8cda-f859a1a0b1e7": "auto",
+  },
+});
+```
+

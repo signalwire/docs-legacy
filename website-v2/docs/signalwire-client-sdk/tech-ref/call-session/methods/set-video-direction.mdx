@@ -1,0 +1,95 @@
+---
+title: setVideoDirection
+slug: /call-session/setvideodirection
+---
+
+import APIField from '@site/src/components/APIField';
+
+Sets the direction of the video track in the WebRTC connection by performing RTC peer renegotiation.
+
+## Parameters
+
+<APIField name="direction" type="UpdateMediaDirection" required>
+  The desired video direction. Valid values: `'sendrecv'`, `'sendonly'`, `'recvonly'`, `'inactive'`
+</APIField>
+
+**UpdateMediaDirection** values:
+- `'sendrecv'` - Send and receive video (default, two-way video)
+- `'sendonly'` - Only send video, don't receive
+- `'recvonly'` - Only receive video, don't send
+- `'inactive'` - Neither send nor receive video
+
+## Signature
+
+```typescript
+call.setVideoDirection(direction: UpdateMediaDirection): Promise<void>
+```
+
+## Returns
+
+**Type:** `Promise<void>`
+
+## Examples
+
+### Enable Two-Way Video
+
+```typescript
+await call.setVideoDirection('sendrecv')
+```
+
+### Watch-Only Mode
+
+```typescript
+// Receive video but don't send
+await call.setVideoDirection('recvonly')
+```
+
+### Broadcast Mode
+
+```typescript
+// Send video but don't receive
+await call.setVideoDirection('sendonly')
+```
+
+### Disable Video Completely
+
+```typescript
+// Neither send nor receive video
+await call.setVideoDirection('inactive')
+```
+
+### Upgrade Audio-Only Call to Video
+
+```typescript
+// Start with audio only (video inactive)
+await call.setVideoDirection('inactive')
+
+// Later, enable two-way video
+await call.setVideoDirection('sendrecv')
+```
+
+### Large Conference (Bandwidth Savings)
+
+```typescript
+// In a 50-person call, only send your video
+// Don't receive 49 other video streams
+await call.setVideoDirection('sendonly')
+```
+
+## Important Notes
+
+**Peer Renegotiation:** This method triggers WebRTC peer renegotiation to update the video track direction. The connection will temporarily adjust while renegotiating.
+
+**Direction vs Mute:**
+- **Mute** (`videoMute()`): Temporarily stops sending video, but the track remains active
+- **Direction**: Changes the fundamental video flow in the WebRTC connection
+
+Use `setVideoDirection()` when you need to:
+- Permanently disable video sending or receiving
+- Optimize bandwidth by not receiving video when unnecessary
+- Upgrade from audio-only to video call
+- Implement broadcast or watch-only modes
+
+Use `videoMute()`/`videoUnmute()` when you just need to temporarily stop sending video.
+
+**Audio Unaffected:** This method only changes the video direction. Audio direction remains unchanged. To update both, use `updateMedia()`.

@@ -1,0 +1,56 @@
+---
+title: Relay.Calling.TapAction
+slug: /node/reference/calling/actions/tap
+description: The Tap Action is used to stream the media of the call to a endpoint.
+toc_max_heading_level: 3
+---
+
+[relay-calling-stopresult]: /docs/server-sdk/v2/node/reference/calling/results/stop
+[relay-calling-tapresult]: /docs/server-sdk/v2/node/reference/calling/results/tap
+[tapasync]: /docs/server-sdk/v2/node/reference/calling/call#tapasync
+This object returned from [`tapAsync`][tapasync] method that represents the running _media tapping_ active on a call.
+
+## Properties
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `result` | [`Relay.Calling.TapResult`][relay-calling-tapresult] | Final `tap` result |
+| `state` | `string` | Current state of tapping |
+| `completed` | `boolean` | Whether the tapping has finished |
+| `payload` | `object` | Payload sent to Relay to start tapping |
+| `controlId` | `string` | UUID to identify the action |
+| `sourceDevice` | `object` | Source device sending media |
+
+## Methods
+
+### stop
+
+Stop the action immediately.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`Promise<StopResult>` - Promise object that will be fulfilled with a [`Relay.Calling.StopResult`][relay-calling-stopresult] object.
+
+**Examples**
+
+> Start tapping using RTP and stop it after 5 seconds.
+
+```javascript
+async function main() {
+  const action = await call.tapAsync({
+    target_type: 'rtp',
+    target_addr: '192.168.1.1',
+    target_port: 1234
+  })
+
+  setTimeout(async () => {
+    const stopResult = await action.stop()
+  }, 5000)
+}
+
+main().catch(console.error)
+```

@@ -1,0 +1,216 @@
+---
+title: Relay.Calling.RecordAction
+slug: /php/reference/calling/actions/record
+description: The RecordAction object is returned when recording a call.
+toc_max_heading_level: 3
+---
+
+[call]: /docs/server-sdk/v2/php/reference/calling/call#recordasync
+[relay-calling-recordresult]: /docs/server-sdk/v2/php/reference/calling/results/record
+[relay-calling-stopresult]: /docs/server-sdk/v2/php/reference/calling/results/stop
+
+This object returned from [`recordAsync`][call] method that represents a recording that is currently active on a call.
+
+## Methods
+
+### getControlId
+
+Return the UUID to identify the recording.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`string` - UUID to identify the action.
+
+**Examples**
+
+Start recording in stereo mode and print the controlId.
+
+```php
+<?php
+
+$params = [
+  'stereo' => true
+];
+$call->recordAsync($params)->done(function($action) {
+  echo $action->getControlId();
+});
+```
+
+### getResult
+
+Returns the final result of the recording.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+[`Relay.Calling.RecordResult`][relay-calling-recordresult] - Final result of the recording.
+
+**Examples**
+
+Start recording in stereo mode and grab the result when it's completed.
+
+```php
+<?php
+
+$params = [
+  'stereo' => true
+];
+$call->recordAsync($params)->done(function($action) {
+  // .. later in the code since it's an async method
+  if ($action->isCompleted()) {
+    $result = $action->getResult();
+  }
+});
+```
+
+### getPayload
+
+Return the payload sent to Relay to initiate the request. Useful to inspect what you sent to perform this action.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`Object` - Payload sent to Relay.
+
+**Examples**
+
+Start recording in stereo mode and print out the payload.
+
+```php
+<?php
+
+$params = [
+  'stereo' => true
+];
+$call->recordAsync($params)->done(function($action) {
+  print_r($action->getPayload());
+});
+```
+
+### getState
+
+Return the current state of recording.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`string` - Current state of recording.
+
+**Examples**
+
+Start recording in stereo mode and print the state.
+
+```php
+<?php
+
+$params = [
+  'stereo' => true
+];
+$call->recordAsync($params)->done(function($action) {
+  echo $action->getState();
+});
+```
+
+### getUrl
+
+Returns the HTTPS URL to the recording file.
+
+> **Note**: the recording may not be present at the URL until the recording is finished.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`string` - HTTPS URL to the file.
+
+**Examples**
+
+Start recording and print the URL.
+
+```php
+<?php
+
+$params = [
+  'stereo' => true
+];
+$call->recordAsync($params)->done(function($action) {
+  echo $result->getUrl();
+});
+```
+
+### isCompleted
+
+Return `true` if the recording has finished, `false` otherwise.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`Boolean` - True/False accordingly to the state.
+
+**Examples**
+
+Start recording in stereo mode and check if it has finished.
+
+```php
+<?php
+
+$params = [
+  'stereo' => true
+];
+$call->recordAsync($params)->done(function($action) {
+  if ($action->isCompleted()) {
+
+  }
+});
+```
+
+### stop
+
+Stop the action immediately.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`React\Promise\Promise` - Promise object that will be fulfilled with a [`Relay.Calling.StopResult`][relay-calling-stopresult] object.
+
+**Examples**
+
+Start recording in stereo mode and stop it an `Agent` is not available.
+
+```php
+<?php
+
+$params = [
+  "audio" => [
+    "stereo" => true
+  ]
+];
+$call->recordAsync($params)->done(function($action) use ($globalAgent) {
+  if ($globalAgent->isAvailable() === false) {
+    $action->stop()->done(function($stopResult) {
+
+    });
+  }
+});
+```

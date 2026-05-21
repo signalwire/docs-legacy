@@ -1,0 +1,182 @@
+---
+title: RELAY SDK for PHP
+slug: /php/reference
+toc_max_heading_level: 3
+---
+import V2IntroPartial from '@site/realtime-sdk_versioned_docs/version-v2/snippets/v2-intro.mdx';
+
+
+[community-led-fork]: https://github.com/signalwire-community/signalwire-php
+[composer]: https://getcomposer.org/
+[learn-more-about-relay-clients]: /docs/server-sdk/v2/php/reference/relay-client
+[learn-more-about-relay-consumers]: /docs/server-sdk/v2/php/reference/consumer
+[learn-more-about-relay-tasks]: /docs/server-sdk/v2/php/reference/task
+[relay-client]: /docs/server-sdk/v2/php/reference/relay-client
+[relay-consumer]: /docs/server-sdk/v2/php/reference/consumer
+[relay-consumers]: /docs/server-sdk/v2/php/reference/consumer
+[relay-task]: /docs/server-sdk/v2/php/reference/task
+
+<V2IntroPartial />
+
+
+
+## Getting Started
+
+The RELAY SDK for PHP enables PHP developers to connect and use SignalWire's RELAY APIs within their own PHP code.
+
+<Warning title="Package Maintenance Status">
+**THIS PACKAGE IS NOT ACTIVELY MAINTAINED ANYMORE**
+
+Visit the [community-led fork][community-led-fork] for new updates to the PHP library, including compatibility with PHP 8.
+</Warning>
+
+
+## Installation
+
+Install the package using [Composer][composer]:
+
+```shell
+composer require signalwire/signalwire
+```
+
+## Minimum Requirements
+
+The PHP SDK requires **`PHP 7.1`** or greater installed on your system.
+
+## Using the SDK
+
+To use the SDK, you need your **project** and **token** from your SignalWire dashboard.
+
+### RELAY Consumer
+
+A [`Relay.Consumer`][relay-consumer] creates a long running process, allowing you to respond to incoming requests and events in realtime. RELAY Consumers abstract all the setup of connecting to RELAY and automatically dispatches workers to handle requests; so you can concentrate on writing your code without having to worry about multi-threading or blocking, everything just works. Think of RELAY Consumers like a background worker system for all your calling and messaging needs.
+
+RELAY Consumers can scale easily, simply by running multiple instances of your `Relay.Consumer` process. Each event will only be delivered to a single consumer, so as your volume increases, just scale up! This process works well whether you are using Docker Swarm, a Procfile on Heroku, your own webserver, and most other environments.
+
+<Tip title="Getting Started">
+Setting up a new consumer is the easiest way to get up and running.
+</Tip>
+
+```php
+<?php
+
+require dirname(__FILE__) . '/vendor/autoload.php';
+
+use Generator as Coroutine;
+use SignalWire\Relay\Consumer;
+
+class CustomConsumer extends Consumer {
+  public $project = 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX';
+  public $token = 'PTXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX';
+  public $contexts = ['home', 'office'];
+
+  public function ready(): Coroutine {
+    yield;
+    // Consumer is successfully connected with Relay.
+    // You can make calls or send messages here..
+  }
+
+  public function onIncomingCall($call): Coroutine {
+    $result = yield $call->answer();
+    if ($result->isSuccessful()) {
+      yield $call->playTTS(['text' => 'Welcome to SignalWire!']);
+    }
+  }
+}
+
+$consumer = new CustomConsumer();
+$consumer->run();
+```
+
+[Learn more about RELAY Consumers][learn-more-about-relay-consumers]
+
+### RELAY Task
+
+A [`Relay.Task`][relay-task] is simple way to send jobs to your [`Relay.Consumers`][relay-consumers] from a short lived process, like a web framework. RELAY Tasks allow you to pass commands down to your Consumers without blocking your short lived request. Think of a RELAY Task as a way to queue a job for your background workers to processes asynchronously.
+
+For example, if you wanted to make an outbound call and play a message when your user clicks a button on your web application, since RELAY is a realtime protocol and relies on you to tell it what to do in realtime, if you did this within your web application, your web server would block until the call was finished... this may take a long time! Instead, simply create a new RELAY Task. This task will be handled by a running RELAY Consumer process and your web application can respond back to your user immediately.
+
+<Tabs>
+<TabItem value="send-a-task" label="Send a Task">
+
+Send a task in the `office` context with custom data.
+
+```php title="create-task.php"
+<?php
+
+require dirname(__FILE__) . '/vendor/autoload.php';
+
+use SignalWire\Relay\Tasking\Task;
+
+$task = new Task('XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX', 'PTXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX');
+$context = 'office';
+$delivered = $task->deliver($context, [
+  'uuid' => 'unique id',
+  'data' => 'data for your job'
+]);
+```
+
+</TabItem>
+<TabItem value="handle-the-task" label="Handle the Task">
+
+Handle the task in a Consumer.
+
+```php title="consumer-task.php"
+<?php
+
+require dirname(__FILE__) . '/vendor/autoload.php';
+
+use Generator as Coroutine;
+
+class CustomConsumer extends SignalWire\Relay\Consumer {
+  public $project = 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX';
+  public $token = 'PTXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX';
+  public $contexts = ['office']; // Task is delivered on the "office" context!
+
+  public function onTask($message): Coroutine {
+    yield;
+    // Retrieve your custom properties in $message..
+    echo $message->uuid; // 'unique id'
+    echo $message->data; // 'data for your job'
+  }
+}
+
+$consumer = new CustomConsumer();
+$consumer->run();
+```
+
+</TabItem>
+</Tabs>
+
+[Learn more about RELAY Tasks][learn-more-about-relay-tasks]
+
+### RELAY Client
+
+[`Relay.Client`][relay-client] is a lower level object, giving you a basic connection to RELAY but that is all. It is best used when you are creating a script only concerned with sending outbound requests or you want complete control over the RELAY connection yourself.
+
+Setting up a new client and make an outbound call.
+
+```php
+<?php
+
+$client = new SignalWire\Relay\Client([
+  'project' => 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
+  'token' => 'PTXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
+]);
+
+$client->on('signalwire.ready', function($client) {
+
+  $params = [ 'type' => 'phone', 'from' => '+1XXXXXXXXXX', 'to' => '+1YYYYYYYYYY' ];
+  $client->calling->dial($params)->done(function($result) {
+    if ($result->isSuccessful()) {
+      // Your active $call..
+      $call = $result->getCall();
+    }
+  });
+
+});
+
+$client->connect();
+```
+
+[Learn more about RELAY Clients][learn-more-about-relay-clients]

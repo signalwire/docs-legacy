@@ -1,0 +1,186 @@
+---
+slug: /compatibility-api/sdks/reference/recordings/list
+title: List
+sidebar_label: List
+toc_max_heading_level: 3
+---
+
+Use this endpoint for the Recordings method to fetch all the recordings that are associated with your SignalWire account.
+This will be returned as a list of recordings.
+
+<EndpointSchemaSnippet endpoint="GET /Accounts/{AccountSid}/Recordings" />
+
+<EndpointResponseSnippet endpoint="GET /Accounts/{AccountSid}/Recordings" />
+
+## Request examples
+
+<CodeBlocks>
+```javascript title="Node.js"
+const { RestClient } = require('@signalwire/compatibility-api')
+const client = RestClient('YourProjectID', 'YourAuthToken', { signalwireSpaceUrl: 'example.signalwire.com' })
+
+client.recordings.each(recordings => console.log(recordings.sid));
+```
+```csharp
+using System;
+using System.Collections.Generic;
+using Twilio;
+using Twilio.Rest.Api.V2010.Account;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        TwilioClient.Init("YourProjectID", "YourAuthToken", new Dictionary<string, object> { ["signalwireSpaceUrl"] = "{SPACE}.signalwire.com" });
+
+        var recordings = RecordingResource.Read();
+
+        foreach(var record in recordings)
+        {
+           Console.WriteLine(record.Sid);
+        }
+    }
+}
+```
+```python
+from signalwire.rest import Client as signalwire_client
+
+client = signalwire_client("YourProjectID", "YourAuthToken", signalwire_space_url = 'example.signalwire.com')
+
+recordings = client.recordings.list()
+
+for record in recordings:
+    print(record.sid)
+```
+```ruby
+require 'signalwire/sdk'
+
+@client = Signalwire::REST::Client.new 'YourProjectID', 'YourAuthToken', signalwire_space_url: "example.signalwire.com"
+
+recordings = @client.recordings.list
+
+recordings.each do |record|
+  puts record.sid
+end
+```
+</CodeBlocks>
+
+---
+
+### Request: list all recordings of a call
+
+List All Recordings of a Call.
+
+<CodeBlocks>
+```javascript title="Node.js"
+const { RestClient } = require('@signalwire/compatibility-api')
+const client = RestClient('YourProjectID', 'YourAuthToken', { signalwireSpaceUrl: 'example.signalwire.com' })
+
+client.recordings.each({ callSid: '43bb71ee-553f-4074-bb20-8e2747647cce' }, recordings => console.log(recordings.sid));
+```
+```csharp
+using System;
+using System.Collections.Generic;
+using Twilio;
+using Twilio.Rest.Api.V2010.Account;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        TwilioClient.Init("YourProjectID", "YourAuthToken", new Dictionary<string, object> { ["signalwireSpaceUrl"] = "{SPACE}.signalwire.com" });
+
+        var recordings = RecordingResource.Read(
+            callSid: "43bb71ee-553f-4074-bb20-8e2747647cce"
+        );
+
+        foreach(var record in recordings)
+        {
+           Console.WriteLine(record.Sid);
+        }
+    }
+}
+```
+```python
+from signalwire.rest import Client as signalwire_client
+
+client = signalwire_client("YourProjectID", "YourAuthToken", signalwire_space_url = 'example.signalwire.com')
+
+recordings = client.recordings \
+                   .list(call_sid='43bb71ee-553f-4074-bb20-8e2747647cce')
+
+for record in recordings:
+    print(record.sid)
+```
+```ruby
+require 'signalwire/sdk'
+
+@client = Signalwire::REST::Client.new 'YourProjectID', 'YourAuthToken', signalwire_space_url: "example.signalwire.com"
+
+recordings = @client.recordings
+                    .list(call_sid: '43bb71ee-553f-4074-bb20-8e2747647cce')
+
+recordings.each do |record|
+  puts record.sid
+end
+```
+</CodeBlocks>
+
+---
+
+### Request: list all recordings on September 25, 2018
+
+> List All Recordings on September 25, 2018
+
+<CodeBlocks>
+```javascript title="Node.js"
+const { RestClient } = require('@signalwire/compatibility-api')
+const client = RestClient('YourProjectID', 'YourAuthToken', { signalwireSpaceUrl: 'example.signalwire.com' })
+
+client.recordings.each({ dateCreated: new Date(Date.UTC(2018, 9, 25, 0, 0, 0)) }, recordings => console.log(recordings.sid));
+```
+```csharp
+using System;
+using System.Collections.Generic;
+using Twilio;
+using Twilio.Rest.Api.V2010.Account;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        TwilioClient.Init("YourProjectID", "YourAuthToken", new Dictionary<string, object> { ["signalwireSpaceUrl"] = "{SPACE}.signalwire.com" });
+
+        var recordings = RecordingResource.Read(
+            dateCreated: new DateTime(2018, 9, 25, 0, 0, 0)
+        );
+
+        foreach(var record in recordings)
+        {
+           Console.WriteLine(record.Sid);
+        }
+    }
+}
+```
+```python
+from signalwire.rest import Client as signalwire_client
+
+client = signalwire_client("YourProjectID", "YourAuthToken", signalwire_space_url = 'example.signalwire.com')
+
+recordings = client.recordings.list(date_created=datetime(2018, 9, 25, 0, 0))
+
+for record in recordings:
+    print(record.sid)
+```
+```ruby
+require 'signalwire/sdk'
+
+@client = Signalwire::REST::Client.new 'YourProjectID', 'YourAuthToken', signalwire_space_url: "example.signalwire.com"
+
+recordings = @client.recordings.list(date_created: Date.new(2018, 9, 25))
+
+recordings.each do |record|
+  puts record.sid
+end
+```
+</CodeBlocks>

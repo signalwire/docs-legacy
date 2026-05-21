@@ -1,0 +1,46 @@
+---
+title: "Events"
+slug: /js/reference/pubsub/client/events
+toc_max_heading_level: 3
+---
+
+The PubSub.Client object emits the events listed below. You can work with these events using the following methods:
+
+<CardGroup>
+  <Card title="on" href="/docs/browser-sdk/js/reference/pubsub/client/on">
+    Subscribe to an event
+  </Card>
+  <Card title="once" href="/docs/browser-sdk/js/reference/pubsub/client/once">
+    Subscribe to an event once
+  </Card>
+  <Card title="off" href="/docs/browser-sdk/js/reference/pubsub/client/off">
+    Unsubscribe from an event
+  </Card>
+  <Card title="removeAllListeners" href="/docs/browser-sdk/js/reference/pubsub/client/remove-all-listeners">
+    Remove all event listeners
+  </Card>
+</CardGroup>
+
+## Events
+
+### message
+
+- **message**(`message`)
+
+A new message has been received.
+
+<Accordion title="Properties">
+
+<ParamField path="message" type="PubSubMessage<PubSubMessageContract>" required={true}>
+  The received message. See [`PubSubMessage`](/docs/browser-sdk/js/reference/pubsub) for more details.
+</ParamField>
+
+</Accordion>
+
+---
+
+### session.expiring
+
+- **session.expiring**()
+
+The session is going to expire. Use the [updateToken](/docs/browser-sdk/js/reference/pubsub/client/update-token) method to refresh your token.

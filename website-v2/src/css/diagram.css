@@ -1,0 +1,23 @@
+/* Diagram images: solid background + color inversion for dark mode */
+
+img.diagram {
+  background-color: white;
+}
+
+[data-theme="dark"] img.diagram {
+  background-color: transparent;
+  filter: invert(1) hue-rotate(180deg);
+}
+
+[data-theme="dark"] [data-rmiz-modal-content] img {
+  background-color: #0c1624 !important;
+}
+
+[data-theme="dark"] [data-rmiz-modal-content]:has(img[src*="diagram"]) {
+  background-color: #0c1624 !important;
+}
+
+[data-theme="dark"] [data-rmiz-modal-content] img[src*="diagram"] {
+  background-color: transparent !important;
+  filter: invert(1) hue-rotate(180deg);
+}

@@ -1,0 +1,149 @@
+---
+title: Relay.Client
+slug: /php/reference/relay-client
+toc_max_heading_level: 3
+---
+
+[link]: #events
+[relay-calling]: /docs/server-sdk/v2/php/reference/calling
+[relay-client-1]: #
+
+`Relay.Client` is the basic connection to RELAY, allowing you send commands to RELAY and setup handlers for inbound events.
+
+## Constructor
+
+Constructs a client object to interact with RELAY.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `project` | `string` | **required** | Project ID from your SignalWire Space |
+| `token` | `string` | **required** | Token from your SignalWire Space |
+
+**Examples**
+
+Create a Client to interact with the RELAY API.
+
+```php
+<?php
+
+$client = new SignalWire\Relay\Client([
+  'project' => 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
+  'token' => 'PTXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
+]);
+```
+
+## Properties
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `calling` | [`Relay.Calling`][relay-calling] | Returns a `Relay.Calling` instance associated with the client. |
+
+## Methods
+
+### connect
+
+Activates the connection to the RELAY API. The connection to RELAY does not happen automatically so that you can setup handlers to events that might occur before the connection is successfully established.
+
+**Returns**
+
+`void`
+
+**Examples**
+
+```php
+<?php
+
+$client->connect();
+```
+
+### disconnect
+
+Disconnect the client from RELAY.
+
+**Returns**
+
+`void`
+
+**Examples**
+
+```php
+<?php
+
+$client->disconnect();
+```
+
+### on
+
+Attach an event handler for a specific type of event.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `$event` | `string` | **required** | Event name. Full list of events [Relay.Client Events][link] |
+| `$callback` | `function` | **required** | Callable to invoke when the event comes. |
+
+**Returns**
+
+[`Relay.Client`][relay-client-1] - The client object itself.
+
+**Examples**
+
+Subscribe to the `signalwire.ready` and `signalwire.error` events.
+
+```php
+<?php
+
+$client->on('signalwire.ready', function($client) {
+  // Your client is ready!
+})->on('signalwire.error', function(\Exception $error) {
+  // Got an error...
+});
+```
+
+### off
+
+Remove an event handler that were attached with `.on()`. If no `handler` parameter is passed, all listeners for that `event` will be removed.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `$event` | `string` | **required** | Event name. Full list of events [Relay.Client Events][link] |
+| `$callback` | `function` | *optional* | Callable to remove. <br /> _Note: `$callback` will be removed from the stack by reference so make sure to use the same reference in both `.on()` and `.off()` methods._ |
+
+**Returns**
+
+[`Relay.Client`][relay-client-1] - The client object itself.
+
+**Examples**
+
+Subscribe to the `signalwire.error` and then, remove the event handler.
+
+```php
+<?php
+
+$errorHandler = function($error) {
+  // Log the error..
+};
+
+$client->on('signalwire.error', $errorHandler);
+
+// .. later
+$client->off('signalwire.error', $errorHandler);
+```
+
+## Events
+
+All available events you can attach a listener on.
+
+| Event | Description |
+|-------|-------------|
+| `signalwire.ready` | The session has been established and all other methods can now be used. |
+| `signalwire.error` | There is an error dispatch at the session level. |
+| `signalwire.socket.open` | The websocket is open. However, you have not yet been authenticated. |
+| `signalwire.socket.error` | The websocket gave an error. |
+| `signalwire.socket.message` | The client has received a message from the websocket. |
+| `signalwire.socket.close` | The websocket is closing. |

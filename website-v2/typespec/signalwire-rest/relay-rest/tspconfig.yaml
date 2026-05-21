@@ -1,0 +1,11 @@
+# Relay REST API - outputs to specs/relay-rest
+extends: ../../tspconfig.yaml
+emit:
+  - "@typespec/openapi3"
+
+options:
+  "@typespec/openapi3":
+    emitter-output-dir: "{cwd}/../../../specs/relay-rest"
+    output-file: openapi.yaml
+    openapi-versions:
+      - "3.1.0"

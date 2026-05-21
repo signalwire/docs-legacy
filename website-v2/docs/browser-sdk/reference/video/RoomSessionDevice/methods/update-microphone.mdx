@@ -1,0 +1,31 @@
+---
+title: "updateMicrophone"
+slug: /js/reference/video/room-session-device/update-microphone
+description: updateMicrophone method for the RoomSessionDevice class.
+toc_max_heading_level: 3
+---
+
+### updateMicrophone
+
+▸ **updateMicrophone**(`constraints`): `Promise<void>`
+
+Replaces the current microphone stream with the one coming from a different device.
+
+#### Parameters
+
+<ParamField path="constraints" type="MediaTrackConstraints" required={true}>
+  Specify the constraints that the device should satisfy. See [MediaTrackConstraints](https://developer.mozilla.org/en-US/docs/Web/API/MediaTrackConstraints).
+</ParamField>
+
+#### Returns
+
+`Promise<void>`
+
+#### Example
+
+```javascript
+await roomDevice.updateMicrophone({
+  deviceId: "/o4ZeWzroh+8q0Ds/CFfmn9XpqaHzmW3L/5ZBC22CRg=",
+});
+```
+

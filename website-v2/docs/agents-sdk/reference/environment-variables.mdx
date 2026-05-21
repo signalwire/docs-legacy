@@ -1,0 +1,203 @@
+---
+title: "Environment Variables"
+sidebar_label: "Environment Variables"
+slug: /python/reference/environment-variables
+toc_max_heading_level: 3
+---
+
+## Environment Variables
+
+Complete reference for all environment variables used by the SignalWire Agents SDK.
+
+### Overview
+
+| Category | Purpose |
+|----------|---------|
+| Authentication | Basic auth credentials |
+| SSL/TLS | HTTPS configuration |
+| Proxy | Reverse proxy settings |
+| Security | Host restrictions, CORS, rate limiting |
+| Logging | Log output control |
+| Skills | Custom skill paths |
+| Serverless | Platform-specific settings |
+
+### Authentication Variables
+
+| Variable | Type | Default | Description |
+|----------|------|---------|-------------|
+| `SWML_BASIC_AUTH_USER` | string | Auto-generated | Username for HTTP Basic Authentication |
+| `SWML_BASIC_AUTH_PASSWORD` | string | Auto-generated | Password for HTTP Basic Authentication |
+
+**Note**: If neither variable is set, credentials are auto-generated and logged at startup.
+
+### SSL/TLS Variables
+
+| Variable | Type | Default | Description |
+|----------|------|---------|-------------|
+| `SWML_SSL_ENABLED` | boolean | `false` | Enable HTTPS ("true", "1", "yes") |
+| `SWML_SSL_CERT_PATH` | string | None | Path to SSL certificate file (.pem/.crt) |
+| `SWML_SSL_KEY_PATH` | string | None | Path to SSL private key file (.key) |
+| `SWML_DOMAIN` | string | None | Domain for SSL certs and URL generation |
+| `SWML_SSL_VERIFY_MODE` | string | `CERT_REQUIRED` | SSL certificate verification mode |
+
+### Proxy Variables
+
+| Variable | Type | Default | Description |
+|----------|------|---------|-------------|
+| `SWML_PROXY_URL_BASE` | string | None | Base URL when behind reverse proxy |
+| `SWML_PROXY_DEBUG` | boolean | `false` | Enable proxy request debug logging |
+
+**Warning**: Setting `SWML_PROXY_URL_BASE` overrides SSL configuration and port settings.
+
+### Security Variables
+
+| Variable | Type | Default | Description |
+|----------|------|---------|-------------|
+| `SWML_ALLOWED_HOSTS` | string | `*` | Comma-separated allowed hosts |
+| `SWML_CORS_ORIGINS` | string | `*` | Comma-separated allowed CORS origins |
+| `SWML_MAX_REQUEST_SIZE` | integer | `10485760` | Maximum request size in bytes (10MB) |
+| `SWML_RATE_LIMIT` | integer | `60` | Rate limit in requests per minute |
+| `SWML_REQUEST_TIMEOUT` | integer | `30` | Request timeout in seconds |
+| `SWML_USE_HSTS` | boolean | `true` | Enable HTTP Strict Transport Security |
+| `SWML_HSTS_MAX_AGE` | integer | `31536000` | HSTS max-age in seconds (1 year) |
+
+### Logging Variables
+
+| Variable | Type | Default | Description |
+|----------|------|---------|-------------|
+| `SIGNALWIRE_LOG_MODE` | string | `auto` | Logging mode: "off", "stderr", "default", "auto" |
+| `SIGNALWIRE_LOG_LEVEL` | string | `info` | Log level: "debug", "info", "warning", "error", "critical" |
+
+### Skills Variables
+
+| Variable | Type | Default | Description |
+|----------|------|---------|-------------|
+| `SIGNALWIRE_SKILL_PATHS` | string | `""` | Colon-separated paths for custom skills |
+
+### Serverless Platform Variables
+
+#### AWS Lambda
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `AWS_LAMBDA_FUNCTION_NAME` | `unknown` | Function name (used for URL construction and logging) |
+| `AWS_LAMBDA_FUNCTION_URL` | Constructed | Function URL (if not set, constructed from region and function name) |
+| `AWS_REGION` | `us-east-1` | AWS region for Lambda execution |
+| `LAMBDA_TASK_ROOT` | None | Lambda environment detection variable |
+
+#### Google Cloud Functions
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `GOOGLE_CLOUD_PROJECT` | None | Google Cloud Project ID |
+| `GCP_PROJECT` | None | Alternative to `GOOGLE_CLOUD_PROJECT` |
+| `GOOGLE_CLOUD_REGION` | `us-central1` | Google Cloud region |
+| `FUNCTION_REGION` | Falls back to `GOOGLE_CLOUD_REGION` | Cloud function region |
+| `FUNCTION_TARGET` | `unknown` | Cloud function target/entry point name |
+| `K_SERVICE` | `unknown` | Knative/Cloud Run service name |
+| `FUNCTION_URL` | None | Cloud function URL (used in simulation) |
+
+#### Azure Functions
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `AZURE_FUNCTIONS_ENVIRONMENT` | None | Environment detection variable |
+| `WEBSITE_SITE_NAME` | None | Azure App Service site name (used to construct URLs) |
+| `AZURE_FUNCTIONS_APP_NAME` | None | Alternative to `WEBSITE_SITE_NAME` |
+| `AZURE_FUNCTION_NAME` | `unknown` | Azure Function name |
+| `FUNCTIONS_WORKER_RUNTIME` | None | Azure Functions worker runtime detection |
+| `AzureWebJobsStorage` | None | Azure Functions storage connection detection |
+
+#### CGI Mode
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `GATEWAY_INTERFACE` | None | CGI environment detection variable |
+| `HTTP_HOST` | Falls back to `SERVER_NAME` | HTTP Host header value |
+| `SERVER_NAME` | `localhost` | Server hostname |
+| `SCRIPT_NAME` | `""` | CGI script path |
+| `PATH_INFO` | `""` | Request path info |
+| `HTTPS` | None | Set to `on` when using HTTPS |
+| `HTTP_AUTHORIZATION` | None | Authorization header value |
+| `REMOTE_USER` | None | Authenticated username |
+| `CONTENT_LENGTH` | None | Request content length |
+
+### Quick Reference
+
+#### Commonly Configured
+
+| Variable | Use Case |
+|----------|----------|
+| `SWML_BASIC_AUTH_USER` / `SWML_BASIC_AUTH_PASSWORD` | Set explicit credentials |
+| `SWML_PROXY_URL_BASE` | When behind a reverse proxy |
+| `SWML_SSL_ENABLED` / `SWML_SSL_CERT_PATH` / `SWML_SSL_KEY_PATH` | For direct HTTPS |
+| `SIGNALWIRE_LOG_LEVEL` | Adjust logging verbosity |
+| `SIGNALWIRE_SKILL_PATHS` | Load custom skills |
+
+#### Production Security
+
+| Variable | Recommendation |
+|----------|----------------|
+| `SWML_ALLOWED_HOSTS` | Restrict to your domain(s) |
+| `SWML_CORS_ORIGINS` | Restrict to trusted origins |
+| `SWML_RATE_LIMIT` | Set appropriate limit |
+| `SWML_USE_HSTS` | Keep enabled (default) |
+
+### Example .env File
+
+```bash
+## Authentication
+SWML_BASIC_AUTH_USER=agent_user
+SWML_BASIC_AUTH_PASSWORD=secret_password_123
+
+## SSL Configuration
+SWML_SSL_ENABLED=true
+SWML_DOMAIN=agent.example.com
+SWML_SSL_CERT_PATH=/etc/ssl/certs/agent.crt
+SWML_SSL_KEY_PATH=/etc/ssl/private/agent.key
+
+## Security
+SWML_ALLOWED_HOSTS=agent.example.com
+SWML_CORS_ORIGINS=https://app.example.com
+SWML_RATE_LIMIT=100
+
+## Logging
+SIGNALWIRE_LOG_MODE=default
+SIGNALWIRE_LOG_LEVEL=info
+
+## Custom Skills
+SIGNALWIRE_SKILL_PATHS=/opt/custom_skills
+```
+
+### Loading Environment Variables
+
+```python
+## Using python-dotenv
+from dotenv import load_dotenv
+load_dotenv()
+
+from signalwire_agents import AgentBase
+agent = AgentBase(name="my-agent")
+```
+
+```bash
+## Using shell
+source .env
+python agent.py
+
+## Using swaig-test
+swaig-test agent.py --env-file .env --dump-swml
+```
+
+### Environment Detection
+
+The SDK automatically detects the execution environment:
+
+```python
+from signalwire_agents.core.logging_config import get_execution_mode
+
+mode = get_execution_mode()
+## Returns: "server", "lambda", "cgi", "google_cloud_function", or "azure_function"
+```
+
+

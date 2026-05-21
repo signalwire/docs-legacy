@@ -1,0 +1,98 @@
+---
+title: "RoomSessionDevice"
+sidebar_position: 3
+slug: /js/reference/video/room-session-device
+toc_max_heading_level: 3
+---
+
+A RoomSessionDevice represents a device (such as a microphone or a camera) that is at some point in its lifetime part of a [RoomSession](/docs/browser-sdk/js/reference/video/room-session). You can obtain a RoomSessionDevice from the [RoomSession](/docs/browser-sdk/js/reference/video/room-session) methods [addCamera](/docs/browser-sdk/js/reference/video/room-session/add-camera), [addMicrophone](/docs/browser-sdk/js/reference/video/room-session/add-microphone), and [addDevice](/docs/browser-sdk/js/reference/video/room-session/add-device).
+
+## Properties
+
+<Indent>
+  <ParamField path="active" type="boolean">
+    Whether the connection is currently active.
+  </ParamField>
+
+  <ParamField path="cameraId" type="string | null">
+    The id of the video device, or null if not available.
+  </ParamField>
+
+  <ParamField path="cameraLabel" type="string | null">
+    The label of the video device, or null if not available.
+  </ParamField>
+
+  <ParamField path="localAudioTrack" type="MediaStreamTrack | null">
+    Provides access to the local audio [MediaStreamTrack](https://developer.mozilla.org/en-US/docs/Web/API/MediaStreamTrack).
+  </ParamField>
+
+  <ParamField path="localStream" type="MediaStream | undefined">
+    Provides access to the local [MediaStream](https://developer.mozilla.org/en-US/docs/Web/API/MediaStream).
+  </ParamField>
+
+  <ParamField path="localVideoTrack" type="MediaStreamTrack | null">
+    Provides access to the local video [MediaStreamTrack](https://developer.mozilla.org/en-US/docs/Web/API/MediaStreamTrack).
+  </ParamField>
+
+  <ParamField path="memberId" type="string">
+    The id of the current member within the room.
+  </ParamField>
+
+  <ParamField path="microphoneId" type="string | null">
+    The id of the audio input device, or null if not available.
+  </ParamField>
+
+  <ParamField path="microphoneLabel" type="string | null">
+    The label of the audio input device, or null if not available.
+  </ParamField>
+
+  <ParamField path="remoteStream" type="MediaStream | undefined">
+    Provides access to the remote [MediaStream](https://developer.mozilla.org/en-US/docs/Web/API/MediaStream).
+  </ParamField>
+
+  <ParamField path="roomId" type="string">
+    The unique identifier for the room.
+  </ParamField>
+
+  <ParamField path="roomSessionId" type="string">
+    The unique identifier for the room session.
+  </ParamField>
+</Indent>
+
+## Methods
+
+<CardGroup cols={3}>
+  <Card title="join" href="/docs/browser-sdk/js/reference/video/room-session-device/join">
+    Join the room session
+  </Card>
+  <Card title="leave" href="/docs/browser-sdk/js/reference/video/room-session-device/leave">
+    Leave the room session
+  </Card>
+  <Card title="audioMute" href="/docs/browser-sdk/js/reference/video/room-session-device/audio-mute">
+    Mute the microphone
+  </Card>
+  <Card title="audioUnmute" href="/docs/browser-sdk/js/reference/video/room-session-device/audio-unmute">
+    Unmute the microphone
+  </Card>
+  <Card title="videoMute" href="/docs/browser-sdk/js/reference/video/room-session-device/video-mute">
+    Mute the video
+  </Card>
+  <Card title="videoUnmute" href="/docs/browser-sdk/js/reference/video/room-session-device/video-unmute">
+    Unmute the video
+  </Card>
+  <Card title="updateCamera" href="/docs/browser-sdk/js/reference/video/room-session-device/update-camera">
+    Switch to a different camera
+  </Card>
+  <Card title="updateMicrophone" href="/docs/browser-sdk/js/reference/video/room-session-device/update-microphone">
+    Switch to a different microphone
+  </Card>
+  <Card title="setInputVolume" href="/docs/browser-sdk/js/reference/video/room-session-device/set-input-volume">
+    Set the input volume level
+  </Card>
+  <Card title="setInputSensitivity" href="/docs/browser-sdk/js/reference/video/room-session-device/set-input-sensitivity">
+    Set the input sensitivity level
+  </Card>
+  <Card title="~~setMicrophoneVolume~~" icon="fa-solid fa-triangle-exclamation" href="/docs/browser-sdk/js/reference/video/room-session-device/set-microphone-volume">
+    *Set microphone volume (deprecated)*
+  </Card>
+</CardGroup>

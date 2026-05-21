@@ -1,0 +1,554 @@
+---
+hide_title: false
+slug: /swml/reference/ai
+title: ai
+description: Create an AI agent to interact with users.
+toc_max_heading_level: 3
+---
+
+[languages]: /docs/swml/reference/ai/languages
+[params]: /docs/swml/reference/ai/params
+[prompt]: /docs/swml/reference/ai/prompt
+[SWAIG]: /docs/swml/reference/ai/swaig
+[set_global_data action]: /docs/swml/reference/ai/swaig/functions/data-map#actions
+[Prompting Best Practices]: /docs/platform/ai/best-practices#crafting-the-initial-prompt-for-the-ai
+[markdown-guide]: https://www.markdownguide.org/
+
+Creates an AI agent that conducts voice conversations using automatic speech recognition (ASR),
+large language models (LLMs), and text-to-speech (TTS) synthesis.
+The agent processes caller speech in real-time, generates contextually appropriate responses,
+and can execute custom functions to interact with external systems and databases through [SignalWire AI Gateway (SWAIG)][SWAIG].
+
+Since the [prompt] configuration is central to AI agent behavior,
+it is recommended to read the [Prompting Best Practices][Prompting Best Practices] guide.
+
+## **Properties**
+
+<ParamField path="ai" type="object" required={true}>
+  An object that defines an AI agent for conducting voice conversations. Accepts the following properties to configure the agent's prompt, behavior, functions, language support, and other settings.
+</ParamField>
+
+<Indent>
+
+<ParamField path="ai.prompt" type="object" required={true}>
+  Defines the AI agent's personality, goals, behaviors, and instructions for handling conversations.
+  The prompt establishes how the agent should interact with callers, what information it should gather,
+  and how it should respond to various scenarios.
+
+  It is recommended to write [prompts][prompt] using [markdown formatting][markdown-guide] as LLMs better understand structured content.
+  Additionally it is recommended to read the [Prompting Best Practices][Prompting Best Practices] guide.
+</ParamField>
+
+
+<ParamField path="ai.global_data" type="object">
+  A key-value object for storing data that persists throughout the AI session.
+  Can be set initially in the SWML script or modified during the conversation using the [`set_global_data`][set_global_data action] action.
+
+  The `global_data` object is accessible everywhere in the AI session: prompts, AI parameters,
+  and SWML returned from SWAIG functions.
+  Access properties using template strings (e.g `${global_data.property_name}`)
+</ParamField>
+
+
+<ParamField path="ai.hints" type="string[] | object[]">
+  Provide an array of strings and/or objects to guide the AI's pronunciation and understanding of specific words or phrases.
+  Words that can commonly be mispronounced can be added to the hints to help the AI speak more accurately.
+
+  **Hints as strings:** Each string in the array gives the AI context on how to interpret certain words.
+  For example, if a user says `Toni` and the hint is `Tony`, the AI understands that the user said `Tony`.
+
+  **Hints as objects:** An array of objects with the properties below to customize how the AI handles specific words.
+</ParamField>
+
+<Indent>
+
+<ParamField path="hints[].hint" type="string" required={true}>
+  The hint to match. This will match the string exactly as provided.
+</ParamField>
+
+<ParamField path="hints[].pattern" type="string" required={true}>
+  A regular expression to match the hint against. This will ensure that the hint has a valid matching pattern before being replaced.
+</ParamField>
+
+<ParamField path="hints[].replace" type="string" required={true}>
+  The text to replace the hint with. This will replace the portion of the hint that matches the pattern.
+</ParamField>
+
+<ParamField path="hints[].ignore_case" type="boolean" default="false">
+  If true, the hint will be matched in a case-insensitive manner. Defaults to false.
+</ParamField>
+
+</Indent>
+
+
+<ParamField path="ai.languages" type="object[]">
+  An array of JSON objects defining supported languages in the conversation.
+
+  See [languages] for more details.
+</ParamField>
+
+
+<ParamField path="ai.params" type="object">
+  A JSON object containing parameters as key-value pairs.
+
+  See [params] for more details.
+</ParamField>
+
+
+#### post_prompt {#post_prompt}
+
+<ParamField path="ai.post_prompt" type="object">
+  The final set of instructions and configuration settings to send to the agent.
+</ParamField>
+
+<Indent>
+
+<ParamField path="post_prompt.text" type="string" required={true}>
+  The instructions to send to the agent.
+</ParamField>
+
+<ParamField path="post_prompt.temperature" type="number" default="1.0">
+  Randomness setting. Float value between 0.0 and 1.5. Closer to 0 will make the output less random.
+</ParamField>
+
+<ParamField path="post_prompt.top_p" type="number" default="1.0">
+  Randomness setting. Alternative to `temperature`. Float value between 0.0 and 1.0. Closer to 0 will make the output less random.
+</ParamField>
+
+<ParamField path="post_prompt.confidence" type="number" default="0.6">
+  Threshold to fire a speech-detect event at the end of the utterance. Float value between 0.0 and 1.0. Decreasing this value will reduce the pause after the user speaks, but may introduce false positives.
+</ParamField>
+
+<ParamField path="post_prompt.presence_penalty" type="number" default="0">
+  Aversion to staying on topic. Float value between -2.0 and 2.0. Positive values increase the model's likelihood to talk about new topics.
+</ParamField>
+
+<ParamField path="post_prompt.frequency_penalty" type="number" default="0">
+  Aversion to repeating lines. Float value between -2.0 and 2.0. Positive values decrease the model's likelihood to repeat the same line verbatim.
+</ParamField>
+
+</Indent>
+
+
+<ParamField path="ai.post_prompt_url" type="string">
+  The URL to which to send status callbacks and reports. Authentication can also be set in the url in the format of `username:password@url`.
+  See [post_prompt_url callback](#post_prompt_url-callback) below.
+</ParamField>
+
+
+<ParamField path="ai.pronounce" type="object[]">
+  An array of objects to clarify the AI's pronunciation of certain words or expressions.
+</ParamField>
+
+<Indent>
+
+<ParamField path="pronounce[].replace" type="string" required={true}>
+  The expression to replace.
+</ParamField>
+
+<ParamField path="pronounce[].with" type="string" required={true}>
+  The phonetic spelling of the expression.
+</ParamField>
+
+<ParamField path="pronounce[].ignore_case" type="boolean" default="true">
+  Whether the pronunciation replacement should ignore case.
+</ParamField>
+
+</Indent>
+
+
+<ParamField path="ai.SWAIG" type="object">
+  An array of JSON objects to create user-defined functions/endpoints that can be executed during the dialogue.
+
+  See [SWAIG] for more details.
+</ParamField>
+
+</Indent>
+
+## post_prompt_url callback
+
+SignalWire will make a request to the `post_prompt_url` with the following parameters:
+
+<ParamField path="action" type="string">
+  Action that prompted this request. The value will be "post_conversation".
+</ParamField>
+
+
+<ParamField path="ai_end_date" type="integer">
+  Timestamp indicating when the AI session ended.
+</ParamField>
+
+
+<ParamField path="ai_session_id" type="string">
+  A unique identifier for the AI session.
+</ParamField>
+
+
+<ParamField path="ai_start_date" type="integer">
+  Timestamp indicating when the AI session started.
+</ParamField>
+
+
+<ParamField path="app_name" type="string">
+  Name of the application that originated the request.
+</ParamField>
+
+
+<ParamField path="call_answer_date" type="integer">
+  Timestamp indicating when the call was answered.
+</ParamField>
+
+
+<ParamField path="call_end_date" type="integer">
+  Timestamp indicating when the call ended.
+</ParamField>
+
+
+<ParamField path="call_id" type="string">
+  ID of the call.
+</ParamField>
+
+
+<ParamField path="call_log" type="object">
+  The complete log of the call, as a JSON object.
+</ParamField>
+
+<Indent>
+<ParamField path="call_log.content" type="string">
+  Content of the call log entry.
+</ParamField>
+
+<ParamField path="call_log.role" type="string">
+  Role associated with the call log entry (e.g., "system", "assistant", "user").
+</ParamField>
+</Indent>
+
+
+<ParamField path="call_start_date" type="integer">
+  Timestamp indicating when the call started.
+</ParamField>
+
+
+<ParamField path="caller_id_name" type="string">
+  Name associated with the caller ID.
+</ParamField>
+
+
+<ParamField path="caller_id_num" type="string">
+  Number associated with the caller ID.
+</ParamField>
+
+
+<ParamField path="content_disposition" type="string">
+  Disposition of the content.
+</ParamField>
+
+
+<ParamField path="content_type" type="string">
+  Type of content. The value will be `text/swaig`.
+</ParamField>
+
+
+<ParamField path="conversation_id" type="string">
+  A unique identifier for the conversation thread, if configured via the AI parameters.
+</ParamField>
+
+
+<ParamField path="post_prompt_data" type="object">
+  The answer from the AI agent to the `post_prompt`. The object contains the three following fields.
+</ParamField>
+
+<Indent>
+<ParamField path="post_prompt_data.parsed" type="object">
+  If a JSON object is detected within the answer, it is parsed and provided here.
+</ParamField>
+
+<ParamField path="post_prompt_data.raw" type="string">
+  The raw data answer from the AI agent.
+</ParamField>
+
+<ParamField path="post_prompt_data.substituted" type="string">
+  The answer from the AI agent, excluding any JSON.
+</ParamField>
+</Indent>
+
+
+<ParamField path="project_id" type="string">
+  ID of the Project.
+</ParamField>
+
+
+<ParamField path="space_id" type="string">
+  ID of the Space.
+</ParamField>
+
+
+<ParamField path="SWMLVars" type="object">
+  A collection of variables related to SWML.
+</ParamField>
+
+
+<ParamField path="swaig_log" type="object">
+  A log related to SWAIG functions.
+</ParamField>
+
+
+<ParamField path="total_input_tokens" type="integer">
+  Represents the total number of input tokens.
+</ParamField>
+
+
+<ParamField path="total_output_tokens" type="integer">
+  Represents the total number of output tokens.
+</ParamField>
+
+
+<ParamField path="version" type="string">
+  Version number.
+</ParamField>
+
+### Post prompt callback request example
+
+Below is a JSON example of the callback request that is sent to the `post_prompt_url`:
+
+```json
+{
+  "total_output_tokens": 119,
+  "caller_id_name": "[CALLER_NAME]",
+  "SWMLVars": {
+    "ai_result": "success",
+    "answer_result": "success"
+  },
+  "call_start_date": 1694541295773508,
+  "project_id": "[PROJECT_ID]",
+  "call_log": [
+    {
+      "content": "[AI INITIAL PROMPT/INSTRUCTIONS]",
+      "role": "system"
+    },
+    {
+      "content": "[AI RESPONSE]",
+      "role": "assistant"
+    },
+    {
+      "content": "[USER RESPONSE]",
+      "role": "user"
+    }
+  ],
+  "ai_start_date": 1694541297950440,
+  "call_answer_date": 1694541296799504,
+  "version": "2.0",
+  "content_disposition": "Conversation Log",
+  "conversation_id": "[CONVERSATION_ID]",
+  "space_id": "[SPACE_ID]",
+  "app_name": "swml app",
+  "swaig_log": [
+    {
+      "post_data": {
+        "content_disposition": "SWAIG Function",
+        "conversation_id": "[CONVERSATION_ID]",
+        "space_id": "[SPACE_ID]",
+        "meta_data_token": "[META_DATA_TOKEN]",
+        "app_name": "swml app",
+        "meta_data": {},
+        "argument": {
+          "raw": "{\n  \"target\": \"[TRANSFER_TARGET]\"\n}",
+          "substituted": "",
+          "parsed": [
+            {
+              "target": "[TRANSFER_TARGET]"
+            }
+          ]
+        },
+        "call_id": "[CALL_ID]",
+        "content_type": "text/swaig",
+        "ai_session_id": "[AI_SESSION_ID]",
+        "caller_id_num": "[CALLER_NUMBER]",
+        "caller_id_name": "[CALLER_NAME]",
+        "project_id": "[PROJECT_ID]",
+        "purpose": "Use to transfer to a target",
+        "argument_desc": {
+          "type": "object",
+          "properties": {
+            "target": {
+              "description": "the target to transfer to",
+              "type": "string"
+            }
+          }
+        },
+        "function": "transfer",
+        "version": "2.0"
+      },
+      "command_name": "transfer",
+      "epoch_time": 1694541334,
+      "command_arg": "{\n  \"target\": \"[TRANSFER_TARGET]\"\n}",
+      "url": "https://example.com/here",
+      "post_response": {
+        "action": [
+          {
+            "say": "This is a say message!"
+          },
+          {
+            "SWML": {
+              "sections": {
+                "main": [
+                  {
+                    "connect": {
+                      "to": "+1XXXXXXXXXX"
+                    }
+                  }
+                ]
+              },
+              "version": "1.0.0"
+            }
+          },
+          {
+            "stop": true
+          }
+        ],
+        "response": "transferred to [TRANSFER_TARGET], the call has ended"
+      }
+    }
+  ],
+  "total_input_tokens": 5627,
+  "caller_id_num": "[CALLER_NUMBER]",
+  "call_id": "[CALL_ID]",
+  "call_end_date": 1694541335435503,
+  "content_type": "text/swaig",
+  "action": "post_conversation",
+  "post_prompt_data": {
+    "substituted": "[SUMMARY_MESSAGE_PLACEHOLDER]",
+    "parsed": [],
+    "raw": "[SUMMARY_MESSAGE_PLACEHOLDER]"
+  },
+  "ai_end_date": 1694541335425164,
+  "ai_session_id": "[AI_SESSION_ID]"
+}
+```
+
+### Responding to post prompt requests
+
+The response to the callback request should be a JSON object with the following parameters:
+
+```json
+{
+  "response": "ok"
+}
+```
+
+
+## Examples
+
+### Minimal AI agent
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - answer: {}
+    - ai:
+        prompt:
+          text: "You are a customer service agent. Answer questions about account status and billing."
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "answer": {}
+      },
+      {
+        "ai": {
+          "prompt": {
+            "text": "You are a customer service agent. Answer questions about account status and billing."
+          }
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+
+### Hints
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+ai:
+  hints:
+  - Tony
+  - hint: swimmel
+    pattern: swimmel
+    replace: SWML
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "ai": {
+    "hints": [
+      "Tony",
+      {
+        "hint": "swimmel",
+        "pattern": "swimmel",
+        "replace": "SWML"
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+
+### Pronounce
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - ai:
+        prompt:
+          text: |
+            You are an expert in the GIF file format. Tell the user whatever they'd like to know in this
+            field.
+        pronounce:
+          - replace: GIF
+            with: jif
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "ai": {
+          "prompt": {
+            "text": "You are an expert in the GIF file format. Tell the user whatever they'd like to know in this\nfield.\n"
+          },
+          "pronounce": [
+            {
+              "replace": "GIF",
+              "with": "jif"
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>

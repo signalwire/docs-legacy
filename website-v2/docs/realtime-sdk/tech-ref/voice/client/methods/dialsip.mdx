@@ -1,0 +1,91 @@
+---
+title: "dialSip"
+slug: /node/reference/voice/client/dial-sip
+description: dialSip method for the Client class.
+toc_max_heading_level: 3
+---
+
+[call-events]: /docs/server-sdk/node/reference/voice/call/events
+[call]: /docs/server-sdk/node/reference/voice/call
+[sipheader]: /docs/server-sdk/node/reference/voice/types#sipheader
+
+### dialSip
+
+- **dialSip**(`params`): `Promise`\<[`Call`][call]>
+
+Makes an outbound call to a SIP endpoint.
+
+#### Parameters
+
+<ParamField path="params" type="object" required>
+  Object containing the parameters for dialing a SIP endpoint.
+</ParamField>
+
+<Indent>
+<ParamField path="from" type="string" required>
+  The party the call is coming from. Must be a SignalWire number or SIP endpoint that you own.
+</ParamField>
+
+<ParamField path="to" type="string" required>
+  The party you are attempting to call.
+</ParamField>
+
+<ParamField path="timeout" type="number">
+  The time, in seconds, the call will ring before it is considered unanswered.
+</ParamField>
+
+<ParamField path="headers" type="SipHeader[]">
+  Array of [`SipHeader`][sipheader] objects. Must be X- headers only, see example below.
+</ParamField>
+
+<ParamField path="codecs" type="SipCodec[]">
+  Optional array of desired codecs in order of preference. Supported values are `PCMU`, `PCMA`, `OPUS`, `G729`, `G722`, `VP8`, `H264`. Default is parent leg codec(s).
+</ParamField>
+
+<ParamField path="webrtcMedia" type="boolean">
+  If `true`, WebRTC media is negotiated. Default is parent leg setting.
+</ParamField>
+
+<ParamField path="sessionTimeout" type="number">
+  Non-negative value, in seconds, to use for the SIP `Session-Expires` header. If `0` or unset, SignalWire will pick the default (typically `600`).
+</ParamField>
+
+<ParamField path="maxPricePerMinute" type="number">
+  The maximum price in USD acceptable for the call to be created. If the rate for the call is greater than this value, the call will not be created. If not set, all calls will be created. Price can have a maximum of four decimal places, i.e. `0.0075`.
+</ParamField>
+
+<ParamField path="listen" type="object">
+  Object that contains callbacks to listen for events. List of Call events can be found [here][call-events].
+</ParamField>
+</Indent>
+
+#### Returns
+
+`Promise`\<[`Call`][call]>
+
+A call object.
+
+#### Example
+
+```js
+import { SignalWire, Voice } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+const voiceClient = client.voice
+
+try {
+  const call = await voiceClient.dialSip({
+    from: "sip:xxx@yyy.zz",
+    to: "sip:ppp@qqq.rr",
+    timeout: 30,
+    headers: [
+      { name: "X-SomeKeyA", value: "SomeValueA" },
+      { name: "X-SomeKeyB", value: "SomeValueB" }
+    ]
+  });
+  console.log("Call answered.", call);
+} catch (e) {
+  console.log("Call not answered.", e);
+}
+```

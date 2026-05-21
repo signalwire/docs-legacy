@@ -1,0 +1,108 @@
+---
+title: unhold
+slug: /call-session/unhold
+---
+
+Resumes the call from hold by restoring outbound audio and video from the local participant.
+
+## Signature
+
+```typescript
+call.unhold(): Promise<void>
+```
+
+## Parameters
+
+None
+
+## Returns
+
+**Type:** `Promise<void>`
+
+## Examples
+
+### Basic Unhold
+
+```typescript
+await call.unhold()
+console.log('Call resumed')
+```
+
+### Hold/Unhold Toggle
+
+```typescript
+let isOnHold = false
+
+async function toggleHold() {
+  if (isOnHold) {
+    await call.unhold()
+    console.log('Call resumed')
+  } else {
+    await call.hold()
+    console.log('Call on hold')
+  }
+  isOnHold = !isOnHold
+}
+
+await toggleHold()
+```
+
+### Unhold with UI Feedback
+
+```typescript
+const resumeButton = document.getElementById('resume-button')
+
+resumeButton.addEventListener('click', async () => {
+  try {
+    await call.unhold()
+    resumeButton.textContent = 'Hold'
+    resumeButton.classList.remove('on-hold')
+  } catch (error) {
+    console.error('Failed to resume call:', error)
+  }
+})
+```
+
+### Timed Hold
+
+```typescript
+// Put call on hold for 2 minutes
+await call.hold()
+console.log('Call on hold for 2 minutes...')
+
+setTimeout(async () => {
+  await call.unhold()
+  console.log('Call automatically resumed')
+}, 2 * 60 * 1000)
+```
+
+### Multi-Call Switching
+
+```typescript
+async function switchBetweenCalls(fromCall, toCall) {
+  // Put current call on hold
+  await fromCall.hold()
+
+  // Resume the other call
+  await toCall.unhold()
+
+  console.log('Switched calls')
+}
+```
+
+## Important Notes
+
+**What Happens on Unhold:**
+- Your outbound audio and video streams are restored
+- You resume sending audio/video to other participants
+- Other participants can now see and hear you again
+- The call returns to its normal active state
+
+**Restores Previous State:** The call is restored to the state it was in before being put on hold. If audio or video were muted before hold, they will remain muted after unhold.
+
+**Must Be On Hold:** This method should only be called when the call is currently on hold (after calling `hold()`). Calling it on an already active call has no effect.
+
+**Automatic Media Resumption:** The SDK automatically:
+- Restores audio/video tracks
+- Re-enables media streaming
+- Updates the UI state (if using framework integration)

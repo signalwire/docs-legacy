@@ -1,0 +1,514 @@
+---
+title: "Multi Agent"
+sidebar_label: "Multi Agent"
+slug: /python/guides/multi-agent
+toc_max_heading_level: 3
+---
+
+## Multi-Agent Servers
+
+Run multiple agents on a single server using `AgentServer`. Each agent gets its own route, and you can configure SIP-based routing for username-to-agent mapping.
+
+Multi-agent servers let you run several specialized agents from a single process. This simplifies deployment, reduces resource overhead, and provides unified management. Instead of running separate processes for sales, support, and billing agents, you run one server that routes requests to the appropriate agent.
+
+This architecture is especially useful when you have related agents that share infrastructure but have different personas and capabilities.
+
+### Single Agent vs Multi-Agent: Decision Guide
+
+Choosing between `agent.run()` and `AgentServer` depends on your deployment needs.
+
+**Use single agent (`agent.run()`) when:**
+
+- You have one agent with a single purpose
+- You want the simplest possible deployment
+- Each agent needs isolated resources (memory, CPU)
+- Agents have very different scaling requirements
+- You're using container orchestration that handles multi-instance deployment
+
+**Use AgentServer when:**
+
+- You have multiple related agents (sales, support, billing)
+- Agents share the same deployment environment
+- You want unified health monitoring
+- SIP routing determines which agent handles a call
+- You want to reduce operational overhead of managing multiple processes
+- Agents share common code or resources
+
+| Single Agent (`agent.run()`) | AgentServer |
+|------------------------------|-------------|
+| One agent per process | Multiple agents per process |
+| Simple deployment | Shared resources |
+| Separate ports per agent | Single port, multiple routes |
+| Independent scaling | Shared scaling |
+| Isolated failures | Unified monitoring |
+| | SIP username routing |
+| | Unified health checks |
+
+### Basic AgentServer
+
+```python
+from signalwire_agents import AgentBase, AgentServer
+
+
+class SalesAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="sales-agent")
+        self.add_language("English", "en-US", "rime.spore")
+        self.prompt_add_section("Role", "You are a sales representative.")
+
+
+class SupportAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="support-agent")
+        self.add_language("English", "en-US", "rime.spore")
+        self.prompt_add_section("Role", "You are a support specialist.")
+
+
+if __name__ == "__main__":
+    server = AgentServer(host="0.0.0.0", port=3000)
+
+    server.register(SalesAgent(), "/sales")
+    server.register(SupportAgent(), "/support")
+
+    server.run()
+```
+
+Agents are available at:
+
+| Endpoint | Description |
+|----------|-------------|
+| `http://localhost:3000/sales` | Sales agent |
+| `http://localhost:3000/support` | Support agent |
+| `http://localhost:3000/health` | Built-in health check |
+
+### AgentServer Configuration
+
+```python
+server = AgentServer(
+    host="0.0.0.0",     # Bind address
+    port=3000,          # Listen port
+    log_level="info"    # debug, info, warning, error, critical
+)
+```
+
+### Registering Agents
+
+#### With Explicit Route
+
+```python
+server.register(SalesAgent(), "/sales")
+```
+
+#### Using Agent's Default Route
+
+```python
+class BillingAgent(AgentBase):
+    def __init__(self):
+        super().__init__(
+            name="billing-agent",
+            route="/billing"  # Default route
+        )
+
+server.register(BillingAgent())  # Uses "/billing"
+```
+
+### Server Architecture
+
+<Frame caption="Server Architecture">
+  <img className="diagram" src={require("@image/agents-sdk-manual/06_05_multi-agent_diagram1.webp").default} alt="Server Architecture." />
+</Frame>
+
+### Managing Agents
+
+#### Get All Agents
+
+```python
+agents = server.get_agents()
+for route, agent in agents:
+    print(f"{route}: {agent.get_name()}")
+```
+
+#### Get Specific Agent
+
+```python
+sales_agent = server.get_agent("/sales")
+```
+
+#### Unregister Agent
+
+```python
+server.unregister("/sales")
+```
+
+### SIP Routing
+
+Route SIP calls to specific agents based on username:
+
+```python
+from signalwire_agents import AgentBase, AgentServer
+
+
+class SalesAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="sales-agent")
+        self.add_language("English", "en-US", "rime.spore")
+        self.prompt_add_section("Role", "You are a sales representative.")
+
+
+class SupportAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="support-agent")
+        self.add_language("English", "en-US", "rime.spore")
+        self.prompt_add_section("Role", "You are a support specialist.")
+
+
+if __name__ == "__main__":
+    server = AgentServer()
+
+    server.register(SalesAgent(), "/sales")
+    server.register(SupportAgent(), "/support")
+
+    # Enable SIP routing
+    server.setup_sip_routing("/sip", auto_map=True)
+
+    # Manual SIP username mapping
+    server.register_sip_username("sales-team", "/sales")
+    server.register_sip_username("help-desk", "/support")
+
+    server.run()
+```
+
+When `auto_map=True`, the server automatically creates mappings:
+
+- Agent name → route (e.g., "salesagent" → "/sales")
+- Route path → route (e.g., "sales" → "/sales")
+
+### SIP Routing Flow
+
+<Frame caption="SIP Routing Flow">
+  <img className="diagram" src={require("@image/agents-sdk-manual/06_05_multi-agent_diagram2.webp").default} alt="SIP Routing Flow." />
+</Frame>
+
+### Health Check Endpoint
+
+AgentServer provides a built-in health check:
+
+```bash
+curl http://localhost:3000/health
+```
+
+Response:
+
+```json
+{
+    "status": "ok",
+    "agents": 2,
+    "routes": ["/sales", "/support"]
+}
+```
+
+### Serverless Deployment
+
+AgentServer supports serverless environments automatically:
+
+```python
+from signalwire_agents import AgentBase, AgentServer
+
+
+class MyAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="my-agent")
+        self.add_language("English", "en-US", "rime.spore")
+
+
+server = AgentServer()
+server.register(MyAgent(), "/agent")
+
+
+## AWS Lambda handler
+def lambda_handler(event, context):
+    return server.run(event, context)
+
+
+## CGI mode (auto-detected)
+if __name__ == "__main__":
+    server.run()
+```
+
+### Complete Example
+
+```python
+#!/usr/bin/env python3
+## multi_agent_server.py - Server with multiple specialized agents
+from signalwire_agents import AgentBase, AgentServer
+from signalwire_agents.core.function_result import SwaigFunctionResult
+
+
+class SalesAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="sales-agent")
+        self.add_language("English", "en-US", "rime.spore")
+
+        self.prompt_add_section(
+            "Role",
+            "You are a sales representative for Acme Corp."
+        )
+
+        self.define_tool(
+            name="get_pricing",
+            description="Get product pricing",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "product": {"type": "string", "description": "Product name"}
+                },
+                "required": ["product"]
+            },
+            handler=self.get_pricing
+        )
+
+    def get_pricing(self, args, raw_data):
+        product = args.get("product", "")
+        # Pricing lookup logic
+        return SwaigFunctionResult(f"The price for {product} is $99.99")
+
+
+class SupportAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="support-agent")
+        self.add_language("English", "en-US", "rime.spore")
+
+        self.prompt_add_section(
+            "Role",
+            "You are a technical support specialist."
+        )
+
+        self.define_tool(
+            name="create_ticket",
+            description="Create a support ticket",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "issue": {"type": "string", "description": "Issue description"}
+                },
+                "required": ["issue"]
+            },
+            handler=self.create_ticket
+        )
+
+    def create_ticket(self, args, raw_data):
+        issue = args.get("issue", "")
+        # Ticket creation logic
+        return SwaigFunctionResult(f"Created ticket #12345 for: {issue}")
+
+
+class BillingAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="billing-agent")
+        self.add_language("English", "en-US", "rime.spore")
+
+        self.prompt_add_section(
+            "Role",
+            "You help customers with billing questions."
+        )
+
+
+if __name__ == "__main__":
+    # Create server
+    server = AgentServer(host="0.0.0.0", port=3000)
+
+    # Register agents
+    server.register(SalesAgent(), "/sales")
+    server.register(SupportAgent(), "/support")
+    server.register(BillingAgent(), "/billing")
+
+    # Enable SIP routing
+    server.setup_sip_routing("/sip", auto_map=True)
+
+    # Custom SIP mappings
+    server.register_sip_username("sales", "/sales")
+    server.register_sip_username("help", "/support")
+    server.register_sip_username("accounts", "/billing")
+
+    print("Agents available:")
+    for route, agent in server.get_agents():
+        print(f"  {route}: {agent.get_name()}")
+
+    server.run()
+```
+
+### AgentServer Methods Summary
+
+| Method | Purpose |
+|--------|---------|
+| `register(agent, route)` | Register an agent at a route |
+| `unregister(route)` | Remove an agent |
+| `get_agents()` | Get all registered agents |
+| `get_agent(route)` | Get agent by route |
+| `setup_sip_routing(route, auto_map)` | Enable SIP-based routing |
+| `register_sip_username(username, route)` | Map SIP username to route |
+| `run()` | Start the server |
+
+### Performance Considerations
+
+Running multiple agents in a single process has implications:
+
+**Memory**: Each agent maintains its own state, but they share the Python interpreter. For most deployments, this reduces overall memory compared to separate processes.
+
+**CPU**: Agents share CPU resources. A heavy-load agent can affect others. Monitor and adjust if needed.
+
+**Startup time**: All agents initialize when the server starts. More agents = longer startup.
+
+**Isolation**: A crash in one agent's handler can affect the entire server. Implement proper error handling in your handlers.
+
+**Scaling**: You scale the entire server, not individual agents. If one agent needs more capacity, you scale everything. For very different scaling needs, consider separate deployments.
+
+### Shared State Between Agents
+
+Agents in an AgentServer are independent instances—they don't share state by default. Each agent has its own prompts, functions, and configuration.
+
+**If you need shared state:**
+
+Use external storage (Redis, database) rather than Python globals:
+
+```python
+import redis
+
+class SharedStateAgent(AgentBase):
+    def __init__(self, redis_client):
+        super().__init__(name="shared-state-agent")
+        self.redis = redis_client
+        # ... setup
+
+    def some_handler(self, args, raw_data):
+        # Read shared state
+        shared_value = self.redis.get("shared_key")
+        # Update shared state
+        self.redis.set("shared_key", "new_value")
+        return SwaigFunctionResult("Done")
+
+# In main
+redis_client = redis.Redis(host='localhost', port=6379)
+server = AgentServer()
+server.register(SharedStateAgent(redis_client), "/agent1")
+server.register(AnotherAgent(redis_client), "/agent2")
+```
+
+**Sharing configuration:**
+
+For shared configuration like API keys or business rules, use a shared module:
+
+```python
+# config.py
+SHARED_CONFIG = {
+    "company_name": "Acme Corp",
+    "support_hours": "9 AM - 5 PM",
+    "api_key": os.environ.get("API_KEY")
+}
+
+# agents.py
+from config import SHARED_CONFIG
+
+class SalesAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="sales-agent")
+        self.prompt_add_section(
+            "Company",
+            f"You work for {SHARED_CONFIG['company_name']}"
+        )
+```
+
+### Routing Logic
+
+AgentServer routes requests based on URL path and SIP username. Understanding this routing helps you design your agent structure.
+
+**Path-based routing** is straightforward:
+- Request to `/sales` → Sales agent
+- Request to `/support` → Support agent
+
+**SIP routing** extracts the username from the SIP address:
+- `sip:sales@example.com` → looks up "sales" → routes to `/sales`
+- `sip:help-desk@example.com` → looks up "help-desk" → routes based on mapping
+
+**Auto-mapping** creates automatic mappings from agent names and route paths:
+```python
+server.setup_sip_routing("/sip", auto_map=True)
+# Creates mappings like:
+# "salesagent" → "/sales" (from agent name, normalized)
+# "sales" → "/sales" (from route path without leading /)
+```
+
+**Manual mapping** gives explicit control:
+```python
+server.register_sip_username("sales-team", "/sales")
+server.register_sip_username("tech-support", "/support")
+```
+
+### Common Patterns
+
+#### Department-Based Routing
+
+Route calls to different departments based on phone number or SIP username:
+
+```python
+server = AgentServer()
+
+server.register(SalesAgent(), "/sales")
+server.register(SupportAgent(), "/support")
+server.register(BillingAgent(), "/billing")
+server.register(ReceptionistAgent(), "/main")  # Default/main line
+
+server.setup_sip_routing("/sip", auto_map=True)
+```
+
+#### Time-Based Routing
+
+Route to different agents based on business hours (implement in a custom router):
+
+```python
+class TimeSensitiveServer:
+    def __init__(self):
+        self.server = AgentServer()
+        self.server.register(LiveAgent(), "/live")
+        self.server.register(AfterHoursAgent(), "/afterhours")
+
+    def get_current_agent_route(self):
+        from datetime import datetime
+        hour = datetime.now().hour
+        if 9 <= hour < 17:  # Business hours
+            return "/live"
+        return "/afterhours"
+```
+
+#### Feature-Based Agents
+
+Different agents for different capabilities:
+
+```python
+server.register(GeneralAgent(), "/general")        # Basic Q&A
+server.register(OrderAgent(), "/orders")           # Order management
+server.register(TechnicalAgent(), "/technical")    # Technical support
+server.register(EscalationAgent(), "/escalation")  # Human escalation
+```
+
+### Best Practices
+
+**DO:**
+
+- Use meaningful route names (/sales, /support, /billing)
+- Enable SIP routing for SIP-based deployments
+- Monitor /health endpoint for availability
+- Use consistent naming between routes and SIP usernames
+- Implement proper error handling in all agent handlers
+- Use external storage for shared state
+- Log which agent handles each request for debugging
+
+**DON'T:**
+
+- Register duplicate routes
+- Forget to handle routing conflicts
+- Mix agent.run() and AgentServer for the same agent
+- Store shared state in Python globals (use external storage)
+- Put agents with very different scaling needs in the same server
+
+

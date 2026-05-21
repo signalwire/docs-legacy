@@ -1,0 +1,66 @@
+---
+title: "CallTap"
+slug: /dotnet/reference/calling/call-tap
+toc_max_heading_level: 3
+---
+[call-tap-tap-type]: /docs/server-sdk/v2/dotnet/reference/calling/call-tap-type
+
+# SignalWire.Relay.Calling.CallTap
+
+This object represents a call tap that is being handled. Currently only audio tapping is available.
+
+## Constructor
+
+The only constructor is the default constructor, properties should all be assigned by initializer or after construction.
+
+**Parameters**
+
+None
+
+**Examples**
+
+> Basic Example
+
+```csharp
+CallTap tap = new CallTap
+{
+    Type = CallTap.TapType.audio,
+    Parameters = new CallTap.AudioParams
+    {
+        // Use default audio tapping parameters
+    }
+};
+```
+
+## Properties
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `Type` | [`SignalWire.Relay.Calling.CallTap.TapType`][call-tap-tap-type] | This object indicates the type of the configuration object. |
+| `Parameters` | object | The configuration object for the operation. |
+
+## Methods
+
+## ParametersAs&lt;T&gt;()
+
+This is a helper method to convert the `Parameters` to the real type.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `T` | Type | <span className="required-arg">required</span> | This is the data type for the conversion, see [`SignalWire.Relay.Calling.CallTap.TapType`][call-tap-tap-type] for more information. |
+
+**Returns**
+
+`T` - This is an instance of the data type resulting from the conversion, see [`SignalWire.Relay.Calling.CallTap.TapType`][call-tap-tap-type] for more information.
+
+**Examples**
+
+```csharp
+CallTap.AudioParams audioParams = tap.ParametersAs<CallTap.AudioParams>();
+```
+
+## Events
+
+None

@@ -1,0 +1,27 @@
+---
+slug: /compatibility-api/sdks/reference/incoming-phone-numbers
+title: Incoming Phone Numbers
+sidebar_label: Incoming Phone Numbers
+toc_max_heading_level: 3
+---
+
+IncomingPhoneNumbers represent an account's phone numbers that were purchased through SignalWire.
+
+## Properties
+
+<Schema type="IncomingPhoneNumber" />
+
+## Example object
+
+<SchemaSnippet type="IncomingPhoneNumber" title="The Incoming Phone Number Object" />
+
+## `address_requirements`
+
+The `address_requirements` attribute has the following values:
+
+|                                        Value |                                                                       |
+| -------------------------------------------: | --------------------------------------------------------------------- |
+|    `none` | No address is required.                                               |
+|     `any` | An address is required, but can be anywhere in the world.             |
+|   `local` | An address is required and must be in the same country as the number. |
+| `foreign` | An address is required and must be outside the country of the number. |

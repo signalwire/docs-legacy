@@ -1,0 +1,34 @@
+.apiBadge {
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-right: 8px;
+    color: white;
+    display: inline-block;
+  }
+  
+  .get {
+    background-color: var(--ifm-color-primary);
+  }
+  
+  .post {
+    background-color: var(--openapi-code-green);
+  }
+  
+  .delete {
+    background-color: var(--openapi-code-red);
+  }
+  
+  .put {
+    background-color: var(--openapi-code-blue);
+  }
+  
+  .patch {
+    background-color: var(--openapi-code-orange);
+  }
+  
+  .head {
+    background-color: var(--ifm-color-secondary-darkest);
+  }

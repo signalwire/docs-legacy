@@ -1,0 +1,93 @@
+---
+title: Resources
+sidebar_position: 1
+description: Learn about Resources on the SignalWire platform - what they are, how they work, and how to manage them in the Dashboard.
+slug: /platform/resources
+Author: Devon White
+x-custom:
+  tags:
+    - product:signalwire_space
+---
+import ResourceAdmonitionPartial from '@site/docs/_partials/common/dashboard/_resource-admonition.mdx';
+import UiAccordionPartial from '@site/docs/_partials/common/dashboard/_ui-accordion.mdx';
+
+
+
+Resources are the primary entities for communication within the Call Fabric ecosystem.
+They are the building blocks of the system, representing the various communication elements
+that can be used to interact with 
+[subscribers](/docs/platform/resources). 
+
+## Manage Resources
+
+### With the REST API
+
+Use the Resources endpoints to manage your Resources programmatically.
+
+<Card title="Resources endpoints" href="/docs/apis/fabric/resources-list">
+  Control Resources using the SignalWire REST API.
+</Card>
+
+### In the Dashboard
+
+The Dashboard is your unified command center for your SignalWire Space. Access it at `{your-space-name}.signalwire.com`.
+
+#### Create
+
+<Info title="No Resources tab?">
+If you don't see the **My Resources** tab, your SignalWire Space is on the **Legacy Dashboard**.
+Refer to the [Legacy](#in-the-legacy-dashboard) section of this guide for instructions for your Dashboard and information about the migration.
+</Info>
+
+<Steps>
+  <Step title="Navigate to Resources">
+    To create a Resource in your SignalWire Space, click on the **My Resources** tab in the left-hand navigation menu.
+
+    From there, you can select the type of Resource you would like to create by clicking on the <kbd>+ Add</kbd> button.
+  </Step>
+  <Step title="Configure the Resource">
+    <ResourceAdmonitionPartial />
+  </Step>
+</Steps>
+
+
+
+
+<Frame 
+
+  caption="Create a new Resource from the Dashboard">
+
+  ![Create a new Resource from the Dashboard.](@image/dashboard/home/home-resources-marked.webp)
+
+</Frame>
+
+Click the **Add** button to select from the grid of available Resource types.
+
+<Frame caption="The Resource selection menu">
+  ![Select a Resource in the Signalwire Dashboard.](@image/dashboard/resources/add-new-resource.webp)
+</Frame>
+
+Alternatively, you can create new Resources from their subpages in the sidebar menu, or using the shortcuts on the Dashboard homepage.
+
+After selecting a Resource, 
+enter the details for the Resource on a new page,
+and select <kbd>Create</kbd> to confirm.
+
+#### Modify or delete
+
+From the Resources page in your SignalWire Dashboard, select the desired Resource to open a detailed view.
+Here, by selecting the `Edit` button, you can alter the specifics of the Resource.
+
+<Frame caption="The list of Resources in a SignalWire Space">
+  ![The list of Resources in a SignalWire Space.](@image/dashboard/resources/resource-list.webp)
+</Frame>
+
+---
+
+## In the Legacy Dashboard
+
+The **Resources experience** is not available in the Legacy Dashboard.
+
+To upgrade your Space to the New UI, [contact Support](https://support.signalwire.com/).
+
+<UiAccordionPartial />

@@ -1,0 +1,173 @@
+---
+title: "CallState"
+keywords:
+  - SignalWire
+  - Realtime SDK
+  - Node.js
+  - call state
+  - call status
+  - call events
+slug: /node/reference/voice/call-state
+sidebar_label: CallState
+description: CallState event payload reference for tracking voice call state changes. Monitor call lifecycle from created through answered, ending, and ended states.
+toc_max_heading_level: 3
+---
+
+[connect]: /docs/server-sdk/node/reference/voice/call/connect
+[connectPhone]: /docs/server-sdk/node/reference/voice/call/connect-phone
+[connectSip]: /docs/server-sdk/node/reference/voice/call/connect-sip
+[dial]: /docs/server-sdk/node/reference/voice/client/dial
+[dialPhone]: /docs/server-sdk/node/reference/voice/client/dial-phone
+[dialSip]: /docs/server-sdk/node/reference/voice/client/dial-sip
+
+Payload for call state events that are triggered by the change in state of an active RELAY-controlled call. 
+
+Obtain instances of this state Callback request by including a `call_state_url` parameter when starting a call with one of the following methods:
+
+- [`Call.connect`][connect]
+- [`Call.connectPhone`][connectPhone]
+- [`Call.connectSip`][connectSip]
+- [`Voice.dial`][dial]
+- [`Voice.dialPhone`][dialPhone]
+- [`Voice.dialSip`][dialSip]
+
+#### Parameters
+
+<ParamField path="event_type" type="string" required>
+  The value will be `"calling.call.state"`.
+</ParamField>
+
+<ParamField path="event_channel" type="string" required>
+  ID for the event channel on which these room session's events are reported.
+</ParamField>
+
+<ParamField path="timestamp" type="number" required>
+  Time of the event.
+</ParamField>
+
+<ParamField path="space_id" type="string" required>
+  ID for the SignalWire Space associated with the call.
+</ParamField>
+
+<ParamField path="project_id" type="string" required>
+  ID for the project associated with the call.
+</ParamField>
+
+<ParamField path="params" type="object" required>
+  Event-specific parameters. This object contains the following fields.
+</ParamField>
+
+<Indent>
+<ParamField path="node_id" type="string" required>
+  ID for the node this call is on.
+</ParamField>
+
+<ParamField path="call_id" type="string" required>
+  ID for the call.
+</ParamField>
+
+<ParamField path="tag" type="string[]">
+  Client data this call is tagged with.
+</ParamField>
+
+<ParamField path="device" type="object" required>
+  Protocol-specific connection information including the device `type`, `from_number`, and `to_number`.
+</ParamField>
+
+<ParamField path="parent" type="object">
+  Information on the call that created this call including the parent `device_type`, `node_id`, and `call_id`.
+</ParamField>
+
+<ParamField path="peer" type="object">
+  Information on the peer call this call is actively connected with including the peer `node_id` and `call_id`.
+</ParamField>
+
+<ParamField path="call_state" type="string" required>
+  The current state that triggered this event. Possible values are `"created"`, `"ringing"`, `"answered"`, `"ending"`, and `"ended"`.
+</ParamField>
+
+<ParamField path="start_time" type="number">
+  The start time of the call in milliseconds since epoch.
+</ParamField>
+
+<ParamField path="answer_time" type="number">
+  The time the call was answered in milliseconds since epoch.
+</ParamField>
+
+<ParamField path="end_time" type="number">
+  The time the call ended in milliseconds since epoch.
+</ParamField>
+
+<ParamField path="created_by" type="string">
+  The method associated with this call state change. Possible values are `"dial"`, `"connect"`, and `"receive"`.
+</ParamField>
+</Indent>
+
+## **Example**
+
+To receive call state webhook notifications, specify a `callStateUrl` when building your device configuration with [`Voice.DeviceBuilder.Phone`][dialPhone]:
+
+```js
+import { SignalWire, Voice } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "your-project-id", token: "your-api-token" });
+
+// Build a device with call state webhook configuration
+const devices = new Voice.DeviceBuilder()
+  .add(Voice.DeviceBuilder.Phone({
+    to: "+1yyyyyyyyyy",
+    from: "+1xxxxxxxxxx",
+    timeout: 30,
+    callStateUrl: "https://your-server.com/call-state-webhook",
+    callStateEvents: ["created", "ringing", "answered", "ended"],
+    maxPricePerMinute: 0.50
+  }));
+
+// Dial using the device configuration
+const call = await client.voice.dial(devices);
+```
+
+Your webhook endpoint will receive POST requests with the CallState payload. Example Express.js handler:
+
+```js
+import express from "express";
+
+const app = express();
+app.use(express.json());
+
+app.post("/call-state-webhook", (req, res) => {
+  const { event_type, timestamp, project_id, space_id, params } = req.body;
+
+  console.log("Event type:", event_type); // "calling.call.state"
+  console.log("Project ID:", project_id);
+  console.log("Call ID:", params.call_id);
+  console.log("Call state:", params.call_state);
+  console.log("Device:", params.device);
+
+  switch (params.call_state) {
+    case "created":
+      console.log("Call created at:", params.start_time);
+      break;
+    case "ringing":
+      console.log("Call is ringing");
+      break;
+    case "answered":
+      console.log("Call answered at:", params.answer_time);
+      break;
+    case "ending":
+      console.log("Call is ending");
+      break;
+    case "ended":
+      console.log("Call ended at:", params.end_time);
+      break;
+  }
+
+  res.status(200).send("OK");
+});
+
+app.listen(3000);
+```
+
+<Tip>
+For real-time call state changes within your SDK application without webhooks, use the [`onStateChanged`](/docs/server-sdk/node/reference/voice/call/events#onstatechanged) event on the Call object instead.
+</Tip>

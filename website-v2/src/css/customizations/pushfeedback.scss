@@ -1,0 +1,92 @@
+// PushFeedback Custom Styles for SignalWire Docs
+// Overrides default PushFeedback CSS variables to match SignalWire theme
+
+// Override PushFeedback CSS variables using consistent SignalWire color system
+:root {
+  // Core PushFeedback color system - use SignalWire variables for consistency
+  --feedback-primary-color: var(--ifm-color-primary) !important;
+  --feedback-secondary-color: var(--ifm-background-surface-color) !important;
+  --feedback-light-color: var(--sw-card-border-color) !important;
+  --feedback-dark-color: var(--ifm-color-emphasis-800) !important;
+  --feedback-text-color: var(--ifm-color-emphasis-900) !important;
+  --feedback-highlight-color: #ffb422 !important; // Stars selected color
+  
+  // Fonts - use SignalWire font system
+  --feedback-font-family: var(--ifm-font-family-base) !important;
+  --feedback-heading-font-size: 16px !important;
+  --feedback-text-font-size: 14px !important;
+
+  // Modal properties using consistent SignalWire variables
+  --feedback-modal-button-submit-bg-color: var(--ifm-color-primary) !important;
+  --feedback-modal-button-submit-bg-color-hover: var(--ifm-color-primary-dark) !important;
+  --feedback-modal-button-submit-text-color: var(--ifm-color-emphasis-100) !important;
+  --feedback-modal-rating-button-stars-selected-color: var(--feedback-highlight-color) !important;
+  --feedback-modal-header-font-family: var(--ifm-heading-font-family) !important;
+
+  
+  // Modal background colors - use consistent SignalWire theme variables
+  --feedback-modal-content-bg-color: var(--ifm-background-surface-color) !important;
+  --feedback-modal-input-bg-color: var(--ifm-color-emphasis-100) !important;
+  --feedback-modal-content-border-color: var(--sw-card-border-color) !important;
+  --feedback-modal-header-text-color: var(--ifm-color-emphasis-900) !important;
+  --feedback-modal-content-text-color: var(--ifm-color-emphasis-900) !important;
+  --feedback-modal-close-color: var(--ifm-color-emphasis-800) !important;
+  
+  // Modal rating button colors - use consistent emphasis colors
+  --feedback-modal-rating-button-color: var(--ifm-color-emphasis-600) !important;
+  --feedback-modal-rating-button-selected-color: var(--ifm-color-primary) !important;
+  
+  // Modal button text colors - match other text in modal
+  --feedback-modal-button-text-color: var(--ifm-color-emphasis-900) !important;
+  --feedback-modal-button-text-color-active: var(--ifm-color-emphasis-800) !important;
+  
+  // Screenshot editor colors - use consistent SignalWire theme variables
+  --feedback-canvas-editor-bg-color: var(--feedback-white-color) !important;
+  --feedback-canvas-editor-border-color: var(--feedback-light-color) !important;
+  --feedback-canvas-editor-header-bg-color: var(--feedback-secondary-color) !important;
+  --feedback-canvas-editor-tool-bg-color: var(--feedback-white-color) !important;
+  --feedback-canvas-editor-tool-bg-hover: var(--feedback-secondary-color) !important;
+  --feedback-canvas-editor-tool-bg-active: var(--feedback-primary-color) !important;
+  --feedback-canvas-editor-tool-text-active: var(--feedback-white-color) !important;
+  --feedback-canvas-editor-tool-icon-active: var(--feedback-white-color) !important;
+  --feedback-canvas-editor-action-primary-bg: var(--feedback-primary-color) !important;
+  --feedback-canvas-editor-action-primary-text: var(--feedback-white-color) !important;
+  --feedback-canvas-editor-action-secondary-bg: var(--feedback-white-color) !important;
+  --feedback-canvas-editor-action-secondary-text: var(--feedback-text-color) !important;
+  --feedback-canvas-editor-action-secondary-border: var(--feedback-light-color) !important;
+  --feedback-canvas-editor-divider-color: var(--feedback-light-color) !important;
+  --feedback-canvas-editor-content-bg: var(--feedback-secondary-color) !important;
+  --feedback-canvas-editor-resize-handle-color: var(--feedback-primary-color) !important;
+  --feedback-canvas-editor-slider-track: var(--feedback-light-color) !important;
+}
+
+// Dark mode overrides - use consistent SignalWire dark theme variables
+[data-theme='dark'] {
+  // Dark mode specific overrides (most inherit from :root automatically)
+  --feedback-text-color: var(--ifm-color-emphasis-700) !important;
+  --feedback-modal-input-text-color: var(--ifm-color-emphasis-800) !important;
+  --feedback-modal-footer-link: var(--sw-link-color) !important;
+  --feedback-modal-button-bg-color-active: transparent !important;
+  --feedback-modal-button-icon-color: var(--ifm-color-emphasis-900) !important;
+  --feedback-modal-close-bg-color: transparent !important;
+  --feedback-modal-button-submit-text-color: var(--ifm-color-emphasis-900) !important;
+  --feedback-modal-content-text-color: var(--ifm-color-emphasis-900) !important;
+  
+  // Screenshot editor dark mode overrides - use SignalWire dark theme colors
+  --feedback-canvas-editor-bg-color: var(--ifm-background-surface-color) !important;
+  --feedback-canvas-editor-border-color: var(--ifm-color-emphasis-300) !important;
+  --feedback-canvas-editor-header-bg-color: var(--ifm-background-surface-color) !important;
+  --feedback-canvas-editor-tool-bg-color: var(--ifm-background-surface-color) !important;
+  --feedback-canvas-editor-tool-bg-hover: var(--ifm-color-emphasis-200) !important;
+  --feedback-canvas-editor-tool-text-color: var(--ifm-color-emphasis-800) !important;
+  --feedback-canvas-editor-action-secondary-bg: var(--ifm-background-surface-color) !important;
+  --feedback-canvas-editor-action-secondary-text: var(--ifm-color-emphasis-800) !important;
+  --feedback-canvas-editor-action-secondary-border: var(--ifm-color-emphasis-300) !important;
+  --feedback-canvas-editor-content-bg: var(--ifm-background-color) !important;
+  --feedback-canvas-editor-divider-color: var(--ifm-color-emphasis-300) !important;
+  --feedback-canvas-editor-slider-track: var(--ifm-color-emphasis-300) !important;
+}
+
+
+
+

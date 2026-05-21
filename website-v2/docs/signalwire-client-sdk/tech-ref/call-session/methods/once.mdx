@@ -1,0 +1,165 @@
+---
+title: once
+slug: /call-session/once
+---
+
+import APIField from '@site/src/components/APIField';
+
+Registers a one-time event listener for the specified event. The listener will be automatically removed after it fires once.
+
+## Signature
+
+```typescript
+call.once<T extends EventNames>(
+  event: T,
+  handler: EventListener<T>
+): CallSession
+```
+
+## Parameters
+
+<APIField name="event" type="string" required>
+  The event name to listen for.
+</APIField>
+
+<APIField name="handler" type="function" required>
+  Callback function to execute when the event fires (will only fire once).
+</APIField>
+
+## Returns
+
+**Type:** `CallSession`
+
+Returns the CallSession instance for method chaining.
+
+## Important Notes
+
+**Automatic Removal:** The listener is automatically removed after it fires once. You don't need to call `off()`.
+
+**Can Be Removed Early:** You can still manually remove a `once()` listener before it fires by using `off()`:
+
+```typescript
+const handler = (params) => {
+  console.log('This might never run')
+}
+
+call.once('member.joined', handler)
+
+// Changed your mind? Remove it before it fires
+call.off('member.joined', handler)
+```
+
+**Multiple once() Listeners:** You can register multiple `once()` listeners for the same event. They will all fire once and then be removed:
+
+```typescript
+call.once('call.joined', (params) => {
+  console.log('First handler')
+})
+
+call.once('call.joined', (params) => {
+  console.log('Second handler')
+})
+
+// Both will fire once when call.joined occurs, then both are removed
+```
+
+**Initialization Pattern:** Commonly used to detect initial state or setup:
+
+```typescript
+call.once('call.joined', (params) => {
+  // Initialize UI with call details
+  initializeCallUI(params)
+})
+
+call.once('layout.changed', (params) => {
+  // Set initial layout in UI
+  setInitialLayout(params.layout)
+})
+```
+
+## Examples
+
+### Basic One-Time Listener
+
+```typescript
+call.once('call.joined', (params) => {
+  console.log('Call joined (this will only log once):', params.call_id)
+})
+```
+
+### Wait for First Member to Join
+
+```typescript
+call.once('member.joined', (params) => {
+  console.log('First member joined:', params.member.name)
+  // This will NOT fire again when other members join
+})
+```
+
+### Promise-Based Pattern
+
+```typescript
+function waitForCallJoined(call) {
+  return new Promise((resolve) => {
+    call.once('call.joined', (params) => {
+      resolve(params)
+    })
+  })
+}
+
+// Usage
+const params = await waitForCallJoined(call)
+console.log('Call joined:', params.call_id)
+```
+
+### Combining with Regular Listeners
+
+```typescript
+// First member only
+call.once('member.joined', (params) => {
+  console.log('First member:', params.member.name)
+})
+
+// All members
+call.on('member.joined', (params) => {
+  console.log('Any member:', params.member.name)
+})
+
+// When a member joins, BOTH handlers fire
+// But the once() handler is then removed
+```
+
+### Method Chaining
+
+```typescript
+call
+  .once('call.joined', (params) => {
+    console.log('Joined:', params.call_id)
+  })
+  .once('layout.changed', (params) => {
+    console.log('First layout:', params.layout.name)
+  })
+  .on('member.joined', (params) => {
+    console.log('Member joined:', params.member.name)
+  })
+```
+
+### Async/Await Pattern
+
+```typescript
+async function handleCall(call) {
+  // Wait for call to be joined
+  await new Promise((resolve) => {
+    call.once('call.joined', resolve)
+  })
+
+  console.log('Call is now active')
+
+  // Wait for first member
+  const memberParams = await new Promise((resolve) => {
+    call.once('member.joined', resolve)
+  })
+
+  console.log('First member joined:', memberParams.member.name)
+}
+```

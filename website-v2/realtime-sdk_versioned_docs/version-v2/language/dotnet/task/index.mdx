@@ -1,0 +1,134 @@
+---
+title: Task API
+slug: /dotnet/reference/task
+toc_max_heading_level: 3
+---
+
+[consumer]: /docs/server-sdk/v2/dotnet/reference/consumer
+
+[relay-task]: /docs/server-sdk/v2/dotnet/reference/task
+# SignalWire.Relay.TaskingAPI
+
+This represents the API interface for the Tasking RELAY Service. A [`SignalWire.Relay.RelayTask`][relay-task] is simple way to send jobs to your [`SignalWire.Relay.Consumer`][consumer] from a short lived process, like a web framework. RELAY Tasks allow you to pass commands down to your Consumers without blocking your short lived request. Think of a RELAY Task as a way to queue a job for your background workers to processes asynchronously.
+
+For example, if you wanted to make an outbound call and play a message when your user clicks a button on your web application, since RELAY is a realtime protocol and relies on you to tell it what to do in realtime, if you did this within your web application, your web server would block until the call was finished... this may take a long time! Instead, simply create a new RELAY Task. This task will be handled by a running RELAY Consumer process and your web application can respond back to your user immediately.
+
+## Methods
+
+### Deliver
+
+Deliver the specified message.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `context` | string | <span className="required-arg">required</span> | The context to receive inbound events. |
+| `message` | JObject | <span className="required-arg">required</span> | The message to deliver. |
+
+**Returns**
+
+`bool` - `true` if the delivery is successfully started, `false` if a problem is encountered.
+
+**Examples**
+
+> Send a message.
+
+```csharp
+bool isSuccessful = client.Tasking.Deliver(
+    validContext,
+    new JObject() {
+        ["number_to_call"] = "+1555XXXXXXX",
+        ["message_to_play"] = "We have a message for you",
+    });
+
+if (isSuccessful)
+{
+    // Message has been queued, you can subscribe to TaskingAPI.OnTaskReceived to receive further updates
+}
+```
+
+## Events
+
+All these events can be used to track a task.
+
+## Receive Events
+
+| Property | Description |
+| :-------- | :----------- |
+| `OnTaskReceived` | A task has been received. |
+
+# SignalWire.Relay.RelayTask
+
+A [`SignalWire.Relay.RelayTask`][relay-task] is a simple way to send jobs to your [`SignalWire.Relay.Consumer`][consumer] from a short lived process, like a web framework. RELAY Tasks allow you to pass commands down to your Consumers without blocking your short lived request. Think of a RELAY Task as a way to queue a job for your background workers to processes asynchronously.
+
+For example, if you wanted to make an outbound call and play a message when your user clicks a button on your web application, since RELAY is a realtime protocol and relies on you to tell it what to do in realtime, if you did this within your web application, your web server would block until the call was finished... this may take a long time! Instead, simply create a new RELAY Task. This task will be handled by a running RELAY Consumer process and your web application can respond back to your user immediately.
+
+## Constructor
+
+The only constructor is the default constructor, properties should all be assigned by initializer or after construction.
+
+**Parameters**
+
+None
+
+**Examples**
+
+> Basic Example
+
+```csharp
+RelayTask task = new RelayTask
+{
+    SpaceID = validSpaceID,
+    ProjectID = validProjectID,
+    Context = validContext,
+    Message = new JObject {
+        ["greet"] = "Hello"
+    },
+}
+```
+
+## Properties
+
+| Property | Type | Description |
+| :-------- | :-------- | :----------- |
+| `SpaceID` | string | The SignalWire Space ID. |
+| `ProjectID` | string | The SignalWire project ID. |
+| `Timestamp` | double | Seconds since the epoch with up to microsecond resolution (hence double). Represents the time the task was received. |
+| `Context` | string | The context used to receive events. |
+| `Message` | JObject | The message to send. |
+
+## Methods
+
+### Deliver
+
+Deliver a message to the specified host. This is typically not used directly, `TaskingAPI.Deliver` is used instead.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `host` | string | <span className="required-arg">required</span> | The host to post the message to. |
+| `project` | string | <span className="required-arg">required</span> | The SignalWire project ID. |
+| `token` | string | <span className="required-arg">required</span> | The authentication token. |
+| `context` | string | <span className="required-arg">required</span> | The context to receive inbound events. |
+| `message` | JObject | <span className="required-arg">required</span> | The message to send. |
+
+**Returns**
+
+`void`
+
+**Examples**
+
+> Send a message.
+
+```csharp
+RelayTask.Deliver(validHost, validProjectID, validToken, validContext, new JObject {
+    ["number_to_call"] = "+1555XXXXXXX",
+    ["message_to_play"] = "We have a message for you",
+});
+```
+
+## Events
+
+None

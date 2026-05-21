@@ -1,0 +1,53 @@
+---
+title: "CallRecord.AudioParams"
+slug: /dotnet/reference/calling/call-record-audio-params
+toc_max_heading_level: 3
+---
+[call-record-audio-params-audio-direction]: /docs/server-sdk/v2/dotnet/reference/calling/call-record-audio-direction
+[call-record-audio-params-audio-format]: /docs/server-sdk/v2/dotnet/reference/calling/call-record-audio-format
+
+# SignalWire.Relay.Calling.CallRecord.AudioParams
+
+This object represents the parameters specific to audio recording.
+
+## Constructor
+
+The only constructor is the default constructor, properties should all be assigned by initializer or after construction.
+
+**Parameters**
+
+None
+
+**Examples**
+
+> Basic Example
+
+```csharp
+CallRecord record = new CallRecord
+{
+    Audio = new CallRecord.AudioParams
+    {
+        // Use default audio recording parameters
+    }
+};
+```
+
+## Properties
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `Beep` | bool? | Whether or not to include a beep at the start of the recording.<br />_Default: false_ |
+| `Format` | [`SignalWire.Relay.Calling.CallRecord.AudioParams.AudioFormat`][call-record-audio-params-audio-format]? | The format of the audio recording.<br />_Default: mp3_ |
+| `Stereo` | bool? | Whether to include stereo or only mono tracks in the audio recording.<br />_Default: false_ |
+| `Direction` | [`SignalWire.Relay.Calling.CallRecord.AudioParams.AudioDirection`][call-record-audio-params-audio-direction]? | The direction to include in the audio recording, speak (what the caller says), listen (what the caller hears), or both.<br />_Default: speak_ |
+| `InitialTimeout` | double? | How long to wait in seconds until audio is detected to begin recording.<br />_Default: 5 seconds_<br />_Note: Disable with 0_ |
+| `EndSilenceTimeout` | double? | How long to wait in seconds after audio is no longer detected to terminate recording.<br />_Default: 1 second_<br />_Note: Disable with 0_ |
+| `Terminators` | string | A string of individual DTMF characters that can be used to terminate recording.<br />_Default: #*_ |
+
+## Methods
+
+None
+
+## Events
+
+None

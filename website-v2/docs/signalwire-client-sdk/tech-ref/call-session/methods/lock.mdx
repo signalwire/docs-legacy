@@ -1,0 +1,108 @@
+---
+title: lock
+slug: /call-session/lock
+---
+
+Locks the call to prevent new participants from joining.
+
+## Signature
+
+```typescript
+lock(): Promise<void>
+```
+
+## Parameters
+
+None
+
+## Returns
+
+**Type:** `Promise<void>`
+
+## Important Notes
+
+**Lock Behavior:** When a call is locked:
+- New participants **cannot** join the call
+- Existing participants remain in the call
+- Participants who left cannot rejoin until the call is unlocked
+- The lock state persists until explicitly unlocked
+
+**Lock does NOT affect:**
+- Existing participants (they stay in the call)
+- Ability to invite existing members back
+- Screen sharing or other call features
+- Media streams or audio/video
+
+## Events
+
+Lock/unlock operations may trigger room update events:
+
+```typescript
+call.on('room.updated', (event) => {
+  console.log('Room updated, locked state may have changed')
+})
+```
+
+## Examples
+
+### Basic usage
+
+```typescript
+await call.lock()
+console.log('Call is now locked')
+```
+
+### Lock after meeting starts
+
+```typescript
+async function startMeeting() {
+  const { members } = await call.getMembers()
+
+  if (members.length >= expectedParticipantCount) {
+    await call.lock()
+    console.log('Meeting started - call is now locked')
+  }
+}
+```
+
+### UI toggle button
+
+```typescript
+let isLocked = false
+
+async function toggleLock() {
+  try {
+    if (isLocked) {
+      await call.unlock()
+      isLocked = false
+      console.log('Call unlocked')
+    } else {
+      await call.lock()
+      isLocked = true
+      console.log('Call locked')
+    }
+
+    updateLockButtonUI(isLocked)
+  } catch (error) {
+    console.error('Failed to toggle lock:', error)
+  }
+}
+```
+
+### Auto-lock after grace period
+
+```typescript
+const GRACE_PERIOD_MS = 5 * 60 * 1000 // 5 minutes
+
+call.on('member.joined', async (event) => {
+  const { members } = await call.getMembers()
+
+  if (members.length === 1) {
+    // First participant joined, start grace period
+    setTimeout(async () => {
+      await call.lock()
+      console.log('Grace period ended - call locked')
+    }, GRACE_PERIOD_MS)
+  }
+})
+```

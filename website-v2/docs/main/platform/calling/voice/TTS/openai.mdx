@@ -1,0 +1,115 @@
+---
+title: OpenAI
+description: Learn how to use OpenAI TTS voices on the SignalWire platform.
+slug: /platform/voice/tts/openai
+---
+
+OpenAI offers versatile multilingual voices balancing low latency and good quality.
+While voices are optimized for English, they perform well across all 
+[supported languages][languages].
+
+Consult 
+[OpenAI's Text-to-Speech documentation][tts]
+for more information and audio samples for available voices.
+
+## Models
+
+OpenAI offers two TTS models with different quality and latency characteristics:
+
+| Model | Description |
+|-------|-------------|
+| `tts-1` | **Default** - Standard quality, optimized for speed |
+| `tts-1-hd` | High-definition quality, improved audio fidelity |
+
+## Voices
+
+OpenAI provides 6 fully multilingual voices optimized for natural-sounding speech:
+
+| Voice | Description |
+|-------|-------------|
+| `alloy` | Neutral, balanced voice |
+| `echo` | Warm, expressive voice |
+| `fable` | British accent, articulate |
+| `onyx` | Deep, authoritative voice |
+| `nova` | Energetic, friendly voice |
+| `shimmer` | Soft, gentle voice |
+
+## Languages
+
+All OpenAI voices are fully multilingual and automatically adapt to the input text language.
+
+Consult OpenAI's [supported languages resource][languages]
+for an up-to-date list.
+
+## Usage
+
+OpenAI voice IDs conform to the following format:
+
+```
+openai.<voice>:<model>
+```
+
+**Parameters:**
+- `voice` (required): One of: alloy, echo, fable, onyx, nova, shimmer
+- `model` (optional): `tts-1` (default) or `tts-1-hd`
+
+**Examples:**
+```
+openai.alloy
+openai.nova:tts-1-hd
+openai.fable:tts-1
+```
+
+---
+
+## Examples
+
+Learn how to use OpenAI voices on the SignalWire platform.
+
+<Tabs>
+<TabItem value="swml" label="SWML">
+Use the
+[**`languages`**](/docs/swml/reference/ai/languages#use-voice-strings)
+SWML method to set one or more voices for an [AI agent](/docs/swml/reference/ai).
+```yaml
+version: 1.0.0
+sections:
+  main:
+  - ai:
+      prompt:
+        text: Have an open-ended conversation about flowers.
+      languages:
+        - name: English
+          code: en-US
+          voice: openai.alloy
+```
+Alternatively, use the [**`say_voice`** parameter](/docs/swml/reference/play#variables) 
+of the [**`play`**](/docs/swml/reference/play)
+SWML method to select a voice for basic TTS.
+```yaml
+version: 1.0.0
+sections:
+  main:
+  - set:
+      say_voice: "openai.alloy"
+  - play: "say:Greetings. This is the Alloy voice from OpenAI's text-to-speech model."
+```
+</TabItem>
+<TabItem value="relay-realtime-sdk" label="RELAY Realtime SDK">
+```javascript
+// This example uses the Node.js SDK for SignalWire's RELAY Realtime API.
+const playback = await call.playTTS({ 
+    text: "Greetings. This is the Alloy voice from OpenAI's text-to-speech model.",
+    voice: "openai.alloy",
+});
+await playback.ended();
+```
+</TabItem>
+<TabItem value="call-flow-builder" label="Call Flow Builder">
+OpenAI voices are not yet supported in Call Flow Builder.
+</TabItem>
+</Tabs>
+
+{/* Links */}
+[languages]: https://platform.openai.com/docs/guides/text-to-speech#supported-languages "OpenAI reference on supported languages."
+[tts]: https://platform.openai.com/docs/guides/text-to-speech#supported-languages "OpenAI TTS documentation."

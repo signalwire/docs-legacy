@@ -1,0 +1,58 @@
+---
+title: DetectAction
+slug: /dotnet/reference/calling/actions/detect
+description: The DetectAction is used to detect DTMF, fax tones, or answering machines.
+toc_max_heading_level: 3
+---
+
+[call-1]: /docs/server-sdk/v2/dotnet/reference/calling/call#detect
+[call]: /docs/server-sdk/v2/dotnet/reference/calling/call#detectasync
+[signalwire-relay-calling-calldetect]: /docs/server-sdk/v2/dotnet/reference/calling/call-detect
+[signalwire-relay-calling-detectresult]: /docs/server-sdk/v2/dotnet/reference/calling/results/detect
+[signalwire-relay-calling-stopresult]: /docs/server-sdk/v2/dotnet/reference/calling/results/stop
+
+# SignalWire.Relay.Calling.DetectAction
+
+This object returned from [`DetectAsync`][call] method that represents a detection operation that is currently active on a call.
+
+## Properties
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `ControlID` | string | The identifier used to control the operation. |
+| `Result` | [`SignalWire.Relay.Calling.DetectResult`][signalwire-relay-calling-detectresult] | Final result of detection. |
+| `Completed` | bool | Whether the detect operation has completed. |
+| `Payload` | [`SignalWire.Relay.Calling.CallDetect`][signalwire-relay-calling-calldetect] | Payload sent to [`Detect`][call-1] to start the detect operation. |
+
+## Methods
+
+### Stop
+
+Stop the action immediately.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+[`SignalWire.Relay.Calling.StopResult`][signalwire-relay-calling-stopresult] - The result object to interact with.
+
+**Examples**
+
+> Start a detector and stop it after 5 seconds.
+
+```csharp
+DetectAction actionDetect = call.DetectAsync(
+    new CallDetect
+    {
+        Type = CallDetect.DetectType.machine,
+        Parameters = new CallDetect.MachineParams
+        {
+        }
+    });
+
+Thread.Sleep(5000);
+
+StopResult resultStop = actionDetect.Stop();
+```

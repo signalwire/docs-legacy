@@ -1,0 +1,47 @@
+---
+title: reattach
+slug: /signalwire-client/reattach
+---
+
+import APIField from '@site/src/components/APIField';
+
+Reattaches to an existing call session using a call ID. This is useful for reconnecting to a call after network interruptions or page refreshes.
+
+## How it works
+
+The `reattach` method allows you to reconnect to an active call that you were previously part of. By providing the call ID, you can restore the CallSession object and resume control of the call.
+
+
+## Parameters
+
+<APIField name="params" type="ReattachParams" required>
+  Configuration for reattaching to the call.
+</APIField>
+
+<APIField name="params.callId" type="string" required>
+  The unique identifier of the call to reattach to.
+</APIField>
+
+## Signature
+
+```typescript
+reattach(params: ReattachParams): Promise<CallSession>
+```
+
+## Returns
+
+**Type:** `Promise<CallSession>`
+
+Returns a Promise that resolves to a [CallSession](../call-session) object representing the reattached call.
+
+## Examples
+
+### Basic reattach
+
+```typescript
+const callSession = await client.reattach({
+  callId: 'call-id-here'
+})
+
+console.log('Reattached to call:', callSession.id)
+```

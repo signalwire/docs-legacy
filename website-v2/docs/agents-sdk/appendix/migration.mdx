@@ -1,0 +1,225 @@
+---
+title: "Migration"
+sidebar_label: "Migration"
+slug: /python/reference/migration
+toc_max_heading_level: 3
+---
+
+## Migration Guide
+
+Guide for migrating to the SignalWire Agents SDK and common migration patterns.
+
+### Current Version
+
+| SDK Version | Python | SignalWire API | Status |
+|-------------|--------|----------------|--------|
+| 1.0.x | 3.8+ | v1 | Current stable release |
+
+### Before Upgrading
+
+1. **Review changelog** for breaking changes
+2. **Backup your code** before upgrading
+3. **Test in development** before production
+4. **Check dependency compatibility**
+
+```bash
+## Check current version
+pip show signalwire-agents
+
+## View available versions
+pip index versions signalwire-agents
+```
+
+### Upgrading
+
+```bash
+## Upgrade to latest
+pip install --upgrade signalwire-agents
+
+## Upgrade to specific version
+pip install signalwire-agents==1.0.15
+
+## Upgrade with all extras
+pip install --upgrade "signalwire-agents[search-all]"
+```
+
+### Migration from Raw SWML
+
+If migrating from hand-written SWML to the SDK:
+
+#### Before (Raw SWML)
+
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [{
+      "ai": {
+        "prompt": {
+          "text": "You are a helpful assistant."
+        },
+        "languages": [{
+          "name": "English",
+          "code": "en-US",
+          "voice": "rime.spore"
+        }],
+        "SWAIG": {
+          "functions": [{
+            "function": "lookup",
+            "description": "Look up information",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "Item ID"
+                }
+              },
+              "required": ["id"]
+            },
+            "web_hook_url": "https://example.com/webhook"
+          }]
+        }
+      }
+    }]
+  }
+}
+```
+
+#### After (SDK)
+
+```python
+from signalwire_agents import AgentBase
+from signalwire_agents.core.function_result import SwaigFunctionResult
+
+agent = AgentBase(name="assistant", route="/")
+agent.prompt_add_section("Role", "You are a helpful assistant.")
+agent.add_language("English", "en-US", "rime.spore")
+
+@agent.tool(description="Look up information")
+def lookup(id: str) -> SwaigFunctionResult:
+    # Your logic here
+    return SwaigFunctionResult(f"Found item {id}")
+
+if __name__ == "__main__":
+    agent.run()
+```
+
+### Common Migration Tasks
+
+| Old Style | New Style |
+|-----------|-----------|
+| JSON parameter schema | Python type hints |
+| Manual webhook handler | `@agent.tool` decorator |
+| Return JSON dict | Return `SwaigFunctionResult` |
+| Manual response parsing | Automatic parameter injection |
+
+### Class-Based Migration
+
+If migrating from functional to class-based agents:
+
+#### Before (Functional)
+
+```python
+from signalwire_agents import AgentBase
+from signalwire_agents.core.function_result import SwaigFunctionResult
+
+agent = AgentBase(name="service", route="/service")
+agent.prompt_add_section("Role", "Customer service agent.")
+agent.add_language("English", "en-US", "rime.spore")
+
+@agent.tool(description="Get account balance")
+def get_balance(account_id: str) -> SwaigFunctionResult:
+    balance = lookup_balance(account_id)
+    return SwaigFunctionResult(f"Balance: ${balance}")
+
+if __name__ == "__main__":
+    agent.run()
+```
+
+#### After (Class-Based)
+
+```python
+from signalwire_agents import AgentBase
+from signalwire_agents.core.function_result import SwaigFunctionResult
+
+
+class ServiceAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="service", route="/service")
+        self.prompt_add_section("Role", "Customer service agent.")
+        self.add_language("English", "en-US", "rime.spore")
+
+    @AgentBase.tool(description="Get account balance")
+    def get_balance(self, account_id: str) -> SwaigFunctionResult:
+        balance = self.lookup_balance(account_id)
+        return SwaigFunctionResult(f"Balance: ${balance}")
+
+    def lookup_balance(self, account_id: str) -> float:
+        # Your lookup logic
+        return 100.00
+
+
+if __name__ == "__main__":
+    agent = ServiceAgent()
+    agent.run()
+```
+
+### Multi-Agent Migration
+
+If migrating multiple agents to use AgentServer:
+
+#### Before (Separate Processes)
+
+```bash
+## Running separate agent processes
+python sales_agent.py &
+python support_agent.py &
+python billing_agent.py &
+```
+
+#### After (AgentServer)
+
+```python
+from signalwire_agents import AgentServer
+from sales_agent import SalesAgent
+from support_agent import SupportAgent
+from billing_agent import BillingAgent
+
+server = AgentServer(host="0.0.0.0", port=8080)
+server.register(SalesAgent())
+server.register(SupportAgent())
+server.register(BillingAgent())
+
+if __name__ == "__main__":
+    server.run()
+```
+
+### Testing After Migration
+
+```bash
+## Verify SWML generation
+swaig-test agent.py --dump-swml
+
+## Compare with expected output
+swaig-test agent.py --dump-swml > new_swml.json
+diff old_swml.json new_swml.json
+
+## Test all functions
+swaig-test agent.py --list-tools
+swaig-test agent.py --exec function_name --param value
+
+## Run integration tests
+pytest tests/
+```
+
+### Getting Help
+
+For migration assistance:
+
+1. Check the changelog for breaking changes
+2. Review updated examples in `/examples`
+3. Use `swaig-test` to validate changes
+4. Test thoroughly in development
+
+

@@ -1,0 +1,48 @@
+---
+title: "setLayout"
+slug: /js/reference/video/room-session/set-layout
+description: setLayout method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+### setLayout
+
+- **setLayout**(`params`): `Promise<void>`
+
+Sets a layout for the room. You can obtain a list of available layouts with [getLayouts](/docs/browser-sdk/js/reference/video/room-session/get-layouts).
+
+#### Parameters
+
+<ParamField path="params" type="object">
+  Object containing the parameters of the method.
+</ParamField>
+
+<Indent>
+<ParamField path="name" type="string">
+  Name of the layout.
+</ParamField>
+
+<ParamField path="positions" type="VideoPositions" required={false}>
+  Positions to assign as soon as the new layout is set.
+</ParamField>
+</Indent>
+
+#### Returns
+
+`Promise<void>`
+
+#### Permissions
+
+- `room.set_layout`
+- `room.set_position` (if you need to assign positions)
+
+You need to specify the permissions when [creating the Video Room Token](/docs/apis/video/create-room-token) on the server side.
+
+#### Example
+
+Set the 6x6 layout:
+
+```javascript
+await roomSession.setLayout({ name: "6x6" });
+```
+

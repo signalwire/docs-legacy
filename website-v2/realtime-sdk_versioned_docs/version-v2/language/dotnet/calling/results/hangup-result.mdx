@@ -1,0 +1,22 @@
+---
+title: HangupResult
+slug: /dotnet/reference/calling/results/hangup
+description: The HangupResult object is returned after a hangup operation.
+toc_max_heading_level: 3
+---
+
+[call]: /docs/server-sdk/v2/dotnet/reference/calling/call#hangup
+[signalwire-relay-calling-disconnectreason]: /docs/server-sdk/v2/dotnet/reference/calling/disconnect-reason
+[signalwire-relay-event]: /docs/server-sdk/v2/dotnet/reference/event
+
+# SignalWire.Relay.Calling.HangupResult
+
+This object returned from [`Hangup`][call] method.
+
+## Properties
+
+| Property | Type | Description |
+| :-------- | :---- | :----------- |
+| `Successful` | bool | Whether the call has been hung up successfully. |
+| `Event` | [`SignalWire.Relay.Event`][signalwire-relay-event] | The last event that completed the call. |
+| `Reason` | [`SignalWire.Relay.Calling.DisconnectReason`][signalwire-relay-calling-disconnectreason] | The hangup reason. |

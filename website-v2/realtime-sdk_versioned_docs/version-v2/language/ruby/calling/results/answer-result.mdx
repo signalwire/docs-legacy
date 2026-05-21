@@ -1,0 +1,20 @@
+---
+title: AnswerResult
+slug: /ruby/reference/calling/results/answer
+description: The AnswerResult object is returned when a call is answered.
+toc_max_heading_level: 3
+---
+
+[call]: /docs/server-sdk/v2/ruby/reference/calling/call#answer
+[relay-event]: /docs/server-sdk/v2/ruby/reference/event
+
+# Relay::Calling::AnswerResult
+
+This object is returned by the [`answer`][call] method.
+
+## Properties
+
+| Property | Type | Description |
+| :------- | :--- | :---------- |
+| `successful` | Boolean | Whether the call has been answered from the remote party. |
+| `event` | [Relay::Event][relay-event] | Last event that completed the operation. |

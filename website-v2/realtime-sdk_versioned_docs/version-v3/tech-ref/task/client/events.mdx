@@ -1,0 +1,29 @@
+---
+title: "Events"
+slug: /node/reference/task/client/events
+description: Events available on the Client class.
+toc_max_heading_level: 3
+---
+
+
+## Events
+
+### task.received
+
+- **task.received**(`payload`)
+
+Emitted whenever a task is received. Your event handler receives the payload. Example:
+
+```javascript
+const client = new Task.Client(...)
+client.on('task.received', (payload) => {
+  console.log('Task Received', payload)
+  // Do something with the payload...
+})
+```
+
+#### Parameters
+
+| Name      | Type                      | Description          |
+|:----------|:--------------------------|:---------------------|
+| `payload` | `Record<string, unknown>` | The message payload. |

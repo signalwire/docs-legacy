@@ -1,0 +1,105 @@
+---
+title: updateMicrophone
+slug: /call-session/updatemicrophone
+---
+
+import APIField from '@site/src/components/APIField';
+
+Replaces the current microphone stream with one from a different audio input device.
+
+## Parameters
+
+<APIField name="constraints" type="MediaTrackConstraints" required>
+  Constraints that the new microphone device should satisfy.
+</APIField>
+
+## Signature
+
+```typescript
+call.updateMicrophone(constraints: MediaTrackConstraints): Promise<void>
+```
+
+## Returns
+
+**Type:** `Promise<void>`
+
+## Examples
+
+### Switch to Specific Microphone
+
+```typescript
+// Get available audio devices
+const devices = await navigator.mediaDevices.enumerateDevices()
+const microphones = devices.filter(d => d.kind === 'audioinput')
+
+// Switch to a specific microphone
+await call.updateMicrophone({
+  deviceId: microphones[1].deviceId
+})
+```
+
+### Switch with Exact Device ID
+
+```typescript
+await call.updateMicrophone({
+  deviceId: { exact: "/o4ZeWzroh+8q0Ds/CFfmn9XpqaHzmW3L/5ZBC22CRg=" }
+})
+```
+
+### Switch Microphone with Audio Constraints
+
+```typescript
+// Switch microphone with specific constraints
+await call.updateMicrophone({
+  deviceId: micId,
+  echoCancellation: true,
+  noiseSuppression: true,
+  autoGainControl: true
+})
+```
+
+### Dynamic Device Switching
+
+```typescript
+// Listen for device changes and switch automatically
+navigator.mediaDevices.addEventListener('devicechange', async () => {
+  const devices = await navigator.mediaDevices.enumerateDevices()
+  const defaultMic = devices.find(d =>
+    d.kind === 'audioinput' && d.deviceId === 'default'
+  )
+
+  if (defaultMic) {
+    await call.updateMicrophone({ deviceId: defaultMic.deviceId })
+  }
+})
+```
+
+## Related Properties
+
+You can access information about the current microphone using these CallSession properties:
+
+- `call.microphoneId` - Current microphone device ID
+- `call.microphoneLabel` - Current microphone device label/name
+- `call.microphoneConstraints` - Current microphone constraints
+- `call.localAudioTrack` - Current local audio MediaStreamTrack
+
+## Important Notes
+
+**Active Stream Replacement:** This method replaces the active audio track in the ongoing call. The audio stream will switch seamlessly without ending the call.
+
+**MediaTrackConstraints:** The `constraints` parameter follows the [MediaTrackConstraints](https://developer.mozilla.org/en-US/docs/Web/API/MediaTrackConstraints) web standard. Common audio properties include:
+- `deviceId` - Specific device identifier
+- `echoCancellation` - Enable/disable echo cancellation
+- `noiseSuppression` - Enable/disable noise suppression
+- `autoGainControl` - Enable/disable automatic gain control
+- `sampleRate` - Audio sample rate
+- `channelCount` - Number of audio channels
+
+**Audio Processing:** When switching microphones, audio processing settings (echo cancellation, noise suppression, etc.) can be reconfigured. For runtime changes to audio processing without switching devices, use `setAudioFlags()`.
+
+**Device Permissions:** The browser must have microphone permissions granted. If switching to a new device requires additional permissions, the user will be prompted.
+
+**Device Availability:** The call will throw an error if:
+- The specified device doesn't exist
+- The device is already in use by another application
+- The constraints cannot be satisfied

@@ -1,0 +1,336 @@
+---
+title: "Changelog"
+sidebar_label: "Changelog"
+slug: /python/reference/changelog
+toc_max_heading_level: 3
+---
+
+## Changelog
+
+Version history and release notes for the SignalWire Agents SDK.
+
+### Version History
+
+| Version | Date | Type | Highlights |
+|---------|------|------|------------|
+| 1.0.15 | 2025 | Feature | Add WebRTC calling to sw-agent-dokku and fix route handling |
+| 1.0.14 | 2025 | Feature | Add WebRTC calling support to sw-agent-dokku generated apps |
+| 1.0.13 | 2025 | Feature | Add sw-agent-dokku CLI for Dokku deployments and fix AgentServer health endpoints |
+| 1.0.12 | 2025 | Feature | Export SkillBase from skills package for easier custom skill development |
+| 1.0.11 | 2025 | Feature | Add mcp-gateway CLI command and cloud function support in sw-agent-init |
+| 1.0.10 | 2025 | Patch | Fix Google Cloud Functions /swaig endpoint and URL detection |
+| 1.0.9 | 2025 | Patch | Fix Lambda and Azure Functions serverless handlers |
+| 1.0.8 | 2025 | Patch | Version bump release |
+| 1.0.7 | 2025 | Feature | New sw-agent-init CLI tool for project scaffolding |
+| 1.0.6 | 2025 | Patch | Fix circular copy issue in contexts |
+| 1.0.5 | 2025 | Release | Version bump release |
+| 1.0.4 | 2025 | Feature | Call flow verb insertion API for SWML customization |
+| 1.0.3 | 2025 | Patch | SWML schema updates for queues and context switching |
+| 1.0.2 | 2025 | Patch | Added serve_static_files() to AgentServer |
+| 1.0.1 | 2025 | Patch | Minor fixes to included examples |
+| 1.0.0 | 2025 | Initial | First public release |
+
+### Version 1.0.15
+
+**Bug Fix Release**
+
+Fixes route handling in AgentServer to prevent catch-all routes from overshadowing custom routes.
+
+#### Changes
+
+| Area | Change |
+|------|--------|
+| AgentServer | Move catch-all handler registration to startup event |
+| AgentServer | Custom routes like `/get_token` now work correctly with gunicorn |
+| sw-agent-dokku | Update GitHub Actions to use reusable workflows |
+| sw-agent-dokku | Improved WebRTC client with robust pattern |
+| sw-agent-dokku | Always update SWML handler URL on startup |
+
+### Version 1.0.14
+
+**Feature Release**
+
+Adds WebRTC calling support to sw-agent-dokku generated applications, allowing browser-based calls.
+
+#### Changes
+
+| Area | Change |
+|------|--------|
+| sw-agent-dokku | Add WebRTC calling support to generated web interface |
+| sw-agent-dokku | Add `/get_token` endpoint for guest token generation |
+| sw-agent-dokku | Add `/get_credentials` endpoint for curl examples |
+| sw-agent-dokku | Add `/get_resource_info` endpoint for dashboard links |
+| sw-agent-dokku | Auto-create SWML handler in SignalWire on startup |
+| sw-agent-dokku | Add SignalWire credentials to environment templates |
+
+### Version 1.0.13
+
+**Feature Release**
+
+Adds `sw-agent-dokku` CLI for deploying SignalWire agents to Dokku servers, and fixes AgentServer health endpoints to work with gunicorn.
+
+#### Changes
+
+| Area | Change |
+|------|--------|
+| CLI | Added `sw-agent-dokku` CLI for Dokku deployments |
+| sw-agent-dokku | Supports simple git push deploys or GitHub Actions CI/CD |
+| sw-agent-dokku | Generates Procfile, CHECKS, requirements.txt for Dokku |
+| sw-agent-dokku | Optional web interface with static file serving |
+| sw-agent-dokku | Preview environments for pull requests |
+| AgentServer | Register `/health` and `/ready` endpoints in `__init__` |
+| AgentServer | Health endpoints now work with gunicorn (not just `server.run()`) |
+
+### Version 1.0.12
+
+**Feature Release**
+
+Exports `SkillBase` from the skills package for more convenient custom skill development.
+
+#### Changes
+
+| Area | Change |
+|------|--------|
+| Skills | Export `SkillBase` from `signalwire_agents.skills` for convenience |
+| Skills | Can now import as `from signalwire_agents.skills import SkillBase` |
+
+### Version 1.0.11
+
+**Feature Release**
+
+Added `mcp-gateway` CLI command for running MCP Gateway servers and enhanced `sw-agent-init` with cloud function deployment support.
+
+#### Changes
+
+| Area | Change |
+|------|--------|
+| CLI | Added `mcp-gateway` CLI command to run MCP Gateway servers |
+| sw-agent-init | Added `--platform` option to generate cloud function deployments (aws, gcp, azure) |
+| sw-agent-init | Added `--region` option to specify deployment region |
+| sw-agent-init | Fixed generated `app.py` to be compatible with `swaig-test` |
+| sw-agent-init | Updated requirements template to use signalwire-agents>=1.0.10 |
+
+### Version 1.0.10
+
+**Patch Release**
+
+Fixed Google Cloud Functions serverless handler to match Lambda and Azure improvements.
+
+#### Changes
+
+| Area | Change |
+|------|--------|
+| Google Cloud Functions | Added `/swaig` endpoint support with function name in request body |
+| Google Cloud Functions | Added URL detection for correct webhook URL generation in SWML |
+| Google Cloud Functions | Fixed serverless mode handling in `run()` method |
+| Auth | Simplified header access using case-insensitive `.get()` method |
+| Serverless | Improved error logging with full traceback |
+
+### Version 1.0.9
+
+**Patch Release**
+
+Fixed serverless handler issues for AWS Lambda and Azure Functions deployments.
+
+#### Changes
+
+| Area | Change |
+|------|--------|
+| Lambda | Fixed `/swaig` endpoint support - function name now correctly read from request body |
+| Lambda | Added support for HTTP API v2 payload format (`rawPath`) in addition to REST API v1 (`pathParameters.proxy`) |
+| Lambda | Fixed base64-encoded body handling |
+| Azure Functions | Fixed URL detection for correct webhook URL generation in SWML |
+| Azure Functions | Added `/swaig` endpoint support with function name in request body |
+| Serverless | Improved request body parsing consistency across all serverless platforms |
+
+### Version 1.0.8
+
+**Patch Release**
+
+Version bump release with no functional changes from 1.0.7.
+
+### Version 1.0.7
+
+**Feature Release**
+
+Added the `sw-agent-init` CLI tool for scaffolding new SignalWire agent projects.
+
+#### Changes
+
+| Area | Change |
+|------|--------|
+| CLI | Added `sw-agent-init` interactive project generator |
+| CLI | Supports basic and full project templates |
+| CLI | Auto-detects SignalWire credentials from environment |
+| CLI | Optional virtual environment creation |
+| CLI | Generates test scaffolding with pytest |
+
+### Version 1.0.6
+
+**Patch Release**
+
+Fixed a circular reference issue when copying agents with contexts.
+
+#### Changes
+
+| Area | Change |
+|------|--------|
+| AgentBase | Fixed circular copy issue in `_contexts_builder` during ephemeral agent creation |
+
+### Version 1.0.5
+
+**Release**
+
+Version bump release with no functional changes from 1.0.4.
+
+### Version 1.0.4
+
+**Feature Release**
+
+Added call flow verb insertion API for customizing SWML call flow with pre-answer, post-answer, and post-AI verbs.
+
+#### Changes
+
+| Area | Change |
+|------|--------|
+| AgentBase | Added `add_pre_answer_verb()` for ringback tones, screening, routing |
+| AgentBase | Added `add_post_answer_verb()` for welcome messages, disclaimers |
+| AgentBase | Added `add_post_ai_verb()` for cleanup, transfers, logging |
+| AgentBase | Added `add_answer_verb()` to configure answer verb (max_duration, etc.) |
+| AgentBase | Added `clear_pre_answer_verbs()`, `clear_post_answer_verbs()`, `clear_post_ai_verbs()` |
+| AgentBase | Fixed `auto_answer=False` to actually skip the answer verb |
+| AgentBase | Added pre-answer verb validation with helpful warnings |
+
+### Version 1.0.3
+
+**Patch Release**
+
+Updated SWML schema with new features for queue management and enhanced context switching.
+
+#### Changes
+
+| Area | Change |
+|------|--------|
+| SWML Schema | Added `enter_queue` method for queue management |
+| SWML Schema | Added `change_context` action for SWAIG functions |
+| SWML Schema | Added `change_step` action for SWAIG functions |
+| SWML Schema | Added `transfer_after_bridge` parameter to `connect` method |
+| SWML Schema | Improved documentation for `execute`, `transfer`, and `connect` destinations |
+| SWML Schema | Fixed payment connector URL documentation link |
+
+### Version 1.0.2
+
+**Patch Release**
+
+Added `serve_static_files()` method to `AgentServer` for properly serving static files alongside agents.
+
+#### Changes
+
+| Area | Change |
+|------|--------|
+| AgentServer | Added `serve_static_files(directory, route)` method |
+| AgentServer | Static files now correctly fall back after agent routes |
+| AgentServer | Both `/route` and `/route/` now work for agent endpoints |
+
+### Version 1.0.1
+
+**Patch Release**
+
+Minor fixes to included examples for better compatibility with the `swaig-test` CLI tool.
+
+#### Changes
+
+| Area | Change |
+|------|--------|
+| Examples | Fixed deprecated API calls in `swml_service_routing_example.py` |
+| Examples | Added error handling for remote search in `sigmond_remote_search.py` |
+| Examples | Fixed argparse conflicts with swaig-test in several examples |
+| Examples | Updated examples to return agents from `main()` for testing |
+
+### Version 1.0.0
+
+**Initial Release**
+
+The first public release of the SignalWire Agents SDK, providing a comprehensive Python framework for building AI voice agents.
+
+#### Core Features
+
+| Feature | Description |
+|---------|-------------|
+| AgentBase | Base class for all voice AI agents |
+| SWAIG Functions | Define callable functions with `@agent.tool` |
+| SwaigFunctionResult | Chainable response builder with actions |
+| DataMap | Serverless REST API integration |
+| Skills System | Auto-discovered plugin architecture |
+| Prefabs | Pre-built agent archetypes |
+| Contexts | Multi-step conversation workflows |
+| AgentServer | Host multiple agents on one server |
+
+#### Built-in Skills
+
+- **datetime**: Current time and date information
+- **native_vector_search**: Local document search
+- **web_search**: Web search integration
+- **math**: Mathematical calculations
+- **datasphere**: SignalWire DataSphere integration
+
+#### Prefab Agents
+
+- **InfoGatherer**: Structured information collection
+- **FAQBot**: Knowledge base Q&A
+- **Survey**: Multi-question surveys
+- **Receptionist**: Call routing
+- **Concierge**: Restaurant/service booking
+
+#### CLI Tools
+
+- **swaig-test**: Test agents and functions locally
+- **sw-search**: Build and query search indexes
+- **sw-agent-init**: Create new agent projects
+
+#### Deployment Support
+
+- Local development server
+- AWS Lambda
+- Google Cloud Functions
+- Azure Functions
+- CGI mode
+- Docker/Kubernetes
+
+### Versioning Policy
+
+The SDK follows [Semantic Versioning](https://semver.org/):
+
+| Version Component | Meaning |
+|-------------------|---------|
+| MAJOR (1.x.x) | Breaking changes requiring code updates |
+| MINOR (x.1.x) | New features, backwards compatible |
+| PATCH (x.x.1) | Bug fixes, backwards compatible |
+
+### Upgrade Notifications
+
+To stay informed about new releases:
+
+1. Watch the GitHub repository
+2. Subscribe to release notifications
+3. Check `pip show signalwire-agents` for current version
+4. Use `pip install --upgrade signalwire-agents` to update
+
+### Reporting Issues
+
+To report bugs or request features:
+
+1. Check existing GitHub issues
+2. Create a new issue with:
+   - SDK version (`pip show signalwire-agents`)
+   - Python version (`python --version`)
+   - Minimal reproduction code
+   - Expected vs actual behavior
+
+### Contributing
+
+Contributions are welcome! See the repository's CONTRIBUTING.md for guidelines.
+
+
+**This concludes the SignalWire Agents SDK documentation.**
+

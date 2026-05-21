@@ -1,0 +1,61 @@
+---
+title: "updateMemberMeta"
+slug: /js/reference/video/room-session/update-member-meta
+description: updateMemberMeta method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+### updateMemberMeta
+
+- **updateMemberMeta**(`params`): `Promise<void>`
+
+Updates a member's metadata in only the specified fields. This is different from
+[setMemberMeta](/docs/browser-sdk/js/reference/video/room-session/set-member-meta), which replaces the whole metadata object.
+
+#### Parameters
+
+<ParamField path="params" type="object">
+  Object containing the parameters of the method.
+</ParamField>
+
+<Indent>
+<ParamField path="memberId" type="string" required={false}>
+  Id of the member to affect. If omitted, affects the current member.
+</ParamField>
+
+<ParamField path="meta" type="Record<string, unknown>">
+  The update to the metadata.
+</ParamField>
+</Indent>
+
+#### Returns
+
+`Promise<void>`
+
+#### Permissions
+
+- `room.set_meta`
+
+You need to specify the permissions when [creating the Video Room Token](/docs/apis/video/create-room-token) on the server side.
+
+#### Example
+
+```js
+roomSession.on("member.updated", (e) => {
+  // We can set an event listener to log changes to the metadata.
+  console.log(e.member.meta);
+});
+
+await roomSession.setMemberMeta({
+  memberId: "...",
+  meta: { foo: "bar", baz: true },
+});
+// The logger will now print `{ foo: "bar", baz: true }`
+
+await roomSession.updateMemberMeta({
+  memberId: "...",
+  meta: { baz: false, t: 10 },
+});
+// The logger will now print `{ foo: "bar", baz: false, t: 10 }`
+```
+

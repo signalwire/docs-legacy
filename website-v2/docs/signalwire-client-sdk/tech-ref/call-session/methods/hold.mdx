@@ -1,0 +1,108 @@
+---
+title: hold
+slug: /call-session/hold
+---
+
+Puts the call on hold by stopping outbound audio and video from the local participant.
+
+## Signature
+
+```typescript
+call.hold(): Promise<void>
+```
+
+## Parameters
+
+None
+
+## Returns
+
+**Type:** `Promise<void>`
+
+## Examples
+
+### Basic Hold
+
+```typescript
+await call.hold()
+console.log('Call is now on hold')
+```
+
+### Hold/Unhold Toggle
+
+```typescript
+let isOnHold = false
+
+async function toggleHold() {
+  if (isOnHold) {
+    await call.unhold()
+    console.log('Call resumed')
+  } else {
+    await call.hold()
+    console.log('Call on hold')
+  }
+  isOnHold = !isOnHold
+}
+
+await toggleHold()
+```
+
+### Hold with UI Feedback
+
+```typescript
+const holdButton = document.getElementById('hold-button')
+
+holdButton.addEventListener('click', async () => {
+  try {
+    await call.hold()
+    holdButton.textContent = 'Resume'
+    holdButton.classList.add('on-hold')
+  } catch (error) {
+    console.error('Failed to hold call:', error)
+  }
+})
+```
+
+### Multi-Call Management
+
+```typescript
+class CallManager {
+  constructor() {
+    this.calls = []
+  }
+
+  async switchToCall(targetCall) {
+    // Hold all other calls
+    for (const call of this.calls) {
+      if (call !== targetCall) {
+        await call.hold()
+      }
+    }
+
+    // Unhold the target call
+    await targetCall.unhold()
+  }
+}
+```
+
+## Important Notes
+
+**What Happens on Hold:**
+- Your outbound audio and video streams are stopped
+- You continue to receive audio and video from other participants
+- The WebRTC connection remains active
+- Other participants will see/hear that you're on hold (muted)
+
+**Hold vs Mute:**
+- **Hold**: Stops both audio AND video outbound streams
+- **Mute**: Stops only audio (`audioMute()`) or only video (`videoMute()`)
+
+Use `hold()` when you want to completely pause your participation in the call but stay connected.
+
+**Still Connected:** While on hold, you remain connected to the call:
+- You can still receive audio/video from others
+- You can still listen to the conversation
+- Other participants remain in the call
+- You can use `unhold()` to resume
+
+**Not a Pause:** Hold does not pause the call for other participants. They continue their conversation - you just stop sending audio/video to them.

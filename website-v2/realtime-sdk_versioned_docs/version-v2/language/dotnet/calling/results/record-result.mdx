@@ -1,0 +1,24 @@
+---
+title: RecordResult
+slug: /dotnet/reference/calling/results/record
+description: The RecordResult object is returned after a record operation.
+toc_max_heading_level: 3
+---
+
+[call-1]: /docs/server-sdk/v2/dotnet/reference/calling/call#recordasync
+[call]: /docs/server-sdk/v2/dotnet/reference/calling/call#record
+[signalwire-relay-event]: /docs/server-sdk/v2/dotnet/reference/event
+
+# SignalWire.Relay.Calling.RecordResult
+
+This object returned from [`Record`][call] method or part of the action when [`RecordAsync`][call-1] completes, which represents the final result of a record operation.
+
+## Properties
+
+| Property | Type | Description |
+| :-------- | :---- | :----------- |
+| `Successful` | bool | Whether the record operation has completed successfully. |
+| `Event` | [`SignalWire.Relay.Event`][signalwire-relay-event] | The last event that completed the call. |
+| `Url` | string | Url to the recorded file. |
+| `Duration` | double? | Duration of the recording in seconds. |
+| `Size` | long? | Size of the recording in bytes. |

@@ -1,0 +1,357 @@
+---
+title: Messaging
+slug: /platform/messaging
+sidebar_label: Overview
+sidebar_position: 0
+description: Integrate powerful, programmable, high-throughput SMS and MMS with SignalWire APIs, SDKs, and no-code application builders
+---
+
+Programmable Messaging is deeply integrated in the SignalWire platform.
+Our robust APIs, SDKs, and application builders are backed by first-class support and a team dedicated to compliance and class-leading delivery rates
+across all carriers and locations.
+
+SignalWire is your Messaging partner from proof-of-concept to deployment.
+Get up and running quickly with our Getting Started guides
+and get registration right the first time with our comprehensive
+[Guide to The Campaign Registry (TCR)][tcr].
+
+## Try it out
+
+<AccordionGroup>
+<Accordion title="Send an SMS message">
+<Tabs>
+<TabItem value="swml" label="SWML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - send_sms:
+        from_number: "+155512312345"
+        to_number: "+15555554321"
+        body: "Hello from SignalWire!"
+```
+</TabItem>
+<TabItem value="relay-realtime-sdk-(server)" label="RELAY Realtime SDK (Server)">
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here"})
+
+let messageClient = client.messaging;
+
+const sendResult = await messageClient.send({
+    from: "+155512312345",
+    to: "+15555554321",
+    body: "Hello from SignalWire!"
+});
+```
+</TabItem>
+<TabItem value="rest-api" label="REST API">
+```bash
+curl -L 'https://<YOUR_SPACE>.signalwire.com/api/laml/2010-04-01/Accounts/<PROJECT_ID_HERE>/Messages' \
+-H 'Content-Type: application/x-www-form-urlencoded' \
+-H 'Accept: application/json' \
+-H 'Authorization: Basic <BASE64 ENCODED AUTHENTICATION STRING>' \
+-d 'To=%2B155512312345' \
+-d 'From=%2B15555554321' \
+-d 'Body=Hello%20from%20SignalWire!'
+```
+</TabItem>
+</Tabs>
+</Accordion>
+
+<Accordion title="Send an MMS message">
+<Tabs>
+<TabItem value="swml" label="SWML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - send_sms:
+        from_number: "+155512312345"
+        to_number: "+15555554321"
+        media: ["https://mcdn.signalwire.com/images/v2/loud/LogoLarge.jpg"]
+```
+</TabItem>
+<TabItem value="relay-realtime-sdk-(server)" label="RELAY Realtime SDK (Server)">
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here"})
+
+let messageClient = client.messaging;
+
+const sendResult = await messageClient.send({
+    from: "+155512312345",
+    to: "+15555554321",
+    media: ["https://mcdn.signalwire.com/images/v2/loud/LogoLarge.jpg"]
+});
+```
+</TabItem>
+<TabItem value="rest-api" label="REST API">
+```bash
+curl -L 'https://<YOUR_SPACE>.signalwire.com/api/laml/2010-04-01/Accounts/<PROJECT_ID_HERE>/Messages' \
+-H 'Content-Type: application/x-www-form-urlencoded' \
+-H 'Accept: application/json' \
+-H 'Authorization: Basic <BASE64 ENCODED AUTHENTICATION STRING>' \
+-d 'To=%2B155512312345' \
+-d 'From=%2B15555554321' \
+-d 'Media=https://mcdn.signalwire.com/images/v2/loud/LogoLarge.jpg'
+```
+</TabItem>
+</Tabs>
+</Accordion>
+
+<Accordion title="Respond to an incoming message">
+<Tabs>
+<TabItem value="relay-realtime-sdk-(server)" label="RELAY Realtime SDK (Server)">
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here"})
+
+await client.messaging.listen({
+  topics: ["office"],
+  async onMessageReceived(message) {
+    client.messaging.send({
+        to: message.from,
+        from: message.to,
+        body: `The message ${message.body} has been received!`
+    })
+  }
+})
+```
+</TabItem>
+</Tabs>
+</Accordion>
+
+<Accordion title="Forward an incoming message">
+<Tabs>
+<TabItem value="relay-realtime-sdk-(server)" label="RELAY Realtime SDK (Server)">
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here"})
+
+await client.messaging.listen({
+  topics: ["office"],
+  async onMessageReceived(message) {
+    client.messaging.send({
+        to: "+1xxxxxxxxxx",
+        from: message.to,
+        body: `
+        You received a message from ${message.from} to SignalWire number ${message.to}.
+        The message was: ${message.body}
+        `
+    })
+  }
+})
+```
+</TabItem>
+</Tabs>
+</Accordion>
+</AccordionGroup>
+
+## Choose an API
+
+  
+SignalWire's many API offerings make it quick and easy to send and receive SMS and MMS within an application through a variety of phone number types. There are a few different ways to utilize these services, so we encourage you to browse the documentation for our APIs.
+  
+  
+<Info title="Looking for Chat or PubSub?" icon="comment">
+SignalWire's Messaging APIs are tailored for SMS and MMS over the PSTN. For non-PSTN applications, check out our [Chat APIs][chat].
+</Info>
+  
+
+
+<CardGroup cols={2}>
+  <Card
+    title="REST APIs"
+    icon="solid comment"
+    href="/docs/apis"
+  >
+    Use classic HTTP calls to manage brands and campaigns, configure phone numbers, and much more.
+  </Card>
+</CardGroup>
+
+## Reference
+
+<CardGroup cols={2}>
+  <Card
+    title="Character limits"
+    icon="solid text-width"
+    href="/docs/platform/messaging/character-limits"
+  >
+    How message segments are measured and priced.
+  </Card>
+  <Card
+    title="MIME types"
+    icon="solid paperclip"
+    href="/docs/platform/messaging/mime-types"
+  >
+    Supported media types for MMS.
+  </Card>
+</CardGroup>
+
+## Frequently asked questions
+
+<AccordionGroup>
+  <Accordion title="What are the essential steps I need to take to start sending messages?">
+
+1. Create a Brand.
+2. Register a Campaign.
+3. Assign phone numbers to the campaign.
+
+Full details are explained in our [Registration](/docs/platform/messaging/campaign-registry/registration) guide.
+
+</Accordion>
+<Accordion title="Why can't I send or receive messages on my new 10DLC number?">
+
+As of December 2025, newly purchased US 10DLC numbers do not have messaging capabilities enabled by default.
+
+**To enable messaging:**
+- **Outbound/mixed use**: Assign your number to an approved [TCR campaign](/docs/platform/messaging/campaign-registry/registration). Messaging is automatically enabled once the number is assigned.
+- **Inbound-only use**: Contact [Support](https://support.signalwire.com/portal) to request inbound messaging enablement.
+- **Testing only**: Your first purchased number is automatically enabled for Platform Free Trial when paired with a verified mobile number.
+
+</Accordion>
+<Accordion title="What is 10DLC?">
+
+10DLC is a type of phone number. Short for 10 Digit Local Code, it is a type of phone number
+that includes an area code followed by 7 additional digits indicating a specific channel.
+For example, +12345678910, where the "+1" indicates the country, the "234" indicates the
+area code, and the remaining digits indicate the channel.
+
+</Accordion>
+<Accordion title="What is the difference between 10DLC and Toll-free phone numbers?">
+
+Toll-free numbers, although slightly more expensive, allow for increased throughput out-of-the-box.
+They also have a registration process tied to them, however once complete, have a higher
+deliverability rating than traditional 10DLC numbers.
+
+</Accordion>
+
+<Accordion title="What is The Campaign Registry?">
+
+The Campaign Registry is a platform that was created in partnership with a company called
+Kaleyra and several Mobile Network Operators (MNOs). The platform itself acts as a source
+of information about every 10DLC number being used for outbound SMS through A2P routes in
+an effort to discourage spam in the industry. In short, any and all 10DLC numbers that are
+to be used for SMS in SignalWire's platform must be registered through the Campaign Registry.
+You can find more information about the Campaign Registry in-depth [here](/docs/platform/messaging/campaign-registry).
+
+</Accordion>
+
+<Accordion title="Can we programmatically create campaigns and brands?">
+
+Yes! You can do this through the SignalWire REST APIs. Check out the [documentation](/docs/apis/relay-rest/list-brands).
+
+</Accordion>
+
+<Accordion title="How many messages can I send out?">
+
+The number of messages you can send out depends on a few different factors. If you are using
+a toll-free number, there is no real limit outside of throughput in regards to the amount
+of messages you could feasibly send. With 10DLC, it depends on your registered use case with
+the Campaign Registry. AT&T provides a limit on the amount of texts per minute you
+can send to an end-user at the campaign level whereas T-Mobile limits the overall amount
+of SMS per day you can send to and end user at the brand level. For more information around
+this, feel free to read [Campaign Registry - All you need to know](/docs/platform/messaging/campaign-registry).
+
+</Accordion>
+
+<Accordion title="What content is not allowed?">
+
+There is some content that is explicitly disallowed from being sent via SMS/MMS with SignalWire.
+You can see this list in full detail [here](/docs/platform/messaging/sms-best-practices).
+
+</Accordion>
+
+<Accordion title="What are Carrier Passthrough Fees?">
+
+Carrier Passthrough Fees, also known as Network Access Fees (NAFs),
+are additional fees that Mobile Network Operators (MNOs), or Carriers,
+charge on a per-SMS/MMS basis for the ability of that SMS/MMS to be passed-through their network.
+
+</Accordion>
+
+<Accordion title="Are all the Carrier Passthrough Fees the same?">
+
+No. Every carrier (MNO) assesses their own rates for inbound and outbound SMS.
+
+</Accordion>
+
+<Accordion title="How do I get higher throughput?">
+
+For verified toll-free numbers, you can contact sales at sales@signalwire.com to increase
+the throughput of those numbers up to 100 MPS for an additional price.
+
+</Accordion>
+
+<Accordion title="Can I just send SMS/MMS to a specific carrier like Verizon?">
+
+SignalWire does not provide a way to explicitly send to Verizon end-users or end-users of
+any other MNO.
+
+</Accordion>
+
+<Accordion title="Do I register toll-free SMS/MMS traffic?">
+
+You can verify toll-free traffic by opening a support ticket with us. Our team will follow
+up with the forms and information we need from you within that support ticket.
+
+</Accordion>
+
+<Accordion title="Does SignalWire manage opt-outs?">
+
+No. Customers are responsible for handling inbound stop requests and removing those customers
+from subscriber lists. Messages should **not** go out to these numbers again unless they
+have opted back in via an Unstop request.
+
+</Accordion>
+
+<Accordion title="What is considered a high opt-out rate?">
+
+Carriers consider anything more than 5% opt-out to be a high rate for consumers who have
+opted in and therefore should want to receive these messages.
+
+</Accordion>
+
+<Accordion title="Can I turn off inbound SMS?">
+
+Not currently. We have no way to turn off inbound SMS at this time. You can leave your numbers
+unset up for messaging and nothing will happen when inbound messages come into the numbers
+though!
+
+</Accordion>
+
+<Accordion title="Do you have a messaging queue?">
+
+We do not have a "scheduled" queue, but messages that exceed your throughput will be entered
+into your Space's backlog and sent when possible. Read about the backlog and queue system
+[here](/docs/platform/rate-limits#queue-and-backlog-system)! The default
+message backlog is 10,000 for the entire Space. These limits can be increased based on
+the use case and individual approval following an [account verification request](/docs/platform/rate-limits).
+
+</Accordion>
+
+<Accordion title="Am I billed once a message is in the queue?">
+
+  Messages are charged when they are 'Sent' successfully - meaning they leave our network without
+  issue. They are charged regardless of whether or not they deliver after they have left our
+  network. You are not charged while your messages are queued or 'failed' (failed meaning they
+  never left our network).
+
+</Accordion>
+
+<Accordion title="Where can I find information on specific error codes?">
+
+Visit our [error code explanation page](/docs/compatibility-api/rest/error-codes) for details.
+
+</Accordion>
+
+</AccordionGroup>
+
+{/* Links */}
+[chat]: /docs/platform/chat
+[tcr]: /docs/platform/messaging/campaign-registry

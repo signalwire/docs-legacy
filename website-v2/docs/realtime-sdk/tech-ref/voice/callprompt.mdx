@@ -1,0 +1,251 @@
+---
+title: "CallPrompt"
+keywords:
+  - SignalWire
+  - Realtime SDK
+  - Node.js
+  - voice prompt
+  - IVR prompt
+  - collect digits
+  - prompt and collect
+slug: /node/reference/voice/call-prompt
+sidebar_label: CallPrompt
+description: CallPrompt object reference for playing prompts and collecting input simultaneously during voice calls. Combine audio/TTS playback with digit/speech collection.
+toc_max_heading_level: 3
+---
+
+[callprompt]: #
+[prompt]: /docs/server-sdk/node/reference/voice/call/prompt
+[promptAudio]: /docs/server-sdk/node/reference/voice/call/prompt-audio
+[promptRingtone]: /docs/server-sdk/node/reference/voice/call/prompt-ringtone
+[promptTTS]: /docs/server-sdk/node/reference/voice/call/prompt-tts
+[type]: #properties
+
+Represents a current or past prompting session in a call. 
+
+Obtain instances of this class by starting a Prompt with one of the following methods:
+
+- [`Call.prompt`][prompt]
+- [`Call.promptAudio`][promptAudio]
+- [`Call.promptRingtone`][promptRingtone]
+- [`Call.promptTTS`][promptTTS]
+
+#### Example
+
+Prompting for a PIN to be entered using the keypad, then waiting for the user to
+finish entering the PIN before proceeding with the next instructions.
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+const call = await client.voice.dialPhone({
+  from: "+YYYYYYYYYY",
+  to: "+XXXXXXXXXX",
+});
+
+// Prompt for digits
+await call.promptTTS({
+  text: "Please enter your PIN",
+  digits: {
+    max: 5,
+    digitTimeout: 5,
+    terminators: "#*",
+  },
+  listen: {
+    onStarted: () => console.log("Prompt started"),
+    onUpdated: (event) => console.log("Prompt updated", event.result),
+    onEnded: async (event) => {
+      console.log("Prompt ended", event.result);
+      console.log("Users Pin", event.digits);
+      call.hangup();
+    },
+    onFailed: () => console.log("Prompt failed"),
+  }
+}).onStarted();
+```
+
+## **Properties**
+
+<ParamField path="confidence" type="number">
+  Confidence level for the speech recognition result (if [`type`][type] is `"speech"`), from 0 to 100. For example, `83.2`.
+</ParamField>
+
+<ParamField path="digits" type="string">
+  The digits that have been collected (if [`type`][type] is `"digit"`). For example, `"12345"`.
+</ParamField>
+
+<ParamField path="id" type="string">
+  The unique id for this prompt.
+</ParamField>
+
+<ParamField path="reason" type='"no_match" | "no_input" | "error"'>
+  Alias for [`type`][type], in case of errors. Use this field to check the reason of the error.
+</ParamField>
+
+<ParamField path="terminator" type="string">
+  The terminator used to complete the prompt (if [`type`][type] is `"digit"`). For example, `"#"`.
+</ParamField>
+
+<ParamField path="text" type="string">
+  The text that has been collected (if [`type`][type] is `"speech"`). For example, `"hello who's there"`.
+</ParamField>
+
+<ParamField path="type" type='"error" | "no_input" | "no_match" | "digit" | "speech"'>
+  The type of this prompt.
+</ParamField>
+
+<ParamField path="result" type="object">
+  The raw result object from the prompt operation.
+</ParamField>
+
+<ParamField path="speech" type="string">
+  Alias for [`text`][type]. The text that has been collected (if [`type`][type] is `"speech"`).
+</ParamField>
+
+<ParamField path="hasEnded" type="boolean">
+  Whether the prompt has ended. Returns `true` if the result type is one of: `"no_input"`, `"error"`, `"no_match"`, `"digit"`, or `"speech"`.
+</ParamField>
+
+## **Methods**
+
+### ended
+
+- **ended**(): `Promise`\<[`CallPrompt`][callprompt]>
+
+Returns a promise that is resolved only after this prompt finishes (or is stopped).
+
+#### Returns
+
+`Promise`\<[`CallPrompt`][callprompt]>
+
+A promise that is resolves to [`CallPrompt`][callprompt] when the prompt has been ended.
+
+#### Example
+
+```js
+const prompt = await call.promptTTS({
+  text: "Please enter your PIN",
+  digits: {
+    max: 5,
+    digitTimeout: 2,
+    terminators: "#*",
+  },
+});
+const { type, digits, terminator } = await prompt.ended();
+```
+
+---
+
+### setVolume
+
+- **setVolume**(`volume`): `Promise`\<[`CallPrompt`][callprompt]>
+
+Changes the volume of the audio.
+
+#### Parameters
+
+<ParamField path="volume" type="number" required>
+  Volume value between -40dB and +40dB.
+</ParamField>
+
+#### Returns
+
+`Promise`\<[`CallPrompt`][callprompt]>
+
+A promise that is resolves to [`CallPrompt`][callprompt] when the volume is changed.
+
+#### Example
+
+```js
+const prompt = await call.promptTTS({
+  text: "Please enter your PIN",
+  digits: {
+    max: 5,
+    digitTimeout: 2,
+    terminators: "#*",
+  },
+});
+await prompt.setVolume(-20);
+```
+
+---
+
+### stop
+
+- **stop**(): `Promise`\<[`CallPrompt`][callprompt]>
+
+Stops the prompt.
+
+#### Returns
+
+`Promise`\<[`CallPrompt`][callprompt]>
+
+A promise that is resolves to [`CallPrompt`][callprompt] when the prompt stops.
+
+#### Example
+
+```js
+const prompt = await call.promptTTS({
+  text: "Please enter your PIN",
+  digits: {
+    max: 5,
+    digitTimeout: 2,
+    terminators: "#*",
+  },
+});
+await prompt.stop();
+```
+
+---
+
+## **Events**
+
+### onStarted
+
+- **CallPrompt.listen**(`{ onStarted: Callback }}`)
+
+Emitted when the prompt starts. Your event handler will receive an instance of [`CallPrompt`][callprompt].
+
+#### Parameters
+
+<ParamField path="prompt" type="CallPrompt" required>
+  The prompt that started. See [`CallPrompt`][callprompt].
+</ParamField>
+
+### onUpdated
+
+- **CallPrompt.listen**(`{ onUpdated: Callback }}`)
+
+Emitted when the prompt is updated. Your event handler will receive an instance of [`CallPrompt`][callprompt].
+
+#### Parameters
+
+<ParamField path="prompt" type="CallPrompt" required>
+  The prompt that updated. See [`CallPrompt`][callprompt].
+</ParamField>
+
+### onFailed
+
+- **CallPrompt.listen**(`{ onFailed: Callback }}`)
+
+Emitted when the prompt fails. Your event handler will receive an instance of [`CallPrompt`][callprompt].
+
+#### Parameters
+
+<ParamField path="prompt" type="CallPrompt" required>
+  The prompt that failed. See [`CallPrompt`][callprompt].
+</ParamField>
+
+### onEnded
+
+- **CallPrompt.listen**(`{ onEnded: Callback }}`)
+
+Emitted when the prompt ends. Your event handler will receive an instance of [`CallPrompt`][callprompt].
+
+#### Parameters
+
+<ParamField path="prompt" type="CallPrompt" required>
+  The prompt that ended. See [`CallPrompt`][callprompt].
+</ParamField>

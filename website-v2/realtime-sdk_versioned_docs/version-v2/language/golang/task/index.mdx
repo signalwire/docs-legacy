@@ -1,0 +1,75 @@
+---
+title: Relay.Task
+slug: /go/reference/task
+toc_max_heading_level: 3
+---
+
+[link-1]: /docs/server-sdk/v2/go/reference/consumer#ontask
+[link]: /docs/server-sdk/v2/go/reference/consumer
+
+## Relay.Task
+
+A `Relay.Task` is simple way to send jobs to your [`Relay.Consumers`][link] from a short lived process, like a web framework. RELAY Tasks allow you to pass commands down to your Consumers without blocking your short lived request. Think of a RELAY Task as a way to queue a job for your background workers to processes asynchronously.
+
+
+### Methods-submenu
+
+<div className="method-definitions"></div>
+
+#### Deliver
+
+Send a job to your `Consumer` in a specific context.
+
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `Context` | `string` | **required** | Context where to send the Task. |
+| `Message` | `array` | **required** | Array with your custom data that will be sent to your Consumer's [`onTask`][link-1] handler. |
+
+**Returns**
+
+`boolean` - Whether the Task has been sent successfully.
+
+**Examples**
+
+> Deliver a task to your Consumer with a message to then make an outbound Call.
+
+```go
+type PassToTask struct {
+	Foo uint   `json:"foo"`
+	Bar string `json:"bar"`
+}
+
+func main() {
+[...]
+consumer.OnTask = func(_ *signalwire.Consumer, ev signalwire.ParamsEventTaskingTask) {
+	signalwire.Log.Info("Task Delivered. %v\n", ev)
+	  
+	go func() {
+		done <- struct{}{}
+	}()
+}
+
+taskMsg := PassToTask{
+	Foo: 123,
+	Bar: "baz",
+	}
+		 
+byteArray, err := json.MarshalIndent(taskMsg, "", "  ")
+if err != nil {
+	signalwire.Log.Error("%v", err)
+	return
+}
+if result := consumer.Client.Tasking.Deliver(DefaultContext, byteArray); !result {
+	signalwire.Log.Error("Could not deliver task\n")
+	go func() {
+		done <- struct{}{}
+		}()
+	}
+}
+// stop when task has been delivered or on error
+<-done
+}
+```

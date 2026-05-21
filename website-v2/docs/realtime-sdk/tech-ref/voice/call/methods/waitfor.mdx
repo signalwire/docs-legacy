@@ -1,0 +1,59 @@
+---
+title: "waitFor"
+slug: /node/reference/voice/call/wait-for
+description: waitFor method for the Call class.
+toc_max_heading_level: 3
+---
+
+
+### waitFor
+
+- **waitFor**(`params`): `Promise<boolean>`
+
+Returns a promise that is resolved only after the current call is in one of the specified states.
+
+#### Parameters
+
+<ParamField path="params" type='"ended" | "ending" | ("ended" | "ending")[]' required>
+  The call state(s) to wait for.
+</ParamField>
+
+#### Returns
+
+`Promise<boolean>`
+
+A promise that resolves to `true` if the call is in one of the specified states, or `false` if the call is ended.
+
+#### Example
+
+In this example, we dial a phone number and play a TTS message.
+After the TTS message is finished, we hangup the call and wait for the call to end
+before printing a message to console.
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+const voiceClient = client.voice;
+
+// Listen for incoming calls
+await voiceClient.listen({
+
+  topics: ["office"],
+  onCallReceived: async (call) => {
+    console.log("Call received");
+    // Answer the call
+    await call.answer();
+
+    // play TTS
+    await call.playTTS({ text: "Hello World" });
+
+    call.hangup();
+
+    call.waitFor("ended").then(() => {
+      console.log("Call ended");
+    });
+  }
+});
+```

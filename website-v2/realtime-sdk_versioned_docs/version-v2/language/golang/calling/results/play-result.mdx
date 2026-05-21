@@ -1,0 +1,42 @@
+---
+title: Relay.Calling.PlayResult
+slug: /go/reference/calling/results/play
+description: The result object that is returned when playing a call.
+toc_max_heading_level: 3
+---
+
+[relay-event]: /docs/server-sdk/v2/go/reference/event
+
+## Relay.Calling.PlayResult
+
+This object returned from one of _synchronous_ play methods that represents the final result of a playing action.
+
+## Methods-submenu
+
+### GetEvent
+
+Returns the last Relay Event arrived for this operation.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+[`Relay.Event`][relay-event] - Last Relay Event.
+
+
+
+### GetSuccessful
+
+Return `true` if the playing has succeeded, `false` otherwise.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`boolean` - Whether the playing has finished successfully.

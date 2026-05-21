@@ -1,0 +1,20 @@
+---
+title: "Relay.Calling.AnswerResult"
+slug: /python/reference/calling/results/answer
+description: The result object that is returned when answering a call.
+toc_max_heading_level: 3
+---
+
+[answer]: /docs/server-sdk/v2/python/reference/calling/call#answer
+[relay-event]: /docs/server-sdk/v2/python/reference/event
+
+## Relay.Calling.AnswerResult
+
+This object is returned by the [`answer`][answer] method.
+
+### Properties
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `successful` | boolean | Whether the call has been answered from the remote party. |
+| `event` | [`Relay.Event`][relay-event] | Last event that completed the operation. |

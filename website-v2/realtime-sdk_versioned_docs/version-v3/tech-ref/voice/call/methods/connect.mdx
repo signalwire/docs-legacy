@@ -1,0 +1,79 @@
+---
+title: "connect"
+slug: /node/reference/voice/call/connect
+description: connect method for the Call class.
+toc_max_heading_level: 3
+---
+
+[call-10]: /docs/server-sdk/v3/node/reference/voice/call
+[call-19]: /docs/server-sdk/v3/node/reference/voice/call
+[devicebuilder-1]: /docs/server-sdk/v3/node/reference/voice/device-builder
+[voice-call-3]: /docs/server-sdk/v3/node/reference/voice/call/disconnected
+[voice-call-4]: /docs/server-sdk/v3/node/reference/voice/call/connect-phone
+[voice-call-5]: /docs/server-sdk/v3/node/reference/voice/call/connect-sip
+[voicedevicebuilder-1]: /docs/server-sdk/v3/node/reference/voice/device-builder
+[voiceplaylist]: /docs/server-sdk/v3/node/reference/voice/playlist
+
+### connect
+
+- **connect**(`params`): `Promise<Call>` - See [Call][call-19] for more details.
+
+Attempt to connect an existing call to a new outbound call. The two devices will hear each other. You can wait until the new peer is disconnected by calling [disconnected][voice-call-3].
+
+This is a generic method that allows you to connect to multiple devices in series, parallel, or combinations of both with the use of a [DeviceBuilder][devicebuilder-1]. For simpler use cases, prefer using [connectPhone][voice-call-4] or [connectSip][voice-call-5].
+
+#### Parameters
+
+| Name     | Type                                                                                                             | Description                                                                                                                                                                                                                       |
+|:---------|:-----------------------------------------------------------------------------------------------------------------|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `params` | [`VoiceDeviceBuilder`][voicedevicebuilder-1] \| `{ devices: VoiceDeviceBuilder ; ringback?: VoicePlaylist }` | Pass only the Dialer specifying the devices to call or an object with the Dialer and Ringback audio to play to call leg. You can play audio, TTS, silence or ringtone. See [VoicePlaylist][voiceplaylist] for more details. |
+
+#### Returns
+
+`Promise<Call>` - See [Call][call-19] for more details.
+
+A promise that resolves to a [`Call`][call-10] object that you can use to control the new peer. The promise resolves only after the new peer picks up the call.
+
+#### Examples
+
+Connecting to a new SIP call.
+
+```js
+const plan = new Voice.DeviceBuilder().add(
+  Voice.DeviceBuilder.Sip({
+    from: "sip:user1@domain.com",
+    to: "sip:user2@domain.com",
+    timeout: 30,
+  })
+);
+
+const peer = await call.connect(plan);
+
+await call.playTTS({ text: "You are peer 1" });
+await peer.playTTS({ text: "You are peer 2" });
+
+await call.disconnected();
+await call.playTTS({ text: "The peer disconnected" });
+```
+
+Connecting to a new SIP call, while playing ringback audio.
+
+```js
+const plan = new Voice.DeviceBuilder().add(
+  Voice.DeviceBuilder.Sip({
+    from: "sip:user1@domain.com",
+    to: "sip:user2@domain.com",
+    timeout: 30,
+  })
+);
+
+const ringback = new Voice.Playlist().add(
+  Voice.Playlist.Ringtone({
+    name: "it",
+  })
+);
+const peer = await call.connect({
+  devices: plan,
+  ringback: ringback,
+});
+```

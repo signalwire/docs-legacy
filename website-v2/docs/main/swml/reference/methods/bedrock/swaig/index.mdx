@@ -1,0 +1,62 @@
+---
+slug: /swml/reference/amazon-bedrock/swaig
+title: SWAIG
+description: The SignalWire AI Gateway Interface. Allows you to create user-defined functions that can be executed during the dialogue.
+toc_max_heading_level: 3
+---
+import WebHookUrlPartial from '@site/docs/_partials/swml/_web-hook-url.mdx';
+
+
+The SignalWire AI Gateway Interface. Allows you to create user-defined functions that can be executed during the dialogue.
+
+## **Properties**
+
+<ParamField path="amazon_bedrock.SWAIG" type="object">
+  An object that accepts the following properties.
+</ParamField>
+
+<Indent>
+
+<ParamField path="SWAIG.defaults" type="object">
+  Default settings for all SWAIG functions. If `defaults` is not set, settings may be set in each function object. Default is not set.
+</ParamField>
+
+<Indent>
+<ParamField path="defaults.web_hook_url" type="string">
+  The default URL to send status callbacks and reports to for all SWAIG functions. If `defaults` is not set, `web_hook_url` may be set in each [SWAIG function](/docs/swml/reference/amazon-bedrock/swaig/functions) object. Authentication can also be set in the url in the format of `username:password@url`.
+</ParamField>
+</Indent>
+
+
+<ParamField path="SWAIG.functions" type="object[]">
+  An array of JSON objects to define functions that can be executed during the interaction with the AI. Default is not set. The fields of this object are the six following.
+
+  See [`functions`](/docs/swml/reference/amazon-bedrock/swaig/functions) for additional details.
+</ParamField>
+
+
+<ParamField path="SWAIG.includes" type="object[]">
+  An array of objects to include remote function signatures. This allows you to include functions that are defined in a remote location.
+
+  See [`includes`](/docs/swml/reference/amazon-bedrock/swaig/includes) for additional details.
+</ParamField>
+
+
+<ParamField path="SWAIG.native_functions" type="string[]">
+  Prebuilt functions the AI agent is able to call.
+  The agent is already aware of these functions and can use them creatively based on prompting.
+  For example, a prompt like "tell the user what time it is" will automatically use `check_time`.
+
+  Accepted values:
+  - `adjust_response_latency` - Adjust how long the agent will wait for the user to stop talking.
+  - `check_time` - Returns the current time for the time zone set in `ai.local_tz`.
+  - `wait_for_user` - Causes the AI to wait until the user speaks again. Use when the user asks to wait or hold on.
+  - `wait_seconds` - Waits for the given amount of time.
+</ParamField>
+
+</Indent>
+
+
+<WebHookUrlPartial />
+
+

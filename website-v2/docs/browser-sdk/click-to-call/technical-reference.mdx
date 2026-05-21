@@ -1,0 +1,341 @@
+---
+title: "Technical reference"
+description: "Complete reference for Click-to-Call configuration options and parameters"
+slug: /click-to-call/reference
+---
+
+
+This page provides a comprehensive reference for Click-to-Call, including all available configuration parameters and their usage.
+
+## Snippet structure
+
+The Click-to-Call snippet consists of two main parts that work together to create a fully functional Click-to-Call widget on your website:
+
+### Async loader (IIFE)
+
+The first part is an Immediately Invoked Function Expression (IIFE) that handles:
+- Loading the required JavaScript resources
+- Authentication with SignalWire services
+- Setting up the necessary namespaces and methods
+
+```javascript
+// Async Loader IIFE - Do not modify this section except for the API key if necessary
+(a => {
+  // Loader implementation
+  // ...
+})({ apiKey: "c2c_XXXXXXXXXXXXXXXXXXXXX", v: "0.0.1" });
+```
+
+<Warning title="Only modify the API key if necessary">
+- Never modify the Async Loader code except for the API key if necessary
+- The API key is linked to your SignalWire account and specific permissions
+- If you need to change the API key, ensure the new key has permissions for the destinations you plan to use
+- If your key doesn't have access to the destination resources, calls will fail to connect
+</Warning>
+
+The loader initializes a global `sw` namespace in your browser window, with a nested `c2c` namespace that contains
+all the methods needed to work with the Click-to-Call widget.
+
+### Component initialization
+
+The second part calls the `spawn` method to configure and render the widget:
+
+```javascript
+// Component initialization - Can be customized
+sw.c2c.spawn('C2CButton', {
+  // Configuration parameters
+  destination: '/public/example',
+  buttonParentSelector: '#click2call',
+  callParentSelector: '#call',
+  // Additional parameters as needed
+});
+```
+
+When you create a Click-to-Call widget in the SignalWire Dashboard, both parts are generated together as a single code snippet.
+You can copy this entire snippet into your website's HTML, and the Click-to-Call widget will be initialized immediately when the
+page loads.
+
+<Tip>
+In some cases, you might want to delay the initialization of the Click-to-Call widget until a specific user action or page event.
+You can achieve this by:
+
+1. Including only the Async Loader part of the script in your page's head or early in the body
+2. Calling the component initialization method later when you want to initialize the widget
+
+</Tip>
+
+
+## Methods
+
+### `spawn`
+
+The `spawn` method is used to initialize the C2C widget. It will use the CSS selectors provided in `buttonParentSelector` and
+`callParentSelector` to render the call button and widget.
+
+#### Syntax
+
+```javascript
+sw.c2c.spawn('componentName', options)
+```
+
+#### Parameters
+
+| Parameter | Type | Description |
+|:----------|:-----|:------------|
+| `componentName`<span className="required-arg">Required</span> | `string` | The component to initialize. Currently only `'C2CButton'` is supported. |
+| [`options`](#options-reference) <span className="required-arg">Required</span> | `object` | An object of configuration options. These options control the behavior and appearance of the C2C widget. |
+
+#### Options reference
+
+The following parameters can be passed in the `options` object to customize the C2C widget:
+
+| Parameter | Type | Default | Description |
+|:----------|:-----|:--------|:------------|
+| [`destination`](#destination) <span className="required-arg">Required</span> | `string` | The resource that was selected when the snippet was created in the dashboard. | The destination address to call, using SignalWire Address format.<br /><br />**Important:** This parameter is required and bound to the destination(s) selected when the snippet was created in the dashboard, otherwise the call will not connect. |
+| [`buttonParentSelector`](#buttonparentselector) <span className="required-arg">Required</span> | `string` | `#click2call` | CSS selector for the element where the call button will be rendered. |
+| [`callParentSelector`](#callparentselector) <span className="required-arg">Required</span> | `string` | `#call` | CSS selector for the element where the call widget will be displayed. |
+| [`innerHTML`](#innerhtml) <span className="optional-arg">Optional</span> | `string` | - | Optional HTML markup to render a custom button. If not provided, a default button will be used. |
+| [`beforeCallStartFn`](#beforecallstartfn) <span className="optional-arg">Optional</span> | `function` | - | Called when user clicks to start a call, before call setup begins. Return `true` to proceed with the call or `false` to cancel. |
+| [`afterCallStartFn`](#aftercallstartfn) <span className="optional-arg">Optional</span> | `function` | - | Called after call setup completes and the connection is established. Useful for updating UI elements or tracking call start events. |
+| [`beforeCallLeaveFn`](#beforecallleavefn) <span className="optional-arg">Optional</span> | `function` | - | Called when user or system initiates call end, before teardown begins. Return `true` to proceed with hanging up or `false` to cancel. |
+| [`afterCallLeaveFn`](#aftercallleavefn) <span className="optional-arg">Optional</span> | `function` | - | Called after call has fully ended and the widget is removed from view. |
+| [`onCallError`](#oncallerror) <span className="optional-arg">Optional</span> | `function` | - | Called if any error occurs during the call setup process. Receives the error object as a parameter. |
+
+#### The `destination` parameter {#destination}
+
+The destination address to call, using SignalWire Address format. This parameter is required and bound to the destinations selected when the snippet was created in the dashboard.
+
+<Warning>
+The `destination` parameter must reference a valid destination that was selected when creating the C2C widget in the dashboard.
+If the destination is not valid, the call will not connect.
+</Warning>
+
+##### Example
+
+```javascript
+sw.c2c.spawn('C2CButton', {
+  destination: '/public/support',
+  // Other parameters...
+});
+```
+
+#### The `buttonParentSelector` parameter {#buttonparentselector}
+
+CSS selector for the HTML element where the call button will be rendered. This element must exist in the DOM when the `sw.c2c.spawn` method is called.
+
+```javascript
+sw.c2c.spawn('C2CButton', {
+  buttonParentSelector: '#my-call-button-container',
+  // Other parameters...
+});
+```
+
+```html
+<!-- Target element in your HTML -->
+
+```
+
+#### The `callParentSelector` parameter {#callparentselector}
+
+CSS selector for the HTML element where the call widget will be displayed when a call is active. This element must exist in the DOM when the `sw.c2c.spawn` method is called.
+
+```javascript
+sw.c2c.spawn('C2CButton', {
+  callParentSelector: '#my-call-widget-container',
+  // Other parameters...
+});
+```
+
+```html
+<!-- Target element in your HTML -->
+
+```
+
+#### The `innerHTML` parameter {#innerhtml}
+
+Optional HTML markup to render a custom call button. If not provided, a default button will be used.
+
+```javascript
+sw.c2c.spawn('C2CButton', {
+  innerHTML: '<button class="my-custom-button"><i class="icon-phone"></i> Call Support</button>',
+  // Other parameters...
+});
+```
+
+This parameter allows you to fully customize the appearance of the call button to match your website's design.
+
+#### The `beforeCallStartFn` parameter {#beforecallstartfn}
+
+A callback function that is called before a call is initiated. It should return `true` to proceed with the call or `false` to cancel.
+
+```javascript
+sw.c2c.spawn('C2CButton', {
+  beforeCallStartFn: () => {
+    // Check if it's during business hours
+    const now = new Date();
+    const hour = now.getHours();
+    
+    if (hour < 9 || hour >= 17) {
+      alert('Our call center is only available from 9 AM to 5 PM.');
+      return false; // Don't proceed with the call
+    }
+    
+    // Show a loading spinner
+    document.getElementById('loading').style.display = 'block';
+    
+    return true; // Proceed with the call
+  },
+  // Other parameters...
+});
+```
+
+Common uses for this callback include:
+
+- Validating form data before initiating a call
+- Performing business hours checks
+- Showing loading indicators
+- Confirming with the user that they want to start a call
+
+#### The `afterCallStartFn` parameter {#aftercallstartfn}
+
+A callback function that is called after a call has been successfully connected.
+
+```javascript
+sw.c2c.spawn('C2CButton', {
+  afterCallStartFn: () => {
+    // Hide the loading spinner
+    document.getElementById('loading').style.display = 'none';
+    
+    // Hide the call button during the call
+    document.getElementById('call-button-container').style.display = 'none';
+    
+    console.log('Call connected successfully');
+  },
+  // Other parameters...
+});
+```
+
+Common uses for this callback include:
+
+- Hiding the call button while a call is active
+- Updating UI elements to reflect the active call state
+- Triggering analytics events
+- Adjusting page layout to accommodate the call widget
+
+#### The `beforeCallLeaveFn` parameter {#beforecallleavefn}
+
+A callback function that is called before a call is hung up. It should return `true` to proceed with hanging up or `false` to cancel.
+
+```javascript
+sw.c2c.spawn('C2CButton', {
+  beforeCallLeaveFn: () => {
+    // Ask for confirmation
+    return confirm('Are you sure you want to end this call?');
+  },
+  // Other parameters...
+});
+```
+
+Common uses for this callback include:
+
+- Showing confirmation dialogs before ending a call
+- Performing cleanup operations
+- Preparing UI elements for the call end state
+
+#### The `afterCallLeaveFn` parameter {#aftercallleavefn}
+
+A callback function that is called after a call has ended and the widget is no longer visible.
+
+```javascript
+sw.c2c.spawn('C2CButton', {
+  afterCallLeaveFn: () => {
+    // Show the call button again
+    document.getElementById('call-button-container').style.display = 'block';
+    
+    // Maybe show a feedback form
+    document.getElementById('call-feedback').style.display = 'block';
+    
+    console.log('Call ended');
+  },
+  // Other parameters...
+});
+```
+
+Common uses for this callback include:
+
+- Restoring UI elements to their pre-call state
+- Showing feedback forms
+- Triggering analytics events
+- Re-enabling form elements or interactive components
+
+#### The `onCallError` parameter {#oncallerror}
+
+A callback function that is called if any error occurs during call setup. It receives the error object as a parameter.
+
+```javascript
+sw.c2c.spawn('C2CButton', {
+  onCallError: (error) => {
+    console.error('Call error:', error);
+    
+    // Hide any loading indicators
+    document.getElementById('loading').style.display = 'none';
+    
+    // Show an appropriate error message to the user
+    if (error.name === 'MediaDeviceError') {
+      alert('Please ensure your microphone is connected and you have granted permission to use it.');
+    } else {
+      alert('Sorry, we couldn\'t connect your call. Please try again later.');
+    }
+  },
+  // Other parameters...
+});
+```
+
+Common uses for this callback include:
+
+- Displaying user-friendly error messages
+- Logging errors for debugging purposes
+- Hiding loading indicators or resetting UI elements
+- Implementing retry logic
+
+## Complete example
+
+Here's a complete example that demonstrates all available configuration parameters:
+
+```javascript
+sw.c2c.spawn('C2CButton', {
+  // Core parameters
+  destination: '/public/support',
+  buttonParentSelector: '#click2call',
+  callParentSelector: '#call',
+  innerHTML: '<button class="custom-call-button">Contact Support</button>',
+  
+  // Callback parameters
+  beforeCallStartFn: () => {
+    console.log('Preparing to start call...');
+    document.getElementById('loading').style.display = 'block';
+    return true;
+  },
+  
+  afterCallStartFn: () => {
+    console.log('Call connected!');
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('click2call').style.display = 'none';
+  },
+  
+  beforeCallLeaveFn: () => {
+    return confirm('Are you sure you want to end this call?');
+  },
+  
+  afterCallLeaveFn: () => {
+    console.log('Call ended.');
+    document.getElementById('click2call').style.display = 'block';
+    document.getElementById('feedback-form').style.display = 'block';
+  },
+  
+  onCallError: (error) => {
+    console.error('Call error:', error);
+    document.getElementById('loading').style.display = 'none';
+    alert('Sorry, we couldn\'t connect your call. Please try again later.');
+  }
+}); 

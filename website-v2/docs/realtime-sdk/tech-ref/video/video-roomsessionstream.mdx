@@ -1,0 +1,145 @@
+---
+title: "RoomSessionStream"
+keywords:
+  - SignalWire
+  - Realtime SDK
+  - Node.js
+  - video streaming
+  - RTMP
+  - live stream
+slug: /node/reference/video/room-session-stream
+sidebar_label: RoomSessionStream
+description: RoomSessionStream reference for managing RTMP streams from video rooms. Stream room audio/video content to external platforms like YouTube.
+toc_max_heading_level: 3
+---
+
+[roomsession]: /docs/server-sdk/node/reference/video/room-session
+[roomsessionstream-1]: /docs/server-sdk/node/reference/video/room-session-stream
+[video-roomsession]: /docs/server-sdk/node/reference/video/room-session/start-stream
+
+Represents a specific stream of a room session. This is an RTMP stream of the
+audio/video content of the room, which will be sent to an external party (e.g.,
+to YouTube).
+
+You can start a stream with [RoomSession.startStream][video-roomsession].
+
+## **Properties**
+
+<ParamField path="id" type="string" required>
+  The unique id of this stream.
+</ParamField>
+
+<ParamField path="roomId" type="string" required>
+  The id of the room associated to this stream.
+</ParamField>
+
+<ParamField path="roomSessionId" type="string" required>
+  The id of the room session associated to this stream.
+</ParamField>
+
+<ParamField path="state" type='"streaming" | "completed"' required>
+  Current state of the stream.
+</ParamField>
+
+<ParamField path="url" type="string">
+  The RTMP URL of the stream.
+</ParamField>
+
+<ParamField path="duration" type="number">
+  Total seconds of time spent streaming, if available. This is equal to (`endedAt` - `startedAt`).
+</ParamField>
+
+<ParamField path="startedAt" type="Date">
+  Start time, if available.
+</ParamField>
+
+<ParamField path="endedAt" type="Date">
+  End time, if available.
+</ParamField>
+
+<ParamField path="hasEnded" type="boolean" required>
+  Whether the stream has ended. Returns `true` if the state is `"completed"`.
+</ParamField>
+
+## **Methods**
+
+### stop
+
+- **stop**(): `Promise<void>`
+
+Stops the stream.
+
+#### Returns
+
+`Promise<void>`
+
+#### Example
+
+In this example, we wait for a room to start and then start
+a stream in that room. We then stop the stream after 10 seconds.
+This example assumes that there is a [`RoomSession`][roomsession] already active and that members are joining the room.
+
+```javascript
+import { SignalWire } from "@signalwire/realtime-api";
+
+// Initialize the SignalWire client
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" });
+
+// Access video client from the main client
+const videoClient = client.video;
+
+// Setup listener for when a room starts
+await videoClient.listen({
+  onRoomStarted: async (roomSession) => {
+    console.log("Room started", roomSession.displayName);
+
+    roomSession.startStream({
+      url: "rtmp://example.com/stream"
+    })
+
+    await roomSession.listen({
+      onStreamStarted: async (stream) => {
+        console.log("Stream started", stream.state);
+
+        // Wait 10 seconds and stop the stream
+        setTimeout(() => {
+          console.log("Stopping stream");
+          stream.stop();
+        }, 10000);
+      },
+      onStreamEnded: (stream) => {
+        console.log("Stream ended", stream.id, stream.state);
+      },
+    });
+  },
+  onRoomEnded: async (roomSession) => {
+    console.log("Room ended", roomSession.displayName);
+  }
+});
+```
+
+## **Events**
+
+### onStarted
+
+- **RoomSessionStream**(`{ listen: {onStarted: Callback }}`)
+
+Emitted when the stream has started.
+
+#### Parameters
+
+<ParamField path="stream" type="RoomSessionStream" required>
+  The stream that has started. See [`RoomSessionStream`][roomsessionstream-1].
+</ParamField>
+
+### onEnded
+
+- **RoomSessionStream**(`{ listen: {onEnded: Callback } }`)
+
+Emitted when the stream has ended.
+
+#### Parameters
+
+<ParamField path="stream" type="RoomSessionStream" required>
+  The stream that has ended. See [`RoomSessionStream`][roomsessionstream-1].
+</ParamField>

@@ -1,0 +1,83 @@
+/**
+ * Table component styles
+ */
+
+.tableContainer {
+  overflow-x: auto;
+  margin-bottom: var(--ifm-paragraph-margin-bottom);
+}
+
+.table {
+  border-collapse: collapse;
+  width: auto;
+  margin: 0;
+  display: table;
+  box-sizing: border-box;
+  font-size: 0.9rem;
+}
+
+.fullWidth {
+  width: 100%;
+}
+
+.table th {
+  background-color: var(--ifm-table-head-background);
+  color: var(--ifm-table-head-color);
+  font-weight: var(--ifm-font-weight-bold);
+  padding: 0.75rem;
+  text-align: left;
+}
+
+.table td {
+  padding: 0.75rem;
+  border-top: 1px solid var(--ifm-table-border-color);
+}
+
+/* Striped Table */
+.striped tr:nth-child(even) {
+  background-color: var(--ifm-table-stripe-background);
+}
+
+/* Bordered Table */
+.bordered th,
+.bordered td {
+  border: 1px solid var(--ifm-table-border-color);
+}
+
+/* Compact Table */
+.compact th,
+.compact td {
+  padding: 0.4rem 0.5rem;
+}
+
+/* Hoverable Table */
+.hoverable tr:hover {
+  background-color: var(--ifm-hover-overlay);
+}
+
+/* Simple container for the table */
+.tableWrapper {
+  overflow-x: auto;
+  margin-bottom: 1rem;
+}
+
+.combinedTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+/* Ensure consistent styling across combined tables */
+.combinedTable th,
+.combinedTable td {
+  padding: 0.75rem;
+  border: 1px solid var(--ifm-table-border-color, #ddd);
+}
+
+.combinedTable th {
+  background-color: var(--ifm-table-head-background, #f4f4f4);
+  font-weight: var(--ifm-font-weight-bold, 700);
+}
+
+.combinedTable tr:nth-child(even) {
+  background-color: var(--ifm-table-stripe-background, #f8f8f8);
+} 

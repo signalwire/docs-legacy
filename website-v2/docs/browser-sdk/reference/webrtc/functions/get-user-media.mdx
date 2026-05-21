@@ -1,0 +1,48 @@
+---
+title: "getUserMedia"
+slug: /js/reference/webrtc/get-user-media
+description: getUserMedia function in the WebRTC namespace.
+toc_max_heading_level: 3
+---
+
+### getUserMedia
+
+- `Const` **getUserMedia**(`constraints?`): `Promise<MediaStream>` — See [MediaStream](https://developer.mozilla.org/en-US/docs/Web/API/MediaStream) for more details.
+
+Prompts the user to share one or more media devices and asynchronously returns an associated [MediaStream](https://developer.mozilla.org/en-US/docs/Web/API/MediaStream) object.
+
+For more information, see [`MediaDevices.getUserMedia()`](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia).
+
+#### Parameters
+
+<ParamField path="constraints" type="MediaStreamConstraints">
+  An optional [MediaStreamConstraints](https://developer.mozilla.org/en-US/docs/Web/API/MediaStreamConstraints) object specifying requirements for the returned [MediaStream](https://developer.mozilla.org/en-US/docs/Web/API/MediaStream).
+</ParamField>
+
+#### Returns
+
+`Promise<MediaStream>`
+
+#### Examples
+
+To only request audio media:
+
+```javascript
+await SignalWire.WebRTC.getUserMedia({ audio: true, video: false });
+// MediaStream {id: "HCXy...", active: true, ...}
+```
+
+To request both audio and video, specifying constraints for the video:
+
+```javascript
+const constraints = {
+  audio: true,
+  video: {
+    width: { min: 1024, ideal: 1280, max: 1920 },
+    height: { min: 576, ideal: 720, max: 1080 },
+  },
+};
+await SignalWire.WebRTC.getUserMedia(constraints);
+// MediaStream {id: "EDVk...", active: true, ...}
+```
+

@@ -1,0 +1,46 @@
+---
+title: "CallRingback.SilenceParams"
+slug: /dotnet/reference/calling/call-ringback-silence-params
+toc_max_heading_level: 3
+---
+
+# SignalWire.Relay.Calling.CallRingback.SilenceParams
+
+This object represents the parameters specific to silence ringback.
+
+## Constructor
+
+The only constructor is the default constructor, properties should all be assigned by initializer or after construction.
+
+**Parameters**
+
+None
+
+**Examples**
+
+> Basic Example
+
+```csharp
+CallRingback ringback = new CallRingback
+{
+    Type = CallRingback.RingbackType.audio,
+    Parameters = new CallRingback.SilenceParams
+    {
+        Duration = 30
+    }
+};
+```
+
+## Properties
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `Duration` | string | The maximum duration for silence on ringback. |
+
+## Methods
+
+None
+
+## Events
+
+None

@@ -1,0 +1,93 @@
+---
+title: SignalWire Documentation
+slug: /
+description: Build powerful communication applications with SignalWire. Explore our REST APIs, Realtime SDKs, and comprehensive guides.
+hide_table_of_contents: true
+---
+
+<div className="lp-page-container">
+  <div className="main-content">
+    {/* Dashed Pattern */}
+    <div className="dashed-pattern dashed-pattern-left"></div>
+    <div className="dashed-pattern dashed-pattern-right"></div>
+
+    {/* Hero Section */}
+    <div className="hero-section">
+      <div className="hero-content">
+        <h1 className="fern-page-heading text-balance break-words">Build on SignalWire</h1>
+        <div className="fern-page-subtitle break-words leading-7">
+          Voice, video, messaging, and AI — one programmable platform, every interface you need.
+        </div>
+      </div>
+    </div>
+
+    {/* Getting Started Banner */}
+    <div className="hp-callout">
+      <Icon icon="circle-info" size="4" />
+      <span className="hp-callout-desc"><strong>New to SignalWire?</strong> Set up your account, grab API credentials, and start building.</span>
+      <Button intent="primary" href="/docs/platform/getting-started" rightIcon="arrow-right">Get started</Button>
+    </div>
+
+    {/* Interfaces & SDKs */}
+    <div className="products-section">
+      <div className="section-header">
+        <h2>Interfaces & SDKs</h2>
+        <p className="fern-page-subtitle">
+          APIs, markup languages, and client libraries for building on SignalWire.
+        </p>
+      </div>
+
+      <CardGroup cols={3}>
+        <Card title="REST APIs" icon="fa-regular fa-code" href="/docs/apis">
+          Complete API reference for voice, video, messaging, and AI services.
+        </Card>
+        <Card title="SWML" icon="fa-regular fa-file-code" href="/docs/swml">
+          Markup language that unifies LLMs, TTS, and STT with PSTN, SIP, and WebRTC.
+        </Card>
+        <Card title="Agents SDK" icon="fa-regular fa-robot" href="/docs/agents-sdk/python">
+          Create AI agents for voice, video, and text interactions.
+        </Card>
+        <Card title="Server SDK" icon="fa-regular fa-bolt" href="/docs/server-sdk/node">
+          Server-side SDK for managing real-time voice, video, messaging, and chat.
+        </Card>
+        <Card title="Browser SDK" icon="fa-regular fa-browser" href="/docs/browser-sdk/js">
+          Add video calling, audio calling, and chat directly to your website.
+        </Card>
+      </CardGroup>
+    </div>
+
+    {/* Tools */}
+    <div className="products-section">
+      <div className="section-header">
+        <h2>Tools</h2>
+        <p className="fern-page-subtitle">
+          No-code builders and utilities to accelerate development.
+        </p>
+      </div>
+
+      <CardGroup cols={3}>
+        <Card title="Call Flow Builder" icon="fa-regular fa-diagram-project" href="/docs/call-flow-builder">
+          Build drag-and-drop calling applications without writing code.
+        </Card>
+        <Card title="Platform & Dashboard" icon="fa-regular fa-gear" href="/docs/platform/getting-started">
+          Manage your SignalWire space, phone numbers, and resources.
+        </Card>
+        <Card title="Wirestarter" icon="fa-regular fa-plug" href="/docs/platform/wirestarter">
+          Scaffold a new SignalWire project in seconds.
+        </Card>
+        <Card title="SWSH" icon="fa-regular fa-terminal" href="/docs/platform/swsh">
+          Interactive shell for testing SWML scripts and API calls.
+        </Card>
+      </CardGroup>
+    </div>
+
+    {/* Twilio Migration */}
+    <div className="hp-callout">
+      <Icon icon="right-left" size="4" />
+      <span className="hp-callout-desc"><strong>Migrating from Twilio?</strong> Drop-in compatible APIs and SDKs — switch with a few lines of code.</span>
+      <Button intent="primary" href="/docs/compatibility-api" rightIcon="arrow-right">Compatibility API</Button>
+    </div>
+
+
+  </div>
+</div>

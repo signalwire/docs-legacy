@@ -1,0 +1,212 @@
+---
+slug: /platform/fax/common-errors
+title: Common fax errors
+description: Our guide to understanding and troubleshooting the most common fax error messages.
+x-custom:
+  ported_from_readme: true
+  tags:
+    - product:fax
+---
+
+The table below lists some of the most common fax error messages along with the likely reason and some troubleshooting steps for resolution.
+
+If these steps to resolve your issue do not help, SignalWire Support can investigate what went wrong with our carrier peers.
+Please open a support request and include the Fax SID with the error. _Per our carrier peers' requirements, these SIDs MUST be from the last 24 hours._
+
+## List of common errors
+
+### Connection Failed
+
+**Meaning:** There was not receiver on the other end of the call to connect to.
+
+**Reason:** The destination is not confirmed to receive facsimile transactions.
+
+**Troubleshooting Steps:**
+
+- Retry
+- Contact the owner of the destination number to confirm compatibility and connectivity
+
+### Document generation error
+
+**Meaning:** There was an error while generating the document. This could be due to the file being deleted before sending.
+
+**Reason:** Internal Service Error.
+
+**Troubleshooting Steps:**
+
+- Retry
+- If the issue persists, contact SignalWire support
+
+### Failed to train with any of the compatible modems
+
+**Meaning:** A remote fax machine was detected, but the sending and receiving modems could not establish communication.
+
+**Reason:** Connectivity issues.
+
+**Troubleshooting Steps:**
+
+- Retry
+- If the issue persists, contact SignalWire support
+
+### Fax transmission not established
+
+**Meaning:** We could not detect a remote fax machine. This could be due to there being no fax machine on the receiving end or a lack of call clarity.
+
+**Reason:** Connectivity issues, Carrier issues, T.38 Incompatibility issue.
+
+**Troubleshooting Steps:**
+
+- Retry
+- Determine whether remote side was configured
+
+### Log entry lost
+
+**Meaning:** The call started but the log entry for the call was lost/incomplete. In practice, this is rare and may indicate a system problem.
+
+**Reason:** Internal Service Error
+
+**Troubleshooting Steps:**
+
+- Retry
+- If the issue persists, contact SignalWire support
+
+### No response after sending a page
+
+**Meaning:** The remote fax machine did not acknowledge that it received a page of the fax. Depending on the remote machine's behavior, it may still have printed the page and any preceding pages.
+
+**Reason:** Connectivity issues
+
+**Troubleshooting Steps:**
+
+- Retry
+- Contact destination to ensure delivery
+
+### Received no response to DCS or TCF
+
+**Meaning:** The bulk fax service could not successfully determine the remote machine's fax capabilities
+
+**Reason:** Network or incompatibility issues.
+
+**Troubleshooting Steps:**
+- Retry
+- Determine whether the remote side was configured for supported fax protocols (T.38/T.30).
+- Ensure the remote side's network is stable.
+- If failures only occur with one number, there's a chance that the remote fax machine is incompatible with our infrastructure.
+
+
+### The call dropped prematurely
+
+**Meaning:** The call dropped due to non-fax transmission error. It is likely that the receiver hung up.
+
+**Reason:** Inbound to SignalWire: The destination is a voice number or not set up to receive faxes. Outbound: The destination is a voice number, or the destination returns ringing for so long that the transmission times out before the handshake can be established.
+
+**Troubleshooting Steps:** Retry. _Note: SignalWire Fax only supports the transmission of PDFs to fax-enabled destinations._
+
+### The HDLC carrier did not stop in a timely manner
+
+**Meaning:** The fax service initiated a fax transmission with the receiver, but there was synchronization (timing) error that could not be resolved.
+
+**Reason:** Likely low-quality routes.
+
+**Troubleshooting Steps:**
+
+- Retry
+- If network conditions persist, contact SignalWire Support to reach out carrier peer
+
+### Timed out waiting for initial communication
+
+**Meaning:** A call was established with the receiver, and the bulk fax service attempted to establish a fax session. However, there was no fax response from the receiver. This could be due to there being no fax machine on the receiving end or lack of call clarity.
+
+**Reason:** No remote fax machine or poor quality routes.
+
+**Troubleshooting Steps:**
+
+- Retry
+- If network conditions persist, contact SignalWire Support to reach out to carrier peer
+
+### Unexpected DCN while waiting for DCS DIS
+
+**Meaning:** "Unexpected DCN (Disconnect) while waiting for DCS (Digital Command Signal) or DIS (Digital Identification Signal)" implies that the fax machine received
+a disconnect signal unexpectedly during the initial negotiation phase, before the communication
+parameters were fully agreed upon.
+
+**Reason:** Network or incompatibility issues.
+
+**Troubleshooting Steps:**
+- Retry
+- Determine whether the remote side was configured for supported fax protocols (T.38/T.30).
+- Ensure the remote side's network is stable.
+- If failures only occur with one number, there's a chance that the remote fax machine is incompatible with our infrastructure.
+
+### Disconnected after permitted retries
+
+**Meaning:** The fax service attempted to send the same message multiple times unsuccessfully. This may be due to a call clarity issue.
+
+**Reason:** Poor network conditions.
+
+**Troubleshooting Steps:**
+
+- Retry
+- If network conditions persist, contact SignalWire Support to reach out to carrier peer
+
+### Far end cannot receive at the resolution of the image
+
+**Meaning:** The remote fax machine does not support receiving faxes sent by our service.
+
+**Reason:** Quality is too high.
+
+**Troubleshooting Steps:** Try lowering quality (Resolution is known as "quality" in Programmable Fax).
+
+### Received a DCN from remote after sending a page
+
+**Meaning:** The remote fax machine responded with a disconnect message after a page was sent successfully. Depending on the remote machine's behavior, it may have still printed the sent page and any preceding pages.
+
+**Reason:** Poor network conditions.
+
+**Troubleshooting Steps:**
+
+- Retry
+- If network conditions persist, contact SignalWire Support to reach out to carrier peer
+
+### Unexpected message received
+
+**Meaning:** The fax service received a message that it did not expect given the current context.
+
+**Reason:** Protocol failure.
+
+**Troubleshooting Steps:** Determine whether the expected number of pages matches the number of successfully transmitted pages. Failure may have been in tearing down the call.
+
+### Unexpected DCM after EOM or MPS sequence
+
+**Meaning:** The remote fax machine disconnected unexpectedly after receiving a page of a multi-page fax. Depending on the remote machine's behavior, it may have still printed the sent pages and any preceding pages.
+
+**Reason:** Poor network conditions.
+
+**Troubleshooting Steps:**
+
+- Retry
+- If network conditions persist, contact SignalWire Support to reach out to carrier peer
+
+### Document loading error
+
+**Meaning:** The fax service attempted to generate the message to send but a document was missing.
+
+**Reason:** Internal Service Error
+
+**Troubleshooting Steps:**
+
+- Retry
+- If the issue persists, contact SignalWire support
+
+### Invalid ECM response received from receiver
+
+**Meaning:** The "Invalid ECM (Error Correction Mode) response received from receiver" error indicates that there's an issue
+with the error correction process, where the receiving fax machine's response to a request for error correction didn't
+match expected parameters or was not understood by the sending machine.
+
+**Reason:** Network or incompatibility issues.
+
+**Troubleshooting Steps:**
+
+- Retry
+- If failures only occur with one number, there's a chance that the remote fax machine is incompatible with our infrastructure.

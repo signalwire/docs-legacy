@@ -1,0 +1,55 @@
+---
+title: conversation.getConversationMessages
+slug: /signalwire-client/conversation-get-conversation-messages
+---
+
+import APIField from '@site/src/components/APIField';
+
+Retrieves messages from a specific persistent conversation. Unlike chat messages which are ephemeral, conversation messages are permanently stored.
+
+## How it works
+
+The `conversation.getConversationMessages` method fetches the message history from a persistent conversation. These messages remain available even after participants leave the conversation.
+
+
+## Parameters
+
+<APIField name="params" type="GetConversationMessagesParams" required>
+  Configuration for retrieving conversation messages.
+</APIField>
+
+<APIField name="params.conversationId" type="string" required>
+  The unique identifier of the conversation.
+</APIField>
+
+<APIField name="params.limit" type="number" default="50">
+  Maximum number of messages to retrieve.
+</APIField>
+
+<APIField name="params.offset" type="number" default="0">
+  Number of messages to skip (for pagination).
+</APIField>
+
+## Signature
+
+```typescript
+conversation.getConversationMessages(params: GetConversationMessagesParams): Promise<GetConversationMessagesResult>
+```
+
+## Returns
+
+**Type:** `Promise<GetConversationMessagesResult>`
+
+Returns a Promise that resolves with an array of messages and pagination information.
+
+## Examples
+
+### Get conversation messages
+
+```typescript
+const result = await client.conversation.getConversationMessages({
+  conversationId: 'conversation-id-here'
+})
+
+console.log('Messages:', result.messages)
+```

@@ -1,0 +1,171 @@
+---
+title: Display call thumbnails
+slug: /js/guides/display-call-thumbnails
+description: Learn how to get thumbnails for your video rooms.
+x-custom:
+  ported_from_readme: true
+  tags:
+    - product:video
+    - language:javascript
+    - language:react
+    - sdk:relaybrowser
+    - sdk:relayrealtime
+
+sidebar_custom_props:
+  platform: javascript
+toc_max_heading_level: 3
+---
+
+Once you start to host multiple rooms with several people each, you might want a way to peek into the rooms. Room names only take you so far.
+
+<Frame caption="Room Previews">
+
+![A preview of a Video Room. Text at the top reads 'Join a room'. Four previews are shown, each labeled with the room name.](@image/project/video-thumbnail/preview_video_thumbnail.webp)
+
+</Frame>
+
+## Introducing Video Previews
+
+Video previews are live thumbnails of the ongoing room sessions. They refresh twice every minute, and record a small slice of the room. You can use these previews to represent a room.
+
+## Turning Video Previews On
+
+Depending on how you are creating your rooms, you need to enable video previews before you can begin using them.
+
+If you’re using the API to programmatically [create rooms](/docs/apis/video/create-room), you need to set the `enable_room_previews` attribute to `true` when creating the new room.
+
+If you’re auto-creating a new room when requesting a room token, you need to set the `enable_room_previews` attribute to `true` .
+
+If you’re using the new programmable video communication tool, just turn on `Enable Room Previews` option from settings.
+
+<Frame caption="Turning room previews on from the UI.">
+![This screenshot shows the configuration options for Video Conferences.](@image/video/conference-settings.webp)
+</Frame>
+
+
+## Obtaining the actual previews
+
+SignalWire makes the video previews accessible as animated `.webp` images. There
+are a few ways to get their URL: some might be easier or better suited based on
+your application. In the following sections we review the different methods,
+namely REST APIs, JavaScript SDKs, and Programmable Video Conferences.
+
+### REST API
+
+If you have a proxy backend (as described in the [Simple Video Demo](/docs/browser-sdk/js/guides/build-a-video-app)), you can query the Rest API for the room sessions. You can either list all room sessions with the [`GET /api/video/room_sessions`](/docs/apis/video/list-room-sessions) endpoint. Or if you have the id of your current room session, you can [`GET /api/video/room_sessions/{id}`](/docs/apis/video/get-room-session).
+
+The URL for the preview image will be in the attribute, `preview_url` for the room session. If preview is turned off, there'll be a `null` instead of the URL.
+
+### Realtime API and Video Client SDK
+
+#### RELAY v3
+
+For Realtime API (RELAY v3), you can add an event listener for
+[`room.started`](/docs/server-sdk/node/reference/video/client/events#onroomstarted)
+event to get new room sessions as they are created.
+
+#### RELAY v4
+
+For Realtime API (RELAY v4), you can add an event listener for
+[`onRoomStarted`](/docs/server-sdk/node/reference/video/client/events#onroomstarted)
+event to get new room sessions as they are created.
+
+For the Video Client SDK running in the browser, the `previewUrl` is available in the same [RoomSession](/docs/browser-sdk/js/reference/video/room-session) object you create to start the video call.
+
+You will find the preview image in the `previewUrl` attribute of the RoomSession object.
+
+### Programmable Video Conferences
+
+If you're using SignalWire's Programmable Video Conferences to create and administrate rooms through the Dashboard, you can access the Video Preview by tapping into the [`setupRoomSession`](/docs/platform/video) parameter when setting up the video room in your web page.
+
+## Refreshing the previews
+
+### Vanilla HTML/JavaScript
+
+The previews of the room are regenerated a few times every minute. The content
+changes, but the URL remains the same. To keep them up to date in your website,
+you should keep on updating them using a timing mechanism like `createInterval`.
+For example, using Programmable Video Conferences with AppKit:
+
+```html
+<body>
+  <img id="preview" />
+  <script>
+    // Video Conference embed code...
+    // !function(e,t){function i(){let ...
+
+    SignalWire.AppKit.VideoConference({
+      token: "<your room token>",
+      setupRoomSession: function (roomSession) {
+        roomSession.on("room.joined", (room) => {
+          console.log(roomSession.previewUrl);
+          setInterval(() => {
+            const preview_img = roomSession.previewUrl;
+            document.getElementById("preview").src = preview_img;
+          }, 10000);
+        });
+      },
+    });
+  </script>
+</body>
+```
+
+### React
+
+If you are using React, you can use the
+`@signalwire-community/react`
+package which offers a handy component for rendering room previews. You just
+need to provide the URL, and the component will take care of refreshing,
+caching, loading indicators, and so on.
+
+For example:
+
+```jsx
+// npm install @signalwire-community/react
+
+import { RoomPreview } from "@signalwire-community/react";
+
+export default function App() {
+  // const previewUrl = ...
+
+  return (
+    <RoomPreview
+      previewUrl={previewUrl}
+      loadingUrl={"https://swrooms.com/swloading.gif"}
+      style={{ height: 150 }}
+    />
+  );
+}
+```
+
+### React Native
+
+If you are using React Native, you can use the
+`@signalwire-community/react-native-room-preview`
+package which offers a handy component for rendering room previews. Just like
+for the React component, you just need to provide the URL, and the component
+will take care of refreshing, caching, loading indicators, and so on.
+
+For example:
+
+```jsx
+import React from "react";
+import { SafeAreaView } from "react-native";
+import { RoomPreview } from "@signalwire-community/react-native-room-preview";
+
+export default function App() {
+  return (
+    <SafeAreaView>
+      <RoomPreview
+        previewUrl={{ uri: "https://my-preview-url" }}
+        loadingUrl={{ uri: "https://swrooms.com/swloading.gif" }}
+        style={{ width: "50%" }}
+      />
+    </SafeAreaView>
+  );
+}
+```
+
+### Demo
+
+The demo code is also available on [GitHub](https://github.com/signalwire/guides/tree/main/Video/Room%20Preview%20Demo).

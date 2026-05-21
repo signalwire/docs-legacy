@@ -1,0 +1,105 @@
+---
+title: deaf
+slug: /call-session/deaf
+---
+
+import APIField from '@site/src/components/APIField';
+
+Mutes incoming audio so you or another participant cannot hear others in the call.
+
+## Parameters
+
+<APIField name="params" type="MemberCommandParams">
+  Options for the deaf operation.
+</APIField>
+
+<APIField name="params.memberId" type="string" default="Your own member">
+  ID of the member to make deaf. If omitted, makes yourself deaf.
+</APIField>
+
+## Signature
+
+```typescript
+deaf(params?: MemberCommandParams): Promise<void>
+```
+
+## Permissions
+
+- **Making yourself deaf:** Requires `call.capabilities.self.deaf.on`
+- **Making another member deaf:** Requires `call.capabilities.member.deaf.on`
+
+## Events
+
+- `member.updated` - General member update event
+- `member.updated.deaf` - Specific deaf state change
+- `member.updated.audioMuted` - Also emitted because microphone is auto-muted
+
+## Important Notes
+
+**Automatic Microphone Mute:** When you make a participant deaf, their microphone is automatically muted as well, even if you don't have the `muteAudio` permission.
+
+```typescript
+// Making deaf automatically mutes the microphone too
+await call.deaf()
+
+// You can manually unmute the microphone if needed
+await call.audioUnmute()
+
+// Now you can speak but still cannot hear others
+```
+
+This ensures that deaf participants don't accidentally broadcast audio when they can't hear the conversation.
+
+**deaf() vs audioMute():**
+
+| Method | Effect on You | Effect on Others |
+|--------|---------------|------------------|
+| `deaf()` | You can't hear others (and your mic is muted) | Others can't hear you (mic auto-muted) |
+| `audioMute()` | You can still hear others | Others can't hear you |
+
+```typescript
+// Scenario 1: You want to listen but not speak
+await call.audioMute()  // You can hear, they can't hear you
+
+// Scenario 2: You want to completely disconnect from audio
+await call.deaf()  // You can't hear, they can't hear you (mic auto-muted)
+```
+
+## Examples
+
+### Make yourself deaf
+
+```typescript
+await call.deaf()
+console.log('You can no longer hear other participants')
+```
+
+### Make another participant deaf
+
+```typescript
+const { members } = await call.getMembers()
+const member = members.find(m => m.name === 'John Doe')
+
+if (member) {
+  await call.deaf({ memberId: member.id })
+}
+```
+
+### Check capabilities before making deaf
+
+```typescript
+if (call.capabilities?.self.deaf.on) {
+  await call.deaf()
+}
+```
+
+### Listen for deaf state changes
+
+```typescript
+call.on('member.updated.deaf', (event) => {
+  const status = event.member.deaf ? 'deaf' : 'can hear'
+  console.log(`Member ${event.member.id} is now ${status}`)
+})
+
+await call.deaf()
+```

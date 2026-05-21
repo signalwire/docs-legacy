@@ -1,0 +1,51 @@
+---
+title: Relay.Calling.FaxAction
+slug: /python/reference/calling/actions/fax
+description: The Fax Action is used to send or receive faxes.
+toc_max_heading_level: 3
+---
+
+[fax-receive-async]: /docs/server-sdk/v2/python/reference/calling/call#fax_receive_async
+[fax-send-async]: /docs/server-sdk/v2/python/reference/calling/call#fax_send_async
+[relay-calling-faxresult]: /docs/server-sdk/v2/python/reference/calling/results/fax
+[relay-calling-stopresult]: /docs/server-sdk/v2/python/reference/calling/results/stop
+
+## Relay.Calling.FaxAction
+
+This object returned from [`fax_receive_async`][fax-receive-async] and [`fax_send_async`][fax-send-async] methods represents a receiving or sending Fax on the call.
+
+### Properties
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `result` | [`Relay.Calling.FaxResult`][relay-calling-faxresult] | Final result for the fax action. |
+| `completed` | boolean | Whether the action has finished. |
+| `payload` | dict | Payload sent to Relay to start faxing. |
+| `control_id` | string | UUID to identify the fax action. |
+
+### Methods
+
+#### stop
+
+Stop the action immediately.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`coroutine` - Coroutine that will return a [`Relay.Calling.StopResult`][relay-calling-stopresult] object.
+
+**Examples**
+
+> Start sending fax and stop it after 5 seconds.
+
+```python
+import asyncio # to use sleep
+
+action = await call.fax_send_async('https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf')
+# For demonstration purposes only..
+await asyncio.sleep(5)
+await action.stop()
+```

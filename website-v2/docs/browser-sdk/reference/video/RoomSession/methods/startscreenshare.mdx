@@ -1,0 +1,72 @@
+---
+title: "startScreenShare"
+slug: /js/reference/video/room-session/start-screen-share
+description: startScreenShare method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+### startScreenShare
+
+- **startScreenShare**(`opts`): `Promise<RoomSessionScreenShare>` - See [RoomSessionScreenShare documentation](/docs/browser-sdk/js/reference/video/room-session-screen-share) for more details.
+
+Adds a screen sharing instance to the room. You can create multiple screen sharing instances and add all of them to the room.
+
+#### Parameters
+
+<ParamField path="opts" type="object">
+  Object containing the parameters of the method.
+</ParamField>
+
+<Indent>
+<ParamField path="audio" type="boolean | MediaTrackConstraints" required={false}>
+  Audio constraints to use when joining the room. Default: `false`.
+</ParamField>
+
+<ParamField path="autoJoin" type="boolean" required={false}>
+  Whether the screen share object should automatically join the room. Default: `true`.
+</ParamField>
+
+<ParamField path="layout" type="string" required={false}>
+  Layout to switch to as soon as the screen share joins the room.
+</ParamField>
+
+<ParamField path="positions" type="VideoPositions" required={false}>
+  Layout positions to assign as soon as the screen share joins the room.
+</ParamField>
+
+<ParamField path="video" type="boolean | MediaTrackConstraints" required={false}>
+  Video constraints to use when joining the room. Default: `true`.
+</ParamField>
+</Indent>
+
+#### Returns
+
+`Promise<RoomSessionScreenShare>` - See [RoomSessionScreenShare documentation](/docs/browser-sdk/js/reference/video/room-session-screen-share) for more details.
+
+#### Permissions
+
+- `room.self.screenshare`
+
+You need to specify the permissions when [creating the Video Room Token](/docs/apis/video/create-room-token) on the server side.
+
+#### Examples
+
+Sharing the screen together with the associated audio:
+
+```js
+await roomSession.startScreenShare({ audio: true, video: true });
+```
+
+Sharing the screen while changing layout:
+
+```js
+await roomSession.startScreenShare({
+  audio: true,
+  video: true,
+  layout: "screen-share",
+  positions: {
+    self: "reserved-1",
+  },
+});
+```
+

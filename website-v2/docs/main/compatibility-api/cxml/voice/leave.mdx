@@ -1,0 +1,180 @@
+---
+title: Leave
+sidebar_label: Leave
+slug: /compatibility-api/cxml/reference/voice/leave
+sidebar_position: 1
+toc_max_heading_level: 3
+---
+
+The `<Leave>` verb transfers a call out of the queue containing that call. It then returns the flow of execution to verb following the `<Enqueue>` that placed this call into the queue.
+
+## Verb attributes
+
+The `<Leave>` verb does not support any attributes.
+
+## Examples
+
+### Leaving a closed queue
+
+<CodeBlocks>
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Enqueue waitUrl="https://example.com/wait.xml">support</Enqueue>
+    <Say>Customer support is now closed. Please call back on the next business day. Thank you.</Say>
+</Response>
+```
+```javascript title="Node.js"
+const { RestClient } = require("@signalwire/compatibility-api");
+const response = new RestClient.LaML.VoiceResponse();
+
+response.enqueue({ waitUrl: "https://example.com/hold-music.xml" }, "support");
+response.say(
+  "Customer support is now closed. Please call back on the next business day. Thank you."
+);
+console.log(response.toString());
+```
+```csharp
+using Twilio.TwiML;
+using System;
+
+
+class Example
+{
+    static void Main()
+    {
+        var response = new VoiceResponse();
+        response.Enqueue("support", waitUrl: new Uri("https://example.com/wait.xml"));
+        response.Say("Customer support is now closed. Please call back on the next business day. Thank you.");
+
+        Console.WriteLine(response.ToString());;
+    }
+}
+```
+```python
+from signalwire.voice_response import VoiceResponse, Enqueue, Say
+
+response = VoiceResponse()
+response.enqueue('support', wait_url='https://example.com/wait.xml')
+response.say('Customer support is now closed. Please call back on the next business day. Thank you.')
+
+print(response)
+```
+```ruby
+require 'signalwire/sdk'
+
+response = Signalwire::Sdk::VoiceResponse.new do |response|
+  response.enqueue(name: 'support', wait_url: 'https://example.com/wait.xml')
+  response.say(message: 'Customer support is now closed. Please call back on the next business day. Thank you.')
+end
+
+puts response.to_s
+```
+</CodeBlocks>
+
+Callers who are waiting in the queue for customer support will automatically be directed out of the queue after closing hours. SignalWire will notify these callers that they have left the queue and will have to try calling back another day.
+
+### Playing audio
+
+<CodeBlocks>
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+     <Play>http://your-application.com/music.mp3</Play>
+</Response>
+```
+```javascript title="Node.js"
+const { RestClient } = require("@signalwire/compatibility-api");
+const response = new RestClient.LaML.VoiceResponse();
+
+response.play("http://your-application.com/music.mp3");
+console.log(response.toString());
+```
+```csharp
+using Twilio.TwiML;
+using System;
+
+class Example
+{
+    static void Main()
+    {
+        var response = new VoiceResponse();
+        response.Play(new Uri("http://your-application.com/music.mp3"));
+
+        Console.WriteLine(response.ToString());;
+    }
+}
+```
+```python
+from signalwire.voice_response import VoiceResponse, Play
+
+response = VoiceResponse()
+response.play('http://your-application.com/music.mp3')
+
+print(response)
+```
+```ruby
+require 'signalwire/sdk'
+
+response = Signalwire::Sdk::VoiceResponse.new do |response|
+  response.play(url: 'http://your-application.com/music.mp3')
+end
+
+puts response.to_s
+```
+</CodeBlocks>
+
+SignalWire will play hold music for the callers in the queue until customer support hours are over.
+
+### Leave a call
+
+<CodeBlocks>
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+     <Leave />
+</Response>
+```
+```javascript title="Node.js"
+const { RestClient } = require("@signalwire/compatibility-api");
+const response = new RestClient.LaML.VoiceResponse();
+
+response.leave();
+console.log(response.toString());
+```
+```csharp
+using Twilio.TwiML;
+using System;
+
+
+class Example
+{
+    static void Main()
+    {
+        var response = new VoiceResponse();
+        response.Leave();
+
+        Console.WriteLine(response.ToString());;
+    }
+}
+```
+```python
+from signalwire.voice_response import VoiceResponse, Leave
+
+response = VoiceResponse()
+response.leave()
+
+print(response)
+```
+```ruby
+require 'signalwire/sdk'
+
+response = Signalwire::Sdk::VoiceResponse.new do |response|
+  response.leave
+end
+
+puts response.to_s
+```
+</CodeBlocks>
+
+wait.xml will dequeue the callers after closing hours and prompt the `<Say>` statement in the first example.

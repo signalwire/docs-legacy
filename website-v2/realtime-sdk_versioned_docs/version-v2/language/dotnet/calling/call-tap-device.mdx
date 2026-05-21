@@ -1,0 +1,69 @@
+---
+title: "CallTapDevice"
+slug: /dotnet/reference/calling/call-tap-device
+toc_max_heading_level: 3
+---
+[call-media-media-type]: /docs/server-sdk/v2/dotnet/reference/calling/call-media-type
+[call-tap-device-device-type]: /docs/server-sdk/v2/dotnet/reference/calling/call-tap-device-type
+
+# SignalWire.Relay.Calling.CallTapDevice
+
+This object represents call tap device, this may represent a source or destination.
+
+## Constructor
+
+The only constructor is the default constructor, properties should all be assigned by initializer or after construction.
+
+**Parameters**
+
+None
+
+**Examples**
+
+> Basic Example
+
+```csharp
+CallTapDevice device = new CallTapDevice
+{
+    Type = CallTapDevice.DeviceType.rtp,
+    Parameters = new CallTapDevice.RTPParams
+    {
+        Address = "1.2.3.4",
+        Port = 12345,
+    }
+};
+```
+
+## Properties
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `Type` | [`SignalWire.Relay.Calling.CallTapDevice.DeviceType`][call-tap-device-device-type] | This is the type of the device. |
+| `Parameters` | object | This is the object that represents the parameters specific to the type, see [`SignalWire.Relay.Calling.CallTapDevice.DeviceType`][call-tap-device-device-type] for more information. |
+
+## Methods
+
+
+## ParametersAs&lt;T&gt;()
+
+This is a helper method to convert the `Parameters` to the real type.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `T` | Type | <span className="required-arg">required</span> | This is the data type for the conversion, see [`SignalWire.Relay.Calling.CallMedia.MediaType`][call-media-media-type] for more information. |
+
+**Returns**
+
+`T` - This is an instance of the data type resulting from the conversion, see [`SignalWire.Relay.Calling.CallMedia.MediaType`][call-media-media-type] for more information.
+
+**Examples**
+
+```csharp
+CallTapDevice.RTPParams rtpParams = device.ParametersAs<CallTapDevice.RTPParams>();
+```
+
+## Events
+
+None

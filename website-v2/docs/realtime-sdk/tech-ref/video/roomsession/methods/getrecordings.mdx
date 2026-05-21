@@ -1,0 +1,87 @@
+---
+title: "getRecordings"
+slug: /node/reference/video/room-session/get-recordings
+description: getRecordings method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+[roomsession-41]: /docs/server-sdk/node/reference/video/room-session
+[roomsessionrecording-12]: /docs/server-sdk/node/reference/video/room-session-recording
+
+### getRecordings
+
+- **getRecordings**(): `Promise`\<\{ `recordings:` [`RoomSessionRecording`][roomsessionrecording-12] }>
+
+Obtains a list of recordings for the current room session.
+
+#### Returns
+
+`Promise`\<\{ `recordings:` [`RoomSessionRecording`][roomsessionrecording-12] }>
+
+A promise that resolves to an object containing the list of [`RoomSessionRecording`][roomsessionrecording-12] objects.
+
+#### Example
+
+In this example, we wait for a room to start and then start a recording in that room.
+After 5 seconds, we then use `getRecordings` to get the list of recording objects.
+We then loop through the list of recordings and print out the `state` and `id` of each recording.
+Afterwards, we stop the recording. This example assumes that there is a [`RoomSession`][roomsession-41]
+already active and that members are joining the room.
+
+```javascript
+import { SignalWire } from "@signalwire/realtime-api";
+
+// Initialize the SignalWire client
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+// Access the video client from the main client
+const videoClient = client.video;
+
+// Setup listener for when a room starts
+await videoClient.listen({
+  onRoomStarted: async (roomSession) => {
+    console.log("Room started", roomSession.displayName);
+
+    let roomRecording = roomSession.startRecording({
+      listen: {
+        onStarted: () => {
+          console.log("Recording started");
+        },
+        onUpdated: (recording) => {
+          console.log("Recording updated", recording.state);
+        },
+        onEnded: (recording) => {
+          console.log(`Recording ended.
+          Recording State: ${recording.state}.
+          Recording Id: ${recording.id}`);
+
+        },
+      }
+    })
+    setTimeout( async () => {
+      // Get the roomSession recordings
+      let rooomRecordings = await roomSession.getRecordings();
+      rooomRecordings.recordings.forEach(recording => {
+        console.log("Active Recording", recording.id, recording.state);
+      });
+
+      // Stop recording after 5 seconds
+      roomRecording.stop();
+    }, 5000);
+
+    // Setup listener for when a member joins
+    await roomSession.listen({
+      onMemberJoined: async (member) => {
+        console.log("Member joined", member.name);
+
+    },
+      onMemberLeft: (member) => {
+        console.log("Member left", member.name);
+      },
+    });
+  },
+  onRoomEnded: async (roomSession) => {
+    console.log("Room ended", roomSession.displayName);
+  }
+});
+```

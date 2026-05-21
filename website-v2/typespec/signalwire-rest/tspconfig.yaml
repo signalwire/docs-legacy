@@ -1,0 +1,11 @@
+# SignalWire REST APIs - Base configuration
+# Each API now has its own tspconfig.yaml that outputs to specs/{ApiName}/
+# Run TypeSpec from each API folder (e.g., calling-api, chat-api, etc.)
+extends: ../tspconfig.yaml
+
+# Legacy single-folder output (deprecated - use per-API configs instead)
+# emit:
+#   - "@typespec/openapi3"
+# options:
+#   "@typespec/openapi3":
+#     emitter-output-dir: "{cwd}/../../fern/openapi-specs"

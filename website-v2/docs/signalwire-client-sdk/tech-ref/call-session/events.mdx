@@ -1,0 +1,1118 @@
+---
+title: CallSession Events
+slug: /call-session/events
+---
+
+import APIField from '@site/src/components/APIField';
+
+Events emitted by a CallSession object during call lifecycle, member actions, and room updates.
+
+## Core Call Events
+
+### `call.joined`
+
+Fired when you successfully join a call.
+
+<APIField name="room_session" type="InternalCallSessionEntity">
+  Complete room session object.
+</APIField>
+
+<APIField name="room_id" type="string" required>
+  The room ID.
+</APIField>
+
+<APIField name="room_session_id" type="string" required>
+  The room session ID.
+</APIField>
+
+<APIField name="call_id" type="string" required>
+  The call ID.
+</APIField>
+
+<APIField name="member_id" type="string" required>
+  Your member ID.
+</APIField>
+
+<APIField name="capabilities" type="[CallCapabilitiesContract](../types#callcapabilitiescontract)" required>
+  Your permissions and capabilities for this call session.
+</APIField>
+
+<APIField name="origin_call_id" type="string" required>
+  The original call ID.
+</APIField>
+
+<APIField name="node_id" type="string">
+  Node ID (may be undefined).
+</APIField>
+
+```typescript
+call.on('call.joined', (event) => {
+  console.log('Joined call:', event.call_id)
+  console.log('Your member ID:', event.member_id)
+  console.log('Capabilities:', event.capabilities)
+})
+```
+
+### `call.updated`
+
+Fired when call properties are updated.
+
+<APIField name="room_session" type="InternalCallSessionEntity" required>
+  Updated room session object.
+</APIField>
+
+<APIField name="room_id" type="string" required>
+  The room ID.
+</APIField>
+
+<APIField name="room_session_id" type="string" required>
+  The room session ID.
+</APIField>
+
+```typescript
+call.on('call.updated', (event) => {
+  console.log('Call updated:', event.room_session)
+})
+```
+
+### `call.left`
+
+Fired when you leave the call.
+
+<APIField name="room_session" type="InternalCallSessionEntity" required>
+  Room session object.
+</APIField>
+
+<APIField name="room_id" type="string" required>
+  The room ID.
+</APIField>
+
+<APIField name="room_session_id" type="string" required>
+  The room session ID.
+</APIField>
+
+<APIField name="call_id" type="string" required>
+  The call ID.
+</APIField>
+
+<APIField name="member_id" type="string" required>
+  Your member ID.
+</APIField>
+
+<APIField name="origin_call_id" type="string" required>
+  The original call ID.
+</APIField>
+
+<APIField name="reason" type="string" required>
+  Reason for leaving (e.g., "hangup", "kicked").
+</APIField>
+
+```typescript
+call.on('call.left', (event) => {
+  console.log('Left call:', event.reason)
+})
+```
+
+### `call.state`
+
+Fired when the call state changes.
+
+<APIField name="call_id" type="string" required>
+  The call ID.
+</APIField>
+
+<APIField name="node_id" type="string" required>
+  The node ID.
+</APIField>
+
+<APIField name="segment_id" type="string" required>
+  The segment ID.
+</APIField>
+
+<APIField name="call_state" type="CallStates" required>
+  Current call state.
+</APIField>
+
+<APIField name="direction" type="CallDirection" required>
+  Call direction (inbound/outbound).
+</APIField>
+
+<APIField name="device" type="CallDevice" required>
+  Device information.
+</APIField>
+
+<APIField name="start_time" type="number" required>
+  Call start timestamp.
+</APIField>
+
+<APIField name="answer_time" type="number" required>
+  Call answer timestamp.
+</APIField>
+
+<APIField name="end_time" type="number" required>
+  Call end timestamp.
+</APIField>
+
+<APIField name="room_session_id" type="string" required>
+  The room session ID.
+</APIField>
+
+```typescript
+call.on('call.state', (event) => {
+  console.log('Call state:', event.call_state)
+  console.log('Direction:', event.direction)
+})
+```
+
+### `call.play`
+
+Fired when audio/video playback starts in the call.
+
+<APIField name="control_id" type="string" required>
+  Playback control ID.
+</APIField>
+
+<APIField name="call_id" type="string" required>
+  The call ID.
+</APIField>
+
+<APIField name="node_id" type="string" required>
+  The node ID.
+</APIField>
+
+<APIField name="state" type="CallPlayState" required>
+  Playback state.
+</APIField>
+
+<APIField name="room_session_id" type="string" required>
+  The room session ID.
+</APIField>
+
+```typescript
+call.on('call.play', (event) => {
+  console.log('Playback state:', event.state)
+})
+```
+
+### `call.connect`
+
+Fired when a call connection is established.
+
+<APIField name="connect_state" type="CallConnectStates" required>
+  Connection state.
+</APIField>
+
+<APIField name="call_id" type="string" required>
+  The call ID.
+</APIField>
+
+<APIField name="node_id" type="string" required>
+  The node ID.
+</APIField>
+
+<APIField name="segment_id" type="string" required>
+  The segment ID.
+</APIField>
+
+<APIField name="room_session_id" type="string" required>
+  The room session ID.
+</APIField>
+
+<APIField name="peer" type="object">
+  Peer connection information (optional).
+</APIField>
+
+<APIField name="peer.call_id" type="string">
+  The peer's call ID.
+</APIField>
+
+<APIField name="peer.node_id" type="string">
+  The peer's node ID.
+</APIField>
+
+<APIField name="peer.device" type="CallDevice">
+  The peer's device information.
+</APIField>
+
+```typescript
+call.on('call.connect', (event) => {
+  console.log('Connect state:', event.connect_state)
+  if (event.peer) {
+    console.log('Peer call ID:', event.peer.call_id)
+  }
+})
+```
+
+### `call.room`
+
+Fired for room-level call events.
+
+<APIField name="joined_status" type="string" required>
+  Join status.
+</APIField>
+
+<APIField name="call_id" type="string" required>
+  The call ID.
+</APIField>
+
+<APIField name="node_id" type="string" required>
+  The node ID.
+</APIField>
+
+<APIField name="segment_id" type="string" required>
+  The segment ID.
+</APIField>
+
+<APIField name="room_session_id" type="string" required>
+  The room session ID.
+</APIField>
+
+```typescript
+call.on('call.room', (event) => {
+  console.log('Joined status:', event.joined_status)
+})
+```
+
+## Room Events
+
+### `room.joined`
+
+Fired when the room is joined.
+
+<APIField name="room_session" type="InternalCallSessionEntity" required>
+  Complete room session object.
+</APIField>
+
+<APIField name="room_id" type="string" required>
+  The room ID.
+</APIField>
+
+<APIField name="room_session_id" type="string" required>
+  The room session ID.
+</APIField>
+
+<APIField name="call_id" type="string" required>
+  The call ID.
+</APIField>
+
+<APIField name="member_id" type="string" required>
+  Your member ID.
+</APIField>
+
+<APIField name="node_id" type="string">
+  Node ID (may be undefined).
+</APIField>
+
+<APIField name="origin_call_id" type="string" required>
+  The original call ID.
+</APIField>
+
+<APIField name="capabilities" type="Capability[]" required>
+  Raw capabilities array.
+</APIField>
+
+```typescript
+call.on('room.joined', (event) => {
+  console.log('Room joined:', event.room_id)
+  console.log('Member ID:', event.member_id)
+})
+```
+
+### `room.subscribed`
+
+Fired when successfully subscribed to room events. This is the event that `start()` waits for.
+
+<APIField name="room_session" type="InternalCallSessionEntity" required>
+  Complete room session object.
+</APIField>
+
+<APIField name="room_id" type="string" required>
+  The room ID.
+</APIField>
+
+<APIField name="room_session_id" type="string" required>
+  The room session ID.
+</APIField>
+
+<APIField name="call_id" type="string" required>
+  The call ID.
+</APIField>
+
+<APIField name="member_id" type="string" required>
+  Your member ID.
+</APIField>
+
+<APIField name="node_id" type="string">
+  Node ID (may be undefined).
+</APIField>
+
+<APIField name="origin_call_id" type="string" required>
+  The original call ID.
+</APIField>
+
+<APIField name="capabilities" type="Capability[]" required>
+  Raw capabilities array.
+</APIField>
+
+```typescript
+call.on('room.subscribed', (event) => {
+  console.log('Subscribed to room:', event.call_id)
+})
+```
+
+### `room.updated`
+
+Fired when room properties change (e.g., lock/unlock).
+
+<APIField name="room_session" type="InternalCallSessionEntity" required>
+  Updated room session object.
+</APIField>
+
+<APIField name="room_id" type="string" required>
+  The room ID.
+</APIField>
+
+<APIField name="room_session_id" type="string" required>
+  The room session ID.
+</APIField>
+
+```typescript
+call.on('room.updated', (event) => {
+  console.log('Room locked:', event.room_session.locked)
+})
+```
+
+### `room.left`
+
+Fired when you leave the room.
+
+<APIField name="reason" type="string">
+  Reason for leaving (all parameters are optional).
+</APIField>
+
+```typescript
+call.on('room.left', (event) => {
+  if (event) {
+    console.log('Left room:', event.reason)
+  }
+})
+```
+
+## Member Events
+
+### `member.joined`
+
+Fired when a new member joins the call.
+
+<APIField name="member" type="[InternalMemberEntity](../types#internalmemberentity)" required>
+  The member object with all properties.
+</APIField>
+
+<APIField name="room_id" type="string" required>
+  The room ID.
+</APIField>
+
+<APIField name="room_session_id" type="string" required>
+  The room session ID.
+</APIField>
+
+```typescript
+call.on('member.joined', (event) => {
+  console.log(`${event.member.name} joined (ID: ${event.member.id})`)
+})
+```
+
+### `member.updated`
+
+General event fired when any member property changes.
+
+<APIField name="member" type="InternalMemberEntityUpdated" required>
+  Updated member object with changed properties.
+</APIField>
+
+<APIField name="room_id" type="string" required>
+  The room ID.
+</APIField>
+
+<APIField name="room_session_id" type="string" required>
+  The room session ID.
+</APIField>
+
+```typescript
+call.on('member.updated', (event) => {
+  console.log('Member updated:', event.member)
+})
+```
+
+### `member.left`
+
+Fired when a member leaves the call.
+
+<APIField name="member" type="[InternalMemberEntity](../types#internalmemberentity)" required>
+  The member who left.
+</APIField>
+
+<APIField name="room_id" type="string" required>
+  The room ID.
+</APIField>
+
+<APIField name="room_session_id" type="string" required>
+  The room session ID.
+</APIField>
+
+<APIField name="reason" type="string" required>
+  Reason for leaving (e.g., "hangup", "kicked").
+</APIField>
+
+```typescript
+call.on('member.left', (event) => {
+  console.log(`${event.member.name} left: ${event.reason}`)
+})
+```
+
+### `member.talking`
+
+Fired when a member starts or stops talking (voice activity detection).
+
+<APIField name="room_id" type="string" required>
+  The room ID.
+</APIField>
+
+<APIField name="room_session_id" type="string" required>
+  The room session ID.
+</APIField>
+
+<APIField name="member.member_id" type="string" required>
+  The member ID.
+</APIField>
+
+<APIField name="member.node_id" type="string" required>
+  The node ID.
+</APIField>
+
+<APIField name="member.talking" type="boolean" required>
+  Whether member is currently talking.
+</APIField>
+
+```typescript
+call.on('member.talking', (event) => {
+  if (event.member.talking) {
+    console.log(`Member ${event.member.member_id} is talking`)
+  }
+})
+```
+
+### `memberList.updated`
+
+Fired when the member list changes (members join or leave).
+
+<APIField name="members" type="InternalMemberEntity[]" required>
+  Complete array of all current members.
+</APIField>
+
+```typescript
+call.on('memberList.updated', (event) => {
+  console.log(`Total members: ${event.members.length}`)
+})
+```
+
+## Member State Events
+
+These specific `member.updated` events fire when particular member properties change.
+
+### `member.updated.audioMuted`
+
+Fired when a member's audio mute state changes.
+
+```typescript
+call.on('member.updated.audioMuted', (event) => {
+  const status = event.member.audio_muted ? 'muted' : 'unmuted'
+  console.log(`${event.member.name} audio ${status}`)
+})
+```
+
+### `member.updated.videoMuted`
+
+Fired when a member's video mute state changes.
+
+```typescript
+call.on('member.updated.videoMuted', (event) => {
+  const status = event.member.video_muted ? 'muted' : 'unmuted'
+  console.log(`${event.member.name} video ${status}`)
+})
+```
+
+### `member.updated.deaf`
+
+Fired when a member's deaf state changes.
+
+```typescript
+call.on('member.updated.deaf', (event) => {
+  const status = event.member.deaf ? 'deafened' : 'undeafened'
+  console.log(`${event.member.name} ${status}`)
+})
+```
+
+### `member.updated.visible`
+
+Fired when a member's visibility changes.
+
+```typescript
+call.on('member.updated.visible', (event) => {
+  console.log(`${event.member.name} visible:`, event.member.visible)
+})
+```
+
+### `member.updated.onHold`
+
+Fired when a member's hold state changes.
+
+```typescript
+call.on('member.updated.onHold', (event) => {
+  const status = event.member.on_hold ? 'on hold' : 'off hold'
+  console.log(`${event.member.name} is ${status}`)
+})
+```
+
+### `member.updated.inputVolume`
+
+Fired when a member's input (microphone) volume changes.
+
+```typescript
+call.on('member.updated.inputVolume', (event) => {
+  console.log(`${event.member.name} input volume:`, event.member.input_volume)
+})
+```
+
+### `member.updated.outputVolume`
+
+Fired when a member's output (speaker) volume changes.
+
+```typescript
+call.on('member.updated.outputVolume', (event) => {
+  console.log(`${event.member.name} output volume:`, event.member.output_volume)
+})
+```
+
+### `member.updated.inputSensitivity`
+
+Fired when a member's input sensitivity changes.
+
+```typescript
+call.on('member.updated.inputSensitivity', (event) => {
+  console.log(`${event.member.name} sensitivity:`, event.member.input_sensitivity)
+})
+```
+
+### `member.updated.handraised`
+
+Fired when a member raises or lowers their hand.
+
+```typescript
+call.on('member.updated.handraised', (event) => {
+  const status = event.member.handraised ? 'raised' : 'lowered'
+  console.log(`${event.member.name} ${status} hand`)
+})
+```
+
+### `member.updated.echoCancellation`
+
+Fired when a member's echo cancellation setting changes.
+
+```typescript
+call.on('member.updated.echoCancellation', (event) => {
+  console.log(`Echo cancellation:`, event.member.echo_cancellation)
+})
+```
+
+### `member.updated.autoGain`
+
+Fired when a member's automatic gain control setting changes.
+
+```typescript
+call.on('member.updated.autoGain', (event) => {
+  console.log(`Auto gain:`, event.member.auto_gain)
+})
+```
+
+### `member.updated.noiseCancellation`
+
+Fired when a member's noise cancellation setting changes.
+
+```typescript
+call.on('member.updated.noiseCancellation', (event) => {
+  console.log(`Noise cancellation:`, event.member.noise_cancellation)
+})
+```
+
+### `member.updated.noiseSuppression`
+
+Fired when a member's noise suppression setting changes.
+
+```typescript
+call.on('member.updated.noiseSuppression', (event) => {
+  console.log(`Noise suppression:`, event.member.noise_suppression)
+})
+```
+
+## Layout Events
+
+### `layout.changed`
+
+Fired when the video layout changes.
+
+<APIField name="layout" type="[InternalVideoLayout](../types#internalvideolayout)" required>
+  Layout object with name and layers.
+</APIField>
+
+<APIField name="layout.name" type="string" required>
+  Layout name (e.g., "grid-responsive", "2x2").
+</APIField>
+
+<APIField name="layout.layers" type="Layer[]" required>
+  Array of layer objects with member positions.
+</APIField>
+
+<APIField name="room_id" type="string" required>
+  The room ID.
+</APIField>
+
+<APIField name="room_session_id" type="string" required>
+  The room session ID.
+</APIField>
+
+```typescript
+call.on('layout.changed', (event) => {
+  console.log('Layout changed to:', event.layout.name)
+
+  // Find your position
+  const myLayer = event.layout.layers.find(
+    layer => layer.member_id === call.memberId
+  )
+  if (myLayer) {
+    console.log('Your position:', myLayer.position)
+  }
+})
+```
+
+## Media Events
+
+### `media.connected`
+
+Fired when media connection is established.
+
+```typescript
+call.on('media.connected', () => {
+  console.log('Media connected')
+})
+```
+
+### `media.reconnecting`
+
+Fired when media is reconnecting after a disruption.
+
+```typescript
+call.on('media.reconnecting', () => {
+  console.log('Media reconnecting...')
+})
+```
+
+### `media.disconnected`
+
+Fired when media connection is lost.
+
+```typescript
+call.on('media.disconnected', () => {
+  console.log('Media disconnected')
+})
+```
+
+## Connection State Events
+
+These events pass the CallSession object as a parameter and represent internal call state changes.
+
+### `connecting`
+
+Connection is being established.
+
+```typescript
+call.on('connecting', (callSession) => {
+  console.log('Connecting...')
+})
+```
+
+### `connected`
+
+Connection has been successfully established.
+
+```typescript
+call.on('connected', (callSession) => {
+  console.log('Connected!')
+})
+```
+
+### `disconnected`
+
+Connection has been terminated.
+
+```typescript
+call.on('disconnected', (callSession) => {
+  console.log('Disconnected')
+})
+```
+
+### `disconnecting`
+
+Connection is being torn down.
+
+```typescript
+call.on('disconnecting', (callSession) => {
+  console.log('Disconnecting...')
+})
+```
+
+### `reconnecting`
+
+Connection is attempting to reconnect after being lost.
+
+```typescript
+call.on('reconnecting', (callSession) => {
+  console.log('Reconnecting...')
+})
+```
+
+### `reconnected`
+
+Connection has been successfully re-established.
+
+```typescript
+call.on('reconnected', (callSession) => {
+  console.log('Reconnected!')
+})
+```
+
+### `active`
+
+Connection is active and media is flowing.
+
+```typescript
+call.on('active', (callSession) => {
+  console.log('Call is active')
+})
+```
+
+### `answering`
+
+Call is being answered.
+
+```typescript
+call.on('answering', (callSession) => {
+  console.log('Answering call...')
+})
+```
+
+### `early`
+
+Early media state (before call is fully answered).
+
+```typescript
+call.on('early', (callSession) => {
+  console.log('Early media')
+})
+```
+
+### `hangup`
+
+Call is hanging up.
+
+```typescript
+call.on('hangup', (callSession) => {
+  console.log('Call hanging up')
+})
+```
+
+### `destroy`
+
+Call is fully destroyed and all resources are released.
+
+```typescript
+call.on('destroy', () => {
+  console.log('Call destroyed')
+})
+```
+
+### `held`
+
+Call is on hold.
+
+```typescript
+call.on('held', (callSession) => {
+  console.log('Call on hold')
+})
+```
+
+### `new`
+
+New connection being established.
+
+```typescript
+call.on('new', (callSession) => {
+  console.log('New connection')
+})
+```
+
+### `ringing`
+
+Call is ringing.
+
+```typescript
+call.on('ringing', (callSession) => {
+  console.log('Ringing...')
+})
+```
+
+### `trying`
+
+Attempting to establish connection.
+
+```typescript
+call.on('trying', (callSession) => {
+  console.log('Trying to connect...')
+})
+```
+
+### `requesting`
+
+Connection request is being initiated.
+
+```typescript
+call.on('requesting', (callSession) => {
+  console.log('Requesting connection...')
+})
+```
+
+### `recovering`
+
+Connection is in recovery mode, attempting to restore state.
+
+```typescript
+call.on('recovering', (callSession) => {
+  console.log('Recovering connection...')
+})
+```
+
+### `purge`
+
+Connection resources are being purged/cleaned up.
+
+```typescript
+call.on('purge', (callSession) => {
+  console.log('Purging connection resources')
+})
+```
+
+## Device Events
+
+### `camera.updated`
+
+Fired when the camera device changes.
+
+<APIField name="previous" type="VideoRoomMediaDeviceInfo" required>
+  The previous camera device.
+</APIField>
+
+<APIField name="current" type="VideoRoomMediaDeviceInfo" required>
+  The current camera device.
+</APIField>
+
+```typescript
+call.on('camera.updated', (event) => {
+  console.log('Camera updated from:', event.previous.deviceId)
+  console.log('Camera updated to:', event.current.deviceId)
+})
+```
+
+### `camera.disconnected`
+
+Fired when the camera is disconnected.
+
+<APIField name="deviceId" type="string" required>
+  The device ID of the disconnected camera.
+</APIField>
+
+<APIField name="label" type="string" required>
+  The label of the disconnected camera.
+</APIField>
+
+<APIField name="kind" type="string" required>
+  The kind of device (videoinput).
+</APIField>
+
+```typescript
+call.on('camera.disconnected', (event) => {
+  console.log('Camera disconnected:', event.label)
+})
+```
+
+### `microphone.updated`
+
+Fired when the microphone device changes.
+
+<APIField name="previous" type="VideoRoomMediaDeviceInfo" required>
+  The previous microphone device.
+</APIField>
+
+<APIField name="current" type="VideoRoomMediaDeviceInfo" required>
+  The current microphone device.
+</APIField>
+
+```typescript
+call.on('microphone.updated', (event) => {
+  console.log('Microphone updated from:', event.previous.deviceId)
+  console.log('Microphone updated to:', event.current.deviceId)
+})
+```
+
+### `microphone.disconnected`
+
+Fired when the microphone is disconnected.
+
+<APIField name="deviceId" type="string" required>
+  The device ID of the disconnected microphone.
+</APIField>
+
+<APIField name="label" type="string" required>
+  The label of the disconnected microphone.
+</APIField>
+
+<APIField name="kind" type="string" required>
+  The kind of device (audioinput).
+</APIField>
+
+```typescript
+call.on('microphone.disconnected', (event) => {
+  console.log('Microphone disconnected:', event.label)
+})
+```
+
+### `speaker.updated`
+
+Fired when the speaker device changes.
+
+<APIField name="previous" type="VideoRoomMediaDeviceInfo" required>
+  The previous speaker device.
+</APIField>
+
+<APIField name="current" type="VideoRoomMediaDeviceInfo" required>
+  The current speaker device.
+</APIField>
+
+```typescript
+call.on('speaker.updated', (event) => {
+  console.log('Speaker updated from:', event.previous.deviceId)
+  console.log('Speaker updated to:', event.current.deviceId)
+})
+```
+
+### `speaker.disconnected`
+
+Fired when the speaker is disconnected.
+
+<APIField name="deviceId" type="string" required>
+  The device ID of the disconnected speaker.
+</APIField>
+
+<APIField name="label" type="string" required>
+  The label of the disconnected speaker.
+</APIField>
+
+<APIField name="kind" type="string" required>
+  The kind of device (audiooutput).
+</APIField>
+
+```typescript
+call.on('speaker.disconnected', (event) => {
+  console.log('Speaker disconnected:', event.label)
+})
+```
+
+## WebRTC Events
+
+### `track`
+
+Fired when a new WebRTC media track is added.
+
+```typescript
+call.on('track', (event) => {
+  console.log('New track:', event.track.kind)
+  console.log('Streams:', event.streams)
+})
+```
+
+## Common Patterns
+
+### Managing Event Listeners
+
+```typescript
+// Add listener
+const handler = (params) => {
+  console.log('Event fired:', params)
+}
+call.on('member.joined', handler)
+
+// Remove listener
+call.off('member.joined', handler)
+
+// One-time listener
+call.once('call.joined', (params) => {
+  console.log('Joined - fires only once')
+})
+```
+
+### Track Member Count
+
+```typescript
+let memberCount = 0
+
+call.on('member.joined', () => {
+  memberCount++
+  updateUI({ memberCount })
+})
+
+call.on('member.left', () => {
+  memberCount--
+  updateUI({ memberCount })
+})
+```
+
+### Monitor Active Speakers
+
+```typescript
+const activeSpeakers = new Set()
+
+call.on('member.talking', (event) => {
+  if (event.member.talking) {
+    activeSpeakers.add(event.member.member_id)
+  } else {
+    activeSpeakers.delete(event.member.member_id)
+  }
+
+  console.log(`Active speakers: ${activeSpeakers.size}`)
+})
+```
+
+### Handle Connection Issues
+
+```typescript
+call.on('media.disconnected', () => {
+  showNotification('Connection lost')
+})
+
+call.on('media.reconnecting', () => {
+  showNotification('Reconnecting...')
+})
+
+call.on('media.connected', () => {
+  showNotification('Connection restored')
+})
+```

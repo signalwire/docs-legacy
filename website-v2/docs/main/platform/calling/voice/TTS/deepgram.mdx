@@ -1,0 +1,113 @@
+---
+title: Deepgram
+description: Learn how to use Deepgram TTS voices on the SignalWire platform.
+slug: /platform/voice/tts/deepgram
+---
+
+Deepgram's Aura model offers a wide range of voices for its text-to-speech API, 
+each designed to produce natural-sounding speech output in an array of different accents and speaking styles.
+
+Deepgram voices have human-like tones, rhythm, and emotion, 
+lower than 250 ms latency, 
+and are optimized for high-throughput applications.
+
+Consult Deepgram's [TTS models guide](https://developers.deepgram.com/docs/tts-models)
+for more information and samples for supported voices.
+
+## Models
+
+Deepgram's Aura model provides ultra-low latency text-to-speech optimized for conversational AI:
+
+| Model | Description |
+|-------|-------------|
+| `aura` | **Default** - Low-latency conversational TTS with human-like tones |
+
+## Voices
+
+Deepgram Aura voices are designed for natural-sounding English speech. Each voice follows the pattern `aura-<name>-en`.
+
+Popular voices include:
+- `aura-asteria-en` - Clear, professional female voice
+- `aura-luna-en` - Warm, conversational female voice
+- `aura-stella-en` - Energetic, friendly female voice
+- `aura-athena-en` - Authoritative female voice
+- `aura-hera-en` - Mature, confident female voice
+- `aura-orion-en` - Deep, authoritative male voice
+- `aura-arcas-en` - Professional male voice
+- `aura-perseus-en` - Friendly male voice
+- `aura-angus-en` - Casual male voice
+- `aura-orpheus-en` - Smooth, articulate male voice
+- `aura-helios-en` - Energetic male voice
+- `aura-zeus-en` - Powerful, commanding male voice
+
+For a complete list, consult Deepgram's [Voice Selection guide](https://developers.deepgram.com/docs/tts-models).
+
+## Usage
+
+Deepgram voice IDs conform to the following format:
+
+```
+deepgram.<voice>
+```
+
+Where `<voice>` is the voice identifier from Deepgram's [Voice Selection](https://developers.deepgram.com/docs/tts-models) reference.
+
+Copy the voice ID from the **Values** column of Deepgram's Voice Selection reference, prepend `deepgram.`, and the string is ready for use.
+
+**Examples:**
+```
+deepgram.aura-asteria-en
+deepgram.aura-orion-en
+deepgram.aura-luna-en
+deepgram.aura-zeus-en
+```
+
+---
+
+## Examples
+
+Learn how to use Deepgram voices on the SignalWire platform.
+
+<Tabs>
+<TabItem value="swml" label="SWML">
+Use the
+[**`languages`**](/docs/swml/reference/ai/languages#use-voice-strings)
+SWML method to set one or more voices for an [AI agent](/docs/swml/reference/ai).
+```yaml
+version: 1.0.0
+sections:
+  main:
+  - ai:
+      prompt:
+        text: Have an open-ended conversation about flowers.
+      languages:
+        - name: English
+          code: en-US
+          voice: deepgram.aura-asteria-en
+```
+Alternatively, use the [**`say_voice`** parameter](/docs/swml/reference/play#variables) 
+of the [**`play`**](/docs/swml/reference/play)
+SWML method to select a voice for basic TTS.
+```yaml
+version: 1.0.0
+sections:
+  main:
+  - set:
+      say_voice: "deepgram.aura-asteria-en"
+  - play: "say:Greetings. This is the Asteria voice from Deepgram's Aura text-to-speech model."
+```
+</TabItem>
+<TabItem value="relay-realtime-sdk" label="RELAY Realtime SDK">
+```javascript
+// This example uses the Node.js SDK for SignalWire's RELAY Realtime API.
+const playback = await call.playTTS({ 
+    text: "Greetings. This is the Asteria voice from Deepgram's Aura text-to-speech model.",
+    voice: "deepgram.aura-asteria-en",
+});
+await playback.ended();
+```
+</TabItem>
+<TabItem value="call-flow-builder" label="Call Flow Builder">
+Deepgram voices are not yet supported in Call Flow Builder.
+</TabItem>
+</Tabs>

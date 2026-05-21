@@ -1,0 +1,52 @@
+---
+title: chat.subscribe
+slug: /signalwire-client/chat-subscribe
+---
+
+import APIField from '@site/src/components/APIField';
+
+Subscribes to real-time chat message events in a conversation, allowing you to receive notifications when new messages arrive.
+
+## How it works
+
+The `chat.subscribe` method establishes a real-time subscription to chat events. When new messages are sent in the conversation, your callback function is invoked with the message details.
+
+## Parameters
+
+<APIField name="params" type="ConversationChatMessagesSubscribeParams" required>
+  Configuration for the subscription.
+</APIField>
+
+<APIField name="params.conversationId" type="string" required>
+  The unique identifier of the conversation to subscribe to.
+</APIField>
+
+<APIField name="params.onMessage" type="(message: ChatMessage) => void" required>
+  Callback function invoked when new messages arrive.
+</APIField>
+
+## Signature
+
+```typescript
+chat.subscribe(params: ConversationChatMessagesSubscribeParams): Promise<ConversationSubscribeResult>
+```
+
+## Returns
+
+**Type:** `Promise<ConversationSubscribeResult>`
+
+Returns a Promise that resolves with subscription details including an unsubscribe method.
+
+## Examples
+
+### Subscribe to messages
+
+```typescript
+const subscription = await client.chat.subscribe({
+  conversationId: 'conversation-id-here',
+  onMessage: (message) => {
+    console.log('New message from', message.from)
+    console.log('Content:', message.content)
+  }
+})
+```

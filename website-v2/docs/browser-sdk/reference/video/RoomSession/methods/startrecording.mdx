@@ -1,0 +1,30 @@
+---
+title: "startRecording"
+slug: /js/reference/video/room-session/start-recording
+description: startRecording method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+### startRecording
+
+- **startRecording**(): `Promise<RoomSessionRecording>` - See [RoomSessionRecording documentation](/docs/browser-sdk/js/reference/video/room-session-recording) for more details.
+
+Starts the recording of the room. You can use the returned [RoomSessionRecording](/docs/browser-sdk/js/reference/video/room-session-recording) object to control the recording (e.g., pause, resume, stop).
+
+#### Returns
+
+`Promise<RoomSessionRecording>` - See [RoomSessionRecording documentation](/docs/browser-sdk/js/reference/video/room-session-recording) for more details.
+
+#### Permissions
+
+- `room.recording`
+
+You need to specify the permissions when [creating the Video Room Token](/docs/apis/video/create-room-token) on the server side.
+
+#### Example
+
+```javascript
+const rec = await roomSession.startRecording();
+await rec.stop();
+```
+

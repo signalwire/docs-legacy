@@ -1,0 +1,54 @@
+---
+title: Relay.Calling.RecordAction
+slug: /node/reference/calling/actions/record
+description: The Record Action is used to record a call.
+toc_max_heading_level: 3
+---
+
+[recordasync]: /docs/server-sdk/v2/node/reference/calling/call#recordasync
+[relay-calling-recordresult]: /docs/server-sdk/v2/node/reference/calling/results/record
+[relay-calling-stopresult]: /docs/server-sdk/v2/node/reference/calling/results/stop
+This object returned from [`recordAsync`][recordasync] method that represents a recording currently active on a call.
+
+## Properties
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `result` | [`Relay.Calling.RecordResult`][relay-calling-recordresult] | Final result of recording |
+| `state` | `string` | Current state of recording |
+| `url` | `string` | HTTPS URL to the recording file. _It may not be present at the URL until the recording is finished._ |
+| `completed` | `boolean` | Whether the recording has finished |
+| `payload` | `object` | Payload sent to Relay to start recording |
+| `controlId` | `string` | UUID to identify the recording |
+
+## Methods
+
+### stop
+
+Stop the action immediately.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`Promise<StopResult>` - Promise object that will be fulfilled with a [`Relay.Calling.StopResult`][relay-calling-stopresult] object.
+
+**Examples**
+
+> Start recording in stereo mode and stop it if `Agent` is not available.
+
+```javascript
+async function main() {
+  const action = await call.recordAsync({
+    stereo: true
+  })
+
+  if (Agent.isAvailable() === false) {
+    const stopResult = await action.stop()
+  }
+}
+
+main().catch(console.error)
+```

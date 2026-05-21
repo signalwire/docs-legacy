@@ -1,0 +1,90 @@
+---
+slug: /compatibility-api/sdks/reference/recordings/retrieve
+title: Retrieve
+sidebar_label: Retrieve
+toc_max_heading_level: 3
+---
+
+Use this endpoint for the Recordings method to retrieve a single recording media or its metadata.
+
+Direct external access to recording files is useful for many external applications, so they are public and do not require Basic Auth to access. 
+This allows external applications to embed recording URLs without exposing their SignalWire API credentials. 
+SignalWire recording URLs are long and random, making them difficult to guess or exploit unless you reveal the URL.
+
+## Recording file types
+
+### WAV
+
+When a recording URI has no extension or a `.wav` extension, the request will return a binary WAV version of the recording file.
+
+`GET https://example.signalwire.com/api/laml/2010-04-01/Accounts/{AccountSid}/Recordings/{Sid}`
+
+### MP3
+
+Setting an extension of ".mp3" on the URI returns a binary MP3 version of the recording. For example:
+
+`GET https://example.signalwire.com/api/laml/2010-04-01/Accounts/{AccountSid}/Recordings/{Sid}.mp3`
+
+### Metadata
+
+A recording's metadata, such as duration, cost, time, can be returned by setting the Recording URI's extension to `.json`. For example:
+
+`GET https://example.signalwire.com/api/laml/2010-04-01/Accounts/{AccountSid}/Recordings/{Sid}.json`
+
+---
+
+<EndpointSchemaSnippet endpoint="GET /Accounts/{AccountSid}/Recordings/{Sid}" />
+
+<EndpointResponseSnippet endpoint="GET /Accounts/{AccountSid}/Recordings/{Sid}" />
+
+## Request examples
+
+<CodeBlocks>
+```javascript title="Node.js"
+const { RestClient } = require('@signalwire/compatibility-api')
+const client = RestClient('YourProjectID', 'YourAuthToken', { signalwireSpaceUrl: 'example.signalwire.com' })
+
+client.recordings('Sid')
+      .fetch()
+      .then(recording => console.log(recording.callSid))
+      .done();
+```
+```csharp
+using System;
+using System.Collections.Generic;
+using Twilio;
+using Twilio.Rest.Api.V2010.Account;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        TwilioClient.Init("YourProjectID", "YourAuthToken", new Dictionary<string, object> { ["signalwireSpaceUrl"] = "{SPACE}.signalwire.com" });
+
+        var recording = RecordingResource.Fetch(
+            pathSid: "Sid"
+        );
+
+        Console.WriteLine(recording.CallSid);
+    }
+}
+```
+```python
+from signalwire.rest import Client as signalwire_client
+
+client = signalwire_client("YourProjectID", "YourAuthToken", signalwire_space_url = 'example.signalwire.com')
+
+recording = client.recordings('Sid').fetch()
+
+print(recording.call_sid)
+```
+```ruby
+require 'signalwire/sdk'
+
+@client = Signalwire::REST::Client.new 'YourProjectID', 'YourAuthToken', signalwire_space_url: "example.signalwire.com"
+
+recording = @client.recordings('Sid').fetch
+
+puts recording.call_sid
+```
+</CodeBlocks>

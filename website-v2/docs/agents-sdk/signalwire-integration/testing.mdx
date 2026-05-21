@@ -1,0 +1,226 @@
+---
+title: "Testing"
+sidebar_label: "Testing"
+slug: /python/guides/testing
+toc_max_heading_level: 3
+---
+
+## Testing
+
+Test your agent thoroughly before production. Use local testing, swaig-test CLI, and test calls.
+
+### Testing Stages
+
+#### 1. Local Testing
+- Run agent locally
+- Test with swaig-test CLI
+- Verify SWML output
+
+#### 2. Tunnel Testing
+- Expose via ngrok
+- Make real calls
+- Test end-to-end
+
+#### 3. Production Testing
+- Deploy to production server
+- Test with real phone
+- Monitor call logs
+
+### swaig-test CLI
+
+Test agents without making calls:
+
+```bash
+## List available functions
+swaig-test my_agent.py --list-tools
+
+## View SWML output
+swaig-test my_agent.py --dump-swml
+
+## Execute a function
+swaig-test my_agent.py --exec get_weather --city Seattle
+
+## Raw JSON output
+swaig-test my_agent.py --dump-swml --raw
+```
+
+### Local Server Testing
+
+Run your agent locally:
+
+```bash
+## Start the agent
+python my_agent.py
+
+## In another terminal, test the endpoint
+curl -X POST http://localhost:3000/ \
+  -H "Content-Type: application/json" \
+  -d '{"call_id": "test-123"}'
+```
+
+### Using ngrok
+
+Expose local server for real calls:
+
+```bash
+## Terminal 1: Run agent
+python my_agent.py
+
+## Terminal 2: Start ngrok
+ngrok http 3000
+```
+
+Copy the ngrok HTTPS URL and configure in SignalWire.
+
+### Test Call Checklist
+
+#### Basic Functionality
+- Call connects successfully
+- Agent greeting plays
+- Speech recognition works
+- Agent responds appropriately
+
+#### Function Calls
+- Functions execute correctly
+- Results returned to AI
+- AI summarizes results properly
+
+#### Edge Cases
+- Silence handling
+- Interruption handling
+- Long responses
+- Multiple function calls
+
+#### Error Handling
+- Invalid input handled
+- Function errors handled gracefully
+- Timeout behavior correct
+
+### Viewing Logs
+
+In SignalWire dashboard:
+
+1. Go to [Logs](https://my.signalwire.com/?/logs/voices)
+2. Find your test call
+3. View details:
+   - Call duration
+   - SWML executed
+   - Function calls
+   - Errors
+
+### Debugging with Logs
+
+Add logging to your agent:
+
+```python
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
+
+
+class MyAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="my-agent")
+        self.log.info("Agent initialized")
+
+    def my_handler(self, args, raw_data):
+        self.log.debug(f"Function called with args: {args}")
+        self.log.debug(f"Raw data: {raw_data}")
+
+        result = "Some result"
+        self.log.info(f"Returning: {result}")
+
+        return SwaigFunctionResult(result)
+```
+
+### Testing Transfers
+
+Test call transfers carefully:
+
+```python
+def test_transfer(self, args, raw_data):
+    # Use a test number you control
+    test_number = "+15551234567"
+
+    return (
+        SwaigFunctionResult("Transferring now")
+        .connect(test_number, final=True)
+    )
+```
+
+### Testing SMS
+
+Test SMS sending:
+
+```python
+def test_sms(self, args, raw_data):
+    # Send to your own phone for testing
+    return (
+        SwaigFunctionResult("Sent test SMS")
+        .send_sms(
+            to_number="+15551234567",  # Your test phone
+            from_number="+15559876543", # Your SignalWire number
+            body="Test message from agent"
+        )
+    )
+```
+
+### Load Testing
+
+For production readiness:
+
+- Test concurrent call handling
+- Monitor server resources
+- Check response times under load
+- Verify function execution at scale
+- Test database/API connection pooling
+
+### Common Test Scenarios
+
+| Scenario | What to Test |
+|----------|--------------|
+| Happy path | Normal conversation flow |
+| No speech | Silence and timeout handling |
+| Background noise | Speech recognition accuracy |
+| Rapid speech | Interruption handling |
+| Invalid requests | Error handling |
+| Function errors | Graceful degradation |
+| Long calls | Memory and stability |
+
+### Automated Testing
+
+Create test scripts:
+
+```python
+import requests
+
+
+def test_swml_endpoint():
+    """Test that SWML endpoint returns valid response"""
+    response = requests.post(
+        "http://localhost:3000/",
+        json={"call_id": "test-123"},
+        headers={"Content-Type": "application/json"}
+    )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert "version" in data
+    assert data["version"] == "1.0.0"
+
+
+def test_function_execution():
+    """Test that functions execute correctly"""
+    response = requests.post(
+        "http://localhost:3000/swaig",
+        json={
+            "function": "get_weather",
+            "argument": {"parsed": [{"city": "Seattle"}]},
+            "call_id": "test-123"
+        }
+    )
+
+    assert response.status_code == 200
+```
+
+

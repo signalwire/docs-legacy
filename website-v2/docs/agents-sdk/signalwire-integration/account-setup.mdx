@@ -1,0 +1,188 @@
+---
+title: "Account Setup"
+sidebar_label: "Account Setup"
+slug: /python/guides/account-setup
+toc_max_heading_level: 3
+---
+
+# SignalWire Integration
+
+Connect your agents to phone numbers through SignalWire. This chapter covers account setup, phone number configuration, and testing your voice agents.
+
+## What You'll Learn
+
+This chapter covers SignalWire integration:
+
+1. **Account Setup** - Create and configure your SignalWire account
+2. **Phone Numbers** - Purchase and manage phone numbers
+3. **Mapping Numbers** - Connect phone numbers to your agents
+4. **Testing** - Test your agents before going live
+5. **Troubleshooting** - Common issues and solutions
+
+## Integration Overview
+
+<Frame caption="SignalWire Integration">
+  <img className="diagram" src={require("@image/agents-sdk-manual/08_01_account-setup_diagram1.webp").default} alt="SignalWire Integration." />
+</Frame>
+
+## Prerequisites
+
+Before connecting to SignalWire:
+
+- Working agent (tested locally)
+- Publicly accessible server
+- SignalWire account
+
+## Chapter Contents
+
+| Section | Description |
+|---------|-------------|
+| [Account Setup](/docs/agents-sdk/python/guides/account-setup) | Create SignalWire account and project |
+| [Phone Numbers](/docs/agents-sdk/python/guides/phone-numbers) | Purchase and manage numbers |
+| [Mapping Numbers](/docs/agents-sdk/python/guides/mapping-numbers) | Connect numbers to agents |
+| [Testing](/docs/agents-sdk/python/guides/testing) | Test calls and debugging |
+| [Troubleshooting](/docs/agents-sdk/python/guides/troubleshooting) | Common issues and fixes |
+
+## Quick Integration Steps
+
+### Step 1: Account Setup
+- Create SignalWire account
+- Create a project
+- Note your Space Name
+
+### Step 2: Phone Number
+- Purchase a phone number
+- Or use a SIP endpoint
+
+### Step 3: Deploy Agent
+- Deploy agent to public URL
+- Verify HTTPS is working
+- Test SWML endpoint responds
+
+### Step 4: Connect
+- Point phone number to agent URL
+- Make test call
+- Verify agent responds
+
+## Architecture
+
+<Frame caption="Call Flow Architecture">
+  <img className="diagram" src={require("@image/agents-sdk-manual/08_01_account-setup_diagram2.webp").default} alt="Call Flow Architecture." />
+</Frame>
+
+## Required URLs
+
+Your agent needs to be accessible at these endpoints:
+
+| Endpoint | Method | Purpose |
+|----------|--------|---------|
+| `/` | POST | Main SWML document |
+| `/swaig` | POST | SWAIG function calls |
+
+## Security Considerations
+
+- Always use HTTPS for production
+- Enable basic auth for SWML endpoints
+- Use secure tokens for SWAIG functions
+- Don't expose sensitive data in prompts
+- Monitor for unusual call patterns
+
+Let's start with setting up your SignalWire account.
+
+## Create Account
+
+1. Go to [signalwire.com](https://signalwire.com)
+2. Click [Sign Up](https://id.signalwire.com/onboarding) or [Login](https://id.signalwire.com/login/session/new)
+3. Complete registration with email and password
+4. Verify your email address
+
+**Note:** If you have problems verifying your account, email support@signalwire.com
+
+## Create a Project
+
+After logging in:
+
+1. Navigate to Projects in the dashboard
+2. Click "Create New Project"
+3. Enter a project name (e.g., "Voice Agents")
+4. Select your use case
+
+## Space Name
+
+Your Space Name is your unique SignalWire identifier.
+
+**URL Format:** `https://YOUR-SPACE-NAME.signalwire.com`
+
+**Example:** `https://mycompany.signalwire.com`
+
+**You'll need this for:**
+- API authentication
+- Dashboard access
+- SWML webhook configuration
+
+## API Credentials
+
+Get your API credentials from the project:
+
+1. Go to [API Credentials](https://my.signalwire.com/?page=/credentials)
+2. Note your Project ID
+3. Create an API Token if needed
+
+| Credential | Format |
+|------------|--------|
+| Project ID | `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx` |
+| API Token | `PTxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx` |
+| Space Name | `your-Space` |
+
+**Keep these secure - don't commit to version control!**
+
+## Environment Variables
+
+Set these for your agent:
+
+```bash
+export SIGNALWIRE_PROJECT_ID="your-project-id"
+export SIGNALWIRE_API_TOKEN="your-api-token"
+export SIGNALWIRE_SPACE_NAME="your-Space"
+```
+
+## Dashboard Overview
+
+| Section | Purpose |
+|---------|---------|
+| **[Phone Numbers](https://my.signalwire.com/?page=/phone_numbers)** | Purchase and manage phone numbers |
+| **[SWML](https://my.signalwire.com/?page=/resources/scripts)** | Configure SWML scripts and webhooks |
+| **[Logs](https://my.signalwire.com/?/logs/voices)** | View call history and debugging info |
+| **[API Credentials](https://my.signalwire.com/?page=/credentials)** | Credentials and API explorer |
+| **[Billing](https://my.signalwire.com/?page=/payment_methods)** | Account balance and usage |
+
+## Add Credit
+
+Before making calls:
+
+1. Go to [Billing](https://my.signalwire.com/?page=/payment_methods)
+2. Add payment method
+3. Add credit to your account
+
+Trial accounts may have limited credit for testing.
+
+## Account Verification
+
+Some features require account verification:
+
+- Phone number purchases
+- Outbound calling
+- Certain number types
+
+Complete verification in Account Settings if prompted.
+
+## Next Steps
+
+With your account ready:
+
+1. [Purchase a phone number](https://my.signalwire.com/?page=/phone_numbers)
+2. Deploy your agent
+3. Connect the number to your agent
+
+
+

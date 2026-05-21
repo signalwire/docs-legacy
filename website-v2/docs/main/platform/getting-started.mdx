@@ -1,0 +1,357 @@
+---
+title: Get started
+description: The SignalWire platform
+slug: getting-started
+sidebar_position: 0
+---
+
+SignalWire is a programmable unified communications platform that unifies voice, messaging, video, and AI into a single control plane.
+SignalWire's APIs and SDKs enable developers to build state-of-the-art realtime communication experiences without needing to
+manage complex telecom infrastructure or stitch together disconnected tools.
+
+This guide will help you set up your account, explore the core APIs, and launch your first application.
+
+## Your SignalWire Space
+
+When you [create a SignalWire account](https://signalwire.com/signup), you also create a **Space**,
+like `spacename.signalwire.com`.
+Your [Dashboard](https://my.signalwire.com) is located at that subdomain.
+In your Dashboard, you can:
+
+- Buy and configure phone numbers
+- Create and manage your applications
+- View call logs and analytics
+- Access your API credentials
+- Set up AI agents, call flows, and more
+
+<Frame>
+  ![The SignalWire Dashboard](@image/dashboard/home/home.webp)
+</Frame>
+
+## Core concepts
+
+### Communication channels
+
+SignalWire supports the following communication channels:
+
+<CardGroup cols={3}>
+  <Card title="Voice" href="/docs/platform/voice" icon="solid phone">
+    Phone calls, IVRs, recording, conferencing
+  </Card>
+  <Card title="Video" href="/docs/platform/video" icon="solid video">
+    Video rooms, screen sharing, recordings
+  </Card>
+  <Card title="Messaging" href="/docs/platform/messaging" icon="solid message">
+    SMS and MMS text messages
+  </Card>
+  <Card title="Chat" href="/docs/platform/chat" icon="solid comments">
+    Real-time chat for web and mobile apps
+  </Card>
+  <Card title="AI" href="/docs/platform/ai" icon="solid robot">
+    Intelligent voice agents powered by LLMs
+  </Card>
+  <Card title="Fax" href="/docs/platform/fax" icon="solid fax">
+    Send and receive faxes programmatically
+  </Card>
+</CardGroup>
+
+Most channels can work over different **transports** depending on how you want to connect:
+
+| Transport | What it is | Common uses |
+|-----------|-----------|-------------|
+| **PSTN** | The traditional phone network | Calling regular phone numbers, receiving calls from landlines and cell phones |
+| **SIP** | Voice over IP protocol | Connecting PBX systems, desk phones, softphones, and VoIP carriers |
+| **WebRTC** | Browser-based real-time communication | In-app calling, video conferencing, browser-based contact centers |
+
+For example, a voice call could come in via PSTN (someone dialing your number), SIP (from a desk phone), or WebRTC (from your web app).
+**SignalWire will handle all three.**
+
+### Phone numbers
+
+To make or receive calls and messages through the phone network, you'll need SignalWire phone numbers.
+You can buy local numbers, toll-free numbers, or short codes directly from your Dashboard or the
+[API](/docs/apis/relay-rest/purchase-phone-number).
+
+Each number can be configured to handle incoming calls and messages differently -
+whether that's forwarding to another number, running a script, connecting to an AI agent,
+or triggering your own application.
+
+<Card title="Learn more about Phone Numbers" href="/docs/platform/phone-numbers" horizontal>
+  How to buy, configure, and manage your numbers
+</Card>
+
+We also offer the option of purchasing phone numbers programmatically via our [Purchase a Phone Number](/docs/apis/relay-rest/purchase-phone-number) API Endpoint.
+
+### Resources
+
+In SignalWire, a **Resource** is anything that can handle communications - an AI agent, a script, a SIP connection, or your own application.
+When a call or message comes in, you tell SignalWire which Resource should handle it.
+
+Common resource types include:
+- **SWML Scripts** - Simple JSON/YAML instructions hosted in your Dashboard
+- **AI Agents** - Conversational AI that handles calls autonomously
+- **Call Flows** - Visual drag-and-drop call routing
+- **Relay Applications** - Your own server applications connected via WebSocket
+
+<Card title="Learn more about Resources" href="/docs/platform/resources" horizontal>
+  Understanding the different resource types
+</Card>
+
+### Addresses
+
+Every Resource has an **Address**.
+This is a unique identifier that lets you target and interact with it.
+Think of addresses as the **phone number** for any resource, but broader in scope.
+
+Addresses can be:
+- **Phone numbers** - Traditional numbers like `+14155551234` for PSTN calls
+- **SIP addresses** - For VoIP connections like `sip:user@domain.com`
+- **Aliases** - Custom names like `/support-queue` or `/main-conference` that are easy to remember
+
+A single Resource can have multiple addresses, and you can change them anytime.
+For example, you might point both a phone number and a custom alias to the same AI agent.
+
+<Card title="Learn more about Addresses" href="/docs/platform/addresses" horizontal>
+  How addressing works in SignalWire
+</Card>
+
+### Subscribers
+
+**Subscribers** are end users who authenticate with SignalWire to make and receive calls.
+If you're building a contact center, business phone system, or video conferencing app for example, your users become Subscribers.
+
+SignalWire manages these users for you. You create, update, and delete them through our REST APIs, and each Subscriber gets:
+- **Authentication** - Secure credentials and tokens for logging in
+- **A callable address** - They can be reached directly at `/private/username`
+- **Multi-device support** - They can answer calls from a browser, mobile app, or desk phone
+
+This means you don't have to build user management, authentication, or device registration yourself - SignalWire handles it.
+
+<Card title="Learn more about Subscribers" href="/docs/platform/subscribers" horizontal>
+  User management and authentication
+</Card>
+
+
+---
+
+## Start building
+
+Now that you understand the basics, let's figure out the best way for you to build.
+The right approach depends on what you're creating and how you prefer to work.
+
+### What are you trying to build?
+
+<AccordionGroup>
+<Accordion title="AI Application" defaultOpen={true}>
+
+**You want to build an AI-powered voice agent that handles phone calls.**
+
+This is common for:
+- Automated customer service
+- Appointment scheduling and reminders
+- FAQ bots and information lines
+- Lead qualification and surveys
+- Virtual receptionists
+
+**[Agents SDK](/docs/agents-sdk/python)** - A Python framework for building sophisticated AI voice agents.
+You get full control over prompts, custom functions (SWAIG) dedicated to AI, customizeable conversation flow, and seamless LLM integration.
+Best for complex agents that need to perform actions like booking appointments, looking up data, or integrating with your systems.
+
+**[AI Agent (Dashboard)](/docs/platform/ai/no-code-agents)** - Configure an AI agent directly in your Dashboard without writing code.
+Set up prompts, choose a voice, add functions, and connect it to a phone number.
+Great for getting started quickly or simpler use cases.
+
+**[SWML with AI](/docs/swml/reference/ai)** - Add AI capabilities to your SWML scripts using the `ai` method.
+Good when you want AI as part of a larger call flow that includes other logic.
+
+<CardGroup cols={3}>
+  <Card title="Agents SDK" href="/docs/agents-sdk/python">
+    Python, full control
+  </Card>
+
+  <Card title="SWML AI Method" href="/docs/swml/reference/ai">
+    AI in call flows
+  </Card>
+
+  <Card title="Dashboard AI Agent" href="/docs/platform/ai/no-code-agents">
+    No-code setup
+  </Card>
+</CardGroup>
+
+#### Quick start with Agents SDK:
+
+```bash
+pip install signalwire-agents
+```
+
+```python
+from signalwire_agents import AgentBase
+
+class MyAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="Assistant", route="/agent")
+        self.prompt_add_section("main", body="You are a helpful assistant for Acme Corp.")
+
+agent = MyAgent()
+agent.serve()
+```
+
+<Card title="Agents SDK Quickstart" href="/docs/agents-sdk/python/guides/quickstart" horizontal>
+  Build your first AI voice agent
+</Card>
+
+</Accordion>
+<Accordion title="Browser or Mobile App">
+
+**You want voice, video, or chat directly in a web browser or mobile app.**
+
+This is common for:
+- Click-to-call buttons on websites
+- In-app voice or video calling
+- Browser-based contact centers
+- Video conferencing applications
+
+**[Browser SDK](/docs/browser-sdk/js)** - Our JavaScript SDK for building custom WebRTC experiences.
+You get full control over the UI and user experience. Best when you need video conferencing, custom calling interfaces, or real-time chat.
+
+**[Click-to-Call](/docs/browser-sdk/click-to-call)** - A pre-built widget you can drop onto any website.
+Users click a button and call you directly from their browser. Minimal code required - great for adding a "call us" button quickly.
+
+<Card title="Browser SDK Guide" href="/docs/browser-sdk/js" horizontal>
+  Build voice, video, and chat in the browser
+</Card>
+
+</Accordion>
+<Accordion title="Server Application">
+
+**You're building a backend service that handles calls or messages.**
+
+This is common for:
+- IVR systems and phone menus
+- Automated call routing
+- SMS notifications and two-factor auth
+- Call centers and support systems
+- AI voice agents
+
+#### Do you need real-time control?
+
+**If you need simple call handling** (IVRs, call forwarding, playing messages), use **[SWML](/docs/swml)**.
+Your server responds to webhooks with JSON/YAML instructions. It's stateless, works with any programming language, and is the simplest approach for most use cases.
+
+**If you need real-time control** (live call monitoring, mid-call transfers, complex orchestration), use the **[Realtime SDK](/docs/server-sdk/node)**.
+It maintains a persistent WebSocket connection for instant, bi-directional communication.
+Best for applications that need to react to events as they happen.
+
+**If you're building AI voice agents**, use the **[Agents SDK](/docs/agents-sdk/python)**.
+It's a Python framework specifically designed for creating conversational AI that handles phone calls.
+It handles the complexity of integrating with LLMs and managing conversations.
+
+<CardGroup cols={3}>
+  <Card title="Agents SDK" href="/docs/agents-sdk/python">
+    AI voice agents, Python
+  </Card>
+  <Card title="SWML" href="/docs/swml">
+    HTTP webhooks, any language
+  </Card>
+  <Card title="Realtime SDK" href="/docs/server-sdk/node">
+    WebSocket, Node.js
+  </Card>
+</CardGroup>
+
+</Accordion>
+<Accordion title="No-Code / Low-Code">
+
+**You want to build without writing much (or any) code.**
+
+This is common for quick prototypes, simple IVRs, and small businesses needing basic call handling.
+
+**[Call Flow Builder](/docs/call-flow-builder)** - A visual, drag-and-drop interface for building call handling logic. No code required.
+You connect nodes to define what happens when someone calls - play a message, gather input, route to different people, etc.
+
+**[SWML Scripts](/docs/swml)** - Write simple JSON or YAML scripts directly in your Dashboard.
+It's not quite "no code" but it's very low code, and you don't need to run any servers. SignalWire hosts the scripts for you.
+
+**[AI Agent](/docs/platform/ai/no-code-agents)** - Configure a conversational AI agent through your Dashboard. Set up prompts, choose a voice, and connect it to a phone number.
+The AI handles conversations autonomously.
+
+<CardGroup cols={3}>
+  <Card title="Call Flow Builder" href="/docs/call-flow-builder">
+    Visual drag-and-drop
+  </Card>
+  <Card title="SWML Scripts" href="/docs/swml">
+    Simple JSON/YAML
+  </Card>
+  <Card title="AI Agent" href="/docs/platform/ai/no-code-agents">
+    Dashboard AI setup
+  </Card>
+</CardGroup>
+
+#### Quick start for no-code:
+
+1. **Buy a phone number** - Go to Phone Numbers in your Dashboard
+2. **Create a Call Flow** - Use Call Flow Builder to design what happens when someone calls
+3. **Assign it to your number** - Edit the number settings and select your Call Flow
+4. **Call your number** - Test it out!
+
+</Accordion>
+<Accordion title="Migrating from Twilio">
+
+**You have an existing Twilio application and want to move to SignalWire.**
+
+Good news, SignalWire's **[Compatibility API](/docs/compatibility-api)** is designed as a drop-in replacement.
+In most cases, you can switch by changing a few lines of code.
+
+#### What's compatible:
+
+| Twilio | SignalWire |
+|--------|------------|
+| TwiML | [cXML](/docs/compatibility-api/cxml) (same syntax) |
+| REST API | [Compatibility REST API](/docs/compatibility-api/rest) |
+| Helper Libraries | [Compatibility SDKs](/docs/compatibility-api/sdks) (Node, Python, Ruby, C#) |
+| Account SID | Project ID |
+| Auth Token | API Token |
+
+<Warning>
+AI is **not supported** in the Compatibility API.
+Check out the **AI Application** section instead.
+</Warning>
+
+#### Migration steps:
+
+1. **Create a SignalWire account** at [signalwire.com/signup](https://signalwire.com/signup)
+2. **Get your credentials** from Dashboard > API > API Tokens
+3. **Update your code** to use SignalWire's SDK and credentials
+4. **Update webhook URLs** if needed (cXML syntax is identical to TwiML)
+5. **[Buy](/docs/platform/phone-numbers) or [port](/docs/platform/porting-into-signalwire) phone numbers** to SignalWire
+6. **Test** your application
+
+```javascript
+// Change from this (Twilio)
+const twilio = require("twilio");
+const client = twilio(ACCOUNT_SID, AUTH_TOKEN);
+
+// To this (SignalWire)
+const { RestClient } = require("@signalwire/compatibility-api");
+const client = RestClient(PROJECT_ID, API_TOKEN, {
+  signalwireSpaceUrl: "your-space.signalwire.com"
+});
+```
+
+<Card title="Compatibility API Guide" href="/docs/compatibility-api" horizontal>
+  Complete migration documentation
+</Card>
+
+</Accordion>
+</AccordionGroup>
+
+---
+
+## Next Steps
+
+Once you've chosen your path, here are some resources to help you along the way:
+
+- **[Discord Community](https://discord.com/invite/F2WNYTNjuF)** - Join 8,000+ developers. Great for questions and sharing what you're building.
+- **[GitHub](https://github.com/signalwire/)** - Example code, SDKs, and open source tools.
+- **[API Reference](/docs/apis)** - Detailed documentation for all our REST APIs.
+
+If you get stuck or have questions, our support team is here to help at [support@signalwire.com](mailto:support@signalwire.com).

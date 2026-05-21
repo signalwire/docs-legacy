@@ -1,0 +1,264 @@
+openapi: 3.0.3
+info:
+  version: 1.0.0
+  title: Project API
+  description: An API to programmatically manage your SignalWire projects.
+  termsOfService: https://signalwire.com/legal/signalwire-cloud-agreement
+externalDocs:
+  url: https://developer.signalwire.com
+  description: Find more information about this and other SignalWire APIs.
+servers:
+  - url: https://{space_name}.signalwire.com/api/project
+    variables:
+      space_name:
+        default: YOUR_SPACE
+        description: Your SignalWire Space's subdomain.
+security:
+  - basic_auth: []
+components:
+  securitySchemes:
+    basic_auth:
+      type: http
+      scheme: basic
+
+tags:
+  - name: Tokens
+  
+paths:
+  /tokens:
+    post:
+      operationId: create_token
+      summary: Generate a new API Token
+      description: >
+        Generate an API Token for a project to be used to authenticate requests
+        within the project. 
+
+
+        #### Permissions
+
+        You must set the functions allowed by this API Token by selecting which
+        types of requests this API Token is allowed to make.
+
+        Valid options are: calling, chat, fax, management, messaging, numbers,
+        pubsub, storage, tasking, and video
+      tags:
+        - Tokens
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - type: object
+                  required:
+                    - name
+                    - permissions
+                - type: object
+                  properties:
+                    name:
+                      type: string
+                      description: The name representing the API token.
+                      example: John Doe's Token
+                    permissions:
+                      type: array
+                      description: >-
+                        The permissions you would like to enable for this token.
+                        Valid permissions are calling, chat, fax, management,
+                        messaging, numbers, pubsub, storage, tasking, and video
+                      example:
+                        - calling
+                        - fax
+                        - messaging
+                - type: object
+                  properties:
+                    subproject_id:
+                      type: string
+                      description: >-
+                        The unique identifier of the subproject you would like
+                        to create a token for. The subproject passed must be a
+                        child of the project used to authenticate the request.
+                      example: 9a7fc048-984f-11ee-b9d1-0242ac120002
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: The ID of the created API Token.
+                    example: ea14556a-984f-11ee-b9d1-0242ac120002
+                  name:
+                    type: string
+                    description: The name of the created API Token.
+                    example: John Doe's Token
+                  permissions:
+                    type: array
+                    description: The permissions enabled for this token.
+                    example:
+                      - calling
+                      - fax
+                      - messaging
+                  token:
+                    type: string
+                    description: >-
+                      The API token that can be used along with the project ID
+                      for basic authentication
+                    example: PT037258e533e87ac63174ee136ed0798dc85d4f4f9e6d7191
+        '422':
+          description: Unprocessable Entity. You may have specified invalid parameters.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  type:
+                    type: string
+                  code:
+                    type: string
+                  message:
+                    type: string
+                  attribute:
+                    type: string
+                  url:
+                    type: string
+                    format: uri
+                required:
+                  - type
+                  - code
+                  - message
+                  - url
+                example:
+                  type: validation_error
+                  code: invalid_auth_token_permissions
+                  message: >-
+                    Permissions contains invalid selections (valid permissions
+                    are: calling, chat, fax, management, messaging, numbers,
+                    pubsub, storage, tasking, and video)
+                  attribute: permissions
+                  url: >-
+                    https://developer.signalwire.com/rest/overview/error-codes/#invalid_auth_token_permissions
+  /tokens/{token_id}:
+    patch:
+      operationId: update_token
+      summary: Update an API Token
+      description: >
+        Update an API Token's name or permissions.  
+
+
+        #### Permissions
+
+        You can modify the functions allowed by this API Token by selecting
+        which types of requests this API Token is allowed to make.
+
+        Valid options are: calling, chat, fax, management, messaging, numbers,
+        pubsub, storage, tasking, and video
+      tags:
+        - Tokens
+      parameters:
+        - name: token_id
+          in: path
+          description: The unique identifier of the token that you want to update.
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - type: object
+                - type: object
+                  properties:
+                    name:
+                      type: string
+                      description: The name representing the API token.
+                      example: John Doe's Token
+                    permissions:
+                      type: array
+                      description: >-
+                        The permissions you would like to enable for this token.
+                        Valid permissions are calling, chat, fax, management,
+                        messaging, numbers, pubsub, storage, tasking, and video
+                      example:
+                        - calling
+                        - fax
+                        - messaging
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: The ID of the created API Token.
+                    example: ea14556a-984f-11ee-b9d1-0242ac120002
+                  name:
+                    type: string
+                    description: The name of the created API Token.
+                    example: John Doe's Token
+                  permissions:
+                    type: array
+                    description: The permissions enabled for this token.
+                    example:
+                      - calling
+                      - fax
+                      - messaging
+                  token:
+                    type: string
+                    description: >-
+                      The API token that can be used along with the project ID
+                      for basic authentication
+                    example: PT037258e533e87ac63174ee136ed0798dc85d4f4f9e6d7191
+        '422':
+          description: Unprocessable Entity. You may have specified invalid parameters.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  type:
+                    type: string
+                  code:
+                    type: string
+                  message:
+                    type: string
+                  attribute:
+                    type: string
+                  url:
+                    type: string
+                    format: uri
+                required:
+                  - type
+                  - code
+                  - message
+                  - url
+                example:
+                  type: validation_error
+                  code: invalid_auth_token_permissions
+                  message: >-
+                    Permissions contains invalid selections (valid permissions
+                    are: calling, chat, fax, management, messaging, numbers,
+                    pubsub, storage, tasking, and video)
+                  attribute: permissions
+                  url: >-
+                    https://developer.signalwire.com/rest/overview/error-codes/#invalid_auth_token_permissions
+    delete:
+      operationId: delete_token
+      summary: Delete an API Token
+      description: |
+        Delete an API Token. This action cannot be undone.
+      tags:
+        - Tokens
+      parameters:
+        - name: token_id
+          in: path
+          description: The unique identifier of the token that you want to update.
+          required: true
+      responses:
+        '204':
+          description: No Content

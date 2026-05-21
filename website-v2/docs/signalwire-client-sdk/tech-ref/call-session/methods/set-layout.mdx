@@ -1,0 +1,142 @@
+---
+title: setLayout
+slug: /call-session/setlayout
+---
+
+import APIField from '@site/src/components/APIField';
+
+Changes the video layout for the call, optionally positioning specific members.
+
+## Signature
+
+```typescript
+setLayout(params: SetLayoutParams): Promise<void>
+```
+
+## Parameters
+
+<APIField name="params" type="SetLayoutParams" required>
+  Layout configuration object.
+</APIField>
+
+<APIField name="params.name" type="string" required>
+  Name of the layout to apply (e.g., "grid-responsive", "2x2", "6x6").
+</APIField>
+
+<APIField name="params.positions" type="Record<string, [VideoPosition](../types#videoposition)>">
+  Map of member IDs to specific positions in the layout.
+</APIField>
+
+## Returns
+
+**Type:** `Promise<void>`
+
+## Important Notes
+
+**Layout Availability:**
+- Available layouts depend on your SignalWire project configuration
+- Use `getLayouts()` to retrieve the list of available layouts
+- Common layouts: `grid-responsive`, `2x2`, `3x3`, `4x4`, `5x5`, `6x6`, `8x8`
+
+**Position Types:**
+
+**Reserved Positions** (`reserved-1`, `reserved-2`, etc.)
+- Pin important participants to specific spots
+- Remain fixed even as other members join/leave
+
+**Standard Positions** (`standard-1`, `standard-2`, etc.)
+- Dynamic positioning for regular participants
+
+**Special Positions:**
+- `auto` - SDK automatically positions the member
+- `off-canvas` - Member is in the call but not visible
+- `full-screen` - Member takes up the entire screen
+- `playback` - For media playback positioning
+
+**Positions vs setPositions():**
+- `setLayout()` can optionally set positions while changing the layout
+- Use `setPositions()` if you only want to reposition members without changing the layout
+
+## Events
+
+- `layout.changed` - Layout has been updated
+
+```typescript
+call.on('layout.changed', (event) => {
+  console.log('New layout:', event.layout.name)
+})
+```
+
+## Examples
+
+### Set a basic layout
+
+```typescript
+await call.setLayout({ name: '6x6' })
+await call.setLayout({ name: '2x2' })
+await call.setLayout({ name: 'grid-responsive' })
+```
+
+### Set layout with specific member positions
+
+```typescript
+await call.setLayout({
+  name: '6x6',
+  positions: {
+    'member-id-1': 'reserved-1',
+    'member-id-2': 'reserved-2',
+    'member-id-3': 'auto'
+  }
+})
+```
+
+### Full workflow: Get available layouts, then set
+
+```typescript
+const { layouts } = await call.getLayouts()
+
+const desiredLayout = '6x6'
+if (layouts.includes(desiredLayout)) {
+  await call.setLayout({ name: desiredLayout })
+}
+```
+
+### Position yourself in a layout
+
+```typescript
+// Use "self" keyword if you don't know your member ID yet
+await call.setLayout({
+  name: '4x4',
+  positions: {
+    'self': 'reserved-1'
+  }
+})
+
+// If you know your member ID
+await call.setLayout({
+  name: '4x4',
+  positions: {
+    [call.memberId]: 'reserved-1'
+  }
+})
+```
+
+### Dynamic layout based on participant count
+
+```typescript
+const { members } = await call.getMembers()
+const memberCount = members.length
+
+let layoutName: string
+if (memberCount <= 4) {
+  layoutName = '2x2'
+} else if (memberCount <= 9) {
+  layoutName = '3x3'
+} else if (memberCount <= 16) {
+  layoutName = '4x4'
+} else {
+  layoutName = '6x6'
+}
+
+await call.setLayout({ name: layoutName })
+```

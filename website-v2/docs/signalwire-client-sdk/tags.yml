@@ -1,0 +1,18 @@
+browser-sdk:
+  label: Browser SDK
+  description: Client-side SDK for web applications
+chat:
+  label: Chat
+  description: Chat functionality in the Browser SDK
+video:
+  label: Video
+  description: Video functionality in the Browser SDK
+pubsub:
+  label: PubSub
+  description: Publish-Subscribe functionality in the Browser SDK
+webrtc:
+  label: WebRTC
+  description: WebRTC functionality in the Browser SDK
+guides:
+  label: Guides
+  description: How-to guides and tutorials

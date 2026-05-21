@@ -1,0 +1,272 @@
+---
+
+title: Compatibility Libraries and SDKs
+sidebar_label: Overview
+slug: /compatibility-api/sdks
+toc_max_heading_level: 3
+---
+
+SignalWire has clients in a number of different languages that make using the SignalWire Compatibility API possible with your existing application. They are also built to make migrating from other service providers to SignalWire quick and easy.
+
+The Compatibility SDK has two primary components:
+
+ - **REST Client:** The REST client is used to make API calls for initiating outbound calls and messages, managing phone numbers, retrieving call logs, and other operations. See the [REST API Methods](/docs/compatibility-api/rest) for the complete API reference.
+ - **cXML Builders:** The cXML builders do not make API calls directly. Instead, they are helper libraries that enable you to easily generate cXML responses within your language of choice. The SDK provides three response builders for the different channel types:
+   - `VoiceResponse` — Build XML for handling voice calls
+   - `MessagingResponse` — Build XML for handling SMS/MMS messages
+   - `FaxResponse` — Build XML for handling faxes
+
+   See the [cXML Specification](/docs/compatibility-api/cxml) for technical reference on the XML format and available verbs.
+
+---
+
+## Getting started with the SDKs
+
+  <Tabs groupId="cxml-api">
+
+  <TabItem value="node.js" label="Node.js">
+
+    <h3>Installing the SDK</h3>
+
+    Install the package using NPM:
+
+    ```js
+    npm install @signalwire/compatibility-api
+    ```
+
+    <h3>Initializing the Client</h3>
+
+    In order to use the NodeJS client, you must get your `Space URL`, `Project ID`, and `API Token`
+    from your SignalWire Dashboard and initialize the client:
+
+    ```js
+    const { RestClient } = require("@signalwire/compatibility-api");
+
+    const client = RestClient(
+    "your-project",
+    "your-token",
+    { signalwireSpaceUrl: "example.signalwire.com" }
+    );
+
+    // You can then use client to make calls, send messages, and more.
+    ```
+
+    <h4>Using Environment Variables</h4>
+
+    Alternatively, you can use an environment variable to pass the Space URL:
+
+    ```makefile
+      SIGNALWIRE_SPACE_URL=example.signalwire.com
+    ```
+
+    With this approach, `signalwireSpaceUrl` will be pulled from the `.env` file instead of having to be passed as an argument:
+
+    ```js
+      const { RestClient } = require("@signalwire/compatibility-api");
+
+      const client = RestClient(
+      "your-project",
+      "your-token"
+      );
+    ```
+
+    <h4>Migrating from Twilio</h4>
+
+    You can easily migrate from Twilio with minimal changes.
+
+    To get started, you will need to replace the `Twilio` client with the `SignalWire` client and update the `from` number
+    to a valid SignalWire number.
+
+<Info title="Make sure to change the 'From' number!">
+When migrating to SignalWire, make sure to replace the `from` numbers with a valid SignalWire number.
+</Info>
+
+    ```js
+    // Replace these lines:
+    const twilio = require('twilio')
+    const response = new twilio.twiml.VoiceResponse()
+
+    // With:
+    const { RestClient } = require('@signalwire/compatibility-api')
+    const response = new RestClient.LaML.VoiceResponse()
+
+    // Now use response like you did before!
+    response.say('Hey, welcome to SignalWire!')
+    ```
+
+    
+
+  </TabItem>
+  <TabItem value="python" label="Python">
+
+    <h3>Installing the SDK</h3>
+
+    Install the package using pip:
+
+    ```bash
+    pip install signalwire
+    ```
+
+    <h3>Initializing the Client</h3>
+
+    In order to use the Python client, you must get your `Space URL`, `Project ID`, and `API Token`
+    from your SignalWire Dashboard and initialize the client:
+
+    ```python
+    from signalwire.rest import Client as signalwire_client
+
+    client = signalwire_client(
+    "your-project",
+    "your-token",
+    signalwire_space_url="example.signalwire.com"
+    )
+
+    # You can then use client to make calls, send messages, and more.
+    ```
+
+    Alternatively, you can use an environment variable to set up the Space URL. Place the Space URL in your `.env` file:
+
+    ```makefile
+    SIGNALWIRE_SPACE_URL=example.signalwire.com
+    ```
+
+    With this approach, `signalwire_space_url` will be pulled from the `.env` for you:
+
+    ```python
+    from signalwire.rest import Client as signalwire_client
+    client = signalwire_client('your-project', 'your-token')
+    ```
+
+    <h4>Migrating from Twilio</h4>
+
+    To get started, you will need to replace the `Twilio` client with the `SignalWire` client and update the `from` number
+    to a valid SignalWire number.
+
+<Info title="Make sure to change the 'From' number!">
+When migrating to SignalWire, make sure to replace the `from` numbers with a valid SignalWire number.
+</Info>
+
+    ```python
+    # Replace these lines:
+    from twilio.rest import Client
+    client = Client('account_sid', 'auth_token')
+
+    # With:
+    from signalwire.rest import Client as signalwire_client
+    client = signalwire_client('your-project', 'your-token', signalwire_space_url = 'example.signalwire.com')
+
+    # Now use client variable like you did before!
+    ```
+
+  </TabItem>
+  <TabItem value="ruby" label="Ruby">
+
+    <h3>Installing the SDK</h3>
+
+    Install the package via rubygems:
+
+    ```bash
+    gem install signalwire
+    ```
+
+    ---
+
+    <h3>Initializing the Client</h3>
+
+    In order to use the Ruby client, you must get your `Space URL`, `Project ID`, and `API Token`
+    from your SignalWire Dashboard and initialize the client:
+
+    ```ruby
+    require 'signalwire/sdk'
+    @client = Signalwire::REST::Client.new 'your-project', 'your-token', signalwire_space_url: "example.signalwire.com"
+
+    # You can then use @client to make calls, send messages, and more.
+    ```
+
+    Alternatively, you can use an environment variable to set up the Space URL. Place the Space URL in your `.env` file:
+
+    ```makefile
+    SIGNALWIRE_SPACE_URL=example.signalwire.com
+    ```
+
+    With this approach, `signalwire_space_url` will be pulled from the `.env` for you:
+
+    ```ruby
+    require 'signalwire/sdk'
+    @client = Signalwire::REST::Client.new 'your-project', 'your-token'
+    ```
+
+    Or, you can configure your SignalWire subdomain with an initializer:
+
+    ```ruby
+    require 'signalwire/sdk'
+
+    Signalwire::Sdk.configure do |config|
+      config.hostname = "example.signalwire.com"
+    end
+    ```
+
+    ---
+
+    <h4>Migrating from Twilio</h4>
+
+    To get started, you will need to replace the `Twilio` client with the `SignalWire` client and update the `from` number
+    to a valid SignalWire number.
+
+<Info title="Make sure to change the 'From' number!">
+When migrating to SignalWire, make sure to replace the `from` numbers with a valid SignalWire number.
+</Info>
+
+    ```ruby
+    # Replace these lines:
+    require 'twilio-ruby'
+    @client = Twilio::REST::Client.new('account_sid', 'auth_token')
+
+    # With:
+    require 'signalwire/sdk'
+    @client = Signalwire::REST::Client.new 'your-project', 'your-token', signalwire_space_url: "example.signalwire.com"
+
+    # Now use @client variable like you did before!
+    ```
+
+  </TabItem>
+  <TabItem value="c#" label="C#">
+
+    <h3>Installing the SDK</h3>
+
+    Use [nuget](https://www.nuget.org/packages/SignalWire-DotNet/) to add a reference to the signalwire-dotnet project.
+
+    ---
+
+    <h3>Initializing the Client</h3>
+
+    In order to use the C# client, you must get your `Space URL`, `Project ID`, and `API Token`
+    from your SignalWire Dashboard and initialize the client:
+
+    ```csharp
+    TwilioClient.Init("YourProjectID", "YourAuthToken", new Dictionary<string, object> { ["signalwireSpaceUrl"] = "{SPACE}.signalwire.com" });
+    ```
+
+    ---
+
+    <h4>Migrating from Twilio</h4>
+
+    To get started, you will need to replace the `Twilio` client with the `SignalWire` client and update the `from` number
+    to a valid SignalWire number.
+
+<Info title="Make sure to change the 'From' number!">
+When migrating to SignalWire, make sure to replace the `from` numbers with a valid SignalWire number.
+</Info>
+
+    ```csharp
+    // Replace these lines:
+    TwilioClient.Init("accountSid", "authToken");
+
+    // With:
+    TwilioClient.Init("YourProjectID", "YourAuthToken", new Dictionary<string, object> { ["signalwireSpaceUrl"] = "{SPACE}.signalwire.com" });
+
+    // Now use client like you did before!
+    ```
+
+  </TabItem>
+  </Tabs>

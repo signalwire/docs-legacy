@@ -1,0 +1,23 @@
+---
+title: "stopTrack"
+slug: /js/reference/webrtc/stop-track
+description: stopTrack function in the WebRTC namespace.
+toc_max_heading_level: 3
+---
+
+### stopTrack
+
+- `Const` **stopTrack**(`track`): `void`
+
+Stops a specified track. Similar to [`MediaStreamTrack.stop()`](https://developer.mozilla.org/en-US/docs/Web/API/MediaStreamTrack/stop), but also fires the `ended` event.
+
+#### Parameters
+
+<ParamField path="track" type="MediaStreamTrack" required={true}>
+  The media stream track to stop. See [MediaStreamTrack](https://developer.mozilla.org/en-US/docs/Web/API/MediaStreamTrack) for more details.
+</ParamField>
+
+#### Returns
+
+`void`
+

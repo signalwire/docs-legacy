@@ -1,0 +1,59 @@
+---
+slug: /compatibility-api/sdks/reference/queues/create
+title: Create
+sidebar_label: Create
+toc_max_heading_level: 3
+---
+
+Use this endpoint for the Queues method to create a new call queue.
+
+<EndpointSchemaSnippet endpoint="POST /Accounts/{AccountSid}/Queues" />
+
+## Request examples
+
+<CodeBlocks>
+```javascript title="Node.js"
+const { RestClient } = require('@signalwire/compatibility-api')
+const client = RestClient('YourProjectID', 'YourAuthToken', { signalwireSpaceUrl: 'example.signalwire.com' })
+
+client.queues.create({friendlyName: 'Queue1'})
+             .then(queue => console.log(queue.sid))
+             .done();
+```
+```csharp
+using System;
+using System.Collections.Generic;
+using Twilio;
+using Twilio.Rest.Api.V2010.Account;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        TwilioClient.Init("YourProjectID", "YourAuthToken", new Dictionary<string, object> { ["signalwireSpaceUrl"] = "{SPACE}.signalwire.com" });
+
+        var queue = QueueResource.Create(friendlyName: "Queue1");
+
+        Console.WriteLine(queue.Sid);
+    }
+}
+```
+```python
+from signalwire.rest import Client as signalwire_client
+
+client = signalwire_client("YourProjectID", "YourAuthToken", signalwire_space_url = 'example.signalwire.com')
+
+queue = client.queues.create(friendly_name='Queue1')
+
+print(queue.sid)
+```
+```ruby
+require 'signalwire/sdk'
+
+@client = Signalwire::REST::Client.new 'YourProjectID', 'YourAuthToken', signalwire_space_url: "example.signalwire.com"
+
+queue = @client.queues.create(friendly_name: 'Queue1')
+
+puts queue.sid
+```
+</CodeBlocks>

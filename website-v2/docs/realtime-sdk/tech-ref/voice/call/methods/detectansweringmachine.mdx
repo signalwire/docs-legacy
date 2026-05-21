@@ -1,0 +1,118 @@
+---
+title: "detectAnsweringMachine"
+slug: /node/reference/voice/call/detect-answering-machine
+description: detectAnsweringMachine method for the Call class.
+toc_max_heading_level: 3
+---
+
+[calldetect-events]: /docs/server-sdk/node/reference/voice/call-detect#events
+[calldetect-onstarted]: /docs/server-sdk/node/reference/voice/call-detect#onstarted
+[calldetect]: /docs/server-sdk/node/reference/voice/call-detect
+
+### detectAnsweringMachine {#voice_call_detect_answering}
+
+- **detectAnsweringMachine**(`params?`): `Promise`\<[`CallDetect`][calldetect]>
+
+Detects the presence of an answering machine.
+
+#### Parameters
+
+<ParamField path="params" type="object">
+  Object containing the parameters for answering machine detection.
+</ParamField>
+
+<Indent>
+<ParamField path="timeout" type="number" default="30.0">
+  Number of seconds to run the detector for.
+</ParamField>
+
+<ParamField path="waitForBeep" type="boolean" default="false">
+  Whether to wait until the device is ready for voicemail delivery.
+</ParamField>
+
+<ParamField path="initialTimeout" type="number" default="4.5">
+  Number of seconds to wait for initial voice before giving up.
+</ParamField>
+
+<ParamField path="endSilenceTimeout" type="number" default="1.0">
+  Number of seconds to wait for voice to finish.
+</ParamField>
+
+<ParamField path="machineReadyTimeout" type="number">
+  Number of seconds to wait for voice to finish before firing the `READY` event. Default is the value of `endSilenceTimeout`.
+</ParamField>
+
+<ParamField path="machineVoiceThreshold" type="number" default="1.25">
+  How many seconds of voice to decide it is a machine.
+</ParamField>
+
+<ParamField path="machineWordsThreshold" type="number" default="6">
+  How many words to count to decide it is a machine.
+</ParamField>
+
+<ParamField path="detectInterruptions" type="boolean" default="false">
+  If set to `true`, a `NOT_READY` event is fired if speech is detected after the `READY` event. This allows the application to restart message delivery to the answering machine.
+</ParamField>
+
+<ParamField path="listen" type="object">
+  Callback to listen for events. List of detect events can be found [here][calldetect-events]. Example event: [`onStarted`][calldetect-onstarted].
+</ParamField>
+</Indent>
+
+#### Returns
+
+`Promise`\<[`CallDetect`][calldetect]>
+
+A promise that resolves to a [`CallDetect`][calldetect] object that you can use to
+view the current state and results of the `detect` session.
+
+#### Example
+
+In this example, we dial a phone number and wait for the answering machine detection to finish.
+Once the detection is finished, we log the result and then play a TTS message.
+At the end of the TTS message, we hangup the call.
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+const voiceClient = client.voice;
+
+try {
+  // Outbound Dial
+  const call = await voiceClient.dialPhone({
+    from: "SignalWire From Number Here",
+    to: "Destination Number Here",
+    timeout: 30,
+    listen: {
+      onStateChanged: (call) => {
+        console.log("Call state changed:", call.state);
+      }
+    }
+  });
+
+  // Answering machine detection
+  await call.detectAnsweringMachine({
+    waitForBeep: true,
+    endSilenceTimeout: 4,
+    listen: {
+      onStarted: () => {
+        console.log("Answering machine detection started");
+      },
+      onUpdated: (event) => {
+        console.log("Answering machine detection updated:", event.result);
+      },
+      onEnded: async (event) => {
+        console.log("Answering machine detection ended:", event.result);
+        }
+      }
+    });
+  // Plays a TTS message after the answering machine detection is finished.
+  // Then the Call will hangup after the TTS message is finished.
+  await call.playTTS({ text: "Hello, this is a test call from SignalWire!" });
+  call.hangup();
+} catch (e) {
+  console.log("Call not answered.", e);
+}
+```

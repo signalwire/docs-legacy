@@ -1,0 +1,18 @@
+---
+title: Relay.Calling.PassResult
+slug: /node/reference/calling/results/pass
+description: The result object that is returned when passing a call.
+toc_max_heading_level: 3
+---
+
+[pass]: /docs/server-sdk/v2/node/reference/calling/call#pass
+[relay-event]: /docs/server-sdk/v2/node/reference/event
+This object returned from the [`pass`][pass] method.
+
+## Properties
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `completed` | `boolean` | Whether the pass operation has completed |
+| `successful` | `string` | HTTP status code indicating whether the call has been passed successfully |
+| `event` | [`Relay.Event`][relay-event] | Last event that completed the operation |

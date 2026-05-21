@@ -1,0 +1,29 @@
+---
+title: "getStreams"
+slug: /node/reference/video/room-session/get-streams
+description: getStreams method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+[roomsessionstream-4]: /docs/server-sdk/v3/node/reference/video/room-session-stream
+
+### getStreams
+
+- **getStreams**(): `Promise<{ streams: RoomSessionStream }>` - See [RoomSessionStream][roomsessionstream-4] for more details.
+
+Obtains a list of active streams for this RoomSession. These are RTMP streams of
+the audio/video content of this room, which will be sent to an external party
+(e.g., to YouTube).
+
+#### Returns
+
+`Promise<{ streams: RoomSessionStream }>` - See [RoomSessionStream][roomsessionstream-4] for more details.
+
+#### Example
+
+```javascript
+const s = await roomSession.getStreams();
+for (const stream of s.streams) {
+  console.log(stream.id, stream.url);
+}
+```

@@ -1,0 +1,125 @@
+---
+title: "Phone Numbers"
+sidebar_label: "Phone Numbers"
+slug: /python/guides/phone-numbers
+toc_max_heading_level: 3
+---
+
+## Phone Numbers
+
+Purchase and configure phone numbers to receive calls for your agents.
+
+### Purchasing Numbers
+
+1. Go to [Phone Numbers](https://my.signalwire.com/?page=/phone_numbers) in dashboard
+2. Click "Buy a New Phone Number"
+3. Search by area code or location
+4. Select a number and purchase
+
+### Number Types
+
+| Type | Description | Use Case |
+|------|-------------|----------|
+| Local | Standard local numbers | General business use |
+| Toll-Free | 800/888/877/866 numbers | Customer service |
+| Short Code | 5-6 digit numbers | SMS campaigns |
+
+### Number Features
+
+Each number can support:
+
+| Feature | Description |
+|---------|-------------|
+| Voice | Inbound/outbound calls |
+| SMS | Text messaging |
+| MMS | Picture messaging |
+| Fax | Fax transmission |
+
+### Managing Numbers
+
+View your numbers in [Phone Numbers](https://my.signalwire.com/?page=/phone_numbers) section. Each number shows:
+
+| Field | Example |
+|-------|---------|
+| Number | +1 (555) 123-4567 |
+| Type | Local |
+| Capabilities | Voice, SMS |
+| Status | Active |
+| Voice Handler | `https://your-server.com/agent` |
+
+**Available Actions:**
+- Edit Settings
+- View [Logs](https://my.signalwire.com/?/logs/voices)
+- Release Number
+
+### Number Settings
+
+Configure each number:
+
+**Voice Settings:**
+- Accept Incoming: Enable/disable
+- Voice URL: Your agent's SWML endpoint
+- Fallback URL: Backup if primary fails
+
+**SMS Settings:**
+- Accept Incoming: Enable/disable
+- Message URL: Webhook for SMS
+
+### SIP Endpoints
+
+Alternative to phone numbers - use SIP for testing.
+
+**SIP Address Format:** `sip:username@your-space.signalwire.com`
+
+**Use with:**
+- Software phones (Zoiper, Linphone)
+- SIP-enabled devices
+- Testing without PSTN charges
+
+### Number Porting
+
+Bring existing numbers to SignalWire:
+
+1. Go to [Phone Numbers](https://my.signalwire.com/?page=/phone_numbers) > [Porting Request](https://my.signalwire.com/?port_requests/new)
+2. Submit porting request
+3. Provide current carrier info
+4. Wait for port completion (~1 week in most cases)
+
+### Costs
+
+**Phone Number Costs:**
+- Monthly rental fee per number
+- Varies by number type and country
+
+**Voice Usage:**
+- Per-minute charges for calls
+- Inbound vs outbound rates differ
+- See [Voice Pricing](https://signalwire.com/pricing/voice)
+
+**AI Agent Usage:**
+- Per-minute AI processing costs
+- Includes STT, TTS, and LLM usage
+- See [AI Agent Pricing](https://signalwire.com/pricing/ai-agent-pricing)
+
+**Questions?** Contact sales@signalwire.com for custom pricing and volume discounts.
+
+### Multiple Numbers
+
+You can have multiple numbers pointing to:
+
+- Same agent (multiple entry points)
+- Different agents (department routing)
+- Different configurations per number
+
+```python
+## Agent can check which number was called
+def my_handler(self, args, raw_data):
+    called_number = raw_data.get("called_id_num")
+
+    if called_number == "+15551234567":
+        return SwaigFunctionResult("Sales line")
+    else:
+        return SwaigFunctionResult("Support line")
+```
+
+

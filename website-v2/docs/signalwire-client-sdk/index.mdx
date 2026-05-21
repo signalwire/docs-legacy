@@ -1,0 +1,400 @@
+---
+title: "SignalWire Client SDK"
+sidebar_position: 0
+sidebar_custom_props:
+  hideFromIndex: true
+---
+
+import { SiJavascript } from "react-icons/si";
+import { MdCode, MdLibraryBooks, MdPhoneIphone, MdVideoCall, MdAutoAwesome, MdCallMerge, MdChatBubble, MdSecurity } from "react-icons/md";
+import { TbApi, TbBrandReactNative, TbFileCode } from "react-icons/tb";
+import { FaLayerGroup } from "react-icons/fa";
+
+<InstallHero
+  title="SignalWire Client SDK"
+  titleIcon={<SiJavascript />}
+  installCommand="npm install @signalwire/client"
+  docsUrl="/sdks/signalwire-client-sdk/"
+  status="beta"
+  packages={[
+    {
+      githubUrl: "https://github.com/signalwire/signalwire-sdk",
+      type: "npm",
+      packageName: "@signalwire/client",
+    }
+  ]}
+/>
+
+# Overview
+
+The SignalWire Client SDK is a JavaScript library that enables WebRTC-based voice, video, and chat applications for web browsers and React Native mobile apps. Built on WebSocket architecture, it provides real-time communication capabilities without additional plugins.
+
+:::info This SDK is meant to replace the [Browser SDK](/browser-sdk) 
+
+The SignalWire Client SDK should be used in place of the [Browser SDK](/browser-sdk) for all new projects. The new SDK maintains the API where possible while making architectural changes to support a unified way of interacting with SignalWire's services.
+
+:::
+
+## Features
+
+<CardGroup cols={3}>
+
+  <Card 
+    title="Unified interface" 
+    icon={<FaLayerGroup />} 
+  >
+    One consistent API for every call type—AI agents, humans, conferences, or scripts
+  </Card>
+
+  <Card 
+    title="Native mobile apps" 
+    icon={<MdPhoneIphone />} 
+  >
+    Build iOS and Android apps with React Native support and VoIP push notifications for incoming calls
+  </Card>
+
+  <Card 
+    title="Video conferencing at scale" 
+    icon={<MdVideoCall />} 
+  >
+    HD video calls and conferences supporting hundreds of simultaneous participants
+  </Card>
+
+  <Card 
+    title="Dynamic call scripting" 
+    icon={<TbFileCode />} 
+  >
+    Use SWML or cXML to create intelligent call flows, route between destinations, and make real-time decisions
+  </Card>
+
+  <Card 
+    title="AI-powered experiences" 
+    icon={<MdAutoAwesome />} 
+  >
+    Update your website UI in real-time based on AI agent output using SWML user events
+  </Card>
+
+
+  <Card 
+    title="Browser-based telephony" 
+    icon={<MdCallMerge />} 
+  >
+    Route, compose, parallelize, and merge phone calls directly from the browser with powerful telephony controls
+  </Card>
+
+  <Card 
+    title="Conversation API" 
+    icon={<MdChatBubble />} 
+  >
+    Subscriber-centric interaction tracking that combines chat, events, and logs in a single real-time stream
+  </Card>
+
+  <Card 
+    title="OAuth2 authentication" 
+    icon={<MdSecurity />} 
+  >
+    Build secure, frontend-only telephony applications with modern OAuth2 authentication and subscriber management
+  </Card>
+
+</CardGroup>
+
+## Getting Started
+
+<Steps>
+
+### Install the SDK
+
+Choose your preferred installation method:
+
+```bash
+npm install @signalwire/client
+```
+
+Or include it via CDN:
+
+```html
+<script src="https://cdn.signalwire.com/@signalwire/client"></script>
+```
+
+### Set up a SWML resource
+
+Create a [SWML Resource](/platform/call-fabric/resources/swml-scripts) from the Dashboard. 
+
+{/* TODO: replace this with an AI thing ofc */}
+
+<Tabs>
+<TabItem value="ai" label="AI Agent">
+
+```yaml 
+version: 1.0.0
+sections:
+  main:
+    - ai:
+        prompt: |
+            You are Franklin's assistant, and your job is to collect messages 
+            for him over the phone.
+            You can reassure that Franklin will get in touch as soon as possible.
+            Collect the user's name and number if you do not already know it from
+            the caller id.
+        post_prompt: |
+          Summarize the message in JSON with `name`, `number` and `message`
+        post_prompt_url: "https://example.com/my-api"
+```
+
+</TabItem>
+<TabItem value="swml" label="SWML Script">
+
+```yaml 
+version: 1.0.0
+sections:
+  main:
+  - play: "https://cdn.signalwire.com/swml/April_Kisses.mp3"
+```
+
+</TabItem>
+</Tabs>
+
+Navigate to the newly created SWML Resource's `Addresses and Phone Numbers` tab, and note the Address UUID.
+
+### Create a Guest Token for that address
+
+Guest tokens are a simple way to get access to a specific address.
+
+```bash
+curl -L -g 'https://{Your_Space_Name}.signalwire.com/api/fabric/guests/tokens' \
+  -u '<Project ID>:<API Token>' \
+  -H 'Content-Type: application/json' \
+  -H 'Accept: application/json' \
+  -d '{"allowed_addresses":["<Address UUID>"]}'
+```
+
+This [Create Guest Tokens](/apis/fabric/guest-tokens-create) endpoint 
+will give you a JSON response with a `token` property. To quickly get started, you can 
+choose to run the endpoint directly from the 
+[Guest Tokens documentation page](/apis/fabric/guest-tokens-create).
+
+The API credentials can be found in your dashboard. To learn how to find it, 
+see [Your Credentials](/platform/dashboard/getting-started/your-signalwire-api-space) page.
+
+### Test your setup
+
+Create a simple video room to test your setup:
+
+<Tabs>
+<TabItem value="npm" label="Vite Vanilla" default>
+
+```javascript
+import { SignalWire } from "@signalwire/client";
+
+const $ = (x: string) => document.querySelector<HTMLButtonElement>(x);
+
+$("#app")!.textContent = "Connecting ...";
+
+const client = await SignalWire({
+  token: import.meta.env.VITE_TOKEN,
+});
+
+$("#app")!.innerHTML = `
+  <div>
+    <button id="startCall">Start Call</button>
+    <button id="hangupCall" disabled>Hangup</button>
+    <div id="callContainer"></div>
+  </div>
+`;
+
+const startButton = $("#startCall")!;
+const hangupButton = $("#hangupCall")!;
+const callContainer = $("#callContainer")!;
+
+startButton.addEventListener("click", async () => {
+  startButton.disabled = true;
+  startButton.textContent = "Connecting...";
+
+  const callSession = await client.dial({
+    to: "/private/aprilkisses",
+    rootElement: callContainer,
+  });
+
+  callSession.on("call.joined", () => {
+    startButton.textContent = "Call Joined";
+    hangupButton.disabled = false;
+  });
+
+  callSession.start();
+
+  hangupButton.addEventListener("click", () => {
+    callSession.hangup();
+    hangupButton.disabled = true;
+    startButton.disabled = false;
+    startButton.textContent = "Start Call";
+  });
+});
+```
+
+</TabItem>
+<TabItem value="cdn" label="Vanilla HTML/JS">
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SignalWire Call Example</title>
+  </head>
+  <body>
+    <div id="app">
+      <button id="startCall">Start Call</button>
+      <button id="hangupCall" disabled>Hangup</button>
+      <div id="callContainer"></div>
+    </div>
+
+    <script src="https://cdn.signalwire.com/@signalwire/client"></script>
+    <script>
+      const $ = (x) => document.querySelector(x);
+
+      async function main() {
+        const startButton = $("#startCall");
+        const hangupButton = $("#hangupCall");
+        const callContainer = $("#callContainer");
+
+        const client = await SignalWire.SignalWire({
+          token:
+            "<token you got from the API>",
+        });
+
+        let callSession;
+
+        startButton.addEventListener("click", async () => {
+          startButton.disabled = true;
+          startButton.textContent = "Connecting...";
+
+          callSession = await client.dial({
+            to: "/private/aprilkisses",
+            rootElement: callContainer,
+          });
+
+          callSession.on("call.joined", () => {
+            startButton.textContent = "Call Joined";
+            hangupButton.disabled = false;
+          });
+
+          callSession.start();
+        });
+
+        hangupButton.addEventListener("click", () => {
+          callSession.hangup();
+          hangupButton.disabled = true;
+          startButton.disabled = false;
+          startButton.textContent = "Start Call";
+        });
+      }
+
+      main();
+    </script>
+  </body>
+</html>
+```
+
+</TabItem>
+</Tabs>
+
+### Walkthrough
+
+<AccordionGroup>
+<Accordion title="Initialize the SignalWire Client Instance">
+
+After you get the token from the CURL request, you can initialize the client.
+
+```javascript
+const client = await SignalWire({
+  token: "<token you got from the API>",
+});
+```
+
+It is recommended to keep a persistent client instance for the lifetime of the application.
+
+</Accordion>
+<Accordion title="Dial to an Address">
+
+When the user clicks the `Start Call` button, you can use the `dial` method to dial the call.
+
+```javascript
+const callSession = await client.dial({
+  to: "<address for a SWML Resource or a phone number or a SIP address>",
+  rootElement: $("#callContainer")!,
+});
+```
+
+The `callSession` object is a [CallSession](/sdks/signalwire-client-sdk/call-session) object 
+that you can use to manage the call.
+
+After the call session is created, you can use the `start` method to start the call.
+
+```javascript
+callSession.start();
+```
+
+</Accordion>
+
+<Accordion title="Listening for Events">
+
+After the call session is created, you can use the `on` method to listen for events.
+
+```javascript
+callSession.on("call.joined", () => {
+  console.log("Call joined");
+  // UI Updates
+});
+```
+
+</Accordion>
+
+<Accordion title="Hangup the Call">
+
+You can use the `hangup` method to hangup the call.
+
+```javascript
+callSession.hangup();
+```
+
+</Accordion>
+
+</AccordionGroup>
+
+### Next steps and variations
+
+If you're coming from other providers, you might find our compatibility XML offering [cXML](/compatibility-api/cxml) easier. 
+It can be created and dialed to the same as SWML. To get the full feature set of our platform, we still recommend using SWML.
+
+Of course, scripts are not the only things to dial to. You can try dialing phone numbers directly, in e.164 format, or SIP addresses.
+
+Similarly, you can create AI agents either through the dashboard, or directly in SWML. 
+
+<CardGroup>
+  <Card 
+    title="The Call Fabric Architecture" 
+    href="/platform/call-fabric"
+    icon={<TbApi />}
+  />
+</CardGroup>
+
+
+
+</Steps>
+
+## Explore the SDK
+
+<CardGroup>
+  <Card 
+    title="Technical Reference" 
+    description="Complete API documentation for all namespaces, classes, and methods"
+    href="/sdks/signalwire-client-sdk/technical-reference"
+    icon={<MdCode />}
+  />
+  <Card 
+    title="Guides & Examples" 
+    description="Step-by-step tutorials and practical examples to get you building quickly"
+    href="/sdks/signalwire-client-sdk/guides"
+    icon={<MdLibraryBooks />}
+  />
+</CardGroup>

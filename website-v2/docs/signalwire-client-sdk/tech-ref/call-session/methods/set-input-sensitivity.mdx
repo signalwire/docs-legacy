@@ -1,0 +1,162 @@
+---
+title: setInputSensitivity
+slug: /call-session/setinputsensitivity
+---
+
+import APIField from '@site/src/components/APIField';
+
+Adjusts the microphone sensitivity threshold for detecting when a participant is speaking.
+
+## Signature
+
+```typescript
+setInputSensitivity(params: MemberCommandWithValueParams): Promise<void>
+```
+
+## Parameters
+
+<APIField name="params" type="MemberCommandWithValueParams" required>
+  Sensitivity configuration object.
+</APIField>
+
+<APIField name="params.value" type="number" required>
+  Sensitivity level from 0 to 100. Default is 30.
+</APIField>
+
+<APIField name="params.memberId" type="string" default="Your member ID">
+  Member to control. Omit to control your own microphone, provide specific ID to control another member.
+</APIField>
+
+## Returns
+
+**Type:** `Promise<void>`
+
+## Important Notes
+
+**Sensitivity Scale (0 to 100):**
+
+| Value | Behavior | Use Case |
+|-------|----------|----------|
+| `0` | Lowest sensitivity (essentially muted) | Completely suppress voice detection |
+| `1-20` | Very low sensitivity | Very noisy environments, only detect loud speech |
+| `21-40` | Low to moderate sensitivity | Noisy environments, normal speech levels |
+| `30` | **Default** | Balanced for most environments |
+| `41-60` | Moderate to high sensitivity | Quiet environments |
+| `61-80` | High sensitivity | Very quiet environments, soft-spoken users |
+| `81-100` | Very high sensitivity | Detect very quiet speech, may pick up noise |
+
+**Sensitivity vs Volume:**
+
+| Setting | Controls | Purpose |
+|---------|----------|---------|
+| **Input Sensitivity** | Speech detection threshold | When the `member.talking` event fires |
+| **Input Volume** | Audio loudness | How loud the microphone sounds to others |
+
+```typescript
+// High sensitivity = detect quieter speech (lower threshold for talking detection)
+await call.setInputSensitivity({ value: 80 })
+
+// High volume = louder microphone output (others hear you louder)
+await call.setInputVolume({ volume: 10 })
+```
+
+**Effect on member.talking Event:**
+- Sensitivity controls when the `member.talking` event is triggered
+- **Higher sensitivity** = Quieter speech triggers the event
+- **Lower sensitivity** = Only louder speech triggers the event
+- Does NOT affect the actual audio transmitted to other participants
+
+```typescript
+// With high sensitivity (80), even whispers may trigger talking event
+await call.setInputSensitivity({ value: 80 })
+
+call.on('member.talking', (event) => {
+  console.log(`Member ${event.member.id} is talking:`, event.member.talking)
+})
+```
+
+**Environment Considerations:**
+
+**Noisy Environments:**
+- Use **lower sensitivity** (10-20) to avoid false positives
+- Prevents background noise from triggering talking detection
+- User must speak louder to be detected as talking
+
+**Quiet Environments:**
+- Use **higher sensitivity** (60-80) to detect softer speech
+- Allows natural conversation without raising voice
+- May pick up background sounds as false positives
+
+**Real-time Adjustment:**
+- Sensitivity changes take effect immediately
+- No need to restart microphone or re-join call
+- Can be adjusted dynamically based on detected noise levels
+
+## Examples
+
+### Adjust your own microphone sensitivity
+
+```typescript
+// Increase sensitivity (detect quieter speech)
+await call.setInputSensitivity({ value: 80 })
+
+// Decrease sensitivity (only detect louder speech)
+await call.setInputSensitivity({ value: 15 })
+
+// Reset to default sensitivity
+await call.setInputSensitivity({ value: 30 })
+
+// Maximum sensitivity (most sensitive)
+await call.setInputSensitivity({ value: 100 })
+
+// Minimum sensitivity (essentially muted)
+await call.setInputSensitivity({ value: 0 })
+```
+
+### Adjust another member's microphone sensitivity
+
+```typescript
+await call.setInputSensitivity({
+  memberId: 'member-123',
+  value: 80
+})
+```
+
+### Sensitivity control UI
+
+```typescript
+// HTML: <input type="range" id="micSensitivity" min="0" max="100" value="30">
+
+const sensitivitySlider = document.getElementById('micSensitivity') as HTMLInputElement
+
+sensitivitySlider.addEventListener('change', async (e) => {
+  const value = parseInt(e.target.value)
+
+  try {
+    await call.setInputSensitivity({ value })
+    console.log(`Microphone sensitivity set to ${value}`)
+  } catch (error) {
+    console.error('Failed to set sensitivity:', error)
+  }
+})
+```
+
+### Automatic sensitivity based on environment
+
+```typescript
+async function setOptimalSensitivity() {
+  const noiseLevel = await detectEnvironmentNoise()
+
+  let sensitivity: number
+
+  if (noiseLevel === 'quiet') {
+    sensitivity = 80  // High sensitivity for quiet environments
+  } else if (noiseLevel === 'moderate') {
+    sensitivity = 30  // Default sensitivity
+  } else {
+    sensitivity = 10  // Low sensitivity for noisy environments
+  }
+
+  await call.setInputSensitivity({ value: sensitivity })
+}
+```

@@ -1,0 +1,90 @@
+---
+title: "play"
+slug: /node/reference/voice/call/play
+description: play method for the Call class.
+toc_max_heading_level: 3
+---
+
+[callplayback-events]: /docs/server-sdk/node/reference/voice/call-playback#events
+[callplayback-onstarted]: /docs/server-sdk/node/reference/voice/call-playback#onstarted
+[callplayback]: /docs/server-sdk/node/reference/voice/call-playback
+[playaudio]: /docs/server-sdk/node/reference/voice/call/play-audio
+[playringtone]: /docs/server-sdk/node/reference/voice/call/play-ringtone
+[playsilence]: /docs/server-sdk/node/reference/voice/call/play-silence
+[playtts]: /docs/server-sdk/node/reference/voice/call/play-tts
+[voiceplaylist]: /docs/server-sdk/node/reference/voice/playlist
+
+### play
+
+- **play**(`params`): `Promise`\<[`CallPlayback`][callplayback]>
+
+Play one or multiple media in a Call and waits until the playing has ended.
+
+The play method is a generic method for all types of media, see [playAudio][playaudio], [playSilence][playsilence], [playTTS][playtts] or [playRingtone][playringtone] for more specific usages.
+
+#### Parameters
+
+<ParamField path="params" type="object" required>
+  Object containing the parameters for playing media.
+</ParamField>
+
+<Indent>
+<ParamField path="playlist" type="VoicePlaylist" required>
+  A media playlist. See [`VoicePlaylist`][voiceplaylist].
+</ParamField>
+
+<ParamField path="listen" type="object">
+  Callback to listen for events. List of playback events can be found [here][callplayback-events]. Example event: [`onStarted`][callplayback-onstarted].
+</ParamField>
+</Indent>
+
+#### Returns
+
+`Promise`\<[`CallPlayback`][callplayback]>
+
+A promise that resolves to a [`CallPlayback`][callplayback] object that you can use to
+view the current state and results of the `play` session.
+
+#### Example
+
+In this example, we dial a phone number and play a TTS message. Once the TTS message is finished playing, we then
+play silence on the call for 1 second and then play an audio file. Once the audio file is finished playing, we hangup the call.
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+const voiceClient = client.voice;
+
+// Listen for incoming calls
+await voiceClient.listen({
+  topics: ["office"],
+  onCallReceived: async (call) => {
+    console.log("Call received");
+    // Answer the call and play a TTS message using the generic play method, then play silence for 1 second, then play an audio file.
+    call.answer();
+    const playlist = new Voice.Playlist({ volume: 1.0 })
+    .add(Voice.Playlist.TTS({
+      text: 'Welcome to SignalWire!'
+    }))
+    .add(Voice.Playlist.Silence({ duration: 1 }))
+    .add(Voice.Playlist.Audio({
+      url: 'https://cdn.signalwire.com/default-music/welcome.mp3'
+    }))
+    await call.play({
+      playlist: playlist,
+      listen: {
+        onStarted: () => console.log('Playback started!'),
+        onFailed: (playback) => console.log('Playback failed', playback.state),
+        onUpdated: (playback) => console.log('Playback state is:', playback.state),
+        onEnded: (playback) => {
+          console.log('Playback ended', playback.state);
+          // Hangup the call
+          call.hangup();
+        },
+      }
+    }).onStarted();
+  }
+});
+```

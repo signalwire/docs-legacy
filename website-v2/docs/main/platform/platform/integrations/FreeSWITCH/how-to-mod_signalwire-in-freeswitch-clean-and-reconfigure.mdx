@@ -1,0 +1,19 @@
+---
+title: Clean and reconfigure with mod_signalwire
+slug: /platform/freeswitch/mod-signalwire
+x-custom:
+  ported_from_readme: true
+  tags:
+    - product:freeswitch
+---
+
+
+When using FreeSWITCH mod_signalwire, these commands can be used to unload mod_signalwire, discard current Connector configs, and obtain a new Token.
+
+| Action              | Command                                                                                                                                                                               |
+|:--------------------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Unload mod          | `fs_cli -x “unload mod_signalwire”`                                                                                                                                                   |
+| Kill gateway        | `fs_cli -x “sofia profile signalwire killgw signalwire”`                                                                                                                              |
+| Remove config files | `fs_cli -x "signalwire token-reset"`                                                                                                                                                  |
+| Load mod            | `fs_cli-x “load mod_signalwire”`                                                                                                                                                      |
+| Reconfigure         | Obtain new token with `fs_cli -x "signalwire token"`, delete old connector from account Dashboard and complete setup process again; also re-forward Number to newly created Connector |

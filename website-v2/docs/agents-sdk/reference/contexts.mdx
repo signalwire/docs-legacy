@@ -1,0 +1,394 @@
+---
+title: "Contexts"
+sidebar_label: "Contexts"
+slug: /python/reference/contexts
+toc_max_heading_level: 3
+---
+
+## ContextBuilder API
+
+API reference for ContextBuilder and Step classes, enabling multi-step conversation workflows.
+
+### Class Definitions
+
+```python
+from signalwire_agents.core.contexts import ContextBuilder, Step
+```
+
+### Overview
+
+Contexts define structured conversation workflows with multiple steps.
+
+**Context Structure:**
+
+- **Context** - A named conversation workflow
+  - **Steps** - Sequential conversation phases
+    - Prompt text or POM sections
+    - Completion criteria
+    - Available functions
+    - Navigation rules
+
+### Step Class
+
+#### Constructor
+
+```python
+Step(name: str)  # Step name/identifier
+```
+
+#### set_text
+
+```python
+def set_text(self, text: str) -> 'Step'
+```
+
+Set the step's prompt text directly.
+
+```python
+step = Step("greeting")
+step.set_text("Welcome the caller and ask how you can help.")
+```
+
+#### add_section
+
+```python
+def add_section(self, title: str, body: str) -> 'Step'
+```
+
+Add a POM section to the step.
+
+```python
+step = Step("collect_info")
+step.add_section("Task", "Collect the caller's name and phone number.")
+step.add_section("Guidelines", "Be polite and patient.")
+```
+
+#### add_bullets
+
+```python
+def add_bullets(self, title: str, bullets: List[str]) -> 'Step'
+```
+
+Add a section with bullet points.
+
+```python
+step.add_bullets("Requirements", [
+    "Get full legal name",
+    "Verify phone number",
+    "Confirm email address"
+])
+```
+
+#### set_step_criteria
+
+```python
+def set_step_criteria(self, criteria: str) -> 'Step'
+```
+
+Define when this step is complete.
+
+```python
+step.set_step_criteria(
+    "Step is complete when caller has provided their name and phone number."
+)
+```
+
+#### set_functions
+
+```python
+def set_functions(self, functions: Union[str, List[str]]) -> 'Step'
+```
+
+Set which functions are available in this step.
+
+```python
+## Disable all functions
+step.set_functions("none")
+
+## Allow specific functions
+step.set_functions(["lookup_account", "verify_identity"])
+```
+
+#### set_valid_steps
+
+```python
+def set_valid_steps(self, steps: List[str]) -> 'Step'
+```
+
+Set which steps can be navigated to.
+
+```python
+step.set_valid_steps(["confirmation", "error_handling"])
+```
+
+#### set_valid_contexts
+
+```python
+def set_valid_contexts(self, contexts: List[str]) -> 'Step'
+```
+
+Set which contexts can be navigated to.
+
+```python
+step.set_valid_contexts(["support", "billing"])
+```
+
+### Step Context Switch Methods
+
+#### set_reset_system_prompt
+
+```python
+def set_reset_system_prompt(self, system_prompt: str) -> 'Step'
+```
+
+Set system prompt for context switching.
+
+#### set_reset_user_prompt
+
+```python
+def set_reset_user_prompt(self, user_prompt: str) -> 'Step'
+```
+
+Set user prompt for context switching.
+
+#### set_reset_consolidate
+
+```python
+def set_reset_consolidate(self, consolidate: bool) -> 'Step'
+```
+
+Set whether to consolidate conversation on context switch.
+
+#### set_reset_full_reset
+
+```python
+def set_reset_full_reset(self, full_reset: bool) -> 'Step'
+```
+
+Set whether to do full reset on context switch.
+
+### ContextBuilder Class
+
+#### Constructor
+
+```python
+ContextBuilder()
+```
+
+Create a new context builder.
+
+#### add_context
+
+```python
+def add_context(
+    self,
+    name: str,           # Context name
+    steps: List[Step]    # List of steps
+) -> 'ContextBuilder'
+```
+
+Add a context with its steps.
+
+```python
+builder = ContextBuilder()
+builder.add_context("main", [
+    Step("greeting").set_text("Greet the caller"),
+    Step("collect").set_text("Collect information"),
+    Step("confirm").set_text("Confirm details")
+])
+```
+
+#### set_default_context
+
+```python
+def set_default_context(self, name: str) -> 'ContextBuilder'
+```
+
+Set the default starting context.
+
+```python
+builder.set_default_context("main")
+```
+
+#### build
+
+```python
+def build(self) -> Dict[str, Any]
+```
+
+Build the contexts structure for SWML.
+
+### Using with AgentBase
+
+```python
+from signalwire_agents import AgentBase
+from signalwire_agents.core.contexts import ContextBuilder, Step
+
+agent = AgentBase(name="workflow-agent")
+
+## Create context builder
+builder = ContextBuilder()
+
+## Define steps for main context
+greeting = (
+    Step("greeting")
+    .set_text("Welcome the caller and ask how you can help today.")
+    .set_functions("none")
+    .set_valid_steps(["collect_info"])
+)
+
+collect = (
+    Step("collect_info")
+    .add_section("Task", "Collect the caller's information.")
+    .add_bullets("Required Information", [
+        "Full name",
+        "Account number",
+        "Reason for calling"
+    ])
+    .set_step_criteria("Complete when all information is collected.")
+    .set_functions(["lookup_account"])
+    .set_valid_steps(["process", "error"])
+)
+
+process = (
+    Step("process")
+    .set_text("Process the caller's request based on collected information.")
+    .set_valid_steps(["farewell"])
+)
+
+farewell = (
+    Step("farewell")
+    .set_text("Thank the caller and end the conversation.")
+    .set_functions("none")
+)
+
+## Add context
+builder.add_context("main", [greeting, collect, process, farewell])
+builder.set_default_context("main")
+
+## Apply to agent
+agent.set_contexts(builder)
+```
+
+### Multiple Contexts Example
+
+```python
+builder = ContextBuilder()
+
+## Main menu context
+main_steps = [
+    Step("menu")
+    .set_text("Present options: sales, support, or billing.")
+    .set_valid_contexts(["sales", "support", "billing"])
+]
+builder.add_context("main", main_steps)
+
+## Sales context
+sales_steps = [
+    Step("qualify")
+    .set_text("Understand what product the caller is interested in.")
+    .set_functions(["check_inventory", "get_pricing"])
+    .set_valid_steps(["quote"]),
+
+    Step("quote")
+    .set_text("Provide pricing and availability.")
+    .set_valid_steps(["close"]),
+
+    Step("close")
+    .set_text("Close the sale or schedule follow-up.")
+    .set_valid_contexts(["main"])
+]
+builder.add_context("sales", sales_steps)
+
+## Support context
+support_steps = [
+    Step("diagnose")
+    .set_text("Understand the customer's issue.")
+    .set_functions(["lookup_account", "check_status"])
+    .set_valid_steps(["resolve"]),
+
+    Step("resolve")
+    .set_text("Resolve the issue or escalate.")
+    .set_functions(["create_ticket", "transfer_call"])
+    .set_valid_contexts(["main"])
+]
+builder.add_context("support", support_steps)
+
+builder.set_default_context("main")
+```
+
+### Step Flow Diagram
+
+<Frame caption="Step Navigation">
+  <img className="diagram" src={require("@image/agents-sdk-manual/10_07_api-contexts_diagram1.webp").default} alt="Step Navigation." />
+</Frame>
+
+### Generated SWML Structure
+
+The contexts system generates SWML with this structure:
+
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [{
+      "ai": {
+        "contexts": {
+          "default": "main",
+          "main": {
+            "steps": [
+              {
+                "name": "greeting",
+                "text": "Welcome the caller...",
+                "functions": "none",
+                "valid_steps": ["collect_info"]
+              },
+              {
+                "name": "collect_info",
+                "text": "## Task\nCollect information...",
+                "step_criteria": "Complete when...",
+                "functions": ["lookup_account"],
+                "valid_steps": ["process", "error"]
+              }
+            ]
+          }
+        }
+      }
+    }]
+  }
+}
+```
+
+### Context Design Tips
+
+**Step criteria best practices:**
+
+- Be specific: "Complete when user provides full name AND phone number"
+- Avoid ambiguity: Don't use "when done" or "when finished"
+- Include failure conditions: "Complete when verified OR after 3 failed attempts"
+
+**Function availability:**
+
+- Use `set_functions("none")` for greeting/farewell steps where no actions are needed
+- Limit functions to what's relevant for each step to prevent LLM confusion
+- Always include escape routes (transfer, escalate) where appropriate
+
+### See Also
+
+| Topic | Reference |
+|-------|-----------|
+| Contexts guide | [Contexts [Contexts & Workflows](/docs/agents-sdk/python/guides/contexts-workflows) Workflows](/docs/agents-sdk/python/guides/contexts-workflows) |
+| State management | [State Management](/docs/agents-sdk/python/guides/state-management) |
+| Context switching in functions | [SwaigFunctionResult API](/docs/agents-sdk/python/reference/function-result) - `swml_change_step()`, `swml_change_context()` |
+
+### Troubleshooting
+
+| Issue | Solution |
+|-------|----------|
+| Step not changing | Verify step name matches exactly in `set_valid_steps()` |
+| Functions unavailable | Check `set_functions()` includes the function name |
+| Infinite loop | Ensure step criteria can be met; add timeout handling |
+| Context not found | Verify context name in `set_valid_contexts()` |
+
+
+

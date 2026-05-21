@@ -1,0 +1,67 @@
+---
+title: Utility functions
+slug: /js/reference/signalwire/utils
+toc_max_heading_level: 3
+---
+
+## `buildVideoElement`
+
+- **buildVideoElement**(`options`): `Promise<BuildVideoElementReturnType>`
+
+A function that creates and optionally injects a video DOM element for a given Call or Room object.
+
+<Tip>
+
+If you have passed a `rootElement` when [instantiating the SignalWire client](/docs/browser-sdk/js/reference/signalwire/client#instantiation), or
+when [`dial`](/docs/browser-sdk/js/reference/signalwire/client/dial)ing a call, the SDK will manage the DOM automatically; injecting the resulting video stream
+into the `rootElement` that you specified.
+
+But for more fine grained control, or if you're using a library like React, you can choose to
+manually manage DOM using this function. Be sure to not specify a `rootElement` at instantiation or during dialing.
+
+</Tip>
+
+#### Parameters
+
+| Name                             | Type                                                                | Required? | Description                                                                                                                                                                                          |
+| :------------------------------- | :------------------------------------------------------------------ | :-------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `options`                        | `object`                                                            | Required  |
+| `options.room`                   | [`CallFabricRoomSession`](/docs/browser-sdk/js/reference/signalwire/client#callfabricroomsession) | Required  | The Call Fabric Room Session to build the video element for                                                                                                                                          |
+| `options.rootElement`            | `HTMLElement`                                                       | Optional  | The HTML container element which will contain the video stream. If `rootElement` is not passed, the resulting DOM element will be returned, and can be injected into any container element manually. |
+| `options.applyLocalVideoOverlay` | boolean                                                             | Optional  | Whether to apply local video overlays on the remote stream                                                                                                                                           |
+
+#### Response
+
+| Name                   | Type          | Description                                                                                                                                                           |
+| :--------------------- | :------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `response`             | `object`      | -                                                                                                                                                                     |
+| `response.element`     | `HTMLElement` | The container for the stream. If `rootElement` was not passed, this is a newly created container. Otherwise, it is the same as the `rootElement` which was passed in. |
+| `response.unsubscribe` | `()=>void`    | Call this function to turn off all event handling for the stream before disposing of the container element.                                                           |
+
+#### Example
+
+After the [SignalWire Client](/docs/browser-sdk/js/reference/signalwire/client) has been [instantiated](/docs/browser-sdk/js/reference/signalwire/client#instantiation), you can
+dial a video call and inject it into the DOM as follows:
+
+```js
+const call = await client.dial({
+  /* ... */
+});
+
+await call.start();
+
+const { element, unsubscribe } = await buildVideoElement({
+  room: call,
+});
+const container = document.getElementById("container");
+container.appendChild(element);
+```
+
+Alternatively, you can pass in the `rootElement` parameter and let the function automatically manage DOM:
+
+```js
+const { element, unsubscribe } = await buildVideoElement({
+  room: call,
+  rootElement: document.getElementById("container"),
+});
+```

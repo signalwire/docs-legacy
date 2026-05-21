@@ -1,0 +1,22 @@
+---
+title: ConnectResult
+slug: /dotnet/reference/calling/results/connect
+description: The ConnectResult object is returned after a connect operation.
+toc_max_heading_level: 3
+---
+
+[call]: /docs/server-sdk/v2/dotnet/reference/calling/call#connect
+[signalwire-relay-calling-call]: /docs/server-sdk/v2/dotnet/reference/calling/call
+[signalwire-relay-event]: /docs/server-sdk/v2/dotnet/reference/event
+
+# SignalWire.Relay.Calling.ConnectResult
+
+This object returned from [`Connect`][call] method that represents the final result of a connection between your call and another peer.
+
+## Properties
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `Successful` | bool | Whether the recording has completed successfully. |
+| `Event` | [`SignalWire.Relay.Event`][signalwire-relay-event] | The last event that completed the call. |
+| `Call` | [`SignalWire.Relay.Calling.Call`][signalwire-relay-calling-call] | Peer Call connected with yours when successful. |

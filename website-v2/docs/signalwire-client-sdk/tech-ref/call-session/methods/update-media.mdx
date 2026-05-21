@@ -1,0 +1,174 @@
+---
+title: updateMedia
+slug: /call-session/updatemedia
+---
+
+import APIField from '@site/src/components/APIField';
+
+Upgrades or downgrades the media tracks in the WebRTC connection by performing RTC peer renegotiation.
+
+## Parameters
+
+<APIField name="params" type="UpdateMediaParams" required>
+  Media update configuration.
+</APIField>
+
+<APIField name="params.audio" type="MediaControl">
+  Audio track configuration.
+</APIField>
+
+<APIField name="params.audio.direction" type="UpdateMediaDirection" required>
+  Audio direction. Valid values: `'sendrecv'`, `'sendonly'`, `'recvonly'`, `'inactive'`
+</APIField>
+
+<APIField name="params.audio.constraints" type="MediaTrackConstraints">
+  Audio constraints (only when direction is 'sendonly' or 'sendrecv').
+</APIField>
+
+<APIField name="params.video" type="MediaControl">
+  Video track configuration.
+</APIField>
+
+<APIField name="params.video.direction" type="UpdateMediaDirection" required>
+  Video direction. Valid values: `'sendrecv'`, `'sendonly'`, `'recvonly'`, `'inactive'`
+</APIField>
+
+<APIField name="params.video.constraints" type="MediaTrackConstraints">
+  Video constraints (only when direction is 'sendonly' or 'sendrecv').
+</APIField>
+
+**UpdateMediaDirection** values:
+- `'sendrecv'` - Send and receive media (default)
+- `'sendonly'` - Only send media, don't receive
+- `'recvonly'` - Only receive media, don't send
+- `'inactive'` - Neither send nor receive media
+
+## Signature
+
+```typescript
+call.updateMedia(params: UpdateMediaParams): Promise<void>
+```
+
+## Returns
+
+**Type:** `Promise<void>`
+
+## Examples
+
+### Enable Two-Way Video
+
+```typescript
+// Upgrade to full two-way video
+await call.updateMedia({
+  video: { direction: 'sendrecv' }
+})
+```
+
+### Enable Video with Constraints
+
+```typescript
+// Enable two-way video with specific resolution
+await call.updateMedia({
+  video: {
+    direction: 'sendrecv',
+    constraints: {
+      width: { ideal: 1280 },
+      height: { ideal: 720 }
+    }
+  }
+})
+```
+
+### Listen-Only Mode
+
+```typescript
+// Set both audio and video to receive-only
+await call.updateMedia({
+  audio: { direction: 'recvonly' },
+  video: { direction: 'recvonly' }
+})
+```
+
+### Broadcast Mode
+
+```typescript
+// Send audio and video but don't receive
+await call.updateMedia({
+  audio: { direction: 'sendonly' },
+  video: { direction: 'sendonly' }
+})
+```
+
+### Audio-Only Call
+
+```typescript
+// Enable two-way audio, disable video
+await call.updateMedia({
+  audio: { direction: 'sendrecv' },
+  video: { direction: 'inactive' }
+})
+```
+
+### Upgrade from Audio to Video
+
+```typescript
+// Start with audio only
+await call.updateMedia({
+  audio: { direction: 'sendrecv' },
+  video: { direction: 'inactive' }
+})
+
+// Later, upgrade to include video
+await call.updateMedia({
+  audio: { direction: 'sendrecv' },
+  video: { direction: 'sendrecv' }
+})
+```
+
+### Webinar/Broadcast Scenario
+
+```typescript
+// Host: Send audio/video, receive only audio
+await call.updateMedia({
+  audio: { direction: 'sendrecv' },
+  video: { direction: 'sendonly' }
+})
+
+// Attendee: Receive everything, send only audio
+await call.updateMedia({
+  audio: { direction: 'sendrecv' },
+  video: { direction: 'recvonly' }
+})
+```
+
+## Important Notes
+
+**Peer Renegotiation:** This method triggers WebRTC peer renegotiation, which means:
+- New media constraints are negotiated with the remote peer
+- The connection temporarily adjusts while renegotiating
+- This is a more fundamental change than muting/unmuting
+
+**Direction vs Mute:**
+- **Mute** (`audioMute()`/`videoMute()`): Stops sending media but the track remains active
+- **Direction**: Changes the fundamental media flow in the connection
+
+Use `updateMedia()` when you need to:
+- Add or remove media tracks entirely
+- Change fundamental media flow (send/receive/both/neither)
+- Optimize bandwidth by disabling receiving when not needed
+
+Use mute/unmute when you just need to temporarily stop sending media.
+
+**Partial Updates:** You can update just audio or video independently:
+
+```typescript
+// Update only video direction
+await call.updateMedia({
+  video: { direction: 'recvonly' }
+})
+// Audio direction remains unchanged
+```
+
+**Use Specific Methods:** For common cases, prefer using the specific direction methods:
+- `setAudioDirection()` - Update only audio direction
+- `setVideoDirection()` - Update only video direction

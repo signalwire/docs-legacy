@@ -1,0 +1,26 @@
+---
+title: Handle Call
+description: Call Flow Builder node to handle an incoming call.
+slug: /call-flow-builder/reference/handle-call
+---
+The `Handle Call` node is used to handle an incoming call.
+It is the first node in the call flow, does not have an input connector and is mandatory in every call flow.
+The `Handle Call` node cannot be deleted from the call flow and an additional `Handle Call` node cannot be added to the call flow.
+The first node connected to the Handle Call node is the starting point of the call flow.
+
+## **Node Settings**
+
+**None**
+
+---
+
+## **Example**
+
+In the example below, the `Handle Call` node is connected to the `Answer Call` node, which is the starting point of the call flow.
+After the call is answered, the call flow continues with the `Play Audio or TTS` node to play a TTS message to the caller.
+
+<Frame caption="Handle Call Node being used in a Call Flow" ogImage>
+
+![Handle Call Node being used in a Call Flow.](@image/call-flow/nodes/handle_call.webp)
+
+</Frame>

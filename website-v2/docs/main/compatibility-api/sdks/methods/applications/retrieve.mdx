@@ -1,0 +1,136 @@
+﻿---
+id: 98d520ce-1014-4d52-9b4b-b5d81c97bed4
+slug: /compatibility-api/sdks/reference/applications/retrieve
+title: Retrieve
+sidebar-title: Retrieve
+max-toc-depth: 3
+---
+
+Use this endpoint for the Applications method to retrieve Applications associated with your account in a list.
+
+---
+
+## Retrieve a single application
+
+In this example, we retrieve a single application using its `Sid` and print the application's `FriendlyName`.
+
+<EndpointSchemaSnippet endpoint="GET /Accounts/{AccountSid}/Applications/{Sid}" selector="request.path" />
+
+<EndpointSchemaSnippet endpoint="GET /Accounts/{AccountSid}/Applications/{Sid}" selector="response" />
+
+<EndpointResponseSnippet endpoint="GET /Accounts/{AccountSid}/Applications/{Sid}" />
+
+### Request examples
+
+<CodeBlocks>
+```javascript title="Node.js"
+const { RestClient } = require('@signalwire/compatibility-api')
+const client = RestClient('YourProjectID', 'YourAuthToken', { signalwireSpaceUrl: 'example.signalwire.com' })
+
+client.applications('Sid')
+      .fetch()
+      .then(application => console.log(application.friendlyName))
+      .done();
+```
+```csharp
+using System;
+using System.Collections.Generic;
+using Twilio;
+using Twilio.Rest.Api.V2010.Account;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        TwilioClient.Init("YourProjectID", "YourAuthToken", new Dictionary<string, object> { ["signalwireSpaceUrl"] = "{SPACE}.signalwire.com" });
+
+        var application = ApplicationResource.Fetch(
+            pathSid: "Sid"
+        );
+
+        Console.WriteLine(application.FriendlyName);
+    }
+}
+```
+```python
+from signalwire.rest import Client as signalwire_client
+
+client = signalwire_client("YourProjectID", "YourAuthToken", signalwire_space_url = 'example.signalwire.com')
+
+application = client.applications('Sid').fetch()
+
+print(application.friendly_name)
+```
+```ruby
+require 'signalwire/sdk'
+
+@client = Signalwire::REST::Client.new 'YourProjectID', 'YourAuthToken', signalwire_space_url: "example.signalwire.com"
+
+application = @client.applications('Sid').fetch
+
+puts application.friendly_name
+```
+</CodeBlocks>
+
+---
+
+## Retrieve all applications
+
+<EndpointSchemaSnippet endpoint="GET /Accounts/{AccountSid}/Applications" selector="request.query" />
+
+<EndpointSchemaSnippet endpoint="GET /Accounts/{AccountSid}/Applications" selector="response" />
+
+<EndpointResponseSnippet endpoint="GET /Accounts/{AccountSid}/Applications" />
+
+### Request examples
+
+<CodeBlocks>
+```javascript title="Node.js"
+const { RestClient } = require('@signalwire/compatibility-api')
+const client = RestClient('YourProjectID', 'YourAuthToken', { signalwireSpaceUrl: 'example.signalwire.com' })
+
+client.applications.each(applications => console.log(applications.sid));
+```
+```csharp
+using System;
+using System.Collections.Generic;
+using Twilio;
+using Twilio.Rest.Api.V2010.Account;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        TwilioClient.Init("YourProjectID", "YourAuthToken", new Dictionary<string, object> { ["signalwireSpaceUrl"] = "{SPACE}.signalwire.com" });
+
+        var applications = ApplicationResource.Read();
+
+        foreach(var record in applications)
+        {
+           Console.WriteLine(record.Sid);
+        }
+    }
+}
+```
+```python
+from signalwire.rest import Client as signalwire_client
+
+client = signalwire_client("YourProjectID", "YourAuthToken", signalwire_space_url = 'example.signalwire.com')
+
+applications = client.applications.list()
+
+for record in applications:
+    print(record.sid)
+```
+```ruby
+require 'signalwire/sdk'
+
+@client = Signalwire::REST::Client.new 'YourProjectID', 'YourAuthToken', signalwire_space_url: "example.signalwire.com"
+
+applications = @client.applications.list
+
+applications.each do |record|
+  puts record.sid
+end
+```
+</CodeBlocks>

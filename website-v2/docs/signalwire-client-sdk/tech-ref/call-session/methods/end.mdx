@@ -1,0 +1,140 @@
+---
+title: end
+slug: /call-session/end
+---
+
+import APIField from '@site/src/components/APIField';
+
+Ends the call for yourself or another participant, disconnecting them completely.
+
+## Signature
+
+```typescript
+end(params?: MemberCommandParams): Promise<void>
+```
+
+## Parameters
+
+<APIField name="params" type="MemberCommandParams">
+  Configuration object.
+</APIField>
+
+<APIField name="params.memberId" type="string" default="Your member ID">
+  Member to end the call for. Omit to end your own call, provide specific ID to end another member's call.
+</APIField>
+
+## Returns
+
+**Type:** `Promise<void>`
+
+## Important Notes
+
+**end() vs hangup() vs leave():**
+
+| Method | Effect | Use Case |
+|--------|--------|----------|
+| `end()` | Ends call for yourself or another member | General disconnect, can target specific members |
+| `hangup()` | Ends your own call | Explicitly disconnect yourself |
+| `leave()` | Alias for `hangup()` | Same as hangup, more semantic name |
+
+**When to use each:**
+
+```typescript
+// End your own call
+await call.end()        // ✅ Works
+await call.hangup()     // ✅ Works (more explicit)
+await call.leave()      // ✅ Works (semantic alias)
+
+// End another member's call
+await call.end({ memberId: 'member-123' })  // ✅ Works
+await call.removeMember({ memberId: 'member-123' })  // ✅ Alternative method
+```
+
+**end() vs removeMember():**
+
+Both methods can disconnect a participant:
+
+| Method | Purpose | Semantic Meaning |
+|--------|---------|------------------|
+| `end()` | End the call for a member | Terminate their call session |
+| `removeMember()` | Remove a member from the call | Kick them out / moderate |
+
+**Recommendation:** Use `removeMember()` for moderation actions (kicking users), and `end()` for general disconnection.
+
+**Cleanup Behavior:** When you end your own call:
+- WebRTC connection is closed
+- All media streams are stopped
+- Screen shares are automatically stopped
+- Event listeners remain active (clean them up manually if needed)
+
+## Events
+
+When a call is ended, the following events may fire:
+- `call.left` - Participant has left the call
+- `member.left` - Member has been removed from the call
+
+```typescript
+call.on('member.left', (event) => {
+  console.log(`Member ${event.member.id} left the call`)
+})
+```
+
+## Examples
+
+### End your own call
+
+```typescript
+await call.end()
+console.log('You have left the call')
+```
+
+### End another participant's call
+
+```typescript
+await call.end({ memberId: 'member-123' })
+console.log('Member removed from call')
+```
+
+### Get member ID and end their call
+
+```typescript
+const { members } = await call.getMembers()
+const memberToRemove = members.find(m => m.name === 'John Doe')
+
+if (memberToRemove) {
+  await call.end({ memberId: memberToRemove.id })
+  console.log(`${memberToRemove.name} has been removed from the call`)
+}
+```
+
+### Graceful disconnect
+
+```typescript
+async function leaveCallGracefully() {
+  // Mute audio/video before leaving
+  await call.audioMute()
+  await call.videoMute()
+
+  // End the call
+  await call.end()
+
+  console.log('Left call gracefully')
+}
+```
+
+### End call with confirmation
+
+```typescript
+async function endCallWithConfirmation() {
+  const confirmed = confirm('Are you sure you want to end the call?')
+
+  if (confirmed) {
+    try {
+      await call.end()
+      console.log('Call ended by user')
+    } catch (error) {
+      console.error('Failed to end call:', error)
+    }
+  }
+}
+```

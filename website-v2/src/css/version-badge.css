@@ -1,0 +1,72 @@
+/* Base version badge styling */
+.version-badge-latest,
+.version-badge-deprecated,
+.version-badge-unreleased {
+  /* Reset all inherited styles */
+  all: unset !important;
+  
+  /* Common badge styling */
+  font-size: 0.75rem !important;
+  padding: 0.125rem 0.375rem !important;
+  border-radius: 0.25rem !important;
+  margin-left: 0.5rem !important;
+  display: inline-block !important;
+  font-weight: 500 !important;
+  white-space: nowrap !important;
+  pointer-events: none !important;
+  
+  /* Protect from gradient text effects */
+  -webkit-background-clip: padding-box !important;
+  background-clip: padding-box !important;
+}
+
+/* Latest version badge - green */
+.version-badge-latest {
+  background-color: var(--ifm-color-success-contrast-background) !important;
+  color: var(--ifm-color-success-contrast-foreground) !important;
+  -webkit-text-fill-color: var(--ifm-color-success-contrast-foreground) !important;
+}
+
+/* Deprecated version badge - orange/red */
+.version-badge-deprecated {
+  background-color: var(--ifm-color-warning-contrast-background) !important;
+  color: var(--ifm-color-warning-contrast-foreground) !important;
+  -webkit-text-fill-color: var(--ifm-color-warning-contrast-foreground) !important;
+}
+
+/* Unreleased version badge - blue */
+.version-badge-unreleased {
+  background-color: var(--ifm-color-info-contrast-background) !important;
+  color: var(--ifm-color-info-contrast-foreground) !important;
+  -webkit-text-fill-color: var(--ifm-color-info-contrast-foreground) !important;
+}
+
+
+/* Version badge trigger button - preserve badge styling, add dropdown behavior */
+.version-badge-dropdown-container .version-badge-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  cursor: pointer;
+  border: none;
+  /* Inherits Docusaurus badge styling automatically */
+}
+
+/* Dropdown arrow animation - only for version badge */
+.version-badge-dropdown-container .version-badge-dropdown-icon {
+  transition: transform 0.2s;
+}
+
+.version-badge-dropdown-container .version-badge-dropdown-icon-open {
+  transform: rotate(180deg);
+}
+
+/* Mobile positioning - only for version badge dropdown */
+@media (max-width: 996px) {
+  .version-badge-dropdown-container.dropdown .dropdown__menu {
+    right: 0;
+    left: auto;
+    min-width: 120px;
+  }
+}
+

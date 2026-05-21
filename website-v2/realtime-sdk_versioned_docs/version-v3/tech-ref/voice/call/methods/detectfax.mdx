@@ -1,0 +1,36 @@
+---
+title: "detectFax"
+slug: /node/reference/voice/call/detect-fax
+description: detectFax method for the Call class.
+toc_max_heading_level: 3
+---
+
+[calldetect-8]: /docs/server-sdk/v3/node/reference/voice/call-detect
+
+### detectFax
+
+- **detectFax**(`params?`): `Promise<CallDetect>` - See [CallDetect][calldetect-8] for more details.
+
+Detects the presence of a fax machine.
+
+#### Parameters
+
+| Name                  | Type               | Description                                                                                 |
+|:----------------------|:-------------------|:--------------------------------------------------------------------------------------------|
+| `params?`             | `Object`           | -                                                                                           |
+| `params.timeout?`     | `number`           | Number of seconds to run the detector for. Defaults to 30.0.                                |
+| `params.tone?`        | `"CED"` \| `"CNG"` | The fax tone to detect: <code>CED</code> or <code>CNG</code>. Defaults to <code>CED</code>. |
+| `params.waitForBeep?` | `boolean`          | Whether to wait until the device is ready for voicemail delivery. Defaults to false.        |
+
+#### Returns
+
+`Promise<CallDetect>` - See [CallDetect][calldetect-8] for more details.
+
+#### Example
+
+```js
+const detect = await call.detectFax();
+const result = await detect.ended();
+
+console.log("Detect result:", result.type);
+```

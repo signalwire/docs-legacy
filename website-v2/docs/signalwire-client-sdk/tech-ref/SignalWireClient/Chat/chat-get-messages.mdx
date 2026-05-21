@@ -1,0 +1,54 @@
+---
+title: chat.getMessages
+slug: /signalwire-client/chat-get-messages
+---
+
+import APIField from '@site/src/components/APIField';
+
+Retrieves chat messages from a conversation. This method is used for in-call chat functionality.
+
+## How it works
+
+The `chat.getMessages` method fetches chat messages that were sent during a call or conversation. These are ephemeral messages tied to an active call session.
+
+## Parameters
+
+<APIField name="params" type="GetConversationChatMessageParams" required>
+  Configuration for retrieving chat messages.
+</APIField>
+
+<APIField name="params.conversationId" type="string" required>
+  The unique identifier of the conversation.
+</APIField>
+
+<APIField name="params.limit" type="number" default="50">
+  Maximum number of messages to retrieve.
+</APIField>
+
+<APIField name="params.offset" type="number" default="0">
+  Number of messages to skip (for pagination).
+</APIField>
+
+## Signature
+
+```typescript
+chat.getMessages(params: GetConversationChatMessageParams): Promise<GetConversationChatMessageResult>
+```
+
+## Returns
+
+**Type:** `Promise<GetConversationChatMessageResult>`
+
+Returns a Promise that resolves with an array of chat messages and pagination information.
+
+## Examples
+
+### Get recent messages
+
+```typescript
+const result = await client.chat.getMessages({
+  conversationId: 'conversation-id-here'
+})
+
+console.log('Messages:', result.messages)
+```

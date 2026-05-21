@@ -1,0 +1,417 @@
+---
+title: Dial
+sidebar_label: Dial
+slug: /compatibility-api/cxml/reference/voice/dial
+sidebar_position: 1
+toc_max_heading_level: 3
+---
+
+The `<Dial>` verb connects an existing call to another phone number. `<Dial>` will end this new call if: the called number does not answer, the number does not exist, or SignalWire receives a busy signal.
+
+You can use the `<Dial>` verb with the following nouns:
+
+| Noun                                    |                                                                                                          |
+|:----------------------------------------|:---------------------------------------------------------------------------------------------------------|
+| [`<Conference>`](/docs/compatibility-api/cxml/reference/voice/conference) | A conference call between two or more callers.                                                           |
+| [`<Number>`](/docs/compatibility-api/cxml/reference/voice/number)         | A phone number with additional attributes.                                                               |
+| [`<Sip>`](/docs/compatibility-api/cxml/reference/voice/sip)               | A SIP endpoint.                                                                                          |
+| [`<Verto>`](/docs/compatibility-api/cxml/reference/voice/verto)           | A Verto client.                                                                                          |
+| [`<Queue>`](/docs/compatibility-api/cxml/reference/voice/queue)           | A line for callers to wait in. The current call will be connected to the call at the front of the queue. |
+
+## Verb attributes
+
+<ParamField path="action" type="string">
+  The `action` attribute takes in an absolute URL. SignalWire will make a `GET` or `POST` request to this URL after the dialed call ends. If no `action` is provided, SignalWire will continue to the next verb in the document. SignalWire will end the call if there are no more verbs following the `<Dial>` verb in the document. See [below](#dial_action) for request parameters.
+</ParamField>
+
+<ParamField path="answerOnBridge" type="boolean" default="false">
+  If set to true, the inbound call will ring until the number that was dialed answers the call. If the inbound call is a SIP call, SignalWire will send a 180 or 183 to your SIP server as soon as it connects to SignalWire. When the `<Dial>` call is connected, a 200 will be sent.
+</ParamField>
+
+<ParamField path="callerId" type="string">
+  The inbound caller's phone number, which is displayed to the number that was dialed. The caller ID must be a valid E.164 number. Note that the number specified here must either be verified or purchased in the SignalWire Dashboard.
+</ParamField>
+
+<ParamField path="callerName" type="string">
+  The caller name displayed for Sip calls. This should be an alphanumeric string. Limit is 70 characters.
+</ParamField>
+
+<ParamField path="hangupOnStar" type="boolean" default="false">
+  The initiator of the call can hangup on the dialed number by using the `*` key.
+</ParamField>
+
+<ParamField path="method" type="string" default="POST">
+  The `method` attribute specifies whether the request to action is a `GET` or a `POST`. Valid values are `GET` or `POST`.
+</ParamField>
+
+<ParamField path="record" type="string" default="do-not-record">
+  The `record` attribute allows the ability to record both legs of a call. Recordings are available as **mono-channel** or **dual-channel**. See [below](#record_channels) for a detailed explanation of these channels.
+</ParamField>
+
+<ParamField path="recordingStatusCallback" type="string">
+  The `recordingStatusCallback` attribute takes in an absolute or relative URL. SignalWire will make a `GET` or `POST` request to this URL when recording is available. See [below](#dial_recordingStatusCallback) for request parameters.
+</ParamField>
+
+<ParamField path="recordingStatusCallbackEvent" type="string" default="completed">
+  The different recording statuses. Possible values are `completed`, `in-progress`, and `absent`. To specify multiple events, separate with a space.
+</ParamField>
+
+<ParamField path="recordingStatusCallbackMethod" type="string" default="POST">
+  Whether the request to `recordingStatusCallback` URL is a `GET` or a `POST`.
+</ParamField>
+
+<ParamField path="recordingStorageUrl" type="string">
+  The `recordingStorageUrl` attribute accepts an absolute URL as the destination to send a recording to, if you prefer to host your own recordings and bypass SignalWire storage. The recording files are in `.wav` format.
+</ParamField>
+
+<ParamField path="recordingStorageUrlMethod" type="string" default="POST">
+  Specifies which HTTP verb to use when sending the recording to the `recordingStorageUrl`. Available values are: **POST** and **PUT**.
+</ParamField>
+
+<ParamField path="recordingTrack" type="string" default="both">
+  Specifies whether to record the `inbound` audio to SignalWire from the called party or the `outbound` audio from SignalWire to the called party or `both` the inbound and outbound audio.
+</ParamField>
+
+<ParamField path="ringTone" type="string">
+  The ability to change the ringback tone played to the caller when dialing a number. Default value is the ringback tone from the carrier. Available values are the following ISO 3166-1 alpha-2 country codes: **at**, **au**, **bg**, **br**, **be**, **ch**, **cl**, **cn**, **cz**, **de**, **dk**, **ee**, **es**, **fi**, **fr**, **gr**, **hu**, **il**, **in**, **it**, **lt**, **jp**, **mx**, **my**, **nl**, **no**, **nz**, **ph**, **pl**, **pt**, **ru**, **se**, **sg**, **th**, **uk**, **us**, **us-old**, **tw**, **ve**, **za**.
+</ParamField>
+
+<ParamField path="timeLimit" type="integer" default="14400">
+  Maximum duration, in seconds, for a `<Dial>`. Default value is 4 hours (14400 seconds).
+</ParamField>
+
+<ParamField path="timeout" type="integer" default="30">
+  The time, in seconds, that SignalWire will wait for a call to be answered before setting the status of the call to `no-answer`. Minimum value is 5 seconds and maximum value is 600 seconds. For some call flows, there may be a 5-second buffer added to the timeout value you provide.
+</ParamField>
+
+<ParamField path="trim" type="string" default="do-not-trim">
+  Whether silence in the beginning and end of recordings is removed. Use `trim-silence` to achieve this behavior.
+</ParamField>
+
+
+
+
+#### Request parameters for the `action` URL {#dial_action}
+
+You can expect several parameters to be present in the request associated to the `action` URL. First, you have the [Standard Request Parameters](/docs/compatibility-api/cxml/reference/voice#request-parameters). Then, you also have the following specific parameters:
+
+<ParamField path="DialCallDuration" type="integer">
+  The duration, in seconds, of the dialed call.
+</ParamField>
+
+<ParamField path="DialCallSid" type="string">
+  The unique identifier of the new call leg.
+</ParamField>
+
+<ParamField path="DialCallStatus" type="string">
+  The status of the dialed call attempt. See [below](#action_dialCallStatus) for status values.
+</ParamField>
+
+<ParamField path="RecordingUrl" type="string">
+  The URL of the recorded audio file. This parameter is only present if `record` is set on a `<Dial>`.
+</ParamField>
+
+
+
+
+#### Values for `DialCallStatus` parameter {#action_dialCallStatus}
+
+The `DialCallStatus` parameter of the `action` attribute can be one of the following values:
+
+| Value | Description |
+|:------|:------------|
+| `completed` | The number that was dialed answered the call and was successfully connected to the caller. |
+| `answered` | When calling to a conference, the number that was dialed answered the call and was successfully connected to the caller. |
+| `busy` | SignalWire received a busy signal when connecting to the dialed number. |
+| `no-answer` | The number that was dialed did not answer the call in time. |
+| `failed` | SignalWire was unable to connect to the dialed number. This usually occurs when the dialed number does not exist. |
+| `canceled` | The call was canceled through a REST API before it was answered. |
+
+
+
+
+#### Values for `record` parameter {#record_channels}
+
+The `record` attribute allows for recordings in **mono-channel** or **dual-channel**:
+
+- **mono-channel**: both legs of a call are combined into one channel in one recording file
+  - _record-from-answer_: starts the recording when the call is answered
+  - _record-from-ringing_: starts the recording when ringing begins
+- **dual-channel**: both legs of a call use separate channels in one recording file
+  - _record-from-answer-dual_: starts the recording when the call is answered
+  - _record-from-ringing-dual_: starts the recording when ringing begins
+
+<br />
+
+
+#### Request parameters for `recordingStatusCallback` {#dial_recordingStatusCallback}
+
+<WebhookPayloadSnippet webhook="recordingStatusCallback" />
+
+## Examples
+
+### A simple dial
+
+<CodeBlocks>
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Dial>123-456-7890</Dial>
+</Response>
+```
+
+```javascript title="Node.js"
+const { RestClient } = require("@signalwire/compatibility-api");
+const response = new RestClient.LaML.VoiceResponse();
+
+response.dial("123-456-7890");
+console.log(response.toString());
+```
+
+```csharp
+using Twilio.TwiML;
+using System;
+
+class Example
+{
+    static void Main()
+    {
+        var response = new VoiceResponse();
+        response.Dial("123-456-7890");
+
+        Console.WriteLine(response.ToString());;
+    }
+}
+```
+
+```python
+from signalwire.voice_response import VoiceResponse, Dial
+
+response = VoiceResponse()
+response.dial('123-456-7890')
+
+print(response)
+```
+
+```ruby
+require 'signalwire/sdk'
+
+response = Signalwire::Sdk::VoiceResponse.new do |response|
+  response.dial('123-456-7890')
+end
+
+puts response.to_s
+```
+</CodeBlocks>
+If the dialed number answers the call, the two parties can talk to each other until one of them hangs up the phone.
+
+### Dial a number from a SignalWire client
+
+<CodeBlocks>
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Dial callerId="+18007778899">
+        <Number>+18004445566</Number>
+    </Dial>
+</Response>
+```
+
+```javascript title="Node.js"
+const { RestClient } = require("@signalwire/compatibility-api");
+const response = new RestClient.LaML.VoiceResponse();
+
+dial = response.dial({ callerId: "+18007778899" });
+dial.number("+18004445566");
+console.log(response.toString());
+```
+
+```csharp
+using Twilio.TwiML;
+using Twilio.TwiML.Voice;
+using System;
+
+
+class Example
+{
+    static void Main()
+    {
+        var response = new VoiceResponse();
+        var dial = new Dial(callerId: "+18007778899");
+        dial.Number("+18004445566");
+        response.Append(dial);
+
+        Console.WriteLine(response.ToString());;
+    }
+}
+```
+
+```python
+from signalwire.voice_response import VoiceResponse, Dial, Number
+
+response = VoiceResponse()
+dial = Dial(caller_id='+18007778899')
+dial.number('+18004445566')
+response.append(dial)
+
+print(response)
+```
+
+```ruby
+require 'signalwire/sdk'
+
+response = Signalwire::Sdk::VoiceResponse.new do |response|
+  response.dial(caller_id: '+18007778899') do |dial|
+    dial.number('+18004445566')
+  end
+end
+
+puts response.to_s
+```
+</CodeBlocks>
+
+In order to dial from a SignalWire client, you need to make sure you are inputting a valid phone number. If the number in the `callerID` is not valid, the call will fail.
+
+### Mono-channel recording
+
+<CodeBlocks>
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Dial record="record-from-ringing"
+          recordingStatusCallback="https://example.com/recording_status">
+        <Number>+10123456789</Number>
+    </Dial>
+</Response>
+```
+
+```javascript title="Node.js"
+const { RestClient } = require("@signalwire/compatibility-api");
+const response = new RestClient.LaML.VoiceResponse();
+
+dial = response.dial({
+  record: "record-from-ringing",
+  recordingStatusCallback: "https://example.com/recording_status",
+});
+dial.number("+10123456789");
+console.log(response.toString());
+```
+
+```csharp
+using Twilio.TwiML;
+using Twilio.TwiML.Voice;
+using System;
+
+
+class Example
+{
+    static void Main()
+    {
+        var response = new VoiceResponse();
+        var dial = new Dial(record: "record-from-ringing",
+            recordingStatusCallback: new Uri("https://example.com/recording_status"));
+        dial.Number("+10123456789");
+        response.Append(dial);
+
+        Console.WriteLine(response.ToString());;
+    }
+}
+```
+
+```python
+from signalwire.voice_response import VoiceResponse, Dial, Number
+
+response = VoiceResponse()
+dial = Dial(record='record-from-ringing', recording_status_callback='https://example.com/recording_status')
+dial.number('+10123456789')
+response.append(dial)
+
+print(response)
+```
+
+```ruby
+require 'signalwire/sdk'
+
+response = Signalwire::Sdk::VoiceResponse.new do |response|
+  response.dial(record: 'record-from-ringing', recording_status_callback: 'https://example.com/recording_status') do |dial|
+    dial.number('+10123456789')
+  end
+end
+
+puts response.to_s
+```
+</CodeBlocks>
+
+With mono-channel recording, each participant in the call will be recorded on the same channel. The recording will then be stored in a single recording file. Since we have set `record` to **record-from-ringing**, the recording will begin when the phone starts to ring.
+
+### Dual-channel recording for a conference call
+
+<CodeBlocks>
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Dial record="record-from-ringing-dual"
+          recordingStatusCallback="https://example.com/recording_status">
+        <Conference>teamcall</Conference>
+    </Dial>
+</Response>
+```
+
+```javascript title="Node.js"
+const { RestClient } = require("@signalwire/compatibility-api");
+const response = new RestClient.LaML.VoiceResponse();
+
+dial = response.dial({
+  record: "record-from-ringing-dual",
+  recordingStatusCallback: "https://example.com/recording_status",
+});
+dial.conference("teamcall");
+console.log(response.toString());
+```
+
+```csharp
+using Twilio.TwiML;
+using Twilio.TwiML.Voice;
+using System;
+
+
+class Example
+{
+    static void Main()
+    {
+        var response = new VoiceResponse();
+        var dial = new Dial(record: "record-from-ringing-dual",
+            recordingStatusCallback: new Uri("https://example.com/recording_status"));
+        dial.Conference("teamcall");
+        response.Append(dial);
+
+        Console.WriteLine(response.ToString());;
+    }
+}
+```
+
+```python
+from signalwire.voice_response import VoiceResponse, Dial, Conference
+
+response = VoiceResponse()
+dial = Dial(record='record-from-ringing-dual', recording_status_callback='https://example.com/recording_status')
+dial.conference('teamcall')
+response.append(dial)
+
+print(response)
+```
+
+```ruby
+require 'signalwire/sdk'
+
+response = Signalwire::Sdk::VoiceResponse.new do |response|
+  response.dial(record: 'record-from-ringing-dual', recording_status_callback: 'https://example.com/recording_status') do |dial|
+    dial.conference('teamcall')
+  end
+end
+
+puts response.to_s
+```
+</CodeBlocks>
+
+This example connects the caller to the conference call, **teamcall**. With dual-channel recording, each participant in the call will be recorded in a separate channel. The recording will then be stored in a single recording file. Since we have set `record` to **record-from-ringing-dual**, the recording will begin when the phone starts to ring.

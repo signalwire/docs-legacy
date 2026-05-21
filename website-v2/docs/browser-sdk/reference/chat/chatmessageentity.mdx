@@ -1,0 +1,29 @@
+---
+title: "ChatMessageEntity"
+slug: /js/reference/chat/chat-message-entity
+toc_max_heading_level: 3
+---
+
+An object representing a Chat Message with only the state properties of [`ChatMessage`](/docs/browser-sdk/js/reference/chat/chat-message).
+
+## Properties
+
+<ParamField path="content" type="any" required={true}>
+  The content of this message. This can be any JSON-serializable object or value.
+</ParamField>
+
+<ParamField path="id" type="string" required={true}>
+  The id of this message.
+</ParamField>
+
+<ParamField path="member" type="ChatMember" required={true}>
+  The member which sent this message. See [`ChatMember`](/docs/browser-sdk/js/reference/chat/chat-member) for more details.
+</ParamField>
+
+<ParamField path="meta" type="any">
+  Any metadata associated with this message.
+</ParamField>
+
+<ParamField path="publishedAt" type="Date" required={true}>
+  The date and time at which this message was published.
+</ParamField>

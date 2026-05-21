@@ -1,0 +1,31 @@
+---
+title: "getSpeakerDevices"
+slug: /js/reference/webrtc/get-speaker-devices
+description: getSpeakerDevices function in the WebRTC namespace.
+toc_max_heading_level: 3
+---
+
+### getSpeakerDevices
+
+- `Const` **getSpeakerDevices**(): `Promise<MediaDeviceInfo[]>` — See [MediaDeviceInfo](https://developer.mozilla.org/en-US/docs/Web/API/mediadeviceinfo) for more details.
+
+Returns an array of speaker devices that can be accessed on this device (for which we have permissions).
+
+#### Returns
+
+`Promise<MediaDeviceInfo[]>`
+
+#### Example
+
+```javascript
+await SignalWire.WebRTC.getSpeakerDevices();
+// [
+//   {
+//     "deviceId": "ADciLf...NYgF8=",
+//     "kind": "audiooutput",
+//     "label": "External Speaker",
+//     "groupId": "rgZgKM...NW1hU="
+//   }
+// ]
+```
+

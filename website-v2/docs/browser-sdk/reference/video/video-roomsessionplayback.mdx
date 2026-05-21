@@ -1,0 +1,193 @@
+---
+title: "RoomSessionPlayback"
+sidebar_position: 4
+slug: /js/reference/video/room-session-playback
+toc_max_heading_level: 3
+---
+
+Instances of this class allow you to control (e.g., pause, resume, stop) the playback inside a room session. You can obtain instances of this class by starting a playback from the desired [RoomSession](/docs/browser-sdk/js/reference/video/room-session) (see [RoomSession.play](/docs/browser-sdk/js/reference/video/room-session/play)).
+
+## Properties
+
+<ParamField path="endedAt" type="Date">
+  End time, if available.
+</ParamField>
+
+<ParamField path="id" type="string" required={true}>
+  Unique id for this playback.
+</ParamField>
+
+<ParamField path="position" type="number" required={true}>
+  Current playback position, in milliseconds.
+</ParamField>
+
+<ParamField path="roomSessionId" type="string" required={true}>
+  Id of the room session associated to this playback.
+</ParamField>
+
+<ParamField path="seekable" type="boolean" required={true}>
+  Whether the seek functions ([seek](#seek), [forward](#forward), [rewind](#rewind)) can be used for this playback
+</ParamField>
+
+<ParamField path="startedAt" type="Date" required={true}>
+  Start time, if available.
+</ParamField>
+
+<ParamField path="state" type='"paused" | "completed" | "playing"' required={true}>
+  Current state of the playback.
+</ParamField>
+
+<ParamField path="url" type="string" required={true}>
+  Url of the file reproduced by this playback.
+</ParamField>
+
+<ParamField path="volume" type="number" required={true}>
+  Audio volume at which the playback file is reproduced.
+</ParamField>
+
+## Methods
+
+### forward
+
+▸ **forward**(`offset`): `Promise<void>`
+
+Seeks the current playback forward by the specified offset.
+
+#### Parameters
+
+<ParamField path="offset" type="number">
+  Relative number of milliseconds to seek forward from the current position. Defaults to 5000 (5 seconds).
+</ParamField>
+
+#### Returns
+
+`Promise<void>`
+
+#### Permissions
+
+- `room.playback.seek` or the more permissive `room.playback`
+
+You need to specify the permissions when [creating the Video Room Token](/docs/apis/video/create-room-token) on the server side.
+
+#### Example
+
+```javascript
+const playback = await roomSession.play({ url: "rtmp://example.com/foo" });
+await playback.forward(5000); // 5 seconds
+```
+
+---
+
+### pause
+
+▸ **pause**(): `Promise<void>`
+
+Pauses the playback.
+
+#### Returns
+
+`Promise<void>`
+
+---
+
+### resume
+
+▸ **resume**(): `Promise<void>`
+
+Resumes the playback.
+
+#### Returns
+
+`Promise<void>`
+
+---
+
+### rewind
+
+▸ **rewind**(`offset`): `Promise<void>`
+
+Seeks the current playback backwards by the specified offset.
+
+#### Parameters
+
+<ParamField path="offset" type="number">
+  Relative number of milliseconds to seek backwards from the current position. Defaults to 5000 (5 seconds).
+</ParamField>
+
+#### Returns
+
+`Promise<void>`
+
+#### Permissions
+
+- `room.playback.seek` or the more permissive `room.playback`
+
+You need to specify the permissions when [creating the Video Room Token](/docs/apis/video/create-room-token) on the server side.
+
+#### Example
+
+```javascript
+const playback = await roomSession.play({ url: "rtmp://example.com/foo" });
+await playback.rewind(5000); // 5 seconds
+```
+
+---
+
+### seek
+
+▸ **seek**(`timecode`): `Promise<void>`
+
+Seeks the current playback to the specified absolute position.
+
+#### Parameters
+
+<ParamField path="timecode" type="number" required={true}>
+  The absolute position in milliseconds to seek to in the playback.
+</ParamField>
+
+#### Returns
+
+`Promise<void>`
+
+#### Permissions
+
+- `room.playback.seek` or the more permissive `room.playback`
+
+You need to specify the permissions when [creating the Video Room Token](/docs/apis/video/create-room-token) on the server side.
+
+#### Example
+
+```javascript
+const playback = await roomSession.play({ url: "rtmp://example.com/foo" });
+await playback.seek(30_000); // 30th second
+```
+
+---
+
+### setVolume
+
+▸ **setVolume**(`volume`): `Promise<void>`
+
+Sets the audio volume for the playback.
+
+#### Parameters
+
+<ParamField path="volume" type="number" required={true}>
+  The desired volume. Values range from -50 to 50, with a default of 0.
+</ParamField>
+
+#### Returns
+
+`Promise<void>`
+
+---
+
+### stop
+
+▸ **stop**(): `Promise<void>`
+
+Stops the playback.
+
+#### Returns
+
+`Promise<void>`

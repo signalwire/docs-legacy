@@ -1,0 +1,67 @@
+---
+title: "setRaisedHand"
+slug: /node/reference/video/room-session/set-raised-hand
+description: setRaisedHand method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+
+### setRaisedHand
+
+- **setRaisedHand**(`params`): `Promise<void>`
+
+Sets the raised hand status for the current member.
+
+#### Parameters
+
+<ParamField path="params" type="object" required>
+  Object containing the parameters of the method.
+</ParamField>
+
+<Indent>
+<ParamField path="memberId" type="string" required>
+  ID of the member to affect.
+</ParamField>
+
+<ParamField path="raised" type="boolean" default="true">
+  Whether to raise or lower the hand. If omitted, the hand status is toggled to the opposite of the current status.
+</ParamField>
+</Indent>
+
+#### Returns
+
+`Promise<void>`
+
+#### Example
+
+In this example, we wait for a member to join the room and then set the raised hand status for that member to `true`.
+
+```javascript
+import { SignalWire } from "@signalwire/realtime-api";
+
+// Initialize the SignalWire client
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" });
+
+// Access video client from the main client
+const videoClient = client.video;
+
+// Setup listener for when a room starts
+await videoClient.listen({
+  onRoomStarted: async (roomSession) => {
+    console.log("Room started", roomSession.displayName);
+
+    // Setup listener for when a member joins the room
+    await roomSession.listen({
+      onMemberJoined: async (member) => {
+        console.log("Member joined", member.name);
+
+        // Set the raised hand status for the member
+        await roomSession.setRaisedHand({
+          memberId: member.id,
+          raised: true
+        });
+      }
+    });
+  }
+});
+```

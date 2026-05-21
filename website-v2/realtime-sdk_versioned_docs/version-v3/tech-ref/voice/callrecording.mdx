@@ -1,0 +1,122 @@
+---
+title: "CallRecording"
+slug: /node/reference/voice/call-recording
+sidebar_label: CallRecording
+description: CallRecording object reference for recording voice calls. Control recordings with pause, resume, and stop methods. Access recording URLs and metadata.
+toc_max_heading_level: 3
+---
+
+[callrecording-5]: /docs/server-sdk/v3/node/reference/voice/call-recording
+[voice-call-1]: /docs/server-sdk/v3/node/reference/voice/call/record-audio
+[voice-call]: /docs/server-sdk/v3/node/reference/voice/call/record
+
+Represents a recording of a call. You can obtain instances of this class by starting a Recording with one of the following methods:
+
+- [`Call.record`][voice-call]
+- [`Call.recordAudio`][voice-call-1]
+
+#### Example
+
+Recording the audio of the call as soon as the other party answers the phone. We
+also print the id of the recording and, when it ends, the URL (which can be used
+to download the recording).
+
+```js
+import { Voice } from "@signalwire/realtime-api";
+
+const client = new Voice.Client({
+  project: "<project-id>",
+  token: "<api-token>",
+  topics: ["office"],
+});
+
+const call = await client.dialPhone({
+  from: "+YYYYYYYYYY",
+  to: "+XXXXXXXXXX",
+});
+
+await call.playTTS({ text: "This call will be recorded." });
+
+// Print out the URL of the recording, as soon as the recording ends.
+call.on("recording.ended", (recording) => {
+  console.log("Recording URL:", recording.url);
+});
+
+// Start recording
+const recording = await call.recordAudio({
+  direction: "both",
+  endSilenceTimeout: 0,
+  terminators: "",
+});
+console.log("Recording id:", recording.id);
+```
+
+## Properties
+
+### id
+
+The unique id for this recording.
+
+**Syntax:** `CallRecording.id()`
+
+**Returns:** `string`
+
+## Methods
+
+### pause
+
+- **pause**(): `Promise<CallRecording>` - See [CallRecording][callrecording-5] for more details.
+
+Pauses the recording.
+
+| Parameters  | Value                                                                                                                                            |
+|:------------|:-------------------------------------------------------------------------------------------------------------------------------------------------|
+| `behavior?` | **skip**: Does not record during the pause period <br />**silence**: Replaces the actual audio of the call with silence during the pause period. |
+
+#### Returns
+
+`Promise<CallRecording>` - See [CallRecording][callrecording-5] for more details.
+
+#### Example
+
+```js
+const recording = await call.recordingAudio({ direction: "both"});
+...
+await recording.pause();
+```
+
+### resume
+
+- **resume**(): `Promise<CallRecording>` - See [CallRecording][callrecording-5] for more details.
+
+Resumes the recording.
+
+#### Returns
+
+`Promise<CallRecording>` - See [CallRecording][callrecording-5] for more details.
+
+#### Example
+
+```js
+const recording = await call.recordingAudio({ direction: "both"});
+...
+await recording.resume();
+```
+
+### stop
+
+- **stop**(): `Promise<CallRecording>` - See [CallRecording][callrecording-5] for more details.
+
+Stops the recording.
+
+#### Returns
+
+`Promise<CallRecording>` - See [CallRecording][callrecording-5] for more details.
+
+#### Example
+
+```js
+const recording = await call.recordAudio({ direction: "both" });
+...
+await recording.stop();
+```

@@ -1,0 +1,23 @@
+---
+title: "Relay.Calling.TapResult"
+slug: /python/reference/calling/results/tap
+description: The result object that is returned when tapping a call.
+toc_max_heading_level: 3
+---
+
+[relay-event]: /docs/server-sdk/v2/python/reference/event
+[tap]: /docs/server-sdk/v2/python/reference/calling/call#tap
+
+## Relay.Calling.TapResult
+
+This object returned from [`tap`][tap] method that represents the final result of a tapping.
+
+### Properties
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `successful` | boolean | Whether the tapping has completed successfully. |
+| `event` | [`Relay.Event`][relay-event] | Last event that completed the operation. |
+| `tap` | dict | Object with payload for this action. |
+| `source_device` | dict | Source device sending media. |
+| `destination_device` | dict | Destination device receiving media. |

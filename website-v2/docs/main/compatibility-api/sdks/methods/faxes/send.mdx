@@ -1,0 +1,119 @@
+---
+slug: /compatibility-api/sdks/reference/faxes/send
+title: Send
+sidebar_label: Send
+toc_max_heading_level: 3
+---
+
+Use this endpoint for the Fax method to send a Fax.
+
+<EndpointSchemaSnippet endpoint="POST /Accounts/{AccountSid}/Faxes" />
+
+## Request examples
+
+<CodeBlocks>
+
+```javascript title="Node.js"
+const { RestClient } = require('@signalwire/compatibility-api')
+const client = RestClient('YourProjectID', 'YourAuthToken', { signalwireSpaceUrl: 'example.signalwire.com' })
+
+client.fax.faxes
+  .create({
+     from: '+13103383454',
+     to: '+13104456789',
+     mediaUrl: 'https://example.com/fax.pdf'
+   })
+  .then(fax => console.log(fax.sid))
+  .done();
+```
+
+```csharp
+using System;
+using System.Collections.Generic;
+using Twilio;
+using Twilio.Rest.Fax.V1;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        TwilioClient.Init("YourProjectID", "YourAuthToken", new Dictionary<string, object> { ["signalwireSpaceUrl"] = "{SPACE}.signalwire.com" });
+
+        var fax = FaxResource.Create(
+            from: "+13103383454",
+            to: "+13104456789",
+            mediaUrl: new Uri("https://example.com/fax.pdf")
+        );
+
+        Console.WriteLine(fax.Sid);
+    }
+}
+```
+
+```python
+from signalwire.rest import Client as signalwire_client
+
+client = signalwire_client("YourProjectID", "YourAuthToken", signalwire_space_url = 'example.signalwire.com')
+
+fax = client.fax.faxes \
+    .create(
+         from_='+13103383454',
+         to='+13104456789',
+         media_url='https://example.com/fax.pdf'
+     )
+
+print(fax.sid)
+```
+
+```ruby
+require 'signalwire/sdk'
+
+@client = Signalwire::REST::Client.new 'YourProjectID', 'YourAuthToken', signalwire_space_url: "example.signalwire.com"
+
+fax = @client.fax.faxes
+  .create(
+     from: '+13103383454',
+     to: '+13104456789',
+     media_url: 'https://example.com/fax.pdf'
+   )
+puts fax.sid
+```
+
+</CodeBlocks>
+---
+
+## StatusCallback parameters
+
+The `StatusCallback` request contains the following parameters:
+
+<ParamField path="RemoteStationId" type="string">
+  The transmitting subscriber identification (TSID) reported by the fax machine that sent in the fax.
+</ParamField>
+
+<ParamField path="FaxStatus" type="string">
+  The status of the fax.
+</ParamField>
+
+<ParamField path="OriginalMediaUrl" type="string">
+  The original URL passed when a fax is sent.
+</ParamField>
+
+<ParamField path="NumPages" type="integer">
+  The number of pages received from a successful fax.
+</ParamField>
+
+<ParamField path="MediaSid" type="string">
+  The SID that uniquely identifies the fax media.
+</ParamField>
+
+<ParamField path="MediaUrl" type="string">
+  The media URL to request to retrieve incoming media.
+</ParamField>
+
+<ParamField path="ErrorCode" type="string">
+  The error code provides more information on a failed fax.
+</ParamField>
+
+<ParamField path="ErrorMessage" type="string">
+  The message explaining the reason for fax failure.
+</ParamField>

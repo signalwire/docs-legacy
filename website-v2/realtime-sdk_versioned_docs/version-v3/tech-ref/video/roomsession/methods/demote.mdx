@@ -1,0 +1,35 @@
+---
+title: "demote"
+slug: /node/reference/video/room-session/demote
+description: demote method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+[link-1]: /docs/server-sdk/v3/node/reference/video/room-session/promote
+
+### demote
+
+- **demote**(`params`): `Promise<void>`
+
+Demotes a participant from "member" to "audience". See [promote][link-1].
+
+#### Parameters
+
+| Name                   | Type                                        | Description                                                                                                      |
+|:-----------------------|:--------------------------------------------|:-----------------------------------------------------------------------------------------------------------------|
+| `params`               | `Object`                                    | -                                                                                                                |
+| `params.memberId`      | `string`                                    | Id of the member to affect.                                                                                      |
+| `params.mediaAllowed?` | `"all"` \| `"audio-only"` \| `"video-only"` | Specifies the media that the client will be allowed to _receive_. An audience participant cannot send any media. |
+
+#### Returns
+
+`Promise<void>`
+
+#### Example
+
+```javascript
+await roomSession.demote({
+  memberId: "de550c0c-3fac-4efd-b06f-b5b8614b8966",
+  mediaAllowed: "all",
+});
+```

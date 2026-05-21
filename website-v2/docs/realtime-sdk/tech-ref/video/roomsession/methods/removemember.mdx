@@ -1,0 +1,69 @@
+---
+title: "removeMember"
+slug: /node/reference/video/room-session/remove-member
+description: removeMember method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+[roomsession-41]: /docs/server-sdk/node/reference/video/room-session
+
+### removeMember
+
+- **removeMember**(`params`): `Promise<void>`
+
+Removes a specific participant from the room.
+
+#### Parameters
+
+<ParamField path="params" type="object" required>
+  Object containing the parameters of the method.
+</ParamField>
+
+<Indent>
+<ParamField path="memberId" type="string" required>
+  ID of the member to remove.
+</ParamField>
+</Indent>
+
+#### Returns
+
+`Promise<void>`
+
+#### Example
+
+In this example, we wait for a room to start and then remove the second member
+that joins the room after 5 seconds. This example assumes that there is a [`RoomSession`][roomsession-41]
+already active and that members are joining the room.
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+// Initialize the SignalWire client
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+// Access the video client from the main client
+const videoClient = client.video;
+
+// Setup listener for when a room starts
+await videoClient.listen({
+  onRoomStarted: async (roomsession) => {
+    console.log("Room started", roomsession.displayName);
+
+    // listen for when new participants join the room
+    roomsession.listen({
+      onMemberJoined: async (member) => {
+        console.log("Member joined", member.name);
+
+        // remove the member from the room after 5 seconds
+
+        setTimeout(async () => {
+          console.log("Removing member", member.name);
+          roomsession.removeMember({
+            memberId: member.id,
+          });
+        }, 5000);
+      },
+    });
+  }
+});
+```

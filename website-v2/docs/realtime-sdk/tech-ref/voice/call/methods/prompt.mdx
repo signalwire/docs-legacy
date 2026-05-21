@@ -1,0 +1,147 @@
+---
+title: "prompt"
+slug: /node/reference/voice/call/prompt
+description: prompt method for the Call class.
+toc_max_heading_level: 3
+---
+
+[callprompt-onstarted]: /docs/server-sdk/node/reference/voice/call-prompt#onstarted
+[callprompt]: /docs/server-sdk/node/reference/voice/call-prompt
+[collectdigitsconfig]: /docs/server-sdk/node/reference/voice/types#collectdigitsconfig
+[collectspeechconfig]: /docs/server-sdk/node/reference/voice/types#collectspeechconfig
+[promptaudio]: /docs/server-sdk/node/reference/voice/call/prompt-audio
+[promptringtone]: /docs/server-sdk/node/reference/voice/call/prompt-ringtone
+[prompttts]: /docs/server-sdk/node/reference/voice/call/prompt-tts
+[voiceplaylist]: /docs/server-sdk/node/reference/voice/playlist
+
+### prompt
+
+- **prompt**(`params`): `Promise`\<[`CallPrompt`][callprompt]>
+
+Generic method to prompt the user for input. 
+
+<Info>
+Take a look at [`promptAudio`][promptaudio], [`promptRingtone`][promptringtone], or [`promptTTS`][prompttts] for the more specific input methods.
+</Info>
+
+#### Parameters
+
+<ParamField path="params" type="object" required>
+  Object containing the parameters for prompting the user for input.
+</ParamField>
+
+<Indent>
+<ParamField path="playlist" type="VoicePlaylist" required>
+  A media playlist to play. See [`VoicePlaylist`][voiceplaylist].
+</ParamField>
+
+<ParamField path="digits" type="CollectDigitsConfig">
+  Configuration for collecting digits. You must either set this, or `speech`. See [`CollectDigitsConfig`][collectdigitsconfig].
+</ParamField>
+
+<ParamField path="speech" type="CollectSpeechConfig">
+  Configuration for collecting speech. You must either set this, or `digits`. Pass an empty object to use the default configuration. See [`CollectSpeechConfig`][collectspeechconfig].
+</ParamField>
+
+<ParamField path="initialTimeout" type="number" default="4">
+  Initial timeout in seconds.
+</ParamField>
+
+<ParamField path="listen" type="object">
+  Callback to listen for events. List of prompt events can be found [here][callprompt]. Example event: [`onStarted`][callprompt-onstarted].
+</ParamField>
+</Indent>
+
+#### Returns
+
+`Promise`\<[`CallPrompt`][callprompt]>
+
+A promise that resolves to a [`CallPrompt`][callprompt] object that you can use to
+view the current state and results of the `prompt` session.
+
+#### Examples
+
+**Digits Example**
+
+In this example, we dial a phone number and prompt for digits. After the digits are entered or a timeout occurs, the prompt session will end and return the digits results,
+and the call will hangup.
+We also listen for prompt events.
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+const voiceClient = client.voice;
+
+// Listen for incoming calls
+await voiceClient.listen({
+  topics: ["office"],
+  onCallReceived: async (call) => {
+    console.log("Call received");
+    // Answer the call
+    call.answer();
+    // Prompt for digits. After the digits are entered or a timeout occurs, the prompt session will end and return the digits results, and the call will hangup.
+    await call.prompt({
+      playlist: new Voice.Playlist().add(
+        Voice.Playlist.TTS({ text: "Please enter your PIN number."})
+      ),
+      digits: {
+        max: 4,
+        digitTimeout: 10,
+        terminators: "#*"
+      },
+      listen: {
+        onStarted: () => console.log("Prompt started!"),
+        onFailed: () => console.log("Prompt failed!"),
+        onUpdated: (promptResult) => console.log("Prompt updated!", promptResult.result),
+        onEnded: (promptResult) => {
+          console.log("Prompt ended!", promptResult.result);
+          call.hangup();
+        }
+      }
+    }).onStarted();
+  }
+});
+```
+
+**Speech Example**
+
+In this example, we dial a phone number and prompt for speech. After the speech is entered or a timeout occurs, the call will hangup.
+We also listen for prompt events.
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+const voiceClient = client.voice;
+
+// Listen for incoming calls
+await voiceClient.listen({
+  topics: ["office"],
+  onCallReceived: async (call) => {
+    console.log("Call received");
+    // Answer the call
+    call.answer();
+    // Prompt for speech. After the speech is entered or a timeout occurs, the call will hangup.
+    await call.prompt({
+      playlist: new Voice.Playlist().add(
+        Voice.Playlist.TTS({ text: "Please enter your PIN number."})
+      ),
+      speech: {
+        model: "enhanced.phone_call"
+      },
+      listen: {
+        onStarted: () => console.log("Prompt started!"),
+        onFailed: () => console.log("Prompt failed!"),
+        onUpdated: (promptResult) => console.log("Prompt updated!", promptResult.result),
+        onEnded: (promptResult) => {
+          console.log("Prompt ended!", promptResult.result);
+          call.hangup();
+        }
+      }
+    }).onStarted();
+  }
+});
+```

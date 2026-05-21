@@ -1,0 +1,29 @@
+---
+title: FaxResult
+slug: /dotnet/reference/calling/results/fax
+description: The FaxResult object is returned after a fax operation.
+toc_max_heading_level: 3
+---
+
+[call-1]: /docs/server-sdk/v2/dotnet/reference/calling/call#faxsend
+[call-2]: /docs/server-sdk/v2/dotnet/reference/calling/call#faxsendasync
+[call]: /docs/server-sdk/v2/dotnet/reference/calling/call#faxreceive
+[signalwire-relay-calling-direction]: /docs/server-sdk/v2/dotnet/reference/calling/direction
+[signalwire-relay-event]: /docs/server-sdk/v2/dotnet/reference/event
+
+[fax-receive-async]: /docs/server-sdk/v2/dotnet/reference/calling/call#faxreceiveasync
+# SignalWire.Relay.Calling.FaxResult
+
+This object returned from [`FaxReceive`][call] and [`FaxSend`][call-1] methods or part of the action when [`FaxReceiveAsync`][fax-receive-async] and [`FaxSendAsync`][call-2] complete, which represents the final result of a fax operation.
+
+## Properties
+
+| Property | Type | Description |
+| :-------- | :---- | :----------- |
+| `Event` | [`SignalWire.Relay.Event`][signalwire-relay-event] | The last event that completed the call. |
+| `Direction` | [`SignalWire.Relay.Calling.Direction`][signalwire-relay-calling-direction] | Indicates the direction of the result. |
+| `Document` | string | The location of the faxed document. |
+| `Identity` | string | The phone number representing the client side of the operation. |
+| `Pages` | int | The quantity of successfully transmitted pages. |
+| `RemoteIdentity` | string | The phone number representing the remote side of the operation. |
+| `Successful` | bool | Whether the fax operation has completed successfully. |

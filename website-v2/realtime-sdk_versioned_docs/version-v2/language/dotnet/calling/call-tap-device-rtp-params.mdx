@@ -1,0 +1,48 @@
+---
+title: "CallTapDevice.RTPParams"
+slug: /dotnet/reference/calling/call-tap-device-rtp-params
+toc_max_heading_level: 3
+---
+
+# SignalWire.Relay.Calling.CallTapDevice.RTPParams
+
+This object represents the parameters specific to RTP device tapping.
+
+## Constructor
+
+The only constructor is the default constructor, properties should all be assigned by initializer or after construction.
+
+**Parameters**
+
+None
+
+**Examples**
+
+> Basic Example
+
+```csharp
+CallTapDevice device = new CallTapDevice
+{
+    Type = CallTapDevice.DeviceType.rtp,
+    Parameters = new CallTapDevice.RTPParams
+    {
+        Address = "1.2.3.4",
+        Port = 12345,
+    }
+};
+```
+
+## Properties
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `Address` | string | The IP address of the tap device. |
+| `Port` | integer | The port of the tap device. |
+
+## Methods
+
+None
+
+## Events
+
+None

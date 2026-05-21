@@ -1,0 +1,83 @@
+---
+title: "detectFax"
+slug: /node/reference/voice/call/detect-fax
+description: detectFax method for the Call class.
+toc_max_heading_level: 3
+---
+
+[calldetect-events]: /docs/server-sdk/node/reference/voice/call-detect#events
+[calldetect-onstarted]: /docs/server-sdk/node/reference/voice/call-detect#onstarted
+[calldetect]: /docs/server-sdk/node/reference/voice/call-detect
+
+### detectFax {#voice_call_detect_fax}
+
+- **detectFax**(`params?`): `Promise`\<[`CallDetect`][calldetect]>
+
+Detects the presence of a fax machine.
+
+#### Parameters
+
+<ParamField path="params" type="object">
+  Object containing the parameters for fax detection.
+</ParamField>
+
+<Indent>
+<ParamField path="timeout" type="number" default="30.0">
+  Number of seconds to run the detector for.
+</ParamField>
+
+<ParamField path="tone" type='"CED" | "CNG"' default="CED">
+  The fax tone to detect: `CED` or `CNG`.
+</ParamField>
+
+<ParamField path="waitForBeep" type="boolean" default="false">
+  Whether to wait until the device is ready for voicemail delivery.
+</ParamField>
+
+<ParamField path="listen" type="object">
+  Callback to listen for events. List of detect events can be found [here][calldetect-events]. Example event: [`onStarted`][calldetect-onstarted].
+</ParamField>
+</Indent>
+
+#### Returns
+
+`Promise`\<[`CallDetect`][calldetect]>
+
+A promise that resolves to a [`CallDetect`][calldetect] object that you can use to
+view the current state and results of the `detect` session.
+
+#### Example
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+const voiceClient = client.voice;
+
+// Setup a voice client tolisten for incoming calls
+await voiceClient.listen({
+  topics: ['office'],
+  onCallReceived: async (call) => {
+    // Answer the call
+    console.log("Call received");
+    call.answer();
+    // Fax detection
+    await call.detectFax({
+      tone: 'CNG',
+      listen: {
+        onStarted: () => {
+          console.log("Fax detection started");
+        },
+        onUpdated: (event) => {
+          console.log("Fax detection updated:", event.result);
+        },
+        onEnded: (event) => {
+          console.log("Fax detection finished:", event.result);
+          call.hangup();
+        }
+      }
+    }).onStarted()
+  }
+})
+```

@@ -1,0 +1,53 @@
+---
+title: "deaf"
+slug: /js/reference/video/room-session/deaf
+description: deaf method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+### deaf
+
+- **deaf**(`params?`): `Promise<void>`
+
+Mutes the incoming audio. The affected participant will not hear audio from the other participants anymore. You can use this method to make deaf either yourself or another participant in the room.
+
+Note that in addition to making a participant deaf, this will also automatically mute the microphone of the target participant (even if there is no `audio_mute` permission). If you want, you can then manually unmute it by calling [audioUnmute](/docs/browser-sdk/js/reference/video/room-session/audio-unmute).
+
+#### Parameters
+
+<ParamField path="params" type="object" required={false}>
+  Object containing the parameters of the method.
+</ParamField>
+
+<Indent>
+<ParamField path="memberId" type="string" required={false}>
+  Id of the member to affect. If omitted, affects the default device in the local client.
+</ParamField>
+</Indent>
+
+#### Returns
+
+`Promise<void>`
+
+#### Permissions
+
+- `room.self.deaf`: to make yourself deaf.
+- `room.member.deaf`: to make deaf a remote member.
+
+You need to specify the permissions when [creating the Video Room Token](/docs/apis/video/create-room-token) on the server side.
+
+#### Examples
+
+Making yourself deaf:
+
+```javascript
+await roomSession.deaf();
+```
+
+Making another participant deaf:
+
+```javascript
+const id = "de550c0c-3fac-4efd-b06f-b5b8614b8966"; // you can get this from getMembers()
+await roomSession.deaf({ memberId: id });
+```
+

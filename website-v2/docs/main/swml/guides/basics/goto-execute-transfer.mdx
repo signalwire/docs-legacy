@@ -1,0 +1,290 @@
+---
+title: Control program flow
+description: How are the methods goto, execute and transfer different?
+slug: /swml/guides/goto-execute-transfer-disambiguation-will-it-blend
+
+---
+
+SWML offers a lot of flexibility in how you control program flow with its control methods.
+Of these, [`goto`], [`execute`], and [`transfer`] allow you to unconditionally control program flow.
+
+## goto
+
+The [`goto`] method is designed to allow you to jump to particular labels within a section.
+Use this method to simulate more complex loops like `while` and `for` loops.
+
+<Warning>
+You cannot jump to sections using `goto`.
+Use [`execute`] described further below to jump sections.
+</Warning>
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - play:
+        url: 'say:Entering infinite loop'
+    - label: loop
+    - play:
+        url: 'say:Looping ...'
+    - goto:
+        label: loop
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "play": {
+          "url": "say:Entering infinite loop"
+        }
+      },
+      {
+        "label": "loop"
+      },
+      {
+        "play": {
+          "url": "say:Looping ..."
+        }
+      },
+      {
+        "goto": {
+          "label": "loop"
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+```mermaid
+graph LR;
+    loop["loop"]
+    main --> loop
+    loop -- goto --> loop
+```
+
+## execute
+
+The [`execute`] method allows you to invoke a subsection as a function. You can pass parameters to the function
+and receive a return value.
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - play:
+        url: 'say:Transferring you to another section'
+    - execute:
+        dest: subsection
+    - play:
+        url: 'say: ${return_value}'
+  subsection:
+    - play:
+        url: 'say:inside a subsection'
+    - return: back!
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "play": {
+          "url": "say:Transferring you to another section"
+        }
+      },
+      {
+        "execute": {
+          "dest": "subsection"
+        }
+      },
+      {
+        "play": {
+          "url": "say: ${return_value}"
+        }
+      }
+    ],
+    "subsection": [
+      {
+        "play": {
+          "url": "say:inside a subsection"
+        }
+      },
+      {
+        "return": "back!"
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+Output transcript:
+
+```
+"Transferring you to another section"
+"inside a subsection"
+"back!"
+```
+
+```mermaid
+graph LR;
+    main --> subsection
+    subsection --"back!"--> main
+```
+
+Or in a more complex example:
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - play:
+        url: 'say:Transferring you to another section'
+    - execute:
+        dest: subsection
+        params:
+          a: 1
+          b: 2
+    - play:
+        url: 'say: ${return_value}'
+  subsection:
+    - return: '${params.a+params.b}'
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "play": {
+          "url": "say:Transferring you to another section"
+        }
+      },
+      {
+        "execute": {
+          "dest": "subsection",
+          "params": {
+            "a": 1,
+            "b": 2
+          }
+        }
+      },
+      {
+        "play": {
+          "url": "say: ${return_value}"
+        }
+      }
+    ],
+    "subsection": [
+      {
+        "return": "${params.a+params.b}"
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+```mermaid
+graph LR;
+    main -- "a:1, b:2" --> subsection
+    subsection -- "12" --> main
+```
+
+## transfer
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - play:
+        url: 'say:Transferring you to another section'
+    - transfer:
+        dest: subsection
+    - play:
+        url: 'say:Back!'
+  subsection:
+    - play:
+        url: 'say:inside a subsection'
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "play": {
+          "url": "say:Transferring you to another section"
+        }
+      },
+      {
+        "transfer": {
+          "dest": "subsection"
+        }
+      },
+      {
+        "play": {
+          "url": "say:Back!"
+        }
+      }
+    ],
+    "subsection": [
+      {
+        "play": {
+          "url": "say:inside a subsection"
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+Output transcript:
+
+```
+"Transferring you to another section"
+"inside a subsection"
+```
+
+Notice how we aren't going back to the calling section at all.
+
+```mermaid
+graph LR;
+    main -- "params, vars, etc" --> subsection
+```
+
+## Conclusion
+
+|       | [`goto`]                             | [`execute`]                                          | [`transfer`]                                         |
+|:------|:-------------------------------------|:-----------------------------------------------------|:-----------------------------------------------------|
+| Use   | Jump between labels within a section | Invoke a subsection with params, then return         | Invoke a subsection with params                      |
+| Scope | within a section                     | From one section to another, or to another SWML file | From one section to another, or to another SWML file |
+
+[`goto`]: /docs/swml/reference/goto
+[`transfer`]: /docs/swml/reference/transfer
+[`execute`]: /docs/swml/reference/execute

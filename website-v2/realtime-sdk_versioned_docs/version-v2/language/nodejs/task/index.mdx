@@ -1,0 +1,61 @@
+---
+title: Relay.Task
+slug: /node/reference/task
+toc_max_heading_level: 3
+---
+
+[relay-consumers]: /docs/server-sdk/v2/node/reference/consumer
+A `Relay.Task` is simple way to send jobs to your [`Relay.Consumers`][relay-consumers] from a short lived process, like a web framework. RELAY Tasks allow you to pass commands down to your Consumers without blocking your short lived request. Think of a RELAY Task as a way to queue a job for your background workers to processes asynchronously.
+
+## Creating Tasks
+
+A Task is a simple object with 2 required arguments: `project` and `token`. Project and Token are used to send the Task to your Consumers. Once created, the Task has only one method `deliver` to send jobs to your Consumer.
+
+```javascript
+const { Task } = require('@signalwire/node')
+
+const yourTask = new Task('XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX', 'PTXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX')
+const context = 'office'
+yourTask.deliver(context, { 'key': 'value', 'data': 'data for your job' })
+  .then(() => {
+    console.log('Task created successfully!')
+  })
+  .catch((error) => {
+    console.log('Error creating task!', error)
+  })
+```
+
+## Methods
+
+### deliver
+
+Send a job to your `Consumer` in a specific context.
+
+#### Parameters
+
+| Parameter | Type | Default | Description |
+| --------- | ---- | ------- | ----------- |
+| `context` | `string` | **required** | Context where to send the Task |
+| `message` | `object` | **required** | Object with your custom data that will be sent to your Consumer's [`onTask`][relay-consumers] handler |
+
+#### Returns
+
+`Promise` - Promise resolved in case of success, rejected otherwise.
+
+#### Examples
+
+> Deliver a task to your Consumer with a message to then make an outbound Call.
+
+```javascript
+const message = {
+  'action': 'call',
+  'from': '+18881112222'
+  'to': '+18881113333'
+}
+task.deliver('office', message).then(() => {
+  console.log('Task created successfully!')
+})
+.catch((error) => {
+  console.log('Error creating task!', error)
+})
+```

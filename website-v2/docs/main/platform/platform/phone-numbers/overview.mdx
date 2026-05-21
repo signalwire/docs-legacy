@@ -1,0 +1,89 @@
+---
+title: Phone numbers
+description: The SignalWire Dashboard
+
+slug: /platform/phone-numbers
+sidebar_label: Overview
+sidebar_position: 0
+---
+
+
+Whether working with Voice, Messaging, or Fax, manage your Phone Numbers with this section of the Dashboard.
+
+<Frame caption="Search, filter, and purchase Local, Toll-Free, or Shortcode numbers in the Dashboard.">
+  ![The Phone Numbers page in the SignalWire Dashboard.](@image/dashboard/phone-numbers/choose.webp)
+</Frame>
+
+SignalWire offers three main types of numbers:
+
+| Type                           | About                                                                                                        |
+| :---                           | :---                                                                                                         |
+| **10-digit long code (10DLC)** | A standard phone number suited to local voice services, conversational messaging, and fax.                   |
+| **Toll-free**                  | Commonly used for business voice services, application messaging, and fax.                                   | 
+| **Short code**                 | The best choice for messaging-heavy applications, with unparalleled messaging throughput and deliverability. |
+
+Our 10DLC phone numbers are also referred to as **DIDs** or **Direct-Inward-Dial** numbers. 
+This is just another way to say these numbers are virtual numbers that connect to a specific person or app instead of having a single number for your business that goes to a menu or queue and requires extensions. 
+After all of your systems and methods are in place, DIDs allow for a simple user experience.
+
+## Purchased Numbers
+
+
+  
+    First, you're going to need SignalWire phone numbers. 
+    This section shows all of the 10DLC and Toll-Free phone numbers you have purchased and their capabilities. 
+    You can purchase additional phone numbers with the blue "+ New" button on the top right. 
+  
+  
+    <Card
+      title="Sign up for a SignalWire account"
+      icon="solid hashtag"
+      href="https://signalwire.com/signup"
+    >
+    Open a new account and reserve a  unique `.signalwire.com` Space domain.
+    </Card>
+  
+
+
+Clicking on a phone number will take you to a details page where you can
+
+- Edit the settings to change the actions taken when the number receives an incoming phone call, fax, or message.
+- Transfer the number to another project in your Space
+- Set an emergency E911 address for the number
+- View billing history for the number
+- Release the number
+
+The "⋯" menu has an Edit link to the same page to change the actions taken when the number receives an incoming phone call, fax, or message. **This is the most important set-up for your phone number as no action occurs on incoming calls until these settings are in place.** If you need help setting up call handling, refer to the following sources:
+
+- [Webhooks](/docs/platform/webhooks)
+- [SWML Reference](/docs/swml/)
+- [Making and Receiving Phone Calls](/docs/swml/guides/make-and-receive-calls)
+
+## Verified
+
+In this tab, you will find a list of phone numbers that you have verified that you already own outside of SignalWire. These numbers are not ported to SignalWire and you will continue to be serviced by the original provider. Phone numbers that are verified on the SignalWire network can only be used with SignalWire as a caller ID for placing outbound calls. The [Verified Caller ID](/docs/platform/voice/how-to-set-caller-id-or-cnam) guide can walk you through the process if you need more help.
+
+## Short Codes
+
+All of your purchased Short Code numbers are displayed here. You can purchase a new Short Code number with the blue "Get Started" button for your first number or the blue "+ New" button on the top right if you already own Short Code numbers. This will connect you to our sales department which will walk you through the purchasing process. After the process is complete, a list of your Short Codes will be displayed in a list. As with the other purchased numbers, clicking on a number will open its details page where you can:
+
+- Edit the settings to change the actions taken when the Short Code number receives an incoming message.
+- Transfer the Code to another Project in your Space
+- View billing history
+- Release the Short Code
+
+## Port Requests
+
+If you decide to port over your existing phone numbers to the SignalWire service, you will submit your port requests here. You can port any number, wireless or business landline. Once successfully ported, the phone number will appear in your Purchased tab with all of your other SignalWire numbers. For more support on the porting process, see [Porting Into SignalWire](/docs/platform/porting-into-signalwire).
+
+## Number Groups
+
+You can create and manage Number Groups in this tab. This is a helpful way to organize your Purchased phone numbers for efficient call handling. Create a new Number Group by clicking the blue "Create a Number Group" or "+ New" button, depending on whether you already have any groups. After you name your group, you can add numbers from your full list of Purchased numbers with a simple toggle. A phone number can be in multiple groups.
+
+You also have the option here to enable Sticky Sender. With sticky sender enabled, instead of choosing a random number from the group, the same "From" number will be chosen for the same "To" number every time. This means that without doing any extra work on your side, your customer will always receive messages from the same company number.
+
+You can delete a number group from its settings page. Deleting the group will cause any services and applications that reference it to fail, so ensure that the number group is not being used before deleting. Deleting the group will not release the phone numbers from your account.
+
+## E911
+
+Manage addresses for emergency services in the **E911** tab. See [What is E911?](/docs/platform/e911) for setup and testing instructions.

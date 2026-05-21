@@ -1,0 +1,130 @@
+---
+title: "Technical Reference"
+sidebar_label: Overview
+sidebar_position: 0
+slug: /js
+toc_max_heading_level: 3
+---
+import InstallationPartial from '@site/docs/_partials/browser-sdk/v3/_installation.mdx';
+import GettingStartedStepsPartial from '@site/docs/_partials/browser-sdk/v3/_getting_started_steps.mdx';
+
+
+<InstallationPartial />
+
+The SignalWire Browser SDK is a JavaScript library that enables WebRTC-based voice, video, and chat applications directly in web browsers.
+Built on WebSocket architecture, it provides real-time communication capabilities without plugins or downloads.
+
+<Accordion title="Getting Started" defaultOpen={false}>
+  <GettingStartedStepsPartial />
+</Accordion>
+
+
+## Core Concepts
+
+The SDK operates through WebSocket connections that handle both method calls and real-time events.
+When you call methods like `join()` or `publish()`, the SDK sends requests and returns promises.
+Simultaneously, you can listen for real-time events like new members joining or messages arriving using the `.on()` method.
+
+## Namespaces
+
+<CardGroup cols={2}>
+  <Card title="Video" icon="fa-solid fa-video" href="/docs/browser-sdk/js/reference/video">
+    Create and display video rooms, members, recordings, and streams
+  </Card>
+  <Card title="Chat" icon="fa-solid fa-comments" href="/docs/browser-sdk/js/reference/chat">
+    Build chat applications with members and messages
+  </Card>
+  <Card title="PubSub" icon="fa-solid fa-tower-broadcast" href="/docs/browser-sdk/js/reference/pubsub">
+    Publish and subscribe to real-time message channels
+  </Card>
+  <Card title="SignalWire Client" icon="fa-solid fa-server" href="/docs/browser-sdk/js/reference/signalwire">
+    The client for making and receiving calls, playing audio, and recording.
+  </Card>
+  <Card title="WebRTC" icon="fa-solid fa-globe" href="/docs/browser-sdk/js/reference/webrtc">
+    A wrapper for browser's device and media stream management
+  </Card>
+</CardGroup>
+
+### WebSocket Event Architecture
+
+The SDK operates on a bidirectional WebSocket connection between your browser application and SignalWire's servers. This enables real-time communication through a structured event system:
+
+```mermaid
+graph LR
+    A["Browser Application<br/>(Your Web App)"] <-->|"Method Calls<br/>roomSession.join(), client.publish()<br/>chat.subscribe()"| B[WebSocket<br/>Connection] <-->|"Process & Respond"| C[SignalWire]
+    
+    C -->|"Real-time Events<br/>member.joined, message.received<br/>call.state"| B -->|"Event Data<br/>client.on('events')"| A
+```
+
+When you call a method like `roomSession.join()`, the SDK sends your request over the WebSocket connection and SignalWire processes it and responds immediately. These method calls follow a request-response pattern - the returned promise resolves with the result data, such as joining a video room or publishing a message.
+
+The `.on()` methods handle a different communication pattern: real-time event notifications. These are asynchronous events triggered by external actions - like when someone joins your video room (`member.joined`), sends you a message (`message.received`), or when device states change (`call.state`). Unlike method responses, these events arrive whenever the triggering action occurs, not as a direct response to your code.
+
+### Authentication and Access Control
+
+Browser SDK clients use token-based authentication for security. Since web browsers are untrusted environments where secrets can be exposed, API tokens must be kept on your server and used to generate limited-scope tokens for client use.
+
+#### Server-to-Browser Authentication Flow
+
+```mermaid
+sequenceDiagram
+    participant SW as SignalWire Servers
+    participant YS as Your Server
+    participant B as Browser (Client)
+    
+    B->>YS: Request token for room/channel access
+    YS->>SW: POST /api/video/room_tokens<br/>(with Project ID & API Token)
+    SW-->>YS: { "token": "limited-scope-token" }
+    YS-->>B: { "token": "limited-scope-token" }
+    
+    B->>SW: Connect with Browser SDK<br/>(using limited token)
+    SW-->>B: WebSocket connection established
+    SW-->>B: Real-time events & media streams
+```
+
+#### Token Types by Namespace
+
+Different namespaces require specific token types:
+
+```javascript
+// Video Room Session - requires Room Token
+const roomSession = new SignalWire.Video.RoomSession({
+  token: "room-token-from-rest-api",        // Get from /api/video/room_tokens
+  rootElement: document.getElementById("video-container")
+});
+
+// Chat Client - requires Chat Token  
+const chatClient = new SignalWire.Chat.Client({
+  token: "chat-token-from-rest-api"         // Get from /api/chat/tokens
+});
+
+// PubSub Client - requires PubSub Token
+const pubSubClient = new SignalWire.PubSub.Client({
+  token: "pubsub-token-from-rest-api"       // Get from /api/fabric/subscriber_tokens
+});
+```
+
+#### Server-Side Token Generation
+
+Your server uses Project ID and API Token to generate limited-scope tokens:
+
+```javascript
+// Example: Generate a Video Room Token
+const response = await fetch('https://<YOUR_SPACE>.signalwire.com/api/video/room_tokens', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Basic ' + btoa('<PROJECT_ID>:<API_TOKEN>'),
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    room_name: "my_room",
+    user_name: "John Smith",
+    permissions: ["room.self.audio_mute", "room.self.video_mute"]
+  })
+});
+
+const { token } = await response.json();
+// Send this token to your browser client
+```
+
+This approach ensures your project credentials never expose to client-side code while providing scoped access to specific rooms, channels, or resources.

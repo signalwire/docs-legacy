@@ -1,0 +1,83 @@
+---
+title: leave
+slug: /call-session/leave
+---
+
+Leaves the call and disconnects from the WebRTC session. This is an alias for `hangup()`.
+
+## Signature
+
+```typescript
+leave(): Promise<void>
+```
+
+## Parameters
+
+None
+
+## Returns
+
+**Type:** `Promise<void>`
+
+## Important Notes
+
+**Alias for hangup():**
+
+`leave()` is functionally identical to `hangup()`. Both methods:
+- End the call for the local participant
+- Disconnect the WebRTC connection
+- Clean up all resources
+- Trigger the `destroy` event
+
+```typescript
+// These are equivalent
+await call.leave()
+await call.hangup()
+```
+
+**Cleanup:**
+
+Always listen to the `destroy` event to know when cleanup is complete:
+
+```typescript
+call.on('destroy', () => {
+  console.log('Call resources cleaned up')
+  // Perform any additional cleanup
+})
+
+await call.leave()
+```
+
+## Examples
+
+### Basic usage
+
+```typescript
+// Leave the call
+await call.leave()
+console.log('Left the call')
+```
+
+### With cleanup listener
+
+```typescript
+call.on('destroy', () => {
+  console.log('Call has been cleaned up')
+})
+
+await call.leave()
+```
+
+### Leave and navigate away
+
+```typescript
+async function endCallAndRedirect() {
+  try {
+    await call.leave()
+    console.log('Successfully left the call')
+    window.location.href = '/dashboard'
+  } catch (error) {
+    console.error('Failed to leave call:', error)
+  }
+}
+```

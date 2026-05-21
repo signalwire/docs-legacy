@@ -1,0 +1,56 @@
+---
+title: "unlock"
+slug: /node/reference/video/room-session/unlock
+description: unlock method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+[roomsession-41]: /docs/server-sdk/node/reference/video/room-session
+
+### unlock
+
+- **unlock**(): `Promise<void>`
+
+Unlocks the room if it had been previously locked. This allows new participants to join the room.
+
+#### Returns
+
+`Promise<void>`
+
+#### Example
+
+In this example, we lock a room when it starts and then unlock it after 20 seconds.
+This example assumes that there is a [`RoomSession`][roomsession-41] already active and users are joining it.
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+const videoClient = client.video;
+
+// Setup listener for when a room starts
+await videoClient.listen({
+  onRoomStarted: async (roomsession) => {
+      // Lock the room
+      console.log('Locking room');
+      await roomsession.lock();
+
+      // unlock the room after 20 seconds
+
+      setTimeout(async () => {
+        console.log('Unlocking room');
+        await roomsession.unlock();
+      }, 20000);
+
+      roomsession.listen({
+        onMemberJoined: async (member) => {
+          console.log('Member joined', member.name);
+        },
+        onMemberLeft: async (member) => {
+          console.log('Member left', member.name);
+        },
+      })
+    }
+  })
+```

@@ -1,0 +1,111 @@
+---
+title: VirtualAgent
+sidebar_label: VirtualAgent
+slug: /compatibility-api/cxml/reference/voice/virtual-agent
+availability: deprecated
+sidebar_position: 9999
+toc_max_heading_level: 3
+---
+
+<Warning title="Deprecated Notice">
+Dialogflow application creation and management through the SignalWire Compatibility API is deprecated.
+Only existing Dialog applications will continue to function; new Dialog applications can no longer be created.
+</Warning>
+
+[`<Connect>`](/docs/compatibility-api/cxml/reference/voice/connect) verb's `<VirtualAgent>` noun permits connecting the
+call to a Dialogflow agent.
+
+For example, one can connect to Dialogflow with:
+
+<CodeBlocks>
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+  <Connect action="https://example.com/next-xml-instructions" >
+    <VirtualAgent connectorName="my-agent" />
+  </Connect>
+</Response>
+```
+```javascript title="Node.js"
+const { RestClient } = require("@signalwire/compatibility-api");
+
+const response = new RestClient.LaML.VoiceResponse();
+const connect = response.connect({
+  action: "https://example.com/next-xml-instructions",
+});
+connect.virtualAgent({
+  connectorName: "my-agent",
+});
+
+console.log(response.toString());
+```
+```csharp
+using System;
+using Twilio.TwiML;
+using Twilio.TwiML.Voice;
+
+class Example
+{
+    static void Main()
+    {
+        var response = new VoiceResponse();
+        var connect = new Connect(action: new Uri("https://example.com/next-xml-instructions"));
+        connect.VirtualAgent(connectorName: "my-agent");
+        response.Append(connect);
+
+        Console.WriteLine(response.ToString());
+    }
+}
+```
+```python
+from signalwire.voice_response import Connect, VoiceResponse, VirtualAgent
+
+response = VoiceResponse()
+connect = Connect(action='https://example.com/next-xml-instructions')
+connect.virtual_agent(
+    connector_name='my-agent'
+)
+response.append(connect)
+
+print(response)
+```
+```ruby
+require 'signalwire/sdk'
+
+response = Signalwire::Sdk::VoiceResponse.new do |response|
+  response.connect(action: 'https://example.com/next-xml-instructions') do |connect|
+    connect.virtual_agent(connector_name: 'my-agent')
+  end
+end
+
+puts response.to_s
+```
+</CodeBlocks>
+
+## Noun attributes
+
+<ParamField path="connectorName" type="string" required={true}>
+  The Google Project ID of the agent to use. Find a list of IDs in the [Dialogflow](https://my.signalwire.com/?page=dialogflow_agents) page in the UI.
+</ParamField>
+
+After a Dialogflow conversation is completed, SignalWire can make a request to the `<Connect>` verb's `action` attribute. In addition to the [Standard Request Parameters](/docs/compatibility-api/cxml/reference/voice#request-parameters), the following are parameters passed back to your application when SignalWire makes the request.
+
+<ParamField path="VirtualAgentError" type="string">
+  An error message, in case `VirtualAgentStatus` is `"failed"`.
+</ParamField>
+
+<ParamField path="VirtualAgentErrorCode" type="string">
+  An [error code](/docs/compatibility-api/rest/error-codes), in case `VirtualAgentStatus` is `"failed"`.
+</ParamField>
+
+<ParamField path="VirtualAgentProvider" type="string">
+  The provider of the VirtualAgent (e.g., `Dialogflow`)
+</ParamField>
+
+<ParamField path="VirtualAgentProviderData" type="string">
+  A JSON object (serialized as a string) containing data about the Dialogflow interaction.
+</ParamField>
+
+<ParamField path="VirtualAgentStatus" type="string">
+  E.g. `failed` or `transfer`
+</ParamField>

@@ -1,0 +1,45 @@
+---
+title: InstallHero Example
+---
+
+import InstallHero from './index';
+
+# InstallHero Component Example
+
+The InstallHero component provides a beautiful and consistent way to display installation instructions for your SDK or package.
+
+## Basic Usage
+
+<InstallHero
+  title="SignalWire Python SDK"
+  description="Build real-time communications applications with SignalWire's Python SDK"
+  installCommand="pip install signalwire"
+  language="bash"
+  version="2.0.0"
+  githubUrl="https://github.com/signalwire/signalwire-python"
+  docsUrl="/docs/sdks/python"
+  gettingStartedUrl="/docs/sdks/python/getting-started"
+  status="stable"
+/>
+
+## Beta Version Example
+
+<InstallHero
+  title="SignalWire Node.js SDK"
+  description="Build real-time communications applications with SignalWire's Node.js SDK"
+  installCommand="npm install @signalwire/sdk"
+  language="bash"
+  version="3.0.0-beta.1"
+  githubUrl="https://github.com/signalwire/signalwire-node"
+  docsUrl="/docs/sdks/node"
+  gettingStartedUrl="/docs/sdks/node/getting-started"
+  status="beta"
+/>
+
+## Minimal Example
+
+<InstallHero
+  title="SignalWire Ruby SDK"
+  installCommand="gem install signalwire"
+  language="bash"
+/> 

@@ -1,0 +1,122 @@
+---
+title: "Video"
+sidebar_label: Overview
+sidebar_position: 0
+slug: /js/reference/video
+toc_max_heading_level: 3
+---
+import CreateRoomObjectOptionsPartial from '@site/docs/_partials/browser-sdk/v3/_create-room-object-options.mdx';
+
+
+The Video namespace contains the classes and functions that you need to create a video conferencing application.
+
+The [RoomSession](/docs/browser-sdk/js/reference/video/room-session) class is the main interface for managing video room sessions.
+
+## Classes
+
+<Card title="RoomSession" href="/docs/browser-sdk/js/reference/video/room-session" icon="fa-solid fa-star">
+  The main interface for managing video room sessions
+</Card>
+
+<CardGroup cols={2}>
+  <Card title="RoomSessionDevice" href="/docs/browser-sdk/js/reference/video/room-session-device">
+    Control devices within a room session
+  </Card>
+  <Card title="RoomSessionPlayback" href="/docs/browser-sdk/js/reference/video/room-session-playback">
+    Manage media playback in a room session
+  </Card>
+  <Card title="RoomSessionRecording" href="/docs/browser-sdk/js/reference/video/room-session-recording">
+    Handle recording functionality
+  </Card>
+  <Card title="RoomSessionScreenShare" href="/docs/browser-sdk/js/reference/video/room-session-screen-share">
+    Manage screen sharing in a room session
+  </Card>
+  <Card title="~~RoomDevice~~" href="/docs/browser-sdk/js/reference/video/room-session-device" icon="fa-solid fa-warning" iconSize={4} >
+    *Use [RoomSessionDevice](/docs/browser-sdk/js/reference/video/room-session-device) instead.*
+  </Card>
+  <Card title="~~RoomScreenShare~~" href="/docs/browser-sdk/js/reference/video/room-session-screen-share" icon="fa-solid fa-warning" iconSize={4} >
+   *Use [RoomSessionScreenShare](/docs/browser-sdk/js/reference/video/room-session-screen-share) instead.*
+  </Card>
+</CardGroup>
+
+
+## Functions
+
+<Accordion title="~~Functions~~" defaultOpen={false}>
+
+### ~~createRoomObject~~
+
+- `Const` **createRoomObject**(`roomOptions`): `Promise<Room>`
+
+<Warning title="Deprecated">
+Use [RoomSession](/docs/browser-sdk/js/reference/video/room-session) instead.
+</Warning>
+
+Using Video.createRoomObject() you can create a `RoomObject` to join a room.
+
+#### Parameters
+
+<CreateRoomObjectOptionsPartial />
+
+#### Returns
+
+`Promise<Room>`
+
+#### Example
+
+With an HTMLDivElement with id="root" in the DOM.
+
+```js
+// <div id="root"></div>
+
+try {
+  const roomObj = await Video.createRoomObject({
+    token: "<YourJWT>",
+    rootElementId: "root"
+  });
+
+  roomObj.join();
+} catch (error) {
+  console.error("Error", error);
+}
+```
+
+---
+
+### ~~joinRoom~~
+
+- `Const` **joinRoom**(`roomOptions`): `Promise<Room>`
+
+<Warning title="Deprecated">
+Use [RoomSession](/docs/browser-sdk/js/reference/video/room-session) instead.
+</Warning>
+
+Using Video.joinRoom() you can automatically join a room.
+
+#### Parameters
+
+<CreateRoomObjectOptionsPartial />
+
+#### Returns
+
+`Promise<Room>`
+
+#### Example
+
+With an HTMLDivElement with id="root" in the DOM.
+
+```js
+// <div id="root"></div>
+
+try {
+  const roomObj = await Video.joinRoom({
+    token: "<YourJWT>",
+    rootElementId: "root",
+  });
+
+  // You have joined the room..
+} catch (error) {
+  console.error("Error", error);
+}
+```
+</Accordion>

@@ -1,0 +1,70 @@
+---
+slug: /compatibility-api/sdks/reference/applications/create
+title: Create
+sidebar_label: Create
+toc_max_heading_level: 3
+---
+
+Use this endpoint for the Applications method to create a new application within your account.
+
+<EndpointSchemaSnippet endpoint="POST /Accounts/{AccountSid}/Applications" />
+
+## Request examples
+
+<CodeBlocks>
+```javascript title="Node.js"
+const { RestClient } = require('@signalwire/compatibility-api')
+const client = RestClient('YourProjectID', 'YourAuthToken', { signalwireSpaceUrl: 'example.signalwire.com' })
+
+client.applications
+      .create({
+         friendlyName: 'Application1'
+       })
+      .then(application => console.log(application.sid))
+      .done();
+```
+```csharp
+using System;
+using System.Collections.Generic;
+using Twilio;
+using Twilio.Rest.Api.V2010.Account;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        TwilioClient.Init("YourProjectID", "YourAuthToken", new Dictionary<string, object> { ["signalwireSpaceUrl"] = "{SPACE}.signalwire.com" });
+
+        var application = ApplicationResource.Create(
+            friendlyName: "Application1"
+        );
+
+        Console.WriteLine(application.Sid);
+    }
+}
+```
+```python
+from signalwire.rest import Client as signalwire_client
+
+client = signalwire_client("YourProjectID", "YourAuthToken", signalwire_space_url = 'example.signalwire.com')
+
+application = client.applications \
+                    .create(
+                         friendly_name='Application1'
+                     )
+
+print(application.sid)
+```
+```ruby
+require 'signalwire/sdk'
+
+@client = Signalwire::REST::Client.new 'YourProjectID', 'YourAuthToken', signalwire_space_url: "example.signalwire.com"
+
+application = @client.applications
+                     .create(
+                        friendly_name: 'Application1'
+                      )
+
+puts application.sid
+```
+</CodeBlocks>

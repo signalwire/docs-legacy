@@ -1,0 +1,56 @@
+---
+title: "getMembers"
+slug: /js/reference/video/room-session/get-members
+description: getMembers method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+### getMembers
+
+- **getMembers**(): `Promise<{ members: VideoMemberEntity[] }>`
+
+Returns a list of members currently in the room.
+
+#### Returns
+
+`Promise<{ members: VideoMemberEntity[] }>`
+
+#### Example
+
+```javascript
+await roomSession.getMembers()
+// returns:
+{
+"members": [
+  {
+    "visible": true,
+    "room_session_id": "fde15619-13c1-4cb5-899d-96afaca2c52a",
+    "input_volume": 0,
+    "id": "1bf4d4fb-a3e4-4d46-80a8-3ebfdceb2a60",
+    "input_sensitivity": 50,
+    "output_volume": 0,
+    "audio_muted": false,
+    "name": "Mark",
+    "deaf": false,
+    "video_muted": false,
+    "room_id": "aae25822-892c-4832-b0b3-34aac3a0e8d1",
+    "type": "member"
+  },
+  {
+    "visible": true,
+    "room_session_id": "fde15619-13c1-4cb5-899d-96afaca2c52a",
+    "input_volume": 0,
+    "id": "e0c5be44-d6c7-438f-8cda-f859a1a0b1e7",
+    "input_sensitivity": 50,
+    "output_volume": 0,
+    "audio_muted": false,
+    "name": "David",
+    "deaf": false,
+    "video_muted": false,
+    "room_id": "aae25822-892c-4832-b0b3-34aac3a0e8d1",
+    "type": "member"
+  }
+]
+}
+```
+

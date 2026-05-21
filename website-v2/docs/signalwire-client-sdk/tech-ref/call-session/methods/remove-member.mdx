@@ -1,0 +1,128 @@
+---
+title: removeMember
+slug: /call-session/removemember
+---
+
+import APIField from '@site/src/components/APIField';
+
+Removes a specific participant from the call.
+
+## Signature
+
+```typescript
+removeMember(params: Required<MemberCommandParams>): Promise<void>
+```
+
+## Parameters
+
+<APIField name="params" type="MemberCommandParams" required>
+  Parameters for the remove operation.
+</APIField>
+
+<APIField name="params.memberId" type="string" required>
+  ID of the member to remove.
+</APIField>
+
+## Returns
+
+**Type:** `Promise<void>`
+
+## Important Notes
+
+**Permissions Required:** Requires `call.capabilities.member.remove` capability to remove other participants.
+
+**Cannot Remove Yourself:** You cannot use `removeMember()` to remove yourself from the call. Use `hangup()` or `leave()` instead:
+
+```typescript
+// ❌ Wrong - will fail
+await call.removeMember({ memberId: call.memberId })
+
+// ✅ Correct - use hangup() to leave
+await call.hangup()
+```
+
+**Member Left Event:** When a member is removed, the `member.left` event is emitted:
+
+```typescript
+call.on('member.left', (event) => {
+  console.log(`Member ${event.member.id} left the call`)
+})
+
+await call.removeMember({ memberId: 'member-id' })
+```
+
+## Events
+
+When you call `removeMember()`, the following event is emitted:
+
+- `member.left` - Fired when the member is removed from the call
+
+```typescript
+call.on('member.left', (event) => {
+  console.log('Member left:', event.member.id)
+  console.log('Member name:', event.member.name)
+})
+```
+
+## Examples
+
+### Remove a specific member
+
+```typescript
+const { members } = await call.getMembers()
+const memberToRemove = members.find(m => m.name === 'Disruptive User')
+
+if (memberToRemove) {
+  await call.removeMember({ memberId: memberToRemove.id })
+  console.log(`Removed ${memberToRemove.name} from the call`)
+}
+```
+
+### Remove with member ID
+
+```typescript
+const memberId = 'de550c0c-3fac-4efd-b06f-b5b8614b8966'
+
+try {
+  await call.removeMember({ memberId })
+  console.log('Member removed successfully')
+} catch (error) {
+  console.error('Failed to remove member:', error)
+}
+```
+
+### Remove with confirmation
+
+```typescript
+async function removeWithConfirmation(memberId: string, memberName: string) {
+  const confirmed = confirm(`Are you sure you want to remove ${memberName}?`)
+
+  if (confirmed) {
+    await call.removeMember({ memberId })
+    console.log(`${memberName} has been removed`)
+  }
+}
+
+const { members } = await call.getMembers()
+const targetMember = members.find(m => m.name === 'John Doe')
+
+if (targetMember) {
+  await removeWithConfirmation(targetMember.id, targetMember.name)
+}
+```
+
+### Check permissions before removing
+
+```typescript
+const { members } = await call.getMembers()
+const memberToRemove = members.find(m => m.name === 'Problem User')
+
+if (memberToRemove) {
+  if (call.capabilities?.member.remove) {
+    await call.removeMember({ memberId: memberToRemove.id })
+    console.log('Member removed')
+  } else {
+    console.log('You do not have permission to remove members')
+  }
+}
+```

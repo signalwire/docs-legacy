@@ -1,0 +1,20 @@
+---
+title: Relay.Calling.ReferResult
+slug: /node/reference/calling/results/refer
+description: The result object that is returned when SIP referring a call.
+toc_max_heading_level: 3
+---
+
+[refer]: /docs/server-sdk/v2/node/reference/calling/call#refer
+[relay-event]: /docs/server-sdk/v2/node/reference/event
+This object returned from [`refer`][refer] method that represents the final result of a SIP `REFER`.
+
+## Properties
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `successful` | `boolean` | Whether the recording has completed successfully |
+| `event` | [`Relay.Event`][relay-event] | Last event that completed the operation |
+| `referTo` | `string` | The SIP URI the call is transferred to |
+| `referResponseCode` | `string` | SIP response to the REFER request |
+| `referNotifyCode` | `string` | SIP response to the NOTIFY received after the REFER |

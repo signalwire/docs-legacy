@@ -1,0 +1,119 @@
+---
+title: Relay.Calling.TapResult
+slug: /go/reference/calling/results/tap
+description: The result object that is returned when tapping a call.
+toc_max_heading_level: 3
+---
+
+[relay-event]: /docs/server-sdk/v2/go/reference/event
+[tap]: /docs/server-sdk/v2/go/reference/calling/call#tap
+
+## Relay.Calling.TapResult
+
+This object returned from [`tap`][tap] method that represents the final result of a tapping.
+
+## Methods-submenu
+
+### GetDestinationDevice
+
+Returns the `destination` device receiving media.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`Object` - The destination device.
+
+**Examples**
+
+> Tap audio and then inspect the destination device.
+
+```go
+var tapdevice signalwire.TapDevice
+tapdevice.Type = signalwire.TapRTP.String()
+tapdevice.Params.Addr = "82.47.225.162"
+tapdevice.Params.Port = 1234
+tapdevice.Params.Codec = "PCMU"
+tapAction, err := resultDial.Call.TapAudioAsync(signalwire.TapDirectionListen, &tapdevice)
+if err != nil {
+    signalwire.Log.Fatal("Error occurred while trying to tap audio: %v\n", err)
+}
+time.Sleep(10 * time.Second)
+tapAction.Stop()
+signalwire.Log.Info("Tap: %v Result: %v\n", tapAction.GetTap(), tapAction.GetResult())
+signalwire.Log.Info("SourceDevice: %v\n", tapAction.GetSourceDevice())           // comes from the Signalwire platform
+signalwire.Log.Info("DestinationDevice: %v\n", tapAction.GetDestinationDevice()) // the device passed above
+```
+
+### GetEvent
+
+Returns the last Relay Event arrived for this operation.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+[`Relay.Event`][relay-event] - Last Relay Event.
+
+
+### GetSourceDevice
+
+Returns the `source` device sending media.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`Object` - The source device.
+
+**Examples**
+
+> Inspect the source device.
+
+```go
+signalwire.Log.Info("SourceDevice: %v\n", tapAction.GetSourceDevice())           // comes from the Signalwire platform
+```
+
+### GetTap
+
+Returns the params for this `tap` action.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+signalwire.Tap
+
+**Examples**
+
+> Inspect the `tap` params.
+
+```go
+signalwire.Log.Info("Tap: %v Result: %v\n", tapAction.GetTap(), tapAction.GetResult())
+```
+
+### GetSuccessful
+
+Return `true` if the tapping succeeded, `false` otherwise.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`Boolean` - True/False accordingly to the state.
+

@@ -1,0 +1,33 @@
+---
+title: "getStreams"
+slug: /js/reference/video/room-session/get-streams
+description: getStreams method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+### getStreams
+
+- **getStreams**(): `Promise<{ streams: RoomSessionStream}>` - See [RoomSessionStream documentation](/docs/browser-sdk/js/reference/video/room-session-stream) for more details.
+
+Obtains a list of active streams for this RoomSession. These are RTMP streams of
+the audio/video content of this room, which will be sent to an external party
+(e.g., to YouTube).
+
+#### Returns
+
+`Promise<{ streams: RoomSessionStream}>` - See [RoomSessionStream documentation](/docs/browser-sdk/js/reference/video/room-session-stream) for more details.
+
+#### Permissions
+
+- `room.stream`
+
+You need to specify the permissions when [creating the Video Room Token](/docs/apis/video/create-room-token) on the server side.
+
+#### Example
+
+```javascript
+const s = await roomSession.getStreams();
+for (const stream of s.streams) {
+  console.log(stream.id, stream.url);
+}
+```

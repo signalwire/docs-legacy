@@ -1,0 +1,271 @@
+---
+title: The SignalWire Client
+sidebar_label: Client
+slug: /js/reference/signalwire/client
+toc_max_heading_level: 3
+---
+
+The SignalWire Client provides access to SignalWire's services on the browser. It provides methods to handle incoming calls, dial to addresses, and register devices for notifications.
+
+## Instantiation {#instantiation}
+
+The SignalWire client is instantiated using the `SignalWire` function.
+
+If you're including the `@signalwire/js` dependency as a script in HTML, the `SignalWire` function is a property of the `SignalWire` global variable that the script sets:
+
+```html
+<script type="text/javascript" src="https://cdn.signalwire.com/@signalwire/js"></script>
+<script>
+  async function main() {
+    const client = await SignalWire.SignalWire({
+      token: "<TOKEN>",
+    });
+  }
+</script>
+```
+
+If you installed `@signalwire/js` from npm:
+
+```javascript
+import { SignalWire } from "@signalwire/js";
+
+async function main() {
+  const client = await SignalWire({
+    token: "<TOKEN>",
+  });
+}
+```
+
+For React or React Native projects, use the community library:
+
+```jsx
+import { useSignalWire } from "@signalwire-community/react";
+
+export default function App() {
+  const client = useSignalWire({
+    token: "<TOKEN>",
+  });
+}
+```
+
+### Parameters
+
+<Indent>
+  <ParamField path="token" type="string" required={true}>
+    The [access token](/docs/browser-sdk/js/reference/signalwire#authentication) for the subscriber.
+  </ParamField>
+  <ParamField path="rootElement" type="HTMLElement">
+    The HTML container element where the SDK will display the video stream.
+  </ParamField>
+  <ParamField path="incomingCallHandlers" type="IncomingCallHandlers">
+    Callback functions for when a call is received. See [IncomingCallHandlers](#incomingcallhandlers).
+  </ParamField>
+  <ParamField path="userVariables" type="Record<string, any>">
+    Arbitrary variables that are transparent to FreeSWITCH.
+  </ParamField>
+</Indent>
+
+<Tip>
+You can manage the DOM yourself by not specifying a `rootElement` here and using the [`buildVideoElement`](/docs/browser-sdk/js/reference/signalwire/utils#buildvideoelement) function instead.
+</Tip>
+
+### Example
+
+<Tabs>
+<TabItem value="vanilla-js" label="Vanilla JS">
+
+```html
+<html>
+  <body>
+    <script type="text/javascript" src="https://cdn.signalwire.com/@signalwire/js"></script>
+
+    <script>
+      async function main() {
+        const client = await SignalWire.SignalWire({
+          token: "<TOKEN>",
+        });
+
+        const conversations = await client.conversation.getConversations();
+        console.log(conversations);
+
+        const addresses = await client.address.getAddresses();
+        console.log(addresses);
+      }
+      main();
+    </script>
+  </body>
+</html>
+```
+
+</TabItem>
+<TabItem value="react-(community)" label="React (community)">
+
+```jsx
+import { useSignalWire } from "@signalwire-community/react";
+
+// If you were using React Native, you'd import the same hook from
+// the package `@signalwire-community/react-native`. Like so:
+// import { useSignalWire } from "@signalwire-community/react-native";
+import { useEffect } from "react";
+
+export default function App() {
+  const client = useSignalWire({
+    token: "<TOKEN>",
+  });
+
+  useEffect(() => {
+    if (!client) return; // client is not initialized yet
+
+    async function log() {
+      const conversations = await client.conversation.getConversations();
+      console.log(conversations);
+
+      const addresses = await client.address.getAddresses();
+      console.log(addresses);
+    }
+    log(); //useEffect doesn't directly support async effects; thus a subfunction
+  }, [client]);
+
+  return <></>;
+}
+```
+
+</TabItem>
+</Tabs>
+
+## Properties
+
+<Indent>
+  <ParamField path="httpHost" type="string">
+    Returns the URL of the host that the client will use to make HTTP requests (like querying the list of addresses or conversations). _Read-only._
+
+    ```javascript
+    console.log(client.httpHost());
+    // fabric.signalwire.com
+    ```
+  </ParamField>
+</Indent>
+
+## Methods
+
+<CardGroup cols={3}>
+  <Card title="dial" href="/docs/browser-sdk/js/reference/signalwire/client/dial">
+    Dial to an address
+  </Card>
+  <Card title="online" href="/docs/browser-sdk/js/reference/signalwire/client/online">
+    Go online to receive call invites
+  </Card>
+  <Card title="offline" href="/docs/browser-sdk/js/reference/signalwire/client/offline">
+    Go offline to stop receiving call invites
+  </Card>
+  <Card title="getSubscriberInfo" href="/docs/browser-sdk/js/reference/signalwire/client/get-subscriber-info">
+    Get info about the current subscriber
+  </Card>
+  <Card title="connect" href="/docs/browser-sdk/js/reference/signalwire/client/connect">
+    Connect the WebSocket client
+  </Card>
+  <Card title="disconnect" href="/docs/browser-sdk/js/reference/signalwire/client/disconnect">
+    Disconnect the WebSocket client
+  </Card>
+  <Card title="updateToken" href="/docs/browser-sdk/js/reference/signalwire/client/update-token">
+    Update the auth token
+  </Card>
+</CardGroup>
+
+## Namespaces
+
+Certain methods and properties are organized into namespaces for clarity. They can be accessed as follows:
+
+```js
+client.address.getAddresses();
+client.chat.getMessages();
+client.conversation.getConversations();
+```
+
+<CardGroup cols={3}>
+  <Card title="Address" href="/docs/browser-sdk/js/reference/signalwire/client/address">
+    Methods for working with addresses
+  </Card>
+  <Card title="Chat" href="/docs/browser-sdk/js/reference/signalwire/client/chat">
+    Methods for chat functionality
+  </Card>
+  <Card title="Conversation" href="/docs/browser-sdk/js/reference/signalwire/client/conversation">
+    Methods for conversations
+  </Card>
+</CardGroup>
+
+## Type aliases
+
+### IncomingCallHandlers {#incomingcallhandlers}
+
+Use this object to assign callback functions which get invoked when a call is received.
+
+| Name        | Type                                    | Required? | Description                                                   |
+| :---------- | :-------------------------------------- | :-------- | :------------------------------------------------------------ |
+| `all`       | `(IncomingCallNotification) => void`    | Optional  | Since push support has been removed, identical to `websocket` |
+| `websocket` | `(IncomingCallNotification) => void`    | Optional  | Callback for calls received via websocket (overrides `all`)   |
+
+---
+
+### IncomingCallNotification {#incomingcallnotification}
+
+The object passed into the [IncomingCallHandlers](#incomingcallhandlers) callback with the call description and controls.
+
+| Name             | Type                                              | Description                                      |
+| :--------------- | :------------------------------------------------ | :----------------------------------------------- |
+| `invite`         | `object`                                          | -                                                |
+| `invite.details` | [IncomingInvite](#incominginvite)                 | The details of the invite.                       |
+| `invite.accept`  | `(CallOptions) => Promise<CallFabricRoomSession>` | Invoke this function to accept the incoming call |
+| `invite.reject`  | `() => Promise<void>`                             | Invoke this function to reject the incoming call |
+
+---
+
+### IncomingInvite {#incominginvite}
+
+| Name                | Type           | Description                                |
+| :------------------ | :------------- | :----------------------------------------- |
+| `source`            | `"websocket"`  |                                            |
+| `callID`            | `string`       | Unique ID of the incoming call             |
+| `sdp`               | `string`       | _Deprecated_                               |
+| `caller_id_name`    | `string`       | Name of the caller                         |
+| `caller_id_number`  | `string`       | ID or number of the caller                 |
+| `callee_id_name`    | `string`       | Name of the callee                         |
+| `callee_id_number`  | `string`       | ID or number of the callee                 |
+| `display_direction` | `string`       | Direction of the call                      |
+| `nodeId`            | `string`       | The node from where the call was received  |
+
+---
+
+### CallOptions {#calloptions}
+
+| Name                   | Type                                     | Required? | Description                                                                                           |
+| :--------------------- | :--------------------------------------- | :-------- | :---------------------------------------------------------------------------------------------------- |
+| `rootElement`          | `HTMLElement`                            | Optional  | The HTML container element where the SDK will display the video stream.                               |
+| `audio`                | `boolean \| MediaTrackConstraints`       | Optional  | Media track constraints for audio. Passing `true` uses browser defaults, and `false` disables audio. |
+| `video`                | `boolean \| MediaTrackConstraints`       | Optional  | Media track constraints for video. Passing `true` uses browser defaults, and `false` disables video. |
+| `disableUdpIceServers` | `boolean`                                | Optional  | Disables the ICE UDP transport policy.                                                                |
+| `userVariables`        | `Record<string, any>`                    | Optional  | Arbitrary variables that are transparent to FreeSWITCH.                                              |
+
+---
+
+### MediaStreamConstraints {#mediastreamconstraints}
+
+| Name               | Type                                     | Required? | Description                                                                                           |
+| :----------------- | :--------------------------------------- | :-------- | :---------------------------------------------------------------------------------------------------- |
+| `audio`            | `boolean \| MediaTrackConstraints`       | Optional  | Media track constraints for audio. Passing `true` uses browser defaults, and `false` disables audio. |
+| `video`            | `boolean \| MediaTrackConstraints`       | Optional  | Media track constraints for video. Passing `true` uses browser defaults, and `false` disables video. |
+| `peerIdentity`     | `string`                                 | Optional  | Peer identity.                                                                                        |
+| `preferCurrentTab` | `boolean`                                | Optional  | Whether to prefer current tab for the call.                                                           |
+
+
+---
+
+### CallFabricRoomSession {#callfabricroomsession}
+
+Extends [`RoomSession`](/docs/browser-sdk/js/reference/video/room-session).
+
+| Name     | Type                                     | Description                                                                                      |
+| :------- | :--------------------------------------- | :----------------------------------------------------------------------------------------------- |
+| `start`  | `() => void`                             | Starts the call.                                                                                 |
+| `answer` | `boolean \| MediaTrackConstraints`       | Answers the call (only works if the `CallFabricRoomSession` was a result of an incoming call).   |
+| `hangup` | `(id?) => void`                          | Ends the ongoing call by default. If the id of an `RTCPeer` is passed, hangs up that `RTCPeer`. |

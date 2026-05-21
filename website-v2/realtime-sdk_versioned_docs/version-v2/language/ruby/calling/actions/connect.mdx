@@ -1,0 +1,39 @@
+---
+title: ConnectAction
+slug: /ruby/reference/calling/actions/connect
+description: The ConnectAction object is returned when connecting to a call.
+toc_max_heading_level: 3
+---
+
+[call]: /docs/server-sdk/v2/ruby/reference/calling/call#connect
+[relay-calling-connectresult]: /docs/server-sdk/v2/ruby/reference/calling/results/connect
+[relay-calling-stopresult]: /docs/server-sdk/v2/ruby/reference/calling/results/stop
+
+# Relay::Calling::ConnectAction
+
+This object is returned by [`connect!`][call] method and represents a connecting attempt that is currently active on a call.
+
+## Properties
+
+| Property | Type | Description |
+| :------- | :--- | :---------- |
+| `result` | [`Relay::Calling::ConnectResult`][relay-calling-connectresult] | Final result of connecting. |
+| `state` | String | Current state of connecting attempt. |
+| `completed` | Boolean | Whether the connection attempt has completed. |
+| `payload` | Hash | Payload sent to Relay to start the connect. |
+
+## Methods
+
+### stop
+
+Stop the action immediately.
+
+
+
+**Parameters**
+
+None
+
+**Returns**
+
+[`Relay::Calling::StopResult`][relay-calling-stopresult] - A `StopResult` object with a `successful` property.

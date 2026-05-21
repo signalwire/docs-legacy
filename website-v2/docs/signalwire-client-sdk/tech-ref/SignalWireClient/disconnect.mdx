@@ -1,0 +1,36 @@
+---
+title: disconnect
+slug: /signalwire-client/disconnect
+---
+
+import APIField from '@site/src/components/APIField';
+
+The `disconnect` method gracefully terminates the client connection to SignalWire, including all
+active calls, and event subscriptions. 
+
+After disconnecting, you need to create a new client instance or call connection methods again to reconnect.
+
+## Parameters
+
+None
+
+## Signature
+
+```typescript
+disconnect(): Promise<void>
+```
+
+## Returns
+
+**Type:** `Promise<void>`
+
+Returns a Promise that resolves when the disconnection is complete.
+
+## Examples
+
+### Basic disconnect
+
+```typescript
+await client.disconnect()
+console.log('Disconnected from SignalWire')
+```

@@ -1,0 +1,104 @@
+---
+title: Relay.Calling.ConnectResult
+slug: /php/reference/calling/results/connect
+description: The ConnectResult object is returned after a connect operation is completed.
+toc_max_heading_level: 3
+---
+
+[call]: /docs/server-sdk/v2/php/reference/calling/call#connect
+[relay-calling-call]: /docs/server-sdk/v2/php/reference/calling/call
+[relay-event]: /docs/server-sdk/v2/php/reference/event
+
+This object returned from the [`connect`][call] method that represents the final result of a connection between your call and a remote one.
+
+## Methods
+
+### getCall
+
+Return the Call object connected with yours, if the connection succeeded.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+[`Relay.Calling.Call`][relay-calling-call] - The remote Call.
+
+**Examples**
+
+Trying to connect two devices and then use the remote Call.
+
+```php
+<?php
+
+$devices = [
+  [ "type" => "phone", "to" => "+18991114444", "timeout" => 30 ],
+  [ "type" => "phone", "to" => "+18991114445", "timeout" => 20 ]
+];
+$call->connect(...$devices)->done(function($result) {
+  if ($result->isSuccessful()) {
+    $remoteCall = $result->getCall();
+    // Use $remoteCall as a normal Relay.Calling.Call object...
+  }
+});
+```
+
+### getEvent
+
+Returns the last Relay Event arrived for this operation.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+[`Relay.Event`][relay-event] - Last Relay Event.
+
+**Examples**
+
+Trying to connect two devices and then grab the Relay event to inspect the payload.
+
+```php
+<?php
+
+$devices = [
+  [ "type" => "phone", "to" => "+18991114444", "timeout" => 30 ],
+  [ "type" => "phone", "to" => "+18991114445", "timeout" => 20 ]
+];
+$call->connect(...$devices)->done(function($result) {
+  $event = $result->getEvent();
+  // Inspect $event->payload ..
+});
+```
+
+### isSuccessful
+
+Return `true` if the call has connected with a remote party, `false` otherwise.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`boolean` - Whether the call has been connected successfully.
+
+**Examples**
+
+Trying to connect two devices and then check if your call has been connected.
+
+```php
+<?php
+
+$devices = [
+  [ "type" => "phone", "to" => "+18991114444", "timeout" => 30 ],
+  [ "type" => "phone", "to" => "+18991114445", "timeout" => 20 ]
+];
+$call->connect(...$devices)->done(function($result) {
+  if ($result->isSuccessful()) {
+    // Your call has been connected..
+  }
+});
+```

@@ -1,0 +1,12 @@
+# Root configuration with emitter options
+# Child configs will extend this and specify which emitter to use
+output-dir: "{project-root}/tsp-output"
+
+options:
+  "@typespec/openapi3":
+    emitter-output-dir: "{output-dir}/@typespec/openapi3"
+    
+  "@typespec/json-schema":
+    emitter-output-dir: "{output-dir}/@typespec/json-schema"
+    file-type: "json"
+    seal-object-schemas: true

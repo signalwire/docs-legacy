@@ -1,0 +1,35 @@
+---
+title: "playAudio"
+slug: /node/reference/voice/call/play-audio
+description: playAudio method for the Call class.
+toc_max_heading_level: 3
+---
+
+[callplayback-9]: /docs/server-sdk/v3/node/reference/voice/call-playback
+
+### playAudio
+
+- **playAudio**(`params`): `Promise<CallPlayback>` - See [CallPlayback][callplayback-9] for more details.
+
+Plays an audio file.
+
+#### Parameters
+
+| Name             | Type     | Description                                                              |
+|:-----------------|:---------|:-------------------------------------------------------------------------|
+| `params`         | `Object` | -                                                                        |
+| `params.url`     | `string` | HTTP(s) URL to an audio resource to play.                                |
+| `params.volume?` | `number` | Volume value between -40dB and +40dB where 0 is unchanged. Default is 0. |
+
+#### Returns
+
+`Promise<CallPlayback>` - See [CallPlayback][callplayback-9] for more details.
+
+#### Example
+
+```js
+const playback = await call.playAudio({
+  url: "https://cdn.signalwire.com/default-music/welcome.mp3",
+});
+await playback.ended();
+```

@@ -1,0 +1,492 @@
+---
+title: "AgentBase"
+sidebar_label: "AgentBase"
+sidebar_position: 1
+slug: /python/guides/agent-base
+description: Learn how to build voice AI agents using AgentBase, from basic configuration to advanced prompt engineering and voice customization.
+toc_max_heading_level: 3
+---
+
+## What You'll Learn
+
+This chapter covers everything you need to build production-quality agents:
+
+1. **AgentBase** - The foundation class and its capabilities
+2. **Static vs Dynamic** - Choosing the right pattern for your use case
+3. **Prompts & POM** - Crafting effective prompts with the Prompt Object Model
+4. **Voice & Language** - Configuring voices and multi-language support
+5. **AI Parameters** - Tuning conversation behavior
+6. **Hints** - Improving speech recognition accuracy
+7. **Call Flow** - Customizing when and how calls are answered
+
+## Prerequisites
+
+Before building agents, you should understand:
+
+- Core concepts from Chapter 2 (SWML, SWAIG, Lifecycle)
+- Basic Python class structure
+- How SignalWire processes calls
+
+## Agent Architecture Overview
+
+<Frame caption="Agent Components">
+  <img className="diagram" src={require("@image/agents-sdk-manual/03_01_agent-base_diagram1.webp").default} alt="Agent Components." />
+</Frame>
+
+## A Complete Agent Example
+
+Here's what a production agent looks like:
+
+```python
+from signalwire_agents import AgentBase, SwaigFunctionResult
+
+class CustomerSupportAgent(AgentBase):
+    """Production customer support agent."""
+
+    def __init__(self):
+        super().__init__(
+            name="customer-support",
+            route="/support"
+        )
+
+        # Voice configuration
+        self.add_language("English", "en-US", "rime.spore")
+
+        # AI behavior
+        self.set_params({
+            "end_of_speech_timeout": 500,
+            "attention_timeout": 15000,
+            "inactivity_timeout": 30000
+        })
+
+        # Prompts
+        self.prompt_add_section(
+            "Role",
+            "You are Alex, a friendly customer support agent for Acme Inc."
+        )
+
+        self.prompt_add_section(
+            "Guidelines",
+            body="Follow these guidelines:",
+            bullets=[
+                "Be helpful and professional",
+                "Ask clarifying questions when needed",
+                "Keep responses concise for voice",
+                "Offer to transfer if you cannot help"
+            ]
+        )
+
+        # Speech recognition hints
+        self.add_hints([
+            "Acme", "account number", "order status",
+            "refund", "billing", "representative"
+        ])
+
+        # Functions
+        self.define_tool(
+            name="check_order",
+            description="Look up an order by order number",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "order_number": {
+                        "type": "string",
+                        "description": "The order number to look up"
+                    }
+                },
+                "required": ["order_number"]
+            },
+            handler=self.check_order
+        )
+
+        # Skills
+        self.add_skill("datetime")
+
+        # Post-call summary
+        self.set_post_prompt(
+            "Summarize: issue type, resolution, customer satisfaction"
+        )
+
+    def check_order(self, args, raw_data):
+        order_number = args.get("order_number")
+        # Your business logic here
+        return SwaigFunctionResult(
+            f"Order {order_number}: Shipped on Monday, arriving Thursday"
+        )
+
+if __name__ == "__main__":
+    agent = CustomerSupportAgent()
+    agent.run(host="0.0.0.0", port=3000)
+```
+
+## Chapter Contents
+
+| Section | Description |
+|---------|-------------|
+| [AgentBase](/docs/agents-sdk/python/guides/agent-base) | Core class and constructor options |
+| [Static vs Dynamic](/docs/agents-sdk/python/guides/static-vs-dynamic) | Choosing the right pattern |
+| [Prompts & POM](/docs/agents-sdk/python/guides/prompts-pom) | Prompt engineering for voice AI |
+| [Voice & Language](/docs/agents-sdk/python/guides/voice-language) | Voice selection and multi-language |
+| [AI Parameters](/docs/agents-sdk/python/guides/ai-parameters) | Behavior tuning |
+| [Hints](/docs/agents-sdk/python/guides/hints) | Speech recognition improvement |
+| [Call Flow](/docs/agents-sdk/python/guides/call-flow) | Customizing call answer behavior |
+
+## Key Patterns
+
+### Pattern 1: Class-Based Agent
+
+Best for complex agents with multiple functions:
+
+```python
+class MyAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="my-agent")
+        self.configure()
+
+    def configure(self):
+        # All configuration here
+        pass
+```
+
+### Pattern 2: Functional Agent
+
+Quick agents for simple use cases:
+
+```python
+from signalwire_agents import AgentBase
+
+agent = AgentBase(name="simple-agent")
+agent.add_language("English", "en-US", "rime.spore")
+agent.prompt_add_section("Role", "You are a helpful assistant.")
+agent.run()
+```
+
+### Pattern 3: Multi-Agent Server
+
+Multiple agents on one server:
+
+```python
+from signalwire_agents import AgentServer
+
+server = AgentServer()
+server.register(SupportAgent(), "/support")
+server.register(SalesAgent(), "/sales")
+server.register(BillingAgent(), "/billing")
+server.run(port=3000)
+```
+
+## Testing Your Agent
+
+Always test before deploying:
+
+```bash
+# View SWML output
+swaig-test my_agent.py --dump-swml
+
+# List registered functions
+swaig-test my_agent.py --list-tools
+
+# Test a function
+swaig-test my_agent.py --exec check_order --order_number 12345
+```
+
+Let's start with understanding AgentBase in depth.
+
+## Class Overview
+
+<Frame caption="AgentBase Inheritance">
+  <img className="diagram" src={require("@image/agents-sdk-manual/03_01_agent-base_diagram2.webp").default} alt="AgentBase Inheritance." />
+</Frame>
+
+## Constructor Parameters
+
+```python
+from signalwire_agents import AgentBase
+
+agent = AgentBase(
+    # Required
+    name="my-agent",                    # Unique agent identifier
+
+    # Server Configuration
+    route="/",                          # HTTP route path (default: "/")
+    host="0.0.0.0",                     # Bind address (default: "0.0.0.0")
+    port=3000,                          # Server port (default: 3000)
+
+    # Authentication
+    basic_auth=("user", "pass"),        # Override env var credentials
+
+    # Behavior
+    auto_answer=True,                   # Answer calls automatically
+    use_pom=True,                       # Use Prompt Object Model
+
+    # Recording
+    record_call=False,                  # Enable call recording
+    record_format="mp4",                # Recording format
+    record_stereo=True,                 # Stereo recording
+
+    # Tokens and Security
+    token_expiry_secs=3600,             # Function token expiration
+
+    # Advanced
+    default_webhook_url=None,           # Override webhook URL
+    agent_id=None,                      # Custom agent ID (auto-generated)
+    native_functions=None,              # Built-in SignalWire functions
+    schema_path=None,                   # Custom SWML schema path
+    suppress_logs=False,                # Disable logging
+    config_file=None                    # Load from config file
+)
+```
+
+## Parameter Reference
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `name` | str | Required | Unique identifier for the agent |
+| `route` | str | "/" | HTTP route where agent is accessible |
+| `host` | str | "0.0.0.0" | IP address to bind server |
+| `port` | int | 3000 | Port number for server |
+| `basic_auth` | tuple | None | (username, password) for auth |
+| `use_pom` | bool | True | Enable Prompt Object Model |
+| `auto_answer` | bool | True | Auto-answer incoming calls |
+| `record_call` | bool | False | Enable call recording |
+| `record_format` | str | "mp4" | Recording file format |
+| `record_stereo` | bool | True | Record in stereo |
+| `token_expiry_secs` | int | 3600 | Token validity period |
+| `native_functions` | list | None | SignalWire native functions |
+| `suppress_logs` | bool | False | Disable agent logs |
+
+## Creating an Agent
+
+### Class-Based (Recommended)
+
+```python
+from signalwire_agents import AgentBase, SwaigFunctionResult
+
+
+class MyAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="my-agent")
+        self._setup()
+
+    def _setup(self):
+        # Voice
+        self.add_language("English", "en-US", "rime.spore")
+
+        # Prompts
+        self.prompt_add_section("Role", "You are a helpful assistant.")
+
+        # Functions
+        self.define_tool(
+            name="greet",
+            description="Greet the user",
+            parameters={},
+            handler=self.greet
+        )
+
+    def greet(self, args, raw_data):
+        return SwaigFunctionResult("Hello! How can I help you today?")
+
+
+if __name__ == "__main__":
+    agent = MyAgent()
+    agent.run()
+```
+
+### Instance-Based
+
+```python
+from signalwire_agents import AgentBase
+
+agent = AgentBase(name="quick-agent")
+agent.add_language("English", "en-US", "rime.spore")
+agent.prompt_add_section("Role", "You are a helpful assistant.")
+agent.run()
+```
+
+### Declarative (PROMPT_SECTIONS)
+
+```python
+from signalwire_agents import AgentBase
+
+
+class DeclarativeAgent(AgentBase):
+    PROMPT_SECTIONS = {
+        "Role": "You are a helpful customer service agent.",
+        "Guidelines": [
+            "Be professional and courteous",
+            "Ask clarifying questions when needed",
+            "Keep responses concise"
+        ],
+        "Rules": {
+            "body": "Always follow these rules:",
+            "bullets": [
+                "Never share customer data",
+                "Escalate complex issues"
+            ]
+        }
+    }
+
+    def __init__(self):
+        super().__init__(name="declarative-agent")
+        self.add_language("English", "en-US", "rime.spore")
+```
+
+## Key Methods
+
+### Configuration Methods
+
+```python
+# Voice and Language
+agent.add_language(name, code, voice)       # Add language support
+agent.set_languages(languages)               # Set all languages at once
+
+# Prompts
+agent.prompt_add_section(title, body)        # Add prompt section
+agent.prompt_add_subsection(parent, title)   # Add subsection
+agent.set_post_prompt(text)                  # Set post-call summary prompt
+
+# AI Parameters
+agent.set_params(params_dict)                # Set AI behavior parameters
+agent.set_param_value(key, value)            # Set single parameter
+
+# Speech Recognition
+agent.add_hints(hints_list)                  # Add speech hints
+agent.add_hint(hint_string)                  # Add single hint
+
+# Functions
+agent.define_tool(name, description, ...)   # Define SWAIG function
+agent.add_skill(skill_name)                 # Add a skill
+
+# Pronunciation
+agent.add_pronunciation(replace, with_text)  # Add pronunciation rule
+```
+
+### Runtime Methods
+
+```python
+# Start server
+agent.run(host="0.0.0.0", port=3000)
+
+# Get SWML document
+swml = agent.get_swml()
+
+# Access components
+agent.pom              # Prompt Object Model
+agent.data_map         # DataMap builder
+```
+
+## Agent Lifecycle
+
+<Frame caption="Agent Lifecycle">
+  <img className="diagram" src={require("@image/agents-sdk-manual/03_01_agent-base_diagram3.webp").default} alt="Agent Lifecycle." />
+</Frame>
+
+## Configuration File
+
+Load configuration from a YAML/JSON file:
+
+```python
+agent = AgentBase(
+    name="my-agent",
+    config_file="config/agent.yaml"
+)
+```
+
+```yaml
+# config/agent.yaml
+name: my-agent
+route: /support
+host: 0.0.0.0
+port: 3000
+```
+
+## Environment Variables
+
+AgentBase respects these environment variables:
+
+| Variable | Purpose |
+|----------|---------|
+| `SWML_BASIC_AUTH_USER` | Basic auth username |
+| `SWML_BASIC_AUTH_PASSWORD` | Basic auth password |
+| `SWML_PROXY_URL_BASE` | Base URL for webhooks behind proxy |
+| `SWML_SSL_ENABLED` | Enable SSL |
+| `SWML_SSL_CERT_PATH` | SSL certificate path |
+| `SWML_SSL_KEY_PATH` | SSL key path |
+| `SWML_DOMAIN` | Domain for SSL |
+
+## Multi-Agent Server
+
+Run multiple agents on one server:
+
+```python
+from signalwire_agents import AgentServer
+
+
+class SupportAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="support", route="/support")
+        # ... configuration
+
+
+class SalesAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="sales", route="/sales")
+        # ... configuration
+
+
+# Register multiple agents
+server = AgentServer()
+server.register(SupportAgent())
+server.register(SalesAgent())
+server.run(host="0.0.0.0", port=3000)
+```
+
+Access agents at:
+
+- `http://localhost:3000/support`
+- `http://localhost:3000/sales`
+
+## Best Practices
+
+1. **Use class-based agents** for anything beyond simple prototypes
+2. **Organize configuration** into logical private methods
+3. **Set explicit credentials** in production via environment variables
+4. **Use meaningful agent names** for logging and debugging
+5. **Test with swaig-test** before deploying
+
+```python
+class WellOrganizedAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="organized-agent")
+        self._configure_voice()
+        self._configure_prompts()
+        self._configure_functions()
+        self._configure_skills()
+
+    def _configure_voice(self):
+        self.add_language("English", "en-US", "rime.spore")
+        self.set_params({
+            "end_of_speech_timeout": 500,
+            "attention_timeout": 15000
+        })
+
+    def _configure_prompts(self):
+        self.prompt_add_section("Role", "You are a helpful assistant.")
+
+    def _configure_functions(self):
+        self.define_tool(
+            name="help",
+            description="Get help",
+            parameters={},
+            handler=self.get_help
+        )
+
+    def _configure_skills(self):
+        self.add_skill("datetime")
+
+    def get_help(self, args, raw_data):
+        return SwaigFunctionResult("I can help you with...")
+```
+
+
+

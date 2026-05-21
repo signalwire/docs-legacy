@@ -1,0 +1,90 @@
+---
+title: getMemberOverlay
+slug: /call-session/getmemberoverlay
+---
+
+import APIField from '@site/src/components/APIField';
+
+Returns the member overlay element on top of the root element for a specific member.
+
+## Signature
+
+```typescript
+getMemberOverlay(memberId: string): UserOverlay | undefined
+```
+
+## Parameters
+
+<APIField name="memberId" type="string" required>
+  The ID of the member whose overlay to retrieve.
+</APIField>
+
+## Returns
+
+**Type:** `UserOverlay | undefined`
+
+Returns the overlay object for the specified member, or `undefined` if not found.
+
+## Important Notes
+
+**Root Element Required:**
+
+Member overlays are only available when a `rootElement` is provided during call setup:
+
+```typescript
+const call = await client.dial({
+  to: 'user@example.com',
+  rootElement: document.getElementById('video-container')
+})
+
+// Now overlays are available
+const overlay = call.getMemberOverlay(memberId)
+```
+
+**Overlay Availability:**
+
+Overlays are created when members join and have active video. If a member doesn't have an overlay, `getMemberOverlay()` returns `undefined`.
+
+**Use Cases:**
+
+- Custom UI elements on top of member video
+- Adding badges or indicators to member tiles
+- Implementing custom controls per member
+- Accessing DOM elements for advanced manipulation
+
+## Examples
+
+### Get member overlay
+
+```typescript
+const overlay = call.getMemberOverlay('member-123')
+if (overlay) {
+  console.log('Found overlay for member')
+}
+```
+
+### Manipulate member overlay
+
+```typescript
+const { members } = await call.getMembers()
+
+members.forEach(member => {
+  const overlay = call.getMemberOverlay(member.id)
+  if (overlay) {
+    // Access or manipulate the overlay element
+    console.log(`Overlay for ${member.name}:`, overlay)
+  }
+})
+```
+
+### Check if member has overlay
+
+```typescript
+function hasMemberOverlay(memberId: string): boolean {
+  return call.getMemberOverlay(memberId) !== undefined
+}
+
+if (hasMemberOverlay('member-123')) {
+  console.log('Member has an active overlay')
+}
+```

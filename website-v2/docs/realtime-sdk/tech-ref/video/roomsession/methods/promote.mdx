@@ -1,0 +1,106 @@
+---
+title: "promote"
+slug: /node/reference/video/room-session/promote
+description: promote method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+[link-3]: /docs/server-sdk/node/reference/video/room-session/demote
+[permissions]: /docs/apis/permissions
+[roomsession-41]: /docs/server-sdk/node/reference/video/room-session
+
+### promote
+
+- **promote**(`params`): `Promise<void>`
+
+Promotes a participant from "audience" to "member". See [demote][link-3].
+
+#### Parameters
+
+<ParamField path="params" type="object" required>
+  Object containing the parameters of the method.
+</ParamField>
+
+<Indent>
+<ParamField path="memberId" type="string" required>
+  ID of the audience participant to promote.
+</ParamField>
+
+<ParamField path="joinAudioMuted" type="boolean">
+  Force the member's audio to be muted right after the promotion.
+</ParamField>
+
+<ParamField path="joinVideoMuted" type="boolean">
+  Force the member's video to be muted right after the promotion.
+</ParamField>
+
+<ParamField path="mediaAllowed" type='"all" | "audio-only" | "video-only"'>
+  Specifies the media that the client will be allowed to **send**. A member participant can always receive all media.
+</ParamField>
+
+<ParamField path="meta" type="Record<string, unknown>">
+  Metadata to assign to the member.
+</ParamField>
+
+<ParamField path="permissions" type="string[]">
+  List of [permissions][permissions] to grant when the Audience participant will become a Member.
+</ParamField>
+</Indent>
+
+#### Returns
+
+`Promise<void>`
+
+#### Example
+
+In this example, we demote a member to audience as soon as they join the room.
+After 10 seconds, we promote the member back to a roomSession member.
+This example assumes that there is a [`RoomSession`][roomsession-41]
+already active and that members are joining the room.
+
+```javascript
+import { SignalWire } from "@signalwire/realtime-api";
+
+// Initialize the SignalWire client
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+// Access the video client from the main client
+const videoClient = client.video;
+
+// Setup listener for when a room starts
+await videoClient.listen({
+  onRoomStarted: async (roomsession) => {
+    console.log("Room started", roomsession.displayName);
+    await roomsession.listen({
+      // Listen for when a member is updated
+      onMemberJoined: async (member) => {
+        console.log("Member joined", member.id, member.name);
+        // Demote member to audience
+        console.log(`Demoting ${member.id} to audience`);
+        await roomsession.demote({
+          memberId: member.id,
+          mediaAllowed: "audio-only"
+        });
+        // wait 10 seconds then promote the member back to a roomSession member
+        setTimeout(async () => {
+          // Promote the audience participant to a member
+          console.log(`Promoting ${member.name} to member`);
+          await roomsession.promote({
+            memberId: member.id,
+            mediaAllowed: "all",
+            joinAudioMuted: true,
+            joinVideoMuted: false,
+            permissions: [
+              "room.self.audio_mute",
+              "room.self.audio_unmute",
+              "room.self.video_mute",
+              "room.self.video_unmute",
+              "room.list_available_layouts",
+            ]
+          });
+        }, 10000);
+      }
+    });
+  }
+})
+```

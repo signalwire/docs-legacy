@@ -1,0 +1,57 @@
+---
+title: "getMemberState"
+slug: /node/reference/chat/client/get-member-state
+description: getMemberState method for the Client class.
+toc_max_heading_level: 3
+---
+
+
+### getMemberState
+
+- **getMemberState**(`params`): `Promise<\{ channels: Record<string, ChatChannelState> \}>`
+
+Returns the states of a member in the specified channels.
+
+#### Parameters
+
+<ParamField path="params" type="object" required>
+  Object containing the parameters of the method.
+</ParamField>
+
+<Indent>
+<ParamField path="channels" type="string | string[]">
+  Channels for which to get the state.
+</ParamField>
+
+<ParamField path="memberId" type="string" required>
+  ID of the member for which to get the state.
+</ParamField>
+</Indent>
+
+#### Returns
+
+`Promise<{ channels: Record<string, ChatChannelState> }>`
+
+A promise that resolves to an object containing the states of the member in the specified channels.
+
+#### Example
+
+In this example, we fetch the state of the member `User1` in the channel
+`channel1` and print it to the console.
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+const chatClient = client.chat;
+
+let usesId = 'User1'; // Assumes a member with this id already exists and has joined the channel.
+
+const s = await chatClient.getMemberState({
+  channels: "channel1", // or a list of channels like: ["channel1", "channel2"]
+  memberId: usesId
+});
+
+console.log(`The state of ${usesId} is: ${JSON.stringify(s.channels.channel1.state, null, 2)}`);
+```

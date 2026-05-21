@@ -1,0 +1,49 @@
+---
+title: "setMemberPosition"
+slug: /js/reference/video/room-session/set-member-position
+description: setMemberPosition method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+### setMemberPosition
+
+- **setMemberPosition**(`params`): `Promise<void>`
+
+Assigns a position in the layout to the specified member.
+
+#### Parameters
+
+<ParamField path="params" type="object">
+  Object containing the parameters of the method.
+</ParamField>
+
+<Indent>
+<ParamField path="memberId" type="string" required={false}>
+  Id of the member to affect. If omitted, affects the current member.
+</ParamField>
+
+<ParamField path="position" type="VideoPosition">
+  Position to assign in the layout.
+</ParamField>
+</Indent>
+
+#### Returns
+
+`Promise<void>`
+
+#### Permissions
+
+- `room.self.set_position`: to set the position for the local member.
+- `room.member.set_position`: to set the position for a remote member.
+
+You need to specify the permissions when [creating the Video Room Token](/docs/apis/video/create-room-token) on the server side.
+
+#### Example
+
+```js
+await roomSession.setMemberPosition({
+  memberId: "1bf4d4fb-a3e4-4d46-80a8-3ebfdceb2a60",
+  position: "off-canvas",
+});
+```
+

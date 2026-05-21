@@ -1,0 +1,123 @@
+---
+slug: /swml/reference/user-event
+title: user_event
+description: Send custom events to the connected client on the call.
+toc_max_heading_level: 3
+---
+
+[browser-sdk]: /docs/browser-sdk/js/reference/signalwire/client
+[on-method]: /docs/browser-sdk/js/reference/video/room-session/on
+
+Allows the user to set and send events to the connected client on the call. This is useful for triggering actions on the client side.
+Commonly used with the [browser-sdk][browser-sdk].
+Accepts an object mapping event names to values. The event object can be any valid JSON object.
+
+<ParamField path="user_event" type="object" required={true}>
+  An object that accepts the following properties.
+</ParamField>
+
+
+## **Properties**
+
+<ParamField path="user_event.event" type="any" required={true}>
+  An object mapping event names to values. The event object can be any valid JSON object.
+</ParamField>
+
+
+## **Event Object**
+
+The `event` parameter can be any valid JSON object. 
+Any key-value pair in the object is sent to the client as an event type called: `user_event`.
+
+The client can listen for these events using the [on-method][on-method].
+## **Examples**
+
+### Send a custom event to the client
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - user_event:
+        event:
+          myCustomEvent: 'Hello, world!'
+    - play:
+        url: 'say: Custom event sent.'
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "user_event": {
+          "event": {
+            "myCustomEvent": "Hello, world!"
+          }
+        }
+      },
+      {
+        "play": {
+          "url": "say: Custom event sent."
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+### Send multiple events with different payloads
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - user_event:
+        event:
+          eventA:
+            foo: bar
+          eventB:
+            count: 42
+            active: true
+    - play:
+        url: 'say: Multiple events sent.'
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "user_event": {
+          "event": {
+            "eventA": {
+              "foo": "bar"
+            },
+            "eventB": {
+              "count": 42,
+              "active": true
+            }
+          }
+        }
+      },
+      {
+        "play": {
+          "url": "say: Multiple events sent."
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>

@@ -1,0 +1,53 @@
+---
+title: publish
+slug: /js/reference/chat/client/publish
+toc_max_heading_level: 3
+---
+
+- **publish**(`params`): `Promise<void>`
+
+Publish a message into the specified channel.
+
+## Parameters
+
+<ParamField path="params" type="object" required={true}>
+  Configuration object for publishing a message
+</ParamField>
+<Indent>
+  <ParamField path="params.channel" type="string" required={true}>
+    Channel in which to send the message.
+  </ParamField>
+  <ParamField path="params.content" type="any" required={true}>
+    The message to send. This can be any JSON-serializable object or value.
+  </ParamField>
+  <ParamField path="params.meta" type="Record<any, any>">
+    Metadata associated with the message. There are no requirements on the content of metadata.
+  </ParamField>
+</Indent>
+
+## Returns
+
+`Promise<void>`
+
+## Examples
+
+Publishing a message as a string:
+
+```js
+await chatClient.publish({
+  channel: "my-channel",
+  content: "Hello, world."
+});
+```
+
+Publishing a message as an object:
+
+```js
+await chatClient.publish({
+  channel: "my-channel",
+  content: {
+    field_one: "value_one",
+    field_two: "value_two",
+  },
+});
+```

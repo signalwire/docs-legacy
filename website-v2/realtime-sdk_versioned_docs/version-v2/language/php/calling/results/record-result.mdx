@@ -1,0 +1,163 @@
+---
+slug: /php/reference/calling/results/record
+hide_title: true
+toc_max_heading_level: 3
+---
+
+[call]: /docs/server-sdk/v2/php/reference/calling/call#record
+[relay-event]: /docs/server-sdk/v2/php/reference/event
+
+# Relay.Calling.RecordResult
+
+This object returned from [`record`][call] method that represents the final result of a recording.
+
+## Methods
+
+### getDuration
+
+Returns the duration of the recording in seconds.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`number` - Duration of the recording in seconds.
+
+**Examples**
+
+> Start recording and use the duration.
+
+```php
+<?php
+
+$params = [
+  'stereo' => true
+];
+$call->record($params)->done(function($result) {
+  if ($result->isSuccessful()) {
+    $duration = $result->getDuration();
+  }
+});
+```
+
+### getEvent
+
+Returns the last Relay Event arrived for this operation.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+[`Relay.Event`][relay-event] - Last Relay Event.
+
+**Examples**
+
+> Start recording in stereo mode and grab the result when it's completed.
+
+```php
+<?php
+
+$params = [
+  'stereo' => true
+];
+$call->record($params)->done(function($result) {
+  $event = $result->getEvent();
+  // Inspect $event->payload ..
+});
+```
+
+### getSize
+
+Returns the size of the recording file.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`number` - Size of the recording file.
+
+**Examples**
+
+> Start recording and use the size of the file.
+
+```php
+<?php
+
+$params = [
+  'stereo' => true
+];
+$call->record($params)->done(function($result) {
+  if ($result->isSuccessful()) {
+    $size = $result->getSize();
+  }
+});
+```
+
+### getUrl
+
+Returns the HTTPS URL to the recording file.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`string` - HTTPS URL to the file.
+
+**Examples**
+
+> Start recording and use the URL.
+
+```php
+<?php
+
+$params = [
+  'stereo' => true
+];
+$call->record($params)->done(function($result) {
+  if ($result->isSuccessful()) {
+    $httpsUrl = $result->getUrl();
+  }
+});
+```
+
+### isSuccessful
+
+Return `true` if the recording succeeded, `false` otherwise.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`boolean` - True/False accordingly to the state.
+
+**Examples**
+
+> Start the recording and then check if it has ended successfully.
+
+```php
+<?php
+
+$params = [
+  'stereo' => true
+];
+$call->record($params)->done(function($result) {
+  if ($result->isSuccessful()) {
+    // Recording completed with success
+  }
+});
+```

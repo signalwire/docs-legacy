@@ -1,0 +1,82 @@
+---
+title: Relay.Calling.DialResult
+slug: /php/reference/calling/results/dial
+description: The DialResult object is returned after a dial operation is completed.
+toc_max_heading_level: 3
+---
+
+[call]: /docs/server-sdk/v2/php/reference/calling/call#dial
+[index]: /docs/server-sdk/v2/php/reference/calling#dial
+[relay-calling-call]: /docs/server-sdk/v2/php/reference/calling/call
+[relay-event]: /docs/server-sdk/v2/php/reference/event
+
+This object returned from [`Calling dial`][index] and [`Call dial`][call] methods.
+
+## Methods
+
+### getCall
+
+Return the active Call object, right after the remote peer picked it up.
+
+**Returns**
+
+[`Relay.Calling.Call`][relay-calling-call] - The remote Call.
+
+**Examples**
+
+Trying to call a remote peer and, if it answer, get the active Call.
+
+```php
+<?php
+
+$params = [ 'type' => 'phone', 'from' => '+1XXXXXXXXXX', 'to' => '+1YYYYYYYYYY' ];
+$client->calling->dial($params)->done(function($result) {
+  if ($result->isSuccessful()) {
+    $call = $result->getCall();
+    // Your active $call..
+  }
+});
+```
+
+### getEvent
+
+Returns the last Relay Event arrived for this operation.
+
+**Returns**
+
+[`Relay.Event`][relay-event] - Last Relay Event.
+
+**Examples**
+
+Start an outbound Call and then grab the Relay event to inspect the payload.
+
+```php
+<?php
+
+$call->dial()->done(function($result) {
+  $event = $result->getEvent();
+  // Inspect $event->payload ..
+});
+```
+
+### isSuccessful
+
+Return `true` if the call was picked up by the remote party, `false` otherwise.
+
+**Returns**
+
+`boolean` - Whether the call has been answered.
+
+**Examples**
+
+Start an outbound Call and then check if the `dial` has completed successfully.
+
+```php
+<?php
+
+$call->dial()->done(function($result) {
+  if ($result->isSuccessful()) {
+    // Your call has been answered by the remote party..
+  }
+});
+```

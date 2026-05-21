@@ -1,0 +1,146 @@
+---
+slug: /compatibility-api/sdks/reference/incoming-phone-numbers/update
+title: Update
+sidebar_label: Update
+toc_max_heading_level: 3
+---
+
+Use this endpoint for the IncomingPhoneNumber method to modify the properties of an incoming phone number.
+
+<EndpointSchemaSnippet endpoint="POST /Accounts/{AccountSid}/IncomingPhoneNumbers/{Sid}" />
+
+## Request examples
+
+<CodeBlocks>
+```javascript title="Node.js"
+const { RestClient } = require('@signalwire/compatibility-api')
+const client = RestClient('YourProjectID', 'YourAuthToken', { signalwireSpaceUrl: 'example.signalwire.com' })
+
+client.incomingPhoneNumbers('IncomingPhoneNumberSid')
+      .update()
+      .then(incoming_phone_number => console.log(incoming_phone_number.friendlyName))
+      .done();
+```
+
+```csharp
+using System;
+using System.Collections.Generic;
+using Twilio;
+using Twilio.Rest.Api.V2010.Account;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        TwilioClient.Init("YourProjectID", "YourAuthToken", new Dictionary<string, object> { ["signalwireSpaceUrl"] = "{SPACE}.signalwire.com" });
+
+        var incomingPhoneNumber = IncomingPhoneNumberResource.Update(
+            accountSid: "YourProjectID",
+            pathSid: "IncomingPhoneNumberSid"
+        );
+
+        Console.WriteLine(incomingPhoneNumber.FriendlyName);
+    }
+}
+```
+
+```python
+from signalwire.rest import Client as signalwire_client
+
+client = signalwire_client("YourProjectID", "YourAuthToken", signalwire_space_url = 'example.signalwire.com')
+
+incoming_phone_number = client \
+    .incoming_phone_numbers('IncomingPhoneNumberSid') \
+    .update()
+
+print(incoming_phone_number.friendly_name)
+```
+
+```ruby
+require 'signalwire/sdk'
+
+@client = Signalwire::REST::Client.new 'YourProjectID', 'YourAuthToken', signalwire_space_url: "example.signalwire.com"
+
+incoming_phone_number = @client
+  .incoming_phone_numbers('IncomingPhoneNumberSid')
+  .update()
+
+puts incoming_phone_number.friendly_name
+```
+
+</CodeBlocks>
+
+---
+
+### Request: update an IncomingPhoneNumber's VoiceUrl
+
+In this example, we will update the URL that SignalWire will request when a call to your account is received.
+
+<CodeBlocks>
+```javascript title="Node.js"
+const { RestClient } = require('@signalwire/compatibility-api')
+const client = RestClient('YourProjectID', 'YourAuthToken', { signalwireSpaceUrl: 'example.signalwire.com' })
+
+client.incomingPhoneNumbers('IncomingPhoneNumberSid')
+      .update({
+         accountSid: 'b3877c40-da60-4998-90ad-b792e98472ac',
+         voiceUrl: 'http://your-application.com/docs/voice.xml'
+       })
+      .then(incoming_phone_number => console.log(incoming_phone_number.friendlyName))
+      .done();
+```
+
+```csharp
+using System;
+using System.Collections.Generic;
+using Twilio;
+using Twilio.Rest.Api.V2010.Account;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        TwilioClient.Init("YourProjectID", "YourAuthToken", new Dictionary<string, object> { ["signalwireSpaceUrl"] = "{SPACE}.signalwire.com" });
+
+        var incomingPhoneNumber = IncomingPhoneNumberResource.Update(
+            accountSid: "b3877c40-da60-4998-90ad-b792e98472ac",
+            voiceUrl: new Uri("http://your-application.com/docs/voice.xml"),
+            pathSid: "IncomingPhoneNumberSid"
+        );
+
+        Console.WriteLine(incomingPhoneNumber.FriendlyName);
+    }
+}
+```
+
+```python
+from signalwire.rest import Client as signalwire_client
+
+client = signalwire_client("YourProjectID", "YourAuthToken", signalwire_space_url = 'example.signalwire.com')
+
+incoming_phone_number = client \
+    .incoming_phone_numbers('IncomingPhoneNumberSid') \
+    .update(
+         voice_url='http://your-application.com/docs/voice.xml',
+         account_sid='b3877c40-da60-4998-90ad-b792e98472ac'
+     )
+
+print(incoming_phone_number.friendly_name)
+```
+
+```ruby
+require 'signalwire/sdk'
+
+@client = Signalwire::REST::Client.new 'YourProjectID', 'YourAuthToken', signalwire_space_url: "example.signalwire.com"
+
+incoming_phone_number = @client
+  .incoming_phone_numbers('IncomingPhoneNumberSid')
+  .update(
+     account_sid: 'b3877c40-da60-4998-90ad-b792e98472ac',
+     voice_url: 'http://your-application.com/docs/voice.xml'
+   )
+
+puts incoming_phone_number.friendly_name
+```
+
+</CodeBlocks>

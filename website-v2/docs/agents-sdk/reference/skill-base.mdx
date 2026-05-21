@@ -1,0 +1,363 @@
+---
+title: "Skill Base"
+sidebar_label: "Skill Base"
+slug: /python/reference/skill-base
+toc_max_heading_level: 3
+---
+
+## SkillBase API
+
+API reference for SkillBase, the abstract base class for creating custom agent skills.
+
+### Class Definition
+
+```python
+from signalwire_agents.core.skill_base import SkillBase
+
+class SkillBase(ABC):
+    """Abstract base class for all agent skills."""
+```
+
+### Overview
+
+Skills are modular, reusable capabilities that can be added to agents.
+
+**Features:**
+- Auto-discovered from skill directories
+- Automatic dependency validation
+- Configuration via parameters
+- Can add tools, prompts, hints, and global data
+
+### Class Attributes
+
+```python
+class MySkill(SkillBase):
+    # Required attributes
+    SKILL_NAME: str = "my_skill"           # Unique identifier
+    SKILL_DESCRIPTION: str = "Description" # Human-readable description
+
+    # Optional attributes
+    SKILL_VERSION: str = "1.0.0"           # Semantic version
+    REQUIRED_PACKAGES: List[str] = []      # Python packages needed
+    REQUIRED_ENV_VARS: List[str] = []      # Environment variables needed
+    SUPPORTS_MULTIPLE_INSTANCES: bool = False  # Allow multiple instances
+```
+
+### Class Attributes Reference
+
+| Attribute | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `SKILL_NAME` | str | Yes | Unique identifier |
+| `SKILL_DESCRIPTION` | str | Yes | Description |
+| `SKILL_VERSION` | str | No | Version string |
+| `REQUIRED_PACKAGES` | List[str] | No | Package dependencies |
+| `REQUIRED_ENV_VARS` | List[str] | No | Required env vars |
+| `SUPPORTS_MULTIPLE_INSTANCES` | bool | No | Multiple instances |
+
+### Constructor
+
+```python
+def __init__(
+    self,
+    agent: 'AgentBase',                    # Parent agent
+    params: Optional[Dict[str, Any]] = None  # Skill configuration
+)
+```
+
+### Instance Attributes
+
+```python
+self.agent      # Reference to parent AgentBase
+self.params     # Configuration parameters dict
+self.logger     # Skill-specific logger
+self.swaig_fields  # SWAIG metadata to merge into tools
+```
+
+### Abstract Methods (Must Implement)
+
+#### setup
+
+```python
+@abstractmethod
+def setup(self) -> bool:
+    """
+    Setup the skill.
+
+    Returns:
+        True if setup successful, False otherwise
+    """
+    pass
+```
+
+Validate environment, initialize APIs, prepare resources.
+
+#### register_tools
+
+```python
+@abstractmethod
+def register_tools(self) -> None:
+    """Register SWAIG tools with the agent."""
+    pass
+```
+
+Register functions that the skill provides.
+
+### Helper Methods
+
+#### define_tool
+
+```python
+def define_tool(self, **kwargs) -> None
+```
+
+Register a tool with automatic `swaig_fields` merging.
+
+```python
+def register_tools(self):
+    self.define_tool(
+        name="my_search",
+        description="Search functionality",
+        handler=self._handle_search,
+        parameters={
+            "type": "object",
+            "properties": {
+                "query": {"type": "string", "description": "Search query"}
+            },
+            "required": ["query"]
+        }
+    )
+```
+
+#### validate_env_vars
+
+```python
+def validate_env_vars(self) -> bool
+```
+
+Check if all required environment variables are set.
+
+#### validate_packages
+
+```python
+def validate_packages(self) -> bool
+```
+
+Check if all required Python packages are available.
+
+### Optional Override Methods
+
+#### get_hints
+
+```python
+def get_hints(self) -> List[str]:
+    """Return speech recognition hints for this skill."""
+    return []
+```
+
+#### get_global_data
+
+```python
+def get_global_data(self) -> Dict[str, Any]:
+    """Return data to add to agent's global context."""
+    return {}
+```
+
+#### get_prompt_sections
+
+```python
+def get_prompt_sections(self) -> List[Dict[str, Any]]:
+    """Return prompt sections to add to agent."""
+    return []
+```
+
+#### cleanup
+
+```python
+def cleanup(self) -> None:
+    """Cleanup when skill is removed or agent shuts down."""
+    pass
+```
+
+#### get_instance_key
+
+```python
+def get_instance_key(self) -> str:
+    """Get unique key for this skill instance."""
+    pass
+```
+
+### Parameter Schema
+
+#### get_parameter_schema
+
+```python
+@classmethod
+def get_parameter_schema(cls) -> Dict[str, Dict[str, Any]]:
+    """Get parameter schema for this skill."""
+    pass
+```
+
+Define configuration parameters:
+
+```python
+@classmethod
+def get_parameter_schema(cls):
+    schema = super().get_parameter_schema()
+    schema.update({
+        "api_key": {
+            "type": "string",
+            "description": "API key for service",
+            "required": True,
+            "hidden": True,
+            "env_var": "MY_API_KEY"
+        },
+        "max_results": {
+            "type": "integer",
+            "description": "Maximum results to return",
+            "default": 10,
+            "min": 1,
+            "max": 100
+        }
+    })
+    return schema
+```
+
+### Parameter Schema Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `type` | string | Parameter type (string, integer, number, etc.) |
+| `description` | string | Human-readable description |
+| `default` | any | Default value if not provided |
+| `required` | bool | Whether parameter is required |
+| `hidden` | bool | Hide in UIs (for secrets) |
+| `env_var` | string | Environment variable alternative |
+| `enum` | list | List of allowed values |
+| `min/max` | number | Min/max for numeric types |
+
+### Complete Skill Example
+
+```python
+from signalwire_agents.core.skill_base import SkillBase
+from signalwire_agents.core.function_result import SwaigFunctionResult
+from typing import Dict, Any, List
+import os
+
+
+class WeatherSkill(SkillBase):
+    """Skill for weather lookups."""
+
+    SKILL_NAME = "weather"
+    SKILL_DESCRIPTION = "Provides weather information"
+    SKILL_VERSION = "1.0.0"
+    REQUIRED_PACKAGES = ["requests"]
+    REQUIRED_ENV_VARS = ["WEATHER_API_KEY"]
+
+    def setup(self) -> bool:
+        """Initialize the weather skill."""
+        # Validate dependencies
+        if not self.validate_packages():
+            return False
+        if not self.validate_env_vars():
+            return False
+
+        # Store API key
+        self.api_key = os.getenv("WEATHER_API_KEY")
+        return True
+
+    def register_tools(self) -> None:
+        """Register weather tools."""
+        self.define_tool(
+            name="get_weather",
+            description="Get current weather for a location",
+            handler=self._get_weather,
+            parameters={
+                "type": "object",
+                "properties": {
+                    "location": {
+                        "type": "string",
+                        "description": "City name or zip code"
+                    }
+                },
+                "required": ["location"]
+            }
+        )
+
+    def _get_weather(self, args: Dict, raw_data: Dict) -> SwaigFunctionResult:
+        """Handle weather lookup."""
+        import requests
+
+        location = args.get("location")
+        url = f"https://api.weather.com/v1/current?q={location}&key={self.api_key}"
+
+        try:
+            response = requests.get(url)
+            data = response.json()
+            return SwaigFunctionResult(
+                f"Weather in {location}: {data['condition']}, {data['temp']}°F"
+            )
+        except Exception as e:
+            return SwaigFunctionResult(f"Unable to get weather: {str(e)}")
+
+    def get_hints(self) -> List[str]:
+        """Speech recognition hints."""
+        return ["weather", "temperature", "forecast", "sunny", "rainy"]
+
+    def get_prompt_sections(self) -> List[Dict[str, Any]]:
+        """Add weather instructions to prompt."""
+        return [{
+            "title": "Weather Information",
+            "body": "You can check weather for any location using the get_weather function."
+        }]
+
+    @classmethod
+    def get_parameter_schema(cls):
+        schema = super().get_parameter_schema()
+        schema.update({
+            "units": {
+                "type": "string",
+                "description": "Temperature units",
+                "default": "fahrenheit",
+                "enum": ["fahrenheit", "celsius"]
+            }
+        })
+        return schema
+```
+
+### Using Skills
+
+```python
+from signalwire_agents import AgentBase
+
+agent = AgentBase(name="weather-agent")
+
+## Add skill with default configuration
+agent.add_skill("weather")
+
+## Add skill with custom configuration
+agent.add_skill("weather", {
+    "units": "celsius"
+})
+
+## List available skills
+print(agent.list_available_skills())
+```
+
+### Skill Directory Structure
+
+<Files>
+  <Folder name="signalwire_agents/skills" defaultOpen>
+    <Folder name="weather" defaultOpen>
+      <File name="__init__.py" />
+      <File name="skill.py" comment="WeatherSkill class" />
+      <File name="requirements.txt" comment="Skill-specific dependencies" />
+    </Folder>
+    <Folder name="calendar">
+      <File name="__init__.py" />
+      <File name="skill.py" />
+      <File name="requirements.txt" />
+    </Folder>
+  </Folder>
+</Files>
+
+

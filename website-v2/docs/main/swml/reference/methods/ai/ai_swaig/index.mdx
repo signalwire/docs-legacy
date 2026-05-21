@@ -1,0 +1,175 @@
+---
+slug: /swml/reference/ai/swaig
+title: SWAIG
+description: The SignalWire AI Gateway Interface. Allows you to create user-defined functions that can be executed during the dialogue.
+toc_max_heading_level: 3
+---
+import SupportedLanguageCodesPartial from '@site/docs/_partials/swml/_supported-language-codes.mdx';
+import WebHookUrlPartial from '@site/docs/_partials/swml/_web-hook-url.mdx';
+
+
+The SignalWire AI Gateway Interface. Allows you to create user-defined functions that can be executed during the dialogue.
+
+## **Properties**
+
+<ParamField path="ai.SWAIG" type="object">
+  An object that accepts the following properties.
+</ParamField>
+
+<Indent>
+
+<ParamField path="SWAIG.defaults" type="object">
+  Default settings for all SWAIG functions. If `defaults` is not set, settings may be set in each function object. Default is not set.
+</ParamField>
+
+<Indent>
+
+<ParamField path="defaults.web_hook_url" type="string">
+  The default URL to send status callbacks and reports to for all SWAIG functions. If `defaults` is not set, `web_hook_url` may be set in each [SWAIG function](/docs/swml/reference/ai/swaig/functions) object. Authentication can also be set in the url in the format of `username:password@url`.
+</ParamField>
+
+</Indent>
+
+
+<ParamField path="SWAIG.functions" type="object[]">
+  An array of JSON objects to define functions that can be executed during the interaction with the AI. Default is not set. The fields of this object are the six following.
+
+  See [`functions`](/docs/swml/reference/ai/swaig/functions) for additional details.
+</ParamField>
+
+
+<ParamField path="SWAIG.includes" type="object[]">
+  An array of objects to include remote function signatures. This allows you to include functions that are defined in a remote location.
+
+  See [`includes`](/docs/swml/reference/ai/swaig/includes) for additional details.
+</ParamField>
+
+
+<ParamField path="SWAIG.internal_fillers" type="object">
+  An object that defines language-specific filler phrases for internal SWAIG functions.
+  These fillers help break silence between responses and are played asynchronously during function execution.
+  Each key is a function name, and each value is an object mapping [language codes](/docs/swml/reference/ai/swaig#filler-language-codes) to arrays of filler phrases.
+</ParamField>
+
+<Indent>
+
+<ParamField path="internal_fillers.hangup" type="object">
+  Filler phrases played when the AI Agent is hanging up the call.
+</ParamField>
+
+<ParamField path="internal_fillers.check_time" type="object">
+  Filler phrases played when the AI Agent is checking the time.
+</ParamField>
+
+<ParamField path="internal_fillers.wait_for_user" type="object">
+  Filler phrases played when the AI Agent is waiting for user input.
+</ParamField>
+
+<ParamField path="internal_fillers.wait_seconds" type="object">
+  Filler phrases played during deliberate pauses or wait periods.
+</ParamField>
+
+<ParamField path="internal_fillers.adjust_response_latency" type="object">
+  Filler phrases played when the AI Agent is adjusting response timing.
+</ParamField>
+
+<ParamField path="internal_fillers.next_step" type="object">
+  Filler phrases played when transitioning between conversation steps when utilizing [`prompt.contexts`](/docs/swml/reference/ai/prompt).
+</ParamField>
+
+<ParamField path="internal_fillers.change_context" type="object">
+  Filler phrases played when switching between conversation contexts when utilizing [`prompt.contexts`](/docs/swml/reference/ai/prompt).
+</ParamField>
+
+<ParamField path="internal_fillers.get_visual_input" type="object">
+  Filler phrases played when the AI Agent is processing visual input. Enabled when `enable_vision` is set to `true` in [`ai.params`](/docs/swml/reference/ai/params).
+</ParamField>
+
+<ParamField path="internal_fillers.get_ideal_strategy" type="object">
+  Filler phrases played when the AI Agent is thinking or considering options. Enabled when `enable_thinking` is set to `true` in [`ai.params`](/docs/swml/reference/ai/params).
+</ParamField>
+
+</Indent>
+
+
+<ParamField path="SWAIG.native_functions" type="string[]">
+  Prebuilt functions the AI agent is able to call.
+  The agent is already aware of these functions and can use them creatively based on prompting.
+  For example, a prompt like "tell the user what time it is" will automatically use `check_time`.
+
+  Accepted values:
+  - `adjust_response_latency` - Adjust how long the agent will wait for the user to stop talking.
+  - `check_time` - Returns the current time for the time zone set in `ai.local_tz`.
+  - `wait_for_user` - Causes the AI to wait until the user speaks again. Use when the user asks to wait or hold on.
+  - `wait_seconds` - Waits for the given amount of time.
+</ParamField>
+
+</Indent>
+
+
+### Filler language codes
+
+Several SWAIG properties accept filler phrases keyed by language code, including [`internal_fillers`](#internal_fillers) and per-function [`fillers`](/docs/swml/reference/ai/swaig/functions#fillers). The following language codes are supported across all filler configurations.
+
+<SupportedLanguageCodesPartial />
+
+
+<WebHookUrlPartial />
+
+
+## **Examples**
+
+### internal_fillers
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+SWAIG:
+  internal_fillers:
+    hangup:
+      en-US:
+        - 'Goodbye!'
+        - 'Thank you for calling.'
+        - 'Have a great day!'
+      es-ES:
+        - '¡Adiós!'
+        - 'Gracias por llamar.'
+        - '¡Que tengas un buen día!'
+    check_time:
+      default:
+        - 'Let me check the time.'
+        - 'One moment while I get the time.'
+        - 'Just checking the current time.'
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "SWAIG": {
+    "internal_fillers": {
+      "hangup": {
+        "en-US": [
+          "Goodbye!",
+          "Thank you for calling.",
+          "Have a great day!"
+        ],
+        "es-ES": [
+          "¡Adiós!",
+          "Gracias por llamar.",
+          "¡Que tengas un buen día!"
+        ]
+      },
+      "check_time": {
+        "default": [
+          "Let me check the time.",
+          "One moment while I get the time.",
+          "Just checking the current time."
+        ]
+      }
+    }
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+

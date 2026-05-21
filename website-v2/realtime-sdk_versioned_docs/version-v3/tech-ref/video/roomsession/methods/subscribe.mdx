@@ -1,0 +1,36 @@
+---
+title: "subscribe"
+slug: /node/reference/video/room-session/subscribe
+description: subscribe method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+[roomsessionfullstate-2]: /docs/server-sdk/v3/node/reference/video/room-session-full-state
+
+### subscribe
+
+- **subscribe**(): `Promise<RoomSessionFullState>` - See [RoomSessionFullState][roomsessionfullstate-2] for more details.
+
+Listens for the events for which you have provided event handlers and returns the [RoomSessionFullState][roomsessionfullstate-2] that contains the full state of the room session.
+
+Note that you don't need to manually call this method to start listening to events, since they are listened automatically.
+
+#### Returns
+
+`Promise<RoomSessionFullState>` - See [RoomSessionFullState][roomsessionfullstate-2] for more details.
+
+#### Example
+
+```typescript
+const client = ...  // get a client with createClient()
+
+client.video.on('room.started', async (roomSession) => {
+  // attach event listeners...
+  // roomSession.on(...)
+
+  // This gives you the full state of the room session!
+  const roomSessionState = await roomSession.subscribe()
+  console.log('room name:', roomSessionState.name)
+  console.log('members:', roomSessionState.members)
+}
+```

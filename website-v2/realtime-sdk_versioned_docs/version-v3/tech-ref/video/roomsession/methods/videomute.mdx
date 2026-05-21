@@ -1,0 +1,31 @@
+---
+title: "videoMute"
+slug: /node/reference/video/room-session/video-mute
+description: videoMute method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+
+### videoMute
+
+- **videoMute**(`params`): `Promise<void>`
+
+Puts the video of a given member on mute. Participants will see a mute image instead of the video stream.
+
+#### Parameters
+
+| Name              | Type     | Description               |
+|:------------------|:---------|:--------------------------|
+| `params`          | `Object` | -                         |
+| `params.memberId` | `string` | Id of the member to mute. |
+
+#### Returns
+
+`Promise<void>`
+
+#### Example
+
+```typescript
+const id = "de550c0c-3fac-4efd-b06f-b5b8614b8966"; // you can get this from getMembers()
+await roomSession.videoMute({ memberId: id });
+```

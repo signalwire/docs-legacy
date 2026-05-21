@@ -1,0 +1,21 @@
+---
+title: HangupResult
+slug: /ruby/reference/calling/results/hangup
+description: The HangupResult object is returned when a call is hung up.
+toc_max_heading_level: 3
+---
+
+[call]: /docs/server-sdk/v2/ruby/reference/calling/call#hangup
+[relay-event]: /docs/server-sdk/v2/ruby/reference/event
+
+# Relay::Calling::HangupResult
+
+This object is returned by the [`hangup`][call] method.
+
+## Properties
+
+| Property | Type | Description |
+| :------- | :--- | :---------- |
+| `successful` | Boolean | Whether the call has been hung up successfully. |
+| `event` | [Relay::Event][relay-event] | Last event that completed the operation. |
+| `reason` | String | The hangup reason. |

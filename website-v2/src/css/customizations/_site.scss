@@ -1,0 +1,224 @@
+/*
+
+This file contains site-wide structural stylings. That includes sidebars, drop-downs etc.
+
+*/
+
+
+:root {
+  --secondary-navbar-height: 2.8125rem !important;
+}
+
+.header-github-link::before {
+  content: "";
+  width: 24px;
+  height: 24px;
+  display: flex;
+  background-color: var(--ifm-navbar-link-color);
+  mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12'/%3E%3C/svg%3E");
+  transition: background-color var(--ifm-transition-fast)
+    var(--ifm-transition-timing-default);
+}
+
+.header-github-link:hover::before {
+  background-color: var(--ifm-navbar-link-hover-color);
+}
+
+.header-discord-link::before {
+  content: "";
+  width: 24px;
+  height: 24px;
+  display: flex;
+  background-color: var(--ifm-navbar-link-color);
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M20.318 4.361a19.8 19.8 0 0 0-4.886-1.517.075.075 0 0 0-.078.038c-.212.375-.446.866-.609 1.25a18.3 18.3 0 0 0-5.487 0 12 12 0 0 0-.618-1.25.075.075 0 0 0-.078-.038 19.77 19.77 0 0 0-4.886 1.517.06.06 0 0 0-.032.027C.534 9.036-.32 13.571.099 18.048q.005.033.032.056a19.95 19.95 0 0 0 5.993 3.03.075.075 0 0 0 .084-.029c.462-.63.873-1.295 1.227-1.994a.074.074 0 0 0-.015-.089l-.027-.017a13.5 13.5 0 0 1-1.872-.893.075.075 0 0 1-.03-.099l.023-.029q.191-.143.372-.293a.075.075 0 0 1 .077-.011c3.929 1.794 8.181 1.794 12.062 0a.075.075 0 0 1 .08.011q.182.15.372.293a.075.075 0 0 1-.006.128 12 12 0 0 1-1.874.891.075.075 0 0 0-.045.045.075.075 0 0 0 .005.062c.36.697.77 1.364 1.226 1.994a.075.075 0 0 0 .084.029 19.88 19.88 0 0 0 6.002-3.03.075.075 0 0 0 .032-.055c.501-5.177-.839-9.674-3.549-13.659a.045.045 0 0 0-.03-.029zM8.027 15.061c-1.184 0-2.157-1.086-2.157-2.418s.956-2.42 2.157-2.42c1.21 0 2.175 1.095 2.157 2.42 0 1.332-.956 2.418-2.157 2.418zm7.974 0c-1.182 0-2.157-1.086-2.157-2.418s.956-2.42 2.157-2.42c1.21 0 2.177 1.095 2.157 2.42 0 1.332-.947 2.418-2.157 2.418z'/%3E%3C/svg%3E");
+}
+
+.header-discord-link:hover::before {
+  background-color: var(--ifm-navbar-link-hover-color);
+}
+
+// Custom sidebar style
+
+.theme-doc-sidebar-container {
+  .theme-doc-sidebar-menu {
+    font-size: 0.9em;
+
+    // Ensure the external link icon is aligned with the text
+    .menu__list-item.external-link .menu__link {
+      display: flex;
+      align-items: center;
+    }
+    // External link icon styling
+    .menu__list-item.external-link .menu__link::after {
+      content: "";
+      width: 13.5px;
+      height: 13.5px;
+      margin-left: 0.3rem;
+      background-color: currentColor;
+      -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13.5' height='13.5' viewBox='0 0 24 24'%3E%3Cpath d='M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z'/%3E%3C/svg%3E");
+      mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13.5' height='13.5' viewBox='0 0 24 24'%3E%3Cpath d='M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z'/%3E%3C/svg%3E");
+      -webkit-mask-repeat: no-repeat;
+      mask-repeat: no-repeat;
+    }
+
+    // Reset margins for various elements
+    .menu__list .menu__list,
+    .menu__link--sublist,
+    .menu__list-item {
+      margin: 0;
+    }
+
+    // Base menu item styles
+    .menu__list-item {
+      position: relative;
+    }
+
+    // Category header styling
+    .menu-category {
+      // NEW: Separator and spacing
+      margin-bottom: 1rem;
+      padding-top: 0.5rem;
+      border-top: 1px solid var(--ifm-toc-border-color);
+
+      // First category shouldn't have separator
+      &:first-child {
+        border-top: none;
+        padding-top: 0;
+      }
+
+      // ORIGINAL: Category header link styling
+      > .menu__list-item-collapsible {
+        a {
+          font-weight: bold;
+          text-transform: uppercase;
+          font-size: 0.8em;
+          border-left: none;
+          color: var(--sw-category-menu-color);
+
+          &.menu__link--active {
+            color: var(--sw-category-menu-color-active);
+          }
+
+          &:after {
+            background: none;
+          }
+        }
+
+        &:hover {
+          background: none;
+        }
+      }
+
+      > .menu__list {
+        padding-left: 0;
+      }
+    }
+
+    // Deprecated items styling
+    .menu__list-item.deprecated {
+      display: flex;
+      align-items: center;
+
+      .menu__link {
+        text-decoration: line-through;
+      }
+    }
+
+    // Nested menu items styling
+    .menu__list .menu__list .menu__list-item {
+      .menu__link {
+        font-size: 0.9em;
+        font-weight: 400;
+      }
+    }
+
+    // Base styles for nested items
+    .menu__list .menu__list .menu__list-item {
+      .menu__link {
+        font-size: 0.9em;
+        font-weight: 400;
+      }
+    }
+
+    // Apply hover/active effects to items in lists that have vertical lines
+    .menu__list .menu__list:not(.menu-category > .menu__list) {
+      position: relative;
+
+      // Vertical line
+      &::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0.75rem;
+        height: 100%;
+        width: 1px;
+        background-color: var(--ifm-color-gray-300);
+      }
+
+      // Hover/active effects for items in these lists
+      .menu__list-item .menu__link {
+        &--active,
+        &:hover {
+          border-radius: 0;
+          border-left: 1px solid var(--ifm-color-primary);
+          // margin-left: -1px;
+          padding-left: calc(var(--ifm-menu-link-padding-horizontal) - 1px);
+        }
+      }
+    }
+  }
+}
+
+// special color for dark mode
+[data-theme="dark"] .theme-doc-sidebar-container {
+  .theme-doc-sidebar-menu {
+    .menu-category {
+      // Hover/active effects for items in these lists
+      .menu__list .menu__list:not(.menu-category > .menu__list) {
+        .menu__list-item .menu__link {
+          &--active,
+          &:hover {
+            border-left: 1px solid var(--ifm-color-primary-lighter);
+          }
+        }
+      }
+    }
+  }
+}
+
+// Content width for all page types
+.theme-doc-markdown .col.col--12.markdown,
+.generatedIndexPage_vN6x,
+.row:has(.tableOfContents_bqdL:empty) .docItemCol_xLCN,
+.row:not(:has(.tableOfContents_bqdL)) .docItemCol_xLCN {
+  max-width: min(85vw, 70em) !important;
+  margin: 0 auto !important;
+}
+
+// Hide empty TOC
+.col.col--3:has(.tableOfContents_bqdL:empty) {
+  display: none !important;
+}
+
+// Attempt to fix the bug where if you hover over a collapsible menu item, the text disappears.
+
+.navbar-sidebar__item {
+  .menu__list-item-collapsible .menu__link:hover,
+  .menu__list-item-collapsible .menu__link--active:hover {
+    background: var(--sw-horizontal-active-line-color) !important;
+    background-clip: text !important;
+    transition: var(--ifm-transition-fast);
+    -webkit-text-fill-color: transparent;
+  }
+}
+
+.pagination-nav__link:hover {
+  background: color-mix(in srgb, var(--ifm-card-background-color) 60%, transparent);
+}
+
+// Diagram images: invert colors in dark mode for visibility
+// Target both wrapper approach and direct img.diagram class (for medium-zoom cloned images)
+[data-theme="dark"] .diagram img,
+[data-theme="dark"] img.diagram {
+  filter: invert(1) hue-rotate(180deg);
+}

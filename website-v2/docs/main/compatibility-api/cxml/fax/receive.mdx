@@ -1,0 +1,177 @@
+---
+title: Receive
+sidebar_label: Receive
+excerpt: ''
+slug: /compatibility-api/cxml/reference/fax/receive
+sidebar_position: 1
+toc_max_heading_level: 3
+---
+
+The `<Receive>` verb tells SignalWire to receive an incoming fax, which results in the creation of a new Fax instance resource.
+
+Faxes remain stored indefinitely. To delete a fax, use the appropriate API call from the [Compatibility API](/docs/compatibility-api/rest/delete-fax).
+
+## Verb attributes
+
+<ParamField path="action" type="string">
+  The URL to request when a fax has failed or has been received.
+</ParamField>
+
+<ParamField path="mediaType" type="string" default="application/pdf">
+  The type of media used to store fax media. Valid values are `application/pdf` or `image/tiff`.
+</ParamField>
+
+<ParamField path="method" type="string" default="POST">
+  The `method` attribute specifies whether the request to `action` is a `GET` or a `POST`. Valid values are `GET` or `POST`.
+</ParamField>
+
+<ParamField path="pageSize" type="string" default="letter">
+  The size to interpret incoming pages as. Valid values are `letter`, `legal`, or `a4`.
+</ParamField>
+
+## Action callback
+
+If the verb attribute `action` is specified, the action callback will include the [Standard Fax Request Parameters](/docs/compatibility-api/cxml/reference/fax#request-parameters) plus the following optional parameters:
+
+<ParamField path="ErrorCode" type="string">
+  The error code provides more information on a failed fax.
+</ParamField>
+
+<ParamField path="ErrorMessage" type="string">
+  The message explaining the reason for fax failure.
+</ParamField>
+
+<ParamField path="FaxStatus" type="string">
+  The status of the fax.
+</ParamField>
+
+<ParamField path="MediaUrl" type="string">
+  The media URL to request to retrieve incoming media.
+</ParamField>
+
+<ParamField path="NumPages" type="integer">
+  The number of pages received from a successful fax.
+</ParamField>
+
+<ParamField path="RemoteStationId" type="string">
+  The transmitting subscriber identification (TSID) reported by the fax machine that sent in the fax.
+</ParamField>
+
+
+## Examples
+
+### Receive a fax
+
+<CodeBlocks>
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+  <Receive action="/fax/received"/>
+</Response>
+```
+
+```javascript title="Node.js"
+const { RestClient } = require("@signalwire/compatibility-api");
+const response = new RestClient.LaML.FaxResponse();
+
+response.receive({ action: "/fax/received" });
+console.log(response.toString());
+```
+
+```csharp
+using Twilio.TwiML;
+using Twilio.TwiML.Fax;
+using System;
+
+
+class Example
+{
+    static void Main()
+    {
+        var response = new FaxResponse();
+        response.Receive(action: "/fax/received"));
+
+        Console.WriteLine(response.ToString());;
+    }
+}
+```
+
+```python
+from signalwire.fax_response import FaxResponse, Receive
+
+response = FaxResponse()
+response.receive(action="/fax/received")
+
+print(response)
+```
+
+```ruby
+require 'signalwire/sdk'
+
+response = Signalwire::Sdk::FaxResponse.new do |response|
+  response.receive(action: "/fax/received")
+end
+
+puts response.to_s
+```
+</CodeBlocks>
+
+SignalWire will receive the incoming fax and provide a URL endpoint.
+
+### Store fax image
+
+<CodeBlocks>
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+  <Receive mediaType="image/tiff"></Receive>
+</Response>
+```
+
+```javascript title="Node.js"
+const { RestClient } = require("@signalwire/compatibility-api");
+const response = new RestClient.LaML.FaxResponse();
+
+response.receive({ mediaType: "image/tiff" });
+console.log(response.toString());
+```
+
+```csharp
+using Twilio.TwiML;
+using Twilio.TwiML.Fax;
+using System;
+
+
+class Example
+{
+    static void Main()
+    {
+        var response = new FaxResponse();
+        response.Receive(mediaType: "image/tiff"));
+
+        Console.WriteLine(response.ToString());;
+    }
+}
+```
+
+```python
+from signalwire.fax_response import FaxResponse, Receive
+
+response = FaxResponse()
+response.receive(media_type="image/tiff")
+
+print(response)
+```
+
+```ruby
+require 'signalwire/sdk'
+
+response = Signalwire::Sdk::FaxResponse.new do |response|
+  response.receive(media_type: "image/tiff")
+end
+
+puts response.to_s
+```
+</CodeBlocks>
+
+This example shows that the media from the incoming fax will be stored on SignalWire's server in TIFF format.

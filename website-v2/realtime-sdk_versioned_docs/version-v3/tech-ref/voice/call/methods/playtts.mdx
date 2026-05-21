@@ -1,0 +1,58 @@
+---
+title: "playTTS"
+slug: /node/reference/voice/call/play-tts
+description: playTTS method for the Call class.
+toc_max_heading_level: 3
+---
+
+[callplayback-9]: /docs/server-sdk/v3/node/reference/voice/call-playback
+[here-3]: /docs/platform/voice/tts
+[supported-voices-and-languages-1]: /docs/platform/voice/tts
+
+### playTTS
+
+- **playTTS**(`params`): `Promise<CallPlayback>` - See [CallPlayback][callplayback-9] for more details.
+
+Plays text-to-speech.
+
+#### Parameters
+
+| Name               | Type                   | Description                                                                                                                                                                                      |
+|:-------------------|:-----------------------|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `params`           | `Object`               | -                                                                                                                                                                                                |
+| `params.gender?`   | `"male"` \| `"female"` | Gender of the voice. Defaults to `female`.                                                                                                                                                       |
+| `params.language?` | `string`               | Language of the text in `ISO 639-1` (language name) + `ISO 3166` (country code). Defaults to `en-US`.<br /> Supported languages can be found [here][here-3]                |
+| `params.text`      | `string`               | Text to play. SSML may be entered as a string wrapped in `<speak>` tags. <br />See our [supported voices and languages][supported-voices-and-languages-1] documentation for usage and supported tags. |
+| `params.voice?`    | `string`               | Voice to use (takes precedence on `gender`).<br /> Supported voices can be found [here][here-3]                                                                            |
+| `params.volume?`   | `number`               | Volume value between -40dB and +40dB where 0 is unchanged. Default is 0.                                                                                                                         |
+
+#### Returns
+
+`Promise<CallPlayback>` - See [CallPlayback][callplayback-9] for more details.
+
+#### Examples
+
+```js
+const playback = await call.playTTS({ text: "Welcome to SignalWire!" });
+await playback.ended();
+```
+
+Using SSML:
+
+```js
+const playback = await call.playTTS({
+  text: `<speak>
+      Here are <say-as interpret-as="characters">SSML</say-as> samples.
+      I can pause <break time="3s"/>.
+      I can speak in cardinals. Your number is <say-as interpret-as="cardinal">10</say-as>.
+      Or I can speak in ordinals. You are <say-as interpret-as="ordinal">10</say-as> in line.
+      Or I can even speak in digits. The digits for ten are <say-as interpret-as="characters">10</say-as>.
+      I can also substitute phrases, like the <sub alias="World Wide Web Consortium">W3C</sub>.
+      Finally, I can speak a paragraph with two sentences.
+      <p><s>This is sentence one.</s><s>This is sentence two.</s></p>
+    </speak>
+    `,
+  voice: "polly.Joey",
+});
+await playback.ended();
+```

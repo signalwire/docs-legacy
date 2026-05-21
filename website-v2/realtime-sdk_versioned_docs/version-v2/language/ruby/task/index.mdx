@@ -1,0 +1,54 @@
+---
+title: RELAY Task
+slug: /ruby/reference/task
+toc_max_heading_level: 3
+---
+
+[consumer]: /docs/server-sdk/v2/ruby/reference/consumer#on_task
+[relay-consumers]: /docs/server-sdk/v2/ruby/reference/consumer
+
+A `Relay::Task` is simple way to send jobs to your [`Relay.Consumers`][relay-consumers] from a short lived process, like a web framework. RELAY Tasks allow you to pass commands down to your Consumers without blocking your short lived request. Think of a RELAY Task as a way to queue a job for your background workers to processes asynchronously.
+
+## Creating Tasks
+
+A Task is a simple object with 2 required arguments: `project` and `token`. Project and Token are used to send the Task to your Consumers. Once created, the Task has only one method `deliver` to send jobs to your Consumer.
+
+```ruby
+require 'signalwire/relay/task'
+
+task = Signalwire::Relay::Task.new(project: "your-project-id", token: "your-project-token")
+task.deliver(context: 'incoming', message: { number_to_call: '+1555XXXXXXX', message_to_play: 'We have a message for you' })
+```
+
+## Methods
+
+### deliver
+
+Send a job to your `Consumer` in a specific context.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `context` | String | Yes | Context where to send the Task. |
+| `message` | Hash | Yes | Object with your custom data that will be sent to your Consumer's [`on_task`][consumer] handler. |
+
+**Returns**
+
+`Boolean` - `true` if the request was successful, `false` if not.
+
+**Examples**
+
+Deliver a task to your Consumer with a message to then make an outbound Call.
+
+```ruby
+message = {
+  'action': 'call',
+  'from': '+18881112222'
+  'to': '+18881113333'
+}
+
+result = task.deliver(context: 'incoming', message: message)
+
+puts "error delivering task" if result == false
+```

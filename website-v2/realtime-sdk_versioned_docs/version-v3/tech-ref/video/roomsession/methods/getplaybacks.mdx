@@ -1,0 +1,27 @@
+---
+title: "getPlaybacks"
+slug: /node/reference/video/room-session/get-playbacks
+description: getPlaybacks method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+[roomsessionplayback-5]: /docs/server-sdk/v3/node/reference/video/room-session-playback
+
+### getPlaybacks
+
+- **getPlaybacks**(): `Promise<{ playbacks: RoomSessionPlayback }>` - See [RoomSessionPlayback][roomsessionplayback-5] for more details.
+
+Obtains a list of playbacks for the current room session.
+
+#### Returns
+
+`Promise<{ playbacks: RoomSessionPlayback }>` - See [RoomSessionPlayback][roomsessionplayback-5] for more details.
+
+#### Example
+
+```js
+const pl = await roomSession.getPlaybacks();
+if (pl.playbacks.length > 0) {
+  console.log(rec.playbacks[0].id, recs.playbacks[0].state);
+}
+```

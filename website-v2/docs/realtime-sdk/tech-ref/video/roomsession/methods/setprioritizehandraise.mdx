@@ -1,0 +1,48 @@
+---
+title: "setPrioritizeHandraise"
+slug: /node/reference/video/room-session/set-prioritize-hand-raise
+description: setPrioritizeHandraise method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+
+### setPrioritizeHandraise
+
+- **setPrioritizeHandraise**(`param`): `Promise<boolean>`
+
+Set whether to prioritize hand-raise or not. Users with raised hands will be shown in the main video area over other participants who don't have their hand raised.
+
+#### Parameters
+
+<ParamField path="param" type="boolean" required default="true">
+  Whether to prioritize participants on the canvas with their hand-raised. If omitted, the hand status is toggled to the opposite of the current status.
+</ParamField>
+
+#### Returns
+
+`Promise<boolean>`
+
+#### Example
+
+In this example, we wait for a room to start and then set the room to prioritize hand-raise.
+
+```javascript
+import { SignalWire } from "@signalwire/realtime-api";
+
+// Initialize the SignalWire client
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" });
+
+// Access video client from the main client
+const videoClient = client.video;
+
+// Setup listener for when a room starts
+
+await videoClient.listen({
+  onRoomStarted: async (roomSession) => {
+    console.log("Room started", roomSession.displayName);
+
+    // Set the room to prioritize hand-raise
+    await roomSession.setPrioritizeHandraise(true);
+  }
+});
+```

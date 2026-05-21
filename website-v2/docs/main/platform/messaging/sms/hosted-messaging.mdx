@@ -1,0 +1,132 @@
+---
+slug: /platform/messaging/hosted-messaging
+title: Hosted messaging
+description: Learn about porting Messaging services only to the SignalWire platform.
+---
+
+Hosted Messaging allows you to use SignalWire to send and receive SMS and MMS on 
+<Tooltip tip="10DLC stands for '10-digit long code numbers', such as `(123) 456-7890`. [Learn more](/docs/platform/phone-numbers/getting-started/buying-a-phone-number/#types-of-phone-number)">10DLC</Tooltip> 
+and Toll-Free VoIP phone numbers that are held elsewhere for voice (such as a PBX or VoIP provider).
+
+Use Hosted Messaging to migrate a phone number to SignalWire's robust Messaging platform
+while maintaining your existing Voice infrastructure.
+
+## Prerequisites
+
+- A **Letter of Authorization (LOA)** signed and dated by the authorized user or administrator of the number within the past 30 days
+  - Download the LOA form from the "Letter of Authorization" section of the [Port In form](https://forms.signalwire.me/Port-In.html)
+- A **recent invoice** from the current voice provider showing the phone number in service
+- **Permission** from your current voice provider to split Messaging services away from Voice services
+- **An active Campaign with The Campaign Registry** (not required for Toll-Free numbers)
+  - Valid 10DLC Campaign provisioning is required for all US VoIP phone numbers to send outbound messages to the US.
+  - Please ensure that your 10DLC Campaign is in an active state with SignalWire before requesting to host your messaging services.
+  - [Learn more about The Campaign Registry](/docs/platform/messaging/campaign-registry)
+
+<Info>
+SignalWire does not offer Hosted Messaging services for mobile (wireless) phone numbers.
+You can convert a wireless number to VoIP (non-wireless) by 
+[porting both Voice *and* Messaging services to SignalWire.][port-in]
+</Info>
+
+## Instructions
+
+<Steps>
+
+### Verify ownership
+
+Before SignalWire can host messaging, we must verify that you have ownership and authorization to text enable the phone number(s).
+
+To do so, complete a Letter of Authorization.
+
+<Card title="Letter of Authorization form" href="https://forms.signalwire.me/Port-In.html">
+    Download the LOA form under the section titled “Letter of Authorization”.
+</Card>
+
+### Complete request form
+
+Click **Initiate Port Request** to complete the form in your SignalWire Dashboard in the Port Requests area of the Phone Numbers section.
+Fill out all required fields.
+Under **Services to Port**, be sure to select **Messaging Services Only**.
+
+<Card title="Port Requests" href="https://my.signalwire.com?page=port_requests/new">
+    Open the Port Requests interface in your SignalWire Dashboard.
+</Card>
+
+<br/>
+
+<Warning>
+Standard Hosted Messaging requests submitted outside of the process outlined in this guide will not be processed,
+and you will be instructed to return to your Dashboard to submit the order properly.
+SignalWire does not currently offer an API for porting submissions.
+</Warning>
+
+### Order processing and configuration
+
+Once your request is received:
+
+1. SignalWire will review the documentation provided and will add the phone number to your account.  
+2. SignalWire will submit the order to host messaging services. There is a 48 hour minimum turnaround time for message enablement processing. During this time, messaging services should still process through the voice provider or current messaging service provider.  
+3. Once the phone numbers are added to your dashboard, set up your Inbound Message Settings in the phone number configuration. You won't be able to test right away, as the hosted messaging request is still processing.  
+4. 10DLC Campaign provisioning (for US numbers only) begins once the Messaging services have been enabled. This process may take 10-30 minutes. During this provisioning step, **outbound messaging will not function.** 
+
+### Hosted Messaging active
+
+Once SignalWire confirms message enablement, test inbound and outbound functionality.
+
+With all of the above steps completed, you're ready to go!
+
+</Steps>
+
+## Next steps
+
+### Keep Voice services active
+
+You must keep Voice services active with the current voice provider in order to host messaging services with SignalWire. 
+
+<Warning>
+Releasing the phone number with your old voice provider could result in disruption of messaging services.
+If you wish to port the number completely away from your old provider, follow our 
+[guide to porting both voice and messaging services][port-in].
+</Warning>
+
+### Registration or Verification requirements
+
+<CardGroup>
+
+<Card title="10DLC (local) numbers">
+
+Maintain valid 10DLC Campaign provisioning.
+Consult our [reference to 10DLC Campaigns](https://signalwire.com/blogs/industry/a-beginners-guide-to-a2p-10dlc-campaign-registration)
+and our 
+[documentation on The Campaign Registry][tcr]
+for more information.
+</Card>
+
+<Card title="Toll-Free numbers">
+To begin messaging, follow the required [Toll-Free verification process][toll-free].
+</Card>
+
+</CardGroup>
+
+## Frequently asked questions
+
+<AccordionGroup>
+
+    <Accordion title="Can I release Voice services from my old provider once SignalWire's Hosted Messaging is active?" defaultOpen="true">
+        No. If you release Voice services, you will release the whole number. This will break Hosted Messaging.
+    </Accordion>
+    <Accordion title="Is there an API for port requests?" >
+        Not currently.
+    </Accordion>
+
+</AccordionGroup>
+
+## Support
+
+If you have any questions or need assistance during the porting process, 
+[contact Support](https://support.signalwire.com/portal/en/newticket).
+Ensuring a smooth and timely transition is our top priority, and we’re happy to guide you through each step. 
+
+[port-in]: /docs/platform/porting-into-signalwire "Guide to porting numbers into SignalWire"
+[tcr]: /docs/platform/messaging/campaign-registry "Guides on The Campaign Registry"
+[toll-free]: /docs/platform/messaging/hosted-messaging "Guide to Toll-Free number verification"

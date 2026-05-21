@@ -1,0 +1,63 @@
+---
+title: Verto
+sidebar_label: Verto
+slug: /compatibility-api/cxml/reference/voice/verto
+sidebar_position: 1
+toc_max_heading_level: 3
+---
+
+The `<Verto>` noun is used to create a Verto connection. This is a SignalWire specific noun
+that is used to establish a connection between the inbound call to the Verto client.
+
+When using the `<Verto>` noun to dial a Verto client, the client address is formatted as: `<resource_name>@<space_sip_domain>.verto.signalwire.com`.
+
+
+## Verb attributes
+
+The `<Verto>` verb does not support any attributes.
+
+## Nesting
+
+No other verbs can be nested within `<Verto>` however, `<Verto>` is nested within the [`<Dial>`](/docs/compatibility-api/cxml/reference/voice/dial) verb.
+
+## Request parameters
+
+After a Dial attempt is made, SignalWire can make a request to the `<Dial>` verb's `action` attribute.
+In addition to the [Standard Request Parameters](/docs/compatibility-api/cxml/reference/voice#request-parameters), the following are
+parameters passed back to your application when SignalWire makes the request.
+
+| Parameter                | type   | Description                         |
+|:-------------------------|:-------|:------------------------------------|
+| `DialCallSID`            | string | The unique identifier for the call. |
+| `DialSipHangupDirection` | string | The direction of the hangup.        |
+| `DialCallStatus`         | string | The status of the call.             |
+| `DialCallDuration`       | string | The duration of the call.           |
+| `HangupDirection`        | string | The direction of the hangup.        |
+
+## Examples
+
+### A simple Verto dial
+
+```xml
+<?xml version="1.0"?>
+<Response>
+  <Dial>
+    <Verto>Test@mySip-domain.verto.signalwire.com</Verto>
+  </Dial>
+</Response>
+```
+
+
+### Dialing a Verto client with Dial attributes
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Dial
+     record="record-from-answer"
+     method="GET"
+     action="https://www.example.com/after_dial">
+        <Verto>Test@mySip-domain.verto.signalwire.com</Verto>
+    </Dial>
+</Response>
+```

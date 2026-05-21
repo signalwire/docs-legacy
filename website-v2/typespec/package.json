@@ -1,0 +1,40 @@
+{
+  "name": "signalwire-docs-specs",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build": "yarn build:api",
+    "build:all": "yarn build:api && yarn build:schema",
+    "build:api": "yarn build:calling-api && yarn build:chat-api && yarn build:compatibility-api && yarn build:datasphere-api && yarn build:fabric-api && yarn build:logs-api && yarn build:fax-api && yarn build:message-api && yarn build:voice-api && yarn build:pubsub-api && yarn build:project-api && yarn build:relay-rest && yarn build:video-api",
+    "build:schema": "yarn build:swml",
+    "build:swml": "cd ./swml && tsp compile . && cd ../",
+    "build:calling-api": "cd ./signalwire-rest/calling-api && tsp compile . && cd ../../",
+    "build:chat-api": "cd ./signalwire-rest/chat-api && tsp compile . && cd ../../",
+    "build:compatibility-api": "cd ./compatibility-api && tsp compile . && cd ../",
+    "build:datasphere-api": "cd ./signalwire-rest/datasphere-api && tsp compile . && cd ../../",
+    "build:fabric-api": "cd ./signalwire-rest/fabric-api && tsp compile . && cd ../../",
+    "build:logs-api": "cd ./signalwire-rest/logs-api && tsp compile . && cd ../../",
+    "build:fax-api": "cd ./signalwire-rest/fax-api && tsp compile . && cd ../../",
+    "build:message-api": "cd ./signalwire-rest/message-api && tsp compile . && cd ../../",
+    "build:voice-api": "cd ./signalwire-rest/voice-api && tsp compile . && cd ../../",
+    "build:pubsub-api": "cd ./signalwire-rest/pubsub-api && tsp compile . && cd ../../",
+    "build:project-api": "cd ./signalwire-rest/project-api && tsp compile . && cd ../../",
+    "build:relay-rest": "cd ./signalwire-rest/relay-rest && tsp compile . && cd ../../",
+    "build:video-api": "cd ./signalwire-rest/video-api && tsp compile . && cd ../../",
+    "clean": "echo 'Skipping clean step'",
+    "prebuild": "yarn clean",
+    "format": "tsp format **/*.tsp",
+    "format:check": "tsp format --check **/*.tsp"
+  },
+  "dependencies": {
+    "@typespec/compiler": "1.9.0",
+    "@typespec/http": "1.9.0",
+    "@typespec/json-schema": "1.9.0",
+    "@typespec/openapi": "1.9.0",
+    "@typespec/openapi3": "1.9.0",
+    "@typespec/rest": "0.79.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.4"
+  }
+}

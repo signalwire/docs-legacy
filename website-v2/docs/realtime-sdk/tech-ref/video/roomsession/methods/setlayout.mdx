@@ -1,0 +1,71 @@
+---
+title: "setLayout"
+slug: /node/reference/video/room-session/set-layout
+description: setLayout method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+[link-4]: /docs/server-sdk/node/reference/video/room-session/events#videopositions
+[roomsession-41]: /docs/server-sdk/node/reference/video/room-session
+[video-roomsession-4]: /docs/server-sdk/node/reference/video/room-session/get-layouts
+
+### setLayout
+
+- **setLayout**(`params`): `Promise<void>`
+
+Sets a layout for the room. You can obtain a list of available layouts with [`getLayouts`][video-roomsession-4].
+
+#### Parameters
+
+<ParamField path="params" type="object" required>
+  Object containing the parameters of the method.
+</ParamField>
+
+<Indent>
+<ParamField path="name" type="string" required>
+  Name of the layout.
+</ParamField>
+
+<ParamField path="positions" type="VideoPositions">
+  Positions to assign as soon as the new layout is set. See [`VideoPositions`][link-4].
+</ParamField>
+</Indent>
+
+#### Returns
+
+`Promise<void>`
+
+#### Example
+
+In this example, we wait for a room to start and then set the layout for that room to `"6x6"`.
+This example assumes that there is a [`RoomSession`][roomsession-41]
+already active and that members are joining the room.
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+// Initialize the SignalWire client
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+// Access video client from the main client
+const videoClient = client.video;
+
+// Setup listener for when a room starts
+await videoClient.listen({
+  onRoomStarted: (roomsession) => {
+    console.log("Room started", roomsession.displayName);
+    // Set the 6x6 layout
+    roomsession.setLayout({
+      name: "6x6",
+      positions: {
+        self: 'auto'
+      }
+    });
+    roomsession.listen({
+      onRoomUpdated: (roomsession) => {
+        console.log("Room layout updated", roomsession.layoutName);
+      },
+    })
+  }
+});
+```

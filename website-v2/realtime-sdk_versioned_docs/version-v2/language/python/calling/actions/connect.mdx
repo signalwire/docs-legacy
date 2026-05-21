@@ -1,0 +1,22 @@
+---
+title: Relay.Calling.ConnectAction
+slug: /python/reference/calling/actions/connect
+description: The Connect Action is used to connect a call to another call.
+toc_max_heading_level: 3
+---
+
+[connect-async]: /docs/server-sdk/v2/python/reference/calling/call#connect_async
+[relay-calling-connectresult]: /docs/server-sdk/v2/python/reference/calling/results/connect
+
+## Relay.Calling.ConnectAction
+
+This object returned from [`connect_async`][connect-async] method that represents a connecting attempt that is currently active on a call.
+
+### Properties
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `result` | [`Relay.Calling.ConnectResult`][relay-calling-connectresult] | Final result of connecting. |
+| `state` | `string` | Current state of connecting attempt. |
+| `completed` | `boolean` | Whether the connection attempt has completed. |
+| `payload` | `dict` | Payload sent to Relay to start the connect. |

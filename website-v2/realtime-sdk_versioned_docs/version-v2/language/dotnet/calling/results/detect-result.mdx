@@ -1,0 +1,24 @@
+---
+title: DetectResult
+slug: /dotnet/reference/calling/results/detect
+description: The DetectResult object is returned after a detection operation.
+toc_max_heading_level: 3
+---
+
+[call-1]: /docs/server-sdk/v2/dotnet/reference/calling/call#detectasync
+[call]: /docs/server-sdk/v2/dotnet/reference/calling/call#detect
+[signalwire-relay-calling-detectresulttype]: /docs/server-sdk/v2/dotnet/reference/calling/detect-result-type
+[signalwire-relay-event]: /docs/server-sdk/v2/dotnet/reference/event
+
+# SignalWire.Relay.Calling.DetectResult
+
+This object returned from [`Detect`][call] method or part of the action when [`DetectAsync`][call-1] completes, which represents the final result of a detection operation.
+
+## Properties
+
+| Property | Type | Description |
+| :-------- | :---- | :----------- |
+| `Successful` | bool | Whether the detect operation has completed successfully. |
+| `Event` | [`SignalWire.Relay.Event`][signalwire-relay-event] | The last event that completed the call. |
+| `Result` | string | Detail related to the event. |
+| `Type` | [`SignalWire.Relay.Calling.DetectResultType`][signalwire-relay-calling-detectresulttype] | The type of the detection. |

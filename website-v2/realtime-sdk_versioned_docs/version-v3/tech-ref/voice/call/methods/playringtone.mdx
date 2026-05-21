@@ -1,0 +1,35 @@
+---
+title: "playRingtone"
+slug: /node/reference/voice/call/play-ringtone
+description: playRingtone method for the Call class.
+toc_max_heading_level: 3
+---
+
+[callplayback-9]: /docs/server-sdk/v3/node/reference/voice/call-playback
+[types-3]: /docs/server-sdk/v3/node/reference/voice/types#ringtonename
+
+### playRingtone
+
+- **playRingtone**(`params`): `Promise<CallPlayback>` - See [CallPlayback][callplayback-9] for more details.
+
+Plays a ringtone.
+
+#### Parameters
+
+| Name               | Type                                       | Description                                                              |
+|:-------------------|:-------------------------------------------|:-------------------------------------------------------------------------|
+| `params`           | `Object`                                   | -                                                                        |
+| `params.duration?` | `number`                                   | Duration of ringtone to play. Defaults to 1 ringtone iteration.          |
+| `params.name`      | [`RingtoneName`][types-3] | The name of the ringtone.                                                |
+| `params.volume?`   | `number`                                   | Volume value between -40dB and +40dB where 0 is unchanged. Default is 0. |
+
+#### Returns
+
+`Promise<CallPlayback>` - See [CallPlayback][callplayback-9] for more details.
+
+#### Example
+
+```js
+const playback = await call.playRingtone({ name: "it" });
+await playback.ended();
+```

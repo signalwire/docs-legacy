@@ -1,0 +1,42 @@
+---
+title: "answer"
+slug: /node/reference/voice/call/answer
+description: answer method for the Call class.
+toc_max_heading_level: 3
+---
+
+[call]: /docs/server-sdk/node/reference/voice/call
+
+### answer
+
+- **answer**(): `Promise`\<[`Call`][call]>
+
+Answers the incoming call.
+
+#### Parameters
+
+This method has no parameters.
+
+#### Returns
+
+`Promise`\<[`Call`][call]>
+
+#### Example
+
+In this example, we answer an incoming call on the `office` topic.
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+const voiceClient = client.voice;
+
+await voiceClient.listen({
+  topics: ["office"],
+  onCallReceived: (call) => {
+    call.answer();
+    console.log("Call received", call.id);
+  }
+});
+```

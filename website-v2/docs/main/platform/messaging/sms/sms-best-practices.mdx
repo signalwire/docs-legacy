@@ -1,0 +1,158 @@
+---
+title: Optimize delivery rates
+slug: /platform/messaging/sms-best-practices
+x-custom:
+  - hideInGuideShowcase: true
+---
+
+The best way to ensure that your messages reach their intended audience is to follow these rules.
+
+## Consent (Opting In)
+
+Not surprisingly, the best way to avoid being flagged as spam is to ensure that your customers **want** to receive your messaging.
+
+Every time you send out a messaging campaign, you should have accurate, reliable, verifiable recipient opt-in information that is specific to the type of messaging that you are sending. For example, just because a customer opted in to receive account notifications does not mean that they have consented to receive new product marketing. When you follow this opt-in strategy, generally opt-out rates are consistently low (less than 5%) due to obtaining clear recipient consent.
+
+According to the [Cellular Telecommunications and Internet Association (CTIA)](https://api.ctia.org/wp-content/uploads/2023/05/230523-CTIA-Messaging-Principles-and-Best-Practices-FINAL.pdf) guidelines, you should also make sure that as soon as a recipient opts in, you send them an opt-in confirmation message.
+
+## Consent (Opting out)
+
+The other side of the consent coin is of course opting out. It is absolutely essential to offer your customers a way to opt out in every message, even though they already opted in.
+
+Customers have the right to change their minds about receiving future messages at **any** time for **any** reason. Providers who offer messaging services have an obligation to process the opted-out consumer phone number so it is removed from all distribution lists and logged as “opted out” from SMS communications. This ensures that future messages are not attempted and consumer consent is honored.
+
+There are many different methods of including opt-out messaging in your message body. This could include "Reply STOP to opt out", "Reply NO to cancel", "Send X to opt out", or even versions in other languages such as "Responde NO para cancelar."
+
+## Number Association
+
+Phone numbers should be associated with a single use case. Using the same numbers for multiple different increases the chance of issues, so it’s best to not cross-pollinate campaigns.
+
+If the numbers are meant for the same brand, can you use the same set in that case? **No.** Maybe you own a car repair service - you would not want to use the same numbers for marketing purposes that you would for appointment confirmations. This is much more likely to make the carriers question whether your traffic may be illegitimate. Identify sets of numbers for each of your various use cases, and keep them on separate tasks.
+
+## Brand Identification
+
+It is **vitally** important to include your service or business name in the content of the body. Including this information is helpful to both the customers and the carriers.
+
+**Example Message:** “Your appointment is at 3”.
+
+What if you made your dentist appointment 6 months ago at your last cleaning, and you totally forgot about it? You might assume this message isn’t for you and ignore it entirely. So how can we make that better?
+
+**Example Message Improved:** “Dr. Crentist’s Office: Hello Dwight. Your dental cleaning and crown fitting with Dr. Crentist is scheduled for 3 PM on Jan 1st, 2022. Call our office to cancel or reschedule. Reply STOP to opt out.”
+
+This is much more clear and makes it obvious to both the customer and the carrier that this is a simple customer requested appointment reminder.
+
+## Shortened URLs
+
+Shortened URLs can often cause issues as carriers can view them as likely to be spam. If you need to use a link in your message, the full domain is always preferred. If you must use a shortened URL to deliver a customer link, make sure that it is not a common, public, or shared domain shortener. You must use a shortener with a web address and IP address(es) dedicated to your exclusive use.
+
+Here is a list of common public URL shorteners that will result in your messages being flagged as spam:
+
+1. bit.ly
+1. goo.gl
+1. tinyurl.com
+1. Tiny.cc
+1. lc.chat
+1. is.gd
+1. soo.gd
+1. s2r.co
+1. budurl.com
+1. bc.vc
+
+To avoid public URL shorteners, consider using a private URL shortener with a domain and IP dedicated to your exclusive use.
+
+## Explicitly Prohibited Content
+
+Some content is explicitly disallowed from being sent via SMS/MMS with SignalWire.
+
+1. Social marketing
+1. Collections
+1. Financial services, whether account notifications, marketing, collections or billing for:
+    - High-risk/subprime lending/credit card companies
+    - Auto loans
+    - Mortgages
+    - Payday loans
+    - Short-term loans
+    - Student loans
+    - Debt consolidation/reduction/forgiveness
+1. Third Party Insurance
+    - Car Insurance
+    - Health Insurance
+1. Gambling, Casino, and Bingo
+1. Gift cards
+1. Sweepstakes
+1. Free prizes
+1. Investment opportunities
+1. Lead generation
+1. Recruiting
+1. Commission programs
+1. Credit repair
+1. Tax relief
+1. Illicit or illegal substances
+1. Work from home
+1. Get rich quick
+1. UGGS and Rayban campaigns
+1. Phishing
+1. Fraud or scams
+1. Cannabis
+1. Deceptive marketing
+1. SHAFT: Sex, Hate, Alcohol, Firearms or Tobacco
+1. Miscellaneous shams, schemes, hoodwinks, and bamboozles
+
+Including prohibited content in your messages can get your account flagged for fraud. Repeat or serious offenses can result in suspension or cancellation of your SignalWire services.
+
+## What to do if you are flagged as spam?
+
+**FIRST**, make sure that you are following all of the rules described above. Are you using opt-in/opt-outs, declaring your brand, ensuring full domain URLs, and not including any prohibited content?
+
+**SECOND**, if you're sending from local numbers, are you already registered with The Campaign Registry? If not, you can read our guide to
+[The Campaign Registry](/docs/platform/messaging/campaign-registry).
+
+**THIRD**, if you already have a registered campaign, are you using numbers that are registered to a campaign and sending the content that was approved for the campaign?
+
+IF you are following all of these rules and still being flagged as spam, it's time to engage our excellent support team. Create a Support Ticket and include the [message SID](/docs/platform/what-is-a-sid) of a message that was marked as spam so that our team can investigate the cause.
+
+## Why use SMS marketing?
+
+Integrating SMS into your marketing strategy creates much more meaningful interactions with customers. SMS marketing boasts an unbelievably high open rate of **98%** with **45%** of people responding to these messages. To compare, successful email campaigns only reach open rates of 20%-40% and cold calls average 2%.
+
+Consumers in this day and age spend an average of 3.3 hours on their phones, and most smartphone users check their phone at least once every 10 minutes. With that in mind, it's easy to see how much more accessible SMS marketing is compared to many other strategies.
+
+Even though it's been proven that SMS as marketing is very effective, many businesses are still behind the trend, making it the **perfect** time to start deploying SMS as a strategy. Jumping on this trend while it's still fresh shows your customers that you're able to keep up with the demands of modern communication.
+
+SMS marketing is also **much** quicker to execute as you don't have to spend hours creating email templates or writing ad copies/long-form content. You can write a short simple text in a matter of minutes and begin sending out your campaign.
+
+## What industries are best suited for SMS campaigns?
+
+**Marketing**
+
+1. Special Deals and offers
+1.  Exclusive Content 
+
+**Political Messaging**
+
+1. Polls
+1. Voting Information
+1. Campaign Updates
+
+**Appointment Reminders and Updates**
+
+1. Opt-in to receive notifications when an appointment is coming up
+1. Ride share notifications
+1. Food delivery updates
+
+**And many more!**
+
+1. Breaking news, Telehealth, birthday deals, etc. 
+1. City Wide Announcements or Emergency Updates
+1. Hair salons and spas
+1. Electricians, plumbers, roof repair
+
+## How to avoid customers viewing your messages as spam?
+
+Again, the number 1 priority is to make sure your customers WANT your messages.
+
+You can also list your company's number on your website and give it out at promotional events such as conferences or networking events. This can help make sure your number is easily associated with your brand.
+
+You can help encourage people to text your number by offering incentives such as monthly deals or exclusive updates.
+
+Lastly, even though your customers have opted in, it's best not to send them more than 4 texts a month. No one wants to get tons of repetitive marketing messages which can lead to the opposite effect and cause customers to lose interest in the product out of annoyance.

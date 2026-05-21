@@ -1,0 +1,71 @@
+---
+title: "getMemberMeta"
+slug: /node/reference/video/room-session/get-member-meta
+description: getMemberMeta method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+[roomsessionmember-28]: /docs/server-sdk/node/reference/video/room-session-member
+[video-roomsessionmember]: /docs/server-sdk/node/reference/video/room-session-member#field-meta
+
+### getMemberMeta
+
+- **getMemberMeta**(): `Promise`\<\{ `meta:` [`RoomSessionMember.meta`][video-roomsessionmember] }>
+
+Returns the metadata assigned to the specified member.
+
+#### Parameters
+
+<ParamField path="params" type="object" required>
+  Object containing the parameters of the method.
+</ParamField>
+
+<Indent>
+<ParamField path="memberId" type="string">
+  ID of the member for which to obtain the metadata.
+</ParamField>
+</Indent>
+
+#### Returns
+
+`Promise`\<\{ `meta:` [`RoomSessionMember.meta`][video-roomsessionmember] }>
+
+A promise that resolves to an object containing the metadata assigned to the specified [`RoomSessionMember`][roomsessionmember-28].
+
+#### Example
+
+```javascript
+import { SignalWire } from "@signalwire/realtime-api";
+
+// Initialize the SignalWire client
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+// Access the video client from the main client
+const videoClient = client.video;
+
+// Setup listener for when a room starts
+await videoClient.listen({
+  onRoomStarted: async (roomsession) => {
+    console.log("Room started", roomsession.displayName);
+
+    roomsession.listen({
+      onMemberJoined: async (member) => {
+        console.log("Member joined", member.name);
+        // set metadta for the member
+        await roomsession.setMemberMeta({
+          memberId: member.id,
+          meta: {
+            name: member.name,
+            foo: "bar"
+          }
+        });
+        // get member meta
+        const memberMeta = await roomsession.getMemberMeta({
+          memberId: member.id
+        });
+        console.log("Member meta", memberMeta.meta);
+      }
+    })
+  }
+})
+```

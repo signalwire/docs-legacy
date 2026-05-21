@@ -1,0 +1,24 @@
+---
+title: Data formats
+slug: /apis/data-formats
+---
+
+A short recap of the data formats commonly used throughout the API.
+
+## Dates and times
+
+All dates and times in requests to and from SignalWire REST API are UTC, and presented in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
+
+For example, the date and time of 8:01 AM CDT on July 23rd, 2018 is presented as: `2018-07-23T13:01:00Z`
+
+## Phone numbers
+
+All phone numbers in requests to or from the SignalWire REST API are in E.164 format, an unambiguous general format for specifying international phone numbers. Numbers in this format start with a plus sign (`+`) and the country code.
+
+For example, a US-based phone number like `(555) 123-4567` would be formatted like: `+15551234567`.
+
+If a number cannot be represented in E.164 format, then SignalWire uses the raw Caller ID string that was received.
+
+## Case sensitivity
+
+All REST parameters are case-sensitive. Make sure you use the proper casing, as shown in our API Reference.

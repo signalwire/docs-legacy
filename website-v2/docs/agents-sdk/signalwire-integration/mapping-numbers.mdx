@@ -1,0 +1,210 @@
+---
+title: "Mapping Numbers"
+sidebar_label: "Mapping Numbers"
+slug: /python/guides/mapping-numbers
+toc_max_heading_level: 3
+---
+
+## Mapping Numbers
+
+Connect phone numbers to your agent using SignalWire's SWML Script resources.
+
+### Overview
+
+SignalWire uses **SWML Script** resources to connect phone numbers to your agent. When a call comes in, SignalWire fetches SWML from your agent's URL and executes it.
+
+<Frame caption="Caller Flow">
+  <img className="diagram" src={require("@image/agents-sdk-manual/08_03_mapping-numbers_diagram1.webp").default} alt="Caller Flow." />
+</Frame>
+
+### Step 1: Create a SWML Script Resource
+
+1. Log in to SignalWire dashboard
+2. Navigate to **My Resources** in the left sidebar
+3. Click **Script**
+4. Click **New SWML Script**
+5. Fill in the fields:
+   - **Name:** Give your script a name (e.g., "my-agent")
+   - **Handle Calls Using:** Select **External URL**
+   - **Primary Script URL:** Enter your agent URL with credentials
+     - Format: `https://user:pass@your-domain.com/agent`
+6. Click **Create**
+
+<Frame caption="New SWML Script">
+  <img className="diagram" src={require("@image/agents-sdk-manual/08_03_mapping-numbers_diagram3.webp").default} alt="New SWML Script." />
+</Frame>
+
+### Step 2: Add a Phone Number or Address
+
+After creating the script, you'll see the resource configuration page:
+
+<Frame caption="Back to Resources">
+  <img className="diagram" src={require("@image/agents-sdk-manual/08_03_mapping-numbers_diagram4.webp").default} alt="Back to Resources." />
+</Frame>
+
+1. Click the **Addresses & Phone Numbers** tab
+2. Click **+ Add**
+3. Choose your address type:
+   - **Phone Number:** For receiving calls from regular phones (PSTN)
+   - **SIP Address:** For receiving SIP calls
+   - **Alias:** For referencing this resource by a custom name
+4. Follow the prompts to select or purchase a phone number
+5. Your number is now connected to your agent!
+
+<Frame caption="Add an Address">
+  <img className="diagram" src={require("@image/agents-sdk-manual/08_03_mapping-numbers_diagram5.webp").default} alt="Add an Address." />
+</Frame>
+
+### Step 3: Test Your Setup
+
+1. Ensure your agent is running locally
+2. Ensure ngrok is running (if using tunneling)
+3. Call your SignalWire phone number
+4. Hear your agent respond!
+
+### URL Format
+
+Your agent URL structure depends on your setup:
+
+**Single Agent:**
+
+```text
+https://your-server.com/
+```
+
+**Multiple Agents:**
+
+```text
+https://your-server.com/support
+https://your-server.com/sales
+https://your-server.com/billing
+```
+
+**With Authentication (recommended):**
+
+```text
+https://user:pass@your-server.com/
+```
+
+### Using ngrok for Development
+
+```bash
+# Start your agent locally
+python my_agent.py
+
+# In another terminal, start ngrok
+ngrok http 3000
+
+# Use the ngrok HTTPS URL in SignalWire
+# https://abc123.ngrok.io
+```
+
+For a static URL that doesn't change on restart:
+
+```bash
+ngrok http --url=https://your-name.ngrok-free.app 3000
+```
+
+### Basic Authentication
+
+The SDK automatically generates authentication credentials on startup:
+
+```text
+Agent 'my-agent' is available at:
+URL: http://localhost:3000
+Basic Auth: signalwire:7vVZ8iMTOWL0Y7-BG6xaN3qhjmcm4Sf59nORNdlF9bs (source: generated)
+```
+
+For persistent credentials, set environment variables:
+
+```bash
+export SWML_BASIC_AUTH_USER=signalwire
+export SWML_BASIC_AUTH_PASSWORD=your-secure-password
+```
+
+In SignalWire, use URL with credentials:
+
+```text
+https://signalwire:your-secure-password@your-server.com/
+```
+
+### Multi-Agent Server
+
+Run multiple agents on one server:
+
+```python
+from signalwire_agents import AgentServer
+
+server = AgentServer()
+
+# Register agents at different paths
+server.register(SupportAgent(), "/support")
+server.register(SalesAgent(), "/sales")
+server.register(BillingAgent(), "/billing")
+
+server.run(host="0.0.0.0", port=3000)
+```
+
+Create a separate SWML Script resource for each agent:
+
+| Number | SWML Script URL |
+|--------|-----------------|
+| +1 (555) 111-1111 | `https://server.com/support` |
+| +1 (555) 222-2222 | `https://server.com/sales` |
+| +1 (555) 333-3333 | `https://server.com/billing` |
+
+### Fallback URL
+
+Configure a fallback for errors:
+
+| Setting | Value |
+|---------|-------|
+| Primary URL | `https://your-server.com/agent` |
+| Fallback URL | `https://backup-server.com/agent` |
+
+**Fallback triggers on:**
+
+- Connection timeout
+- HTTP 5xx errors
+- Invalid SWML response
+
+### Troubleshooting
+
+#### Common Issues
+
+| Symptom | Likely Cause | Fix |
+|---------|--------------|-----|
+| Connection errors | ngrok not running | Start ngrok in a terminal |
+| 502 Bad Gateway | Wrong port | Match ngrok port to agent port |
+| 401 Unauthorized | Auth mismatch | Check credentials match agent output |
+| 502/503 errors | Agent crashed | Check agent terminal, restart |
+
+#### Test Checklist
+
+```bash
+# 1. Agent running?
+curl http://localhost:3000/
+
+# 2. Tunnel working?
+curl https://your-name.ngrok-free.app/
+
+# 3. Auth working?
+curl https://user:pass@your-name.ngrok-free.app/
+
+# 4. SWML valid?
+swaig-test agent.py --dump-swml
+```
+
+### Verification Checklist
+
+Before going live:
+
+- Agent is deployed and running
+- HTTPS URL is accessible
+- URL returns valid SWML on POST request
+- Basic auth is configured
+- SWML Script resource created in SignalWire
+- Phone number added to SWML Script resource
+- Test call completes successfully
+
+

@@ -1,0 +1,20 @@
+---
+title: PlayResumeResult
+slug: /dotnet/reference/calling/results/play-resume
+description: The PlayResumeResult object is returned after a play resume operation.
+toc_max_heading_level: 3
+---
+
+[play]: /docs/server-sdk/v2/dotnet/reference/calling/actions/play#resume
+[signalwire-relay-event]: /docs/server-sdk/v2/dotnet/reference/event
+
+# SignalWire.Relay.Calling.PlayResumeResult
+
+This object returned from the _synchronous_ [`Resume`][play] method, which represent the final result of a play resume operation.
+
+## Properties
+
+| Property | Type | Description |
+| :-------- | :---- | :----------- |
+| `Successful` | bool | Whether the play resume operation has completed successfully. |
+| `Event` | [`SignalWire.Relay.Event`][signalwire-relay-event] | The last event that completed the call. |

@@ -1,0 +1,151 @@
+[toggle_functions]: /docs/swml/guides/toggle-functions
+[set_meta_data]: /docs/swml/guides/set-meta-data
+[context_switch]: /docs/swml/guides/context-switch
+[properties]: /docs/swml/reference/ai#properties
+[contexts]: /docs/swml/reference/ai/prompt
+[steps]: /docs/swml/reference/ai/prompt
+
+<ParamField path="action[].SWML" type="object">
+  A SWML object to be executed.
+</ParamField>
+
+<ParamField path="action[].say" type="string">
+  A message to be spoken by the AI agent.
+</ParamField>
+
+<ParamField path="action[].stop" type="boolean">
+  Whether to stop the conversation.
+</ParamField>
+
+<ParamField path="action[].hangup" type="boolean">
+  Whether to hang up the call. When set to `true`, the call will be terminated after the AI agent finishes speaking.
+</ParamField>
+
+<ParamField path="action[].hold" type="integer | object">
+  Places the caller on hold while playing hold music (configured via the [`params.hold_music`](/docs/swml/reference/ai/params) parameter).
+  During hold, speech detection is paused and the AI agent will not respond to the caller.
+
+  The value specifies the hold timeout in seconds. Can be:
+  - An integer (e.g., `120` for 120 seconds)
+  - An object with a `timeout` property
+
+  Default timeout is `300` seconds (5 minutes). Maximum timeout is `900` seconds (15 minutes).
+
+  <Note title="Unholding a call">
+  There is no `unhold` SWAIG action because the AI agent is inactive during hold and cannot process actions.
+  To take a caller off hold, either:
+  - Let the hold timeout expire (the AI will automatically resume with a default message), or
+  - Use the [Calling API `ai_unhold` command](/docs/apis/calling/call-commands) to programmatically unhold the call with a custom prompt.
+  </Note>
+</ParamField>
+
+<Indent>
+<ParamField path="hold.timeout" type="integer" default="300">
+  The duration to hold the caller in seconds. Maximum is `900` seconds (15 minutes).
+</ParamField>
+</Indent>
+
+<ParamField path="action[].change_context" type="string">
+  The name of the context to switch to. The context must be defined in the AI's `prompt.contexts` configuration.
+  This action triggers an immediate context switch during the execution of a SWAIG function.
+
+  Visit the [`contexts`][contexts] documentation for details on defining contexts.
+</ParamField>
+
+<ParamField path="action[].change_step" type="string">
+  The name of the step to switch to. The step must be defined in `prompt.contexts.{context_name}.steps` for the current context.
+  This action triggers an immediate step transition during the execution of a SWAIG function.
+
+  Visit the [`steps`][steps] documentation for details on defining steps.
+</ParamField>
+
+<ParamField path="action[].toggle_functions" type="object[]">
+  An array of objects to toggle SWAIG functions on or off during the conversation.
+  Each object identifies a function by name and sets its active state.
+
+  See [`toggle_functions`][toggle_functions] for additional details.
+</ParamField>
+
+<Indent>
+<ParamField path="toggle_functions[].function" type="string" required={true}>
+  The name of the SWAIG function to toggle.
+</ParamField>
+
+<ParamField path="toggle_functions[].active" type="boolean" default="true">
+  Whether to activate or deactivate the function.
+</ParamField>
+</Indent>
+
+<ParamField path="action[].set_global_data" type="object">
+  A JSON object containing any global data, as a key-value map. This action sets the data in the [`global_data`][properties] to be globally referenced.
+</ParamField>
+
+<ParamField path="action[].set_meta_data" type="object">
+  A JSON object containing any metadata, as a key-value map. This action sets the data in the [`meta_data`][properties] to be referenced locally in the function.
+
+  See [`set_meta_data`][set_meta_data] for additional details.
+</ParamField>
+
+<ParamField path="action[].unset_global_data" type="string | object">
+  The key of the global data to unset from the [`global_data`][properties]. You can also reset the `global_data` by passing in a new object.
+</ParamField>
+
+<ParamField path="action[].unset_meta_data" type="string | object">
+  The key of the metadata to unset from the [`meta_data`][properties]. You can also reset the `meta_data` by passing in a new object.
+</ParamField>
+
+<ParamField path="action[].playback_bg" type="object">
+  A JSON object containing the audio file to play.
+</ParamField>
+
+<Indent>
+<ParamField path="playback_bg.file" type="string">
+  URL or filepath of the audio file to play. Authentication can also be set in the url in the format of `username:password@url`.
+</ParamField>
+
+<ParamField path="playback_bg.wait" type="boolean" default="false">
+  Whether to wait for the audio file to finish playing before continuing.
+</ParamField>
+</Indent>
+
+<ParamField path="action[].stop_playback_bg" type="boolean">
+  Whether to stop the background audio file.
+</ParamField>
+
+<ParamField path="action[].user_input" type="string">
+  Used to inject text into the users queue as if they input the data themselves.
+</ParamField>
+
+<ParamField path="action[].context_switch" type="object">
+  A JSON object containing the context to switch to.
+
+  See [`context_switch`][context_switch] for additional details.
+</ParamField>
+
+<Indent>
+<ParamField path="context_switch.system_prompt" type="string">
+  The instructions to send to the agent.
+</ParamField>
+
+<ParamField path="context_switch.consolidate" type="boolean" default="false">
+  Whether to consolidate the context.
+</ParamField>
+
+<ParamField path="context_switch.user_prompt" type="string">
+  A string serving as simulated user input for the AI Agent. During a `context_switch` in the AI's prompt, the `user_prompt` offers the AI pre-established context or guidance.
+</ParamField>
+</Indent>
+
+<ParamField path="action[].transfer" type="object">
+  Transfer the call to a new destination.
+</ParamField>
+
+<Indent>
+<ParamField path="transfer.dest" type="string">
+  The destination to transfer to (phone number, SIP URI, or SWML URL).
+</ParamField>
+
+<ParamField path="transfer.summarize" type="boolean" default="false">
+  Whether to include a conversation summary when transferring.
+</ParamField>
+</Indent>

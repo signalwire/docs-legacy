@@ -1,0 +1,211 @@
+import ActionsPartial from '@site/docs/_partials/swml/_actions.mdx';
+
+[SWML Function properties]: /docs/swml/reference/ai/swaig/functions#properties
+
+## Webhook response
+
+When a SWAIG function is executed, the function expects the user to respond with a JSON object that contains a `response` key and an optional `action` key.
+This request response is used to provide the LLM with a new prompt response via the `response` key and to execute SWML-compatible objects that will perform
+new dialplan actions via the `action` key.
+
+<ParamField path="response" type="string" required={true}>
+  Static text that will be added to the AI agent's context.
+</ParamField>
+
+<ParamField path="action" type="object[]">
+  A list of SWML-compatible objects that are executed upon the execution of a SWAIG function.
+</ParamField>
+
+<Indent>
+<ActionsPartial />
+</Indent>
+
+### Webhook response example
+
+```json
+{
+  "response": "Oh wow, it's 82.0°F in Tulsa. Bet you didn't see that coming! Humidity at 38%. Your hair is going to love this! Wind speed is 2.2 mph. Hold onto your hats, or don't, I'm not your mother! Looks like Sunny. Guess you'll survive another day.",
+  "action": [
+    {
+      "set_meta_data": {
+        "temperature": 82.0,
+        "humidity": 38,
+        "wind_speed": 2.2,
+        "weather": "Sunny"
+      }
+    },
+    {
+      "SWML": {
+        "version": "1.0.0",
+        "sections": {
+          "main": [
+            {
+              "play": {
+                "url": "https://example.com/twister.mp3"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
+```
+
+## Callback Request for web_hook_url
+
+SignalWire will make a request to the `web_hook_url` of a SWAIG function with the following parameters:
+
+<ParamField path="call_id" type="string">
+  The unique identifier for the current call.
+</ParamField>
+
+<ParamField path="ai_session_id" type="string">
+  The unique identifier for the AI session.
+</ParamField>
+
+<ParamField path="project_id" type="string">
+  The project ID associated with the call.
+</ParamField>
+
+<ParamField path="space_id" type="string">
+  The Space ID associated with the call.
+</ParamField>
+
+<ParamField path="caller_id_name" type="string">
+  Name of the caller.
+</ParamField>
+
+<ParamField path="caller_id_num" type="string">
+  Number of the caller.
+</ParamField>
+
+<ParamField path="global_data" type="object">
+  Global data set via the `set_global_data` action, as a key-value map.
+</ParamField>
+
+<ParamField path="content_disposition" type="string">
+  Content disposition identifier (e.g., `"SWAIG Function"`).
+</ParamField>
+
+<ParamField path="channel_active" type="boolean">
+  Whether the channel is currently active.
+</ParamField>
+
+<ParamField path="channel_offhook" type="boolean">
+  Whether the channel is off-hook.
+</ParamField>
+
+<ParamField path="channel_ready" type="boolean">
+  Whether the channel is ready.
+</ParamField>
+
+<ParamField path="content_type" type="string">
+  Type of content. The value will be `text/swaig`.
+</ParamField>
+
+<ParamField path="app_name" type="string">
+  Name of the application that originated the request.
+</ParamField>
+
+<ParamField path="function" type="string">
+  Name of the function that was invoked.
+</ParamField>
+
+<ParamField path="meta_data" type="object">
+  A JSON object containing any user metadata, as a key-value map.
+</ParamField>
+
+<ParamField path="SWMLVars" type="object">
+  A collection of variables related to SWML.
+</ParamField>
+
+<ParamField path="purpose" type="string">
+  The purpose of the function being invoked. The value will be the `functions.purpose` value you provided in the [SWML Function properties].
+</ParamField>
+
+<ParamField path="argument_desc" type="string | object">
+  The description of the argument being passed. This value comes from the argument you provided in the [SWML Function properties].
+</ParamField>
+
+<ParamField path="argument" type="object">
+  The argument the AI agent is providing to the function. The object contains the three following fields.
+</ParamField>
+
+<Indent>
+<ParamField path="argument.parsed" type="object">
+  If a JSON object is detected within the argument, it is parsed and provided here.
+</ParamField>
+
+<ParamField path="argument.raw" type="string">
+  The raw argument provided by the AI agent.
+</ParamField>
+
+<ParamField path="argument.substituted" type="string">
+  The argument provided by the AI agent, excluding any JSON.
+</ParamField>
+</Indent>
+
+<ParamField path="version" type="string">
+  Version number.
+</ParamField>
+
+### Webhook request example
+
+Below is a json example of the callback request that is sent to the `web_hook_url`:
+
+```json
+{
+  "app_name": "swml app",
+  "global_data": {
+    "caller_id_name": "",
+    "caller_id_number": "sip:guest-246dd851-ba60-4762-b0c8-edfe22bc5344@46e10b6d-e5d6-421f-b6b3-e2e22b8934ed.call.signalwire.com;context=guest"
+  },
+  "project_id": "46e10b6d-e5d6-421f-b6b3-e2e22b8934ed",
+  "space_id": "5bb2200d-3662-4f4d-8a8b-d7806946711c",
+  "caller_id_name": "",
+  "caller_id_num": "sip:guest-246dd851-ba60-4762-b0c8-edfe22bc5344@46e10b6d-e5d6-421f-b6b3-e2e22b8934ed.call.signalwire.com;context=guest",
+  "channel_active": true,
+  "channel_offhook": true,
+  "channel_ready": true,
+  "content_type": "text/swaig",
+  "version": "2.0",
+  "content_disposition": "SWAIG Function",
+  "function": "get_weather",
+  "argument": {
+    "parsed": [
+      {
+        "city": "Tulsa",
+        "state": "Oklahoma"
+      }
+    ],
+    "raw": "{\"city\":\"Tulsa\",\"state\":\"Oklahoma\"}"
+  },
+  "call_id": "6e0f2f68-f600-4228-ab27-3dfba2b75da7",
+  "ai_session_id": "9af20f15-7051-4496-a48a-6e712f22daa5",
+  "argument_desc": {
+    "properties": {
+      "city": {
+        "description": "Name of the city",
+        "type": "string"
+      },
+      "country": {
+        "description": "Name of the country",
+        "type": "string"
+      },
+      "state": {
+        "description": "Name of the state",
+        "type": "string"
+      }
+    },
+    "required": [],
+    "type": "object"
+  },
+  "purpose": "Get weather with sarcasm"
+}
+```
+
+## Variables
+
+- **ai_result:** (out) `success` | `failed`
+- **return_value:** (out) `success` | `failed`

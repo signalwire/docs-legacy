@@ -1,0 +1,546 @@
+---
+unlisted: false
+hide_title: false
+title: params
+slug: /swml/reference/ai/params
+description: Parameters for AI that can customize the AI agent's behavior.
+toc_max_heading_level: 3
+---
+
+[functions-fillers]: /docs/swml/reference/ai/swaig/functions
+[ai-languages-params]: /docs/swml/reference/ai/languages#properties
+[post-prompt-url]: /docs/swml/reference/ai#post_prompt_url-callback
+[get-visual-input]: /docs/swml/reference/ai/swaig#properties
+[iana-tz]: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+
+Parameters for AI that can be passed in `ai.params` at the top level of the [`ai` method](/docs/swml/reference/ai).
+These parameters control the fundamental behavior and capabilities of the AI agent, including model selection, conversation management, and advanced features like thinking and vision.
+
+## **Properties**
+
+<ParamField path="ai.params" type="object">
+  An object that accepts the following properties.
+</ParamField>
+
+<Indent>
+
+<ParamField path="params.ai_model" type="string" default="gpt-4o-mini">
+  The AI model that the AI Agent will use during the conversation.
+</ParamField>
+
+<ParamField path="params.ai_name" type="string" default="computer">
+  Sets the name the AI agent responds to for wake/activation purposes. When using `enable_pause`, `start_paused`, or `speak_when_spoken_to`, the user must say this name to get the agent's attention. The name matching is case-insensitive.
+</ParamField>
+
+
+<ParamField path="params.app_name" type="string" default="swml app">
+  A custom identifier for the AI application instance. This name is included in webhook payloads (`post_prompt_url`, SWAIG function calls), allowing backend systems to identify which AI configuration made the request.
+</ParamField>
+
+
+<ParamField path="params.conscience" type="string">
+  Sets the prompt which binds the agent to its purpose. This prompt helps reinforce the AI’s behavior after SWAIG function calls.
+
+  It is used to reinforce the AI agent’s behavior and guardrails throughout the conversation.
+</ParamField>
+
+
+<ParamField path="params.convo" type="object[]">
+  Injects pre-existing conversation history into the AI session at startup.
+  This allows you to seed the AI agent with context from a previous conversation or provide example interactions.
+</ParamField>
+
+<Indent>
+
+<ParamField path="convo[].role" type="string" required={true}>
+  The role of the message sender. Valid values:
+  - `user` - A message from the human caller/user interacting with the AI agent.
+  - `assistant` - A message from the AI agent itself.
+  - `system` - A system message providing instructions or context to guide the AI's behavior.
+</ParamField>
+
+<ParamField path="convo[].content" type="string" required={true}>
+  The text content of the message.
+</ParamField>
+
+<ParamField path="convo[].lang" type="string" default="en">
+  The language code for the message. Uses standard ISO language codes such as `en`, `en-US`, `es`, `fr`, `de`, etc.
+</ParamField>
+
+</Indent>
+
+
+<ParamField path="params.conversation_id" type="string">
+  Used by `check_for_input` and `save_conversation` to identify an individual conversation.
+</ParamField>
+
+
+<ParamField path="params.conversation_sliding_window" type="integer">
+  Sets the size of the sliding window for conversation history. This limits how much conversation history is sent to the AI model.
+</ParamField>
+
+
+<ParamField path="params.direction" type="string" default="the natural direction of the call">
+  Forces the direction of the call to the assistant. Valid values are `inbound` and `outbound`.
+</ParamField>
+
+
+<ParamField path="params.enable_inner_dialog" type="boolean" default="false">
+  Enables the inner dialog feature, which runs a separate AI process in the background that analyzes the conversation and provides real-time insights to the main AI agent. This gives the agent a form of "internal thought process" that can help it make better decisions.
+</ParamField>
+
+
+<ParamField path="params.enable_pause" type="boolean" default="false">
+  Enables the pause/resume functionality for the AI agent. When enabled, a `pause_conversation` function is automatically added that the AI can call when the user says things like "hold on", "wait", or "pause". While paused, the agent stops responding until the user speaks the agent's name (set via `ai_name`) to resume. Cannot be used together with `speak_when_spoken_to`.
+</ParamField>
+
+
+<ParamField path="params.enable_thinking" type="boolean" default="false">
+  Enables thinking output for the AI Agent. When set to `true`, the AI Agent will be able to utilize thinking capabilities. This may introduce a little bit of latency as the AI will use an additional turn in the conversation to think about the query.
+</ParamField>
+
+<ParamField path="params.enable_turn_detection" type="boolean" default="true">
+  Enables intelligent turn detection that monitors partial speech transcripts for sentence-ending punctuation. When detected, the system can proactively finalize the speech recognition, reducing latency before the AI responds. Works with `turn_detection_timeout`.
+</ParamField>
+
+
+<ParamField path="params.enable_vision" type="boolean" default="false">
+  Enables visual input processing for the AI Agent. When set to `true`, the AI Agent will be able to utilize visual processing capabilities. The image used for visual processing will be gathered from the user's camera if video is available on the call, leveraging the [`get_visual_input`][get-visual-input] function.
+</ParamField>
+
+<ParamField path="params.languages_enabled" type="boolean" default="false">
+  Allows multilingualism when `true`.
+</ParamField>
+
+
+<ParamField path="params.local_tz" type="string" default="US/Central">
+  The local timezone setting for the AI. Value should use [IANA TZ ID][iana-tz]
+</ParamField>
+
+
+<ParamField path="params.save_conversation" type="boolean" default="false">
+  Send a summary of the conversation after the call ends. This requires [`post_prompt_url`][post-prompt-url] to be set and the `conversation_id` defined. This eliminates the need for a `post_prompt` in the `ai` parameters.
+</ParamField>
+
+
+<ParamField path="params.summary_mode" type="string">
+  Summary generation mode. Valid values: `"string"`, `"original"`.
+</ParamField>
+
+
+<ParamField path="params.thinking_model" type="string" default="Value of ai_model parameter">
+  The AI model that the AI Agent will use when utilizing thinking capabilities.
+</ParamField>
+
+<ParamField path="params.transfer_summary" type="boolean" default="false">
+  Pass a summary of a conversation from one AI agent to another. For example, transfer a call summary between support agents in two departments.
+</ParamField>
+
+
+<ParamField path="params.vision_model" type="string" default="Value of ai_model parameter">
+  The AI model that the AI Agent will use when utilizing vision capabilities.
+</ParamField>
+
+<ParamField path="params.wait_for_user" type="boolean" default="false">
+  When false, AI agent will initialize dialogue after call is setup. When true, agent will wait for the user to speak first.
+</ParamField>
+
+
+### Speech Recognition
+
+Configure how the AI agent processes and understands spoken input, including speaker identification, voice activity detection, and transcription settings.
+
+<ParamField path="params.asr_diarize" type="boolean" default="false">
+  If true, enables speaker diarization in ASR (Automatic Speech Recognition). This will break up the transcript into chunks, with each chunk containing a unique identity (e.g speaker1, speaker2, etc.) and the text they spoke.
+</ParamField>
+
+
+<ParamField path="params.asr_smart_format" type="boolean" default="false">
+  Enables smart formatting in ASR (Automatic Speech Recognition). This improves the formatting of numbers, dates, times, and other entities in the transcript.
+</ParamField>
+
+
+<ParamField path="params.asr_speaker_affinity" type="boolean" default="false">
+  If true, will force the AI Agent to only respond to the speaker who responds to the AI Agent first. Any other speaker will be ignored.
+</ParamField>
+
+
+<ParamField path="params.end_of_speech_timeout" type="integer" default="700">
+  Amount of silence, in ms, at the end of an utterance to detect end of speech. Allowed values from `0`-`10,000`.
+</ParamField>
+
+
+<ParamField path="params.energy_level" type="number" default="52">
+  Amount of energy necessary for bot to hear you (in dB). Allowed values from `0.0`-`100.0`.
+</ParamField>
+
+
+<ParamField path="params.first_word_timeout" type="integer" default="1000">
+  Amount of time, in ms, to wait for the first word after speech is detected. Allowed values from `0`-`10,000`.
+</ParamField>
+
+
+<ParamField path="params.llm_diarize_aware" type="boolean" default="false">
+  If true, the AI Agent will be involved with the diarization process. Users can state who they are at the start of the conversation and the AI Agent will be able to correctly identify them when they are speaking later in the conversation.
+</ParamField>
+
+
+<ParamField path="params.openai_asr_engine" type="string" default="gcloud_speech_v2_async">
+  The ASR (Automatic Speech Recognition) engine to use. Common values include `deepgram:nova-2`, `deepgram:nova-3`, and other supported ASR engines.
+</ParamField>
+
+
+### Speech Synthesis
+
+Customize the AI agent's voice output, including volume control, voice characteristics, emotional range, and video avatars for visual interactions.
+
+<ParamField path="params.ai_volume" type="integer" default="0">
+  Adjust the volume of the AI. Allowed values from `-50`-`50`.
+</ParamField>
+
+
+<ParamField path="params.max_emotion" type="integer" default="30">
+  Maximum emotion intensity for text-to-speech. Allowed values from `1`-`30`.
+</ParamField>
+
+
+<ParamField path="params.speech_gen_quick_stops" type="integer" default="3">
+  Number of quick stops for speech generation. Allowed values from `0`-`10`.
+</ParamField>
+
+
+<ParamField path="params.tts_number_format" type="string" default="international">
+  The format of the number the AI will reference the phone number. Valid values: `international` (e.g. +12345678901) or `national` (e.g. (234) 567-8901).
+</ParamField>
+
+<ParamField path="params.video_idle_file" type="string">
+  URL of a video file to play when AI is idle. Only works for calls that support video.
+</ParamField>
+
+
+<ParamField path="params.video_listening_file" type="string">
+  URL of a video file to play when AI is listening to the user speak. Only works for calls that support video.
+</ParamField>
+
+
+<ParamField path="params.video_talking_file" type="string">
+  URL of a video file to play when AI is talking. Only works for calls that support video.
+</ParamField>
+
+
+<ParamField path="params.eleven_labs_similarity" type="number" deprecated={true} default="0.75">
+  The similarity slider dictates how closely the AI should adhere to the original voice when attempting to replicate it. The higher the similarity, the closer the AI will sound to the original voice. Valid values range from `0.0` to `1.0`. **Deprecated**: Use [`languages[].params.similarity`][ai-languages-params] instead.
+</ParamField>
+
+
+<ParamField path="params.eleven_labs_stability" type="number" deprecated={true} default="0.50">
+  The stability slider determines how stable the voice is and the randomness between each generation. Lowering this slider introduces a broader emotional range for the voice. Valid values range from `0.0` to `1.0`. **Deprecated**: Use [`languages[].params.stability`][ai-languages-params] instead.
+</ParamField>
+
+
+### Interruption & Barge Control
+
+Manage how the AI agent handles interruptions when users speak over it, including when to stop speaking, acknowledge interruptions, or continue regardless.
+
+<ParamField path="params.acknowledge_interruptions" type="boolean | number" default="false">
+  Instructs the agent to acknowledge crosstalk and confirm user input when the user speaks over the agent. Can be boolean or a positive integer specifying the maximum number of interruptions to acknowledge.
+</ParamField>
+
+
+<ParamField path="params.barge_functions" type="boolean" default="true">
+  Allow functions to be called during barging. When `false`, functions are not executed if the user is speaking.
+</ParamField>
+
+
+<ParamField path="params.barge_match_string" type="string">
+  Takes a string, including a regular expression, defining barge behavior. For example, this param can direct the AI to stop when the word "hippopotomus" is input.
+</ParamField>
+
+
+<ParamField path="params.barge_min_words" type="integer">
+  Defines the number of words that must be input before triggering barge behavior. Allowed values from `1`-`99`.
+</ParamField>
+
+
+<ParamField path="params.enable_barge" type="string">
+  Controls when user can interrupt the AI. Valid values: `"complete"`, `"partial"`, `"all"`, or boolean. Set to `false` to disable barging.
+</ParamField>
+
+
+<ParamField path="params.interrupt_on_noise" type="boolean | integer" default="false">
+  When enabled, barges agent upon any sound interruption longer than 1 second. Can be boolean or a positive integer specifying the threshold.
+</ParamField>
+
+
+<ParamField path="params.interrupt_prompt" type="string">
+  A prompt that is used to help the AI agent respond to interruptions.
+
+  **Default:** "The user didn't wait for you to finish responding and started talking over you. As part of your next response, make a comment about how you were both talking at the same time and verify you properly understand what the user said."
+</ParamField>
+
+
+<ParamField path="params.transparent_barge" type="boolean" default="true">
+  When enabled, the AI will not respond to the user's input when the user is speaking over the agent. The agent will wait for the user to finish speaking before responding. Additionally, any attempt the LLM makes to barge will be ignored and scraped from the conversation logs.
+</ParamField>
+
+
+<ParamField path="params.transparent_barge_max_time" type="integer" default="3000">
+  Maximum duration for transparent barge mode. Allowed values from `0`-`60,000` ms.
+</ParamField>
+
+
+### Timeouts & Delays
+
+Set various timing parameters that control wait times, response delays, and session limits to optimize the conversation flow and prevent dead air.
+
+<ParamField path="params.attention_timeout" type="integer" default="5000">
+  Amount of time, in ms, to wait before prompting the user to respond. Allowed values: `0` (to disable) or `10,000`-`600,000`.
+</ParamField>
+
+
+<ParamField path="params.attention_timeout_prompt" type="string" default="The user has not responded, try to get their attention. Stay in the same language.">
+  A custom prompt that is fed into the AI when the `attention_timeout` is reached.
+</ParamField>
+
+
+<ParamField path="params.digit_timeout" type="integer" default="3000">
+  Time, in ms, at the end of digit input to detect end of input. Allowed values from `0`-`30,000`.
+</ParamField>
+
+
+<ParamField path="params.hard_stop_prompt" type="string">
+  A final prompt that is fed into the AI when the `hard_stop_time` is reached.
+</ParamField>
+
+
+<ParamField path="params.hard_stop_time" type="string">
+  Specifies the maximum duration for the AI Agent to remain active before it exits the session. After the timeout, the AI will stop responding, and will proceed with the next SWML instruction. Time format: `30s` (seconds), `2m` (minutes), `1h` (hours), or combined `1h45m30s`.
+</ParamField>
+
+<ParamField path="params.inactivity_timeout" type="integer" default="600000">
+  Amount of time, in ms, to wait before exiting the app due to inactivity. Allowed values: `0` (to disable) or `10,000`-`3,600,000`.
+</ParamField>
+
+
+<ParamField path="params.initial_sleep_ms" type="integer" default="0">
+  Amount of time, in ms, to wait before the AI Agent starts processing. Allowed values from `0`-`300,000`.
+</ParamField>
+
+
+<ParamField path="params.outbound_attention_timeout" type="integer" default="120000">
+  Sets a time duration for the outbound call recipient to respond to the AI agent before timeout. Allowed values from `10,000`-`600,000` ms.
+</ParamField>
+
+
+<ParamField path="params.speech_event_timeout" type="integer" default="1400">
+  Timeout for speech events processing. Allowed values from `0`-`10,000` ms.
+</ParamField>
+
+
+<ParamField path="params.speech_timeout" type="integer" default="60000">
+  Overall speech timeout (developer mode only). Allowed values from `0`-`600,000` ms.
+</ParamField>
+
+
+### Audio & Media
+
+Control background audio, hold music, and greeting messages to enhance the caller experience during different phases of the conversation.
+
+<ParamField path="params.background_file" type="string">
+  URL of audio file to play in the background while AI plays in foreground.
+</ParamField>
+
+
+<ParamField path="params.background_file_loops" type="integer" default="undefined">
+  Maximum number of times to loop playing the background file.
+</ParamField>
+
+
+<ParamField path="params.background_file_volume" type="integer" default="0">
+  Defines `background_file` volume. Allowed values from `-50` to `50`.
+</ParamField>
+
+
+<ParamField path="params.hold_music" type="string">
+  A URL for the hold music to play, accepting WAV, mp3, and FreeSWITCH `tone_stream`.
+</ParamField>
+
+
+<ParamField path="params.hold_on_process" type="boolean" default="false">
+  Enables hold music during SWAIG processing.
+</ParamField>
+
+
+<ParamField path="params.static_greeting" type="string">
+  The static greeting to play when the call is answered. This will always play at the beginning of the call.
+</ParamField>
+
+
+<ParamField path="params.static_greeting_no_barge" type="boolean" default="false">
+  If `true`, the static greeting will not be interrupted by the user if they speak over the greeting. If `false`, the static greeting can be interrupted by the user if they speak over the greeting.
+</ParamField>
+
+
+### SWAIG Functions
+
+Configure SignalWire AI Gateway (SWAIG) function capabilities, including permissions, execution timing, and data persistence across function calls.
+
+<ParamField path="params.function_wait_for_talking" type="boolean" default="false">
+  If `true`, the AI will wait for any [`filler`][functions-fillers] to finish playing before executing a function. If `false`, the AI will asynchronously execute a function while playing a filler.
+</ParamField>
+
+<ParamField path="params.functions_on_no_response" type="boolean" default="false">
+  Execute functions when the user doesn't respond (on attention timeout).
+</ParamField>
+
+
+<ParamField path="params.swaig_allow_settings" type="boolean" default="true">
+  Allows tweaking any of the indicated settings, such as barge_match_string, using the returned SWML from the SWAIG function.
+</ParamField>
+
+
+<ParamField path="params.swaig_allow_swml" type="boolean" default="true">
+  Allows your SWAIG to return SWML to be executed.
+</ParamField>
+
+
+<ParamField path="params.swaig_post_conversation" type="boolean" default="false">
+  Post entire conversation to any SWAIG call.
+</ParamField>
+
+
+<ParamField path="params.swaig_set_global_data" type="boolean" default="true">
+  Allows SWAIG functions to set global data that persists across function calls.
+</ParamField>
+
+
+### Input & DTMF
+
+Handle dual-tone multi-frequency (DTMF) input and configure input polling for integrating external data sources during conversations.
+
+<ParamField path="params.digit_terminators" type="string">
+  DTMF digit, as a string, to signal the end of input (ex: "#")
+</ParamField>
+
+
+<ParamField path="params.input_poll_freq" type="integer" default="2000">
+  Check for input function with `check_for_input`. Allowed values from `1,000`-`10,000` ms. Example use case: Feeding an inbound SMS to AI on a voice call, eg., for collecting an email address or other complex information.
+</ParamField>
+
+
+### Debug & Development
+
+Enable debugging tools, logging, and performance monitoring features to help developers troubleshoot and optimize their AI agent implementations.
+
+<ParamField path="params.audible_debug" type="boolean" default="false">
+  If `true`, the AI will announce the function that is being executed on the call.
+</ParamField>
+
+
+<ParamField path="params.audible_latency" type="boolean" default="false">
+  Announce latency information during the call for debugging purposes.
+</ParamField>
+
+
+<ParamField path="params.cache_mode" type="boolean" default="false">
+  Enable response caching to improve performance for repeated queries.
+</ParamField>
+
+
+<ParamField path="params.debug" type="boolean | integer" default="false">
+  Enables debug mode for the AI session. When set to `true` or a positive integer, additional debug information is logged and may be included in webhook payloads. Higher integer values increase verbosity.
+</ParamField>
+
+
+<ParamField path="params.debug_webhook_level" type="integer" default="1">
+  Enables debugging to the set URL. Allowed values from `0`-`2`. Level 0 disables, 1 provides basic info, 2 provides verbose info.
+</ParamField>
+
+
+<ParamField path="params.debug_webhook_url" type="string">
+  Each interaction between the AI and end user is posted in real time to the established URL. Authentication can also be set in the url in the format of `username:password@url`.
+</ParamField>
+
+
+<ParamField path="params.enable_accounting" type="boolean" default="false">
+  Enable usage accounting and tracking for billing and analytics purposes.
+</ParamField>
+
+
+<ParamField path="params.verbose_logs" type="boolean" default="false">
+  Enable verbose logging (developer mode only).
+</ParamField>
+
+
+### Inner Dialog
+
+Configure the inner dialog feature, which enables a secondary AI process to analyze conversations in real-time and provide insights to the main AI agent.
+
+<ParamField path="params.inner_dialog_model" type="string">
+  Specifies the AI model to use for the inner dialog feature. If not set, the main `ai_model` is used. This allows you to use a different (potentially faster or cheaper) model for background analysis.
+</ParamField>
+
+
+<ParamField path="params.inner_dialog_prompt" type="string" default="The assistant is intelligent and straightforward, does its job well and is not excessively polite.">
+  The system prompt that guides the inner dialog AI's behavior. This prompt shapes how the background AI analyzes the conversation and what kind of insights it provides to the main agent.
+</ParamField>
+
+
+<ParamField path="params.inner_dialog_synced" type="boolean" default="false">
+  When enabled, synchronizes the inner dialog with the main conversation flow. This ensures the inner dialog AI waits for the main conversation turn to complete before providing its analysis, rather than running fully asynchronously.
+</ParamField>
+
+
+### Pause & Wake
+
+Control the agent's listening behavior, including pause/resume functionality and activation triggers for hands-free scenarios.
+
+<ParamField path="params.speak_when_spoken_to" type="boolean" default="false">
+  When enabled, the AI agent remains silent until directly addressed by name (set via `ai_name`). This creates a "push-to-talk" style interaction where the agent only responds when explicitly called upon, useful for scenarios where the agent should listen but not interrupt.
+</ParamField>
+
+
+<ParamField path="params.start_paused" type="boolean" default="false">
+  When enabled, the AI agent starts in a paused state. The agent will not respond to any input until the user speaks the agent's name (set via `ai_name`) to activate it. This is useful for scenarios where you want the agent to wait for explicit activation.
+</ParamField>
+
+
+<ParamField path="params.wake_prefix" type="string">
+  Specifies an additional prefix that must be spoken along with the agent's name to wake the agent. For example, if `ai_name` is "assistant" and `wake_prefix` is "hey", the user would need to say "hey assistant" to activate the agent.
+</ParamField>
+
+
+### Advanced Configuration
+
+Fine-tune advanced AI behavior settings including response limits, data persistence, prompt formatting, and voice activity detection.
+
+<ParamField path="params.max_response_tokens" type="integer">
+  Sets the maximum number of tokens the AI model can generate in a single response. Allowed values from `1` to `16384`. This helps control response length and costs.
+</ParamField>
+
+
+<ParamField path="params.persist_global_data" type="boolean" default="true">
+  When enabled, `global_data` persists across multiple AI agent invocations within the same call. This allows data set by SWAIG functions to be retained if the AI agent is invoked multiple times during a single call session.
+</ParamField>
+
+
+<ParamField path="params.pom_format" type="string" default="markdown">
+  Specifies the output format for structured prompts sent to the AI model. Valid values are `markdown` or `xml`. This affects how system prompts and context are formatted when sent to the underlying language model.
+</ParamField>
+
+
+<ParamField path="params.swaig_post_swml_vars" type="boolean | array" default="false">
+  Controls whether SWML variables are included in SWAIG function webhook payloads. When set to `true`, all SWML variables are posted. When set to an array of strings, only the specified variable names are included in the payload.
+</ParamField>
+
+
+<ParamField path="params.turn_detection_timeout" type="integer" default="250">
+  Time in milliseconds to wait after detecting a potential end-of-turn before finalizing speech recognition. Works with `enable_turn_detection`. Lower values make the agent more responsive but may cut off users mid-sentence. Allowed values from `0` to `10000`.
+</ParamField>
+
+
+<ParamField path="params.vad_config" type="string">
+  Configures Silero Voice Activity Detection (VAD) settings. Format: `threshold` or `threshold:frame_ms`. The threshold (0-100) sets sensitivity for voice detection, and optional frame_ms (16-40) sets the analysis frame duration in milliseconds.
+</ParamField>
+
+</Indent>

@@ -1,0 +1,107 @@
+.products a,
+.examples a {
+  text-decoration: none !important;
+}
+
+.box {
+  flex: 1;
+  border: 1px solid #0002;
+  /*box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.24);*/
+  border-radius: 4px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.box > .title {
+  font-weight: 500;
+}
+
+.box > .description {
+  flex: 1;
+  margin: 0.5em 0;
+}
+
+.box .smallButton {
+  background: blue;
+  color: white;
+  opacity: 0.6;
+  padding: 5px 8px;
+  border-radius: 5px;
+  font-size: 0.8em;
+  white-space: nowrap;
+}
+
+.tag {
+  font-size: 0.8em;
+  background: rgb(227, 232, 238);
+  border-radius: 5px;
+  padding: 4px 6px;
+}
+
+.products {
+  display: flex;
+  gap: 40px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin: 40px 20px;
+  width: 100%;
+}
+
+.products > .box {
+  min-width: 300px;
+  max-width: 400px;
+}
+
+.examples {
+  display: flex;
+  gap: 40px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin: 40px 5px;
+  width: 100%;
+}
+
+.examples > .box {
+  min-width: 250px;
+  max-width: 350px;
+}
+
+.examples .box .description {
+  margin-bottom: 20px;
+}
+
+.technicalReferences .technicalReference {
+  margin: 0.5em 0;
+  padding: 1em 0;
+  display: flex;
+  align-items: center;
+  color: inherit;
+}
+
+.technicalReferences .technicalReference:hover {
+  background: #fbfbfb;
+}
+
+.technicalReferences .technicalReference .iconPlaceholder {
+  width: 50px;
+  height: 50px;
+  background: #f1f1f1;
+  margin: 0 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.5em;
+}
+
+.technicalReferences .technicalReference .description {
+  font-size: 0.8em;
+}
+
+.technicalReferences a {
+  text-decoration: none;
+}
+
+.technicalReferences p {
+  margin-bottom: 0;
+}

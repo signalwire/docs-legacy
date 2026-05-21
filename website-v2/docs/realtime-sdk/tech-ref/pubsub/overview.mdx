@@ -1,0 +1,54 @@
+---
+title: "PubSub"
+sidebar_label: Overview
+sidebar_position: 0
+keywords:
+  - SignalWire
+  - Realtime SDK
+  - Node.js
+  - PubSub
+  - publish subscribe
+  - real-time events
+slug: /node/reference/pubsub
+description: Access the PubSub API for publish-subscribe messaging patterns. Subscribe to channels, publish messages, and build real-time event-driven applications.
+toc_max_heading_level: 3
+---
+
+[pubsub-client-1]: /docs/server-sdk/node/reference/pubsub/client
+[pubsub-client]: /docs/server-sdk/node/reference/pubsub/client/events
+
+Access the PubSub API Consumer. You can instantiate a [PubSub.Client][pubsub-client-1] to subscribe to PubSub events. 
+
+<Info>
+Refer to [PubSub Events][pubsub-client] for the full list of events that a [PubSub.Client][pubsub-client-1] can subscribe to.
+</Info>
+
+#### Example
+
+The following example logs the messages sent to the "welcome" channel.
+
+```javascript
+import { SignalWire} from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+const pubSubClient = client.pubSub;
+
+await pubSubClient.listen({
+  channels: ["welcome"],
+  onMessageReceived: (message) => {
+    console.log("Received message:", message);
+  }
+});
+```
+
+## **Classes**
+
+<CardGroup cols={2}>
+  <Card title="Client" icon="fa-solid fa-server" href="/docs/server-sdk/node/reference/pubsub/client">
+    The main PubSub client for publishing messages and subscribing to channels.
+  </Card>
+  <Card title="PubSubMessage" icon="fa-solid fa-envelope" href="/docs/server-sdk/node/reference/pubsub/pubsub-message">
+    Represents a message received on a PubSub channel with content and metadata.
+  </Card>
+</CardGroup>

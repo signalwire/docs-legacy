@@ -1,0 +1,50 @@
+---
+title: conversation.join
+slug: /signalwire-client/conversation-join
+---
+
+import APIField from '@site/src/components/APIField';
+
+Joins a persistent conversation, allowing you to send and receive messages in that conversation.
+
+## How it works
+
+The `conversation.join` method adds you as a participant to a persistent conversation. Once joined, you can send messages, receive updates, and access the conversation history.
+
+## Parameters
+
+<APIField name="params" type="JoinConversationParams" required>
+  Configuration for joining the conversation.
+</APIField>
+
+<APIField name="params.conversationId" type="string" required>
+  The unique identifier of the conversation to join.
+</APIField>
+
+<APIField name="params.memberId" type="string">
+  Optional member identifier for the participant.
+</APIField>
+
+## Signature
+
+```typescript
+conversation.join(params: JoinConversationParams): Promise<JoinConversationResponse>
+```
+
+## Returns
+
+**Type:** `Promise<JoinConversationResponse>`
+
+Returns a Promise that resolves with conversation details and participant information.
+
+## Examples
+
+### Join a conversation
+
+```typescript
+const response = await client.conversation.join({
+  conversationId: 'conversation-id-here'
+})
+
+console.log('Joined conversation:', response.conversationId)
+```

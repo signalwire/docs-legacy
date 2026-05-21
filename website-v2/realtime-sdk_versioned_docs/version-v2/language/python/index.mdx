@@ -1,0 +1,149 @@
+---
+title: RELAY SDK for Python
+slug: /python/reference
+toc_max_heading_level: 3
+---
+import V2IntroPartial from '@site/realtime-sdk_versioned_docs/version-v2/snippets/v2-intro.mdx';
+
+
+[asyncio]: https://docs.python.org/3/library/asyncio.html
+[relay-client]: /docs/server-sdk/v2/python/reference/relay-client
+[relay-consumer]: /docs/server-sdk/v2/python/reference/consumer
+[relay-task]: /docs/server-sdk/v2/python/reference/task
+
+<V2IntroPartial />
+
+
+## Getting Started
+
+The RELAY SDK for Python enables developers to connect and use SignalWire's RELAY APIs within their own Python code.
+
+## Installation
+
+Install the package using either `pip` or `pipenv`:
+
+Using `pip`:
+
+```shell
+pip install signalwire
+```
+
+Using `pipenv`:
+
+```shell
+pipenv install signalwire
+```
+
+## Minimum Requirements
+
+The Python SDK is build on top of [asyncio][asyncio] and requires at least Python 3.6 to be run.  
+We suggest to use Python 3.7 or above.
+
+## Using the SDK
+
+To use the SDK, you need your **project** and **token** from your SignalWire dashboard.
+
+### RELAY Consumer
+
+A [`Relay.Consumer`][relay-consumer] creates a long running process, allowing you to respond to incoming requests and events in realtime. RELAY Consumers abstract all the setup of connecting to RELAY and automatically dispatches workers to handle requests; so you can concentrate on writing your code without having to worry about multi-threading or blocking, everything just works. Think of RELAY Consumers like a background worker system for all your calling and messaging needs.
+
+RELAY Consumers can scale easily, simply by running multiple instances of your `Relay.Consumer` process. Each event will only be delivered to a single consumer, so as your volume increases, just scale up! This process works well whether you are using Docker Swarm, a Procfile on Heroku, your own webserver, and most other environments.
+
+Setting up a new consumer is the easiest way to get up and running:
+
+```python
+from signalwire.relay.consumer import Consumer
+
+class CustomConsumer(Consumer):
+  def setup(self):
+    self.project = 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX'
+    self.token = 'PTXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
+    self.contexts = ['home', 'office']
+
+  async def ready(self):
+    # Consumer is successfully connected with Relay.
+    # You can make calls or send messages here..
+
+  async def on_incoming_call(self, call):
+    result = await call.answer()
+    if result.successful:
+      print('Call answered..')
+
+# Run your consumer..
+consumer = CustomConsumer()
+consumer.run()
+```
+
+[Learn more about RELAY Consumers][relay-consumer]
+
+### RELAY Task
+
+A `Relay.Task` is simple way to send jobs to your [`Relay.Consumers`][relay-consumer] from a short lived process, like a web framework. RELAY Tasks allow you to pass commands down to your Consumers without blocking your short lived request. Think of a RELAY Task as a way to queue a job for your background workers to processes asynchronously.
+
+For example, if you wanted to make an outbound call and play a message when your user clicks a button on your web application, since RELAY is a realtime protocol and relies on you to tell it what to do in realtime, if you did this within your web application, your web server would block until the call was finished... this may take a long time! Instead, simply create a new RELAY Task. This task will be handled by a running RELAY Consumer process and your web application can respond back to your user immediately.
+
+Send a task in the `office` context with custom data:
+
+```python
+# create-task.py
+from signalwire.relay.task import Task
+
+project = 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX'
+token = 'PTXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
+task = Task(project=project, token=token)
+success = task.deliver('office', {
+  'uuid': 'unique id',
+  'data': 'data for your job'
+})
+if success:
+  print('Task delivered')
+else:
+  print('Error delivering task..')
+```
+
+Handle the task in a Consumer:
+
+```python
+# consumer-task.py
+from signalwire.relay.consumer import Consumer
+
+class CustomConsumer(Consumer):
+  def setup(self):
+    self.project = 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX'
+    self.token = 'PTXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
+    self.contexts = ['office']
+
+  async def on_task(self, message):
+    print('Handle inbound task')
+    print(message['uuid']) # => 'unique id'
+    print(message['data']) # => 'data for your job'
+
+consumer = CustomConsumer()
+consumer.run()
+```
+
+[Learn more about RELAY Tasks][relay-task]
+
+### RELAY Client
+
+[`Relay.Client`][relay-client] is a lower level object, giving you a basic connection to RELAY but that is all. It is best used when you are creating a script only concerned with sending outbound requests or you want complete control over the RELAY connection yourself.
+
+Setting up a new client and make an outbound call:
+
+```python
+from signalwire.relay.client import Client
+
+async def ready(client):
+  call = client.calling.new_call(from_number='+1XXXXXXXXXX', to_number='+1YYYYYYYYYY')
+  result = await call.dial()
+  if result.successful:
+    print('Your call has been answered..')
+
+project = 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX'
+token = 'PTXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
+client = Client(project=project, token=token)
+client.on('ready', ready)
+client.connect()
+```
+
+[Learn more about RELAY Clients][relay-client]

@@ -1,0 +1,75 @@
+---
+title: "updateMeta"
+slug: /node/reference/video/room-session/update-meta
+description: updateMeta method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+[link-6]: /docs/server-sdk/node/reference/video/room-session/set-meta
+[roomsession-41]: /docs/server-sdk/node/reference/video/room-session
+
+### updateMeta
+
+- **updateMeta**(`meta`): `Promise<void>`
+
+Updates the RoomSession metadata by only setting the specified fields. This is
+different from [setMeta][link-6], which replaces the whole metadata object.
+
+#### Parameters
+
+<ParamField path="meta" type="Record<string, unknown>" required>
+  The update to the metadata.
+</ParamField>
+
+#### Returns
+
+`Promise<void>`
+
+#### Example
+
+In this example, we set metadata for a room as soon as it starts and then
+update the metadata for that room after 5 seconds. This example assumes that
+there is a [`RoomSession`][roomsession-41] already active and
+that members are joining the room.
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+// Initialize the SignalWire client
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" });
+
+// Access video client from the main client
+const videoClient = client.video;
+
+// Setup listener for when a room starts
+await videoClient.listen({
+  onRoomStarted: async (roomSession) => {
+    console.log("Room started", roomSession.displayName);
+
+    // Set the room meta
+    console.log("Setting room meta");
+    await roomSession.setMeta({
+      "foo": "bar",
+      "roomName": roomSession.displayName
+    });
+
+    // Get the room meta
+    let roomMeta = await roomSession.getMeta()
+    console.log("Room meta", roomMeta);
+
+    // update the room meta after 5 seconds
+    setTimeout(async () => {
+      console.log("Updating room meta");
+      await roomSession.setMeta({
+        "foo": "bar",
+        "roomName": roomSession.displayName,
+        "updated": true
+      });
+      console.log("Room meta Updated:", await roomSession.getMeta());
+    }, 5000);
+  },
+  onRoomEnded: async (roomSession) => {
+    console.log("Room ended", roomSession.displayName);
+  }
+});
+```

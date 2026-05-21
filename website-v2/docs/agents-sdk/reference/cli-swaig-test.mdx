@@ -1,0 +1,522 @@
+---
+title: "Cli Swaig Test"
+sidebar_label: "Cli Swaig Test"
+slug: /python/reference/cli-swaig-test
+toc_max_heading_level: 3
+---
+
+## swaig-test CLI
+
+Command-line tool for testing agents and SWAIG functions locally without deploying to production.
+
+### Overview
+
+The `swaig-test` tool loads agent files and allows you to:
+
+- Generate and inspect SWML output
+- Test SWAIG functions with arguments
+- Simulate serverless environments (Lambda, CGI, Cloud Functions, Azure)
+- Debug agent configuration and dynamic behavior
+- Test DataMap functions with live webhook calls
+- Execute functions with mock call data
+
+### Command Syntax
+
+```bash
+swaig-test <agent_path> [options]
+```
+
+### Quick Reference
+
+| Command | Purpose |
+|---------|---------|
+| `swaig-test agent.py` | List available tools |
+| `swaig-test agent.py --dump-swml` | Generate SWML document |
+| `swaig-test agent.py --list-tools` | List all SWAIG functions |
+| `swaig-test agent.py --list-agents` | List agents in multi-agent file |
+| `swaig-test agent.py --exec fn --param val` | Execute a function |
+| `swaig-test agent.py --help-examples` | Show comprehensive examples |
+| `swaig-test agent.py --help-platforms` | Show serverless platform options |
+
+### Basic Usage
+
+```bash
+## Generate SWML document (pretty printed)
+swaig-test agent.py --dump-swml
+
+## Generate raw JSON for piping to jq
+swaig-test agent.py --dump-swml --raw | jq '.'
+
+## List all SWAIG functions
+swaig-test agent.py --list-tools
+
+## Execute a function with CLI-style arguments
+swaig-test agent.py --exec search --query "AI agents" --limit 5
+
+## Execute with verbose output
+swaig-test agent.py --verbose --exec search --query "test"
+```
+
+### Actions
+
+Choose one action per command:
+
+| Action | Description |
+|--------|-------------|
+| `--list-agents` | List all agents in the file |
+| `--list-tools` | List all SWAIG functions in the agent |
+| `--dump-swml` | Generate and output SWML document |
+| `--exec FUNCTION` | Execute a function with CLI arguments |
+| (default) | If no action specified, defaults to `--list-tools` |
+
+### Common Options
+
+| Option | Description |
+|--------|-------------|
+| `-v, --verbose` | Enable verbose output with debug information |
+| `--raw` | Output raw JSON only (for piping to jq) |
+| `--agent-class NAME` | Specify agent class for multi-agent files |
+| `--route PATH` | Specify agent by route (e.g., /healthcare) |
+
+### SWML Generation
+
+#### Basic Generation
+
+```bash
+## Pretty-printed SWML
+swaig-test agent.py --dump-swml
+
+## Raw JSON for processing
+swaig-test agent.py --dump-swml --raw
+
+## Pretty-print with jq
+swaig-test agent.py --dump-swml --raw | jq '.'
+```
+
+#### Extract Specific Fields
+
+```bash
+## Extract SWAIG functions
+swaig-test agent.py --dump-swml --raw | jq '.sections.main[1].ai.SWAIG.functions'
+
+## Extract prompt
+swaig-test agent.py --dump-swml --raw | jq '.sections.main[1].ai.prompt'
+
+## Extract languages
+swaig-test agent.py --dump-swml --raw | jq '.sections.main[1].ai.languages'
+```
+
+#### Generate with Fake Call Data
+
+```bash
+## With comprehensive fake call data (call_id, from, to, etc.)
+swaig-test agent.py --dump-swml --fake-full-data
+
+## Customize call configuration
+swaig-test agent.py --dump-swml --call-type sip --from-number +15551234567
+```
+
+### SWML Generation Options
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `--call-type` | webrtc | Call type: sip or webrtc |
+| `--call-direction` | inbound | Call direction: inbound or outbound |
+| `--call-state` | created | Call state value |
+| `--from-number` | (none) | Override from/caller number |
+| `--to-extension` | (none) | Override to/extension number |
+| `--fake-full-data` | false | Use comprehensive fake post_data |
+
+### Function Execution
+
+#### CLI-Style Arguments (Recommended)
+
+```bash
+## Simple function call
+swaig-test agent.py --exec search --query "AI agents"
+
+## Multiple arguments
+swaig-test agent.py --exec book_reservation \
+  --name "John Doe" \
+  --date "2025-01-20" \
+  --party_size 4
+
+## With verbose output
+swaig-test agent.py --verbose --exec search --query "test"
+```
+
+#### Type Conversion
+
+Arguments are automatically converted:
+
+| Type | Example | Notes |
+|------|---------|-------|
+| String | `--name "John Doe"` | Quoted or unquoted |
+| Integer | `--count 5` | Numeric values |
+| Float | `--threshold 0.75` | Decimal values |
+| Boolean | `--active true` | true/false |
+
+#### Legacy JSON Syntax
+
+Still supported for backwards compatibility:
+
+```bash
+swaig-test agent.py search '{"query": "AI agents", "limit": 5}'
+```
+
+### Function Execution Options
+
+| Option | Description |
+|--------|-------------|
+| `--minimal` | Use minimal post_data (function args only) |
+| `--fake-full-data` | Use comprehensive fake call data |
+| `--custom-data` | JSON string with custom post_data overrides |
+
+### Multi-Agent Files
+
+When a file contains multiple agent classes:
+
+```bash
+## List all agents in file
+swaig-test multi_agent.py --list-agents
+
+## Use specific agent by class name
+swaig-test multi_agent.py --agent-class SalesAgent --list-tools
+swaig-test multi_agent.py --agent-class SalesAgent --dump-swml
+
+## Use specific agent by route
+swaig-test multi_agent.py --route /sales --list-tools
+swaig-test multi_agent.py --route /support --exec create_ticket --issue "Login problem"
+```
+
+### Dynamic Agent Testing
+
+Test agents that configure themselves based on request data:
+
+```bash
+## Test with query parameters
+swaig-test dynamic_agent.py --dump-swml --query-params '{"tier":"premium"}'
+
+## Test with custom headers
+swaig-test dynamic_agent.py --dump-swml --header "Authorization=Bearer token123"
+swaig-test dynamic_agent.py --dump-swml --header "X-Customer-ID=12345"
+
+## Test with custom request body
+swaig-test dynamic_agent.py --dump-swml --method POST --body '{"custom":"data"}'
+
+## Test with user variables
+swaig-test dynamic_agent.py --dump-swml --user-vars '{"preferences":{"language":"es"}}'
+
+## Combined dynamic configuration
+swaig-test dynamic_agent.py --dump-swml \
+  --query-params '{"tier":"premium","region":"eu"}' \
+  --header "X-Customer-ID=12345" \
+  --user-vars '{"preferences":{"language":"es"}}'
+```
+
+### Data Customization Options
+
+| Option | Description |
+|--------|-------------|
+| `--user-vars` | JSON string for userVariables |
+| `--query-params` | JSON string for query parameters |
+| `--header` | Add HTTP header (KEY=VALUE format) |
+| `--override` | Override specific value (path.to.key=value) |
+| `--override-json` | Override with JSON value (path.to.key='\{"nested":true\}') |
+
+### Advanced Data Overrides
+
+```bash
+## Override specific values
+swaig-test agent.py --dump-swml \
+  --override call.state=answered \
+  --override call.timeout=60
+
+## Override with JSON values
+swaig-test agent.py --dump-swml \
+  --override-json vars.custom='{"key":"value","nested":{"data":true}}'
+
+## Combine multiple override types
+swaig-test agent.py --dump-swml \
+  --call-type sip \
+  --user-vars '{"vip":"true"}' \
+  --header "X-Source=test" \
+  --override call.project_id=my-project \
+  --verbose
+```
+
+### Serverless Simulation
+
+Test agents in simulated serverless environments:
+
+| Platform | Value | Description |
+|----------|-------|-------------|
+| AWS Lambda | `lambda` | Simulates Lambda environment |
+| CGI | `cgi` | Simulates CGI deployment |
+| Cloud Functions | `cloud_function` | Simulates Google Cloud Functions |
+| Azure Functions | `azure_function` | Simulates Azure Functions |
+
+#### AWS Lambda Simulation
+
+```bash
+## Basic Lambda simulation
+swaig-test agent.py --simulate-serverless lambda --dump-swml
+
+## With custom Lambda configuration
+swaig-test agent.py --simulate-serverless lambda \
+  --aws-function-name prod-agent \
+  --aws-region us-west-2 \
+  --dump-swml
+
+## With Lambda function URL
+swaig-test agent.py --simulate-serverless lambda \
+  --aws-function-name my-agent \
+  --aws-function-url https://xxx.lambda-url.us-west-2.on.aws \
+  --dump-swml
+
+## With API Gateway
+swaig-test agent.py --simulate-serverless lambda \
+  --aws-api-gateway-id abc123 \
+  --aws-stage prod \
+  --dump-swml
+```
+
+#### AWS Lambda Options
+
+| Option | Description |
+|--------|-------------|
+| `--aws-function-name` | Lambda function name |
+| `--aws-function-url` | Lambda function URL |
+| `--aws-region` | AWS region |
+| `--aws-api-gateway-id` | API Gateway ID for API Gateway URLs |
+| `--aws-stage` | API Gateway stage (default: prod) |
+
+#### CGI Simulation
+
+```bash
+## Basic CGI (host required)
+swaig-test agent.py --simulate-serverless cgi \
+  --cgi-host example.com \
+  --dump-swml
+
+## CGI with HTTPS
+swaig-test agent.py --simulate-serverless cgi \
+  --cgi-host example.com \
+  --cgi-https \
+  --dump-swml
+
+## CGI with custom script path
+swaig-test agent.py --simulate-serverless cgi \
+  --cgi-host example.com \
+  --cgi-script-name /cgi-bin/agent.py \
+  --cgi-path-info /custom/path \
+  --dump-swml
+```
+
+#### CGI Options
+
+| Option | Description |
+|--------|-------------|
+| `--cgi-host` | CGI server hostname (REQUIRED for CGI simulation) |
+| `--cgi-script-name` | CGI script name/path |
+| `--cgi-https` | Use HTTPS for CGI URLs |
+| `--cgi-path-info` | CGI PATH_INFO value |
+
+#### Google Cloud Functions Simulation
+
+```bash
+## Basic Cloud Functions
+swaig-test agent.py --simulate-serverless cloud_function --dump-swml
+
+## With project configuration
+swaig-test agent.py --simulate-serverless cloud_function \
+  --gcp-project my-project \
+  --gcp-region us-central1 \
+  --dump-swml
+
+## With custom function URL
+swaig-test agent.py --simulate-serverless cloud_function \
+  --gcp-function-url https://us-central1-myproject.cloudfunctions.net/agent \
+  --dump-swml
+```
+
+#### GCP Options
+
+| Option | Description |
+|--------|-------------|
+| `--gcp-project` | Google Cloud project ID |
+| `--gcp-function-url` | Google Cloud Function URL |
+| `--gcp-region` | Google Cloud region |
+| `--gcp-service` | Google Cloud service name |
+
+#### Azure Functions Simulation
+
+```bash
+## Basic Azure Functions
+swaig-test agent.py --simulate-serverless azure_function --dump-swml
+
+## With environment
+swaig-test agent.py --simulate-serverless azure_function \
+  --azure-env production \
+  --dump-swml
+
+## With custom function URL
+swaig-test agent.py --simulate-serverless azure_function \
+  --azure-function-url https://myapp.azurewebsites.net/api/agent \
+  --dump-swml
+```
+
+#### Azure Options
+
+| Option | Description |
+|--------|-------------|
+| `--azure-env` | Azure Functions environment |
+| `--azure-function-url` | Azure Function URL |
+
+### Environment Variables
+
+Set environment variables for testing:
+
+```bash
+## Set individual variables
+swaig-test agent.py --simulate-serverless lambda \
+  --env API_KEY=secret123 \
+  --env DEBUG=1 \
+  --exec my_function
+
+## Load from environment file
+swaig-test agent.py --simulate-serverless lambda \
+  --env-file production.env \
+  --dump-swml
+
+## Combine both
+swaig-test agent.py --simulate-serverless lambda \
+  --env-file .env \
+  --env API_KEY=override_key \
+  --dump-swml
+```
+
+### DataMap Function Testing
+
+DataMap functions execute their configured webhooks:
+
+```bash
+## Test DataMap function (makes actual HTTP requests)
+swaig-test agent.py --exec get_weather --city "New York"
+
+## With verbose output to see webhook details
+swaig-test agent.py --verbose --exec get_weather --city "New York"
+```
+
+### Cross-Platform Testing
+
+Compare agent behavior across serverless platforms:
+
+```bash
+## Test across all platforms
+for platform in lambda cgi cloud_function azure_function; do
+  echo "Testing $platform..."
+  if [ "$platform" = "cgi" ]; then
+    swaig-test agent.py --simulate-serverless $platform \
+      --cgi-host example.com --exec my_function --param value
+  else
+    swaig-test agent.py --simulate-serverless $platform \
+      --exec my_function --param value
+  fi
+done
+
+## Compare webhook URLs across platforms
+swaig-test agent.py --simulate-serverless lambda --dump-swml --raw | \
+  jq '.sections.main[1].ai.SWAIG.functions[].web_hook_url'
+
+swaig-test agent.py --simulate-serverless cgi --cgi-host example.com \
+  --dump-swml --raw | jq '.sections.main[1].ai.SWAIG.functions[].web_hook_url'
+```
+
+### Output Options
+
+| Option | Description |
+|--------|-------------|
+| `--raw` | Machine-readable JSON output (suppresses logs) |
+| `--verbose` | Include debug information and detailed output |
+
+### Extended Help
+
+```bash
+## Show platform-specific serverless options
+swaig-test agent.py --help-platforms
+
+## Show comprehensive usage examples
+swaig-test agent.py --help-examples
+```
+
+### Complete Workflow Examples
+
+#### Development Workflow
+
+```bash
+## 1. Inspect generated SWML
+swaig-test agent.py --dump-swml --raw | jq '.'
+
+## 2. List available functions
+swaig-test agent.py --list-tools
+
+## 3. Test a specific function
+swaig-test agent.py --exec search --query "test" --verbose
+
+## 4. Test with fake call data
+swaig-test agent.py --exec book_appointment \
+  --name "John" --date "2025-01-20" \
+  --fake-full-data --verbose
+```
+
+#### Serverless Deployment Testing
+
+```bash
+## Test Lambda configuration
+swaig-test agent.py --simulate-serverless lambda \
+  --aws-function-name my-agent \
+  --aws-region us-east-1 \
+  --dump-swml --raw > swml.json
+
+## Verify webhook URLs are correct
+cat swml.json | jq '.sections.main[1].ai.SWAIG.functions[].web_hook_url'
+
+## Test function execution in Lambda environment
+swaig-test agent.py --simulate-serverless lambda \
+  --aws-function-name my-agent \
+  --exec process_order --order_id "12345" --verbose
+```
+
+#### Multi-Agent Testing
+
+```bash
+## Discover agents
+swaig-test multi_agent.py --list-agents
+
+## Test each agent
+swaig-test multi_agent.py --agent-class RouterAgent --dump-swml
+swaig-test multi_agent.py --agent-class SalesAgent --list-tools
+swaig-test multi_agent.py --agent-class SupportAgent \
+  --exec create_ticket --issue "Cannot login"
+```
+
+### Exit Codes
+
+| Code | Meaning |
+|------|---------|
+| 0 | Success |
+| 1 | General error (file not found, invalid args, execution error) |
+
+### Troubleshooting
+
+| Issue | Solution |
+|-------|----------|
+| Agent file not found | Check path is correct |
+| Multiple agents found | Use `--agent-class` or `--route` to specify |
+| Function not found | Use `--list-tools` to see available functions |
+| CGI host required | Add `--cgi-host` for CGI simulation |
+| Invalid JSON | Check `--query-params` and `--body` syntax |
+| Import errors | Ensure all dependencies are installed |
+
+

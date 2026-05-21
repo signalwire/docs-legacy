@@ -1,0 +1,100 @@
+---
+title: "CallRingback"
+slug: /dotnet/reference/calling/call-ringback
+toc_max_heading_level: 3
+---
+[call-ringback-ringback-type]: /docs/server-sdk/v2/dotnet/reference/calling/call-ringback-type
+
+# SignalWire.Relay.Calling.CallRingback
+
+This object represents a call ringback that is being played.
+
+## Constructor
+
+The only constructor is the default constructor, properties should all be assigned by initializer or after construction.
+
+**Parameters**
+
+None
+
+**Examples**
+
+> Basic Example
+
+```csharp
+CallRingback ringbackAudio = new CallRingback
+{
+     Type = CallRingback.RingbackType.audio,
+     Parameters = new CallRingback.AudioParams
+     {
+          URL = "http://path/to/audio/file"
+     }
+};
+
+CallRingback ringbackRingtone = new CallRingback
+{
+     Type = CallRingback.RingbackType.ringtone,
+     Parameters = new CallRingback.RingtoneParams
+     {
+         Name = "us",
+         Duration = 30
+     }
+};
+
+CallRingback ringbackSilence = new CallRingback
+{
+     Type = CallRingback.RingbackType.silence,
+     Parameters = new CallRingback.SilenceParams
+     {
+         Duration = 30
+     }
+};
+
+CallRingback ringbackTTS = new CallRingback
+{
+     Type = CallRingback.RingbackType.tts,
+     Parameters = new CallRingback.TTSParams
+     {
+         Gender = "female",
+         Language = "en",
+         Text = "I'm a little teapot"
+     }
+};
+```
+
+## Properties
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `Type` | [`SignalWire.Relay.Calling.CallRingback.RingbackType`][call-ringback-ringback-type] | This is the type of the media. |
+| `Parameters` | object | This is the object that represents the parameters specific to the type, see [`SignalWire.Relay.Calling.CallRingback.RingbackType`][call-ringback-ringback-type] for more information. |
+
+## Methods
+
+
+## ParametersAs&lt;T&gt;()
+
+This is a helper method to convert the `Parameters` to the real type.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `T` | Type | <span className="required-arg">required</span> | This is the data type for the conversion, see [`SignalWire.Relay.Calling.CallRingback.RingbackType`][call-ringback-ringback-type] for more information. |
+
+**Returns**
+
+`T` - This is an instance of the data type resulting from the conversion, see [`SignalWire.Relay.Calling.CallRingback.RingbackType`][call-ringback-ringback-type] for more information.
+
+**Examples**
+
+```csharp
+CallRingback.AudioParams audioParams = ringbackAudio.ParametersAs<CallRingback.AudioParams>();
+CallRingback.RingtoneParams ringtoneParams = ringbackRingtone.ParametersAs<CallRingback.RingtoneParams>
+CallRingback.SilenceParams silenceParams = ringbackSilence.ParametersAs<CallRingback.SilenceParams>();
+CallRingback.TTSParams ttsParams = ringbackTTS.ParametersAs<CallRingback.TTSParams>();
+```
+
+## Events
+
+None

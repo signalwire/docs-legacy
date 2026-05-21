@@ -1,0 +1,409 @@
+---
+title: "Swaig Function"
+sidebar_label: "Swaig Function"
+slug: /python/reference/swaig-function
+toc_max_heading_level: 3
+---
+
+## SWAIG Function API
+
+API reference for defining SWAIG functions using decorators and programmatic methods.
+
+### Overview
+
+SWAIG (SignalWire AI Gateway) functions are the primary way for AI agents to perform actions and retrieve information during conversations.
+
+**SWAIG Function Flow:**
+
+```text
+User speaks → AI decides to call function → Webhook invoked → Result
+```
+
+1. AI determines a function should be called based on conversation
+2. SignalWire invokes the webhook with function arguments
+3. Function executes and returns SwaigFunctionResult
+4. AI uses the result to continue the conversation
+
+### Decorator Syntax
+
+#### Basic Usage
+
+```python
+from signalwire_agents import AgentBase
+from signalwire_agents.core.function_result import SwaigFunctionResult
+
+agent = AgentBase(name="my-agent")
+
+@agent.tool(
+    description="Search for information",
+    parameters={
+        "type": "object",
+        "properties": {
+            "query": {"type": "string", "description": "Search query"}
+        },
+        "required": ["query"]
+    }
+)
+def search(args: dict, raw_data: dict = None) -> SwaigFunctionResult:
+    query = args.get("query", "")
+    results = perform_search(query)
+    return SwaigFunctionResult(f"Found: {results}")
+```
+
+#### Decorator Parameters
+
+```python
+@agent.tool(
+    name: str = None,           # Function name (default: function name)
+    description: str = "",      # Function description (required)
+    secure: bool = False,       # Require token authentication
+    fillers: List[str] = None,  # Phrases to say while processing
+    wait_file: str = None,      # Audio URL to play while processing
+    meta_data: Dict = None,     # Custom metadata
+    meta_data_token: str = None # Token for metadata access
+)
+```
+
+### Decorator Parameter Details
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `name` | str | Override function name |
+| `description` | str | What the function does (shown to AI) |
+| `secure` | bool | Require per-call token authentication |
+| `fillers` | List[str] | Phrases like "Let me check on that..." |
+| `wait_file` | str | Hold music URL during processing |
+| `meta_data` | Dict | Static metadata for the function |
+| `meta_data_token` | str | Token scope for metadata access |
+
+### Parameter Schema
+
+Define parameters using JSON Schema in the decorator:
+
+```python
+@agent.tool(
+    description="Book a reservation",
+    parameters={
+        "type": "object",
+        "properties": {
+            "name": {"type": "string", "description": "Guest name"},
+            "party_size": {"type": "integer", "description": "Number of guests"},
+            "date": {"type": "string", "description": "Reservation date"},
+            "time": {"type": "string", "description": "Reservation time"},
+            "special_requests": {"type": "string", "description": "Special requests"}
+        },
+        "required": ["name", "party_size", "date"]
+    }
+)
+def book_reservation(args: dict, raw_data: dict = None) -> SwaigFunctionResult:
+    name = args.get("name", "")
+    party_size = args.get("party_size", 1)
+    date = args.get("date", "")
+    time = args.get("time", "7:00 PM")
+    special_requests = args.get("special_requests")
+    # ... booking logic
+    return SwaigFunctionResult(f"Reservation booked for {name}")
+```
+
+### Type Mapping
+
+| Python Type | JSON Schema Type | Notes |
+|-------------|------------------|-------|
+| `str` | string | Basic string |
+| `int` | integer | Whole numbers |
+| `float` | number | Decimal numbers |
+| `bool` | boolean | True/False |
+| `list` | array | List of items |
+| `dict` | object | Key-value pairs |
+| `Optional[T]` | T (nullable) | Optional parameter |
+
+### Programmatic Definition
+
+#### define_tool Method
+
+```python
+agent.define_tool(
+    name="search",
+    description="Search for information",
+    parameters={
+        "type": "object",
+        "properties": {
+            "query": {
+                "type": "string",
+                "description": "Search query"
+            },
+            "limit": {
+                "type": "integer",
+                "description": "Maximum results",
+                "default": 10
+            }
+        },
+        "required": ["query"]
+    },
+    handler=search_handler,
+    secure=False,
+    fillers=["Searching now..."]
+)
+```
+
+### Handler Function Signature
+
+Handler functions receive parsed arguments and raw data:
+
+```python
+def my_handler(
+    args: Dict[str, Any],      # Parsed function arguments
+    raw_data: Dict[str, Any]   # Complete POST data
+) -> SwaigFunctionResult:
+    # args contains: {"query": "...", "limit": 10}
+    # raw_data contains full request including metadata
+    return SwaigFunctionResult("Result")
+```
+
+### Raw Data Contents
+
+The `raw_data` parameter contains:
+
+```json
+{
+    "function": "function_name",
+    "argument": {
+        "parsed": [{"name": "...", "value": "..."}]
+    },
+    "call_id": "uuid-call-id",
+    "global_data": {"key": "value"},
+    "meta_data": {"key": "value"},
+    "caller_id_name": "Caller Name",
+    "caller_id_number": "+15551234567",
+    "ai_session_id": "uuid-session-id"
+}
+```
+
+### Accessing Raw Data
+
+```python
+@agent.tool(
+    description="Process order",
+    parameters={
+        "type": "object",
+        "properties": {
+            "order_id": {"type": "string", "description": "Order ID"}
+        },
+        "required": ["order_id"]
+    }
+)
+def process_order(args: dict, raw_data: dict = None) -> SwaigFunctionResult:
+    raw_data = raw_data or {}
+    order_id = args.get("order_id", "")
+
+    # Get global data
+    global_data = raw_data.get("global_data", {})
+    user_id = global_data.get("user_id")
+
+    # Get caller info
+    caller_number = raw_data.get("caller_id_number")
+
+    # Get session info
+    call_id = raw_data.get("call_id")
+
+    return SwaigFunctionResult(f"Order {order_id} processed")
+```
+
+### Secure Functions
+
+Secure functions require token authentication per call:
+
+```python
+@agent.tool(
+    description="Access sensitive data",
+    secure=True,
+    parameters={
+        "type": "object",
+        "properties": {
+            "account_id": {"type": "string", "description": "Account ID"}
+        },
+        "required": ["account_id"]
+    }
+)
+def get_account_info(args: dict, raw_data: dict = None) -> SwaigFunctionResult:
+    account_id = args.get("account_id", "")
+    # This function requires a valid token
+    return SwaigFunctionResult(f"Account info for {account_id}")
+```
+
+### Fillers and Wait Files
+
+Keep users engaged during processing:
+
+```python
+## Text fillers - AI speaks these while processing
+@agent.tool(
+    description="Search database",
+    fillers=[
+        "Let me search for that...",
+        "One moment please...",
+        "Checking our records..."
+    ],
+    parameters={
+        "type": "object",
+        "properties": {
+            "query": {"type": "string", "description": "Search query"}
+        },
+        "required": ["query"]
+    }
+)
+def search_database(args: dict, raw_data: dict = None) -> SwaigFunctionResult:
+    query = args.get("query", "")
+    # ... search logic
+    return SwaigFunctionResult(f"Found results for {query}")
+
+## Wait file - Play audio while processing
+@agent.tool(
+    description="Long operation",
+    wait_file="https://example.com/hold_music.mp3",
+    parameters={
+        "type": "object",
+        "properties": {
+            "data": {"type": "string", "description": "Data to process"}
+        },
+        "required": ["data"]
+    }
+)
+def long_operation(args: dict, raw_data: dict = None) -> SwaigFunctionResult:
+    data = args.get("data", "")
+    # ... long processing
+    return SwaigFunctionResult("Processing complete")
+```
+
+### Return Value Requirements
+
+**IMPORTANT**: All SWAIG functions MUST return `SwaigFunctionResult`:
+
+```python
+## Correct
+@agent.tool(
+    description="Get info",
+    parameters={
+        "type": "object",
+        "properties": {
+            "id": {"type": "string", "description": "Item ID"}
+        },
+        "required": ["id"]
+    }
+)
+def get_info(args: dict, raw_data: dict = None) -> SwaigFunctionResult:
+    id = args.get("id", "")
+    return SwaigFunctionResult(f"Information for {id}")
+
+## WRONG - Never return plain strings
+@agent.tool(description="Get info")
+def get_info_wrong(args: dict, raw_data: dict = None) -> str:
+    return "Information retrieved"  # This will fail!
+```
+
+### Complete Example
+
+```python
+#!/usr/bin/env python3
+## order_functions_agent.py - Agent with various SWAIG function patterns
+from signalwire_agents import AgentBase
+from signalwire_agents.core.function_result import SwaigFunctionResult
+
+agent = AgentBase(name="order-agent", route="/orders")
+
+## Simple function
+@agent.tool(
+    description="Get order status",
+    parameters={
+        "type": "object",
+        "properties": {
+            "order_id": {"type": "string", "description": "Order ID to look up"}
+        },
+        "required": ["order_id"]
+    }
+)
+def get_order_status(args: dict, raw_data: dict = None) -> SwaigFunctionResult:
+    order_id = args.get("order_id", "")
+    status = lookup_order(order_id)
+    return SwaigFunctionResult(f"Order {order_id} is {status}")
+
+## Function with multiple parameters
+@agent.tool(
+    description="Place a new order",
+    parameters={
+        "type": "object",
+        "properties": {
+            "product": {"type": "string", "description": "Product name"},
+            "quantity": {"type": "integer", "description": "Quantity to order"},
+            "shipping": {"type": "string", "description": "Shipping method"}
+        },
+        "required": ["product"]
+    }
+)
+def place_order(args: dict, raw_data: dict = None) -> SwaigFunctionResult:
+    product = args.get("product", "")
+    quantity = args.get("quantity", 1)
+    shipping = args.get("shipping", "standard")
+    order_id = create_order(product, quantity, shipping)
+    return SwaigFunctionResult(f"Order {order_id} placed successfully")
+
+## Secure function with fillers
+@agent.tool(
+    description="Cancel an order",
+    secure=True,
+    fillers=["Let me process that cancellation..."],
+    parameters={
+        "type": "object",
+        "properties": {
+            "order_id": {"type": "string", "description": "Order ID to cancel"},
+            "reason": {"type": "string", "description": "Cancellation reason"}
+        },
+        "required": ["order_id"]
+    }
+)
+def cancel_order(args: dict, raw_data: dict = None) -> SwaigFunctionResult:
+    order_id = args.get("order_id", "")
+    reason = args.get("reason")
+    cancel_result = do_cancel(order_id, reason)
+    return SwaigFunctionResult(f"Order {order_id} has been cancelled")
+
+## Function that returns actions
+@agent.tool(
+    description="Transfer to support",
+    parameters={
+        "type": "object",
+        "properties": {
+            "issue_type": {"type": "string", "description": "Type of issue"}
+        },
+        "required": ["issue_type"]
+    }
+)
+def transfer_to_support(args: dict, raw_data: dict = None) -> SwaigFunctionResult:
+    issue_type = args.get("issue_type", "general")
+    return (
+        SwaigFunctionResult("I'll transfer you to our support team")
+        .connect("+15551234567", final=True)
+    )
+
+if __name__ == "__main__":
+    agent.run()
+```
+
+### See Also
+
+| Topic | Reference |
+|-------|-----------|
+| Function results and actions | [SwaigFunctionResult API](/docs/agents-sdk/python/reference/function-result) |
+| Serverless API integration | [DataMap API](/docs/agents-sdk/python/reference/data-map) |
+| Testing functions | [swaig-test CLI](/docs/agents-sdk/python/reference/cli-swaig-test) |
+| Defining functions guide | [Defining Functions](/docs/agents-sdk/python/guides/defining-functions) |
+
+### Troubleshooting
+
+| Issue | Solution |
+|-------|----------|
+| Function not appearing in --list-tools | Ensure decorator has `description` parameter |
+| Function not being called | Check webhook URL accessibility; use `swaig-test --exec` to test locally |
+| Wrong parameters received | Verify parameter types match expected JSON schema types |
+| Return value ignored | Must return `SwaigFunctionResult`, not plain string |
+

@@ -1,0 +1,246 @@
+.card {
+  display: block;
+  font-family: inherit;
+  font-weight: normal;
+  position: relative;
+  margin: 0.5rem 0;
+  border-radius: 0.75rem;
+  border: 1px solid var(--sw-card-border-color);
+  overflow: hidden;
+  width: 100%;
+  transition: all 0.3s ease;
+  background: var(--ifm-card-background-color);
+}
+
+.horizontal {
+  display: flex;
+  align-items: stretch;
+}
+
+.horizontal .imageWrapper {
+  flex: 0 0 auto;
+  width: 33%;
+  min-width: 200px;
+}
+
+.horizontal .cardImage {
+  height: 100%;
+}
+
+.horizontal .cardContent {
+  flex: 1 1 auto;
+}
+
+[data-theme="dark"] .card {
+  background: color-mix(in srgb, var(--ifm-card-background-color) 40%, transparent);
+}
+
+[data-theme="light"] .card[href]:hover {
+  border-color: var(--sw-link-color);
+}
+
+[data-theme="dark"] .card[href]:hover {
+  border-color: transparent;
+  animation:
+    glowFadeIn 0.5s ease-out forwards,
+    glowPulse 3s linear infinite 0.5s;
+  background-image: linear-gradient(
+      var(--ifm-card-background-color),
+      var(--ifm-card-background-color)
+    ),
+    var(--sw-horizontal-active-line-color);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+  transform: scale(1.01);
+}
+
+@keyframes glowFadeIn {
+  0% {
+    box-shadow: 0 0 0px transparent;
+  }
+  100% {
+    box-shadow: 0 0 14px var(--sw-pink-color);
+  }
+}
+
+@keyframes glowPulse {
+  0% {
+    box-shadow: 0 0 15px var(--sw-pink-color);
+  }
+  50% {
+    box-shadow: 0 0 15px var(--sw-blue-color);
+  }
+  100% {
+    box-shadow: 0 0 15px var(--sw-pink-color);
+  }
+}
+
+@keyframes svgFlicker {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 2px var(--sw-pink-color))
+      drop-shadow(0 0 3px var(--sw-blue-color));
+  }
+  33% {
+    filter: drop-shadow(0 0 3px var(--sw-blue-color))
+      drop-shadow(0 0 2px var(--sw-pink-color));
+  }
+  66% {
+    filter: drop-shadow(0 0 1px var(--sw-pink-color))
+      drop-shadow(0 0 4px var(--sw-blue-color));
+  }
+}
+
+.card[href] {
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.imageWrapper {
+  position: relative;
+  width: 100%;
+  min-height: 200px;
+}
+
+.imageLoader {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--ifm-background-surface-color);
+  color: var(--ifm-color-content);
+  opacity: 0.4;
+}
+
+.cardImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hidden {
+  opacity: 0;
+}
+
+.cardContent {
+  padding: 1.25rem 1.5rem;
+}
+
+.iconImage {
+  height: 1.5rem;
+  width: 1.5rem;
+  object-fit: cover;
+  object-position: center;
+}
+
+.iconWrapper {
+  height: 1.5rem;
+  width: 1.5rem;
+  font-size: 1.4rem;
+  fill: var(--ifm-color-content);
+  color: var(--ifm-color-content);
+}
+
+.title {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--ifm-font-color-base);
+  margin-top: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.description {
+  font-size: 0.9rem;
+  color: var(--ifm-color-content-secondary);
+  margin: 0.5rem 0 0 0;
+  line-height: 1.4;
+}
+
+.titleWithIcon {
+  margin-top: 1rem;
+}
+
+.content {
+  margin-top: 0.25rem;
+  font-weight: normal;
+  color: var(--ifm-font-color-base);
+  margin-bottom: 0;
+}
+.content > :last-child {
+  margin-bottom: 0;
+}
+
+.card_link {
+  text-decoration: none !important;
+}
+
+.contentNoTitle {
+  color: var(--ifm-font-color-base);
+}
+
+/* Remove dark mode overrides since we're using Infima variables */
+:global(.dark) .card {
+  border-color: var(--ifm-color-gray-800);
+}
+
+:global(.dark) .iconWrapper {
+  fill: var(--ifm-color-content);
+  color: var(--ifm-color-content);
+}
+
+:global(.dark) .title {
+  color: var(--ifm-font-color-base);
+}
+
+:global(.dark) .description {
+  color: var(--ifm-color-content-secondary);
+}
+
+:global(.dark) .content {
+  color: var(--ifm-font-color-base);
+}
+
+:global(.dark) .contentNoTitle {
+  color: var(--ifm-font-color-base);
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.5rem;
+}
+
+.titleContainer {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.secondaryContent {
+  margin-top: 0.5rem;
+}
+
+@keyframes gradientMove {
+  0% {
+    background-position: 0% 0%;
+  }
+  50% {
+    background-position: 100% 100%;
+  }
+  100% {
+    background-position: 0% 0%;
+  }
+}

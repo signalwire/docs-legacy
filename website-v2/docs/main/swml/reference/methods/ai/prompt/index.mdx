@@ -1,0 +1,796 @@
+---
+hide_title: false
+slug: /swml/reference/ai/prompt
+title: prompt
+description: Establish the set of rules and instructions for the AI agent through a prompt.
+toc_max_heading_level: 3
+---
+
+[prompt-properties]: #properties
+[Prompting Best Practices]: /docs/platform/ai/best-practices#crafting-the-initial-prompt-for-the-ai
+
+Defines the AI agent's personality, goals, behaviors, and instructions for handling conversations.
+The prompt establishes how the agent should interact with callers, what information it should gather,
+and how it should respond to various scenarios.
+
+It is recommended to write prompts using markdown formatting as LLMs better understand structured content.
+Additionally it is recommended to read the [Prompting Best Practices][Prompting Best Practices] guide.
+
+### Prompt types
+
+There are three ways to define prompt content, each suited for different use cases:
+
+- **Text prompt** — A single string containing the full prompt. Best for simple agents where the entire personality, instructions, and rules fit naturally into one block of text.
+
+- **POM (Prompt Object Model)** — A structured array of sections with titles, body text, and bullet points. Best for complex prompts that benefit from clear organization. SignalWire renders the POM into a markdown document before sending it to the LLM.
+
+- **Contexts** — A system of named conversation flows, each with its own steps, memory settings, and transition logic. Best for multi-stage conversations where the agent needs to switch between distinct modes (e.g., greeting → support → billing). Requires a `default` context as the entry point. See [Contexts](#contexts) below.
+
+Text and POM are mutually exclusive — use one or the other. Contexts can be combined with either a text or POM prompt to add structured conversation flows on top of the base prompt.
+
+## **Properties**
+
+<ParamField path="ai.prompt" type="object">
+  An object that contains the [`prompt parameters`][prompt-properties].
+</ParamField>
+
+The `prompt` property accepts one of the following objects:
+
+<Tabs>
+    <TabItem value="regular-prompt" label="Regular Prompt">
+
+<ParamField path="prompt.text" type="string" required={true}>
+  The main identity prompt for the AI. This prompt will be used to outline the agent's personality, role, and other characteristics.
+</ParamField>
+
+<ParamField path="prompt.temperature" type="number" default="1.0">
+  Randomness setting. Float value between 0.0 and 1.5. Closer to 0 will make the output less random.
+</ParamField>
+
+<ParamField path="prompt.top_p" type="number" default="1.0">
+  Randomness setting. Alternative to `temperature`. Float value between 0.0 and 1.0. Closer to 0 will make the output less random.
+</ParamField>
+
+<ParamField path="prompt.confidence" type="number" default="0.6">
+  Threshold to fire a speech-detect event at the end of the utterance. Float value between 0.0 and 1.0. Decreasing this value will reduce the pause after the user speaks, but may introduce false positives.
+</ParamField>
+
+<ParamField path="prompt.presence_penalty" type="number" default="0">
+  Aversion to staying on topic. Float value between -2.0 and 2.0. Positive values increase the model's likelihood to talk about new topics.
+</ParamField>
+
+<ParamField path="prompt.frequency_penalty" type="number" default="0">
+  Aversion to repeating lines. Float value between -2.0 and 2.0. Positive values decrease the model's likelihood to repeat the same line verbatim.
+</ParamField>
+
+<ParamField path="prompt.max_tokens" type="integer" default="256">
+  Limits the amount of tokens that the AI agent may generate when creating its response. Valid value range: `0` - `4096`.
+</ParamField>
+
+    </TabItem>
+    <TabItem value="pom-prompts" label="POM Prompts">
+
+
+<ParamField path="prompt.pom" type="object[]" required={true}>
+  An array of objects that defines the prompt object model (POM) for the AI. The POM is a structured data format for organizing and rendering prompts that are clearly structured and easy to understand. By breaking prompts into sections, users can manage each section independently and then combine them into a single cohesive prompt. SignalWire renders the POM into a markdown document before sending it to the LLM. If the `text` parameter is present while using `pom`, the `pom` prompt will be used instead of `text`.
+</ParamField>
+
+<Indent>
+
+<ParamField path="pom[].title" type="string">
+  The title of the section. Will be a heading in the rendered prompt.
+</ParamField>
+
+<ParamField path="pom[].body" type="string">
+  The body of the section. This will be a paragraph in the rendered prompt.
+  Required if `bullets` is not present.
+</ParamField>
+
+<ParamField path="pom[].bullets" type="string[]">
+  An array of strings that represent the bullets of the section.
+  This will be a list of short statements/rules in the rendered prompt.
+  Optional if `body` is present.
+</ParamField>
+
+<ParamField path="pom[].subsections" type="object[]">
+  An array of section objects allowing users to nest sections within sections. Each subsection accepts the same properties as a top-level POM section (`title`, `body`, `bullets`, `numbered`, `numberedBullets`).
+</ParamField>
+
+<ParamField path="pom[].numbered" type="boolean" default="false">
+  If `true`, the section will be numbered in the rendered prompt.
+</ParamField>
+
+<ParamField path="pom[].numberedBullets" type="boolean" default="false">
+  If `true`, the bullets will be numbered in the rendered prompt.
+</ParamField>
+
+</Indent>
+
+<ParamField path="prompt.temperature" type="number" default="1.0">
+  Randomness setting. Float value between 0.0 and 1.5. Closer to 0 will make the output less random.
+</ParamField>
+
+<ParamField path="prompt.top_p" type="number" default="1.0">
+  Randomness setting. Alternative to `temperature`. Float value between 0.0 and 1.0. Closer to 0 will make the output less random.
+</ParamField>
+
+<ParamField path="prompt.confidence" type="number" default="0.6">
+  Threshold to fire a speech-detect event at the end of the utterance. Float value between 0.0 and 1.0. Decreasing this value will reduce the pause after the user speaks, but may introduce false positives.
+</ParamField>
+
+<ParamField path="prompt.presence_penalty" type="number" default="0">
+  Aversion to staying on topic. Float value between -2.0 and 2.0. Positive values increase the model's likelihood to talk about new topics.
+</ParamField>
+
+<ParamField path="prompt.frequency_penalty" type="number" default="0">
+  Aversion to repeating lines. Float value between -2.0 and 2.0. Positive values decrease the model's likelihood to repeat the same line verbatim.
+</ParamField>
+
+<ParamField path="prompt.max_tokens" type="integer" default="256">
+  Limits the amount of tokens that the AI agent may generate when creating its response. Valid value range: `0` - `4096`.
+</ParamField>
+
+    </TabItem>
+</Tabs>
+
+### Contexts {#contexts}
+
+<ParamField path="prompt.contexts" type="object">
+  An object that defines the available contexts for the AI. Each context represents a set of steps that guide the flow of the conversation. The object must include a `default` key, which specifies the initial context used at the start of the conversation. Additional contexts can be added as other keys within the object.
+</ParamField>
+
+<Indent>
+
+<ParamField path="contexts.default" type="object" required={true}>
+  The default context used at the beginning of the conversation.
+</ParamField>
+
+<ParamField path="contexts.*" type="object">
+  Additional contexts for specialized conversation flows. The key is user-defined (e.g., `support`, `sales`, `billing`).
+</ParamField>
+
+<Indent>
+
+<ParamField path="*.steps" type="object[]" required={true}>
+  An array of step objects that define the conversation flow for this context. Steps execute sequentially unless otherwise specified. Each step contains either a `text` string or a `pom` array to provide prompt instructions.
+</ParamField>
+
+<ParamField path="*.isolated" type="boolean" default="false">
+  When `true`, resets conversation history to only the system prompt when entering this context. Useful for focused tasks that shouldn't be influenced by previous conversation.
+</ParamField>
+
+<ParamField path="*.enter_fillers" type="object[]">
+  Language-specific filler phrases played when transitioning into this context.
+</ParamField>
+
+<Indent>
+
+<ParamField path="enter_fillers[].<language_code>" type="string[]">
+  An array of filler phrases for the specified language code. One phrase is randomly selected during transitions. Possible language codes:
+  - `default` - Default language set by the user in the [`ai.languages`](/docs/swml/reference/ai/languages) property
+  - `bg` - Bulgarian
+  - `ca` - Catalan
+  - `cs` - Czech
+  - `da` - Danish
+  - `da-DK` - Danish (Denmark)
+  - `de` - German
+  - `de-CH` - German (Switzerland)
+  - `el` - Greek
+  - `en` - English
+  - `en-AU` - English (Australia)
+  - `en-GB` - English (United Kingdom)
+  - `en-IN` - English (India)
+  - `en-NZ` - English (New Zealand)
+  - `en-US` - English (United States)
+  - `es` - Spanish
+  - `es-419` - Spanish (Latin America)
+  - `et` - Estonian
+  - `fi` - Finnish
+  - `fr` - French
+  - `fr-CA` - French (Canada)
+  - `hi` - Hindi
+  - `hu` - Hungarian
+  - `id` - Indonesian
+  - `it` - Italian
+  - `ja` - Japanese
+  - `ko` - Korean
+  - `ko-KR` - Korean (South Korea)
+  - `lt` - Lithuanian
+  - `lv` - Latvian
+  - `ms` - Malay
+  - `multi` - Multilingual (Spanish + English)
+  - `nl` - Dutch
+  - `nl-BE` - Flemish (Belgian Dutch)
+  - `no` - Norwegian
+  - `pl` - Polish
+  - `pt` - Portuguese
+  - `pt-BR` - Portuguese (Brazil)
+  - `pt-PT` - Portuguese (Portugal)
+  - `ro` - Romanian
+  - `ru` - Russian
+  - `sk` - Slovak
+  - `sv` - Swedish
+  - `sv-SE` - Swedish (Sweden)
+  - `th` - Thai
+  - `th-TH` - Thai (Thailand)
+  - `tr` - Turkish
+  - `uk` - Ukrainian
+  - `vi` - Vietnamese
+  - `zh` - Chinese (Simplified)
+  - `zh-CN` - Chinese (Simplified, China)
+  - `zh-Hans` - Chinese (Simplified Han)
+  - `zh-Hant` - Chinese (Traditional Han)
+  - `zh-HK` - Chinese (Traditional, Hong Kong)
+  - `zh-TW` - Chinese (Traditional, Taiwan)
+</ParamField>
+
+</Indent>
+
+<ParamField path="*.exit_fillers" type="object[]">
+  Language-specific filler phrases played when leaving this context. Same format as `enter_fillers`.
+</ParamField>
+
+</Indent>
+
+</Indent>
+
+## **Examples**
+
+### Basic prompt
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - ai:
+        prompt:
+          text: |
+            You are a friendly customer service agent for a telecommunications company.
+            Your name is Alex. Always greet the caller warmly and ask how you can help.
+
+            ## Rules
+            - Be polite and professional at all times
+            - If the caller asks about billing, offer to transfer them to the billing department
+            - If you cannot help with a request, apologize and suggest alternatives
+          temperature: 0.8
+          top_p: 0.9
+          confidence: 0.6
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "ai": {
+          "prompt": {
+            "text": "You are a friendly customer service agent for a telecommunications company.\nYour name is Alex. Always greet the caller warmly and ask how you can help.\n\n## Rules\n- Be polite and professional at all times\n- If the caller asks about billing, offer to transfer them to the billing department\n- If you cannot help with a request, apologize and suggest alternatives\n",
+            "temperature": 0.8,
+            "top_p": 0.9,
+            "confidence": 0.6
+          }
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+### POM prompt
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - ai:
+        prompt:
+          text: "Prompt is defined in pom"
+          pom:
+            - title: "Agent Personality"
+              body: "You are a friendly and engaging assistant. Keep the conversation light and fun."
+              subsections:
+                - title: "Personal Information"
+                  numberedBullets: true
+                  bullets:
+                    - "You are a AI Agent"
+                    - "Your name is Frank"
+                    - "You work at SignalWire"
+            - title: "Task"
+              body: "You are to ask the user a series of questions to gather information."
+              bullets:
+                - "Ask the user to provide their name"
+                - "Ask the user to provide their favorite color"
+                - "Ask the user to provide their favorite food"
+                - "Ask the user to provide their favorite movie"
+                - "Ask the user to provide their favorite TV show"
+                - "Ask the user to provide their favorite music"
+                - "Ask the user to provide their favorite sport"
+                - "Ask the user to provide their favorite animal"
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "ai": {
+          "prompt": {
+            "text": "Prompt is defined in pom",
+            "pom": [
+              {
+                "title": "Agent Personality",
+                "body": "You are a friendly and engaging assistant. Keep the conversation light and fun.",
+                "subsections": [
+                  {
+                    "title": "Personal Information",
+                    "numberedBullets": true,
+                    "bullets": [
+                      "You are a AI Agent",
+                      "Your name is Frank",
+                      "You work at SignalWire"
+                    ]
+                  }
+                ]
+              },
+              {
+                "title": "Task",
+                "body": "You are to ask the user a series of questions to gather information.",
+                "bullets": [
+                  "Ask the user to provide their name",
+                  "Ask the user to provide their favorite color",
+                  "Ask the user to provide their favorite food",
+                  "Ask the user to provide their favorite movie",
+                  "Ask the user to provide their favorite TV show",
+                  "Ask the user to provide their favorite music",
+                  "Ask the user to provide their favorite sport",
+                  "Ask the user to provide their favorite animal"
+                ]
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+#### Rendered prompt
+
+The above POM example will render the following markdown prompt:
+
+```markdown
+## Agent Personality
+
+You are a friendly and engaging assistant. Keep the conversation light and fun.
+
+### Personal Information
+
+1. You are a AI Agent
+2. Your name is Frank
+3. You work at SignalWire
+
+## Task
+
+You are to ask the user a series of questions to gather information.
+
+- Ask the user to provide their name
+- Ask the user to provide their favorite color
+- Ask the user to provide their favorite food
+- Ask the user to provide their favorite movie
+- Ask the user to provide their favorite TV show
+- Ask the user to provide their favorite music
+- Ask the user to provide their favorite sport
+- Ask the user to provide their favorite animal
+```
+
+### Basic context
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - ai:
+        prompt:
+          text: You are a helpful assistant that can switch between different expertise areas.
+          contexts:
+            default:
+              steps:
+                - name: greeting
+                  text: Greet the user and ask what they need help with. If they need technical support, transfer them to the support context.
+                  valid_contexts:
+                    - support
+            support:
+              isolated: true
+              enter_fillers:
+                - en-US: ["Switching to technical support", "Let me connect you with support"]
+                  es-ES: ["Cambiando a soporte técnico", "Permítame conectarlo con soporte"]
+              exit_fillers:
+                - en-US: ["Leaving support mode", "Returning to main menu"]
+                  es-ES: ["Saliendo del modo de soporte", "Volviendo al menú principal"]
+              steps:
+                - name: troubleshoot
+                  text: Help the user troubleshoot their technical issue. When finished, ask if they need anything else or want to return to the main menu.
+                  valid_contexts:
+                    - default
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "ai": {
+          "prompt": {
+            "text": "You are a helpful assistant that can switch between different expertise areas.",
+            "contexts": {
+              "default": {
+                "steps": [
+                  {
+                    "name": "greeting",
+                    "text": "Greet the user and ask what they need help with. If they need technical support, transfer them to the support context.",
+                    "valid_contexts": [
+                      "support"
+                    ]
+                  }
+                ]
+              },
+              "support": {
+                "isolated": true,
+                "enter_fillers": [
+                  {
+                    "en-US": [
+                      "Switching to technical support",
+                      "Let me connect you with support"
+                    ],
+                    "es-ES": [
+                      "Cambiando a soporte t\u00e9cnico",
+                      "Perm\u00edtame conectarlo con soporte"
+                    ]
+                  }
+                ],
+                "exit_fillers": [
+                  {
+                    "en-US": [
+                      "Leaving support mode",
+                      "Returning to main menu"
+                    ],
+                    "es-ES": [
+                      "Saliendo del modo de soporte",
+                      "Volviendo al men\u00fa principal"
+                    ]
+                  }
+                ],
+                "steps": [
+                  {
+                    "name": "troubleshoot",
+                    "text": "Help the user troubleshoot their technical issue. When finished, ask if they need anything else or want to return to the main menu.",
+                    "valid_contexts": [
+                      "default"
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+### Advanced multi-context
+
+This example demonstrates multiple contexts with different AI personalities, voice settings, and specialized knowledge domains:
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+sections:
+  main:
+    - ai:
+        hints:
+          - StarWars
+          - StarTrek
+        languages:
+          - name: Ryan-English
+            voice: elevenlabs.patrick
+            code: en-US
+          - name: Luke-English
+            voice: elevenlabs.fin
+            code: en-US
+          - name: Spock-English
+            voice: elevenlabs.charlie
+            code: en-US
+        prompt:
+          text: Help the user transfer to the Star Wars or Star Trek expert.
+          contexts:
+            default:
+              steps:
+                - name: start
+                  text: |+
+                    Your name is Ryan. You are a receptionist. Your only purpose is to change the context to starwars or startrek.
+                  step_criteria: |+
+                    Introduce yourself as Ryan.
+                    Ask the user if he would like to talk to a star wars or star trek expert until they provide an adequate answer.
+                - name: transfer
+                  text: You will now successfully transfer the user to the Star Wars or Star Trek expert.
+                  step_criteria: If the user has chosen a valid context, transfer them to the appropriate expert.
+                  valid_contexts:
+                    - starwars
+                    - startrek
+            starwars:
+              steps:
+                - name: start
+                  text: |+
+                    The user has been transferred to the Star Wars expert.
+                    Until told otherwise, your name is Luke. Change the language to Luke-English.
+                    Your current goal is to get the user to tell you their name.
+                    Unless told otherwise, refer to the user as 'Padawan {users_name}'.
+                  step_criteria: |+
+                    Introduce yourself as Luke, the Star Wars expert.
+                    The user must tell you their name if they only say one word assume that is their name.
+                - name: question
+                  text: |+
+                    Your goal is to get the user to choose one of the following options.
+                    - Jedi Order (advance to jedi_order step)
+                    - The ways of the Force (advance to force step)
+                    - Talk to the star trek expert. (change context to startrek)
+                  step_criteria: +|
+                    The user must provide a valid answer to continue.
+                    Refer to the user as 'Padawan {users_name}' for the rest of the conversation.
+                  valid_steps:
+                    - jedi_order
+                    - force
+                  valid_contexts:
+                    - startrek
+                - name: jedi_order
+                  text: |+
+                    Limit the topic to the Jedi Order.
+                    Inform the user they can say they want to change the topic at any time, if they do move to the question step.
+                  step_criteria: The user says they want to change the topic.
+                  valid_steps:
+                    - question
+                - name: force
+                  text: |+
+                    Limit the topic to the force.
+                    Inform the user they can say they want to change the topic at any time, if they do move to the question step.
+                  step_criteria: The user says they want to change the topic.
+                  valid_steps:
+                    - question
+            startrek:
+              steps:
+                - name: start
+                  text: |+
+                    The user has been transferred to the Star Trek expert.
+                    Until told otherwise, your name is Spok. Change the language to Spok-English.
+                    Your current goal is to get the user to tell you their name.
+                    Unless told otherwise, refer to the user as 'Ensign {users_name}'.
+                  step_criteria: |+
+                    Introduce yourself as Spok, the Star Trek expert.
+                    The user must tell you their name if they only say one word assume that is their name.
+                - name: question
+                  text: |+
+                    Your goal is to get the user to choose one of the following options.
+                    - Vulcan Culture (advance to vulcan_culture step)
+                    - Federation (advance to federation step)
+                    - Talk to the star wars expert. (change context to starwars)
+                  step_criteria: +|
+                    The user must provide a valid answer to continue.
+                    Refer to the user as 'Ensign {users_name}' for the rest of the conversation.
+                  valid_steps:
+                    - vulcan_culture
+                    - federation
+                  valid_contexts:
+                    - starwars
+                - name: vulcan_culture
+                  text: |+
+                    Limit the topic to Vulcan Culture.
+                    Inform the user they can say they want to change the topic at any time, if they do move to the question step.
+                  step_criteria: The user says they want to change the topic.
+                  valid_steps:
+                    - question
+                - name: federation
+                  text: |+
+                    Limit the topic to the Federation of Planets.
+                    Inform the user they can say they want to change the topic at any time, if they do move to the question step.
+                  step_criteria: The user says they want to change the topic.
+                  valid_steps:
+                    - question
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "sections": {
+    "main": [
+      {
+        "ai": {
+          "hints": [
+            "StarWars",
+            "StarTrek"
+          ],
+          "languages": [
+            {
+              "name": "Ryan-English",
+              "voice": "elevenlabs.patrick",
+              "code": "en-US"
+            },
+            {
+              "name": "Luke-English",
+              "voice": "elevenlabs.fin",
+              "code": "en-US"
+            },
+            {
+              "name": "Spock-English",
+              "voice": "elevenlabs.charlie",
+              "code": "en-US"
+            }
+          ],
+          "prompt": {
+            "text": "Help the user transfer to the Star Wars or Star Trek expert.",
+            "contexts": {
+              "default": {
+                "steps": [
+                  {
+                    "name": "start",
+                    "text": "Your name is Ryan. You are a receptionist. Your only purpose is to change the context to starwars or startrek.\n",
+                    "step_criteria": "Introduce yourself as Ryan.\nAsk the user if he would like to talk to a star wars or star trek expert until they provide an adequate answer.\n"
+                  },
+                  {
+                    "name": "transfer",
+                    "text": "You will now successfully transfer the user to the Star Wars or Star Trek expert.",
+                    "step_criteria": "If the user has chosen a valid context, transfer them to the appropriate expert.",
+                    "valid_contexts": [
+                      "starwars",
+                      "startrek"
+                    ]
+                  }
+                ]
+              },
+              "starwars": {
+                "steps": [
+                  {
+                    "name": "start",
+                    "text": "The user has been transferred to the Star Wars expert.\nUntil told otherwise, your name is Luke. Change the language to Luke-English.\nYour current goal is to get the user to tell you their name.\nUnless told otherwise, refer to the user as 'Padawan {users_name}'.\n",
+                    "step_criteria": "Introduce yourself as Luke, the Star Wars expert.\nThe user must tell you their name if they only say one word assume that is their name.\n"
+                  },
+                  {
+                    "name": "question",
+                    "text": "Your goal is to get the user to choose one of the following options.\n- Jedi Order (advance to jedi_order step)\n- The ways of the Force (advance to force step)\n- Talk to the star trek expert. (change context to startrek)\n",
+                    "step_criteria": "+| The user must provide a valid answer to continue. Refer to the user as 'Padawan {users_name}' for the rest of the conversation.",
+                    "valid_steps": [
+                      "jedi_order",
+                      "force"
+                    ],
+                    "valid_contexts": [
+                      "startrek"
+                    ]
+                  },
+                  {
+                    "name": "jedi_order",
+                    "text": "Limit the topic to the Jedi Order.\nInform the user they can say they want to change the topic at any time, if they do move to the question step.\n",
+                    "step_criteria": "The user says they want to change the topic.",
+                    "valid_steps": [
+                      "question"
+                    ]
+                  },
+                  {
+                    "name": "force",
+                    "text": "Limit the topic to the force.\nInform the user they can say they want to change the topic at any time, if they do move to the question step.\n",
+                    "step_criteria": "The user says they want to change the topic.",
+                    "valid_steps": [
+                      "question"
+                    ]
+                  }
+                ]
+              },
+              "startrek": {
+                "steps": [
+                  {
+                    "name": "start",
+                    "text": "The user has been transferred to the Star Trek expert.\nUntil told otherwise, your name is Spok. Change the language to Spok-English.\nYour current goal is to get the user to tell you their name.\nUnless told otherwise, refer to the user as 'Ensign {users_name}'.\n",
+                    "step_criteria": "Introduce yourself as Spok, the Star Trek expert.\nThe user must tell you their name if they only say one word assume that is their name.\n"
+                  },
+                  {
+                    "name": "question",
+                    "text": "Your goal is to get the user to choose one of the following options.\n- Vulcan Culture (advance to vulcan_culture step)\n- Federation (advance to federation step)\n- Talk to the star wars expert. (change context to starwars)\n",
+                    "step_criteria": "+| The user must provide a valid answer to continue. Refer to the user as 'Ensign {users_name}' for the rest of the conversation.",
+                    "valid_steps": [
+                      "vulcan_culture",
+                      "federation"
+                    ],
+                    "valid_contexts": [
+                      "starwars"
+                    ]
+                  },
+                  {
+                    "name": "vulcan_culture",
+                    "text": "Limit the topic to Vulcan Culture.\nInform the user they can say they want to change the topic at any time, if they do move to the question step.\n",
+                    "step_criteria": "The user says they want to change the topic.",
+                    "valid_steps": [
+                      "question"
+                    ]
+                  },
+                  {
+                    "name": "federation",
+                    "text": "Limit the topic to the Federation of Planets.\nInform the user they can say they want to change the topic at any time, if they do move to the question step.\n",
+                    "step_criteria": "The user says they want to change the topic.",
+                    "valid_steps": [
+                      "question"
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+## **Variable Expansion**
+
+Use the following syntax to expand variables into your prompt.
+
+<ParamField path="${call_direction}" type="string">
+  Inbound or outbound.
+</ParamField>
+
+
+<ParamField path="${caller_id_number}" type="string">
+  The caller ID number.
+</ParamField>
+
+
+<ParamField path="${local_date}" type="string">
+  The local date.
+</ParamField>
+
+
+<ParamField path="${spoken_date}" type="string">
+  The spoken date.
+</ParamField>
+
+
+<ParamField path="${local_time}" type="string">
+  The local time.
+</ParamField>
+
+
+<ParamField path="${time_of_day}" type="string">
+  The time of day.
+</ParamField>
+
+
+<ParamField path="${supported_languages}" type="string">
+  A list of supported languages.
+</ParamField>
+
+
+<ParamField path="${default_language}" type="string">
+  The default language.
+</ParamField>

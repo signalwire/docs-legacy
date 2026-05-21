@@ -1,0 +1,46 @@
+---
+title: "CallDetect.DigitParams"
+slug: /dotnet/reference/calling/call-detect-digit-params
+toc_max_heading_level: 3
+---
+
+# SignalWire.Relay.Calling.CallDetect.DigitParams
+
+This object represents the parameters specific to digit detection.
+
+## Constructor
+
+The only constructor is the default constructor, properties should all be assigned by initializer or after construction.
+
+**Parameters**
+
+None
+
+**Examples**
+
+> Basic Example
+
+```csharp
+CallDetect detect = new CallDetect
+{
+    Type = CallDetect.DetectType.digit,
+    Parameters = new CallDetect.DigitParams
+    {
+        // No required parameters
+    }
+};
+```
+
+## Properties
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `Digits` | string | The digits to detect.<br />_Default: 0123456789*#_ |
+
+## Methods
+
+None
+
+## Events
+
+None

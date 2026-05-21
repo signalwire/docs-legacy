@@ -1,0 +1,49 @@
+---
+title: DetectAction
+slug: /ruby/reference/calling/actions/detect
+description: The DetectAction object is returned when staring a detect operation on a call.
+toc_max_heading_level: 3
+---
+
+[call]: /docs/server-sdk/v2/ruby/reference/calling/call#detect
+[relay-calling-detectresult]: /docs/server-sdk/v2/ruby/reference/calling/results/detect
+[relay-calling-stopresult]: /docs/server-sdk/v2/ruby/reference/calling/results/stop
+
+# Relay::Calling::DetectAction
+
+This object returned from the _asynchronous_ [`detect!`][call] methods that represents a running detector on the call.
+
+## Properties
+
+| Property | Type | Description |
+| :------- | :--- | :---------- |
+| `result` | [`Relay::Calling::DetectResult`][relay-calling-detectresult] | Final detector result. |
+| `completed` | boolean | Whether the action has finished. |
+| `payload` | object | Payload sent to Relay to start this detector. |
+| `controlId` | string | UUID to identify the detector. |
+
+## Methods
+
+### stop
+
+Stop the action immediately.
+
+
+
+**Parameters**
+
+None
+
+**Returns**
+
+[`Relay::Calling::StopResult`][relay-calling-stopresult] - A `StopResult` object with a `successful` property.
+
+**Examples**
+
+Detect a machine on the current call. Stop the action after 5 seconds.
+
+```ruby
+action = call.detect!(type: :machine)
+sleep 5
+action.stop
+```

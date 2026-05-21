@@ -1,0 +1,348 @@
+---
+title: "RoomSession"
+sidebar_position: 2
+slug: /js/reference/video/room-session
+toc_max_heading_level: 3
+---
+
+A RoomSession allows you to start and control video sessions.
+
+For example, the following code joins a video session and listens for new members joining:
+
+```javascript
+const roomSession = new SignalWire.Video.RoomSession({
+  token: "<YourRoomToken>",
+  rootElement: document.getElementById("myVideoElement"),
+});
+
+roomSession.on("member.joined", (e) => {
+  console.log(`${e.member.name} joined`);
+});
+
+roomSession.join();
+```
+
+### Obtaining a token
+
+The room token is obtained from the REST API from your backend server. 
+
+<EndpointRequestSnippet endpoint="POST /api/video/room_tokens" />
+
+Please refer to the [Simple Video Demo](/docs/browser-sdk/js/guides/build-a-video-app) guide to learn how to obtain Video Room tokens.
+
+## Constructor
+
+Creates a new RoomSession. Note that the room will not be joined until [join](/docs/browser-sdk/js/reference/video/room-session/join) has been called.
+
+```javascript
+const roomSession = new SignalWire.Video.RoomSession({
+  token: "<YourRoomToken>",
+  // ...
+});
+```
+
+### Parameters
+
+The RoomSession constructor accepts the following parameters:
+
+<Indent>
+  <ParamField path="token" type="string" required={true}>
+    SignalWire video room token (get one from the [REST APIs](/docs/apis/video/create-room-token))
+  </ParamField>
+  <ParamField path="rootElement" type="HTMLElement">
+    HTML element in which to display the video stream.
+  </ParamField>
+  <ParamField path="applyLocalVideoOverlay" type="boolean" default="true">
+    Whether to apply the local-overlay on top of your video.
+  </ParamField>
+  <ParamField path="iceServers" type="RTCIceServer[]">
+    List of [ICE servers](https://developer.mozilla.org/en-US/docs/Web/API/RTCIceServer).
+  </ParamField>
+  <ParamField path="localStream" type="MediaStream">
+    A custom [media stream](https://developer.mozilla.org/en-US/docs/Web/API/MediaStream) to use in place of a camera.
+  </ParamField>
+  <ParamField path="logLevel" type="'trace' | 'debug' | 'info' | 'warn' | 'error' | 'silent'">
+    Logging level.
+  </ParamField>
+  <ParamField path="speakerId" type="string">
+    Id of the speaker device to use for audio output. If undefined, picks a default speaker.
+  </ParamField>
+  <ParamField path="stopCameraWhileMuted" type="boolean" default="true">
+    Whether to stop the camera when the member is muted.
+  </ParamField>
+  <ParamField path="stopMicrophoneWhileMuted" type="boolean" default="true">
+    Whether to stop the microphone when the member is muted.
+  </ParamField>
+  <ParamField path="audio" type="boolean | MediaTrackConstraints" default="true" deprecated={true}>
+    Audio constraints to use when joining the room. _Deprecated: please use the equivalent parameter in [join](/docs/browser-sdk/js/reference/video/room-session/join)._
+  </ParamField>
+  <ParamField path="video" type="boolean | MediaTrackConstraints" default="true" deprecated={true}>
+    Video constraints to use when joining the room. _Deprecated: please use the equivalent parameter in [join](/docs/browser-sdk/js/reference/video/room-session/join)._
+  </ParamField>
+</Indent>
+
+## Properties
+
+The RoomSession class has the following properties:
+
+<Indent>
+  <ParamField path="active" type="boolean">
+    Whether the connection is currently active. _Read-only._
+  </ParamField>
+
+  <ParamField path="cameraId" type="string | null">
+    The id of the video device, or null if not available. _Read-only._
+  </ParamField>
+
+  <ParamField path="cameraLabel" type="string | null">
+    The label of the video device, or null if not available. _Read-only._
+  </ParamField>
+
+  <ParamField path="deviceList" type="RoomSessionDevice[]">
+    Contains any additional devices added via [addCamera](/docs/browser-sdk/js/reference/video/room-session/add-camera), [addMicrophone](/docs/browser-sdk/js/reference/video/room-session/add-microphone), or [addDevice](/docs/browser-sdk/js/reference/video/room-session/add-device). _Read-only._
+  </ParamField>
+
+  <ParamField path="interactivityMode" type="'audience' | 'member'">
+    The current interactivity mode (_member_ or _audience_) for the local member.
+
+    Member participants are allowed to transmit their own audio and/or video to the
+    rest of the room (as in a typical video conference), while audience participants
+    can only view and/or listen. See [join](/docs/browser-sdk/js/reference/video/room-session/join). _Read-only._
+  </ParamField>
+
+  <ParamField path="localAudioTrack" type="MediaStreamTrack | null">
+    Provides access to the local audio [MediaStreamTrack](https://developer.mozilla.org/en-US/docs/Web/API/MediaStreamTrack). _Read-only._
+  </ParamField>
+
+  <ParamField path="localStream" type="MediaStream | undefined">
+    Provides access to the local [MediaStream](https://developer.mozilla.org/en-US/docs/Web/API/MediaStream). _Read-only._
+  </ParamField>
+
+  <ParamField path="localVideoTrack" type="MediaStreamTrack | null">
+    Provides access to the local video [MediaStreamTrack](https://developer.mozilla.org/en-US/docs/Web/API/MediaStreamTrack). _Read-only._
+  </ParamField>
+
+  <ParamField path="localOverlay" type="LocalOverlay">
+    Provides access to the local video overlay. Use this for example to mirror the local video. _Read-only._
+  </ParamField>
+
+  <ParamField path="memberId" type="string">
+    The id of the current member within the room. _Read-only._
+  </ParamField>
+
+  <ParamField path="microphoneId" type="string | null">
+    The id of the audio input device, or null if not available. _Read-only._
+  </ParamField>
+
+  <ParamField path="microphoneLabel" type="string | null">
+    The label of the audio input device, or null if not available. _Read-only._
+  </ParamField>
+
+  <ParamField path="permissions" type="string[]">
+    The list of permissions currently available to the local member. _Read-only._
+  </ParamField>
+
+  <ParamField path="previewUrl" type="string">
+    If the Room has been created with the property `enable_room_previews` set to `true`, this field contains the URL to the room preview. _Read-only._
+  </ParamField>
+
+  <ParamField path="remoteStream" type="MediaStream | undefined">
+    Provides access to the remote [MediaStream](https://developer.mozilla.org/en-US/docs/Web/API/MediaStream). _Read-only._
+  </ParamField>
+
+  <ParamField path="roomId" type="string">
+    The unique identifier for the room. _Read-only._
+  </ParamField>
+
+  <ParamField path="roomSessionId" type="string">
+    The unique identifier for the room session. _Read-only._
+  </ParamField>
+
+  <ParamField path="screenShareList" type="RoomSessionScreenShare[]">
+    Contains any local screen shares added to the room via [startScreenShare](/docs/browser-sdk/js/reference/video/room-session/start-screen-share). _Read-only._
+  </ParamField>
+</Indent>
+
+## Methods
+
+<CardGroup cols={3}>
+  <Card title="join" href="/docs/browser-sdk/js/reference/video/room-session/join">
+    Join the room session
+  </Card>
+  <Card title="leave" href="/docs/browser-sdk/js/reference/video/room-session/leave">
+    Leave the room session
+  </Card>
+  <Card title="destroy" href="/docs/browser-sdk/js/reference/video/room-session/destroy">
+    Destroy the room session
+  </Card>
+  <Card title="addCamera" href="/docs/browser-sdk/js/reference/video/room-session/add-camera">
+    Add a camera device to the room
+  </Card>
+  <Card title="addMicrophone" href="/docs/browser-sdk/js/reference/video/room-session/add-microphone">
+    Add a microphone device to the room
+  </Card>
+  <Card title="addDevice" href="/docs/browser-sdk/js/reference/video/room-session/add-device">
+    Add a media device to the room
+  </Card>
+  <Card title="updateCamera" href="/docs/browser-sdk/js/reference/video/room-session/update-camera">
+    Update the camera device
+  </Card>
+  <Card title="updateMicrophone" href="/docs/browser-sdk/js/reference/video/room-session/update-microphone">
+    Update the microphone device
+  </Card>
+  <Card title="updateSpeaker" href="/docs/browser-sdk/js/reference/video/room-session/update-speaker">
+    Update the speaker device
+  </Card>
+  <Card title="audioMute" href="/docs/browser-sdk/js/reference/video/room-session/audio-mute">
+    Mute the microphone
+  </Card>
+  <Card title="audioUnmute" href="/docs/browser-sdk/js/reference/video/room-session/audio-unmute">
+    Unmute the microphone
+  </Card>
+  <Card title="videoMute" href="/docs/browser-sdk/js/reference/video/room-session/video-mute">
+    Mute the video
+  </Card>
+  <Card title="videoUnmute" href="/docs/browser-sdk/js/reference/video/room-session/video-unmute">
+    Unmute the video
+  </Card>
+  <Card title="deaf" href="/docs/browser-sdk/js/reference/video/room-session/deaf">
+    Stop receiving audio from the room
+  </Card>
+  <Card title="undeaf" href="/docs/browser-sdk/js/reference/video/room-session/undeaf">
+    Resume receiving audio from the room
+  </Card>
+  <Card title="getMembers" href="/docs/browser-sdk/js/reference/video/room-session/get-members">
+    Get list of members in the room
+  </Card>
+  <Card title="removeMember" href="/docs/browser-sdk/js/reference/video/room-session/remove-member">
+    Remove a member from the room
+  </Card>
+  <Card title="removeAllMembers" href="/docs/browser-sdk/js/reference/video/room-session/remove-all-members">
+    Remove all members from the room
+  </Card>
+  <Card title="hangupAll" href="/docs/browser-sdk/js/reference/video/room-session/hangup-all">
+    Disconnect all members from the room
+  </Card>
+  <Card title="promote" href="/docs/browser-sdk/js/reference/video/room-session/promote">
+    Promote audience member to member
+  </Card>
+  <Card title="demote" href="/docs/browser-sdk/js/reference/video/room-session/demote">
+    Demote member to audience
+  </Card>
+  <Card title="startRecording" href="/docs/browser-sdk/js/reference/video/room-session/start-recording">
+    Start recording the room
+  </Card>
+  <Card title="getRecordings" href="/docs/browser-sdk/js/reference/video/room-session/get-recordings">
+    Get list of active recordings
+  </Card>
+  <Card title="startStream" href="/docs/browser-sdk/js/reference/video/room-session/start-stream">
+    Start streaming the room
+  </Card>
+  <Card title="getStreams" href="/docs/browser-sdk/js/reference/video/room-session/get-streams">
+    Get list of active streams
+  </Card>
+  <Card title="play" href="/docs/browser-sdk/js/reference/video/room-session/play">
+    Play media in the room
+  </Card>
+  <Card title="getPlaybacks" href="/docs/browser-sdk/js/reference/video/room-session/get-playbacks">
+    Get list of active playbacks
+  </Card>
+  <Card title="startScreenShare" href="/docs/browser-sdk/js/reference/video/room-session/start-screen-share">
+    Start screen sharing
+  </Card>
+  <Card title="setLayout" href="/docs/browser-sdk/js/reference/video/room-session/set-layout">
+    Set the room layout
+  </Card>
+  <Card title="getLayouts" href="/docs/browser-sdk/js/reference/video/room-session/get-layouts">
+    Get available room layouts
+  </Card>
+  <Card title="setMemberPosition" href="/docs/browser-sdk/js/reference/video/room-session/set-member-position">
+    Set position for a member in the layout
+  </Card>
+  <Card title="setPositions" href="/docs/browser-sdk/js/reference/video/room-session/set-positions">
+    Set positions for multiple members
+  </Card>
+  <Card title="getMeta" href="/docs/browser-sdk/js/reference/video/room-session/get-meta">
+    Get room metadata
+  </Card>
+  <Card title="setMeta" href="/docs/browser-sdk/js/reference/video/room-session/set-meta">
+    Set room metadata
+  </Card>
+  <Card title="updateMeta" href="/docs/browser-sdk/js/reference/video/room-session/update-meta">
+    Update room metadata
+  </Card>
+  <Card title="deleteMeta" href="/docs/browser-sdk/js/reference/video/room-session/delete-meta">
+    Delete room metadata
+  </Card>
+  <Card title="getMemberMeta" href="/docs/browser-sdk/js/reference/video/room-session/get-member-meta">
+    Get member metadata
+  </Card>
+  <Card title="setMemberMeta" href="/docs/browser-sdk/js/reference/video/room-session/set-member-meta">
+    Set member metadata
+  </Card>
+  <Card title="updateMemberMeta" href="/docs/browser-sdk/js/reference/video/room-session/update-member-meta">
+    Update member metadata
+  </Card>
+  <Card title="deleteMemberMeta" href="/docs/browser-sdk/js/reference/video/room-session/delete-member-meta">
+    Delete member metadata
+  </Card>
+  <Card title="setInputVolume" href="/docs/browser-sdk/js/reference/video/room-session/set-input-volume">
+    Set input volume level
+  </Card>
+  <Card title="setOutputVolume" href="/docs/browser-sdk/js/reference/video/room-session/set-output-volume">
+    Set output volume level
+  </Card>
+  <Card title="setInputSensitivity" href="/docs/browser-sdk/js/reference/video/room-session/set-input-sensitivity">
+    Set input sensitivity level
+  </Card>
+  <Card title="setHideVideoMuted" href="/docs/browser-sdk/js/reference/video/room-session/set-hide-video-muted">
+    Hide video for muted members
+  </Card>
+  <Card title="setPrioritizeHandraise" href="/docs/browser-sdk/js/reference/video/room-session/set-prioritize-handraise">
+    Prioritize members with raised hands
+  </Card>
+  <Card title="setRaisedHand" href="/docs/browser-sdk/js/reference/video/room-session/set-raised-hand">
+    Raise or lower hand
+  </Card>
+  <Card title="setLocalStream" href="/docs/browser-sdk/js/reference/video/room-session/set-local-stream">
+    Set local media stream
+  </Card>
+  <Card title="lock" href="/docs/browser-sdk/js/reference/video/room-session/lock">
+    Lock the room
+  </Card>
+  <Card title="unlock" href="/docs/browser-sdk/js/reference/video/room-session/unlock">
+    Unlock the room
+  </Card>
+  <Card title="sendDigits" href="/docs/browser-sdk/js/reference/video/room-session/send-digits">
+    Send DTMF digits
+  </Card>
+  <Card title="on" href="/docs/browser-sdk/js/reference/video/room-session/on">
+    Subscribe to an event
+  </Card>
+  <Card title="once" href="/docs/browser-sdk/js/reference/video/room-session/once">
+    Subscribe to an event once
+  </Card>
+  <Card title="off" href="/docs/browser-sdk/js/reference/video/room-session/off">
+    Unsubscribe from an event
+  </Card>
+  <Card title="removeAllListeners" href="/docs/browser-sdk/js/reference/video/room-session/remove-all-listeners">
+    Remove all event listeners
+  </Card>
+  <Card title="~~createScreenShareObject~~" icon="fa-solid fa-warning" href="/docs/browser-sdk/js/reference/video/room-session/create-screen-share-object" iconSize={4}>
+    *Create screen share object* 
+  </Card>
+  <Card title="~~hideVideoMuted~~" icon="fa-solid fa-warning" href="/docs/browser-sdk/js/reference/video/room-session/hide-video-muted" iconSize={4}>
+    *Hide muted video*
+  </Card>
+  <Card title="~~showVideoMuted~~" icon="fa-solid fa-warning" href="/docs/browser-sdk/js/reference/video/room-session/show-video-muted" iconSize={4}>
+    *Show muted video* 
+  </Card>
+</CardGroup>
+
+## Events
+
+<CardGroup>
+  <Card title="Events" href="/docs/browser-sdk/js/reference/video/room-session/events" icon="fa-solid fa-bell">
+    Events emitted by the RoomSession class.
+  </Card>
+</CardGroup>

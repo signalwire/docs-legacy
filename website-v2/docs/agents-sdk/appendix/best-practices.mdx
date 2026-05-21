@@ -1,0 +1,298 @@
+---
+title: "Best Practices"
+sidebar_label: "Best Practices"
+slug: /python/reference/best-practices
+toc_max_heading_level: 3
+---
+
+## Best Practices
+
+Guidelines and recommendations for building production-quality SignalWire voice AI agents.
+
+### Overview
+
+| Category | Focus Area |
+|----------|------------|
+| Prompt Design | Effective prompts and POM structure |
+| Function Design | Well-structured SWAIG functions |
+| Error Handling | Graceful failure and recovery |
+| Security | Authentication and data protection |
+| Performance | Optimization and efficiency |
+| Testing | Validation and quality assurance |
+| Monitoring | Logging and observability |
+
+### Prompt Design
+
+#### Use POM (Prompt Object Model)
+
+Structure prompts with clear sections:
+
+```python
+from signalwire_agents import AgentBase
+
+agent = AgentBase(name="service", route="/service")
+
+## Good: Structured sections
+agent.prompt_add_section("Role", """
+You are a customer service representative for Acme Corp.
+""")
+
+agent.prompt_add_section("Guidelines", body="Follow these rules:", bullets=[
+    "Be professional and courteous",
+    "Verify customer identity before account access",
+    "Never share sensitive information",
+    "Escalate complex issues to human agents"
+])
+
+agent.add_language("English", "en-US", "rime.spore")
+```
+
+#### Be Specific About Behavior
+
+```python
+## Good: Specific instructions
+agent.prompt_add_section("Response Style", """
+- Keep responses under 3 sentences for simple questions
+- Ask one question at a time
+- Confirm understanding before taking action
+- Use the customer's name when known
+""")
+```
+
+### Function Design
+
+#### Clear Descriptions
+
+```python
+from signalwire_agents import AgentBase
+from signalwire_agents.core.function_result import SwaigFunctionResult
+
+agent = AgentBase(name="accounts", route="/accounts")
+
+## Good: Descriptive with parameter details
+@agent.tool(
+    description="Look up customer account by account number. "
+    "Returns account status, balance, and last activity date."
+)
+def lookup_account(
+    account_number: str  # The 8-digit account number
+) -> SwaigFunctionResult:
+    pass
+```
+
+#### Return Actionable Information
+
+```python
+@agent.tool(description="Check product availability")
+def check_availability(product_id: str) -> SwaigFunctionResult:
+    stock = get_stock(product_id)
+
+    if stock > 10:
+        return SwaigFunctionResult(
+            f"Product {product_id} is in stock with {stock} units available. "
+            "The customer can place an order."
+        )
+    elif stock > 0:
+        return SwaigFunctionResult(
+            f"Product {product_id} has limited stock ({stock} units). "
+            "Suggest ordering soon."
+        )
+    else:
+        return SwaigFunctionResult(
+            f"Product {product_id} is out of stock. "
+            "Expected restock date: next week."
+        )
+```
+
+### Error Handling
+
+#### Graceful Degradation
+
+```python
+@agent.tool(description="Look up order status")
+def order_status(order_id: str) -> SwaigFunctionResult:
+    try:
+        order = fetch_order(order_id)
+        return SwaigFunctionResult(
+            f"Order {order_id}: Status is {order['status']}"
+        )
+    except OrderNotFoundError:
+        return SwaigFunctionResult(
+            f"Order {order_id} was not found. "
+            "Please verify the order number and try again."
+        )
+    except ServiceUnavailableError:
+        return SwaigFunctionResult(
+            "The order system is temporarily unavailable. "
+            "Please try again in a few minutes."
+        )
+```
+
+### Security
+
+#### Use Authentication
+
+```python
+import os
+
+agent = AgentBase(
+    name="secure",
+    route="/secure",
+    basic_auth=(
+        os.environ.get("AGENT_USER", "agent"),
+        os.environ.get("AGENT_PASSWORD")
+    )
+)
+```
+
+#### Secure Function Flag
+
+The `secure=True` flag pauses call recording during function execution. This is useful for sensitive operations but does **not** prevent data from reaching the LLM.
+
+```python
+@agent.tool(
+    description="Collect sensitive information",
+    secure=True  # Pauses recording during execution
+)
+def collect_ssn(args: dict, raw_data: dict = None) -> SwaigFunctionResult:
+    # Recording is paused, but LLM still sees the data
+    ssn = args.get("ssn", "")
+    # Process securely...
+    return SwaigFunctionResult("Information received.")
+```
+
+#### Secure Payment Processing
+
+For payment card collection, **never** collect card data through SWAIG function parameters. Use the `.pay()` method instead, which collects card data via IVR and sends it directly to your payment gateway—the LLM never sees the card number, CVV, or expiry.
+
+```python
+@agent.tool(
+    description="Process payment for order",
+    parameters={
+        "type": "object",
+        "properties": {
+            "amount": {"type": "string", "description": "Amount to charge"}
+        },
+        "required": ["amount"]
+    }
+)
+def process_payment(args: dict, raw_data: dict = None) -> SwaigFunctionResult:
+    amount = args.get("amount", "0.00")
+
+    # Card data collected via IVR, sent directly to payment gateway
+    # LLM never sees card number, CVV, or expiry
+    return (
+        SwaigFunctionResult(
+            "I'll collect your payment information now.",
+            post_process=True
+        )
+        .pay(
+            payment_connector_url="https://payments.example.com/charge",
+            charge_amount=amount,
+            input_method="dtmf",
+            security_code=True,
+            postal_code=True
+        )
+    )
+```
+
+| Approach | Card Data Exposure | Use Case |
+|----------|-------------------|----------|
+| `.pay()` method | Never reaches LLM | Payment processing (PCI compliant) |
+| `secure=True` | LLM sees data, recording paused | Non-payment sensitive data |
+
+#### Environment Variables
+
+| Variable | Purpose |
+|----------|---------|
+| `SWML_BASIC_AUTH_USER` | Basic auth username |
+| `SWML_BASIC_AUTH_PASSWORD` | Basic auth password (required for production) |
+| `SWML_SSL_ENABLED` | Enable HTTPS |
+| `SWML_SSL_CERT_PATH` | SSL certificate path |
+| `SWML_SSL_KEY_PATH` | SSL key path |
+
+### Performance
+
+#### Use DataMap for Simple API Calls
+
+```python
+from signalwire_agents.core.data_map import DataMap
+
+## Good: DataMap for simple lookups (no webhook roundtrip)
+weather_map = DataMap(
+    name="get_weather",
+    description="Get weather for a city"
+)
+weather_map.add_parameter("city", "string", "City name", required=True)
+weather_map.add_webhook(
+    url="https://api.weather.com/v1/current?q=${enc:args.city}",
+    method="GET",
+    output_map={"response": "Weather: ${response.temp}F, ${response.condition}"}
+)
+agent.add_data_map_tool(weather_map)
+```
+
+#### Use Fillers for Long Operations
+
+```python
+@agent.tool(
+    description="Search database",
+    fillers=["Searching...", "This may take a moment..."]
+)
+def search_db(query: str) -> SwaigFunctionResult:
+    # Long-running search
+    results = search_database(query)
+    return SwaigFunctionResult(f"Found {len(results)} matching orders.")
+```
+
+### Testing
+
+#### Use swaig-test
+
+```bash
+## Validate agent configuration
+swaig-test agent.py --dump-swml
+
+## List available functions
+swaig-test agent.py --list-tools
+
+## Test specific function
+swaig-test agent.py --exec lookup_account --account_number "12345678"
+```
+
+### Monitoring
+
+#### Use Structured Logging
+
+```python
+import structlog
+
+logger = structlog.get_logger()
+
+@agent.tool(description="Process refund")
+def process_refund(order_id: str, amount: float) -> SwaigFunctionResult:
+    logger.info(
+        "refund_requested",
+        order_id=order_id,
+        amount=amount
+    )
+    # Process refund
+    return SwaigFunctionResult(f"Refund of ${amount} processed.")
+```
+
+### Production Readiness Checklist
+
+- Authentication configured (basic_auth or environment variables)
+- SSL/HTTPS enabled for production
+- Sensitive functions marked as secure
+- Error handling in all functions
+- Input validation for user-provided data
+- Logging configured (no sensitive data in logs)
+- All functions tested with swaig-test
+- Edge cases and error scenarios tested
+- Prompts reviewed for clarity and completeness
+- Transfer/escalation paths defined
+- Timeout values appropriate for use case
+- Summary handling for call analytics
+
+

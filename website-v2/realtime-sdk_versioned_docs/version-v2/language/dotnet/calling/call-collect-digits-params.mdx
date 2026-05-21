@@ -1,0 +1,47 @@
+---
+title: "CallCollect.DigitsParams"
+slug: /dotnet/reference/calling/call-collect-digits-params
+toc_max_heading_level: 3
+---
+
+# SignalWire.Relay.Calling.CallCollect.DigitsParams
+
+This object represents the parameters specific to digits collecting.
+
+## Constructor
+
+The only constructor is the default constructor, properties should all be assigned by initializer or after construction.
+
+**Parameters**
+
+None
+
+**Examples**
+
+> Basic Example
+
+```csharp
+CallCollect collect = new CallCollect
+{
+    Digits = new CallCollect.DigitsParams
+    {
+        Max = 1
+    }
+};
+```
+
+## Properties
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `Max` | int | The maximum number of digits to collect, must be greater than zero. |
+| `Terminators` | string | A string of individual characters that can be used to terminate prematurely. |
+| `DigitTimeout` | double? | The timeout before terminating prematurely if at least one digit was collected.<br />_Default: 1 second_ |
+
+## Methods
+
+None
+
+## Events
+
+None

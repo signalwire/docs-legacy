@@ -1,0 +1,121 @@
+---
+title: hangup
+slug: /call-session/hangup
+---
+
+import APIField from '@site/src/components/APIField';
+
+Ends the call and disconnects the WebRTC connection.
+
+## Signature
+
+```typescript
+hangup(id?: string): Promise<void>
+```
+
+## Parameters
+
+<APIField name="id" type="string">
+  RTC Peer ID to disconnect. If provided, only that specific peer is disconnected; otherwise, all peers are destroyed.
+</APIField>
+
+## Returns
+
+**Type:** `Promise<void>`
+
+## Important Notes
+
+**Automatic Cleanup:** When you call `hangup()`, the SDK automatically:
+1. Ends all active screen shares in the call
+2. Sends a disconnect signal to the server
+3. Closes the WebRTC peer connection
+4. Sets the call state to `hangup`
+5. Emits the `destroy` event when cleanup is complete
+
+**Lifecycle Events:** The hangup process triggers these events in order:
+1. **`hangup`** - Call state changed to hangup
+2. **`destroy`** - Call has been fully cleaned up
+
+```typescript
+call.on('hangup', (callSession) => {
+  console.log('Call is hanging up')
+})
+
+call.on('destroy', () => {
+  console.log('Call destroyed - resources released')
+  // Safe to navigate away or start a new call
+})
+
+await call.hangup()
+```
+
+**leave() vs hangup():** Both methods do the same thing - `leave()` is simply an alias that calls `hangup()` internally:
+
+```typescript
+// These are functionally identical
+await call.hangup()
+await call.leave()
+```
+
+Use whichever name makes more sense in your context:
+- `hangup()` - Traditional telephony terminology
+- `leave()` - Modern "leaving a room" terminology
+
+**Optional ID Parameter:** The optional `id` parameter is for advanced scenarios where you need to disconnect a specific RTC peer. Most users should call `hangup()` without any parameters to end the entire call session.
+
+## Events
+
+When you call `hangup()`, the following events are emitted:
+- `hangup` - Call state changed to hangup (emits the CallSession object)
+- `destroy` - Call has been fully destroyed and cleaned up
+- Connection state transitions: `disconnecting`, `disconnected`
+
+## Examples
+
+### Basic usage
+
+```typescript
+const call = await client.dial({ to: 'user@example.com' })
+
+// Later, when you want to end the call
+await call.hangup()
+console.log('Call ended')
+```
+
+### With event listeners
+
+```typescript
+call.on('hangup', () => {
+  console.log('Hangup state entered')
+})
+
+call.on('destroy', () => {
+  console.log('Call fully cleaned up')
+})
+
+await call.hangup()
+```
+
+### Using leave() alias
+
+```typescript
+// These are equivalent
+await call.hangup()
+await call.leave()
+```
+
+### Error handling
+
+```typescript
+try {
+  await call.hangup()
+  console.log('Call ended successfully')
+} catch (error) {
+  console.error('Error hanging up call:', error)
+}
+
+// Always listen for the destroy event
+call.on('destroy', () => {
+  console.log('Call resources released')
+})
+```

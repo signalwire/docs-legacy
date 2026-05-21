@@ -1,0 +1,62 @@
+---
+title: "Voice Client"
+sidebar_label: Client
+slug: /node/reference/voice/client
+description: Voice Client reference for initiating and receiving calls.
+sidebar_position: 1
+toc_max_heading_level: 3
+---
+
+[events]: /docs/server-sdk/v3/node/reference/voice/client/events
+[dialphone]: /docs/server-sdk/v3/node/reference/voice/client/dial-phone
+[dialsip]: /docs/server-sdk/v3/node/reference/voice/client/dial-sip
+
+The Voice Client allows you to make outbound calls and receive inbound calls. It connects to SignalWire and listens on one or more topics for incoming call events.
+
+```javascript
+import { Voice } from "@signalwire/realtime-api";
+
+const client = new Voice.Client({
+  project: "<project-id>",
+  token: "<api-token>",
+  topics: ["office"],
+});
+```
+
+Once instantiated, use [`dialPhone`][dialphone] or [`dialSip`][dialsip] to initiate outbound calls, or listen for the `call.received` event to handle inbound calls. See [Events][events] for all available events.
+
+## Constructor
+
+▸ **new Voice.Client**(`opts`): `Voice.Client`
+
+Creates a new Voice Client instance.
+
+#### Parameters
+
+| Name | Type | Description |
+|:-----|:-----|:------------|
+| `opts.project` | `string` | **Required.** SignalWire project ID. |
+| `opts.token` | `string` | **Required.** SignalWire API token. |
+| `opts.topics` | `string[]` | **Required.** Topics to listen on for inbound calls (e.g., `["office", "support"]`). |
+| `opts.debug.logWsTraffic?` | `boolean` | Log WebSocket traffic for debugging. Default: `false`. |
+
+## Examples
+
+### Receiving calls
+
+```javascript
+client.on("call.received", async (call) => {
+  console.log("Got call", call.from, call.to);
+  await call.answer();
+});
+```
+
+### Making calls
+
+```javascript
+const call = await client.dialPhone({
+  from: "+15551234567",
+  to: "+15559876543",
+  timeout: 30,
+});
+```

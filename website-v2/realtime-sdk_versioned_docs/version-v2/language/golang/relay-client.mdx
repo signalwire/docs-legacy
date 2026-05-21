@@ -1,0 +1,94 @@
+---
+title: Relay.Client
+slug: /go/reference/relay-client
+toc_max_heading_level: 3
+---
+
+[relay-calling]: /docs/server-sdk/v2/go/reference/calling
+[relay-messaging]: /docs/server-sdk/v2/go/reference/messaging
+[relay-task]: /docs/server-sdk/v2/go/reference/task
+`Relay.Client` is the basic connection to RELAY, allowing you send commands to RELAY and setup handlers for inbound events.
+
+## Constructor
+
+Constructs a client object to interact with RELAY.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `Project` | `string` | **required** | Project ID from your SignalWire Space |
+| `Token` | `string` | **required** | Token from your SignalWire Space |
+| `Host` | `string` | **optional** | The endpoint URI to send requests to. The SignalWire Space URL, should be a string similar `{your-space}.signalwire.com`. |
+| `signalwireContexts` | `string` | **optional** | List of Contexts for inbound |
+
+**Examples**
+
+> Create a Client to interact with the RELAY API.
+
+```go
+signalwireContexts := []string{DefaultContext}
+
+client := signalwire.Client(PProjectID, PTokenID, "" /*host, empty for default*/, signalwireContexts)
+```
+
+### Properties
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `calling` | [`Relay.Calling`][relay-calling] | Returns a `Relay.Calling` instance associated with the client. |
+| `messaging` | [`Relay.Messaging`][relay-messaging] | Returns a `Relay.Messaging` instance associated with the client. |
+| `tasking` | [`Relay.Tasking`][relay-task] | Returns a `Relay.Tasking` instance associated with the client. |
+
+## Methods
+
+### Connect()
+
+Activates the connection to the RELAY API. The connection to RELAY does not happen automatically so that you can setup handlers to events that might occur before the connection is successfully established.
+
+
+**Returns**
+
+`error`
+
+**Examples**
+
+```go
+signalwireContexts := []string{DefaultContext}
+
+client := signalwire.Client(PProjectID, PTokenID, "" /*host, empty for default*/, signalwireContexts)
+// register callback, anonymous function
+client.OnReady = func (client *signalwire.ClientSession) {
+	signalwire.Log.Info("Client connected\n")
+}
+// start
+err := client.Connect()
+if err != nil {
+	signalwire.Log.Error("Error occurred while starting Signalwire Client\n")
+}
+```
+
+### Disconnect()
+
+Disconnect the client from RELAY.
+
+
+**Returns**
+
+`error`
+
+**Examples**
+
+```go
+if err := client.Disconnect(); err != nil {
+	signalwire.Log.Error("Error occurred while trying to disconnect Client\n")
+}
+```
+
+## Events
+
+All available events you can attach a listener on.
+
+| Property | Description |
+| -------- | ----------- |
+| `OnReady` | The session has been established and all other methods can now be used. |

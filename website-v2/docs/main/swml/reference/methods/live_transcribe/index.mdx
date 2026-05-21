@@ -1,0 +1,236 @@
+---
+title: live_transcribe
+slug: /swml/reference/live-transcribe
+description: Transcribe a voice interaction in real-time.
+toc_max_heading_level: 3
+---
+
+Start live transcription of the call. The transcription will be sent to the specified webhook URL.
+
+## **Properties**
+
+<ParamField path="live_transcribe" type="object" required={true}>
+  An object that accepts the following properties.
+</ParamField>
+
+<Indent>
+
+<ParamField path="live_transcribe.action" type="string | object" required={true}>
+  The action to perform. See [actions](#actions) below.
+</ParamField>
+
+</Indent>
+
+## **Actions**
+
+The `action` property controls the transcription session. Use `start` to begin transcribing with configuration options, `stop` to end an active session, or `summarize` to request an on-demand AI summary mid-session.
+
+<Tabs>
+<TabItem value="start" label="start">
+
+<ParamField path="action.start" type="object" required={true}>
+  Start a live transcription session.
+</ParamField>
+
+<Indent>
+
+<ParamField path="start.webhook" type="string">
+  The URL to receive transcription events via HTTP POST.
+  When `live_events` is enabled, partial results are sent as they occur.
+  When `ai_summary` is enabled, a summary is sent when the session ends.
+  Authentication can also be set in the URL in the format of `username:password@url`.
+</ParamField>
+
+<ParamField path="start.lang" type="string" required={true}>
+  The language to transcribe.
+  See [supported voices & languages](/docs/platform/voice/tts).
+</ParamField>
+
+<ParamField path="start.live_events" type="boolean" default="false">
+  Whether to enable live events.
+</ParamField>
+
+<ParamField path="start.ai_summary" type="boolean" default="false">
+  Whether to enable automatic AI summarization.
+  When enabled, an AI-generated summary of the conversation will be sent to your webhook when the transcription session ends.
+</ParamField>
+
+<ParamField path="start.speech_timeout" type="integer" default="60000">
+  The timeout for speech recognition in milliseconds. Minimum value: `1500`.
+</ParamField>
+
+<ParamField path="start.vad_silence_ms" type="integer" default="300 | 500">
+  Voice activity detection silence time in milliseconds.
+  Default depends on the speech engine: `300` for Deepgram, `500` for Google. Minimum value: `1`.
+</ParamField>
+
+<ParamField path="start.vad_thresh" type="integer" default="400">
+  Voice activity detection threshold. Range: `0` to `1800`.
+</ParamField>
+
+<ParamField path="start.debug_level" type="integer" default="0">
+  Debug level for logging.
+</ParamField>
+
+<ParamField path="start.direction" type="string[]" required={true}>
+  The direction of the call that should be transcribed. Possible values: `remote-caller`, `local-caller`.
+</ParamField>
+
+<ParamField path="start.speech_engine" type="string" default="deepgram">
+  The speech recognition engine to use. Possible values: `deepgram`, `google`.
+</ParamField>
+
+<ParamField path="start.ai_summary_prompt" type="string">
+  The AI prompt that instructs how to summarize the conversation when `ai_summary` is enabled.
+  This prompt is sent to an AI model to guide how it generates the summary.
+
+  Example: "Summarize the key points and action items from this conversation."
+</ParamField>
+
+</Indent>
+
+</TabItem>
+<TabItem value="stop" label="stop">
+
+Set `action` to the string `"stop"` to stop the live transcription session.
+
+This action is designed for use on active calls that have an existing transcription session running.
+You can send this action via the [Call Commands REST API](/docs/apis/calling/call-commands),
+or include it in a SWML section executed via [`transfer`](/docs/swml/reference/transfer) or [`execute`](/docs/swml/reference/execute) during a call.
+
+</TabItem>
+<TabItem value="summarize" label="summarize">
+
+<ParamField path="action.summarize" type="object" required={true}>
+  <Tip title="ai_summary vs summarize">
+  If you want automatic summarization when the session ends instead, use `ai_summary: true` in the `start` action.
+  </Tip>
+
+  Request an on-demand AI summary of the conversation while transcription is still active.
+  This action is designed for use on active calls that have an existing transcription session running.
+  You can send this action via the [Call Commands REST API](/docs/apis/calling/call-commands),
+  or include it in a SWML section executed via [`transfer`](/docs/swml/reference/transfer) or [`execute`](/docs/swml/reference/execute) during a call.
+  If called with an empty object, the default summarization prompt and webhook will be used.
+</ParamField>
+
+<Indent>
+
+<ParamField path="summarize.webhook" type="string">
+  The webhook URI to be called. Authentication can also be set in the URL in the format of `username:password@url`.
+</ParamField>
+
+<ParamField path="summarize.prompt" type="string">
+  The AI prompt that instructs the AI model how to summarize the conversation.
+  This guides the style and content of the generated summary.
+
+  Example: "Provide a bullet-point summary of the main topics discussed."
+</ParamField>
+
+</Indent>
+
+</TabItem>
+</Tabs>
+
+## **Examples**
+
+<Tabs>
+  <TabItem value="start" label="Start">
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - answer: {}
+    - live_transcribe:
+        action:
+          start:
+            webhook: 'https://example.com/webhook'
+            lang: en
+            live_events: true
+            direction:
+              - remote-caller
+              - local-caller
+            speech_engine: deepgram
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      { "answer": {} },
+      {
+        "live_transcribe": {
+          "action": {
+            "start": {
+              "webhook": "https://example.com/webhook",
+              "lang": "en",
+              "live_events": true,
+              "direction": ["remote-caller", "local-caller"],
+              "speech_engine": "deepgram"
+            }
+          }
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+  </TabItem>
+  <TabItem value="stop" label="Stop">
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+live_transcribe:
+  action: stop
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "live_transcribe": {
+    "action": "stop"
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+  </TabItem>
+  <TabItem value="summarize" label="Summarize">
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+live_transcribe:
+  action:
+    summarize:
+      webhook: 'https://example.com/webhook'
+      prompt: Summarize the key points of this conversation.
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "live_transcribe": {
+    "action": {
+      "summarize": {
+        "webhook": "https://example.com/webhook",
+        "prompt": "Summarize the key points of this conversation."
+      }
+    }
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+  </TabItem>
+</Tabs>

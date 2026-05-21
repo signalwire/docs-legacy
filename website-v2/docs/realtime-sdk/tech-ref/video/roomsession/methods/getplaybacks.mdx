@@ -1,0 +1,77 @@
+---
+title: "getPlaybacks"
+slug: /node/reference/video/room-session/get-playbacks
+description: getPlaybacks method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+[roomsession-41]: /docs/server-sdk/node/reference/video/room-session
+[roomsessionplayback-12]: /docs/server-sdk/node/reference/video/room-session-playback
+
+### getPlaybacks
+
+- **getPlaybacks**(): `Promise`\<\{ `playbacks:` [`RoomSessionPlayback`][roomsessionplayback-12] }>
+
+Obtains a list of playbacks for the current room session.
+
+#### Returns
+
+`Promise`\<\{ `playbacks:` [`RoomSessionPlayback`][roomsessionplayback-12] }>
+
+A promise that resolves to an object containing the list of [`RoomSessionPlayback`][roomsessionplayback-12] objects.
+
+#### Example
+
+In this example, we wait for a room to start and then start a playback in that room.
+When a second member joins the roomSession, we use `getPlaybacks` to get the
+list of playback objects. We then loop through the list of playbacks and print
+out the `state`, `url`, and `id` of each playback. This example assumes that there is a [`RoomSession`][roomsession-41]
+already active and that members are joining the room.
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+// Initialize the SignalWire client
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+// Access the video client from the main client
+const videoClient = client.video;
+
+// Setup listener for when a room starts
+await videoClient.listen({
+  onRoomStarted: async (roomSession) => {
+    console.log("Room started", roomSession.displayName);
+
+    // play wait music
+    await roomSession.play({
+      url: "https://cdn.signalwire.com/default-music/welcome.mp3",
+      listen: {
+        onStarted: () => console.log("Playback started"),
+        onUpdated: (playback) => console.log("Playback updated", playback.state),
+        onEnded: () => console.log("Playback ended")
+      }
+    }).onStarted();
+
+    // Setup listener for when a member joins
+    await roomSession.listen({
+      onMemberJoined: async (member) => {
+        console.log("Member joined", member.name);        
+        
+        // get roomSessions playbacks
+        let roomPlaybacks = await roomSession.getPlaybacks();
+
+        // loop through playbacks and print out state, url, and id
+        roomPlaybacks.playbacks.forEach((playback) => {
+          console.log(playback.state, playback.url, playback.id);
+      });
+    },
+      onMemberLeft: (member) => {
+        console.log("Member left", member.name);
+      },
+    });
+  },
+  onRoomEnded: async (roomSession) => {
+    console.log("Room ended", roomSession.displayName);
+  }
+});
+```

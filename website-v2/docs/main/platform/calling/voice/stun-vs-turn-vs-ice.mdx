@@ -1,0 +1,36 @@
+---
+title: STUN vs. TURN vs. ICE
+slug: /platform/voice/stun-vs-turn-vs-ice
+x-custom:
+  ported_from_readme: true
+---
+
+STUN, TURN, and ICE are IETF standard protocols developed to address the Network Address Translator (NAT) traversing problem when establishing peer-to-peer communication sessions. WebRTC and other VoIP stacks implement support for ICE to improve the reliability of IP communications.
+
+### Definitions
+
+- **Session Travel Utilities for NAT (STUN)** - provides a tool for clients to find out their public address and the type of NAT they are behind. It enables users that are behind a NAT to connect to a single peer.
+- **Traversal Using RELAY around NAT (TURN)** - is a protocol that helps in the traversal of NATs or firewalls for multimedia applications. It also supports a connection of a client behind a NAT to a single peer. However, it is used when STUN is not effective. 
+- **Interactive Connectivity Establishment (ICE)** - is a standard that illustrates how to coordinate STUN and TURN to make a connection between clients.
+
+### How do they work?
+
+Two clients, Alice and Bob are using a WebRTC video chatting application to communicate. Alice wants to call Bob using this application.
+
+Alice's browser has to generate a **Session Description Protocol (SDP)** offer to connect to Bob's browser. The SDP offer provides information on the session established by Alice's browser. For example, it contains a list of **ICE candidates** or the available methods a peer is able to communicate, that Bob's browser can use to connect to Alice.
+
+To connect to Bob's browser, Alice's browser needs to generate a Session Description Protocol (SDP) offer. The SDP generation process begins when the application she's using calls createOffer on an RTCPeerConnection object.
+
+An SDP offer contains a bunch of information about the session Alice's browser wants to establish–what codecs to use, whether this will be an audio or video session, and more. It also contains a list of ICE candidates, which are the IP and port pairs that Bob's browser can attempt to use to connect to Alice. Typically, each peer will propose its best candidates first, going down the line toward its worse candidates.
+
+To build this list of candidates, Alice's browser makes requests to a STUN server. The server will return a port pair and public address. Each of these pairs are then added to the list of ICE candidates by Alice's browser. When all the candidates have been gathered, an SDP can be returned. Then, Alice's browser will pass the SDP to Bob's browser through some signaling channel between browsers.
+
+After the SDP has been passed, Bob's browser will need to generate an SDP answer. The same steps discussed above (gathering of ICE candidates, etc.) will be followed by Bob's browser. The answer will be returned to Alice's browser.
+
+After the SDPs have been sent, a series of connectivity checks are executed. The ICE algorithm from both browsers will take a candidate from the list of ICE candidates received from the other peer's SDP and send it a STUN request. For example, if Alice's browser takes a candidate from Bob's SDP, sends it a STUN request, and receives a response from Bob's browser, Alice's browser will consider the check of that candidate successful. Then, that pair will be marked as a valid ICE candidate.
+
+Once the checks have been completed, the two browsers decide which valid candidate to use. After it has been selected, the call will begin. This entire process usually takes milliseconds.
+
+If the two browsers cannot find a valid ICE candidate, a STUN request will be made to the TURN server. This will result in a media RELAY address, which is a public address and port that will forward packets received to and from the browser that set up the RELAY address. The RELAY address will be added to the list of candidates and exchanged through some signaling channel.
+
+If you are building a WebRTC application, the WebRTC stack includes an ICE Agent that takes care of most of what was described for you. You will need to implement a signaling mechanism to exchange SDPs and send them along with new ICE candidates whenever they are discovered.

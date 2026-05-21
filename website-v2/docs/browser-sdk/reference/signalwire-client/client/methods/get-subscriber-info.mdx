@@ -1,0 +1,43 @@
+---
+title: "getSubscriberInfo"
+slug: /js/reference/signalwire/client/get-subscriber-info
+description: getSubscriberInfo method for the SignalWire Client.
+toc_max_heading_level: 3
+---
+
+### getSubscriberInfo
+
+- **getSubscriberInfo**(): `Promise<Object>`
+
+Get information about the subscriber that is currently logged in.
+
+#### Returns
+
+`Promise<Object>`
+
+#### Example
+
+```js
+const client = SignalWire({ token: /* the access token of the currently logged in user */ })
+console.log(await client.getSubscriberInfo())
+```
+
+```json
+{
+  "id": "0bc4b6fe-f388-4a6b-bee3-56096e9420ac",
+  "email": "john@example.com",
+  "first_name": "John",
+  "last_name": "Doe",
+  "display_name": "John Doe",
+  "job_title": "Engineer",
+  "time_zone": "PST",
+  "country": "US",
+  "region": "East",
+  "company_name": "Example Inc",
+  "app_settings": {
+    "display_name": "Cool Application",
+    "scopes": ["read", "write"]
+  }
+}
+```
+

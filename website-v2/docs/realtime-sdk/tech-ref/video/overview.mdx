@@ -1,0 +1,95 @@
+---
+title: "Video"
+sidebar_label: Overview
+sidebar_position: 0
+keywords:
+  - SignalWire
+  - Realtime SDK
+  - Node.js
+  - video API
+  - video conferencing
+  - video rooms
+slug: /node/reference/video
+description: Access the Video API for building video conferencing applications. Manage room sessions, members, recordings, playback, and RTMP streaming.
+toc_max_heading_level: 3
+---
+
+[browser-sdk]: /docs/browser-sdk/js/reference/video/room-session
+[client]: /docs/server-sdk/node/reference/video/client
+[create-a-room-rest-api]: /docs/apis/video/create-room
+[personal-video-conference-pvc]: /docs/platform/video
+[roomsession]: /docs/server-sdk/node/reference/video/room-session
+[video-client-events]: /docs/server-sdk/node/reference/video/client/events
+[video-client-onroomstarted]: /docs/server-sdk/node/reference/video/client/events#onroomstarted
+[video-roomsession-onmemberleft]: /docs/server-sdk/node/reference/video/room-session/events#onmemberleft
+[video-roomsession-listen]: /docs/server-sdk/node/reference/video/room-session/listen
+[video-roomsession-onmemberjoined]: /docs/server-sdk/node/reference/video/room-session/events#onmemberjoined
+
+Access the Video API Consumer. You can instantiate a [Video.Client][client] to subscribe to Video events.
+
+<Info>
+For the full list of events that a [Video.Client][client] can subscribe to, refer to [Video Events][video-client-events].
+</Info>
+
+#### Example
+
+The following example logs whenever a room session is started or when a user joins it.
+A [`RoomSession`][roomsession] can be created through the [Browser SDK][browser-sdk],
+ through the [`Create a Room REST API`][create-a-room-rest-api], or
+through the SignalWire Dashboard, utilizing a [Personal Video Conference (`PVC`)][personal-video-conference-pvc].
+
+When a [`RoomSession`][roomsession] is created, the [`onRoomStarted`][video-client-onroomstarted] event is triggered.
+We can then subscribe to the [`RoomSession`][roomsession] events,
+such as [`onMemberJoined`][video-roomsession-onmemberjoined] and [`onMemberLeft`][video-roomsession-onmemberleft],
+using the [`listen`][video-roomsession-listen] method.
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "ProjectID Here", token: "API Token Here" });
+
+const videoClient = client.video;
+
+await videoClient.listen({
+  onRoomStarted: async (roomSession) => {
+    console.log("Room started:", roomSession.displayName);
+    await roomSession.listen({
+      onMemberJoined: async (member) => {
+        console.log("Member joined:", member.name);
+      },
+      onMemberLeft: async (member) => {
+        console.log("Member left:", member.name);
+      }
+    });
+  },
+  onRoomEnded: async (roomSession) => {
+    console.log("Room ended:", roomSession.displayName);
+  }
+});
+```
+
+## **Classes**
+
+<CardGroup cols={2}>
+  <Card title="Client" icon="fa-solid fa-server" href="/docs/server-sdk/node/reference/video/client">
+    The main Video client for subscribing to room events and monitoring video sessions.
+  </Card>
+  <Card title="RoomSession" icon="fa-solid fa-door-open" href="/docs/server-sdk/node/reference/video/room-session">
+    Represents an active video room session with methods for managing members, recordings, and playback.
+  </Card>
+  <Card title="RoomSessionFullState" icon="fa-solid fa-database" href="/docs/server-sdk/node/reference/video/room-session-full-state">
+    Extended room session object containing the complete state including all members and metadata.
+  </Card>
+  <Card title="RoomSessionMember" icon="fa-solid fa-user" href="/docs/server-sdk/node/reference/video/room-session-member">
+    Represents a participant in a video room with properties for audio/video state and metadata.
+  </Card>
+  <Card title="RoomSessionPlayback" icon="fa-solid fa-play" href="/docs/server-sdk/node/reference/video/room-session-playback">
+    Represents a playback instance in a video room for playing media content.
+  </Card>
+  <Card title="RoomSessionRecording" icon="fa-solid fa-circle-dot" href="/docs/server-sdk/node/reference/video/room-session-recording">
+    Represents a recording instance in a video room with methods to control recording state.
+  </Card>
+  <Card title="RoomSessionStream" icon="fa-solid fa-broadcast-tower" href="/docs/server-sdk/node/reference/video/room-session-stream">
+    Represents an RTMP stream from a video room for streaming to external platforms.
+  </Card>
+</CardGroup>

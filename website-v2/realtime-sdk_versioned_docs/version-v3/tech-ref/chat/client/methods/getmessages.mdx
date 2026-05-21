@@ -1,0 +1,48 @@
+---
+title: "getMessages"
+slug: /node/reference/chat/client/get-messages
+description: getMessages method for the Client class.
+toc_max_heading_level: 3
+---
+
+[link-1]: /docs/server-sdk/v3/node/reference/chat/client/events#chatmessageentity
+
+### getMessages
+
+- **getMessages**(`params`): `Promise<{ cursor: PaginationCursor ; messages: ChatMessageEntity[] }>` - See [`ChatMessageEntity`][link-1] for more details.
+
+Returns the list of messages that were sent to the specified channel.
+
+#### Parameters
+
+| Name             | Type               | Description                                 |
+|:-----------------|:-------------------|:--------------------------------------------|
+| `params`         | `Object`           | -                                           |
+| `params.channel` | `string`           | Channel for which to retrieve the messages. |
+| `params.cursor?` | `PaginationCursor` | Cursor for pagination.                      |
+
+#### Returns
+
+`Promise<{ cursor: PaginationCursor ; messages: ChatMessageEntity[] }>` - See [`ChatMessageEntity`][link-1] for more details.
+
+#### Example
+
+```js
+const m = await chatClient.getMessages({ channel: "chan1" });
+
+m.messages.length; // 23
+m.messages[0]; // the most recent message
+m.messages[0].member; // the sender
+m.messages[0].content; // the content
+m.messages[0].meta; // the metadata (if any)
+
+m.cursor.next; // if not null, there are more messages.
+
+// Get the next page using the cursor
+const next = await chatClient.getMessages({
+  channel: "chan1",
+  cursor: {
+    after: m.cursor.after,
+  },
+});
+```

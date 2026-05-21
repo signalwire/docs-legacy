@@ -1,0 +1,204 @@
+---
+title: The Rime TTS engine
+description: Text-to-speech
+slug: /platform/voice/tts/rime
+
+---
+import AddResourcePartial from '@site/docs/_partials/common/dashboard/_add-resource.mdx';
+
+
+
+Rime offers uniquely realistic voices with a focus on natural expressiveness.
+
+## Models
+
+| Model | Description |
+|-------|-------------|
+| `mistv2` | **Default** - Updated version of mist |
+| `arcana` | Expressive model with natural intonation |
+| `mist` <br/><span className="deprecated-desc">Deprecated</span> | <span className="deprecated-arg">Fast, precise model for business applications</span> |
+
+<CardGroup cols={2}>
+	<Card title="Mist v2" icon="solid wave-square"
+		href="https://docs.rime.ai/api-reference/models#mist">
+			Mist is Rime's fastest model, built for high-volume, business-critical applications.
+	</Card>
+	<Card
+		title="Arcana"
+		icon="solid wand-magic-sparkles"
+		href="https://docs.rime.ai/api-reference/models#arcana">
+			Arcana is Rime's latest and greatest model, offering a variety of ultra-realistic voices
+			prioritizing authenticity and character.
+	</Card>
+</CardGroup>
+
+## Voices
+
+Mist v2 is the default Rime model on the SignalWire platform.
+To use this model, simply set the voice ID.
+
+To use Arcana voices, set `model` to `arcana` with the
+[**`languages`**](/docs/swml/reference/ai/languages#use-voice-strings)
+SWML method:
+
+```yaml
+languages:
+- name: English
+  code: en-US
+  voice: rime.luna
+  model: arcana
+```
+
+## Languages
+
+As of October 29th, 2025, Rime supports the following languages:
+
+| Language | Code |
+| :------ | :---- |
+| English | `eng` |
+| Spanish | `spa` |
+| French | `fra` |
+| German | `ger` |
+| Hindi (Arcana only) | `hin` |
+
+Refer to the
+[Rime docs](https://docs.rime.ai/api-reference/voices)
+for the most up-to-date reference to supported languages.
+
+## Usage
+
+**Format**: `rime.<speaker>:<model>`
+
+**Examples**:
+```
+rime.spore:arcana
+rime.speaker1:mistv2
+rime.voice123:mist
+```
+
+For a full demonstration and sample script, see below.
+
+
+<CardGroup cols={2}>
+   <Card
+        title="Rime dashboard"
+        href="https://app.rime.ai/"
+        icon="solid gauge-high"
+    >
+        Preview Rime voices on their dashboard
+    </Card>
+    <Card
+        title="Rime docs"
+        href="https://docs.rime.ai/api-reference/voices"
+        icon="solid book-open"
+    >
+        Refer to the Rime Docs for an up-to-date list of voice IDs.
+    </Card>
+</CardGroup>
+
+---
+
+## Build with Rime on SignalWire
+
+<Steps>
+
+### Create a Space and add credit
+
+If you don't have one yet, you'll need to 
+[create a SignalWire Space](/docs/platform/signing-up-for-a-space).
+Be sure to add some credit to test with.
+
+### Add a new Resource
+
+<AddResourcePartial />
+
+### Create a SWML Script
+
+From the Resources menu, select **SWML Script**.
+Name it something fun and recognizable.
+Ours is titled Rime Wizard.
+
+Next, paste the following starter script into the text box, and hit <kbd>Save</kbd>:
+
+```yaml
+version: 1.0.0
+sections:
+  main:
+  - ai:
+      prompt:
+        text: | 
+          You're Luna, a voice from Rime's Arcana model! 
+          Introduce yourself, and have a conversation about programmable unified communications on the SignalWire platform. 
+      languages:
+      - name: English
+        code: en-US
+        voice: rime.luna
+        model: arcana
+```
+{/*
+```
+        params:
+          rime_model: arcana
+```
+
+This simple YAML file is actually a complete application that SignalWire hosts and deploys the moment you hit save.
+The hard telecom and LLM integration happen behind the scenes,
+so all you have to worry about is calling the ai method, giving it a prompt, and assigning a TTS voice.
+In this case, we're using Rime's Celeste voice.
+
+SWML is compact but mighty.
+This same SWML script can be expanded to do almost anything -
+call external APIs,
+use defined "tools" or functions,
+retrieve structured information from SignalWire's
+[Datasphere](https://signalwire.com/blogs/developers/signalwire-datasphere-build-specialized-ai) RAG stack,
+switch voices and contexts,
+programmatically modify its own source with the
+[Prompt Object Model](/docs/platform/ai/pom/),
+and transfer to other [Resources](/docs/platform/resources) on SignalWire's Call Fabric platform.
+*/}
+
+### Buy and assign a phone number
+
+Navigate to the **Phone Numbers** section of the Dashboard's left sidebar menu.
+
+Purchase a phone number and assign it to the desired SWML script.
+
+<Frame caption="Assigning a phone number to the SWML Script">
+    ![A purchased phone number showing assignment to a specified Resource.](@image/dashboard/phone-numbers/assign-resource-voice.webp)
+</Frame>
+
+### Give it a call!
+
+Call the number you just assigned to chat with your new AI voice application on the phone.
+
+</Steps>
+
+## Next steps with SWML
+
+Now you've deployed your very first SignalWire voice AI application using Rime voices. 
+Next, dive deeper into SWML to explore its capabilities!
+
+<CardGroup cols={3}>
+   <Card
+        title="Methods reference"
+        href="/docs/swml"
+        icon="solid code"
+    >
+        Documentation for all SWML methods
+    </Card>
+    <Card
+        title="AI in SWML"
+        href="/docs/swml/guides"
+        icon="solid wand-magic-sparkles"
+    >
+        Build advanced AI applications using SignalWire Markup Language
+    </Card>
+    <Card
+        title="Guides"
+        href="/docs/swml/guides"
+        icon="solid book-open"
+    >
+    SWML guides and demo applications
+    </Card>
+</CardGroup>

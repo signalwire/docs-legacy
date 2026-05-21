@@ -1,0 +1,30 @@
+---
+title: "sendDigits"
+slug: /js/reference/video/room-session/send-digits
+description: sendDigits method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+### sendDigits
+
+- **sendDigits**(`string`): `Promise<void>`
+
+Sends DTMF digits to the room. The digits will be sent to the RoomSession.
+
+#### Parameters
+
+<ParamField path="dtmf" type="string">
+  The digits to send. Only the characters `0-9`, `A-D` `*`, and `#` are allowed.
+</ParamField>
+
+
+#### Returns
+
+`Promise<void>`
+
+#### Example
+
+```javascript
+await roomSession.sendDigits("1");
+```
+

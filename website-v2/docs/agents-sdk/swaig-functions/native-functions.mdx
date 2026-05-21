@@ -1,0 +1,312 @@
+---
+title: "Native Functions"
+sidebar_label: "Native Functions"
+slug: /python/guides/native-functions
+toc_max_heading_level: 3
+---
+
+## Native Functions
+
+Native functions are built-in SignalWire capabilities that can be enabled without writing code. They provide common operations like web search and debugging.
+
+### What Are Native Functions?
+
+Native functions run directly on SignalWire's platform. Enable them to give the AI access to built-in capabilities without creating handlers.
+
+| Handler Function | Native Function |
+|------------------|-----------------|
+| You define handler | SignalWire provides |
+| Runs on your server | Runs on SignalWire |
+| Custom logic | Pre-built behavior |
+
+**Available Native Functions:**
+
+- `web_search` - Search the web
+- `debug` - Debug mode for testing
+
+### Enabling Native Functions
+
+Enable native functions in the constructor:
+
+```python
+from signalwire_agents import AgentBase
+
+
+class MyAgent(AgentBase):
+    def __init__(self):
+        super().__init__(
+            name="my-agent",
+            native_functions=["web_search"]  # Enable web search
+        )
+        self.add_language("English", "en-US", "rime.spore")
+```
+
+### Web Search Function
+
+Enable web search to let the AI autonomously search the web during conversations:
+
+```python
+class ResearchAgent(AgentBase):
+    def __init__(self):
+        super().__init__(
+            name="research-agent",
+            native_functions=["web_search"]
+        )
+        self.add_language("English", "en-US", "rime.spore")
+
+        self.prompt_add_section(
+            "Role",
+            "You are a research assistant. Search the web to answer questions."
+        )
+```
+
+#### How Web Search Works
+
+When enabled, the AI can decide to search the web when it needs information to answer a question. The process is:
+
+1. **AI decides to search**: Based on the conversation, the AI determines a search is needed
+2. **Query formulation**: The AI creates a search query from the conversation context
+3. **Search execution**: SignalWire executes the search on the AI's behalf
+4. **Results processing**: Search results are returned to the AI as context
+5. **Response generation**: The AI synthesizes the results into a spoken response
+
+The caller doesn't interact with search directly—the AI handles everything automatically.
+
+#### What Web Search Returns
+
+The AI receives search results including:
+
+- Page titles and snippets
+- URLs of matching pages
+- Relevant text excerpts
+
+The AI then summarizes and presents this information conversationally. It doesn't read URLs or raw HTML to the caller.
+
+#### Web Search Limitations
+
+**No control over search behavior:**
+
+- Cannot specify search engine (Google, Bing, etc.)
+- Cannot filter by domain or site
+- Cannot control result count
+- Cannot exclude specific sources
+
+**Content limitations:**
+
+- Results may be outdated (search index lag)
+- Cannot access paywalled or login-required content
+- Cannot search private/internal sites
+- May not find very recent information
+
+**No result logging:**
+
+- Search queries aren't logged to your server
+- Cannot audit what was searched
+- Cannot cache results for reuse
+
+**Rate and cost:**
+
+- Subject to SignalWire's rate limits
+- May incur additional usage costs
+- Multiple searches per call add latency
+
+#### When to Use Native web_search
+
+**Good use cases:**
+
+- General knowledge questions ("What year was the Eiffel Tower built?")
+- Current events (with freshness caveats)
+- Quick fact lookups during calls
+- Agents that need broad knowledge access
+
+**When to use alternatives instead:**
+
+| Need | Alternative |
+|------|-------------|
+| Specific search engine | `web_search` skill with Google API |
+| Domain-restricted search | Custom handler with filtered API |
+| Result logging/auditing | Custom handler with logging |
+| Cached results | Custom handler with caching layer |
+| Internal/private content | Custom handler with your search backend |
+
+#### Prompting for Web Search
+
+Guide the AI on when and how to use web search:
+
+```python
+self.prompt_add_section(
+    "Search Guidelines",
+    """
+    Use web search when:
+    - Asked about current events or recent information
+    - Need to verify facts you're uncertain about
+    - Question is outside your core knowledge
+
+    Don't search for:
+    - Information already in your prompt
+    - Customer-specific data (use account functions instead)
+    - Simple calculations or conversions
+    """
+)
+```
+
+### Debug Function
+
+Enable debug mode for development and testing:
+
+```python
+class DebugAgent(AgentBase):
+    def __init__(self):
+        super().__init__(
+            name="debug-agent",
+            native_functions=["debug"]
+        )
+        self.add_language("English", "en-US", "rime.spore")
+```
+
+#### What Debug Provides
+
+The debug function exposes diagnostic information during calls:
+
+- Current conversation state
+- Function call history
+- Configuration details
+- Timing information
+
+#### When to Use Debug
+
+**Use during development:**
+
+- Testing conversation flows
+- Verifying function registration
+- Checking prompt configuration
+- Troubleshooting unexpected behavior
+
+**Don't use in production:**
+
+- Exposes internal details to callers
+- May reveal sensitive configuration
+- Adds unnecessary function to AI's options
+- Remove before deploying to production
+
+### Call Transfers
+
+For call transfers, use `SwaigFunctionResult.connect()` in a custom handler function - there is no native transfer function:
+
+```python
+from signalwire_agents import AgentBase, SwaigFunctionResult
+
+
+class TransferAgent(AgentBase):
+    DEPARTMENTS = {
+        "sales": "+15551111111",
+        "support": "+15552222222",
+        "billing": "+15553333333"
+    }
+
+    def __init__(self):
+        super().__init__(name="transfer-agent")
+        self.add_language("English", "en-US", "rime.spore")
+
+        self.prompt_add_section(
+            "Role",
+            "You are a receptionist. Transfer callers to the appropriate department."
+        )
+
+        self.define_tool(
+            name="transfer_call",
+            description="Transfer the call to a department",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "department": {
+                        "type": "string",
+                        "description": "Department to transfer to",
+                        "enum": ["sales", "support", "billing"]
+                    }
+                },
+                "required": ["department"]
+            },
+            handler=self.transfer_call
+        )
+
+    def transfer_call(self, args, raw_data):
+        department = args.get("department")
+        number = self.DEPARTMENTS.get(department)
+
+        if not number:
+            return SwaigFunctionResult("Invalid department")
+
+        return (
+            SwaigFunctionResult(f"Transferring you to {department}")
+            .connect(number, final=True)
+        )
+```
+
+### Combining Native and Custom Functions
+
+Use native functions alongside your custom handlers:
+
+```python
+from signalwire_agents import AgentBase, SwaigFunctionResult
+
+
+class HybridAgent(AgentBase):
+    def __init__(self):
+        super().__init__(
+            name="hybrid-agent",
+            native_functions=["web_search"]  # Native
+        )
+        self.add_language("English", "en-US", "rime.spore")
+
+        # Custom function alongside native ones
+        self.define_tool(
+            name="check_account",
+            description="Look up customer account information",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "account_id": {
+                        "type": "string",
+                        "description": "Account ID"
+                    }
+                },
+                "required": ["account_id"]
+            },
+            handler=self.check_account
+        )
+
+        self.prompt_add_section(
+            "Role",
+            "You are a customer service agent. "
+            "You can check accounts and search the web for information."
+        )
+
+    def check_account(self, args, raw_data):
+        account_id = args.get("account_id")
+        return SwaigFunctionResult(f"Account {account_id} is active")
+```
+
+### When to Use Native vs Custom Functions
+
+| Scenario | Recommendation |
+|----------|----------------|
+| Web search capability | Use `web_search` native function |
+| Development testing | Use `debug` native function |
+| Transfer to phone number | Use SwaigFunctionResult.connect() in custom handler |
+| Transfer to SIP address | Use SwaigFunctionResult.connect() in custom handler |
+| Custom business logic | Use define_tool() with handler |
+| Database lookups | Use define_tool() with handler |
+
+### Native Functions Reference
+
+| Function | Description | Use Case |
+|----------|-------------|----------|
+| `web_search` | Search the web | Answer general questions |
+| `debug` | Debug information | Development/testing |
+
+### Next Steps
+
+You've now learned all about SWAIG functions. Next, explore Skills to add pre-built capabilities to your agents.
+
+

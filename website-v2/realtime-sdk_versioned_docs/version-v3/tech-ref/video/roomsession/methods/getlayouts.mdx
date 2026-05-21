@@ -1,0 +1,32 @@
+---
+title: "getLayouts"
+slug: /node/reference/video/room-session/get-layouts
+description: getLayouts method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+[video-roomsession-2]: /docs/server-sdk/v3/node/reference/video/room-session/set-layout
+
+### getLayouts
+
+- **getLayouts**(): `Promise<{ layouts: string[] }>`
+
+Returns a list of available layouts for the room. To set a room layout, use [setLayout][video-roomsession-2].
+
+#### Returns
+
+`Promise<{ layouts: string[] }>`
+
+#### Example
+
+```typescript
+await roomSession.getLayouts()
+// returns:
+{
+  "layouts": [
+    "8x8", "2x1", "1x1", "5up", "5x5",
+    "4x4", "10x10", "2x2", "6x6", "3x3",
+    "grid-responsive", "highlight-1-responsive"
+  ]
+}
+```

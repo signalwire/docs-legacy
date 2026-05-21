@@ -1,0 +1,195 @@
+---
+title: Relay.Calling.PromptAction
+slug: /go/reference/calling/actions/prompt
+description: The Prompt Action is used to play media while collecting user input.
+toc_max_heading_level: 3
+---
+
+[relay-calling-promptresult]: /docs/server-sdk/v2/go/reference/calling/results/prompt
+
+## Relay.Calling.PromptAction
+
+This object returned from one of _asynchronous_ prompt methods that represents a prompt attempt that is currently active on a call.
+
+### Methods-submenu
+
+
+#### GetResult
+
+Returns the final result of the prompt attempt.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+[`Relay.Calling.PromptResult`][relay-calling-promptresult] - Final result of the prompt attempt.
+
+**Examples**
+
+> Start the attempt and grab the result when it's completed.
+
+```go
+resultDial.Call.OnPrompt = func(promptaction *signalwire.PromptAction) {
+        // we could do something here and this gets called when the Prompt Action finishes.
+}
+
+playAudioParams := signalwire.PlayAudioParams{
+        URL: "https://www.pacdv.com/sounds/voices/can-you-keep-a-secret.wav",
+}
+
+playTTSParams := signalwire.PlayTTSParams{
+        Text: "Hello from Signalwire!",
+}
+
+playRingtoneParams := signalwire.PlayRingtoneParams{
+        Duration: 5,
+        Name:     "us",
+}
+
+play := []signalwire.PlayStruct{{
+        Type:   "audio",
+        Params: playAudioParams,
+}, {
+        Type:   "tts",
+        Params: playTTSParams,
+}, {
+        Type:   "ringtone",
+        Params: playRingtoneParams,
+}}
+
+collectDigits := new(signalwire.CollectDigits)
+collectDigits.Max = 3
+
+collectSpeech := new(signalwire.CollectSpeech)
+collectSpeech.EndSilenceTimeout = 1
+collectSpeech.SpeechTimeout = 10
+collectSpeech.Hints = []string{"top", "well"}
+
+collect := signalwire.CollectStruct{
+        Speech: collectSpeech,
+        Digits: collectDigits,
+}
+
+promptAction, err := resultDial.Call.PromptAsync(&play, &collect)
+if err != nil {
+        signalwire.Log.Error("Error occurred while trying to start Prompt Action\n")
+
+        if err := consumer.Stop(); err != nil {
+                signalwire.Log.Error("Error occurred while trying to stop Consumer. Err: %v\n", err)
+        }
+
+        return
+}
+if !promptAction.GetCompleted() {
+        promptAction.Stop()
+}
+
+for {
+        time.Sleep(1 * time.Second)
+
+        if promptAction.GetCompleted() {
+                break
+        }
+}
+myResult := promptAction.GetResultType()
+switch myResult {
+case signalwire.CollectResultSpeech:
+        signalwire.Log.Info("Speech text: \"%s\" Confidence: %f\n", promptAction.GetCollectResult(), promptAction.GetConfidence())
+case signalwire.CollectResultDigit:
+        signalwire.Log.Info("Digits: \"%s\" Terminator: %s\n", promptAction.GetCollectResult(), promptAction.GetTerminator())
+default:
+        signalwire.Log.Info("Result was: %s\n", myResult.String())
+}
+```
+
+#### GetCompleted
+
+Return `true` if the prompt attempt has finished, `false` otherwise.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`Boolean` - True/False accordingly to the state.
+
+**Examples**
+
+> Start the attempt and check if it has finished.
+
+```go
+promptAction, err := resultDial.Call.PromptAsync(&play, &collect)
+for {
+	time.Sleep(1 * time.Second)
+	if promptAction.GetCompleted() {
+		break
+	}
+}
+```
+
+#### Stop
+
+Stop the action immediately.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+error
+
+**Examples**
+
+> Start the attempt and then stop it.
+
+```go
+if !promptAction.GetCompleted() {
+	promptAction.Stop()
+}
+```
+
+#### Volume
+
+Control the volume of the playback.
+
+
+**Parameters**
+
+| Property | Type | Description |
+| :-------- | :-------- | :----------- |
+| `volume` | <span className="method-prop-type">number</span> | <span className="required-arg">required</span> | Volume value between -40dB and +40dB where 0 is unchanged. |
+
+**Returns**
+
+error
+
+**Examples**
+
+> Start the prompt and increase the playback volume with 5 dB
+
+```go
+promptAction, err := resultDial.Call.PromptAsync(&play, &collect)
+promptAction.Volume(5)
+```
+
+#### GetControlID
+
+Return the UUID to identify the action.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`string` - UUID to identify the action.
+
+

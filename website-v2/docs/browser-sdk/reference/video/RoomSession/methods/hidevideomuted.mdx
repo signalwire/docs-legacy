@@ -1,0 +1,32 @@
+---
+title: "hideVideoMuted"
+slug: /js/reference/video/room-session/hide-video-muted
+description: hideVideoMuted method for the RoomSession class.
+toc_max_heading_level: 3
+availability: deprecated
+---
+
+- **hideVideoMuted**(): `Promise<void>`
+
+<Warning>
+Deprecated. Use [setHideVideoMuted](/docs/browser-sdk/js/reference/video/room-session/set-hide-video-muted) instead.
+</Warning>
+
+Do not show muted videos in the room layout.
+
+#### Returns
+
+`Promise<void>`
+
+#### Permissions
+
+- `room.hide_video_muted`: to set the hand raise priority
+
+You need to specify the permissions when [creating the Video Room Token](/docs/apis/video/create-room-token) on the server side.
+
+#### Example
+
+```javascript
+await roomSession.hideVideoMuted();
+```
+

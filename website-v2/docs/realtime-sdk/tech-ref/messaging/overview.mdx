@@ -1,0 +1,71 @@
+---
+title: "Messaging"
+sidebar_label: Overview
+sidebar_position: 0
+slug: /node/reference/messaging
+keywords:
+  - SignalWire
+  - Realtime SDK
+  - Node.js
+  - messaging API
+  - SMS
+  - MMS
+description: Access the Messaging API to send and receive SMS and MMS messages programmatically. Handle inbound messages and track delivery status with events.
+toc_max_heading_level: 3
+---
+
+[messaging-client-1]: /docs/server-sdk/node/reference/messaging/client
+[messaging-client-2]: /docs/server-sdk/node/reference/messaging/client
+[messaging-client]: /docs/server-sdk/node/reference/messaging/client/events
+
+Access the Messaging API. You can instantiate a [Messaging.Client][messaging-client-1] to send or receive SMS and MMS.  
+
+<Info>
+For a full list of events a [Messaging.Client][messaging-client-1] can subscribe to, refer to [Messaging Events][messaging-client].
+</Info>
+
+#### Example
+
+The following example listens for incoming SMS messages over the `office` topic, and responds to them with a `Hello World!` message.
+
+```javascript
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here"})
+
+let messageClient = client.messaging;
+
+await messageClient.listen({
+  topics: ["office"],
+  async onMessageReceived(message) {
+    console.log("Received message", message);
+    const response = await messageClient.send({
+      from: message.to,
+      to: message.from,
+      body: "Hello World!"
+    });
+    console.log("Sent message", await response);
+  }
+})
+```
+
+In the example above:
+- We import the `SignalWire` library and instantiate a [`Messaging.Client`][messaging-client-2].
+- The application uses the `listen` method to subscribe to incoming SMS messages on the `office` topic.
+- When the application receives a message, it logs the incoming message and responds with a "Hello World!" message using the `send` method.
+
+---
+
+## **Classes**
+
+<CardGroup cols={2}>
+  <Card title="Client" icon="fa-solid fa-server" href="/docs/server-sdk/node/reference/messaging/client">
+    The main Messaging client for sending SMS/MMS and listening for inbound message events.
+  </Card>
+  <Card title="MessageContract" icon="fa-solid fa-file-contract" href="/docs/server-sdk/node/reference/messaging/message-contract">
+    Represents a message object with properties like from, to, body, and media attachments.
+  </Card>
+  <Card title="MessagingSendResult" icon="fa-solid fa-paper-plane" href="/docs/server-sdk/node/reference/messaging/messaging-send-result">
+    The result object returned after sending a message, containing delivery status information.
+  </Card>
+</CardGroup>

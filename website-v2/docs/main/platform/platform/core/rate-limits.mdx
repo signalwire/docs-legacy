@@ -1,0 +1,112 @@
+---
+title: Rate limits
+sidebar_label: Default limits
+slug: /platform/rate-limits
+description: Platform basics
+x-custom:
+  ported_from_readme: true
+---
+
+The below throughput limits apply to Voice and Messaging.
+These are account-level limits that count activity from all Projects within your Space.
+[Contact Support][3] to increase Voice and Messaging throughput.
+
+<Tip>
+Rate limits and backlogs for Messaging and Voice are separate.
+For example, exceeding the Voice rate limit does ***not*** cause outbound messages to [queue](#queue-and-backlog-system).
+</Tip>
+
+## Voice
+
+[View pricing](https://signalwire.com/pricing/voice)
+and [contact Support][3] to increase calling throughput.
+
+Because faxes are sent via phone calls, the below rate limits apply to faxes as well.
+
+| Value                                | Default limit             |
+| :----------------------------------- | :------------------------ |
+| Calls                                | `1` call per second (CPS) |
+| [Backlog](#queue-and-backlog-system) | `10,000` queued calls     |
+
+## Messaging
+
+[View pricing][2] and [contact Support][3] to increase messaging throughput for toll-free or short code numbers.
+
+| Number type                          | Default limit                                                                                                                                            |
+| :----------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Toll-free                            | `3` messages per second (MPS)                                                                                                                            |
+| US long code (10DLC)                 | `4` MPS <br/><span className="optional-arg">Actual throughput may be lower or higher depending on carrier and [TCR](/docs/platform/messaging/campaign-registry) limits</span> |
+| Canadian long code                   | `1` MPS                                                                                                                                                  |
+| Short code                           | `10` MPS                                                                                                                                                 |
+| [Backlog](#queue-and-backlog-system) | `10,000` queued messages                                                                                                                                 |
+
+<Warning>
+Larger messages are automatically split into smaller "segments" which are sent as individual messages.
+Each of these segments counts towards the messages per second (MPS) limit.
+Consult the guide to [Messaging Character Limits](/docs/platform/messaging/character-limits) for more information.
+</Warning>
+
+## API
+
+The below limits apply to all API requests across the SignalWire platform.
+Every HTTP request includes the user's current limit and remaining requests in its X-Header.
+
+| HTTP verb                                                                                                                                    | Limit                             |
+| :------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------- |
+| <span className="badge badge--success">GET</span> <span className="badge badge--danger">DELETE</span>                                                | Effectively unlimited             |
+| <span className="badge badge--primary">POST</span> <span className="badge badge--warning">PUT</span> <span className="badge badge--warning">PATCH</span> | `13800` requests per `10` seconds |
+
+## Space
+
+<Info>
+These limits apply to SignalWire Spaces **not in Trial mode**.
+New accounts remain in Trial mode until at least $5 USD of credit is added.
+</Info>
+
+| Space limit               | Default   |
+| :------------------------ | :-------- |
+| Number of Projects        | Unlimited |
+| Phone numbers per Project | 1000      |
+| Verified IDs              | 1000      |
+| Call backlog              | 10,000    |
+| Message backlog           | 10,000    |
+
+### Queue and backlog system
+
+When an application sends calls or messages to SignalWire at a rate exceeding the applicable rate limit,
+SignalWire **queues** these messages or calls in the order received.
+The **backlog** is the limit to the number of queued (pending) calls or messages.
+The Voice backlog and Messaging backlog are both `10,000` by default.
+
+When the backlog for calls is full, SignalWire will stop adding additional calls to the Voice queue.
+Similarly, when the backlog for messages is full, SignalWire will stop adding to the Messaging queue.
+The platform will process queued calls or messages at the maximum applicable rate, and add new calls or messages to the queue as long as the backlog has not been reached.
+
+<Info>
+The Voice and Messaging backlogs are entirely separate.
+</Info>
+
+If you would like to raise your Voice or Messaging backlog, fill out the [Space Increase Request Form](https://forms.signalwire.me/Space-Increase-Request.html).
+
+### Request increased limits
+
+Request an increase to your Space's default limits by filling out the
+[SignalWire Space Increase Request Form](https://forms.signalwire.me/Space-Increase-Request.html)
+and submitting the required documentation to start the account verification process.
+SignalWire's Space Compliance team reviews submissions and will notify you of the results.
+
+#### Phone number limits
+
+Requests for more than 1000 phone numbers require additional verification.
+Please be prepared to share detailed information about your use case.
+
+<Warning>
+If approved, you **MUST** set up auto top up on your project to the total cost of the numbers monthly **before the limit will be raised**.
+This requirement prevents the suspension of services due to insufficient balance.
+Pricing for phone numbers can be found on the [SignalWire pricing page](https://signalwire.com/pricing/messaging).
+</Warning>
+
+
+{/* Links */}
+[2]: https://signalwire.com/products/cloud-messaging/high-throughput-messaging (Pricing and other information about high-throughput messaging)
+[3]: https://support.signalwire.com/portal/en/newticket (Contact Support)

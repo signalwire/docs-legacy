@@ -1,0 +1,49 @@
+---
+title: "CallDevice.PhoneParams"
+slug: /dotnet/reference/calling/call-device-phone-params
+toc_max_heading_level: 3
+---
+
+# SignalWire.Relay.Calling.CallDevice.PhoneParams
+
+This object represents the parameters specific to a phone device.
+
+## Constructor
+
+The only constructor is the default constructor, properties should all be assigned by initializer or after construction.
+
+**Parameters**
+
+None
+
+**Examples**
+
+> Basic Example
+
+```csharp
+CallDevice device = new CallDevice
+{
+    Type = CallDevice.DeviceType.phone,
+    Parameters = new CallDevice.PhoneParams
+    {
+        ToNumber = "+1XXXXXXXXXX",
+        FromNumber = "+1YYYYYYYYYY",
+    }
+};
+```
+
+## Properties
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `FromNumber` | string | The source phone number in E164 format. |
+| `ToNumber` | string | The destination phone number in E164 format. |
+| `Timeout` | string | The maximum time in seconds to wait for a call to begin. |
+
+## Methods
+
+None
+
+## Events
+
+None

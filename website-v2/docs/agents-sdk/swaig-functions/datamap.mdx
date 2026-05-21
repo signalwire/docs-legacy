@@ -1,0 +1,615 @@
+---
+title: "Datamap"
+sidebar_label: "Datamap"
+slug: /python/guides/data-map
+toc_max_heading_level: 3
+---
+
+## DataMap
+
+DataMap provides serverless API integration - define functions that call REST APIs directly from SignalWire's infrastructure without running code on your server.
+
+DataMap is one of the most powerful features for building production agents quickly. Instead of writing webhook handlers that receive requests, process them, and return responses, you declaratively describe what API to call and how to format the response. SignalWire's infrastructure handles the actual HTTP request, meaning your server doesn't need to be involved at all for simple integrations.
+
+This approach has significant advantages: reduced latency (no round-trip to your server), simplified deployment (fewer endpoints to maintain), and improved reliability (SignalWire's infrastructure handles retries and timeouts). However, it's not suitable for every situation—complex business logic, database operations, and multi-step processing still require traditional handler functions.
+
+### When to Use DataMap vs Handler Functions
+
+Choosing between DataMap and handler functions is one of the first decisions you'll make when adding functionality to your agent. Here's a framework to help you decide:
+
+**Choose DataMap when:**
+
+- You're calling a REST API that returns JSON
+- The response can be formatted with simple variable substitution
+- You don't need to transform data, just extract and present it
+- You want to minimize server-side code and infrastructure
+- The API is reliable and has predictable response formats
+
+**Choose Handler Functions when:**
+
+- You need to access a database or internal systems
+- Business logic requires conditionals, loops, or calculations
+- You need to call multiple APIs and combine results
+- Error handling requires custom logic beyond simple fallbacks
+- You need to validate or sanitize input before processing
+- The response format varies and requires dynamic handling
+
+| Use Handler Functions When | Use DataMap When |
+|----------------------------|------------------|
+| Complex business logic | Simple REST API calls |
+| Database access needed | No custom logic required |
+| Multi-step processing | Want serverless deployment |
+| External service integration with custom handling | Pattern-based responses |
+| Data transformation required | Variable substitution only |
+| Multiple API calls needed | Single API request/response |
+| Custom authentication flows | Static API keys or tokens |
+
+### DataMap Flow
+
+**DataMap Execution Steps:**
+
+1. **AI decides to call function**
+   - Function: `get_weather`
+   - Args: `{"city": "Seattle"}`
+
+2. **SignalWire executes DataMap** (no webhook to your server!)
+   - `GET https://api.weather.com?city=Seattle`
+
+3. **API response processed**
+   - Response: `{"temp": 65, "condition": "cloudy"}`
+
+4. **Output template filled**
+   - Result: "Weather in Seattle: 65 degrees, cloudy"
+
+### Basic DataMap
+
+```python
+from signalwire_agents import AgentBase
+from signalwire_agents.core.data_map import DataMap
+from signalwire_agents.core.function_result import SwaigFunctionResult
+
+
+class WeatherAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="weather-agent")
+        self.add_language("English", "en-US", "rime.spore")
+
+        # Create DataMap
+        weather_dm = (
+            DataMap("get_weather")
+            .description("Get current weather for a city")
+            .parameter("city", "string", "City name", required=True)
+            .webhook("GET", "https://api.weather.com/v1/current?key=API_KEY&q=${enc:args.city}")
+            .output(SwaigFunctionResult(
+                "The weather in ${args.city} is ${response.current.condition.text}, "
+                "${response.current.temp_f} degrees Fahrenheit"
+            ))
+        )
+
+        # Register it
+        self.register_swaig_function(weather_dm.to_swaig_function())
+```
+
+### Variable Substitution
+
+DataMap supports these variable patterns:
+
+| Pattern | Description |
+|---------|-------------|
+| `${args.param}` | Function argument value |
+| `${enc:args.param}` | URL-encoded argument (use in webhook URLs) |
+| `${lc:args.param}` | Lowercase argument value |
+| `${fmt_ph:args.phone}` | Format as phone number |
+| `${response.field}` | API response field |
+| `${response.arr[0]}` | Array element in response |
+| `${global_data.key}` | Global session data |
+| `${meta_data.key}` | Call metadata |
+
+#### Chained Modifiers
+
+Modifiers are applied right-to-left:
+
+| Pattern | Result |
+|---------|--------|
+| `${enc:lc:args.param}` | First lowercase, then URL encode |
+| `${lc:enc:args.param}` | First URL encode, then lowercase |
+
+#### Examples
+
+| Pattern | Result |
+|---------|--------|
+| `${args.city}` | "Seattle" (in body/output) |
+| `${enc:args.city}` | "Seattle" URL-encoded (in URLs) |
+| `${lc:args.city}` | "seattle" (lowercase) |
+| `${enc:lc:args.city}` | "seattle" lowercased then URL-encoded |
+| `${fmt_ph:args.phone}` | "+1 (555) 123-4567" |
+| `${response.temp}` | "65" |
+| `${response.items[0].name}` | "First item" |
+| `${global_data.user_id}` | "user123" |
+
+### DataMap Builder Methods
+
+#### description() / purpose()
+
+Set the function description:
+
+```python
+DataMap("my_function")
+    .description("Look up product information by SKU")
+```
+
+#### parameter()
+
+Add a function parameter:
+
+```python
+.parameter("sku", "string", "Product SKU code", required=True)
+.parameter("include_price", "boolean", "Include pricing info", required=False)
+.parameter("category", "string", "Filter by category", enum=["electronics", "clothing", "food"])
+```
+
+#### webhook()
+
+Add an API call:
+
+```python
+## GET request
+.webhook("GET", "https://api.example.com/products?sku=${enc:args.sku}")
+
+## POST request
+.webhook("POST", "https://api.example.com/search")
+
+## With headers
+.webhook("GET", "https://api.example.com/data",
+         headers={"Authorization": "Bearer ${global_data.api_key}"})
+```
+
+#### body()
+
+Set request body for POST/PUT:
+
+```python
+.webhook("POST", "https://api.example.com/search")
+.body({
+    "query": "${args.search_term}",
+    "limit": 5
+})
+```
+
+#### output()
+
+Set the response for a webhook:
+
+```python
+.output(SwaigFunctionResult(
+    "Found product: ${response.name}. Price: $${response.price}"
+))
+```
+
+#### fallback_output()
+
+Set fallback if all webhooks fail:
+
+```python
+.fallback_output(SwaigFunctionResult(
+    "Sorry, the service is currently unavailable"
+))
+```
+
+### Complete Example
+
+```python
+#!/usr/bin/env python3
+## weather_datamap_agent.py - Weather agent using DataMap
+from signalwire_agents import AgentBase
+from signalwire_agents.core.data_map import DataMap
+from signalwire_agents.core.function_result import SwaigFunctionResult
+
+
+class WeatherAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="weather-agent")
+        self.add_language("English", "en-US", "rime.spore")
+
+        self.prompt_add_section("Role", "You help users check the weather.")
+
+        weather_dm = (
+            DataMap("get_weather")
+            .description("Get current weather conditions for a city")
+            .parameter("city", "string", "City name", required=True)
+            .webhook(
+                "GET",
+                "https://api.weatherapi.com/v1/current.json"
+                "?key=YOUR_API_KEY&q=${enc:args.city}"
+            )
+            .output(SwaigFunctionResult(
+                "Current weather in ${args.city}: "
+                "${response.current.condition.text}, "
+                "${response.current.temp_f} degrees Fahrenheit"
+            ))
+            .fallback_output(SwaigFunctionResult(
+                "Sorry, I couldn't get weather data for ${args.city}"
+            ))
+        )
+
+        self.register_swaig_function(weather_dm.to_swaig_function())
+
+
+if __name__ == "__main__":
+    agent = WeatherAgent()
+    agent.run()
+```
+
+### Error Handling Patterns
+
+DataMap provides several mechanisms for handling errors gracefully. Since you can't write custom error handling code, you need to configure fallback responses declaratively.
+
+#### Handling HTTP Errors
+
+DataMap automatically treats HTTP 4xx and 5xx responses as failures. Combined with `fallback_output`, this ensures your agent always has something meaningful to say:
+
+```python
+product_dm = (
+    DataMap("lookup_product")
+    .description("Look up product by SKU")
+    .parameter("sku", "string", "Product SKU", required=True)
+    .webhook("GET", "https://api.store.com/products/${enc:args.sku}")
+    .output(SwaigFunctionResult(
+        "Found ${response.name}: $${response.price}. ${response.description}"
+    ))
+    .fallback_output(SwaigFunctionResult(
+        "I couldn't find a product with SKU ${args.sku}. "
+        "Please check the SKU and try again."
+    ))
+)
+```
+
+#### Timeout Considerations
+
+DataMap uses reasonable timeout defaults for API calls. For APIs that may be slow, consider using function fillers to provide feedback to the user while waiting:
+
+```python
+# Use fillers for slow API calls
+agent.add_language(
+    "English", "en-US", "rime.spore",
+    function_fillers=["Let me check that for you...", "One moment please..."]
+)
+```
+
+### Real-World Integration Examples
+
+#### Example 1: CRM Customer Lookup
+
+A common pattern is looking up customer information from a CRM system. This example shows how to query a REST API and present the results conversationally:
+
+```python
+#!/usr/bin/env python3
+## crm_agent.py - Customer lookup using DataMap
+from signalwire_agents import AgentBase
+from signalwire_agents.core.data_map import DataMap
+from signalwire_agents.core.function_result import SwaigFunctionResult
+
+
+class CRMAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="crm-agent")
+        self.add_language("English", "en-US", "rime.spore")
+
+        self.prompt_add_section("Role",
+            "You are a customer service agent with access to customer records. "
+            "Help look up customer information when asked.")
+
+        # Customer lookup by email
+        customer_dm = (
+            DataMap("lookup_customer")
+            .description("Look up customer information by email address")
+            .parameter("email", "string", "Customer email address", required=True)
+            .webhook(
+                "GET",
+                "https://api.crm.example.com/v1/customers?email=${enc:args.email}",
+                headers={
+                    "Authorization": "Bearer ${global_data.crm_api_key}",
+                    "Content-Type": "application/json"
+                }
+            )
+            .output(SwaigFunctionResult(
+                "Found customer ${response.data.first_name} ${response.data.last_name}. "
+                "Account status: ${response.data.status}. "
+                "Member since: ${response.data.created_at}. "
+                "Total orders: ${response.data.order_count}."
+            ))
+            .fallback_output(SwaigFunctionResult(
+                "I couldn't find a customer with email ${args.email}. "
+                "Would you like to try a different email address?"
+            ))
+        )
+
+        self.register_swaig_function(customer_dm.to_swaig_function())
+
+
+if __name__ == "__main__":
+    agent = CRMAgent()
+    agent.run()
+```
+
+#### Example 2: Appointment Scheduling API
+
+This example shows a POST request to check appointment availability:
+
+```python
+#!/usr/bin/env python3
+## appointment_agent.py - Appointment scheduling with DataMap
+from signalwire_agents import AgentBase
+from signalwire_agents.core.data_map import DataMap
+from signalwire_agents.core.function_result import SwaigFunctionResult
+
+
+class AppointmentAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="appointment-agent")
+        self.add_language("English", "en-US", "rime.spore")
+
+        self.prompt_add_section("Role",
+            "You help customers check appointment availability and book appointments.")
+
+        # Check availability
+        availability_dm = (
+            DataMap("check_availability")
+            .description("Check available appointment slots for a given date")
+            .parameter("date", "string", "Date in YYYY-MM-DD format", required=True)
+            .parameter("service_type", "string", "Type of service",
+                       required=True, enum=["consultation", "followup", "checkup"])
+            .webhook(
+                "POST",
+                "https://api.scheduling.example.com/v1/availability",
+                headers={
+                    "Authorization": "Bearer ${global_data.scheduling_key}",
+                    "Content-Type": "application/json"
+                }
+            )
+            .body({
+                "date": "${args.date}",
+                "service": "${args.service_type}",
+                "duration_minutes": 30
+            })
+            .output(SwaigFunctionResult(
+                "For ${args.date}, I found ${response.available_slots} available time slots. "
+                "The earliest is at ${response.slots[0].time} and the latest is at "
+                "${response.slots[-1].time}. Would you like to book one of these times?"
+            ))
+            .fallback_output(SwaigFunctionResult(
+                "I couldn't check availability for ${args.date}. "
+                "This might be a weekend or holiday. Would you like to try another date?"
+            ))
+        )
+
+        self.register_swaig_function(availability_dm.to_swaig_function())
+
+
+if __name__ == "__main__":
+    agent = AppointmentAgent()
+    agent.run()
+```
+
+#### Example 3: Order Status Tracking
+
+This example demonstrates looking up order status with multiple possible response fields:
+
+```python
+#!/usr/bin/env python3
+## order_agent.py - Order tracking with DataMap
+from signalwire_agents import AgentBase
+from signalwire_agents.core.data_map import DataMap
+from signalwire_agents.core.function_result import SwaigFunctionResult
+
+
+class OrderAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="order-agent")
+        self.add_language("English", "en-US", "rime.spore")
+
+        self.prompt_add_section("Role",
+            "You help customers track their orders and check delivery status.")
+
+        order_dm = (
+            DataMap("track_order")
+            .description("Get the status of an order by order number")
+            .parameter("order_number", "string", "The order number to track", required=True)
+            .webhook(
+                "GET",
+                "https://api.orders.example.com/v1/orders/${enc:args.order_number}",
+                headers={"X-API-Key": "${global_data.orders_api_key}"}
+            )
+            .output(SwaigFunctionResult(
+                "Order ${args.order_number} status: ${response.status}. "
+                "Shipped on ${response.shipped_date} via ${response.carrier}. "
+                "Tracking number: ${response.tracking_number}. "
+                "Estimated delivery: ${response.estimated_delivery}."
+            ))
+            .fallback_output(SwaigFunctionResult(
+                "I couldn't find order ${args.order_number}. "
+                "Please verify the order number. It should be in the format ORD-XXXXX."
+            ))
+        )
+
+        self.register_swaig_function(order_dm.to_swaig_function())
+
+
+if __name__ == "__main__":
+    agent = OrderAgent()
+    agent.run()
+```
+
+#### Example 4: Multi-Service Agent
+
+This example shows an agent with multiple DataMap functions for different services:
+
+```python
+#!/usr/bin/env python3
+## multi_service_agent.py - Agent with multiple DataMap integrations
+from signalwire_agents import AgentBase
+from signalwire_agents.core.data_map import DataMap
+from signalwire_agents.core.function_result import SwaigFunctionResult
+
+
+class MultiServiceAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="multi-service-agent")
+        self.add_language("English", "en-US", "rime.spore")
+
+        self.prompt_add_section("Role",
+            "You are a helpful assistant that can check weather, "
+            "look up stock prices, and convert currencies.")
+
+        # Weather lookup
+        self.register_swaig_function(
+            DataMap("get_weather")
+            .description("Get current weather for a city")
+            .parameter("city", "string", "City name", required=True)
+            .webhook("GET",
+                "https://api.weatherapi.com/v1/current.json"
+                "?key=${global_data.weather_key}&q=${enc:args.city}")
+            .output(SwaigFunctionResult(
+                "${args.city}: ${response.current.temp_f}°F, "
+                "${response.current.condition.text}"
+            ))
+            .fallback_output(SwaigFunctionResult(
+                "Couldn't get weather for ${args.city}"
+            ))
+            .to_swaig_function()
+        )
+
+        # Stock price lookup
+        self.register_swaig_function(
+            DataMap("get_stock_price")
+            .description("Get current stock price by ticker symbol")
+            .parameter("symbol", "string", "Stock ticker symbol", required=True)
+            .webhook("GET",
+                "https://api.stocks.example.com/v1/quote/${enc:args.symbol}",
+                headers={"Authorization": "Bearer ${global_data.stocks_key}"})
+            .output(SwaigFunctionResult(
+                "${args.symbol}: $${response.price} "
+                "(${response.change_percent}% today)"
+            ))
+            .fallback_output(SwaigFunctionResult(
+                "Couldn't find stock ${args.symbol}"
+            ))
+            .to_swaig_function()
+        )
+
+        # Currency conversion
+        self.register_swaig_function(
+            DataMap("convert_currency")
+            .description("Convert between currencies")
+            .parameter("amount", "number", "Amount to convert", required=True)
+            .parameter("from_currency", "string", "Source currency code", required=True)
+            .parameter("to_currency", "string", "Target currency code", required=True)
+            .webhook("GET",
+                "https://api.exchange.example.com/convert"
+                "?from=${enc:args.from_currency}&to=${enc:args.to_currency}"
+                "&amount=${args.amount}")
+            .output(SwaigFunctionResult(
+                "${args.amount} ${args.from_currency} = "
+                "${response.result} ${args.to_currency}"
+            ))
+            .fallback_output(SwaigFunctionResult(
+                "Couldn't convert currency. Please check the currency codes."
+            ))
+            .to_swaig_function()
+        )
+
+
+if __name__ == "__main__":
+    agent = MultiServiceAgent()
+    agent.run()
+```
+
+### Performance Considerations
+
+When using DataMap, keep these performance factors in mind:
+
+**Latency**: DataMap calls execute on SignalWire's infrastructure, eliminating the round-trip to your server. This typically reduces latency by 50-200ms compared to webhook-based handlers. For time-sensitive interactions, this improvement is significant.
+
+**API Rate Limits**: Your external APIs may have rate limits. Since DataMap calls don't go through your server, you can't implement custom rate limiting logic. Consider:
+- Choosing APIs with generous rate limits
+- Using fallback responses when rate limited
+- Monitoring API usage through your provider's dashboard
+
+**Response Size**: DataMap works best with reasonably-sized JSON responses. Very large responses (>1MB) may cause timeouts or memory issues. If your API returns large datasets, consider:
+- Using query parameters to limit response size
+- Requesting specific fields only
+- Using a handler function instead for complex data processing
+
+**Caching**: DataMap doesn't cache responses. Each function call makes a fresh API request. If your data doesn't change frequently, consider:
+- APIs with built-in caching headers
+- Using handler functions with server-side caching for high-frequency lookups
+
+### DataMap Best Practices
+
+**DO:**
+
+- Always set `fallback_output` for every DataMap—users should never encounter silent failures
+- Use `${enc:args.param}` for any value in a URL to prevent injection and encoding issues
+- Test your DataMap functions with `swaig-test` before deploying
+- Store API keys in `global_data` rather than hardcoding them
+- Use descriptive function names and descriptions to help the AI choose correctly
+- Start simple and add complexity only when needed
+
+**DON'T:**
+
+- Put API keys directly in webhook URLs where they might be logged
+- Use DataMap for operations that require transactions or rollback
+- Assume API responses will always have the expected structure—test edge cases
+- Chain multiple DataMap calls for operations that need atomicity
+- Forget that DataMap has no access to your server's state or databases
+- Use DataMap when you need to transform data beyond simple extraction
+
+### Debugging DataMap
+
+When DataMap functions don't work as expected, use these debugging strategies:
+
+1. **Test the API directly**: Use curl or Postman to verify the API works with your parameters
+2. **Check variable substitution**: Ensure `${args.param}` matches your parameter names exactly
+3. **Verify JSON paths**: Response field access like `${response.data.items[0].name}` must match the actual response structure
+4. **Use swaig-test**: The testing tool shows you exactly what SWML is generated
+
+```bash
+# Test your DataMap agent
+swaig-test your_agent.py --dump-swml
+
+# Look for the data_map section in the output to verify configuration
+```
+
+### Migrating from Handler Functions to DataMap
+
+If you have existing handler functions that make simple API calls, consider migrating them to DataMap:
+
+**Before (Handler Function):**
+```python
+@AgentBase.tool(name="get_weather", description="Get weather for a city")
+def get_weather(self, args, raw_data):
+    city = args.get("city")
+    response = requests.get(f"https://api.weather.com?city={city}&key=API_KEY")
+    data = response.json()
+    return SwaigFunctionResult(
+        f"Weather in {city}: {data['temp']}°F, {data['condition']}"
+    )
+```
+
+**After (DataMap):**
+```python
+weather_dm = (
+    DataMap("get_weather")
+    .description("Get weather for a city")
+    .parameter("city", "string", "City name", required=True)
+    .webhook("GET", "https://api.weather.com?city=${enc:args.city}&key=API_KEY")
+    .output(SwaigFunctionResult(
+        "Weather in ${args.city}: ${response.temp}°F, ${response.condition}"
+    ))
+    .fallback_output(SwaigFunctionResult("Couldn't get weather for ${args.city}"))
+)
+self.register_swaig_function(weather_dm.to_swaig_function())
+```
+
+The DataMap version is more concise, doesn't require the `requests` library, and includes built-in error handling.
+

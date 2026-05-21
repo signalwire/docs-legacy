@@ -1,0 +1,41 @@
+---
+title: "getDevices"
+slug: /js/reference/webrtc/get-devices
+description: getDevices function in the WebRTC namespace.
+toc_max_heading_level: 3
+---
+
+### getDevices
+
+- `Const` **getDevices**(`name?`, `fullList?`): `Promise<MediaDeviceInfo[]>` — See [MediaDeviceInfo](https://developer.mozilla.org/en-US/docs/Web/API/mediadeviceinfo) for more details.
+
+Enumerates the media input and output devices available on this machine. If `name` is provided, only the devices of the specified kind are returned. Possible values for `name` are `"camera"`, `"microphone"`, and `"speaker"`, which respectively correspond to [getCameraDevices](/docs/browser-sdk/js/reference/webrtc/get-camera-devices), [getMicrophoneDevices](/docs/browser-sdk/js/reference/webrtc/get-microphone-devices), and [getSpeakerDevices](/docs/browser-sdk/js/reference/webrtc/get-speaker-devices).
+
+#### Parameters
+
+<ParamField path="name" type="DevicePermissionName" default="undefined">
+  Filter for this device category.
+</ParamField>
+
+<ParamField path="fullList" type="boolean" default="false">
+  Set to `true` to retrieve the raw list as returned by the browser, which might include multiple, duplicate `deviceId`s for the same group.
+</ParamField>
+
+#### Returns
+
+`Promise<MediaDeviceInfo[]>`
+
+#### Example
+
+```javascript
+await SignalWire.WebRTC.getDevices("camera", true);
+// [
+//   {
+//     "deviceId": "3c4f97...",
+//     "kind": "videoinput",
+//     "label": "HD Camera",
+//     "groupId": "828fec..."
+//   }
+// ]
+```
+

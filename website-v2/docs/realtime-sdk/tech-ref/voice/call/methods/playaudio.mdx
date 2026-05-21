@@ -1,0 +1,79 @@
+---
+title: "playAudio"
+slug: /node/reference/voice/call/play-audio
+description: playAudio method for the Call class.
+toc_max_heading_level: 3
+---
+
+[callplayback-events]: /docs/server-sdk/node/reference/voice/call-playback#events
+[callplayback-onstarted]: /docs/server-sdk/node/reference/voice/call-playback#onstarted
+[callplayback]: /docs/server-sdk/node/reference/voice/call-playback
+
+### playAudio
+
+- **playAudio**(`params`): `Promise`\<[`CallPlayback`][callplayback]>
+
+Plays an audio file.
+
+#### Parameters
+
+<ParamField path="params" type="object" required>
+  Object containing the parameters for playing audio.
+</ParamField>
+
+<Indent>
+<ParamField path="url" type="string" required>
+  HTTP(s) URL to an audio resource to play.
+</ParamField>
+
+<ParamField path="volume" type="number" default="0">
+  Volume value between -40dB and +40dB where 0 is unchanged.
+</ParamField>
+
+<ParamField path="listen" type="object">
+  Callback to listen for events. List of playback events can be found [here][callplayback-events]. Example event: [`onStarted`][callplayback-onstarted].
+</ParamField>
+</Indent>
+
+#### Returns
+
+`Promise`\<[`CallPlayback`][callplayback]>
+
+A promise that resolves to a [`CallPlayback`][callplayback] object that you can use to
+view the current state and results of the `play` session.
+
+#### Example
+
+In this example, we dial a phone number and play an audio file. Once the audio file is finished playing, we hangup the call.
+We also listen for playback events.
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+const voiceClient = client.voice;
+
+// Listen for incoming calls
+await voiceClient.listen({
+  topics: ["office"],
+  onCallReceived: async (call) => {
+    console.log("Call received");
+    // Answer the call and play an audio file. Listens for playback events. Ends the call after the audio file is finished playing.
+    call.answer();
+    await call.playAudio({
+      url: "https://cdn.signalwire.com/default-music/welcome.mp3",
+      listen: {
+        onStarted: () => console.log("Started playing"),
+        onFailed: () => console.log("Failed to play"),
+        onUpdated: (event) => console.log("Updated playing", event.state),
+        onEnded: (event) => {
+          console.log("Ended playing", event.state);
+          // Hangup the call
+          call.hangup();
+        }
+      }
+    }).onStarted();
+  }
+});
+```

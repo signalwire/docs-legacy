@@ -1,0 +1,60 @@
+---
+title: Relay.Task
+slug: /php/reference/task
+toc_max_heading_level: 3
+---
+
+[consumer]: /docs/server-sdk/v2/php/reference/consumer#ontask
+[relay-consumers]: /docs/server-sdk/v2/php/reference/consumer
+
+A `Relay.Task` is simple way to send jobs to your [`Relay.Consumers`][relay-consumers] from a short lived process, like a web framework. RELAY Tasks allow you to pass commands down to your Consumers without blocking your short lived request. Think of a RELAY Task as a way to queue a job for your background workers to processes asynchronously.
+
+## Creating Tasks
+
+A Task is a simple object with 2 required arguments: `$project` and `$token`. Project and Token are used to send the Task to your Consumers. Once created, the Task has only one method `deliver` to send jobs to your Consumer.
+
+```php
+<?php
+
+require dirname(__FILE__) . '/vendor/autoload.php';
+
+use SignalWire\Relay\Tasking\Task;
+
+$task = new Task('XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX', 'PTXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX');
+$context = 'office';
+$delivered = $task->deliver($context, [
+  'key' => 'value',
+  'data' => 'data for your job'
+]);
+```
+
+## Methods
+
+### deliver
+
+Send a job to your `Consumer` in a specific context.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `$context` | `string` | **required** | Context where to send the Task. |
+| `$message` | `array` | **required** | Array with your custom data that will be sent to your Consumer's [`onTask`][consumer] handler. |
+
+**Returns**
+
+`boolean` - Whether the Task has been sent successfully.
+
+**Examples**
+
+Deliver a task to your Consumer with a message to then make an outbound Call.
+
+```php
+<?php
+
+$delivered = $task->deliver('office', [
+  'action' => 'call',
+  'from' => '+18881112222'
+  'to' => '+18881113333'
+]);
+```

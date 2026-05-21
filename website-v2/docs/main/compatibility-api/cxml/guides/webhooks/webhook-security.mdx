@@ -1,0 +1,127 @@
+---
+title: Webhook security
+slug: /compatibility-api/guides/webhook-security
+author: rsowald
+x-custom:
+  tags:
+    - product:messaging
+    - product:voice
+    - product:fax
+    - sdk:compatibility
+    - language:nodejs
+---
+
+When building an application with SignalWire services, you are very likely to use [webhooks](/docs/platform/webhooks) to exchange information with SignalWire. A webhook is an HTTP(S) request sent to your web application when a key event has occurred, such as an inbound call, inbound message, or a status change. This allows SignalWire to query your web application in order for instructions on what to do next. For example, you might use a webhook to handle an inbound call by reading the instructions in your webhook to play an IVR, route the customer to the right department, and connect them with an agent. You could also use a webhook as a status callback where each status change of a call or message is sent to your web application which might store some instructions for handling emergent errors.
+
+If your application exposes sensitive data or makes changes to your data, then you may want verify that the HTTP requests to your web application are coming from SignalWire, and not a malicious third party. To support that level of security, SignalWire signs every webhook request with a digital HMAC signature.
+
+You can find your personalized signing key in the [API Credentials Space](https://my.signalwire.com?page=credentials) of your Dashboard. Click "Show" to display the key and a copy icon to easily copy the signature into your code. Each project in your Dashboard will have its own signing key for verification. You can reset the signing key by clicking the reset button. Please note that it takes about a minute for the new key to be active. You will also be able to see the new key before finalizing the reset request so that you can copy it to wherever it needs to be updated.
+
+<Frame caption="the API Credentials page">
+
+![The SignalWire Space showing API credentials, including Signing Key](@image/dashboard/credentials/api-credentials-with-signing-key.webp)
+
+</Frame>
+
+## Verifying the webhook signature
+
+### NodeJs
+
+In your webhook logic, you can include the `validateRequest` method to check the key include on the request against the value you copy from your Credentials page.
+
+```js
+import { RestClient } from "@signalwire/compatibility-api";
+
+app.post("/mywebhook", (req, res) => {
+  const valid = RestClient.validateRequest(
+    "XXXXXXXX", // signing key copied from your credentials page
+    req.headers["x-signalwire-signature"],
+    "https://example.ngrok.io/mywebhook",
+    req.body
+  );
+});
+```
+
+This method takes as its parameters:
+
+1. The signing key copied from your Credentials page.
+2. Where to find the request signing key in the request header.
+3. The url the request is calling.
+4. The included request parameters. This should virtually always be the request body.
+
+If you are using Express for your application, you also have the option of using the middleware shortcut `webhook()` which doesn't require any parameters instead of the `validateRequest` method.
+
+<Warning>
+If using a service like ngrok to test locally, it is preferred to use the `validateRequest` method instead of the `webhook()` middleware.
+This is because `ngrok` will rewrite the request headers and protocol, which will cause the signature to fail validation.
+</Warning>
+
+```js
+import { RestClient } from "@signalwire/compatibility-api";
+
+app.post("/mywebhook", RestClient.webhook('Signing Key Here'), (req, res) => {
+  const response = new VoiceResponse();
+  // application logic
+});
+```
+
+### Python
+
+In your Python Application you can inclued the `RequestValidator` constructor  to check the key include on the request against the value you copy from your Credentials page.
+
+```python
+# import the RequestValidator constructor
+from signalwire.request_validator import RequestValidator
+
+# Define your endpoint
+@app.route("/voice_say", methods=['POST', 'GET'])
+def voice_say():
+  url = "https://example.ngrok.io/voice_say"
+  token = "xxxxxx" # signing key copied from your credentials page
+  signature = request.headers.get("x-signalwire-signature")
+
+  if(signature == None):
+    return Response(json.dumps({"message": "unauthorized"}), status=401, mimetype="application/json")
+  else:
+    validator = RequestValidator(token)
+    validate = validator.validate(url, request.form, signature)
+    if(validate):
+      r = VoiceResponse()
+      r.say("This works")
+      return Response(r.to_xml(), status=200, mimetype="application/xml")
+    else:
+      r = VoiceResponse()
+      r.say("This is wrong")
+      return Response(r.to_xml(), status=401, mimetype="application/xml")
+```
+In the above snippet we are doing the following
+
+1. Using the `RequestValidator` constructor while passing the signing key copied from the Credentials page.
+2. If the request is coming from Signalwire, the validator is expecting an header `x-signalwire-signature`
+3. The URL the request is calling 
+4. The included request parameters. This should virtually always be the request body.
+
+For Django the Snippet might look a little different like this:
+
+```python
+# import the RequestValidator constructor
+from signalwire.request_validator import RequestValidator
+
+@csrf_exempt
+def home(request):
+  token = "xxxxxxxx" # signing key copied from your credentials page
+
+  validator = RequestValidator(token)
+
+  request_valid = validator.validate(
+        "https://example.ngrok.io/api/home/", # The url  the request is calling
+        request.POST,
+        request.META.get('HTTP_X_SIGNALWIRE_SIGNATURE', '')
+    )
+
+  if request_valid:
+    # perform logic Here
+  else:
+    # send unauthorized response
+```
+In terms of Django `request.POST` replaces `request.form` while `request.META.get('HTTP_X_SIGNALWIRE_SIGNATURE)` replaces `request.headers.get("x-signalwire-signature")`

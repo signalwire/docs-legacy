@@ -1,0 +1,790 @@
+---
+title: "Results Actions"
+sidebar_label: "Results Actions"
+slug: /python/guides/result-actions
+toc_max_heading_level: 3
+---
+
+## Results & Actions
+
+SwaigFunctionResult is the return type for all SWAIG functions. It contains response text for the AI to speak and optional actions like transfers, SMS, or context changes.
+
+### Basic Results
+
+Return a simple response:
+
+```python
+from signalwire_agents import SwaigFunctionResult
+
+
+def check_order(self, args, raw_data):
+    order_number = args.get("order_number")
+    return SwaigFunctionResult(f"Order {order_number} shipped yesterday")
+```
+
+### SwaigFunctionResult Components
+
+| Component | Description |
+|-----------|-------------|
+| `response` | Text the AI will speak to the caller |
+| `action` | List of actions to execute (transfers, SMS, context changes, etc.) |
+| `post_process` | If `True`, AI speaks once more before actions execute (useful for confirmations) |
+
+### Method Chaining
+
+SwaigFunctionResult methods return self for chaining:
+
+```python
+def transfer_to_support(self, args, raw_data):
+    department = args.get("department", "support")
+
+    return (
+        SwaigFunctionResult("I'll transfer you now")
+        .connect("+15551234567", final=True)
+    )
+```
+
+### Call Transfer
+
+Transfer to another number:
+
+```python
+def transfer_call(self, args, raw_data):
+    department = args.get("department")
+
+    numbers = {
+        "sales": "+15551111111",
+        "support": "+15552222222",
+        "billing": "+15553333333"
+    }
+
+    dest = numbers.get(department, "+15550000000")
+
+    return (
+        SwaigFunctionResult(f"Transferring you to {department}")
+        .connect(dest, final=True)
+    )
+```
+
+**Transfer options:**
+
+```python
+## Permanent transfer - call leaves agent completely
+.connect("+15551234567", final=True)
+
+## Temporary transfer - returns to agent if far end hangs up
+.connect("+15551234567", final=False)
+
+## With custom caller ID
+.connect("+15551234567", final=True, from_addr="+15559876543")
+
+## Transfer to SIP address
+.connect("support@company.com", final=True)
+```
+
+**SIP REFER transfer:**
+
+Use SIP REFER for attended transfers:
+
+```python
+def transfer_to_extension(self, args, raw_data):
+    extension = args.get("extension")
+
+    return (
+        SwaigFunctionResult(f"Transferring to extension {extension}")
+        .sip_refer(f"sip:{extension}@pbx.example.com")
+    )
+```
+
+**SWML-specific transfer:**
+
+Transfer with AI response for context handoff:
+
+```python
+def transfer_with_context(self, args, raw_data):
+    department = args.get("department")
+
+    return (
+        SwaigFunctionResult("Let me connect you")
+        .swml_transfer(
+            dest="+15551234567",
+            ai_response=f"Customer needs help with {department}",
+            final=True
+        )
+    )
+```
+
+### Send SMS
+
+Send a text message during the call:
+
+```python
+def send_confirmation(self, args, raw_data):
+    phone = args.get("phone_number")
+    order_id = args.get("order_id")
+
+    return (
+        SwaigFunctionResult("I've sent you a confirmation text")
+        .send_sms(
+            to_number=phone,
+            from_number="+15559876543",
+            body=f"Your order {order_id} has been confirmed!"
+        )
+    )
+```
+
+**SMS with media:**
+
+```python
+def send_receipt(self, args, raw_data):
+    phone = args.get("phone_number")
+    receipt_url = args.get("receipt_url")
+
+    return (
+        SwaigFunctionResult("I've sent your receipt")
+        .send_sms(
+            to_number=phone,
+            from_number="+15559876543",
+            body="Here's your receipt:",
+            media=[receipt_url]
+        )
+    )
+```
+
+### Payment Processing
+
+Process credit card payments during the call:
+
+```python
+def collect_payment(self, args, raw_data):
+    amount = args.get("amount")
+    description = args.get("description", "Purchase")
+
+    return (
+        SwaigFunctionResult("I'll collect your payment information now")
+        .pay(
+            payment_connector_url="https://api.example.com/payment",
+            charge_amount=amount,
+            description=description,
+            input_method="dtmf",
+            security_code=True,
+            postal_code=True
+        )
+    )
+```
+
+**Payment with custom prompts:**
+
+```python
+def subscription_payment(self, args, raw_data):
+    return (
+        SwaigFunctionResult("Let's set up your monthly subscription")
+        .pay(
+            payment_connector_url="https://api.example.com/subscribe",
+            charge_amount="29.99",
+            description="Monthly Subscription",
+            token_type="reusable",
+            prompts=[
+                {
+                    "say": "Please enter your credit card number",
+                    "type": "card_number"
+                },
+                {
+                    "say": "Enter the expiration month and year",
+                    "type": "expiration"
+                }
+            ]
+        )
+    )
+```
+
+### Call Recording
+
+Start and stop call recording:
+
+```python
+def start_recording(self, args, raw_data):
+    return (
+        SwaigFunctionResult("Starting call recording")
+        .record_call(
+            control_id="my_recording",
+            stereo=True,
+            format="mp3",
+            direction="both"
+        )
+    )
+
+
+def stop_recording(self, args, raw_data):
+    return (
+        SwaigFunctionResult("Recording stopped")
+        .stop_record_call(control_id="my_recording")
+    )
+```
+
+**Record with auto-stop:**
+
+```python
+def record_with_timeout(self, args, raw_data):
+    return (
+        SwaigFunctionResult("Recording your message")
+        .record_call(
+            control_id="voicemail",
+            max_length=120.0,  # Stop after 2 minutes
+            end_silence_timeout=3.0,  # Stop after 3s silence
+            beep=True
+        )
+    )
+```
+
+### Audio Tapping
+
+Tap audio to external endpoint for monitoring or transcription. Supports WebSocket (`wss://`) or RTP (`rtp://`) URIs:
+
+**WebSocket tap:**
+
+```python
+def start_websocket_monitoring(self, args, raw_data):
+    return (
+        SwaigFunctionResult("Call monitoring started")
+        .tap(
+            uri="wss://monitor.example.com/audio",
+            control_id="supervisor_tap",
+            direction="both",
+            codec="PCMU"
+        )
+    )
+```
+
+**RTP tap:**
+
+```python
+def start_rtp_tap(self, args, raw_data):
+    return (
+        SwaigFunctionResult("Recording to RTP endpoint")
+        .tap(
+            uri="rtp://192.168.1.100:5004",
+            control_id="rtp_tap",
+            direction="both",
+            codec="PCMU",
+            rtp_ptime=20
+        )
+    )
+
+
+def stop_monitoring(self, args, raw_data):
+    return (
+        SwaigFunctionResult("Monitoring stopped")
+        .stop_tap(control_id="supervisor_tap")
+    )
+```
+
+### Call Control
+
+**Hold:**
+
+Put caller on hold:
+
+```python
+def hold_for_agent(self, args, raw_data):
+    return (
+        SwaigFunctionResult("Please hold while I find an available agent")
+        .hold(timeout=60)  # Hold for up to 60 seconds
+    )
+```
+
+### Hang Up
+
+End the call:
+
+```python
+def end_call(self, args, raw_data):
+    return (
+        SwaigFunctionResult("Thank you for calling. Goodbye!")
+        .hangup()
+    )
+```
+
+### Speech Control
+
+**Direct speech with .say():**
+
+Make the AI speak specific text immediately:
+
+```python
+def announce_status(self, args, raw_data):
+    order_status = args.get("status")
+
+    return (
+        SwaigFunctionResult()
+        .say(f"Your order status is: {order_status}")
+    )
+```
+
+**Stop AI from speaking:**
+
+```python
+def interrupt_speech(self, args, raw_data):
+    return (
+        SwaigFunctionResult()
+        .stop()  # Immediately stop AI speech
+        .say("Let me start over")
+    )
+```
+
+**Wait for user input:**
+
+Pause and wait for the user to speak:
+
+```python
+def wait_for_confirmation(self, args, raw_data):
+    return (
+        SwaigFunctionResult("I'll wait for your response")
+        .wait_for_user(enabled=True, timeout=10)
+    )
+```
+
+**Simulate user input:**
+
+Inject text as if the user spoke it:
+
+```python
+def auto_confirm(self, args, raw_data):
+    return (
+        SwaigFunctionResult()
+        .simulate_user_input("yes, I confirm")
+    )
+```
+
+### Background Audio
+
+Play audio files in the background during conversation:
+
+```python
+def play_hold_music(self, args, raw_data):
+    return (
+        SwaigFunctionResult("Please hold")
+        .play_background_file(
+            filename="https://example.com/hold-music.mp3",
+            wait=False
+        )
+    )
+
+
+def stop_hold_music(self, args, raw_data):
+    return (
+        SwaigFunctionResult("I'm back")
+        .stop_background_file()
+    )
+```
+
+### Update Global Data
+
+Store data accessible throughout the call:
+
+```python
+def save_customer_info(self, args, raw_data):
+    customer_id = args.get("customer_id")
+    customer_name = args.get("name")
+
+    return (
+        SwaigFunctionResult(f"I've noted your information, {customer_name}")
+        .update_global_data({
+            "customer_id": customer_id,
+            "customer_name": customer_name,
+            "verified": True
+        })
+    )
+```
+
+**Remove global data:**
+
+```python
+def clear_session_data(self, args, raw_data):
+    return (
+        SwaigFunctionResult("Session data cleared")
+        .remove_global_data(["customer_id", "verified"])
+    )
+```
+
+### Metadata Management
+
+Store function-specific metadata (separate from global data):
+
+```python
+def track_function_usage(self, args, raw_data):
+    return (
+        SwaigFunctionResult("Usage tracked")
+        .set_metadata({
+            "function_called": "check_order",
+            "timestamp": "2024-01-15T10:30:00Z",
+            "user_id": args.get("user_id")
+        })
+    )
+```
+
+**Remove metadata:**
+
+```python
+def clear_function_metadata(self, args, raw_data):
+    return (
+        SwaigFunctionResult("Metadata cleared")
+        .remove_metadata(["timestamp", "user_id"])
+    )
+```
+
+### Context Switching
+
+**Advanced context switch:**
+
+Change the agent's prompt/context with new system and user prompts:
+
+```python
+def switch_to_technical(self, args, raw_data):
+    return (
+        SwaigFunctionResult("Switching to technical support mode")
+        .switch_context(
+            system_prompt="You are now a technical support specialist. "
+                         "Help the customer with their technical issue.",
+            user_prompt="The customer needs help with their account"
+        )
+    )
+```
+
+**SWML context switch:**
+
+Switch to a named SWML context:
+
+```python
+def switch_to_billing(self, args, raw_data):
+    return (
+        SwaigFunctionResult("Let me connect you with billing")
+        .swml_change_context("billing_context")
+    )
+```
+
+**SWML step change:**
+
+Change to a specific workflow step:
+
+```python
+def move_to_checkout(self, args, raw_data):
+    return (
+        SwaigFunctionResult("Moving to checkout")
+        .swml_change_step("checkout_step")
+    )
+```
+
+### Function Control
+
+Dynamically enable or disable functions during the call:
+
+```python
+def enable_payment_functions(self, args, raw_data):
+    return (
+        SwaigFunctionResult("Payment functions are now available")
+        .toggle_functions([
+            {"function": "collect_payment", "active": True},
+            {"function": "refund_payment", "active": True},
+            {"function": "check_balance", "active": False}
+        ])
+    )
+```
+
+**Enable functions on timeout:**
+
+```python
+def enable_escalation_on_timeout(self, args, raw_data):
+    return (
+        SwaigFunctionResult("I'll help you with that")
+        .enable_functions_on_timeout(enabled=True)
+    )
+```
+
+**Update AI settings:**
+
+```python
+def adjust_speech_timing(self, args, raw_data):
+    return (
+        SwaigFunctionResult("Adjusting response timing")
+        .update_settings({
+            "end_of_speech_timeout": 1000,
+            "attention_timeout": 30000
+        })
+    )
+```
+
+**Set speech timeouts:**
+
+```python
+def configure_timeouts(self, args, raw_data):
+    return (
+        SwaigFunctionResult()
+        .set_end_of_speech_timeout(800)  # 800ms
+        .set_speech_event_timeout(5000)  # 5s
+    )
+```
+
+### Conference & Rooms
+
+**Join a conference:**
+
+```python
+def join_team_conference(self, args, raw_data):
+    conf_name = args.get("conference_name")
+
+    return (
+        SwaigFunctionResult(f"Joining {conf_name}")
+        .join_conference(
+            name=conf_name,
+            muted=False,
+            beep="true",
+            start_conference_on_enter=True
+        )
+    )
+```
+
+**Join a SignalWire room:**
+
+```python
+def join_support_room(self, args, raw_data):
+    return (
+        SwaigFunctionResult("Connecting to support room")
+        .join_room(name="support-room-1")
+    )
+```
+
+### Post-Processing
+
+Let AI speak once more before executing actions:
+
+```python
+def transfer_with_confirmation(self, args, raw_data):
+    return (
+        SwaigFunctionResult(
+            "I'll transfer you to billing. Is there anything else first?",
+            post_process=True  # AI can respond to follow-up before transfer
+        )
+        .connect("+15551234567", final=True)
+    )
+```
+
+### Multiple Actions
+
+Chain multiple actions together:
+
+```python
+def complete_interaction(self, args, raw_data):
+    customer_phone = args.get("phone")
+
+    return (
+        SwaigFunctionResult("I've completed your request")
+        .update_global_data({"interaction_complete": True})
+        .send_sms(
+            to_number=customer_phone,
+            from_number="+15559876543",
+            body="Thank you for calling!"
+        )
+    )
+```
+
+### Action Execution Order and Interactions
+
+When chaining multiple actions, understanding how they interact is important.
+
+#### Execution Order
+
+Actions execute in the order they're added to the SwaigFunctionResult. The response text is processed first, then actions execute sequentially.
+
+```python
+# These execute in order: 1, 2, 3
+return (
+    SwaigFunctionResult("Starting process")
+    .update_global_data({"step": 1})      # 1st
+    .send_sms(to_number=phone, ...)       # 2nd
+    .update_global_data({"step": 2})      # 3rd
+)
+```
+
+#### Terminal Actions
+
+Some actions end the call or AI session. Once a terminal action executes, subsequent actions may not run:
+
+**Terminal actions:**
+
+- `.connect(final=True)` - Transfers call away permanently
+- `.hangup()` - Ends the call
+- `.swml_transfer(final=True)` - Transfers to another SWML endpoint
+
+**Non-terminal actions:**
+
+- `.update_global_data()` - Continues normally
+- `.send_sms()` - Continues normally
+- `.say()` - Continues normally
+- `.connect(final=False)` - Returns to agent if far end hangs up
+
+**Best practice:** Put terminal actions last in the chain.
+
+```python
+# Good - data saved before transfer
+return (
+    SwaigFunctionResult("Transferring you now")
+    .update_global_data({"transferred": True})  # Executes
+    .send_sms(to_number=phone, body="...")      # Executes
+    .connect("+15551234567", final=True)        # Terminal
+)
+
+# Risky - SMS might not send
+return (
+    SwaigFunctionResult("Transferring you now")
+    .connect("+15551234567", final=True)        # Terminal - call leaves
+    .send_sms(to_number=phone, body="...")      # May not execute
+)
+```
+
+#### Conflicting Actions
+
+Some action combinations don't make sense together:
+
+| Combination | Result |
+|-------------|--------|
+| Multiple `.connect()` | Last one wins |
+| `.hangup()` then `.connect()` | Hangup executes, connect ignored |
+| `.connect(final=True)` then `.say()` | Say won't execute (call transferred) |
+| Multiple `.update_global_data()` | Merged (later keys overwrite earlier) |
+| Multiple `.send_sms()` | All execute (multiple SMS sent) |
+
+#### Using post_process with Actions
+
+When `post_process=True`, the AI speaks the response and can respond to follow-up before actions execute:
+
+```python
+return (
+    SwaigFunctionResult(
+        "I'll transfer you. Anything else first?",
+        post_process=True  # AI waits for response
+    )
+    .connect("+15551234567", final=True)  # Executes after AI finishes
+)
+```
+
+This is useful for:
+
+- Confirming before transfers
+- Last-chance questions before hangup
+- Warning before destructive actions
+
+#### Action Timing Considerations
+
+**Immediate actions** execute as soon as the function returns:
+
+- `.update_global_data()`
+- `.toggle_functions()`
+
+**Speech actions** execute during AI's turn:
+
+- `.say()`
+- `.stop()`
+
+**Call control actions** affect the call flow:
+
+- `.connect()` - Immediate transfer
+- `.hangup()` - Immediate disconnect
+- `.hold()` - Immediate hold
+
+**External actions** may have latency:
+
+- `.send_sms()` - Network delay possible
+- `.record_call()` - Recording starts immediately but storage is async
+
+### Advanced: Execute Raw SWML
+
+For advanced use cases, execute raw SWML documents directly:
+
+```python
+def execute_custom_swml(self, args, raw_data):
+    swml_doc = {
+        "version": "1.0.0",
+        "sections": {
+            "main": [
+                {"play": {"url": "https://example.com/announcement.mp3"}},
+                {"hangup": {}}
+            ]
+        }
+    }
+
+    return (
+        SwaigFunctionResult()
+        .execute_swml(swml_doc, transfer=False)
+    )
+```
+
+**Note:** Most use cases are covered by the convenience methods above. Use `execute_swml()` only when you need SWML features not available through other action methods.
+
+### Action Reference
+
+#### Call Control Actions
+
+| Method | Description |
+|--------|-------------|
+| `.connect(dest, final, from_addr)` | Transfer call to another number or SIP URI |
+| `.swml_transfer(dest, ai_response, final)` | SWML-specific transfer with AI response |
+| `.sip_refer(to_uri)` | SIP REFER transfer |
+| `.hangup()` | End the call |
+| `.hold(timeout)` | Put caller on hold (default 300s, max 900s) |
+| `.send_sms(to, from, body, media)` | Send SMS message |
+| `.record_call(control_id, stereo, ...)` | Start call recording |
+| `.stop_record_call(control_id)` | Stop call recording |
+| `.tap(uri, control_id, direction, ...)` | Tap call audio to external URI |
+| `.stop_tap(control_id)` | Stop call tapping |
+| `.pay(payment_connector_url, ...)` | Process payment |
+| `.execute_swml(doc, transfer)` | Execute raw SWML document |
+| `.join_room(name)` | Join a SignalWire room |
+| `.join_conference(name, muted, ...)` | Join a conference |
+
+#### Speech & Audio Actions
+
+| Method | Description |
+|--------|-------------|
+| `.say(text)` | Have AI speak specific text |
+| `.stop()` | Stop AI from speaking |
+| `.play_background_file(url, wait)` | Play background audio |
+| `.stop_background_file()` | Stop background audio |
+| `.simulate_user_input(text)` | Inject text as user speech |
+| `.wait_for_user(enabled, timeout, answer_first)` | Wait for user to speak |
+
+#### Context & Workflow Actions
+
+| Method | Description |
+|--------|-------------|
+| `.switch_context(system_prompt, user_prompt)` | Advanced context switch with new prompts |
+| `.swml_change_context(ctx)` | Switch to named context |
+| `.swml_change_step(step)` | Change to specific workflow step |
+
+#### Data Management Actions
+
+| Method | Description |
+|--------|-------------|
+| `.update_global_data(data)` | Set global session data |
+| `.remove_global_data(keys)` | Remove keys from global data |
+| `.set_metadata(data)` | Set function-specific metadata |
+| `.remove_metadata(keys)` | Remove function metadata keys |
+
+#### AI Behavior Actions
+
+| Method | Description |
+|--------|-------------|
+| `.toggle_functions(funcs)` | Enable/disable specific functions |
+| `.enable_functions_on_timeout(enabled)` | Enable functions when timeout occurs |
+| `.update_settings(config)` | Modify AI settings dynamically |
+| `.set_end_of_speech_timeout(ms)` | Adjust speech timeout |
+| `.set_speech_event_timeout(ms)` | Adjust speech event timeout |
+| `.enable_extensive_data(enabled)` | Enable extended data in webhooks |
+
+#### Events
+
+| Method | Description |
+|--------|-------------|
+| `.swml_user_event(data)` | Fire custom user event |
+
+

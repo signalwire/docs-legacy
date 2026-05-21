@@ -1,0 +1,131 @@
+---
+slug: /compatibility-api/sdks/reference/messaging/update
+title: Update
+sidebar_label: Update
+toc_max_heading_level: 3
+---
+
+Use this endpoint for the Media method to update a message body after it has been sent.
+Useful for removing sensitive information from the body after the message has been received.
+
+<EndpointSchemaSnippet endpoint="POST /Accounts/{AccountSid}/Messages/{Sid}" />
+
+## Request examples
+
+<CodeBlocks>
+
+```javascript title="Node.js"
+const { RestClient } = require('@signalwire/compatibility-api')
+const client = RestClient('YourProjectID', 'YourAuthToken', { signalwireSpaceUrl: 'example.signalwire.com' })
+
+client.messages('MessageSid')
+      .update({body: 'Overridden'})
+      .then(message => console.log(message.to))
+      .done();
+```
+
+```csharp
+using System;
+using System.Collections.Generic;
+using Twilio;
+using Twilio.Rest.Api.V2010.Account;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        TwilioClient.Init("YourProjectID", "YourAuthToken", new Dictionary<string, object> { ["signalwireSpaceUrl"] = "{SPACE}.signalwire.com" });
+
+        var message = MessageResource.Update(
+            body: "Overridden",
+            pathSid: "MessageSid"
+        );
+
+        Console.WriteLine(message.To);
+    }
+}
+```
+
+```python
+from signalwire.rest import Client as signalwire_client
+
+client = signalwire_client("YourProjectID", "YourAuthToken", signalwire_space_url = 'example.signalwire.com')
+
+message = client.messages('MessageSid') \
+                .update(body='Overridden')
+
+print(message.to)
+```
+
+```ruby
+require 'signalwire/sdk'
+
+@client = Signalwire::REST::Client.new 'YourProjectID', 'YourAuthToken', signalwire_space_url: "example.signalwire.com"
+
+message = @client.messages('MMXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX')
+                 .update(body: 'Overridden')
+
+puts message.to
+```
+
+</CodeBlocks>
+
+---
+
+### Request: redact a message
+
+Redact a message body by posting an empty string as the body to a `sent` message.
+
+<CodeBlocks>
+
+```javascript title="Node.js"
+const { RestClient } = require('@signalwire/compatibility-api')
+const client = RestClient('YourProjectID', 'YourAuthToken', { signalwireSpaceUrl: 'example.signalwire.com' })
+
+client.messages('MessageSid')
+      .update({body: ''})
+      .then((message) => process.stdout.write(message.body));
+```
+
+```csharp
+using System;
+using System.Collections.Generic;
+using Twilio;
+using Twilio.Rest.Api.V2010.Account;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        TwilioClient.Init("YourProjectID", "YourAuthToken", new Dictionary<string, object> { ["signalwireSpaceUrl"] = "{SPACE}.signalwire.com" });
+
+        const string sid = "MessageSid";
+        var message = MessageResource.Update(sid, "");
+
+        Console.WriteLine(message.Body);
+    }
+}
+```
+
+```python
+from signalwire.rest import Client as signalwire_client
+
+client = signalwire_client("YourProjectID", "YourAuthToken", signalwire_space_url = 'example.signalwire.com')
+
+client.messages("MessageSid") \
+      .update(body="")
+```
+
+```ruby
+require 'signalwire/sdk'
+
+@client = Signalwire::REST::Client.new 'YourProjectID', 'YourAuthToken', signalwire_space_url: "example.signalwire.com"
+
+@message = @client.api.messages('MessageSid').fetch
+
+@message.update(body: '')
+
+puts @message.body
+```
+
+</CodeBlocks>

@@ -1,0 +1,74 @@
+/**
+ * SignalWire Modern Signup FAB - Material Web Components
+ * Gradient overlay approach
+ */
+
+:root {
+  // Make FAB transparent and force white text/icons for all states
+  --md-fab-container-color: transparent;
+  --md-fab-icon-color: white;
+  --md-fab-label-text-color: white;
+
+  // Change font for Extended FAB text
+  --md-fab-label-text-font: var(--ifm-heading-font-family);
+}
+
+.container {
+  // Positioning
+  position: fixed;
+  bottom: 88px;
+  right: 24px;
+  transition: transform 0.2s ease-in-out, opacity 0.5s ease-in-out;
+  
+  // Initial state - hidden
+  opacity: 0;
+  
+  // Visible state
+  &.visible {
+    opacity: 1;
+  }
+    
+  // Create gradient overlay with slight slant
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      120deg,
+      var(--sw-blue-color) 0%,
+      var(--sw-pink-color) 100%
+    );
+    border-radius: 16px;
+    pointer-events: none;
+    transition: opacity 0.2s ease-in-out;
+  }
+  
+  // Hover effects
+  &:hover {
+    transform: scale(1.05);
+    
+    &::before {
+      opacity: 0.9;
+      filter: brightness(1.1);
+    }
+  }
+  
+  // Active/pressed effect
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+// Dark mode gradient - reverse the colors
+:root[data-theme="dark"] .container {
+  &::before {
+    background: linear-gradient(
+      120deg,
+      var(--sw-pink-color) 0%,
+      var(--sw-blue-color) 100%
+    );
+  }
+}

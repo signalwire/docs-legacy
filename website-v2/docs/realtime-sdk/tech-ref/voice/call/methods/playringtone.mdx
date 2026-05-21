@@ -1,0 +1,84 @@
+---
+title: "playRingtone"
+slug: /node/reference/voice/call/play-ringtone
+description: playRingtone method for the Call class.
+toc_max_heading_level: 3
+---
+
+[callplayback-events]: /docs/server-sdk/node/reference/voice/call-playback#events
+[callplayback-onstarted]: /docs/server-sdk/node/reference/voice/call-playback#onstarted
+[callplayback]: /docs/server-sdk/node/reference/voice/call-playback
+[ringtonename]: /docs/server-sdk/node/reference/voice/types#ringtonename
+
+### playRingtone
+
+- **playRingtone**(`params`): `Promise`\<[`CallPlayback`][callplayback]>
+
+Plays a ringtone.
+
+#### Parameters
+
+<ParamField path="params" type="object" required>
+  Object containing the parameters for playing a ringtone.
+</ParamField>
+
+<Indent>
+<ParamField path="name" type="RingtoneName" required>
+  The name of the ringtone. See [`RingtoneName`][ringtonename].
+</ParamField>
+
+<ParamField path="duration" type="number">
+  Duration of ringtone to play in seconds. Defaults to 1 ringtone iteration.
+</ParamField>
+
+<ParamField path="volume" type="number" default="0">
+  Volume value between -40dB and +40dB where 0 is unchanged.
+</ParamField>
+
+<ParamField path="listen" type="object">
+  Callback to listen for events. List of playback events can be found [here][callplayback-events]. Example event: [`onStarted`][callplayback-onstarted].
+</ParamField>
+</Indent>
+
+#### Returns
+
+`Promise`\<[`CallPlayback`][callplayback]>
+
+A promise that resolves to a [`CallPlayback`][callplayback] object that you can use to
+view the current state and results of the `play` session.
+
+#### Example
+
+In this example, we dial a phone number and play a ringtone for a duration of 10 seconds.
+Once the ringtone is finished playing, we hangup the call.
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+const voiceClient = client.voice;
+
+// Listen for incoming calls
+await voiceClient.listen({
+  topics: ["office"],
+  onCallReceived: async (call) => {
+    console.log("Call received");
+    // Answer the call and play a ringtone. Listens for playback events. Ends the call after the ringtone is finished playing for 10 seconds.
+    call.answer();
+    await call.playRingtone({
+      duration: 10,
+      name: "it",
+      listen: {
+        onStarted: () => console.log("Ringtone started"),
+        onFailed: () => console.log("Ringtone failed"),
+        onUpdated: (event) => console.log("Ringtone updated", event.state),
+        onEnded: (event) => {
+          console.log("Ringtone ended", event);
+          call.hangup();
+        }
+      }
+    }).onStarted();
+  }
+});
+```

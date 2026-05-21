@@ -1,0 +1,22 @@
+---
+title: SendDigitsAction
+slug: /ruby/reference/calling/actions/send-digits
+description: The SendDigitsAction object is returned when starting a send digits operation on a call.
+toc_max_heading_level: 3
+---
+
+[call]: /docs/server-sdk/v2/ruby/reference/calling/call#send_digits
+[relay-calling-senddigitsresult]: /docs/server-sdk/v2/ruby/reference/calling/results/send-digits
+
+# Relay::Calling::SendDigitsAction
+
+This object is returned by the asynchronous [`send_digits!`][call] method and represents a `send_digits` action that is currently active on a call.
+
+## Properties
+
+| Property | Type | Description |
+| :------- | :--- | :---------- |
+| `result` | [`Relay::Calling::SendDigitsResult`][relay-calling-senddigitsresult] | Final result of sending digits. |
+| `state` | String | Current state of the digits being sent. |
+| `completed` | Boolean | Whether the sending has finished. |
+| `control_id` | String | UUID to identify the action. |

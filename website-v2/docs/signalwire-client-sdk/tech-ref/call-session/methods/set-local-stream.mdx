@@ -1,0 +1,138 @@
+---
+title: setLocalStream
+slug: /call-session/setlocalstream
+---
+
+import APIField from '@site/src/components/APIField';
+
+Replaces the current local media stream with a custom MediaStream.
+
+## Parameters
+
+<APIField name="stream" type="MediaStream" required>
+  The MediaStream to use as the new local stream.
+</APIField>
+
+## Signature
+
+```typescript
+call.setLocalStream(stream: MediaStream): Promise<MediaStream>
+```
+
+## Returns
+
+**Type:** `Promise<MediaStream>`
+
+Returns the MediaStream that was set.
+
+## Examples
+
+### Replace with Custom MediaStream
+
+```typescript
+// Create a custom media stream
+const customStream = await navigator.mediaDevices.getUserMedia({
+  audio: true,
+  video: { width: 1920, height: 1080 }
+})
+
+// Replace the call's local stream
+await call.setLocalStream(customStream)
+```
+
+### Use Canvas as Video Source
+
+```typescript
+// Create a canvas element
+const canvas = document.createElement('canvas')
+canvas.width = 640
+canvas.height = 480
+const ctx = canvas.getContext('2d')
+
+// Draw something on the canvas
+ctx.fillStyle = 'blue'
+ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+// Capture canvas as stream
+const canvasStream = canvas.captureStream(30) // 30 fps
+
+// Get audio from microphone
+const audioStream = await navigator.mediaDevices.getUserMedia({ audio: true })
+
+// Combine canvas video with microphone audio
+const combinedStream = new MediaStream([
+  ...canvasStream.getVideoTracks(),
+  ...audioStream.getAudioTracks()
+])
+
+// Replace call stream with canvas + audio
+await call.setLocalStream(combinedStream)
+```
+
+### Use Pre-processed Audio/Video
+
+```typescript
+// Get media with constraints
+const stream = await navigator.mediaDevices.getUserMedia({
+  audio: {
+    echoCancellation: true,
+    noiseSuppression: true
+  },
+  video: {
+    width: { ideal: 1280 },
+    height: { ideal: 720 }
+  }
+})
+
+// Apply custom processing (e.g., filters, effects)
+// ... custom processing logic ...
+
+// Set the processed stream
+await call.setLocalStream(stream)
+```
+
+### Switch Between Multiple Streams
+
+```typescript
+let currentStreamIndex = 0
+const streams = [stream1, stream2, stream3]
+
+async function switchToNextStream() {
+  currentStreamIndex = (currentStreamIndex + 1) % streams.length
+  await call.setLocalStream(streams[currentStreamIndex])
+  console.log(`Switched to stream ${currentStreamIndex}`)
+}
+
+// Call this to cycle through streams
+await switchToNextStream()
+```
+
+## Related Properties
+
+Access the current local media stream:
+
+- `call.localStream` - Current local MediaStream
+- `call.localAudioTrack` - Current local audio track
+- `call.localVideoTrack` - Current local video track
+
+## Important Notes
+
+**Full Stream Replacement:** This method replaces the entire local media stream (both audio and video tracks). If you only want to replace the camera or microphone, use `updateCamera()` or `updateMicrophone()` instead.
+
+**Advanced Use Case:** This method is primarily for advanced scenarios where you need complete control over the media stream, such as:
+- Using canvas or WebGL as video source
+- Applying custom audio/video processing
+- Using pre-recorded media files
+- Implementing virtual backgrounds or filters
+
+**Track Management:** You are responsible for managing the lifecycle of tracks in the custom stream. Make sure to properly stop old tracks when replacing streams to avoid resource leaks.
+
+**Stream Requirements:** The MediaStream can contain:
+- Audio tracks, video tracks, or both
+- **If the stream has no audio tracks:** Audio remains unaffected (existing audio continues)
+- **If the stream has no video tracks:** Video remains unaffected (existing video continues)
+- Tracks must be in the correct state (not ended/stopped)
+
+This allows you to replace only audio or only video by providing a stream with just the desired track type.
+
+**Mute State Preserved:** The current mute state (audio/video) is preserved when replacing the stream. If the call was muted, the new stream will also be muted.

@@ -1,0 +1,322 @@
+---
+title: Relay.Consumer
+slug: /php/reference/consumer
+toc_max_heading_level: 3
+---
+
+[call]: /docs/server-sdk/v2/php/reference/calling/call
+[index]: /docs/server-sdk/v2/php/reference#contexts
+[message-1]: /docs/server-sdk/v2/php/reference/messaging/message
+[promises]: https://reactphp.org/promise/
+[reactphp]: https://reactphp.org/
+[relay-client]: /docs/server-sdk/v2/php/reference/relay-client
+[relay-task]: /docs/server-sdk/v2/php/reference/task
+
+A RELAY Consumer is a simple PHP class that runs in its own process along side your application to handle calling and messaging events in realtime. RELAY Consumers abstract all the setup of connecting to RELAY and automatically dispatch workers to handle requests. Consumers will receive requests and delegate them to their own worker thread, allowing you to focus on your business logic without having to worry about multi-threading or blocking, everything just works. Think of RELAY Consumers like a background worker system for all your calling and messaging needs.
+
+## Creating Consumers
+
+A RELAY Consumer is a simple object, customized by specifying [contexts][index] and event handlers to respond to incoming events.
+
+A consumer has 2 required properties: `project`, `token`, and usually requires at least one `contexts` for incoming events. Project and Token are used to authenticate your Consumer to your SignalWire account. Contexts are a list of contexts you want this Consumer to listen for.
+
+```php
+<?php
+
+require dirname(__FILE__) . '/vendor/autoload.php';
+
+use Generator as Coroutine;
+
+class CustomConsumer extends SignalWire\Relay\Consumer {
+  public $project = 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX';
+  public $token = 'PTXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX';
+  public $contexts = ['default'];
+
+  public function onIncomingCall($call): Coroutine {
+    yield $call->answer();
+    yield $call->playTTS(['text' => 'Welcome to SignalWire!']);
+  }
+}
+
+$consumer = new CustomConsumer();
+$consumer->run();
+```
+
+## Coroutine & yield keywords
+
+In the Consumer examples you can see the special keyword `yield` and the return type `Coroutine` on the `onIncomingCall` method. These keywords help you write asynchronous code that "seems" synchronous, avoiding the need to nest your code in multiple callbacks.
+
+Since the Relay PHP SDK is built on top of [ReactPHP][reactphp], a lot of methods return [Promises][promises] that will be resolved with the result of the asynchronous operations. By flattening out the nested callbacks, you can just `yield` the Promises to wait for its value.
+
+If you are familiar with Javascript, `yield` is similar to the `async/await` syntax in JS.
+
+<Tabs>
+<TabItem value="with-yield" label="With yield">
+
+```php
+<?php
+  public function onIncomingCall($call): Coroutine {
+    // Using yield
+    $answerResult = yield $call->answer();
+  }
+```
+
+</TabItem>
+<TabItem value="without-yield" label="Without yield">
+
+```php
+<?php
+  public function onIncomingCall($call): Coroutine {
+    // Without using yield
+    $call->answer()->done(function($answerResult) {
+      // .. use $answerResult here..
+    });
+  }
+```
+
+</TabItem>
+</Tabs>
+
+<Note title="Important">
+Within functions with return type `Coroutine` you must force PHP to parse the function as a Generator so, if you don't need any `yield` in your code, just set the first line as:
+
+```php
+<?php
+  public function onIncomingCall($call): Coroutine {
+    yield;
+    // ...
+  }
+```
+</Note>
+
+## Initializing Consumers
+
+You can optionally add an `setup` method if you need to do any initialization work before processing messages. This is useful to do any one-off work that you wouldn't want to do for each and every event, such as setting up logging or connecting to a datastore.
+
+```php
+<?php
+
+require dirname(__FILE__) . '/vendor/autoload.php';
+
+use Generator as Coroutine;
+
+class CustomConsumer extends SignalWire\Relay\Consumer {
+  public $project = 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX';
+  public $token = 'PTXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX';
+  public $contexts = ['default'];
+
+  public function setup() {
+    // Initialize anything you'd like available for all events.
+    // Like logging, database connections, etc.
+  }
+
+  public function onIncomingCall($call): Coroutine {
+    yield $call->answer();
+    yield $call->playTTS(['text' => 'Welcome to SignalWire!']);
+  }
+}
+
+$consumer = new CustomConsumer();
+$consumer->run();
+```
+
+## Properties
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `client` | [`Relay.Client`][relay-client] | The underlying Relay client object. |
+
+## Event Handlers
+
+Event handlers are where you will write most of your code. They are executed when your consumer receives a matching event for the contexts specified by your Consumer.
+
+### ready
+
+Executed once your Consumer is connected to RELAY and the session has been established.
+
+```php
+<?php
+
+require dirname(__FILE__) . '/vendor/autoload.php';
+
+use Generator as Coroutine;
+
+class CustomConsumer extends SignalWire\Relay\Consumer {
+  public $project = 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX';
+  public $token = 'PTXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX';
+  public $contexts = ['default'];
+
+  public function ready(): Coroutine {
+    $params = [ 'type' => 'phone', 'from' => '+1XXXXXXXXXX', 'to' => '+1YYYYYYYYYY' ];
+    $dialResult = yield $this->client->calling->dial($params);
+    if ($dialResult->isSuccessful()) {
+      // Your active $call..
+      $call = $dialResult->getCall();
+    }
+  }
+}
+
+$consumer = new CustomConsumer();
+$consumer->run();
+```
+
+### onIncomingCall
+
+Executed when you receive an inbound call, passes in the inbound [`Call`][call] object.
+
+```php
+<?php
+
+require dirname(__FILE__) . '/vendor/autoload.php';
+
+use Generator as Coroutine;
+
+class CustomConsumer extends SignalWire\Relay\Consumer {
+  public $project = 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX';
+  public $token = 'PTXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX';
+  public $contexts = ['default'];
+
+  public function onIncomingCall($call): Coroutine {
+    yield $call->answer();
+    yield $call->playTTS(['text' => 'Welcome to SignalWire!']);
+  }
+}
+
+$consumer = new CustomConsumer();
+$consumer->run();
+```
+
+### onTask
+
+Executed with your message sent through a [`Relay.Task`][relay-task].
+
+```php
+<?php
+
+require dirname(__FILE__) . '/vendor/autoload.php';
+
+use Generator as Coroutine;
+
+class CustomConsumer extends SignalWire\Relay\Consumer {
+  public $project = 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX';
+  public $token = 'PTXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX';
+  public $contexts = ['default'];
+
+  public function onTask($message): Coroutine {
+    yield;
+    print_r($message);
+    // ..Use your own $message sent in the context "default" from a Relay.Task
+  }
+}
+
+$consumer = new CustomConsumer();
+$consumer->run();
+```
+
+### onIncomingMessage
+
+Executed when you receive an inbound SMS or MMS, passes in the inbound [`Message`][message-1] object.
+
+```php
+<?php
+
+require dirname(__FILE__) . '/vendor/autoload.php';
+
+use Generator as Coroutine;
+
+class CustomConsumer extends SignalWire\Relay\Consumer {
+  public $project = 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX';
+  public $token = 'PTXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX';
+  public $contexts = ['default'];
+
+  public function onIncomingMessage($message): Coroutine {
+    yield;
+    // Handle the inbound message here..
+  }
+}
+
+$consumer = new CustomConsumer();
+$consumer->run();
+```
+
+### onMessageStateChange
+
+Executed when a message state changes, passes in the inbound [`Message`][message-1] object.
+
+
+```php
+<?php
+
+require dirname(__FILE__) . '/vendor/autoload.php';
+
+use Generator as Coroutine;
+use SignalWire\Log;
+
+class CustomConsumer extends SignalWire\Relay\Consumer {
+  public $project = 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX';
+  public $token = 'PTXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX';
+  public $contexts = ['default'];
+
+  public function ready(): Coroutine {
+    $params = [
+      'context' => 'default',
+      'from' => '+1xxx',
+      'to' => '+1yyy',
+      'body' => 'Welcome at SignalWire!'
+    ];
+    $result = yield $this->client->messaging->send($params);
+    if ($result->isSuccessful()) {
+      Log::info('SMS queued successfully!');
+    }
+  }
+
+  public function onMessageStateChange($message): Coroutine {
+    yield;
+    // Keep track of your SMS state changes..
+    Log::info("Message {$message->id} state: {$message->state}.");
+  }
+}
+
+$consumer = new CustomConsumer();
+$consumer->run();
+```
+
+## Cleaning Up on Exit
+
+When a RELAY Consumer shuts down, you have the opportunity to clean up any resources held by the consumer. For example, you could close any open files, network connections, or send a notification to your monitoring service.
+
+Just implement a `teardown` method in your consumer and it will be called during the shutdown procedure.
+
+```php
+<?php
+
+require dirname(__FILE__) . '/vendor/autoload.php';
+
+use Generator as Coroutine;
+
+class CustomConsumer extends SignalWire\Relay\Consumer {
+  public $project = 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX';
+  public $token = 'PTXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX';
+  public $contexts = ['default'];
+
+  public function onIncomingCall($call): Coroutine {
+    yield $call->answer();
+    yield $call->playTTS(['text' => 'Welcome to SignalWire!']);
+  }
+
+  public function teardown(): Coroutine {
+    // Clean up any resources when exiting.
+  }
+}
+
+$consumer = new CustomConsumer();
+$consumer->run();
+```
+
+## Running Consumers
+
+Running a consumer is just like running any other PHP script, simply execute the script as a separate process and ensure you invoke the `->run();` method at the end of your script. The process will stay up until you shut it down.
+
+## Shutting Down Consumers
+
+In order to gracefully shut down a RELAY consumer process, send it the `SIGTERM` signal. Most process supervisors such as Runit, Docker and Kubernetes send this signal when shutting down a process, so using those systems will make things easier.

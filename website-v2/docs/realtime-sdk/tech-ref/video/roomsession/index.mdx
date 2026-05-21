@@ -1,0 +1,83 @@
+---
+title: "RoomSession"
+slug: /node/reference/video/room-session
+description: Video Room Session reference for managing video rooms.
+toc_max_heading_level: 3
+---
+
+[video-client]: /docs/server-sdk/node/reference/video/client
+[video-roomsession]: /docs/server-sdk/node/reference/video/room-session/set-hide-video-muted
+
+Represents a room session.You can obtain instances of this class by subscribing to the appropriate events from [Video.Client][video-client].
+
+#### Example
+
+```javascript
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+const videoClient = client.video;
+
+await videoClient.listen({
+  onRoomStarted: (roomsession) => {
+    console.log(roomsession);
+  }
+})
+```
+
+---
+
+## **Properties**
+
+<ParamField path="displayName" type="string">
+  Display name for this room. Defaults to the value of `name`.
+</ParamField>
+
+<ParamField path="hideVideoMuted" type="boolean">
+  Whether muted videos are shown in the room layout. See [setHideVideoMuted][video-roomsession].
+</ParamField>
+
+<ParamField path="id" type="string">
+  Unique id for this room session.
+</ParamField>
+
+<ParamField path="layoutName" type="string">
+  Current layout name used in the room.
+</ParamField>
+
+<ParamField path="meta" type="Record<string, unknown>">
+  Metadata associated to this room session.
+</ParamField>
+
+<ParamField path="name" type="string">
+  Name of this room.
+</ParamField>
+
+<ParamField path="previewUrl" type="string" optional>
+  URL to the room preview.
+</ParamField>
+
+<ParamField path="roomId" type="string">
+  ID of the room associated to this room session.
+</ParamField>
+
+<ParamField path="recording" type="boolean">
+  Whether the room is currently being recorded.
+</ParamField>
+
+<ParamField path="streaming" type="boolean">
+  Whether the room is currently being streamed.
+</ParamField>
+
+<ParamField path="locked" type="boolean">
+  Whether the room is currently locked.
+</ParamField>
+
+<ParamField path="prioritizeHandraise" type="boolean">
+  Whether raised hands are prioritized in the layout.
+</ParamField>
+
+<ParamField path="updated" type="string[]">
+  Array of property names that were updated. Only present in event payloads.
+</ParamField>

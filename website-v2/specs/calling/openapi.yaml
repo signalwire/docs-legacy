@@ -1,0 +1,1031 @@
+openapi: 3.0.0
+info:
+  title: Calling API
+  version: 1.0.0
+  contact:
+    name: SignalWire
+    url: https://support.signalwire.com/portal/en/newticket?departmentId=1029313000000006907&layoutId=1029313000000074011
+    email: support@signalwire.com
+  license:
+    name: MIT
+    url: https://github.com/signalwire/docs/blob/main/LICENSE
+  termsOfService: https://signalwire.com/legal/signalwire-cloud-agreement
+  description: API to create/manage SignalWire's Calls.
+externalDocs:
+  url: https://developer.signalwire.com/rest/signalwire-rest/endpoints/calling
+  description: The Calling API holds a collection of endpoints that will help you create and manage calls.
+tags:
+  - name: Calls
+    description: Endpoints related to creating and managing calls
+    externalDocs:
+      url: https://developer.signalwire.com/rest/signalwire-rest/endpoints/calling/calls
+      description: Developer documentation on Calling API Call endpoints
+paths:
+  /calls:
+    post:
+      operationId: call-commands
+      summary: Send Call Commands
+      description: |-
+        Unified JSON-RPC style endpoint for executing call methods through command-based dispatch.
+        Send a request with the appropriate `command` field to invoke the desired call operation.
+        This endpoint provides a single interface for all call-related methods including creation, updates, termination, and AI conversation control.
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CallResponse'
+        '401':
+          description: Access is unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Types.StatusCodes.StatusCode401'
+        '404':
+          description: The server cannot find the requested resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Types.StatusCodes.StatusCode404'
+        '422':
+          description: Client error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CallCreate422Error'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Types.StatusCodes.StatusCode500'
+      tags:
+        - Calls
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CallRequest'
+            examples:
+              Inject AI message:
+                summary: Inject AI message
+                description: Send a message to the AI conversation to modify behavior or add context
+                value:
+                  command: calling.ai_message
+                  id: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+                  params:
+                    role: system
+                    message_text: You are now in expert mode. Provide detailed technical responses and use industry terminology.
+              Unhold active call:
+                summary: Unhold active call
+                description: Resume an AI call that was previously put on hold
+                value:
+                  command: calling.ai_unhold
+                  id: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+                  params: {}
+              Hold active call:
+                summary: Hold active call
+                description: Put an active AI call on hold, pausing the conversation
+                value:
+                  command: calling.ai_hold
+                  id: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+                  params: {}
+              End call:
+                summary: End call
+                description: Terminate an active call immediately
+                value:
+                  command: calling.end
+                  id: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+                  params:
+                    reason: hangup
+              Update active call:
+                summary: Update active call
+                description: Modify an existing call's parameters in real-time
+                value:
+                  command: update
+                  params:
+                    id: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+                    url: https://example.com/swml
+                    fallback_url: https://example.com/fallback
+              Create new call:
+                summary: Create new call
+                description: Initiate a new outbound call with the dial command
+                value:
+                  command: dial
+                  params:
+                    from: '+15551234567'
+                    to: '+15559876543'
+                    url: https://example.com/swml
+                    caller_id: '+15551234567'
+                    status_url: https://example.com/status_callback
+                    status_events:
+                      - answered
+                      - ended
+security:
+  - BasicAuth: []
+components:
+  schemas:
+    CallAIMessageRequest:
+      type: object
+      required:
+        - id
+        - command
+        - params
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/uuid'
+          description: The unique identifying ID of a existing call.
+          example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+        command:
+          type: string
+          enum:
+            - calling.ai_message
+          description: The `calling.ai_message` command is used to inject a message into the AI conversation.
+          example: calling.ai_message
+        params:
+          type: object
+          properties:
+            role:
+              type: string
+              enum:
+                - system
+                - user
+                - assistant
+              description: |-
+                The role that the message is from. Each role type has a different purpose and will influence how the AI will interpret the message.
+                - `system`: Inject instructions or context that modify the AI's behavior mid-conversation without the caller hearing it. This could change the AI's personality, add new constraints, provide context about the conversation, or give the AI information it should know going forward.
+                - `user`: Inject a message as if the caller said it. This would appear in the conversation history as coming from the caller, and the AI would respond to it as if the caller just spoke it.
+                - `assistant`: Inject a message as if the AI said it. This would appear as an AI response in the conversation history. The AI would treat this as its own previous response when generating future replies.
+              example: system
+            message_text:
+              type: string
+              description: The text content that will be sent to the AI.
+              example: You are now in expert mode. Provide detailed technical responses.
+          required:
+            - role
+            - message_text
+          description: An object of parameters that will be utilized by the active command.
+      title: Inject AI message
+    CallCreate422Error:
+      type: object
+      required:
+        - errors
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/Types.StatusCodes.StatusCode422Error'
+      example:
+        errors:
+          - type: validation_error
+            code: missing_required_parameter
+            message: url must be a valid http or https url
+            attribute: url
+            url: https://developer.signalwire.com/rest/signalwire-rest/overview/error-codes#field-http-url-required
+    CallCreateParamsSWML:
+      type: object
+      required:
+        - from
+        - to
+        - swml
+      properties:
+        from:
+          type: string
+          description: The address that initiated the call. Can be either a E.164 formatted number (`+xxxxxxxxxxx`), or a SIP endpoint (`sip:xxx@yyy.zzz`).
+          example: sip:from-sip@example-112233445566.sip.signalwire.com
+        to:
+          type: string
+          description: The address that received the call. Can be either a E.164 formatted number (`+xxxxxxxxxxx`), or a SIP endpoint (`sip:xxx@yyy.zzz`).
+          example: sip:from-sip@example-112233445567.sip.signalwire.com
+        caller_id:
+          type: string
+          description: The number, in E.164 format, or identifier of the caller.
+          example: '+1234567890'
+        fallback_url:
+          type: string
+          description: The Fallback URL to handle the call. This parameter allows you to specify a backup webhook or different route in your code containing SWML instructions for handling the call.
+          example: https://example.com/fallback
+        status_url:
+          type: string
+          format: uri
+          description: A URL that will recieve status updates of the current call. Any call events defined in `status_events` will be delivered to the defined URL.
+          example: https://example.com/status_callback
+        status_events:
+          type: array
+          items:
+            type: string
+            enum:
+              - answered
+              - queued
+              - initiated
+              - ringing
+              - ending
+              - ended
+          description: The call events that will be monitored and sent to the `status_url` when active.
+          example:
+            - answered
+            - ended
+        swml:
+          type: string
+          description: Inline SWML, passed as a string, containing SWML instructions for handling the call. Either `url` or `swml` must be included for a new call.
+          example: "{'version': '1.0.0', 'sections': { 'main': [{ 'answer': { 'max_duration': 60 }},{ 'play': { 'urls': ['silence:2', 'say:Hello from SignalWire!']}}]}}"
+      title: Create call (SWML)
+    CallCreateParamsURL:
+      type: object
+      required:
+        - from
+        - to
+        - url
+      properties:
+        from:
+          type: string
+          description: The address that initiated the call. Can be either a E.164 formatted number (`+xxxxxxxxxxx`), or a SIP endpoint (`sip:xxx@yyy.zzz`).
+          example: sip:from-sip@example-112233445566.sip.signalwire.com
+        to:
+          type: string
+          description: The address that received the call. Can be either a E.164 formatted number (`+xxxxxxxxxxx`), or a SIP endpoint (`sip:xxx@yyy.zzz`).
+          example: sip:from-sip@example-112233445567.sip.signalwire.com
+        caller_id:
+          type: string
+          description: The number, in E.164 format, or identifier of the caller.
+          example: '+1234567890'
+        fallback_url:
+          type: string
+          description: The Fallback URL to handle the call. This parameter allows you to specify a backup webhook or different route in your code containing SWML instructions for handling the call.
+          example: https://example.com/fallback
+        status_url:
+          type: string
+          format: uri
+          description: A URL that will recieve status updates of the current call. Any call events defined in `status_events` will be delivered to the defined URL.
+          example: https://example.com/status_callback
+        status_events:
+          type: array
+          items:
+            type: string
+            enum:
+              - answered
+              - queued
+              - initiated
+              - ringing
+              - ending
+              - ended
+          description: The call events that will be monitored and sent to the `status_url` when active.
+          example:
+            - answered
+            - ended
+        url:
+          type: string
+          description: |-
+            The URL to handle the call. This parameter allows you to specify a webhook or different route in your code containing SWML instructions for handling the call.
+            Either `url` or `swml` must be included for a new call.
+          example: https://example.com/swml
+      title: Create call (URL)
+    CallCreateRequest:
+      type: object
+      required:
+        - command
+        - params
+      properties:
+        command:
+          type: string
+          enum:
+            - dial
+          description: The `dial` command is used to create a new call.
+          example: dial
+        params:
+          anyOf:
+            - $ref: '#/components/schemas/CallCreateParamsURL'
+            - $ref: '#/components/schemas/CallCreateParamsSWML'
+          description: An object of parameters that will be utilized by the active command.
+      title: Create call
+    CallHangupRequest:
+      type: object
+      required:
+        - id
+        - command
+        - params
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/uuid'
+          description: The unique identifying ID of a existing call.
+          example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+        command:
+          type: string
+          enum:
+            - calling.end
+          description: The `calling.end` command is used to hang up a call.
+          example: calling.end
+        params:
+          type: object
+          properties:
+            reason:
+              type: string
+              enum:
+                - hangup
+                - busy
+              description: Set the reason why the call was hung up.
+              example: hangup
+          description: An object of parameters that will be utilized by the active command.
+      title: Hangup call
+    CallHoldRequest:
+      type: object
+      required:
+        - id
+        - command
+        - params
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/uuid'
+          description: The unique identifying ID of a existing call.
+          example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+        command:
+          type: string
+          enum:
+            - calling.ai_hold
+          description: The `calling.ai_hold` command is used to hold a call.
+          example: calling.ai_hold
+        params:
+          type: object
+          properties:
+            timeout:
+              type: integer
+              format: int32
+              maximum: 300
+              description: The duration to hold the caller in seconds.
+              example: 300
+              default: 300
+            prompt:
+              type: string
+              description: |-
+                A system message added to the AI conversation before placing the caller on hold.
+                The AI will speak this message to the caller before hold music begins.
+              example: Please hold while I transfer you to a specialist.
+              default: Tell the user you are putting them on hold.
+          description: An object of parameters that will be utilized by the active command.
+      title: Hold call
+    CallLiveTranscribeRequest:
+      type: object
+      required:
+        - id
+        - command
+        - params
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/uuid'
+          description: The unique identifying ID of a existing call.
+          example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+        command:
+          type: string
+          enum:
+            - calling.live_transcribe
+          description: The `calling.live_transcribe` command is used to control live transcription on an active call.
+          example: calling.live_transcribe
+        params:
+          type: object
+          properties:
+            action:
+              anyOf:
+                - $ref: '#/components/schemas/LiveTranscribeStartAction'
+                - $ref: '#/components/schemas/LiveTranscribeSummarizeAction'
+                - $ref: '#/components/schemas/LiveTranscribeStopAction'
+              description: 'The transcription action to perform: start, stop, or summarize.'
+          required:
+            - action
+          description: An object of parameters that will be utilized by the active command.
+      title: Live Transcribe
+    CallLiveTranslateRequest:
+      type: object
+      required:
+        - id
+        - command
+        - params
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/uuid'
+          description: The unique identifying ID of a existing call.
+          example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+        command:
+          type: string
+          enum:
+            - calling.live_translate
+          description: The `calling.live_translate` command is used to control live translation on an active call.
+          example: calling.live_translate
+        params:
+          type: object
+          properties:
+            action:
+              anyOf:
+                - $ref: '#/components/schemas/LiveTranslateStartAction'
+                - $ref: '#/components/schemas/LiveTranslateSummarizeAction'
+                - $ref: '#/components/schemas/LiveTranslateInjectAction'
+                - $ref: '#/components/schemas/LiveTranslateStopAction'
+              description: 'The translation action to perform: start, stop, summarize, or inject.'
+          required:
+            - action
+          description: An object of parameters that will be utilized by the active command.
+      title: Live Translate
+    CallRequest:
+      type: object
+      oneOf:
+        - $ref: '#/components/schemas/CallCreateRequest'
+        - $ref: '#/components/schemas/CallUpdateCurrentCallRequest'
+        - $ref: '#/components/schemas/CallHangupRequest'
+        - $ref: '#/components/schemas/CallHoldRequest'
+        - $ref: '#/components/schemas/CallUnholdRequest'
+        - $ref: '#/components/schemas/CallAIMessageRequest'
+        - $ref: '#/components/schemas/CallLiveTranscribeRequest'
+        - $ref: '#/components/schemas/CallLiveTranslateRequest'
+      discriminator:
+        propertyName: command
+        mapping:
+          dial: '#/components/schemas/CallCreateRequest'
+          update: '#/components/schemas/CallUpdateCurrentCallRequest'
+          calling.end: '#/components/schemas/CallHangupRequest'
+          calling.ai_hold: '#/components/schemas/CallHoldRequest'
+          calling.ai_unhold: '#/components/schemas/CallUnholdRequest'
+          calling.ai_message: '#/components/schemas/CallAIMessageRequest'
+          calling.live_transcribe: '#/components/schemas/CallLiveTranscribeRequest'
+          calling.live_translate: '#/components/schemas/CallLiveTranslateRequest'
+      description: |-
+        Call request union for JSON-RPC style method dispatch. Use the `command` field to specify which call method to invoke:
+
+        - **`dial`** - Create and initiate a new outbound call to a destination. Returns immediately with call details while the call is being established in the background.
+
+        - **`update`** - Modify an active call's properties in real-time. Update call parameters such as routing, recording settings, or other call-specific configurations.
+
+        - **`calling.end`** - Terminate an active call immediately. Disconnects all parties and ends the call session. Cannot be reversed once executed.
+
+        - **`calling.ai_hold`** - Place an AI-powered call on hold. Pauses the AI conversation and typically plays hold music or a message to the caller. The AI agent becomes inactive until unhold.
+
+        - **`calling.ai_unhold`** - Resume an AI call from hold state. Reactivates the AI agent and continues the conversation from where it was paused.
+
+        - **`calling.ai_message`** - Inject a message into an active AI conversation. Allows you to dynamically add context, instructions, or system messages to guide the AI agent's behavior during the call.
+
+        - **`calling.live_transcribe`** - Control live transcription on an active call. Start real-time speech-to-text transcription, stop transcription, or request an on-demand AI summary of the conversation.
+
+        - **`calling.live_translate`** - Control live translation on an active call. Start real-time language translation between call participants, stop translation, request summaries, or inject messages to be translated and spoken.
+    CallResponse:
+      type: object
+      required:
+        - id
+        - from
+        - to
+        - direction
+        - status
+        - duration
+        - duration_ms
+        - billing_ms
+        - source
+        - type
+        - url
+        - charge
+        - created_at
+        - parent_id
+        - charge_details
+      properties:
+        id:
+          type: string
+          description: The unique identifier of the call on SignalWire. This can be used to update the call programmatically.
+          example: 0e9c80d7-a149-4917-892d-420043709f45
+        from:
+          type: string
+          description: The origin number or address.
+          example: '+12069708643'
+        to:
+          type: string
+          description: The destination number or address.
+          example: '+18048390497'
+        direction:
+          type: string
+          enum:
+            - outbound-api
+          description: The direction of the call.
+          example: outbound-api
+        status:
+          type: string
+          enum:
+            - answered
+            - queued
+            - initiated
+            - ringing
+            - ending
+            - ended
+          description: The status of the call.
+          example: queued
+        duration:
+          type: integer
+          nullable: true
+          description: The duration of the call in seconds.
+          example: null
+        duration_ms:
+          type: integer
+          nullable: true
+          description: The duration of the call in milliseconds.
+          example: null
+        billing_ms:
+          type: integer
+          nullable: true
+          description: The billable duration of the call in milliseconds.
+          example: null
+        source:
+          type: string
+          enum:
+            - realtime_api
+          description: Source of this call.
+          example: realtime_api
+        type:
+          type: string
+          enum:
+            - relay_pstn_call
+            - relay_sip_call
+            - relay_webrtc_call
+          description: Type of this call.
+          example: relay_pstn_call
+        url:
+          type: string
+          nullable: true
+          description: The URL associated with this call.
+          example: null
+        charge:
+          type: number
+          format: double
+          description: Total charge for this call.
+          example: 0
+        created_at:
+          type: string
+          format: date-time
+          description: The date and time when the call was created.
+          example: '2024-05-06T12:20:00Z'
+        parent_id:
+          type: string
+          nullable: true
+          description: The parent call ID if this is a child call.
+          example: null
+        charge_details:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChargeDetails'
+          description: Details on charges associated with this call.
+    CallUnholdRequest:
+      type: object
+      required:
+        - id
+        - command
+        - params
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/uuid'
+          description: The unique identifying ID of a existing call.
+          example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+        command:
+          type: string
+          enum:
+            - calling.ai_unhold
+          description: The `calling.ai_unhold` command is used to unhold a call.
+          example: calling.ai_unhold
+        params:
+          type: object
+          properties:
+            prompt:
+              type: string
+              description: |-
+                A system message added to the AI conversation when taking the caller off hold.
+                The AI will use this context when resuming the conversation.
+              example: The user has been connected to a specialist.
+              default: The user has been taken off hold.
+          description: An object of parameters that will be utilized by the active command.
+      title: Unhold call
+    CallUpdateCurrentCallRequest:
+      type: object
+      required:
+        - command
+        - params
+      properties:
+        command:
+          type: string
+          enum:
+            - update
+          description: The `update` command is used to update a existing call with a new dialplan.
+          example: update
+        params:
+          anyOf:
+            - $ref: '#/components/schemas/CallUpdateParamsURL'
+            - $ref: '#/components/schemas/CallUpdateParamsSWML'
+          description: An object of parameters that will be utilized by the active command.
+      title: Update call
+    CallUpdateParamsSWML:
+      type: object
+      required:
+        - id
+        - swml
+      properties:
+        id:
+          type: string
+          description: The unique identifying ID of a existing call.
+          example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+        fallback_url:
+          type: string
+          description: |-
+            The Fallback URL to handle the call. 
+            This parameter allows you to specify a backup webhook or different route in your code containing SWML instructions for handling the call.
+          example: https://example.com/fallback
+        status:
+          type: string
+          enum:
+            - canceled
+            - completed
+          description: Either `canceled` (to cancel a not yet connected call) or `completed` (to end a call that is in progress).
+          example: canceled
+        swml:
+          type: string
+          description: Inline SWML, passed as a string, containing SWML instructions for handling the call. Either `url` or `swml` must be included for a new call.
+          example: "{'version': '1.0.0', 'sections': { 'main': [{ 'answer': { 'max_duration': 60 }},{ 'play': { 'urls': ['silence:2', 'say:Hello from SignalWire!']}}]}}"
+      title: Update call (SWML)
+    CallUpdateParamsURL:
+      type: object
+      required:
+        - id
+        - url
+      properties:
+        id:
+          type: string
+          description: The unique identifying ID of a existing call.
+          example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+        fallback_url:
+          type: string
+          description: |-
+            The Fallback URL to handle the call. 
+            This parameter allows you to specify a backup webhook or different route in your code containing SWML instructions for handling the call.
+          example: https://example.com/fallback
+        status:
+          type: string
+          enum:
+            - canceled
+            - completed
+          description: Either `canceled` (to cancel a not yet connected call) or `completed` (to end a call that is in progress).
+          example: canceled
+        url:
+          type: string
+          description: |-
+            The URL to handle the call. This parameter allows you to specify a webhook or different route in your code containing SWML instructions for handling the call.
+            Either `url` or `swml` must be included for a new call.
+          example: https://example.com/swml
+      title: Update call (URL)
+    ChargeDetails:
+      type: object
+      required:
+        - description
+        - amount
+      properties:
+        description:
+          type: string
+          description: Description for this charge.
+          example: Text to Speech
+        amount:
+          type: number
+          description: Charged amount.
+          example: 0.121176
+    CustomTranslationFilter:
+      type: string
+      pattern: ^prompt:.+$
+      description: Custom translation filter with a prompt prefix. Use `prompt:` followed by your custom instructions (e.g., `prompt:Use formal business language`).
+      title: Custom Filter
+    LiveTranscribeStartAction:
+      type: object
+      required:
+        - start
+      properties:
+        start:
+          type: object
+          properties:
+            lang:
+              type: string
+              description: The language to transcribe (e.g., 'en-US', 'es-ES').
+              example: en-US
+            direction:
+              type: array
+              items:
+                type: string
+                enum:
+                  - local-caller
+                  - remote-caller
+              description: The direction(s) of the call to transcribe.
+              example:
+                - local-caller
+                - remote-caller
+            webhook:
+              type: string
+              description: The webhook URL to receive transcription events.
+              example: https://example.com/webhook
+            live_events:
+              type: boolean
+              description: Whether to send real-time utterance events as speech is recognized.
+              example: true
+            ai_summary:
+              type: boolean
+              description: Whether to generate an AI summary when transcription ends.
+              example: true
+            ai_summary_prompt:
+              type: string
+              description: The AI prompt that instructs how to summarize the conversation when `ai_summary` is enabled.
+              example: Summarize the key points of this conversation.
+            speech_engine:
+              type: string
+              enum:
+                - deepgram
+                - google
+              description: The speech recognition engine to use.
+              example: deepgram
+              default: deepgram
+            speech_timeout:
+              type: integer
+              format: int32
+              description: Speech timeout in milliseconds.
+              example: 60000
+              default: 60000
+            vad_silence_ms:
+              type: integer
+              format: int32
+              description: 'Voice activity detection silence time in milliseconds. Default depends on speech engine: `300` for Deepgram, `500` for Google.'
+              example: 300
+            vad_thresh:
+              type: integer
+              format: int32
+              description: Voice activity detection threshold (0-1800).
+              example: 400
+              default: 400
+            debug_level:
+              type: integer
+              format: int32
+              description: Debug level for logging (0-2).
+              example: 0
+              default: 0
+          required:
+            - lang
+            - direction
+          description: Starts live transcription of the call.
+      title: Start
+    LiveTranscribeStopAction:
+      type: string
+      enum:
+        - stop
+      description: Stops the live transcription session.
+      title: Stop
+    LiveTranscribeSummarizeAction:
+      type: object
+      required:
+        - summarize
+      properties:
+        summarize:
+          type: object
+          properties:
+            webhook:
+              type: string
+              description: The webhook URL to receive the summary.
+              example: https://example.com/webhook
+            prompt:
+              type: string
+              description: The AI prompt that instructs how to summarize the conversation.
+              example: Provide a bullet-point summary of the main topics discussed.
+          description: Request an on-demand AI summary of the conversation.
+      title: Summarize
+    LiveTranslateInjectAction:
+      type: object
+      required:
+        - inject
+      properties:
+        inject:
+          type: object
+          properties:
+            message:
+              type: string
+              description: The text message to inject and translate.
+              example: Please hold while I transfer you to a specialist.
+            direction:
+              type: string
+              enum:
+                - local-caller
+                - remote-caller
+              description: The direction to send the translated message.
+              example: remote-caller
+          required:
+            - message
+            - direction
+          description: Inject a message into the conversation to be translated and spoken.
+      title: Inject
+    LiveTranslateStartAction:
+      type: object
+      required:
+        - start
+      properties:
+        start:
+          type: object
+          properties:
+            from_lang:
+              type: string
+              description: The language to translate from (e.g., 'en-US').
+              example: en-US
+            to_lang:
+              type: string
+              description: The language to translate to (e.g., 'es-ES').
+              example: es-ES
+            direction:
+              type: array
+              items:
+                type: string
+                enum:
+                  - local-caller
+                  - remote-caller
+              description: The direction(s) of the call to translate.
+              example:
+                - local-caller
+                - remote-caller
+            from_voice:
+              type: string
+              description: The TTS voice for the source language.
+              example: elevenlabs.josh
+            to_voice:
+              type: string
+              description: The TTS voice for the target language.
+              example: elevenlabs.josh
+            filter_from:
+              anyOf:
+                - $ref: '#/components/schemas/TranslationFilterPreset'
+                - $ref: '#/components/schemas/CustomTranslationFilter'
+              description: Translation filter for the source language direction.
+              example: professional
+            filter_to:
+              anyOf:
+                - $ref: '#/components/schemas/TranslationFilterPreset'
+                - $ref: '#/components/schemas/CustomTranslationFilter'
+              description: Translation filter for the target language direction.
+              example: professional
+            webhook:
+              type: string
+              description: The webhook URL to receive translation events.
+              example: https://example.com/webhook
+            live_events:
+              type: boolean
+              description: Whether to send real-time translation events.
+              example: true
+            ai_summary:
+              type: boolean
+              description: Whether to generate AI summaries in both languages when translation ends.
+              example: true
+            ai_summary_prompt:
+              type: string
+              description: The AI prompt that instructs how to summarize the conversation when `ai_summary` is enabled.
+              example: Summarize this translated conversation.
+            speech_engine:
+              type: string
+              enum:
+                - deepgram
+                - google
+              description: The speech recognition engine to use.
+              example: deepgram
+              default: deepgram
+            speech_timeout:
+              type: integer
+              format: int32
+              description: Speech timeout in milliseconds.
+              example: 60000
+              default: 60000
+            vad_silence_ms:
+              type: integer
+              format: int32
+              description: 'Voice activity detection silence time in milliseconds. Default depends on speech engine: `300` for Deepgram, `500` for Google.'
+              example: 300
+            vad_thresh:
+              type: integer
+              format: int32
+              description: Voice activity detection threshold (0-1800).
+              example: 400
+              default: 400
+            debug_level:
+              type: integer
+              format: int32
+              description: Debug level for logging (0-2).
+              example: 0
+              default: 0
+          required:
+            - from_lang
+            - to_lang
+            - direction
+          description: Starts live translation of the call.
+      title: Start
+    LiveTranslateStopAction:
+      type: string
+      enum:
+        - stop
+      description: Stops the live translation session.
+      title: Stop
+    LiveTranslateSummarizeAction:
+      type: object
+      required:
+        - summarize
+      properties:
+        summarize:
+          type: object
+          properties:
+            webhook:
+              type: string
+              description: The webhook URL to receive the summary.
+              example: https://example.com/webhook
+            prompt:
+              type: string
+              description: The AI prompt that instructs how to summarize the conversation.
+              example: Summarize the key agreements reached in both languages.
+          description: Request an on-demand AI summary of the translated conversation.
+      title: Summarize
+    TranslationFilterPreset:
+      type: string
+      enum:
+        - polite
+        - rude
+        - professional
+        - shakespeare
+        - gen-z
+      description: |-
+        Preset translation filter values that adjust the tone or style of translated speech.
+
+        - `polite` - Translates to a polite version, removing anything insulting while maintaining sentiment
+        - `rude` - Translates to a rude and insulting version while maintaining sentiment
+        - `professional` - Translates to sound professional, removing slang or lingo
+        - `shakespeare` - Translates to sound like Shakespeare, speaking in iambic pentameter
+        - `gen-z` - Translates to use Gen-Z slang and expressions
+      title: Filter Presets
+    Types.StatusCodes.StatusCode401:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          enum:
+            - Unauthorized
+    Types.StatusCodes.StatusCode404:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          enum:
+            - Not Found
+    Types.StatusCodes.StatusCode422Error:
+      type: object
+      required:
+        - type
+        - code
+        - message
+        - attribute
+        - url
+      properties:
+        type:
+          type: string
+          description: Error type.
+        code:
+          type: string
+          description: Error code.
+        message:
+          type: string
+          description: Error details.
+        attribute:
+          type: string
+          description: Request parameter associated with this error.
+        url:
+          type: string
+          description: Link to developer resource for this error.
+    Types.StatusCodes.StatusCode500:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          enum:
+            - Internal Server Error
+    uuid:
+      type: string
+      format: uuid
+      description: Universal Unique Identifier.
+  securitySchemes:
+    BasicAuth:
+      type: http
+      scheme: Basic
+servers:
+  - url: https://{space_name}.signalwire.com/api/calling
+    description: Endpoint
+    variables:
+      space_name:
+        default: '{Your_Space_Name}'
+        description: The domain of the users SignalWire space.

@@ -1,0 +1,50 @@
+---
+title: address.getMyAddresses
+slug: /signalwire-client/address-get-my-addresses
+---
+
+import APIField from '@site/src/components/APIField';
+
+Retrieves only the addresses that the current subscriber can be called with.
+This is different from `getAddresses()` which returns all addresses visible to the subscriber.
+
+## Parameters
+
+None
+
+## Signature
+
+```typescript
+address.getMyAddresses(): Promise<Address[]>
+```
+
+## Returns
+
+**Type:** `Promise<Address[]>`
+
+Returns a Promise that resolves with an array of addresses that the current subscriber can be called with.
+
+## Examples
+
+### Get my addresses
+
+```typescript
+const addresses = await client.address.getMyAddresses()
+
+console.log('My addresses:', addresses)
+```
+
+### Display user's addresses
+
+```typescript
+const addresses = await client.address.getMyAddresses()
+
+const select = document.getElementById('my-addresses-select')
+
+addresses.forEach(address => {
+  const option = document.createElement('option')
+  option.value = address.id
+  option.textContent = `${address.display_name} (${address.name})`
+  select.appendChild(option)
+})
+```

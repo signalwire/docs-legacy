@@ -1,0 +1,62 @@
+---
+slug: /compatibility-api/sdks/reference/calls/retrieve
+title: Retrieve
+sidebar_label: Retrieve
+toc_max_heading_level: 3
+---
+
+Use this endpoint for the Calls method to retrieve a single call.
+
+<EndpointSchemaSnippet endpoint="GET /Accounts/{AccountSid}/Calls/{Sid}" />
+
+<EndpointResponseSnippet endpoint="GET /Accounts/{AccountSid}/Calls/{Sid}" />
+
+## Request examples
+
+<CodeBlocks>
+```javascript title="Node.js"
+const { RestClient } = require('@signalwire/compatibility-api')
+const client = RestClient('YourProjectID', 'YourAuthToken', { signalwireSpaceUrl: 'example.signalwire.com' })
+
+client.calls('Sid')
+      .fetch()
+      .then(call => console.log(call.to))
+      .done();
+```
+```csharp
+using System;
+using System.Collections.Generic;
+using Twilio;
+using Twilio.Rest.Api.V2010.Account;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        TwilioClient.Init("YourProjectID", "YourAuthToken", new Dictionary<string, object> { ["signalwireSpaceUrl"] = "{SPACE}.signalwire.com" });
+
+        var call = CallResource.Fetch(pathSid: "Sid");
+
+        Console.WriteLine(call.To);
+    }
+}
+```
+```python
+from signalwire.rest import Client as signalwire_client
+
+client = signalwire_client("YourProjectID", "YourAuthToken", signalwire_space_url = 'example.signalwire.com')
+
+call = client.calls('Sid').fetch()
+
+print(call.to)
+```
+```ruby
+require 'signalwire/sdk'
+
+@client = Signalwire::REST::Client.new 'YourProjectID', 'YourAuthToken', signalwire_space_url: "example.signalwire.com"
+
+call = @client.calls('Sid').fetch
+
+puts call.to
+```
+</CodeBlocks>

@@ -1,0 +1,114 @@
+---
+title: Relay.Calling.ConnectAction
+slug: /php/reference/calling/actions/connect
+description: The ConnectAction object is returned when connecting a call.
+toc_max_heading_level: 3
+---
+
+[call]: /docs/server-sdk/v2/php/reference/calling/call#connectasync
+[relay-calling-connectresult]: /docs/server-sdk/v2/php/reference/calling/results/connect
+
+This object returned from [`connectAsync`][call] method that represents a connecting attempt that is currently active on a call.
+
+## Methods
+
+### getResult
+
+Returns the final result of the connect attempt.
+
+**Returns**
+
+[`Relay.Calling.ConnectResult`][relay-calling-connectresult] - Final result of the connect attempt.
+
+**Examples**
+
+Trying to connect two numbers in series and grab the result when it's completed.
+
+```php
+<?php
+
+$devices = [
+  [ "type" => "phone", "to" => "+18991114444", "timeout" => 30 ],
+  [ "type" => "phone", "to" => "+18991114445", "timeout" => 20 ]
+];
+$call->connectAsync(...$devices)->done(function($action) {
+  // .. later in the code since it's an async method
+  if ($action->isCompleted()) {
+    $result = $action->getResult();
+  }
+});
+```
+
+### getState
+
+Return the current state of the connect attempt.
+
+**Returns**
+
+`string` - Current state of the connect attempt.
+
+**Examples**
+
+Trying to connect two numbers in series and print the state.
+
+```php
+<?php
+
+$devices = [
+  [ "type" => "phone", "to" => "+18991114444", "timeout" => 30 ],
+  [ "type" => "phone", "to" => "+18991114445", "timeout" => 20 ]
+];
+$call->connectAsync(...$devices)->done(function($action) {
+  echo $action->getState();
+});
+```
+
+### getPayload
+
+Return the payload sent to Relay to initiate the request. Useful to inspect what you sent to perform this action.
+
+**Returns**
+
+`Object` - Payload sent to Relay.
+
+**Examples**
+
+Trying to connect two numbers in series and print out the payload.
+
+```php
+<?php
+
+$devices = [
+  [ "type" => "phone", "to" => "+18991114444", "timeout" => 30 ],
+  [ "type" => "phone", "to" => "+18991114445", "timeout" => 20 ]
+];
+$call->connectAsync(...$devices)->done(function($action) {
+  print_r($action->getPayload());
+});
+```
+
+### isCompleted
+
+Return `true` if the connect attempt has finished, `false` otherwise.
+
+**Returns**
+
+`Boolean` - True/False accordingly to the state.
+
+**Examples**
+
+Trying to connect two numbers in series and check if it has finished.
+
+```php
+<?php
+
+$devices = [
+  [ "type" => "phone", "to" => "+18991114444", "timeout" => 30 ],
+  [ "type" => "phone", "to" => "+18991114445", "timeout" => 20 ]
+];
+$call->connectAsync(...$devices)->done(function($action) {
+  if ($action->isCompleted()) {
+
+  }
+});
+```

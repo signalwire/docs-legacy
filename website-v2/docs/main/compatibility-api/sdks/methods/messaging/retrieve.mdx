@@ -1,0 +1,67 @@
+---
+slug: /compatibility-api/sdks/reference/messaging/retrieve
+title: Retrieve
+sidebar_label: Retrieve
+toc_max_heading_level: 3
+---
+
+Use this endpoint for the Media method to retrieve a single message.
+
+<EndpointSchemaSnippet endpoint="GET /Accounts/{AccountSid}/Messages/{Sid}" />
+
+<EndpointResponseSnippet endpoint="GET /Accounts/{AccountSid}/Messages/{Sid}" />
+
+## Request examples
+
+<CodeBlocks>
+
+```javascript title="Node.js"
+const { RestClient } = require('@signalwire/compatibility-api')
+const client = RestClient('YourProjectID', 'YourAuthToken', { signalwireSpaceUrl: 'example.signalwire.com' })
+
+client.messages('MessageSid')
+      .fetch()
+      .then(message => console.log(message.to))
+      .done();
+```
+
+```csharp
+using System;
+using System.Collections.Generic;
+using Twilio;
+using Twilio.Rest.Api.V2010.Account;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        TwilioClient.Init("YourProjectID", "YourAuthToken", new Dictionary<string, object> { ["signalwireSpaceUrl"] = "{SPACE}.signalwire.com" });
+
+        var message = MessageResource.Fetch(pathSid: "MessageSid");
+
+        Console.WriteLine(message.To);
+    }
+}
+```
+
+```python
+from signalwire.rest import Client as signalwire_client
+
+client = signalwire_client("YourProjectID", "YourAuthToken", signalwire_space_url = 'example.signalwire.com')
+
+message = client.messages('MessageSid').fetch()
+
+print(message.to)
+```
+
+```ruby
+require 'signalwire/sdk'
+
+@client = Signalwire::REST::Client.new 'YourProjectID', 'YourAuthToken', signalwire_space_url: "example.signalwire.com"
+
+message = @client.messages('MessageSid').fetch
+
+puts message.to
+```
+
+</CodeBlocks>

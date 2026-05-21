@@ -1,0 +1,456 @@
+---
+title: Gather
+sidebar_label: Gather
+slug: /compatibility-api/cxml/reference/voice/gather
+sidebar_position: 1
+toc_max_heading_level: 3
+---
+
+The `<Gather>` verb transcribes speech or collects digits during a call.
+
+## Verb attributes
+
+<ParamField path="action" type="string">
+  The `action` attribute takes in an absolute URL. SignalWire will make a `GET` or `POST` request to this URL when entering of digits is completed. If there is no URL provided, SignalWire will re-request the URL that was previously used, which can cause an unwanted looping behavior. Be sure to provide the proper URL in order to avoid this outcome. See [below](#gather_action) for specified request parameters.
+</ParamField>
+
+<ParamField path="actionOnEmptyResult" type="boolean" default="false">
+  Send a webhook to the `action` URL even if there is no input. By default, if no input is detected, the next XML instruction is executed but by setting `actionOnEmptyResult` to `true`, a callback to the `action` URL will be sent to continue call flow.
+</ParamField>
+
+<ParamField path="enhanced" type="boolean" default="false">
+  This attribute enables enhanced speech recognition, which will incur an added cost. When it is `false`, `speechModel` has no effect.
+</ParamField>
+
+<ParamField path="finishOnKey" type="string" default="#">
+  The set of digits, (0-9, \*, #), that can end a recording.
+</ParamField>
+
+<ParamField path="hints" type="string">
+  A list of words and phrases, each a max of 100 characters, a caller is likely to say during a call.
+</ParamField>
+
+<ParamField path="input" type="string" default="dtmf">
+  The type of input received from a caller (i.e. speech or DTMF). Values can be `dtmf`, `speech`, or `dtmf speech`.
+</ParamField>
+
+<ParamField path="language" type="string" default="en-US">
+  The language in which you expect your callers to speak.
+</ParamField>
+
+<ParamField path="method" type="string" default="POST">
+  The `method` attribute specifies whether the request to action is a `GET` or a `POST`. Valid values are `GET` or `POST`.
+</ParamField>
+
+<ParamField path="numDigits" type="integer">
+  The number of digits you expect to be pressed by a caller.
+</ParamField>
+
+<ParamField path="partialResultCallback" type="string">
+  The URL to request to during speech recognition. No URL is specified by default.
+</ParamField>
+
+<ParamField path="partialResultCallbackMethod" type="string" default="POST">
+  The type of HTTP request to use when requesting a `partialResultCallback`.
+</ParamField>
+
+<ParamField path="profanityFilter" type="boolean" default="true">
+  Tells SignalWire whether or not to filter profane language when transcribing a call.
+</ParamField>
+
+<ParamField path="speechModel" type="string">
+  The model of enhanced speech recognition you would like to use. This attribute only has an effect if `enhanced` is `true`. Valid values are `phone_call`, `video`, or `default`. `phone_call` optimizes speech recognition for phone calls at a 8khz sample rate. `video` optimizes speech recognition for video calls at a 16khz sample rate. `default` will automatically choose the current best option between `phone_call` and `video`.
+</ParamField>
+
+<ParamField path="speechTimeout" type="string">
+  The set time, in seconds, that SignalWire will wait before ending speech recognition. If set to `auto`, SignalWire will automatically end speech recognition when there is a pause in speech.
+</ParamField>
+
+<ParamField path="timeout" type="integer" default="5">
+  The number of seconds of silence or inaction that denote the end of caller input.
+</ParamField>
+
+
+
+
+#### Supported languages
+
+You can find a list of our supported languages [here](/docs/platform/voice/tts).
+
+#### Request parameters for `action` URL {#gather_action}
+
+The `action` request contains the [Standard Request Parameters](/docs/compatibility-api/cxml/reference/voice#request-parameters) as well as:
+
+<ParamField path="Confidence" type="string">
+  The score, between 0.0 and 1.0, that determines the accuracy of a transcription.
+</ParamField>
+
+<ParamField path="Digits" type="string">
+  The buttons pressed by a caller.
+</ParamField>
+
+<ParamField path="SpeechResult" type="string">
+  The transcribed result of the caller's speech.
+</ParamField>
+
+## Nesting
+
+The following verbs can be nested within a `<Gather>`:
+
+- `<Play>`: plays an audio file, that SignalWire fetches from the URL you configured, back to the caller.
+- `<Pause>`: waits silently for a distinctive number of seconds.
+- `<Say>`: reads supplied text back to the caller.
+
+## Examples
+
+### Handle gathered input on your server
+
+
+This example demonstrates a complete flow: the initial cXML prompts the caller for input, and your server handles the POST request to process `Digits` or `SpeechResult` and respond with appropriate cXML.
+
+<Tabs>
+  <TabItem value="request-cxml" label="Request cXML">
+
+This cXML is served to SignalWire (e.g., as your webhook response). It prompts the caller for input and specifies your server's `action` URL to handle the result.
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Gather input="speech dtmf" action="https://example.com/handle-gather" method="POST"
+            numDigits="1" hints="sales, support, billing" timeout="5" speechTimeout="auto">
+        <Say>
+            Press 1 or say sales for sales.
+            Press 2 or say support for technical support.
+            Press 3 or say billing for billing questions.
+        </Say>
+    </Gather>
+    <Say>We did not receive any input. Goodbye!</Say>
+</Response>
+```
+
+  </TabItem>
+
+  <TabItem value="server-handler-(node.js)" label="Server Handler (Node.js)">
+
+When the caller provides input, SignalWire POSTs to your `action` URL with `Digits` (for DTMF) and/or `SpeechResult` and `Confidence` (for speech). Your server processes the input and returns cXML to continue the call.
+
+```javascript title="Node.js"
+const express = require("express");
+const app = express();
+app.use(express.urlencoded({ extended: true }));
+
+app.post("/handle-gather", (req, res) => {
+  // Extract gathered input from POST body
+  const digits = req.body.Digits || "";
+  const speechResult = (req.body.SpeechResult || "").toLowerCase();
+  const confidence = parseFloat(req.body.Confidence) || 0;
+
+  // Also available: CallSid, From, To, and other standard parameters
+  const callSid = req.body.CallSid;
+
+  let responseXml = '<?xml version="1.0" encoding="UTF-8"?><Response>';
+
+  // Determine selection from DTMF or speech
+  if (digits === "1" || speechResult.includes("sales")) {
+    responseXml += "<Say>Connecting you to sales. Please hold.</Say>";
+    responseXml += "<Dial>+15551234567</Dial>";
+  } else if (digits === "2" || speechResult.includes("support")) {
+    responseXml += "<Say>Connecting you to technical support.</Say>";
+    responseXml += "<Dial>+15559876543</Dial>";
+  } else if (digits === "3" || speechResult.includes("billing")) {
+    responseXml += "<Say>Connecting you to billing.</Say>";
+    responseXml += "<Dial>+15555555555</Dial>";
+  } else {
+    // Invalid or no input - prompt again
+    responseXml += '<Gather input="speech dtmf" action="https://example.com/handle-gather" method="POST" numDigits="1" hints="sales, support, billing" timeout="5" speechTimeout="auto">';
+    responseXml += "<Say>Sorry, I didn't understand. Press 1 for sales, 2 for support, or 3 for billing.</Say>";
+    responseXml += "</Gather>";
+    responseXml += "<Say>We did not receive valid input. Goodbye!</Say>";
+  }
+
+  responseXml += "</Response>";
+
+  res.type("text/xml");
+  res.send(responseXml);
+});
+
+app.listen(3000, () => console.log("Server running on port 3000"));
+```
+
+  </TabItem>
+</Tabs>
+
+### A simple gather
+
+<CodeBlocks>
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Gather/>
+</Response>
+```
+```javascript title="Node.js"
+const { RestClient } = require("@signalwire/compatibility-api");
+const response = new RestClient.LaML.VoiceResponse();
+
+response.gather();
+console.log(response.toString());
+```
+```csharp
+using Twilio.TwiML;
+using System;
+
+
+class Example
+{
+    static void Main()
+    {
+        var response = new VoiceResponse();
+        response.Gather();
+
+        Console.WriteLine(response.ToString());;
+    }
+}
+```
+```python
+from signalwire.voice_response import VoiceResponse, Gather
+
+response = VoiceResponse()
+response.gather()
+
+print(response)
+```
+```ruby
+require 'signalwire/sdk'
+
+response = Signalwire::Sdk::VoiceResponse.new do |response|
+  response.gather
+end
+
+puts response.to_s
+```
+</CodeBlocks>
+
+SignalWire will collect any speech or digits pressed during a call.
+
+### Nesting `<Say>` within a gather
+
+<CodeBlocks>
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Gather action="https://example.com/process_gather.php" method="GET">
+        <Say>
+            Please enter your account number,
+            followed by the pound sign.
+        </Say>
+    </Gather>
+    <Say>We did not receive any input. Goodbye!</Say>
+</Response>
+```
+```javascript title="Node.js"
+const { RestClient } = require("@signalwire/compatibility-api");
+const response = new RestClient.LaML.VoiceResponse();
+
+const gather = response.gather({
+  action: "https://example.com/process_gather.php",
+  method: "GET",
+});
+gather.say("Please enter your account number, followed by the pound sign.");
+response.say("We did not receive any input. Goodbye!");
+console.log(response.toString());
+```
+```csharp
+using Twilio.TwiML;
+using Twilio.Http;
+using Twilio.TwiML.Voice;
+using System;
+
+
+class Example
+{
+    static void Main()
+    {
+        var response = new VoiceResponse();
+        var gather = new Gather(action: new Uri("https://example.com/process_gather.php"), method: HttpMethod.Get);
+        gather.Say("Please enter your account number, followed by the pound sign.");
+
+        response.Append(gather);
+        response.Say("We did not receive any input. Goodbye!");
+
+        Console.WriteLine(response.ToString());;
+    }
+}
+```
+```python
+from signalwire.voice_response import VoiceResponse, Gather, Say
+
+response = VoiceResponse()
+gather = Gather(action='https://example.com/process_gather.php', method='GET')
+gather.say('Please enter your account number, followed by the pound sign.')
+response.append(gather)
+response.say('We did not receive any input. Goodbye!')
+
+print(response)
+```
+```ruby
+require 'signalwire/sdk'
+
+response = Signalwire::Sdk::VoiceResponse.new do |response|
+  response.gather(action: 'https://example.com/process_gather.php', method: 'GET') do |gather|
+    gather.say(message: 'Please enter your account number, followed by the pound sign.')
+  end
+  response.say(message: 'We did not receive any input. Goodbye!')
+end
+
+puts response.to_s
+```
+</CodeBlocks>
+
+You can use the `<Say>` verb to prompt callers to enter the desired input. In this example, when a caller enters their account number, SignalWire will submit the result to the URL provided in the `action` attribute. If the caller does not enter any digits, SignalWire will prompt the 'Goodbye' statement.
+
+### Nesting `<Play>` within a gather
+
+<CodeBlocks>
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Gather action="https://example.com/process_gather.php" method="GET">
+        <Play>https://your-application.com/audio.mp3</Play>
+    </Gather>
+    <Say>We did not receive any input. Goodbye!</Say>
+</Response>
+```
+```javascript title="Node.js"
+const { RestClient } = require("@signalwire/compatibility-api");
+const response = new RestClient.LaML.VoiceResponse();
+
+const gather = response.gather({
+  action: "https://example.com/process_gather.php",
+  method: "GET",
+});
+gather.play("https://your-application.com/audio.mp3");
+response.say("We did not receive any input. Goodbye!");
+console.log(response.toString());
+```
+```csharp
+using Twilio.TwiML;
+using Twilio.Http;
+using Twilio.TwiML.Voice;
+using System;
+
+
+class Example
+{
+    static void Main()
+    {
+        var response = new VoiceResponse();
+        var gather = new Gather(action: new Uri("https://example.com/process_gather.php"), method: HttpMethod.Get);
+        gather.Play("https://your-application.com/audio.mp3");
+
+        response.Append(gather);
+        response.Say("We did not receive any input. Goodbye!");
+
+        Console.WriteLine(response.ToString());;
+    }
+}
+```
+```python
+from signalwire.voice_response import VoiceResponse, Gather, Say
+
+response = VoiceResponse()
+gather = Gather(action='https://example.com/process_gather.php', method='GET')
+gather.play('https://your-application.com/audio.mp3')
+response.append(gather)
+response.say('We did not receive any input. Goodbye!')
+
+print(response)
+```
+```ruby
+require 'signalwire/sdk'
+
+response = Signalwire::Sdk::VoiceResponse.new do |response|
+  response.gather(action: 'https://example.com/process_gather.php', method: 'GET') do |gather|
+    gather.play(message: 'https://your-application.com/audio.mp3')
+  end
+  response.say(message: 'We did not receive any input. Goodbye!')
+end
+
+puts response.to_s
+```
+</CodeBlocks>
+
+You can use the `<Play>` verb to prompt callers to enter the desired input. In this example, when a caller enters their account number, SignalWire will submit the result to the URL provided in the `action` attribute. If the caller does not enter any digits, SignalWire will prompt the 'Goodbye' statement.
+
+### Gather DTMF or speech
+
+<CodeBlocks>
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Gather input="speech dtmf" timeout="5" numDigits="1">
+        <Say>Please press 3 or say account for account information.</Say>
+    </Gather>
+</Response>
+```
+```javascript title="Node.js"
+const { RestClient } = require("@signalwire/compatibility-api");
+const response = new RestClient.LaML.VoiceResponse();
+
+const gather = response.gather({ input: "speech dtmf", timeout: 5, numDigits: 1 });
+gather.say("Please press 3 or say account for account information.");
+console.log(response.toString());
+```
+```csharp
+using Twilio.TwiML;
+using Twilio.TwiML.Voice;
+using System;
+
+
+class Example
+{
+    static void Main()
+    {
+        var response = new VoiceResponse();
+        var gather = new Gather(input: "speech dtmf", timeout: 5, numDigits: 1);
+        gather.Say("Please press 3 or say account for account information.");
+
+        response.Append(gather);
+        Console.WriteLine(response.ToString());;
+    }
+}
+```
+```python
+from signalwire.voice_response import VoiceResponse, Gather, Say
+
+response = VoiceResponse()
+gather = Gather(input='speech dtmf', timeout=5, num_digits=1)
+gather.say('Please press 3 or say account for account information.')
+response.append(gather)
+
+print(response)
+```
+```ruby
+require 'signalwire/sdk'
+
+response = Signalwire::Sdk::VoiceResponse.new do |response|
+  response.gather(input: 'speech dtmf', timeout: 5, num_digits: 1) do |gather|
+    gather.say(message: 'Please press 3 or say account for account information.')
+  end
+end
+
+puts response.to_s
+```
+</CodeBlocks>
+
+A caller can access their account information either through speech recognition or DTMF tones. SignalWire will wait 5 seconds before processing the information and sending the data.
+
+## Potential issues
+
+#### `<Gather>` doesn't receive caller input when the caller is using a VoIP phone.
+
+**Solution**: Some VoIP phones have trouble sending DTMF tones. Phones typically use compressed bandwidth-conserving audio protocols that can interfere with the transmission of the digit's signal.
+
+#### The `Digits` parameter is not sent to the `<Gather>` URL.
+
+**Solution**: Verify that your application is not responding to the `action` URL with an HTTP 3xx redirect. SignalWire will follow this redirect but will not resend the **Digits** parameter.

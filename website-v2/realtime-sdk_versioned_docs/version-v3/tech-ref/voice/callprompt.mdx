@@ -1,0 +1,223 @@
+---
+title: "CallPrompt"
+slug: /node/reference/voice/call-prompt
+sidebar_label: CallPrompt
+description: CallPrompt object reference for playing prompts and collecting input simultaneously during voice calls. Combine audio/TTS playback with digit/speech collection.
+toc_max_heading_level: 3
+---
+
+[callprompt-6]: /docs/server-sdk/v3/node/reference/voice/call-prompt
+[link-1]: #ended
+[link]: #type
+[voice-call-1]: /docs/server-sdk/v3/node/reference/voice/call/prompt-audio
+[voice-call-2]: /docs/server-sdk/v3/node/reference/voice/call/prompt-ringtone
+[voice-call-3]: /docs/server-sdk/v3/node/reference/voice/call/prompt-tts
+[voice-call]: /docs/server-sdk/v3/node/reference/voice/call/prompt
+
+Represents a current or past prompting session in a call. You can obtain instances of this class by starting a Prompt with one of the following methods:
+
+- [`Call.prompt`][voice-call]
+- [`Call.promptAudio`][voice-call-1]
+- [`Call.promptRingtone`][voice-call-2]
+- [`Call.promptTTS`][voice-call-3]
+
+#### Example
+
+Prompting for a PIN to be entered using the keypad, then waiting for the user to
+finish entering the PIN before proceeding with the next instructions.
+
+```js
+import { Voice } from "@signalwire/realtime-api";
+
+const client = new Voice.Client({
+  project: "<project-id>",
+  token: "<api-token>",
+  topics: ["office"],
+});
+
+const call = await client.dialPhone({
+  from: "+YYYYYYYYYY",
+  to: "+XXXXXXXXXX",
+});
+
+// Prompt for digits
+const prompt = await call.promptTTS({
+  text: "Please enter your PIN",
+  digits: {
+    max: 5,
+    digitTimeout: 5,
+    terminators: "#*",
+  },
+});
+const { digits } = await prompt.ended();
+
+console.log("Entered PIN:", digits);
+```
+
+## Properties
+
+### confidence
+
+Confidence level for the speech recognition result (if [`type`][link] is `"speech"`), from 0 to 100. For example, `83.2`.
+
+**Syntax:** `CallPrompt.confidence()`
+
+**Returns:** `number`
+
+---
+
+### digits
+
+The digits that have been collected (if [`type`][link] is `"digit"`). For example, `"12345"`.
+
+**Syntax:** `CallPrompt.digits()`
+
+**Returns:** `string`
+
+---
+
+### id
+
+The unique id for this prompt.
+
+**Syntax:** `CallPrompt.id()`
+
+**Returns:** `string`
+
+---
+
+### reason
+
+Alias for [`type`][link], in case of errors. Use this field to check the reason of the error.
+
+**Syntax:** `CallPrompt.reason()`
+
+**Returns:** `"no_match"` | `"no_input"` | `"error"`
+
+---
+
+### terminator
+
+The terminator used to complete the prompt (if [`type`][link] is `"digit"`). For example, `"#"`.
+
+**Syntax:** `CallPrompt.terminator()`
+
+**Returns:** `string`
+
+---
+
+### text
+
+The text that has been collected (if [`type`][link] is `"speech"`). For example, `"hello who's there"`.
+
+**Syntax:** `CallPrompt.text()`
+
+**Returns:** `string`
+
+---
+
+### type
+
+The type of this prompt.
+
+**Syntax:** `CallPrompt.type()`
+
+**Returns:** `"error"` | `"no_input"` | `"no_match"` | `"digit"` | `"speech"`
+
+## Methods
+
+### ended
+
+- **ended**(): `Promise<CallPrompt>` - See [CallPrompt][callprompt-6] for more details.
+
+Returns a promise that is resolved only after this prompt finishes (or is stopped).
+
+#### Returns
+
+`Promise<CallPrompt>` - See [CallPrompt][callprompt-6] for more details.
+
+#### Example
+
+```js
+const prompt = await call.promptTTS({
+  text: "Please enter your PIN",
+  digits: {
+    max: 5,
+    digitTimeout: 2,
+    terminators: "#*",
+  },
+});
+const { type, digits, terminator } = await prompt.ended();
+```
+
+---
+
+### setVolume
+
+- **setVolume**(`volume`): `Promise<CallPrompt>` - See [CallPrompt][callprompt-6] for more details.
+
+Changes the volume of the audio.
+
+#### Parameters
+
+| Name     | Type     | Description                           |
+|:---------|:---------|:--------------------------------------|
+| `volume` | `number` | Volume value between -40dB and +40dB. |
+
+#### Returns
+
+`Promise<CallPrompt>` - See [CallPrompt][callprompt-6] for more details.
+
+#### Example
+
+```js
+const prompt = await call.promptTTS({
+  text: "Please enter your PIN",
+  digits: {
+    max: 5,
+    digitTimeout: 2,
+    terminators: "#*",
+  },
+});
+await prompt.setVolume(-20);
+```
+
+---
+
+### stop
+
+- **stop**(): `Promise<CallPrompt>` - See [CallPrompt][callprompt-6] for more details.
+
+Stops the prompt.
+
+#### Returns
+
+`Promise<CallPrompt>` - See [CallPrompt][callprompt-6] for more details.
+
+#### Example
+
+```js
+const prompt = await call.promptTTS({
+  text: "Please enter your PIN",
+  digits: {
+    max: 5,
+    digitTimeout: 2,
+    terminators: "#*",
+  },
+});
+await prompt.stop();
+```
+
+---
+
+### ~~waitForResult~~
+
+- **waitForResult**(): `Promise<CallPrompt>` - See [CallPrompt][callprompt-6] for more details.
+
+Returns a promise that is resolved only after this prompt finishes (or is stopped).
+
+<Warning>
+
+This method is deprecated. See [ended][link-1] instead.
+
+</Warning>

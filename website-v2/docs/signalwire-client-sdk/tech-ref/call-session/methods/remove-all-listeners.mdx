@@ -1,0 +1,137 @@
+---
+title: removeAllListeners
+slug: /call-session/removealllisteners
+---
+
+import APIField from '@site/src/components/APIField';
+
+Removes all event listeners, either for a specific event or for all events.
+
+## Signature
+
+```typescript
+call.removeAllListeners<T extends EventNames>(
+  event?: T
+): CallSession
+```
+
+## Parameters
+
+<APIField name="event" type="string">
+  The event name to remove all listeners from. If not provided, removes ALL listeners from ALL events.
+</APIField>
+
+## Returns
+
+**Type:** `CallSession`
+
+Returns the CallSession instance for method chaining.
+
+## Important Notes
+
+**Nuclear Option:** Calling `removeAllListeners()` without parameters removes ALL listeners from ALL events. Use with caution.
+
+```typescript
+call.removeAllListeners() // Removes EVERYTHING
+```
+
+**Event-Specific Cleanup:** To remove all listeners for just one event, pass the event name:
+
+```typescript
+call.removeAllListeners('member.joined') // Only removes member.joined listeners
+```
+
+**Automatic Cleanup:** When a CallSession is destroyed (via `hangup()`), all listeners are automatically cleaned up. You typically don't need to call this manually before ending a call.
+
+**No Error on Empty:** Calling `removeAllListeners()` when there are no listeners does nothing and throws no error.
+
+**Prefer Specific Cleanup:** For better code maintainability, prefer using `off()` with specific handler references when possible:
+
+```typescript
+// ✅ Better - explicit and targeted
+call.off('member.joined', specificHandler)
+
+// ⚠️ Use sparingly - removes all handlers
+call.removeAllListeners('member.joined')
+
+// ❌ Use very carefully - removes everything
+call.removeAllListeners()
+```
+
+## Examples
+
+### Remove All Listeners for a Specific Event
+
+```typescript
+// Register multiple handlers
+call.on('member.joined', handler1)
+call.on('member.joined', handler2)
+call.once('member.joined', handler3)
+
+// Remove all member.joined listeners
+call.removeAllListeners('member.joined')
+```
+
+### Remove All Listeners from All Events
+
+```typescript
+// Register various handlers
+call.on('member.joined', handler1)
+call.on('member.left', handler2)
+call.on('layout.changed', handler3)
+call.on('call.state', handler4)
+
+// Remove ALL listeners from ALL events
+call.removeAllListeners()
+```
+
+### Cleanup Pattern
+
+```typescript
+function attachCallListeners(call) {
+  call.on('member.joined', (params) => {
+    console.log('Member joined:', params.member.name)
+  })
+
+  call.on('member.left', (params) => {
+    console.log('Member left:', params.member.name)
+  })
+
+  call.on('layout.changed', (params) => {
+    console.log('Layout changed:', params.layout.name)
+  })
+
+  // Return cleanup function
+  return () => {
+    call.removeAllListeners() // Clean up everything
+  }
+}
+
+// Usage
+const cleanup = attachCallListeners(call)
+
+// Later, when done
+cleanup()
+```
+
+### Component Unmount Cleanup
+
+```typescript
+class CallComponent {
+  constructor(call) {
+    this.call = call
+    this.setupListeners()
+  }
+
+  setupListeners() {
+    this.call.on('member.joined', this.onMemberJoined)
+    this.call.on('member.left', this.onMemberLeft)
+    this.call.on('layout.changed', this.onLayoutChanged)
+  }
+
+  unmount() {
+    // Clean up all listeners when component is destroyed
+    this.call.removeAllListeners()
+  }
+}
+```

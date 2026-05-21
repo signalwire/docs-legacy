@@ -1,0 +1,99 @@
+---
+title: updateCamera
+slug: /call-session/updatecamera
+---
+
+import APIField from '@site/src/components/APIField';
+
+Replaces the current camera stream with one from a different video device.
+
+## Parameters
+
+<APIField name="constraints" type="MediaTrackConstraints" required>
+  Constraints that the new camera device should satisfy.
+</APIField>
+
+## Signature
+
+```typescript
+call.updateCamera(constraints: MediaTrackConstraints): Promise<void>
+```
+
+## Returns
+
+**Type:** `Promise<void>`
+
+## Examples
+
+### Switch to Specific Camera Device
+
+```typescript
+// Get available video devices
+const devices = await navigator.mediaDevices.enumerateDevices()
+const cameras = devices.filter(d => d.kind === 'videoinput')
+
+// Switch to a specific camera
+await call.updateCamera({
+  deviceId: cameras[1].deviceId
+})
+```
+
+### Switch with Exact Device ID
+
+```typescript
+await call.updateCamera({
+  deviceId: { exact: "/o4ZeWzroh+8q0Ds/CFfmn9XpqaHzmW3L/5ZBC22CRg=" }
+})
+```
+
+### Switch Camera with Resolution Constraints
+
+```typescript
+// Switch camera and request specific resolution
+await call.updateCamera({
+  deviceId: cameraId,
+  width: { ideal: 1280 },
+  height: { ideal: 720 }
+})
+```
+
+### Switch to Front/Rear Camera (Mobile)
+
+```typescript
+// Switch to front camera
+await call.updateCamera({
+  facingMode: 'user'
+})
+
+// Switch to rear camera
+await call.updateCamera({
+  facingMode: 'environment'
+})
+```
+
+## Related Properties
+
+You can access information about the current camera using these CallSession properties:
+
+- `call.cameraId` - Current camera device ID
+- `call.cameraLabel` - Current camera device label/name
+- `call.cameraConstraints` - Current camera constraints
+- `call.localVideoTrack` - Current local video MediaStreamTrack
+
+## Important Notes
+
+**Active Stream Replacement:** This method replaces the active video track in the ongoing call. The video stream will switch seamlessly without ending the call.
+
+**MediaTrackConstraints:** The `constraints` parameter follows the [MediaTrackConstraints](https://developer.mozilla.org/en-US/docs/Web/API/MediaTrackConstraints) web standard. Common properties include:
+- `deviceId` - Specific device identifier
+- `facingMode` - Camera direction ('user' or 'environment')
+- `width` / `height` - Resolution constraints
+- `frameRate` - Frame rate constraints
+- `aspectRatio` - Aspect ratio (SDK automatically includes `16/9` as default)
+
+**Device Permissions:** The browser must have camera permissions granted. If switching to a new device requires additional permissions, the user will be prompted.
+
+**Device Availability:** The call will throw an error if:
+- The specified device doesn't exist
+- The device is already in use by another application
+- The constraints cannot be satisfied

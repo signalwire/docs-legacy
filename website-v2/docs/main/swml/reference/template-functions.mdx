@@ -1,0 +1,630 @@
+---
+slug: /swml/reference/template-functions
+title: Template functions
+description: Reference for built-in template transformation functions in SWML
+
+---
+
+Template functions provide simple text transformations for common operations like converting to lowercase, URL encoding, and date formatting.
+They complement JavaScript expressions by handling specific formatting tasks that don't require complex logic.
+
+For information about variable scopes, see the [Variables Reference](/docs/swml/reference/variables).
+For JavaScript expressions and data manipulation, see the [Expressions Reference](/docs/swml/reference/expressions).
+
+<Warning>
+Template functions are **only** available in [SWAIG (SignalWire AI Gateway)](/docs/swml/reference/ai/swaig) contexts, specifically within:
+- AI function `data_map` processing (expressions, webhooks, output)
+- Webhook responses to SWAIG functions
+- AI prompt variable expansion
+
+They are **not** available in regular SWML methods or general variable contexts. For regular SWML variable manipulation, use JavaScript expressions with the `${expression}` syntax instead.
+</Warning>
+
+## Reference
+
+<ParamField path="lc" type="string">
+  Converts a string to lowercase. Commonly used to normalize user input for case-insensitive comparisons or ensure consistent casing when accessing object properties dynamically.
+
+  **Syntax:** `${lc:<value>}`
+  
+  **Example:**
+  <CodeBlocks>
+<CodeBlock title="YAML">
+```yaml {13} startLine={8} maxLines=10
+SWAIG:
+    functions:
+      - function: lookup
+        description: Look up department contact
+        parameters:
+          type: object
+          properties:
+            department:
+              type: string
+              description: Department name from user
+        data_map:
+          expressions:
+            - string: '${meta_data.contacts.${lc:args.department}}'
+              pattern: '\w+'
+              output:
+                response: "Found contact for ${args.department}"
+        meta_data:
+          contacts:
+            sales: '+12025551234'
+            support: '+12025555678'
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json {19} startLine={14} maxLines=10
+{
+  "SWAIG": {
+    "functions": [
+      {
+        "function": "lookup",
+        "description": "Look up department contact",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "department": {
+              "type": "string",
+              "description": "Department name from user"
+            }
+          }
+        },
+        "data_map": {
+          "expressions": [
+            {
+              "string": "${meta_data.contacts.${lc:args.department}}",
+              "pattern": "\\w+",
+              "output": {
+                "response": "Found contact for ${args.department}"
+              }
+            }
+          ]
+        },
+        "meta_data": {
+          "contacts": {
+            "sales": "+12025551234",
+            "support": "+12025555678"
+          }
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+</ParamField>
+
+<ParamField path="enc:url" type="string">
+  Encodes a string for safe use in URLs by converting special characters to percent-encoded equivalents. Always use this when including variables in URL query parameters or paths to prevent special characters from breaking URLs or causing unexpected behavior.
+
+  **Syntax:** `${enc:url:<value>}`
+
+  **Example:**
+  <CodeBlocks>
+<CodeBlock title="YAML">
+```yaml {13} startLine={8} maxLines=10
+SWAIG:
+    functions:
+      - function: search
+        description: Search external knowledge base
+        parameters:
+          type: object
+          properties:
+            query:
+              type: string
+              description: User's search query
+        data_map:
+          webhooks:
+            - url: 'https://api.example.com/search?q=${enc:url:args.query}'
+              method: GET
+              output:
+                response: "Found ${results.total} results for ${args.query}"
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json {19} startLine={14} maxLines=10
+{
+  "SWAIG": {
+    "functions": [
+      {
+        "function": "search",
+        "description": "Search external knowledge base",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "query": {
+              "type": "string",
+              "description": "User's search query"
+            }
+          }
+        },
+        "data_map": {
+          "webhooks": [
+            {
+              "url": "https://api.example.com/search?q=${enc:url:args.query}",
+              "method": "GET",
+              "output": {
+                "response": "Found ${results.total} results for ${args.query}"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+</ParamField>
+
+<ParamField path="strftime_tz" type="string">
+  Formats the current date and time using standard strftime format codes with timezone support. This generates timestamps at the moment the template is evaluated, not when the SWML script was created.
+
+  **Syntax:** `@{strftime_tz <timezone> <format>}`
+
+  **Common format codes:**
+
+  | Code | Description | Example |
+  |------|-------------|---------|
+  | `%Y-%m-%d` | ISO date | 2025-01-15 |
+  | `%H:%M:%S` | 24-hour time | 14:30:45 |
+  | `%I:%M %p` | 12-hour time | 02:30 PM |
+  | `%A, %B %d, %Y` | Full readable date | Monday, January 15, 2025 |
+
+  **Example:**
+  <CodeBlocks>
+<CodeBlock title="YAML">
+```yaml {10} startLine={5} maxLines=10
+SWAIG:
+    functions:
+      - function: log_call
+        description: Log call details with timestamp
+        data_map:
+          webhooks:
+            - url: 'https://api.example.com/logs'
+              method: POST
+              params:
+                timestamp: '@{strftime_tz America/Chicago %Y-%m-%d %H:%M:%S}'
+                call_id: '${call.call_id}'
+                from: '${call.from}'
+              output:
+                response: "Call logged successfully"
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json {13} startLine={8} maxLines=10
+{
+  "SWAIG": {
+    "functions": [
+      {
+        "function": "log_call",
+        "description": "Log call details with timestamp",
+        "data_map": {
+          "webhooks": [
+            {
+              "url": "https://api.example.com/logs",
+              "method": "POST",
+              "params": {
+                "timestamp": "@{strftime_tz America/Chicago %Y-%m-%d %H:%M:%S}",
+                "call_id": "${call.call_id}",
+                "from": "${call.from}"
+              },
+              "output": {
+                "response": "Call logged successfully"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+</ParamField>
+
+<ParamField path="fmt_ph" type="string">
+  Formats a phone number using specified international format standards. Supports multiple format types for different use cases, with optional separators for improved text-to-speech pronunciation.
+
+  **Syntax:** `@{fmt_ph <format> <phone_number>}` or `@{fmt_ph <format>:sep:<separator> <phone_number>}`
+
+  **Available formats:**
+  - `national` - National format (default)
+  - `international` - International format with country code
+  - `RFC3966` - RFC 3966 format (tel: URI)
+  - `e164` - E.164 format (+1234567890)
+
+  **Example:**
+  <CodeBlocks>
+<CodeBlock title="YAML">
+```yaml {8-9} startLine={4} maxLines=10
+SWAIG:
+    functions:
+      - function: format_number
+        description: Format phone number for speech
+        data_map:
+          output:
+            response: |
+              International format: @{fmt_ph international ${call.from}}
+              Spaced format: @{fmt_ph national:sep:- ${call.from}}
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json {9} startLine={4} maxLines=10
+{
+  "SWAIG": {
+    "functions": [
+      {
+        "function": "format_number",
+        "description": "Format phone number for speech",
+        "data_map": {
+          "output": {
+            "response": "International format: @{fmt_ph international ${call.from}}\nSpaced format: @{fmt_ph national:sep:- ${call.from}}"
+          }
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+</ParamField>
+
+<ParamField path="expr" type="string">
+  Evaluates simple arithmetic expressions with literal numbers. Supports addition, subtraction, multiplication, division, and parentheses for grouping. Only works with literal numbers and cannot reference variables.
+
+  **Syntax:** `@{expr <expression>}`
+
+  **Example:**
+  <CodeBlocks>
+<CodeBlock title="YAML">
+```yaml {7} startLine={2} maxLines=10
+SWAIG:
+    functions:
+      - function: calculate_discount
+        description: Calculate discount amount
+        data_map:
+          output:
+            response: "The discount is @{expr (100 - 25) / 5} dollars"
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json {9} startLine={4} maxLines=10
+{
+  "SWAIG": {
+    "functions": [
+      {
+        "function": "calculate_discount",
+        "description": "Calculate discount amount",
+        "data_map": {
+          "output": {
+            "response": "The discount is @{expr (100 - 25) / 5} dollars"
+          }
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+</ParamField>
+
+<ParamField path="echo" type="string">
+  Returns the argument unchanged. Primarily useful for debugging template evaluation or forcing explicit variable expansion in complex nested scenarios.
+
+  **Syntax:** `@{echo <text>}`
+
+  **Example:**
+  <CodeBlocks>
+<CodeBlock title="YAML">
+```yaml {13} startLine={8} maxLines=10
+SWAIG:
+    functions:
+      - function: debug_value
+        description: Debug template evaluation
+        parameters:
+          type: object
+          properties:
+            input:
+              type: string
+              description: Value to debug
+        data_map:
+          output:
+            response: "Debug value: @{echo ${args.input}}"
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json {18} startLine={13} maxLines=10
+{
+  "SWAIG": {
+    "functions": [
+      {
+        "function": "debug_value",
+        "description": "Debug template evaluation",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "input": {
+              "type": "string",
+              "description": "Value to debug"
+            }
+          }
+        },
+        "data_map": {
+          "output": {
+            "response": "Debug value: @{echo ${args.input}}"
+          }
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+</ParamField>
+
+<ParamField path="separate" type="string">
+  Inserts spaces between each character in a string to improve text-to-speech pronunciation. Particularly useful for spelling out confirmation codes, license plates, serial numbers, or any text that should be read character-by-character.
+
+  **Syntax:** `@{separate <text>}`
+
+  **Example:**
+  <CodeBlocks>
+<CodeBlock title="YAML">
+```yaml {13} startLine={8} maxLines=10
+SWAIG:
+    functions:
+      - function: spell_code
+        description: Spell out confirmation code
+        parameters:
+          type: object
+          properties:
+            code:
+              type: string
+              description: Confirmation code to spell
+        data_map:
+          output:
+            response: "Your code is @{separate ${args.code}}"
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json {18} startLine={13} maxLines=10
+{
+  "SWAIG": {
+    "functions": [
+      {
+        "function": "spell_code",
+        "description": "Spell out confirmation code",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "code": {
+              "type": "string",
+              "description": "Confirmation code to spell"
+            }
+          }
+        },
+        "data_map": {
+          "output": {
+            "response": "Your code is @{separate ${args.code}}"
+          }
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+In this example, if `code` is "ABC123", the AI will pronounce "A B C 1 2 3" instead of trying to say "ABC123" as a word.
+</ParamField>
+
+<ParamField path="sleep" type="string">
+  Pauses execution for the specified number of seconds. Can be used for rate limiting, timing coordination, or testing purposes.
+
+  **Syntax:** `@{sleep <seconds>}`
+
+  <Warning>
+Use sparingly in production environments. Excessive delays can cause timeouts, impact call quality, and degrade user experience. Best suited for development, testing, or specific rate-limiting scenarios.
+</Warning>
+
+  **Example:**
+  <CodeBlocks>
+<CodeBlock title="YAML">
+```yaml {7} startLine={2} maxLines=10
+SWAIG:
+    functions:
+      - function: delayed_task
+        description: Execute with delay for rate limiting
+        data_map:
+          output:
+            response: "Executed after @{sleep 2} second delay"
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json {9} startLine={4} maxLines=10
+{
+  "SWAIG": {
+    "functions": [
+      {
+        "function": "delayed_task",
+        "description": "Execute with delay for rate limiting",
+        "data_map": {
+          "output": {
+            "response": "Executed after @{sleep 2} second delay"
+          }
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+</ParamField>
+
+## Function chaining
+
+Prefix functions (using `${...}` syntax) can be chained together to apply multiple transformations in sequence. The transformations are applied from left to right.
+
+**Syntax:** `${func1:func2:func3:<value>}`
+
+**Example:**
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml {14} startLine={9} maxLines=10
+SWAIG:
+  functions:
+    - function: search
+      description: Search external knowledge base
+      parameters:
+        type: object
+        properties:
+          query:
+            type: string
+            description: User's search query
+      data_map:
+        webhooks:
+          # First converts to lowercase, then URL encodes
+          - url: 'https://api.example.com/search?q=${lc:enc:url:args.query}'
+            method: GET
+            output:
+              response: "Found results for ${args.query}"
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json {19} startLine={14} maxLines=10
+{
+  "SWAIG": {
+    "functions": [
+      {
+        "function": "search",
+        "description": "Search external knowledge base",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "query": {
+              "type": "string",
+              "description": "User's search query"
+            }
+          }
+        },
+        "data_map": {
+          "webhooks": [
+            {
+              "url": "https://api.example.com/search?q=${lc:enc:url:args.query}",
+              "method": "GET",
+              "output": {
+                "response": "Found results for ${args.query}"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+## Full example
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - answer: {}
+    - ai:
+        prompt:
+          text: |
+            You help users access department resources.
+            When they specify a department, use the lookup function.
+        SWAIG:
+          functions:
+            - function: lookup
+              description: Look up department contact
+              parameters:
+                type: object
+                properties:
+                  department:
+                    type: string
+                    description: Department name from user
+              data_map:
+                expressions:
+                  - string: '${meta_data.contacts.${lc:args.department}}'
+                    pattern: '\w+'
+                    output:
+                      response: "Found contact for ${args.department}"
+              meta_data:
+                contacts:
+                  sales: '+12025551234'
+                  support: '+12025555678'
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "answer": {}
+      },
+      {
+        "ai": {
+          "prompt": {
+            "text": "You help users access department resources.\nWhen they specify a department, use the lookup function.\n"
+          },
+          "SWAIG": {
+            "functions": [
+              {
+                "function": "lookup",
+                "description": "Look up department contact",
+                "parameters": {
+                  "type": "object",
+                  "properties": {
+                    "department": {
+                      "type": "string",
+                      "description": "Department name from user"
+                    }
+                  }
+                },
+                "data_map": {
+                  "expressions": [
+                    {
+                      "string": "${meta_data.contacts.${lc:args.department}}",
+                      "pattern": "\\w+",
+                      "output": {
+                        "response": "Found contact for ${args.department}"
+                      }
+                    }
+                  ]
+                },
+                "meta_data": {
+                  "contacts": {
+                    "sales": "+12025551234",
+                    "support": "+12025555678"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>

@@ -1,0 +1,87 @@
+---
+title: Gathering user input
+slug: /compatibility-api/guides/gather-user-input
+x-custom:
+  author: danieleds
+description: Use cXML to prompt and receive user input.
+---
+import CreateCxmlScriptPartial from '@site/docs/_partials/common/dashboard/_create-cxml-script.mdx';
+import UiAccordionPartial from '@site/docs/_partials/common/dashboard/_ui-accordion.mdx';
+
+
+This article explains how to gather input from users using cXML Scripts.
+
+In general, there are three kinds of input that you could want to gather: keypad
+input, text input via speech recognition, and audio recordings. In this article
+we are going to focus on keypad input and speech recognition.
+
+## cXML for Gathering Input
+
+We are going to define the call handling instructions in a cXML Script hosted on SignalWire.
+
+<CreateCxmlScriptPartial />
+
+<UiAccordionPartial />
+
+Paste the following XML content in your new cXML Script:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+  <Gather
+    input="speech dtmf"
+    action="https://example.com/my-webhook"
+    timeout="5"
+    numDigits="5"
+    hints="one two three four five six seven eight nine">
+    <Say>
+      Welcome! Please enter or say your account number.
+    </Say>
+  </Gather>
+
+  <Say>No input detected.</Say>
+  <Hangup />
+</Response>
+```
+
+We used the [`<Gather>`](/docs/compatibility-api/cxml/reference/voice/gather) verb to gather input as soon as the call starts. We set five attributes:
+
+- `input`, which specifies which kind of input we want to gather (in our case, both speech and DTMF keypad input);
+- `action`, which specifies the URL to fetch when the input has been collected (the URL should return a new cXML document to execute);
+- `timeout`, i.e., the number of seconds of silence or inaction that denote the end of caller input;
+- `numDigits`, which indicates the number of digits to collect via DTMF keypad input; and
+- `hints`, an optional list of words to help the speech recognition algorithm.
+
+Within the `<Gather>` verb, we nested [`<Say>`](/docs/compatibility-api/cxml/reference/voice/say) in order to play some instructions.
+
+When input gathering completes, the script will fetch the URL specified in
+`action` and will execute it. If, instead, no input is detected within the
+timeout, then the following instructions keep executing: in our case, we say "no input detected" and hang up.
+
+## Reading the User Input
+
+When fetching the Gather's `action` URL, SignalWire includes some parameters such as:
+
+- `From`: the caller's number
+- `To`: the callee's number
+- `Digits`: DTMF digits gathered from the user, if any
+- `SpeechResult`: Speech input gathered from the user, if any
+- ...more
+
+With a custom web server, you can read these parameters and, depending on their
+value, emit a different cXML document to execute. You can easily test this with
+sites such as https://webhook.site, which allow you to view the details for
+incoming webhook requests.
+
+## Assigning the Script to a SignalWire Phone Number
+
+The final step is to configure one of your SignalWire phone numbers to answer calls using the cXML Script we just created.
+You can do that from the "Phone Numbers" section:
+
+![Assign Resource.](@image/dashboard/phone-numbers/assign-resource-voice.webp)
+
+## Conclusion
+
+cXML Scripts offer a quick and easy way to get started with common use cases. If you are an advanced developer, or you need more
+flexibility and real-time control on your calls, you may be interested in our
+guide about how to [make and receive calls in Node.js](/docs/server-sdk/node/guides/get-started-with-voice).

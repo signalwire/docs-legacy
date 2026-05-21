@@ -1,0 +1,41 @@
+---
+title: RecordAction
+slug: /ruby/reference/calling/actions/record
+description: The RecordAction object is returned when starting a record operation on a call.
+toc_max_heading_level: 3
+---
+
+[call]: /docs/server-sdk/v2/ruby/reference/calling/call#record
+[relay-calling-recordresult]: /docs/server-sdk/v2/ruby/reference/calling/results/record
+[relay-calling-stopresult]: /docs/server-sdk/v2/ruby/reference/calling/results/stop
+
+# Relay::Calling::RecordAction
+
+This object is returned by the [`record!`][call] method and represents a recording that is currently active on a call.
+
+## Properties
+
+| Property | Type | Description |
+| :------- | :--- | :---------- |
+| `result` | [`Relay::Calling::RecordResult`][relay-calling-recordresult] | Final result of recording. |
+| `state` | String | Current state of recording. |
+| `completed` | Boolean | Whether the recording has finished. |
+| `payload` | Hash | Payload sent to Relay to start recording. |
+| `controlId` | String | UUID to identify the recording. |
+| `url` | String | Url of the recording. The file may not be present until the recording is finished. |
+
+## Methods
+
+### stop
+
+Stop the action immediately.
+
+
+
+**Parameters**
+
+None
+
+**Returns**
+
+[`Relay::Calling::StopResult`][relay-calling-stopresult] - A `StopResult` object with a `successful` property.

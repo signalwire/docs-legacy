@@ -1,0 +1,29 @@
+---
+title: "videoMute"
+slug: /js/reference/video/room-session-device/video-mute
+description: videoMute method for the RoomSessionDevice class.
+toc_max_heading_level: 3
+---
+
+### videoMute
+
+▸ **videoMute**(): `Promise<void>`
+
+Puts the video on mute. Participants will see a mute image instead of the video stream.
+
+#### Returns
+
+`Promise<void>`
+
+#### Permissions
+
+- `room.self.video_mute`
+
+You need to specify the permissions when [creating the Video Room Token](/docs/apis/video/create-room-token) on the server side.
+
+#### Example
+
+```javascript
+await roomdevice.videoMute();
+```
+

@@ -1,0 +1,48 @@
+---
+title: "demote"
+slug: /js/reference/video/room-session/demote
+description: demote method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+### demote
+
+- **demote**(`params`): `Promise<void>`
+
+Demotes a participant from "member" to "audience". See [join](/docs/browser-sdk/js/reference/video/room-session/join) and [promote](/docs/browser-sdk/js/reference/video/room-session/promote).
+
+#### Parameters
+
+<ParamField path="params" type="object">
+  Object containing the parameters of the method.
+</ParamField>
+
+<Indent>
+<ParamField path="memberId" type="string" required={false}>
+  Id of the member to affect. If omitted, affects the current member.
+</ParamField>
+
+<ParamField path="mediaAllowed" type='"all" | "audio-only" | "video-only"' required={false}>
+  Specifies the media that the client will be allowed to _receive_. An audience participant cannot send any media.
+</ParamField>
+</Indent>
+
+#### Returns
+
+`Promise<void>`
+
+#### Permissions
+
+- `room.member.demote`
+
+You need to specify the permissions when [creating the Video Room Token](/docs/apis/video/create-room-token) on the server side.
+
+#### Example
+
+```javascript
+await roomSession.demote({
+  memberId: "de550c0c-3fac-4efd-b06f-b5b8614b8966",
+  mediaAllowed: "all",
+});
+```
+

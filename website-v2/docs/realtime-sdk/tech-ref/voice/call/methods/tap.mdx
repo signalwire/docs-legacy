@@ -1,0 +1,107 @@
+---
+title: "tap"
+slug: /node/reference/voice/call/tap
+description: tap method for the Call class.
+toc_max_heading_level: 3
+---
+
+[calltap-onstarted]: /docs/server-sdk/node/reference/voice/call-tap#onstarted
+[calltap]: /docs/server-sdk/node/reference/voice/call-tap
+[tapaudio]: /docs/server-sdk/node/reference/voice/call/tap-audio
+[tapdevice]: /docs/server-sdk/node/reference/voice/types#tapdevice
+
+### tap
+
+- **tap**(`params`): `Promise`\<[`CallTap`][calltap]>
+
+Intercept call media and stream it to the specified WebSocket endpoint.
+Prefer using [tapAudio][tapaudio] if you only need to tap audio.
+
+<Warning>
+
+This is an experimental method. The destination must be a hosted WebSocket/RTP server, with an address that SignalWire can reach.
+
+A current limitation of this method is that the destination device does not receive any metadata regarding the origin of the stream.
+
+</Warning>
+
+#### Parameters
+
+<ParamField path="params" type="object" required>
+  Object containing the parameters for tapping the call.
+</ParamField>
+
+<Indent>
+<ParamField path="device" type="TapDevice" required>
+  Destination device. Can be either WebSocket or RTP. See [`TapDevice`][tapdevice].
+</ParamField>
+
+<ParamField path="audio" type="object" required>
+  An object with the configuration for audio tapping. See audio parameters below.
+</ParamField>
+
+<Indent>
+<ParamField path="direction" type='"listen" | "speak" | "both"' required>
+  Direction to tap. Can be `"listen"` (what the caller hears), `"speak"` (what the caller says), or `"both"`.
+</ParamField>
+</Indent>
+
+<ParamField path="listen" type="object">
+  Callback to listen for events. List of tap events can be found [here][calltap]. Example event: [`onStarted`][calltap-onstarted].
+</ParamField>
+</Indent>
+
+#### Returns
+
+`Promise`\<[`CallTap`][calltap]>
+
+A promise that resolves to a [`CallTap`][calltap] object that you can use to
+view the current state and results of the `tap` session.
+
+#### Example
+
+In this example, we dial a phone number and tap the call audio
+to a WebSocket endpoint. After the call is tapped, we play a TTS message
+to the caller, and then stop the tap and hangup the call.
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+const voiceClient = client.voice;
+
+// Listen for incoming calls
+await voiceClient.listen({
+
+  topics: ["office"],
+  onCallReceived: async (call) => {
+    console.log("Call received");
+    // Answer the call
+    await call.answer();
+
+    // Start a tap
+    const callTap = await call.tap({
+      device: {
+        type: "ws",
+        uri: "wss://example.domain.com/websocket_endpoint"
+      },
+      audio: {
+        direction: "both",
+      },
+      listen: {
+        onStarted: () => {
+          console.log("Tap started");
+        },
+        onEnded: () => {
+          console.log("Tap ended");
+        },
+      }
+    }).onStarted();
+    await call.playTTS({ text: "We are currently tapping the call audio." });
+    // Stop the tap
+    await callTap.stop();
+    call.hangup();
+  }
+});
+```

@@ -1,0 +1,33 @@
+---
+title: Echo
+sidebar_label: Echo
+slug: /compatibility-api/cxml/reference/voice/echo
+sidebar_position: 1
+toc_max_heading_level: 3
+---
+
+The `<Echo>` verb will echo audio back to the call.
+
+## Verb attributes
+
+<ParamField path="timeout" type="integer" default="60">
+  The number of seconds SignalWire will echo, from 5 up to 120 seconds.
+</ParamField>
+
+## Nesting
+
+No other verbs can be nested within `<Echo>`.
+
+## Examples
+
+### A simple echo test
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Echo timeout="120"/>
+    <Hangup/>
+</Response>
+```
+
+SignalWire answers calls and echoes what it hears for 2 minutes.

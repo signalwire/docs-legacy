@@ -1,0 +1,442 @@
+---
+title: Configuration files
+sidebar_label: "Configuration files"
+description: >-
+  Learn about the unified configuration system for SignalWire AI Agents SDK,
+  including JSON configuration files and environment variable substitution.
+slug: /python/reference/configuration
+keywords:
+  - SignalWire
+  - agents
+  - sdk
+  - ai
+  - python
+toc_max_heading_level: 3
+---
+
+# Config files
+
+Config files enable granular, isolated control of development, staging, and production environments,
+and allow substitution of sensitive values using environment variables.
+
+## Usage
+
+### Auto-load
+
+<div className="row">
+
+<div className="col col--6">
+
+The simplest way to start is to place a `config.json` file next to your agent in the project directory.
+It will be loaded automatically.
+
+</div>
+<div className="col col--6">
+
+<Files>
+  <File name="config.json" />
+  <File name="dev-agent.py" />
+  <Folder name="venv" />
+</Files>
+
+</div>
+</div>
+
+### Declare path
+
+If you want to specify the path to your config file, pass it in using the `config_file` parameter.
+
+<Tabs>
+
+<TabItem value="with-agentbase-class" label="With AgentBase class">
+
+```python title="agent.py"
+from signalwire_agents import AgentBase
+
+# Create an agent
+agent = AgentBase(name="Sigmond", config_file="./path/to/config.json")
+
+# Start the agent
+agent.serve()
+```
+
+</TabItem>
+
+<TabItem value="with-a-custom-class" label="With a custom class">
+
+When using a custom class, make sure to include the `**kwargs` parameter in the two places shown below.
+
+This allows our custom TestAgent class to accept and pass through any AgentBase parameters (like config_file)
+without explicitly defining each one in the constructor.
+
+```python title="agent.py"
+from signalwire_agents import AgentBase
+
+class TestAgent(AgentBase):
+
+    def __init__(self, **kwargs):
+        super().__init__(name="test", **kwargs)
+
+agent = TestAgent(config_file="./path/to/config.json")
+
+# Start the agent
+agent.serve()
+```
+
+</TabItem>
+
+</Tabs>
+
+### Structure
+
+Configuration files support both JSON and YAML formats with environment variable substitution.
+Here's a complete example showing the main configuration sections:
+
+```json
+{
+  "service": {
+    "name": "my-service",
+    "host": "${HOST|0.0.0.0}",
+    "port": "${PORT|3000}"
+  },
+  "security": {
+    "ssl_enabled": "${SSL_ENABLED|false}",
+    "ssl_cert_path": "${SSL_CERT|/etc/ssl/cert.pem}",
+    "ssl_key_path": "${SSL_KEY|/etc/ssl/key.pem}",
+    "auth": {
+      "basic": {
+        "enabled": true,
+        "user": "${AUTH_USER|signalwire}",
+        "password": "${AUTH_PASSWORD}"
+      },
+      "bearer": {
+        "enabled": "${BEARER_ENABLED|false}",
+        "token": "${BEARER_TOKEN}"
+      }
+    },
+    "allowed_hosts": ["${PRIMARY_HOST}", "${SECONDARY_HOST|localhost}"],
+    "cors_origins": "${CORS_ORIGINS|*}",
+    "rate_limit": "${RATE_LIMIT|60}"
+  }
+}
+```
+
+### Service options
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `service.name` | string | - | Service name for identification. This is the name set when instantiating your agent. |
+| `service.host` | string | `"0.0.0.0"` | Host/IP address to bind to |
+| `service.port` | number | `3000` | Port number to listen on |
+| `service.route` | string | `"/"` | Base route path for the service |
+
+### Security options
+
+All services share the same security configuration options:
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `ssl_enabled` | boolean | `false` | Enable HTTPS/SSL encryption |
+| `ssl_cert_path` | string | - | Path to SSL certificate file |
+| `ssl_key_path` | string | - | Path to SSL private key file |
+| `domain` | string | - | Domain name for SSL configuration |
+| `allowed_hosts` | array | `["*"]` | List of allowed host headers |
+| `cors_origins` | array | `["*"]` | List of allowed CORS origins |
+| `max_request_size` | number | `10485760` | Maximum request size in bytes (10MB) |
+| `rate_limit` | number | `60` | Requests per minute |
+| `request_timeout` | number | `30` | Request timeout in seconds |
+| `use_hsts` | boolean | `true` | Enable HTTP Strict Transport Security |
+| `hsts_max_age` | number | `31536000` | HSTS max age in seconds (1 year) |
+
+Here's a comprehensive example:
+
+```json
+{
+  "security": {
+    "ssl_enabled": true,
+    "ssl_cert_path": "/etc/ssl/cert.pem",
+    "ssl_key_path": "/etc/ssl/key.pem",
+    "domain": "api.example.com",
+
+    "allowed_hosts": ["api.example.com", "app.example.com"],
+    "cors_origins": ["https://app.example.com"],
+
+    "max_request_size": 5242880,
+    "rate_limit": 30,
+    "request_timeout": 60,
+
+    "use_hsts": true,
+    "hsts_max_age": 31536000
+  }
+}
+```
+
+### Agent options
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `agent.auto_answer` | boolean | `true` | Automatically answer incoming calls |
+| `agent.record_call` | boolean | `false` | Enable call recording |
+| `agent.record_format` | string | `"mp4"` | Recording format (`mp3`, `mp4`, `wav`) |
+| `agent.record_stereo` | boolean | `true` | Record in stereo (separate channels for each party) |
+| `agent.token_expiry_secs` | number | `3600` | Token expiration time in seconds |
+| `agent.use_pom` | boolean | `true` | Use Prompt Object Model for prompt construction |
+
+```json
+{
+  "agent": {
+    "auto_answer": true,
+    "record_call": true,
+    "record_format": "mp3",
+    "record_stereo": true,
+    "token_expiry_secs": 7200,
+    "use_pom": true
+  }
+}
+```
+
+### Skills options
+
+Skills can be activated and configured via the config file:
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `skills[].name` | string | Skill identifier (e.g., `datetime`, `math`, `native_vector_search`) |
+| `skills[].params` | object | Skill-specific configuration parameters |
+
+```json
+{
+  "skills": [
+    { "name": "datetime" },
+    { "name": "math" },
+    {
+      "name": "native_vector_search",
+      "params": {
+        "index_path": "./knowledge.swsearch",
+        "tool_name": "search_docs",
+        "tool_description": "Search the knowledge base"
+      }
+    }
+  ]
+}
+```
+
+### Logging options
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `logging.level` | string | `"info"` | Log level (`debug`, `info`, `warning`, `error`) |
+| `logging.format` | string | `"structured"` | Output format (`structured`, `plain`) |
+| `logging.mode` | string | `"default"` | Logging mode (`default`, `off`) |
+
+```json
+{
+  "logging": {
+    "level": "info",
+    "format": "structured",
+    "mode": "default"
+  }
+}
+```
+
+---
+
+## Prioritization
+
+Services in the Agents SDK look for configuration files in the below locations, in this order:
+
+1. Service-specific: `{service_name}_config.json` (e.g., `search_config.json`)
+2. Generic: `config.json`
+3. Hidden: `.swml/config.json`
+4. User home: `~/.swml/config.json`
+5. System: `/etc/swml/config.json`
+
+Configuration values are applied in this order (highest to lowest):
+
+1. **Constructor parameters** - Explicitly passed to service
+2. **Config file values** - From JSON configuration
+3. **Environment variables** - Direct env vars
+4. **Defaults** - Hard-coded defaults
+
+The SDK validates config files on load, checking for required fields, correct types, and valid file paths (e.g., SSL certificates).
+
+## Environment variables
+
+### Substitution
+
+The configuration system supports `${VAR|default}` syntax:
+
+- `${VAR}` - Use environment variable VAR (error if not set)
+- `${VAR|default}` - Use VAR or "default" if not set
+- `${VAR|}` - Use VAR or empty string if not set
+
+For example:
+
+```json title="config.json"
+{
+  "database": {
+    "host": "${DB_HOST|localhost}",
+    "port": "${DB_PORT|5432}",
+    "password": "${DB_PASSWORD}"
+  }
+}
+```
+
+<Accordion title="Set environment variables" defaultOpen={true}>
+
+Environment variables can be set in several ways depending on your deployment method.
+For example:
+
+<Tabs>
+<TabItem value=".env-file" label=".env file">
+
+Create a `.env` file in your project root (add to `.gitignore`):
+
+```bash title=".env"
+DB_PASSWORD=mysecretpassword
+SSL_ENABLED=true
+AUTH_USER=myuser
+```
+
+Optionally, use `python-dotenv` to load the `.env` variables:
+```bash
+pip install python-dotenv
+```
+
+```python
+from dotenv import load_dotenv
+load_dotenv()  # This loads the .env file
+```
+
+</TabItem>
+<TabItem value="command-line" label="Command line">
+
+Run the following commands in sequence:
+
+```bash
+export DB_PASSWORD=mysecretpassword
+export SSL_ENABLED=true
+export AUTH_USER=myuser
+```
+
+</TabItem>
+<TabItem value="docker" label="Docker">
+
+```bash
+docker run -e DB_PASSWORD=mysecretpassword -e SSL_ENABLED=true myapp
+```
+
+</TabItem>
+<TabItem value="docker-compose" label="Docker Compose">
+
+```yaml
+environment:
+  - DB_PASSWORD=mysecretpassword
+  - SSL_ENABLED=true
+  - AUTH_USER=myuser
+```
+
+</TabItem>
+<TabItem value="kubernetes" label="Kubernetes">
+
+```yaml
+env:
+  - name: DB_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: db-secret
+        key: password
+```
+
+</TabItem>
+</Tabs>
+
+For [serverless deployment](/docs/agents-sdk/python/guides/serverless),
+refer to each provider's docs on managing environment variables:
+
+<CardGroup cols={3}>
+  <Card
+    title="AWS Lambda"
+    href="https://docs.aws.amazon.com/lambda/latest/dg/configuration-envvars.html"
+  >
+    Configure environment variables for Lambda functions
+  </Card>
+  <Card
+    title="Google Cloud Functions"
+    href="https://cloud.google.com/functions/docs/configuring/env-var"
+  >
+    Set environment variables in Cloud Functions
+  </Card>
+  <Card
+    title="Azure Functions"
+    href="https://docs.microsoft.com/en-us/azure/azure-functions/functions-how-to-use-azure-function-app-settings"
+  >
+    Manage app settings and environment variables
+  </Card>
+</CardGroup>
+
+</Accordion>
+
+## Examples
+
+### Development
+
+This simple config sets up basic auth without SSL on port 3000.
+
+```json
+{
+  "service": {
+    "host": "localhost",
+    "port": 3000
+  },
+  "security": {
+    "ssl_enabled": false,
+    "auth": {
+      "basic": {
+        "user": "dev",
+        "password": "devpass123"
+      }
+    }
+  }
+}
+```
+
+### Production
+
+This config secures your service with SSL encryption,
+domain-based host restrictions,
+and environment variable substitution for sensitive credentials.
+
+```json
+{
+  "service": {
+    "host": "${HOST|0.0.0.0}",
+    "port": "${PORT|443}"
+  },
+  "security": {
+    "ssl_enabled": true,
+    "ssl_cert_path": "${SSL_CERT_PATH}",
+    "ssl_key_path": "${SSL_KEY_PATH}",
+    "domain": "${DOMAIN}",
+    "auth": {
+      "basic": {
+        "user": "${AUTH_USER}",
+        "password": "${AUTH_PASSWORD}"
+      }
+    },
+    "allowed_hosts": ["${DOMAIN}"],
+    "use_hsts": true
+  }
+}
+```
+
+## Best practices
+
+1. **Use environment substitution** for sensitive values
+2. **Validate configurations** before deploying to production
+3. **Document custom configurations** for your team
+4. **Test configurations** in staging environments first
+5. **Version control** non-sensitive configuration templates
+6. **Monitor configuration loading** in application logs
+
+For detailed security configuration options, see the [Security guide](/docs/agents-sdk/python/guides/security).

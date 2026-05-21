@@ -1,0 +1,31 @@
+---
+title: StopResult
+slug: /go/reference/calling/results/stop
+description: The result object that is returned when stopping a call.
+toc_max_heading_level: 3
+---
+
+[relay-event]: /docs/server-sdk/v2/go/reference/event
+
+## Relay.Calling.StopResult
+
+This object is returned from synchronous stop methods and represents the final result of a stop operation.
+
+## Methods
+
+### getEvent
+
+Returns the last Relay Event that arrived for this operation.
+
+**Returns**
+
+[`*signalwire.Event`][relay-event] - Last Relay Event.
+
+
+### getSuccessful
+
+Returns `true` if the stop operation was successful, `false` otherwise.
+
+**Returns**
+
+`bool` - Whether the stop operation has finished successfully.

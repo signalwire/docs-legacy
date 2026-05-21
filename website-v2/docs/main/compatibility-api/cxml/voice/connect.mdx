@@ -1,0 +1,41 @@
+---
+title: Connect
+sidebar_label: Connect
+slug: /compatibility-api/cxml/reference/voice/connect
+sidebar_position: 1
+toc_max_heading_level: 3
+---
+
+The `<Connect>` verb connects an existing call to another resource.
+
+You can use the `<Connect>` verb with the following nouns:
+
+|                    Noun                     |                             |
+|:-------------------------------------------:|:---------------------------:|
+|         [`<Room>`](/docs/compatibility-api/cxml/reference/voice/room)         |        A video room.        |
+|         [`<Stream>`](/docs/compatibility-api/cxml/reference/voice/stream)          |   A bidirectional stream.   |
+| [`<VirtualAgent>`](/docs/compatibility-api/cxml/reference/voice/virtual-agent) | A Dialogflow virtual agent. |
+
+## Examples
+
+### A simple connect
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+  <Connect>
+    <Room>my-room-name</Room>
+  </Connect>
+</Response>
+```
+
+### Bidirectional media stream
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+  <Connect>
+    <Stream url="wss://your-application.com/audiostream" />
+  </Connect>
+</Response>
+```

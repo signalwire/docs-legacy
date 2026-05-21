@@ -1,0 +1,49 @@
+---
+title: address.getAddress
+slug: /signalwire-client/address-get-address
+---
+
+import APIField from '@site/src/components/APIField';
+
+Retrieves detailed information about a specific address by its ID or by its name. 
+
+The response includes the preview URL, display name, resource type, available channels, lock status, and timestamps.
+For full type information, see the [`GetAddressResult`](../../Types/index.mdx#getaddressresult) type.
+
+## Parameters
+
+<APIField name="addressId" type="string" required>
+  The unique identifier of the address to retrieve.
+</APIField>
+
+## Signature
+
+```typescript
+address.getAddress(addressId: string): Promise<GetAddressResult>
+```
+
+## Returns
+
+**Type:** `Promise<`[`GetAddressResult`](../../Types/index.mdx#getaddressresult)`>`
+
+Returns a Promise that resolves with detailed information about the requested address.
+
+## Examples
+
+### Get address by ID
+
+```typescript
+const address = await client.address.getAddress({id: 'address-id-here'})
+
+console.log('Address:', address.number)
+console.log('Type:', address.type)
+```
+
+### Get address by name
+
+```typescript
+const address = await client.address.getAddress({name: 'address-name-here'})
+
+console.log('Address:', address.number)
+console.log('Type:', address.type)
+```

@@ -1,0 +1,98 @@
+---
+title: "RoomSessionScreenShare"
+sidebar_position: 6
+slug: /js/reference/video/room-session-screen-share
+toc_max_heading_level: 3
+---
+
+Represents a screen share. This object is returned by the [startScreenShare](/docs/browser-sdk/js/reference/video/room-session/start-screen-share) method in a RoomSession, and can be used to control the screen share.
+
+## Properties
+
+<Indent>
+  <ParamField path="active" type="boolean">
+    Whether the connection is currently active.
+  </ParamField>
+
+  <ParamField path="cameraId" type="string | null">
+    The id of the video device, or null if not available.
+  </ParamField>
+
+  <ParamField path="cameraLabel" type="string | null">
+    The label of the video device, or null if not available.
+  </ParamField>
+
+  <ParamField path="localAudioTrack" type="MediaStreamTrack | null">
+    Provides access to the local audio [MediaStreamTrack](https://developer.mozilla.org/en-US/docs/Web/API/MediaStreamTrack).
+  </ParamField>
+
+  <ParamField path="localStream" type="MediaStream | undefined">
+    Provides access to the local [MediaStream](https://developer.mozilla.org/en-US/docs/Web/API/MediaStream).
+  </ParamField>
+
+  <ParamField path="localVideoTrack" type="MediaStreamTrack | null">
+    Provides access to the local video [MediaStreamTrack](https://developer.mozilla.org/en-US/docs/Web/API/MediaStreamTrack).
+  </ParamField>
+
+  <ParamField path="memberId" type="string">
+    The id of the current member within the room.
+  </ParamField>
+
+  <ParamField path="microphoneId" type="string | null">
+    The id of the audio input device, or null if not available.
+  </ParamField>
+
+  <ParamField path="microphoneLabel" type="string | null">
+    The label of the audio input device, or null if not available.
+  </ParamField>
+
+  <ParamField path="remoteStream" type="MediaStream | undefined">
+    Provides access to the remote [MediaStream](https://developer.mozilla.org/en-US/docs/Web/API/MediaStream).
+  </ParamField>
+
+  <ParamField path="roomId" type="string">
+    The unique identifier for the room.
+  </ParamField>
+
+  <ParamField path="roomSessionId" type="string">
+    The unique identifier for the room session.
+  </ParamField>
+</Indent>
+
+## Methods
+
+<CardGroup cols={3}>
+  <Card title="join" href="/docs/browser-sdk/js/reference/video/room-session-screen-share/join">
+    Join the room session
+  </Card>
+  <Card title="leave" href="/docs/browser-sdk/js/reference/video/room-session-screen-share/leave">
+    Leave the room session
+  </Card>
+  <Card title="audioMute" href="/docs/browser-sdk/js/reference/video/room-session-screen-share/audio-mute">
+    Mute the microphone
+  </Card>
+  <Card title="audioUnmute" href="/docs/browser-sdk/js/reference/video/room-session-screen-share/audio-unmute">
+    Unmute the microphone
+  </Card>
+  <Card title="videoMute" href="/docs/browser-sdk/js/reference/video/room-session-screen-share/video-mute">
+    Mute the video
+  </Card>
+  <Card title="videoUnmute" href="/docs/browser-sdk/js/reference/video/room-session-screen-share/video-unmute">
+    Unmute the video
+  </Card>
+  <Card title="updateCamera" href="/docs/browser-sdk/js/reference/video/room-session-screen-share/update-camera">
+    Switch to a different camera
+  </Card>
+  <Card title="updateMicrophone" href="/docs/browser-sdk/js/reference/video/room-session-screen-share/update-microphone">
+    Switch to a different microphone
+  </Card>
+  <Card title="setInputVolume" href="/docs/browser-sdk/js/reference/video/room-session-screen-share/set-input-volume">
+    Set the input volume level
+  </Card>
+  <Card title="setInputSensitivity" href="/docs/browser-sdk/js/reference/video/room-session-screen-share/set-input-sensitivity">
+    Set the input sensitivity level
+  </Card>
+  <Card title="~~setMicrophoneVolume~~" icon="fa-solid fa-triangle-exclamation" href="/docs/browser-sdk/js/reference/video/room-session-screen-share/set-microphone-volume">
+    *Set microphone volume (deprecated)*
+  </Card>
+</CardGroup>

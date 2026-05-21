@@ -1,0 +1,198 @@
+---
+title: startScreenShare
+slug: /call-session/startscreenshare
+---
+
+import APIField from '@site/src/components/APIField';
+
+Starts screen sharing within the call, allowing you to share your screen, application window, or browser tab with other participants.
+
+## Parameters
+
+<APIField name="opts" type="[StartScreenShareOptions](../types#startscreenshareoptions)">
+  Screen share configuration options.
+</APIField>
+
+<APIField name="opts.autoJoin" type="boolean" default="true">
+  Whether to automatically join the screen share to the call.
+</APIField>
+
+<APIField name="opts.audio" type="boolean | MediaTrackConstraints" default="false">
+  Whether to capture system audio with the screen share.
+</APIField>
+
+<APIField name="opts.video" type="boolean | MediaTrackConstraints" default="true">
+  Whether to capture video (the screen content).
+</APIField>
+
+<APIField name="opts.layout" type="string">
+  Layout name to use for the screen share.
+</APIField>
+
+<APIField name="opts.positions" type="object">
+  Position configuration for the screen share in the layout.
+</APIField>
+
+## Signature
+
+```typescript
+call.startScreenShare(opts?: StartScreenShareOptions): Promise<RoomSessionScreenShare>
+```
+
+## Returns
+
+**Type:** `Promise<RoomSessionScreenShare>`
+
+A Promise that resolves with a `RoomSessionScreenShare` object representing the active screen share session.
+
+## Examples
+
+### Basic Screen Share
+
+```typescript
+// Start screen sharing (user will be prompted to select screen/window/tab)
+const screenShare = await call.startScreenShare()
+console.log('Screen sharing started')
+```
+
+### Screen Share with Audio
+
+```typescript
+// Share screen with system audio (if supported by browser)
+const screenShare = await call.startScreenShare({
+  audio: true,
+  video: true
+})
+```
+
+### Manual Join Control
+
+```typescript
+// Create screen share but don't join automatically
+const screenShare = await call.startScreenShare({
+  autoJoin: false
+})
+
+// Join manually later
+await screenShare.join()
+```
+
+### Screen Share with Layout
+
+```typescript
+// Start screen share with specific layout
+const screenShare = await call.startScreenShare({
+  layout: '1x1',
+  positions: {
+    self: 'standard'
+  }
+})
+```
+
+### Stop Screen Share
+
+```typescript
+const screenShare = await call.startScreenShare()
+
+// Later, stop sharing
+await screenShare.leave()
+```
+
+### Handle Screen Share Lifecycle
+
+```typescript
+const screenShare = await call.startScreenShare()
+
+// Listen for when screen share ends
+screenShare.on('room.left', () => {
+  console.log('Screen sharing stopped')
+  // Update UI
+})
+
+// User clicks stop button in browser or your app
+await screenShare.leave()
+```
+
+### Presentation Mode
+
+```typescript
+async function startPresentation() {
+  try {
+    const screenShare = await call.startScreenShare({
+      audio: true // Include system audio for video playback
+    })
+
+    // Optional: Mute your camera while presenting
+    await call.videoMute()
+
+    return screenShare
+  } catch (error) {
+    console.error('Failed to start presentation:', error)
+  }
+}
+```
+
+### Screen Share Toggle
+
+```typescript
+let activeScreenShare = null
+
+async function toggleScreenShare() {
+  if (activeScreenShare) {
+    // Stop existing screen share
+    await activeScreenShare.leave()
+    activeScreenShare = null
+  } else {
+    // Start new screen share
+    activeScreenShare = await call.startScreenShare()
+
+    activeScreenShare.on('room.left', () => {
+      activeScreenShare = null
+      updateUIButton('Share Screen')
+    })
+
+    updateUIButton('Stop Sharing')
+  }
+}
+```
+
+## Important Notes
+
+**Browser Prompt:** When you call this method, the browser will display a native dialog asking the user to select what to share:
+- **Entire screen** - Share the full desktop
+- **Application window** - Share a specific application
+- **Browser tab** - Share a specific tab
+
+**System Audio:** The `audio: true` option allows capturing system audio along with screen content. This is useful for:
+- Sharing videos with sound
+- Presenting applications with audio
+- Broadcasting computer audio
+
+**Note:** System audio capture is only supported in Chrome/Edge and requires specific permissions.
+
+**Automatic Stop:** The screen share will automatically end when:
+- User clicks the browser's "Stop sharing" button
+- The video track ends
+- You call `screenShare.leave()`
+
+**Multiple Screen Shares:** You can have multiple simultaneous screen shares. Access them via `call.screenShareList`:
+
+```typescript
+// Start first screen share
+const screenShare1 = await call.startScreenShare()
+
+// Start second screen share
+const screenShare2 = await call.startScreenShare()
+
+// Both are tracked
+console.log(call.screenShareList) // [screenShare1, screenShare2]
+```
+
+**RoomSessionScreenShare Object:** The returned object has its own methods and events:
+- `screenShare.leave()` - Stop the screen share
+- `screenShare.on('room.left', handler)` - Listen for end events
+
+**Browser Support:** Screen sharing requires:
+- Modern browsers (Chrome, Edge, Firefox, Safari)
+- Secure context (HTTPS or localhost)
+- User permission (granted via browser prompt)

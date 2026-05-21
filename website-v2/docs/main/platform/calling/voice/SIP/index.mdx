@@ -1,0 +1,114 @@
+---
+title: SIP
+sidebar_label: SIP
+slug: /platform/voice/sip
+sidebar_position: 1
+---
+
+Session Initiation Protocol (SIP) is a signaling protocol used for initiating, maintaining, and terminating real-time communication sessions. 
+These sessions can include voice and video applications over the Internet. 
+
+## Overview
+
+SIP is fundamental to modern Voice over IP (VoIP) communications and enables features such as:
+
+- Voice and video calls
+- Conference calling
+- Presence information
+- Multimedia distribution
+
+Getting started with SIP involves understanding a few key components:
+- SIP endpoints (phones, softphones, or applications)
+- SIP servers (proxies, registrars)
+- Network requirements
+
+In traditional telephony, there has always been a very clear distinction between the two phases of a call. 
+
+- "Call Setup", known as **Signaling**, is the process of getting a voice call to begin and included getting the two phones in question to connect.
+- "Data Transfer", or **Media** as the name implies, was the process by which data, considered as the voice, moves from one phone to the other. 
+
+**SIP (Session Initiation Protocol)**, at its simplest explanation, 
+is a way of transmitting a call through a SIP trunk, which we will cover later. 
+SIP was designed to be a general protocol to set up real-time multimedia sessions between groups of participants. 
+SIP enables users to communicate through all channels, including voice, fax, SMS, MMS, and even video via a given network. 
+In a nutshell, with SIP, one can move their PBX system to the cloud, enabling **VoIP (Voice over IP)**.
+
+### How does SIP calling work?
+
+There are three main parts to a traditional phone system. 
+
+- **PBX (Private Branch Exchange)** - the physical system that manages your calls. 
+When you hear PBX, think about the brains of the network and the component that enables different functions to take place like voicemail or call transfer.
+- **PRI (Primary Rate Interface) Lines** - physical lines that connect the PBX to the PSTN.
+- **PSTN (Public Switched Telephone Network)** - the network that routes the calls to their final destination. 
+
+SIP allows you to remove that second part and operate a phone system without the need for PRI lines.
+With SIP, voice calls can now be transferred between the PBX and the PSTN through the cloud as opposed to actual, physical lines. 
+Because a physical connection to a voice provider or phone company is no longer required, you can send data through a **SIP trunk**, a type of virtual phone line. 
+SIP trunks allow calls to be broken down into digital packets and sent across a network to their final destination, which means you are able to send calls to any phone number worldwide. 
+This is perhaps one of the largest benefits to SIP trunking; 
+as many phone companies charge for international long-range calling, these costs can be avoided through communicating via SIP.
+
+### What are the benefits of SIP?
+
+#### Flexibility
+
+SIP phone systems enable you to perform a wide range of functions that a traditional phone system may not allow you to do. Some of these functions include:
+
+- The capability to identify a user's location.
+- The capability to determine user availability.
+- The ability to set up and manage different sessions (i.e. transferring and terminating calls, adding three-way conferences, etc.)
+- Enabling instant messaging, multimedia conferences, user presence information, and E911 calls for emergencies.
+- Bridging different sets of equipment and software by negotiating common capabilities before the calls start, akin to two people who speak different languages finding a way to communicate. SIP has the benefit of working with diverse vendors and setups as long as they share even a fraction of similar capabilities.
+
+#### Affordability
+
+As we alluded to earlier, a big benefit of alternating to a SIP trunk is price-oriented. We had mentioned how you save on long-range calls and international calls due to every call being viewed as a local call through SIP. However, there are other areas that a SIP trunk saves money in, including:
+
+- The elimination of regular hardware purchases and the costs to install and maintain the hardware.
+- The elimination of monthly subscription fees to a traditional telephone provider.
+- The streamlining, downsizing, and possible eliminating of small and/or consequentially obsolete networks. 
+
+#### Scalability
+
+Revisiting the affordability aspect, when a company expands, the hardware and the labor to also expand their traditional phone system becomes expensive as well. On top of the hardware, increasing the number of phones also requires you to buy additional phone lines which normally must be purchased in large quantities, thus requiring you to purchase more phone lines than what you actually need. This can be a huge limiting factor to the capabilities of the company while also increasing the cost of taking in new employees. By using SIP, you can scale at your own pace and only purchase what you need, making the scalability of your business much more practical.
+
+#### Ease of maintenance and operation
+
+SIP calling consolidates your entire communication network into a handful of devices, making the system easy to troubleshoot. In the event of an issue, SIP trunking enables better failover, as you can have more than one SIP provider in order to provide redundancy and cut down on network downtime.
+
+#### Sound quality
+
+Most SIP providers offer wideband audio or HD voice with a higher sample rate of telephone audio, giving your phone higher fidelity audio than other systems.
+
+## Using a softphone with SignalWire {#softphone-configuration}
+
+Any SIP-compatible softphone (such as Zoiper, Bria, Linphone, MicroSIP, or 3CX) can be used with a SignalWire SIP Credential.
+After [creating a SIP credential](/docs/platform/voice/sip) in your SignalWire Dashboard, configure your softphone with the following settings.
+All fields are required.
+
+| Setting | Description |
+|---------|-------------|
+| Domain | Your SIP Credential domain (e.g., `your-space.sip.signalwire.com`) |
+| Username | The username of your SIP Credential. This setting can be adjusted in the URI field when creating a new SIP Credential |
+| Password | The password set when creating your SIP Credential |
+| Transport | The signaling transport protocol: TLS, TCP, or UDP. Must match the transport configured on your SIP Credential. |
+| Encryption type | Controls media encryption (SRTP). Must match your Credential setting: `required` or `optional`. |
+
+<Note>
+The **Domain**, **Username**, and **Password** are all found and created via the SIP Credential page
+of your [SignalWire Dashboard](https://my.signalwire.com/resources/sips).
+</Note>
+
+For app-specific setup steps, refer to your softphone's official documentation.
+
+## SIP gateways
+
+A SIP gateway is a [Resource](/docs/platform/resources) on SignalWire's Call Fabric platform that forwards calls to external SIP addresses. When you assign a phone number or other [Address](/docs/platform/addresses) to a SIP gateway, incoming calls are seamlessly routed to the configured destination with support for configurable encryption and codec settings.
+
+SIP gateways are distinct from [SIP Domain Applications](/docs/platform/voice/sip/domain-applications), which route inbound calls to SignalWire SIP addresses, and [SIP Endpoints](/docs/platform/voice), which register your devices to SignalWire SIP addresses. You can create and manage SIP gateways through the SignalWire Dashboard or programmatically via the [SIP Gateway REST API endpoint](/docs/apis/fabric/sip-gateways-list).
+
+---
+
+If you want more information about how to use and get started with SIP in SignalWire's platform, check out our guide to
+[Setting Up a SIP Credential](/docs/platform/voice)!

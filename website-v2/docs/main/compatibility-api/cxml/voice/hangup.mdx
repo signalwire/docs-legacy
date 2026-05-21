@@ -1,0 +1,72 @@
+---
+title: Hangup
+sidebar_label: Hangup
+slug: /compatibility-api/cxml/reference/voice/hangup
+sidebar_position: 1
+toc_max_heading_level: 3
+---
+
+The `<Hangup>` verb ends a call. While `<Reject>`ed calls are never answered, calls that use the `<Hangup>` verb for disconnection are still answered, becoming subject to billing.
+
+## Verb attributes
+
+The `<Hangup>` verb does not support any attributes.
+
+## Nesting
+
+No other verbs can be nested within `<Hangup>` and you cannot nest `<Hangup>` within any other verbs.
+
+## Examples
+
+### A simple hangup
+
+<CodeBlocks>
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Hangup/>
+</Response>
+```
+```javascript title="Node.js"
+const { RestClient } = require("@signalwire/compatibility-api");
+const response = new RestClient.LaML.VoiceResponse();
+
+response.hangup();
+console.log(response.toString());
+```
+```csharp
+using Twilio.TwiML;
+using System;
+
+
+class Example
+{
+    static void Main()
+    {
+        var response = new VoiceResponse();
+        response.Hangup();
+
+        Console.WriteLine(response.ToString());;
+    }
+}
+```
+```python
+from signalwire.voice_response import VoiceResponse, Hangup
+
+response = VoiceResponse()
+response.hangup()
+
+print(response)
+```
+```ruby
+require 'signalwire/sdk'
+
+response = Signalwire::Sdk::VoiceResponse.new do |response|
+  response.hangup
+end
+
+puts response.to_s
+```
+</CodeBlocks>
+
+SignalWire will answer the call then immediately hangup.

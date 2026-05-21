@@ -1,0 +1,55 @@
+---
+title: "setOutputVolume"
+slug: /js/reference/video/room-session/set-output-volume
+description: setOutputVolume method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+### setOutputVolume
+
+- **setOutputVolume**(`params`): `Promise<void>`
+
+Sets the output volume level (e.g., for the speaker). You can use this method to set the output volume for either yourself or another participant in the room.
+
+#### Parameters
+
+<ParamField path="params" type="object">
+  Object containing the parameters of the method.
+</ParamField>
+
+<Indent>
+<ParamField path="memberId" type="string" required={false}>
+  Id of the member to affect. If omitted, affects the default device in the local client.
+</ParamField>
+
+<ParamField path="volume" type="number">
+  Desired volume. Values range from -50 to 50, with a default of 0.
+</ParamField>
+</Indent>
+
+#### Returns
+
+`Promise<void>`
+
+#### Permissions
+
+- `room.self.set_output_volume`: to set the speaker volume for yourself.
+- `room.member.set_output_volume`: to set the speaker volume for a remote member.
+
+You need to specify the permissions when [creating the Video Room Token](/docs/apis/video/create-room-token) on the server side.
+
+#### Examples
+
+Setting your own output volume:
+
+```javascript
+await roomSession.setOutputVolume({ volume: -10 });
+```
+
+Setting the output volume of another participant:
+
+```javascript
+const id = "de550c0c-3fac-4efd-b06f-b5b8614b8966"; // you can get this from getMembers()
+await roomSession.setOutputVolume({ memberId: id, volume: -10 });
+```
+

@@ -1,0 +1,25 @@
+.slideshow {
+  position: relative;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.slide {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+:global(.slick-prev),
+:global(.slick-next) {
+  z-index: 1;
+}
+
+:global(.slick-prev) {
+  left: 25px;
+}
+
+:global(.slick-next) {
+  right: 25px;
+}

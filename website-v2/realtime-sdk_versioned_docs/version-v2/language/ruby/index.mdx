@@ -1,0 +1,113 @@
+---
+title: RELAY SDK for Ruby
+slug: /ruby/reference
+toc_max_heading_level: 3
+---
+import V2IntroPartial from '@site/realtime-sdk_versioned_docs/version-v2/snippets/v2-intro.mdx';
+
+
+[learn-more-about-relay-clients]: /docs/server-sdk/v2/ruby/reference/relay-client
+[learn-more-about-relay-consumers]: /docs/server-sdk/v2/ruby/reference/consumer
+[learn-more-about-relay-tasks]: /docs/server-sdk/v2/ruby/reference/task
+[relay-client]: /docs/server-sdk/v2/ruby/reference/relay-client
+[relay-consumer-1]: /docs/server-sdk/v2/ruby/reference/consumer
+
+<V2IntroPartial />
+
+
+## Getting Started
+
+The RELAY SDK for Ruby enables Ruby developers to connect and use SignalWire's RELAY APIs within their own Ruby code.
+
+
+## Installation
+
+Install the gem using RubyGems:
+
+```shell
+gem install signalwire
+```
+
+Or add it to your Gemfile
+
+```ruby
+gem "signalwire"
+```
+
+Then require it in your scripts:
+
+```ruby
+require "signalwire"
+```
+
+## Minimum Requirements
+
+The Relay SDK gem requires Ruby version 2.0 or higher.
+
+## Using the SDK
+
+To use the SDK, you need your **project** and **token** from your SignalWire dashboard. Credentials can be passed to initializers, or set via `SIGNALWIRE_PROJECT_KEY` and `SIGNALWIRE_TOKEN` environment variables.
+
+### RELAY Consumer
+
+A [`Relay.Consumer`][relay-consumer-1] creates a long running process, allowing you to respond to incoming requests and events in realtime. RELAY Consumers abstract all the setup of connecting to RELAY and automatically dispatches workers to handle requests; so you can concentrate on writing your code without having to worry about multi-threading or blocking, everything just works. Think of RELAY Consumers like a background worker system for all your calling and messaging needs.
+
+RELAY Consumers can scale easily, simply by running multiple instances of your `Relay.Consumer` process. Each event will only be delivered to a single consumer, so as your volume increases, just scale up! This process works well whether you are using Docker Swarm, a Procfile on Heroku, your own webserver, and most other environments.
+
+> Setting up a new consumer is the easiest way to get up and running.
+
+```ruby
+require "signalwire"
+
+class MyConsumer < Signalwire::Relay::Consumer
+  contexts ['incoming']
+
+  def on_incoming_call(call)
+    call.answer
+    call.play_tts 'the quick brown fox jumps over the lazy dog'
+    call.hangup
+  end
+end
+
+MyConsumer.new.run
+```
+
+[Learn more about RELAY Consumers][learn-more-about-relay-consumers]
+
+### RELAY Task
+
+A `SignalWire::Relay::Task` is a simple way to send jobs to your [`Relay.Consumer`][relay-consumer-1] from a short lived process, like a web framework. RELAY Tasks allow you to pass commands down to your Consumers without blocking your short lived request. Think of a RELAY Task as a way to queue a job for your background workers to processes asynchronously.
+
+For example, if you wanted to make an outbound call and play a message when your user clicks a button on your web application, since RELAY is a realtime protocol and relies on you to tell it what to do in realtime, if you did this within your web application, your web server would block until the call was finished... this may take a long time! Instead, simply create a new RELAY Task. This task will be handled by a running RELAY Consumer process and your web application can respond back to your user immediately.
+
+```ruby
+require 'signalwire/relay/task'
+
+task = Signalwire::Relay::Task.new(project: "your-project-id", token: "your-project-token")
+task.deliver(context: 'incoming', message: { number_to_call: '+1555XXXXXXX', message_to_play: 'We have a message for you' })
+```
+
+[Learn more about RELAY Tasks][learn-more-about-relay-tasks]
+
+### RELAY Client
+
+[`Relay.Client`][relay-client] is the underlying Relay connection Consumers use. It offers an alternative API for cases that require more specialized functionality.
+
+> Setting up a new client and make an outbound call.
+
+```ruby
+require "signalwire"
+
+client = Signalwire::Relay::Client.new(project: "your-project-id", token: "your-project-token")
+
+client.on :ready do
+  call_handle = client.calling.new_call(from: "+1XXXXXXXXXX", to: "+1YYYYYYYYYY")
+  call_handle.on :answered do
+    # your call has been answered
+  end
+end
+
+client.connect!
+```
+
+[Learn more about RELAY Clients][learn-more-about-relay-clients]

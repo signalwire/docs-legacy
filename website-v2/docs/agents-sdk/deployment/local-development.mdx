@@ -1,0 +1,353 @@
+---
+title: "Local Development"
+sidebar_label: "Local Development"
+slug: /python/guides/local-development
+toc_max_heading_level: 3
+---
+
+# Deployment
+
+Deploy your agents as local servers, production services, or serverless functions. This chapter covers all deployment options from development to production.
+
+## What You'll Learn
+
+This chapter covers deployment options:
+
+1. **Local Development** - Running agents during development
+2. **Production** - Deploying to production servers
+3. **Serverless** - AWS Lambda, Google Cloud Functions, Azure Functions
+4. **Docker & Kubernetes** - Container-based deployment
+5. **CGI Mode** - Traditional web server deployment
+
+## Deployment Options Overview
+
+| Environment | Options |
+|-------------|---------|
+| **Development** | `agent.run()` on localhost, ngrok for public testing, auto-reload on changes |
+| **Production** | Uvicorn with workers, HTTPS with certificates, load balancing, health monitoring |
+| **Serverless** | AWS Lambda, Google Cloud Functions, Azure Functions, auto-scaling, pay per invocation |
+| **Container** | Docker, Kubernetes, auto-scaling, rolling updates, service mesh |
+| **Traditional** | CGI mode, Apache/nginx integration, shared hosting compatible |
+
+## Environment Detection
+
+The SDK automatically detects your deployment environment:
+
+| Environment Variable | Detected Mode |
+|---------------------|---------------|
+| `GATEWAY_INTERFACE` | CGI mode |
+| `AWS_LAMBDA_FUNCTION_NAME` | AWS Lambda |
+| `LAMBDA_TASK_ROOT` | AWS Lambda |
+| `FUNCTION_TARGET` | Google Cloud Functions |
+| `K_SERVICE` | Google Cloud Functions |
+| `GOOGLE_CLOUD_PROJECT` | Google Cloud Functions |
+| `AZURE_FUNCTIONS_ENVIRONMENT` | Azure Functions |
+| `FUNCTIONS_WORKER_RUNTIME` | Azure Functions |
+| (none of above) | Server mode (default) |
+
+## Chapter Contents
+
+| Section | Description |
+|---------|-------------|
+| [Local Development](/docs/agents-sdk/python/guides/local-development) | Development server and testing |
+| [Production](/docs/agents-sdk/python/guides/production) | Production server deployment |
+| [Serverless](/docs/agents-sdk/python/guides/serverless) | Lambda, Cloud Functions, Azure |
+| [Docker & Kubernetes](/docs/agents-sdk/python/guides/docker-kubernetes) | Container deployment |
+| [CGI Mode](/docs/agents-sdk/python/guides/cgi-mode) | Traditional CGI deployment |
+
+## Quick Start
+
+```python
+from signalwire_agents import AgentBase
+
+class MyAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="my-agent")
+        self.add_language("English", "en-US", "rime.spore")
+        self.prompt_add_section("Role", "You are a helpful assistant.")
+
+if __name__ == "__main__":
+    agent = MyAgent()
+    agent.run()  # Automatically detects environment
+```
+
+The `run()` method automatically:
+
+- Detects serverless environments (Lambda, Cloud Functions, Azure)
+- Starts a development server on localhost for local development
+- Handles CGI mode when deployed to traditional web servers
+
+## Starting the Development Server
+
+The simplest way to run your agent locally:
+
+```python
+from signalwire_agents import AgentBase
+
+
+class MyAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="my-agent")
+        self.add_language("English", "en-US", "rime.spore")
+        self.prompt_add_section("Role", "You are a helpful assistant.")
+
+
+if __name__ == "__main__":
+    agent = MyAgent()
+    agent.run()  # Starts on http://localhost:3000
+```
+
+## Server Configuration
+
+### Custom Host and Port
+
+```python
+agent.run(host="0.0.0.0", port=8080)
+```
+
+### Using serve() Directly
+
+For more control, use `serve()` instead of `run()`:
+
+```python
+# Development server
+agent.serve(host="127.0.0.1", port=3000)
+
+# Listen on all interfaces
+agent.serve(host="0.0.0.0", port=3000)
+```
+
+## Development Endpoints
+
+| Endpoint | Method | Purpose |
+|----------|--------|---------|
+| `/` | GET/POST | SWML document |
+| `/swaig` | POST | SWAIG function calls |
+| `/post_prompt` | POST | Post-prompt handling |
+| `/debug` | GET/POST | Debug information |
+| `/health` | GET | Health check (AgentServer only) |
+
+## Testing Your Agent
+
+### View SWML Output
+
+```bash
+# Get the SWML document
+curl http://localhost:3000/
+
+# Pretty print with jq
+curl http://localhost:3000/ | jq .
+```
+
+### Using swaig-test CLI
+
+```bash
+# List available functions
+swaig-test my_agent.py --list-tools
+
+# Test a specific function
+swaig-test my_agent.py --exec get_weather --city "Seattle"
+
+# Dump SWML output
+swaig-test my_agent.py --dump-swml
+```
+
+## Exposing Local Server
+
+SignalWire needs to reach your agent via a public URL. Use ngrok or similar:
+
+**Connection Flow:** SignalWire Cloud → ngrok tunnel → localhost:3000
+
+**Steps:**
+1. Start your agent: `python my_agent.py`
+2. Start ngrok: `ngrok http 3000`
+3. Use ngrok URL in SignalWire: `https://abc123.ngrok.io`
+
+### Using ngrok
+
+```bash
+# Start your agent
+python my_agent.py
+
+# In another terminal, start ngrok
+ngrok http 3000
+```
+
+ngrok provides a public URL like `https://abc123.ngrok.io` that forwards to your local server.
+
+### Using localtunnel
+
+```bash
+# Install
+npm install -g localtunnel
+
+# Start tunnel
+lt --port 3000
+```
+
+## Environment Variables for Development
+
+```bash
+# Disable authentication for local testing
+export SWML_BASIC_AUTH_USER=""
+export SWML_BASIC_AUTH_PASSWORD=""
+
+# Or set custom credentials
+export SWML_BASIC_AUTH_USER="dev"
+export SWML_BASIC_AUTH_PASSWORD="test123"
+
+# Override proxy URL if behind ngrok
+export SWML_PROXY_URL_BASE="https://abc123.ngrok.io"
+```
+
+## Proxy URL Configuration
+
+When behind ngrok or another proxy, the SDK needs to know the public URL:
+
+```python
+import os
+
+# Option 1: Environment variable
+os.environ['SWML_PROXY_URL_BASE'] = 'https://abc123.ngrok.io'
+
+# Option 2: Auto-detection from X-Forwarded headers
+# The SDK automatically detects proxy from request headers
+```
+
+## Development Workflow
+
+**1. Code**
+
+Write/modify your agent code.
+
+**2. Test Locally**
+- `swaig-test my_agent.py --dump-swml`
+- `swaig-test my_agent.py --exec function_name --param value`
+
+**3. Run Server**
+
+`python my_agent.py`
+
+**4. Expose Publicly**
+
+`ngrok http 3000`
+
+**5. Test with SignalWire**
+
+Point phone number to ngrok URL and make test call.
+
+## Debug Mode
+
+Enable debug logging:
+
+```python
+import logging
+logging.basicConfig(level=logging.DEBUG)
+
+agent = MyAgent()
+agent.run()
+```
+
+Or via environment variable:
+
+```bash
+export SIGNALWIRE_LOG_MODE=default
+python my_agent.py
+```
+
+## Hot Reloading
+
+For automatic reloading during development, use uvicorn directly:
+
+```bash
+# Install uvicorn with reload support
+pip install uvicorn[standard]
+
+# Run with auto-reload
+uvicorn my_agent:agent._app --reload --host 0.0.0.0 --port 3000
+```
+
+Or create a development script:
+
+```python
+# dev.py
+from my_agent import MyAgent
+
+agent = MyAgent()
+app = agent._app  # Expose the ASGI app for uvicorn
+```
+
+Then run:
+
+```bash
+uvicorn dev:app --reload --port 3000
+```
+
+## Serving Static Files
+
+Use `AgentServer.serve_static_files()` to serve static files alongside your agents. This is useful for web dashboards, documentation, or any static content:
+
+```python
+from signalwire_agents import AgentServer
+from pathlib import Path
+
+# Create your agents
+from my_agents import SupportAgent, SalesAgent
+
+HOST = "0.0.0.0"
+PORT = 3000
+
+server = AgentServer(host=HOST, port=PORT)
+server.register(SupportAgent(), "/support")
+server.register(SalesAgent(), "/sales")
+
+# Serve static files from web directory
+web_dir = Path(__file__).parent / "web"
+if web_dir.exists():
+    server.serve_static_files(str(web_dir))
+
+server.run()
+```
+
+**Directory Structure:**
+
+<Files>
+  <Folder name="my_project" defaultOpen>
+    <File name="server.py" />
+    <File name="my_agents.py" />
+    <Folder name="web" defaultOpen>
+      <File name="index.html" />
+      <File name="styles.css" />
+      <File name="app.js" />
+    </Folder>
+  </Folder>
+</Files>
+
+**Key Points:**
+
+- Use `server.serve_static_files(directory)` to serve static files
+- Agent routes always take priority over static files
+- Requests to `/` serve `index.html` from the static directory
+- Both `/support` and `/support/` work correctly with agents
+
+**Route Priority:**
+
+| Route | Handler |
+|-------|---------|
+| `/support` | SupportAgent |
+| `/sales` | SalesAgent |
+| `/health` | AgentServer health check |
+| `/*` | Static files (fallback) |
+
+## Common Development Issues
+
+| Issue | Solution |
+|-------|----------|
+| Port already in use | Use different port: `agent.run(port=8080)` |
+| 401 Unauthorized | Check `SWML_BASIC_AUTH_*` env vars |
+| Functions not found | Verify function registration |
+| SWML URL wrong | Set `SWML_PROXY_URL_BASE` for ngrok |
+| Connection refused | Ensure agent is running on correct port |
+| Static files not found | Check `web_dir.exists()` and path is correct |
+
+

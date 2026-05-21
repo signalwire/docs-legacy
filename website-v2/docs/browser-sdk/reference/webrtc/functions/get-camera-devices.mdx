@@ -1,0 +1,31 @@
+---
+title: "getCameraDevices"
+slug: /js/reference/webrtc/get-camera-devices
+description: getCameraDevices function in the WebRTC namespace.
+toc_max_heading_level: 3
+---
+
+### getCameraDevices
+
+- `Const` **getCameraDevices**(): `Promise<MediaDeviceInfo[]>` — See [MediaDeviceInfo](https://developer.mozilla.org/en-US/docs/Web/API/mediadeviceinfo) for more details.
+
+Returns an array of camera devices that can be accessed on this device (for which we have permissions).
+
+#### Returns
+
+`Promise<MediaDeviceInfo[]>`
+
+#### Example
+
+```javascript
+await SignalWire.WebRTC.getCameraDevices();
+// [
+//   {
+//     "deviceId": "Rug5Bk...4TMhY=",
+//     "kind": "videoinput",
+//     "label": "HD FaceTime Camera",
+//     "groupId": "Su/dzw...ccfnY="
+//   }
+// ]
+```
+

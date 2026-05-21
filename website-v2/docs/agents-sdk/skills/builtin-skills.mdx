@@ -1,0 +1,595 @@
+---
+title: "Builtin Skills"
+sidebar_label: "Builtin Skills"
+slug: /python/guides/builtin-skills
+toc_max_heading_level: 3
+---
+
+## Built-in Skills
+
+The SDK includes ready-to-use skills for common tasks like datetime, math, web search, and more. Each skill adds specific capabilities to your agents.
+
+### Available Skills
+
+| Skill | Description | Requirements |
+|-------|-------------|--------------|
+| `datetime` | Date/time information | pytz |
+| `math` | Mathematical calculations | (none) |
+| `web_search` | Web search via Google API | API key |
+| `wikipedia_search` | Wikipedia lookups | (none) |
+| `weather_api` | Weather information | API key |
+| `joke` | Tell jokes | (none) |
+| `play_background_file` | Play audio files | (none) |
+| `swml_transfer` | Transfer to SWML endpoint | (none) |
+| `datasphere` | DataSphere document search | API credentials |
+| `native_vector_search` | Local vector search | search extras |
+| `mcp_gateway` | MCP server integration | MCP Gateway service |
+
+### datetime
+
+Get current date and time information with timezone support. This is one of the most commonly used skills—callers often ask "what time is it?" or need scheduling help.
+
+**Functions:**
+
+- `get_current_time` - Get current time in a timezone
+- `get_current_date` - Get today's date
+
+**Requirements:** `pytz` package (usually installed automatically)
+
+**Parameters:**
+
+| Parameter | Type | Description | Default |
+|-----------|------|-------------|---------|
+| `default_timezone` | string | Default timezone if none specified | "UTC" |
+| `tool_name_time` | string | Custom name for time function | "get_current_time" |
+| `tool_name_date` | string | Custom name for date function | "get_current_date" |
+
+**Output format:**
+
+- Time: "The current time in America/New_York is 2:30 PM"
+- Date: "Today's date is November 25, 2024"
+
+**Common use cases:**
+
+- "What time is it?" / "What time is it in Tokyo?"
+- "What's today's date?"
+- Scheduling and appointment contexts
+- Time zone conversions
+
+**Limitations:**
+
+- Requires valid timezone names (e.g., "America/New_York", not "EST")
+- Doesn't do time math or calculate durations
+- Doesn't handle historical dates
+
+```python
+from signalwire_agents import AgentBase
+
+
+class TimeAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="time-agent")
+        self.add_language("English", "en-US", "rime.spore")
+
+        self.add_skill("datetime", {
+            "default_timezone": "America/New_York"
+        })
+
+        self.prompt_add_section(
+            "Role",
+            "You help users with date and time information."
+        )
+```
+
+### math
+
+Perform mathematical calculations safely. The skill uses a secure expression evaluator that supports common operations without executing arbitrary code.
+
+**Functions:**
+
+- `calculate` - Evaluate mathematical expressions
+
+**Requirements:** None
+
+**Parameters:**
+
+| Parameter | Type | Description | Default |
+|-----------|------|-------------|---------|
+| `tool_name` | string | Custom function name | "calculate" |
+| `tool_description` | string | Custom description | "Perform calculations" |
+
+**Supported operations:**
+
+- Basic: `+`, `-`, `*`, `/`, `**` (power), `%` (modulo)
+- Functions: `sqrt`, `sin`, `cos`, `tan`, `log`, `abs`, `round`
+- Constants: `pi`, `e`
+- Parentheses for grouping
+
+**Output format:**
+
+- "The result of 15 * 23 is 345"
+- "The square root of 144 is 12"
+
+**Common use cases:**
+
+- "What's 15 percent of 230?"
+- "Calculate 45 times 67"
+- "What's the square root of 256?"
+- Price calculations, tip calculations
+
+**Limitations:**
+
+- Limited to supported functions (no arbitrary Python)
+- Large numbers may lose precision
+- Can't solve equations or do symbolic math
+
+```python
+from signalwire_agents import AgentBase
+
+
+class CalculatorAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="calculator")
+        self.add_language("English", "en-US", "rime.spore")
+
+        self.add_skill("math")
+
+        self.prompt_add_section(
+            "Role",
+            "You are a calculator that helps with math."
+        )
+```
+
+### web_search
+
+Search the web using Google Custom Search API. Results are filtered for quality and summarized for voice delivery.
+
+**Functions:**
+
+- `web_search` - Search the web and return summarized results
+
+**Requirements:**
+
+- Google Custom Search API key (from Google Cloud Console)
+- Search Engine ID (from Programmable Search Engine)
+
+**Setup:**
+
+1. Create a project in Google Cloud Console
+2. Enable the Custom Search JSON API
+3. Create an API key
+4. Create a Programmable Search Engine at https://programmablesearchengine.google.com/
+5. Get the Search Engine ID
+
+**Parameters:**
+
+| Parameter | Type | Description | Default |
+|-----------|------|-------------|---------|
+| `api_key` | string | Google API key | Required |
+| `search_engine_id` | string | Search engine ID | Required |
+| `num_results` | integer | Results to return | 3 |
+| `min_quality_score` | number | Quality threshold (0-1) | 0.3 |
+| `tool_name` | string | Custom function name | "web_search" |
+| `tool_description` | string | Custom description | "Search the web" |
+
+**Output format:**
+Returns a summary of top results with titles, snippets, and URLs.
+
+**Common use cases:**
+
+- Current events and news queries
+- Fact-checking and verification
+- Looking up specific information
+- Research assistance
+
+**Limitations:**
+
+- Requires paid Google API (free tier has limits)
+- Results depend on search engine configuration
+- May not work for very recent events (indexing delay)
+- Quality varies with search terms
+
+**Multi-instance support:** Yes - add multiple instances for different search engines (news, docs, etc.)
+
+```python
+from signalwire_agents import AgentBase
+
+
+class SearchAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="search-agent")
+        self.add_language("English", "en-US", "rime.spore")
+
+        self.add_skill("web_search", {
+            "api_key": "YOUR_GOOGLE_API_KEY",
+            "search_engine_id": "YOUR_SEARCH_ENGINE_ID",
+            "num_results": 3
+        })
+
+        self.prompt_add_section(
+            "Role",
+            "You search the web to answer questions."
+        )
+```
+
+### wikipedia_search
+
+Search Wikipedia for information. A free, no-API-key alternative to web search for factual queries.
+
+**Functions:**
+
+- `search_wikipedia` - Search and retrieve Wikipedia article summaries
+
+**Requirements:** None (uses public Wikipedia API)
+
+**Parameters:**
+
+| Parameter | Type | Description | Default |
+|-----------|------|-------------|---------|
+| `language` | string | Wikipedia language code | "en" |
+| `sentences` | integer | Sentences to return per result | 3 |
+| `tool_name` | string | Custom function name | "search_wikipedia" |
+
+**Output format:**
+Returns article title and summary excerpt.
+
+**Common use cases:**
+
+- Factual questions ("Who was Marie Curie?")
+- Definitions and explanations
+- Historical information
+- General knowledge queries
+
+**Limitations:**
+
+- Only searches Wikipedia (not general web)
+- May not have very recent information
+- Content quality varies by article
+- Not suitable for opinions or current events
+
+```python
+from signalwire_agents import AgentBase
+
+
+class WikiAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="wiki-agent")
+        self.add_language("English", "en-US", "rime.spore")
+
+        self.add_skill("wikipedia_search", {
+            "sentences": 5  # More detailed summaries
+        })
+
+        self.prompt_add_section(
+            "Role",
+            "You look up information on Wikipedia to answer factual questions."
+        )
+```
+
+### weather_api
+
+Get current weather information for locations worldwide. Commonly used for small talk, travel planning, and location-aware services.
+
+**Functions:**
+
+- `get_weather` - Get current weather conditions for a location
+
+**Requirements:** WeatherAPI.com API key (free tier available)
+
+**Setup:**
+
+1. Sign up at https://www.weatherapi.com/
+2. Get your API key from the dashboard
+3. Free tier allows 1 million calls/month
+
+**Parameters:**
+
+| Parameter | Type | Description | Default |
+|-----------|------|-------------|---------|
+| `api_key` | string | WeatherAPI.com API key | Required |
+| `tool_name` | string | Custom function name | "get_weather" |
+| `tool_description` | string | Custom description | "Get weather" |
+
+**Output format:**
+"Weather in Seattle: 58°F (14°C), partly cloudy. Humidity: 72%. Wind: 8 mph."
+
+**Common use cases:**
+
+- "What's the weather in Chicago?"
+- "Is it raining in London?"
+- Travel and event planning
+- Small talk and conversation starters
+
+**Limitations:**
+
+- Current conditions only (no forecast in basic skill)
+- Location must be recognizable (city names, zip codes)
+- Weather data may have slight delay
+- API rate limits apply
+
+```python
+from signalwire_agents import AgentBase
+
+
+class WeatherAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="weather-agent")
+        self.add_language("English", "en-US", "rime.spore")
+
+        self.add_skill("weather_api", {
+            "api_key": "YOUR_WEATHER_API_KEY"
+        })
+
+        self.prompt_add_section(
+            "Role",
+            "You provide weather information for any location."
+        )
+```
+
+### joke
+
+Tell jokes to lighten the mood or entertain callers. Uses a curated joke database for clean, family-friendly humor.
+
+**Functions:**
+
+- `tell_joke` - Get a random joke
+
+**Requirements:** None
+
+**Parameters:**
+
+| Parameter | Type | Description | Default |
+|-----------|------|-------------|---------|
+| `category` | string | Joke category filter | None (random) |
+| `tool_name` | string | Custom function name | "tell_joke" |
+
+**Common use cases:**
+
+- Entertainment and engagement
+- Breaking tension in conversations
+- Waiting periods during processing
+- Adding personality to your agent
+
+**Limitations:**
+
+- Limited joke database
+- May repeat jokes in long conversations
+- Humor is subjective
+
+```python
+from signalwire_agents import AgentBase
+
+
+class FunAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="fun-agent")
+        self.add_language("English", "en-US", "rime.spore")
+
+        self.add_skill("joke")
+
+        self.prompt_add_section(
+            "Role",
+            "You are a fun assistant that tells jokes when asked."
+        )
+```
+
+### play_background_file
+
+Play audio files in the background during calls. Audio plays while conversation continues, useful for hold music, ambient sound, or audio cues.
+
+**Functions:**
+
+- `play_background_file` - Start playing audio file
+- `stop_background_file` - Stop currently playing audio
+
+**Requirements:** None (audio file must be accessible via URL)
+
+**Parameters:**
+
+| Parameter | Type | Description | Default |
+|-----------|------|-------------|---------|
+| `audio_url` | string | URL of audio file to play | Required |
+| `volume` | number | Playback volume (0.0-1.0) | 0.5 |
+| `loop` | boolean | Loop the audio | false |
+| `tool_name_play` | string | Custom play function name | "play_background_file" |
+| `tool_name_stop` | string | Custom stop function name | "stop_background_file" |
+
+**Supported formats:** MP3, WAV, OGG
+
+**Common use cases:**
+
+- Hold music while processing
+- Ambient sound for atmosphere
+- Audio notifications or alerts
+- Branding jingles
+
+**Limitations:**
+
+- Audio file must be publicly accessible
+- Large files may have loading delay
+- Background audio may interfere with speech recognition
+
+```python
+from signalwire_agents import AgentBase
+
+
+class MusicAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="music-agent")
+        self.add_language("English", "en-US", "rime.spore")
+
+        self.add_skill("play_background_file", {
+            "audio_url": "https://example.com/hold-music.mp3",
+            "volume": 0.3,  # Lower volume for background
+            "loop": True
+        })
+```
+
+### swml_transfer
+
+Transfer calls to another SWML endpoint.
+
+**Functions:**
+
+- `transfer_to_swml` - Transfer to SWML URL
+
+**Requirements:** None
+
+```python
+from signalwire_agents import AgentBase
+
+
+class TransferAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="transfer-agent")
+        self.add_language("English", "en-US", "rime.spore")
+
+        self.add_skill("swml_transfer", {
+            "swml_url": "https://your-server.com/other-agent",
+            "description": "Transfer to specialist"
+        })
+```
+
+### datasphere
+
+Search SignalWire DataSphere documents.
+
+**Functions:**
+
+- `search_datasphere` - Search uploaded documents
+
+**Requirements:** DataSphere API credentials
+
+```python
+from signalwire_agents import AgentBase
+
+
+class KnowledgeAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="knowledge-agent")
+        self.add_language("English", "en-US", "rime.spore")
+
+        self.add_skill("datasphere", {
+            "space_name": "your-space",
+            "project_id": "YOUR_PROJECT_ID",
+            "api_token": "YOUR_API_TOKEN"
+        })
+```
+
+### native_vector_search
+
+Local vector search using .swsearch index files.
+
+**Functions:**
+
+- `search_knowledge` - Search local vector index
+
+**Requirements:** Search extras installed (`pip install "signalwire-agents[search]"`)
+
+```python
+from signalwire_agents import AgentBase
+
+
+class LocalSearchAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="local-search")
+        self.add_language("English", "en-US", "rime.spore")
+
+        self.add_skill("native_vector_search", {
+            "index_path": "/path/to/knowledge.swsearch",
+            "tool_name": "search_docs"
+        })
+```
+
+### mcp_gateway
+
+Connect to MCP (Model Context Protocol) servers via the MCP Gateway service. This skill dynamically creates SWAIG functions from MCP tools, enabling your agent to use any MCP-compatible tool.
+
+**Functions:** Dynamically created based on connected MCP services
+
+**Requirements:**
+
+- MCP Gateway service running (see [MCP Gateway](/docs/agents-sdk/python/guides/mcp-gateway))
+- Gateway URL and authentication credentials
+
+**Parameters:**
+
+| Parameter | Type | Description | Default |
+|-----------|------|-------------|---------|
+| `gateway_url` | string | MCP Gateway service URL | Required |
+| `auth_user` | string | Basic auth username | None |
+| `auth_password` | string | Basic auth password | None |
+| `auth_token` | string | Bearer token (alternative auth) | None |
+| `services` | array | Services and tools to enable | All |
+| `session_timeout` | integer | Session timeout (seconds) | 300 |
+| `tool_prefix` | string | Prefix for function names | "mcp_" |
+| `retry_attempts` | integer | Connection retries | 3 |
+| `request_timeout` | integer | Request timeout (seconds) | 30 |
+| `verify_ssl` | boolean | Verify SSL certificates | true |
+
+**How it works:**
+
+1. Skill connects to gateway and discovers available tools
+2. Each MCP tool becomes a SWAIG function (e.g., `mcp_todo_add_todo`)
+3. Sessions persist per call_id, enabling stateful tools
+4. Session automatically closes when call ends
+
+**Common use cases:**
+
+- Integrating existing MCP ecosystem tools
+- Stateful operations that persist across a call
+- Sandboxed tool execution
+- Managing multiple tool services
+
+**Limitations:**
+
+- Requires running MCP Gateway service
+- Adds network latency (gateway hop)
+- Tools must be MCP-compatible
+
+```python
+from signalwire_agents import AgentBase
+
+
+class MCPAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="mcp-agent")
+        self.add_language("English", "en-US", "rime.spore")
+
+        self.add_skill("mcp_gateway", {
+            "gateway_url": "http://localhost:8080",
+            "auth_user": "admin",
+            "auth_password": "secure-password",
+            "services": [
+                {"name": "todo", "tools": "*"},
+                {"name": "calculator", "tools": ["add", "multiply"]}
+            ]
+        })
+
+        self.prompt_add_section(
+            "Role",
+            "You help users manage tasks and perform calculations."
+        )
+```
+
+For detailed setup and configuration, see [MCP Gateway](/docs/agents-sdk/python/guides/mcp-gateway).
+
+### Skills Summary Table
+
+| Skill | Functions | API Required | Multi-Instance |
+|-------|-----------|--------------|----------------|
+| `datetime` | 2 | No | No |
+| `math` | 1 | No | No |
+| `web_search` | 1 | Yes | Yes |
+| `wikipedia_search` | 1 | No | No |
+| `weather_api` | 1 | Yes | No |
+| `joke` | 1 | No | No |
+| `play_background_file` | 2 | No | No |
+| `swml_transfer` | 1 | No | Yes |
+| `datasphere` | 1 | Yes | Yes |
+| `native_vector_search` | 1 | No | Yes |
+| `mcp_gateway` | Dynamic | No* | Yes |
+
+\* Requires MCP Gateway service, not external API
+
+

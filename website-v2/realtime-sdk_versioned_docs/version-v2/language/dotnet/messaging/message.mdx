@@ -1,0 +1,22 @@
+---
+title: SignalWire.Relay.Messaging.Message
+slug: /dotnet/reference/messaging/message
+toc_max_heading_level: 3
+---
+A `Message` represents an SMS and/or MMS message.
+
+## Properties
+
+| Property | Type | Description |
+| :-------- | :-------- | :----------- |
+| `Body` | string | The SMS message body. May be `null` but at least one of `Body` and `Media` will be populated. |
+| `Context` | string | The context the message belongs to. |
+| `Direction` | SignalWire.Relay.Messaging.Direction | The direction of the message. |
+| `From` | string | The number that sent the message in E164 format. |
+| `ID` | string | The unique identifier of the message. |
+| `Media` | List&lt;string&gt; | The list of URLs associated with the MMS. May be `null` but at least one of `Body` and `Media` will be populated. |
+| `Tags` | List&lt;string&gt; | The list of tags associated to the message. May be `null`. |
+| `To` | string | The number that received the message in E164 format. |
+| `Reason` | string | For messages that are `undelivered` or `failed`, a string explaining the message's state. `null` otherwise. |
+| `Segments` | int | The number of segments in the message. |
+| `State` | SignalWire.Relay.Messaging.MessageState | The current state of the message. |

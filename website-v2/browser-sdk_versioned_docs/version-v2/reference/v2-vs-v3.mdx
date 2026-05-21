@@ -1,0 +1,84 @@
+---
+title: "RELAY Browser SDK v2 vs v3"
+sidebar_position: 1
+slug: /js/reference/v2-vs-v3
+toc_max_heading_level: 3
+---
+
+The SignalWire **Client-side SDKs** transform your **browser** into a real-time media engine, enabling developers to directly make **audio** and **video calls** to phone numbers, SIP endpoints, and other browsers. With a few lines of code, you can even set up a full-fledged video conferencing system. Using the client-side SDKs you can add immersive, scalable communication — from video conferences and softphones to click-to-call and mobile gaming — all available right in your own **web pages** and **applications**.
+
+Depending on your **use case**, you can choose among **two different SDK versions**:
+
+- [RELAY Browser SDK v3](/docs/browser-sdk/js)
+- [RELAY Browser SDK v2](/docs/browser-sdk/v2/js)
+
+Both SDKs are **JavaScript libraries** that run entirely on the **browser**.
+
+To help get you started, in the following we will introduce two broad and common use cases: for each of them, we suggest which of the two SDKs is the most indicated to the job. Keep into consideration that, in the near future, all functionality of RELAY Browser SDK v2 will be integrated into RELAY Browser SDK v3, which will become the reference SDK.
+
+## I am building an audio/video conferencing application
+
+If what you are building is closely related to an audio/video conferencing application, which for example should allow the existence of **multiple distinct rooms** for joining by multiple people, then the [**RELAY Browser SDK v3**][javascript_sdk] is likely to be the right tool for the job. This doesn't sound like your use case? Then [skip below][sec_relay_sdk].
+
+With the **RELAY Browser SDK v3**, you will be able to build web pages that can stream your voice and video to other users connected to the same system. You can let your users join or leave virtual rooms with an extremely simple API. In other words, you can use the RELAY Browser SDK v3 to build your own personalized video conference experience.
+
+Moreover, you have full granular control over the permissions within your system. You can enable some of your users to only join conference calls, while others could list ongoing calls and jump in to assist from a support Dashboard. Permissions are handled jointly with the authentication system, which uses JWTs, allowing an easy and secure control of your users' capabilities.
+
+At the moment, the **RELAY Browser SDK v3** does not allow dialing PSTN numbers or SIP endpoints. This will become supported in the near future. For now, it means that all participants should access from a web browser. If you need to dial different endpoints, then perhaps the [RELAY Browser SDK v2][sec_relay_sdk] suits you better. Note, however, that with the RELAY Browser SDK v2 you will have no room support.
+
+#### Installing the RELAY Browser SDK v3
+
+Starting to use the RELAY Browser SDK v3 is as easy as loading a script from a CDN. In fact, that's exactly how you do it:
+
+```html
+<script src="https://cdn.signalwire.com/@signalwire/js"></script>
+```
+
+Then, you can use the global `SignalWire` variable in your application. If you prefer, the JavaScript SDK v3 is also available as a NPM package:
+
+```shell
+$ npm i @signalwire/js
+```
+
+For getting started with the **RELAY Browser SDK v3**, take a look at our [API reference](/docs/browser-sdk/js).
+
+## I am building a one-to-one communication app that should dial other browsers or phones {#i-am-building-a-one-to-one-communication-app-which-should-dial-other-browsers-or-phones}
+
+If what you are building is an application that should allow your users, from their browser, to initiate an audio or video call towards other **browsers**, **phone numbers**, or **SIP endpoints**, then the [**RELAY Browser SDK v2**][relay_sdk] (Relay SDK) is the right choice for you.
+
+By exploiting SignalWire's powerful and flexible Relay API, the RELAY Browser SDK v2 gives you access to reliable low-latency communication over a broad set of endpoints in a seamless way, both for your users and for the developers.
+
+As an example, with the RELAY Browser SDK v2 it is extremely easy to build a web-based **call center** application from which the operator can both dial PSTN phone numbers, _and_ perform internal video calls. All with the same API.
+
+At the moment, the **RELAY Browser SDK v2** does not support the creation and management of virtual rooms. If you need a multi-room experience, the [RELAY Browser SDK v3][sec_javascript_sdk] might be more indicated for you. Note, however, that as of today the RELAY Browser SDK v3 only supports web browser endpoints, so you won't be able to dial PSTN numbers or SIP endpoints while using the RELAY Browser SDK v3. However, these will be supported soon.
+
+#### Installing the RELAY Browser SDK v2
+
+As is the case for the RELAY Browser SDK v3, also the **RELAY Browser SDK v2** can be loaded as a script from a CDN. In fact, it can be imported like this:
+
+```html
+<script src="https://cdn.signalwire.com/@signalwire/js@1"></script>
+```
+
+Then, you can use the global `Relay` variable in your application. If you prefer, the RELAY Browser SDK v2 is also available as an NPM package:
+
+```shell
+$ npm i @signalwire/js@^1
+```
+
+For getting started with the **RELAY Browser SDK v2**, take a look at our [documentation](/docs/browser-sdk/v2/js) and [API reference](/docs/browser-sdk/v2/js/reference/relay-client).
+
+## Still unsure?
+
+Here are several use-cases, classified according to the SDK that is most indicated for them.
+
+| RELAY Browser SDK v3 | RELAY Browser SDK v2 |
+| :------------------: | :------------------: |
+|   Remote learning    |  Technical support   |
+|     Remote work      |     Call center      |
+| Remote conferencing  | Patient consultation |
+
+[RELAY_sdk]: https://www.npmjs.com/package/@signalwire/js/v/1.2.7
+[javascript_sdk]: https://www.npmjs.com/package/@signalwire/js
+[sec_RELAY_sdk]: #i-am-building-a-one-to-one-communication-app-which-should-dial-other-browsers-or-phones
+[sec_javascript_sdk]: #i-am-building-an-audiovideo-conferencing-application

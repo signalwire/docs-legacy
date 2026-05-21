@@ -1,0 +1,502 @@
+---
+title: "Understanding Skills"
+sidebar_label: "Understanding Skills"
+slug: /python/guides/understanding-skills
+toc_max_heading_level: 3
+---
+
+# Skills
+
+Skills are modular, reusable capabilities that add functions, prompts, and integrations to your agents without custom code.
+
+## What You'll Learn
+
+This chapter covers the skills system:
+
+1. **Understanding Skills** - What skills are and how they work
+2. **Built-in Skills** - Pre-built skills available in the SDK
+3. **Adding Skills** - How to add skills to your agents
+4. **Custom Skills** - Creating your own skills
+5. **Skill Configuration** - Parameters and advanced options
+
+## What Are Skills?
+
+Skills are pre-packaged capabilities that add:
+
+- **Functions** - SWAIG tools the AI can call
+- **Prompts** - Instructions for how to use the skill
+- **Hints** - Speech recognition keywords
+- **Global Data** - Variables available throughout the call
+
+| Without Skills | With Skills |
+|----------------|-------------|
+| Write weather function | `self.add_skill("weather")` |
+| Add API integration | |
+| Write prompts | Done! |
+| Add speech hints | |
+| Handle errors | |
+
+## Quick Start
+
+Add a skill in one line:
+
+```python
+from signalwire_agents import AgentBase
+
+class MyAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="my-agent")
+        self.add_language("English", "en-US", "rime.spore")
+
+        # Add datetime capability
+        self.add_skill("datetime")
+
+        # Add math capability
+        self.add_skill("math")
+
+        self.prompt_add_section(
+            "Role",
+            "You are a helpful assistant that can tell time and do math."
+        )
+```
+
+## Available Built-in Skills
+
+| Skill | Description |
+|-------|-------------|
+| `datetime` | Get current date and time |
+| `math` | Perform calculations |
+| `web_search` | Search the web (requires API key) |
+| `wikipedia_search` | Search Wikipedia |
+| `weather_api` | Get weather information |
+| `joke` | Tell jokes |
+| `play_background_file` | Play audio files |
+| `swml_transfer` | Transfer calls to SWML endpoints |
+| `datasphere` | Search DataSphere documents |
+| `native_vector_search` | Local vector search |
+
+## Chapter Contents
+
+| Section | Description |
+|---------|-------------|
+| [Built-in Skills](/docs/agents-sdk/python/guides/builtin-skills) | Reference for included skills |
+| [Adding Skills](/docs/agents-sdk/python/guides/adding-skills) | How to use skills in your agents |
+| [Custom Skills](/docs/agents-sdk/python/guides/custom) | Creating your own skills |
+| [Skill Configuration](/docs/agents-sdk/python/guides/skill-config) | Parameters and advanced options |
+
+## Skills vs Functions
+
+| Aspect | SWAIG Function | Skill |
+|--------|----------------|-------|
+| **Scope** | Single function | Multiple functions + prompts + hints |
+| **Reusability** | Per-agent | Across all agents |
+| **Setup** | define_tool() | add_skill() |
+| **Customization** | Full control | Parameters only |
+| **Maintenance** | You maintain | SDK maintains |
+
+## When to Use Skills
+
+### Use Built-in Skills When:
+
+- Standard capability needed (datetime, search, etc.)
+- Want quick setup without custom code
+- Need tested, maintained functionality
+
+### Create Custom Skills When:
+
+- Reusing capability across multiple agents
+- Want to share functionality with team/community
+- Packaging complex integrations
+
+### Use SWAIG Functions When:
+
+- One-off custom logic
+- Agent-specific business rules
+- Need full control over implementation
+
+## Complete Example
+
+```python
+#!/usr/bin/env python3
+# assistant_agent.py - Agent with multiple skills
+from signalwire_agents import AgentBase
+
+class AssistantAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="assistant")
+        self.add_language("English", "en-US", "rime.spore")
+
+        # Add multiple skills
+        self.add_skill("datetime")
+        self.add_skill("math")
+
+        self.prompt_add_section(
+            "Role",
+            "You are a helpful assistant named Alex."
+        )
+
+        self.prompt_add_section(
+            "Capabilities",
+            body="You can help with:",
+            bullets=[
+                "Telling the current date and time",
+                "Performing math calculations"
+            ]
+        )
+
+if __name__ == "__main__":
+    agent = AssistantAgent()
+    agent.run()
+```
+
+Let's start by understanding how skills work internally.
+
+## Skill Architecture
+
+### SkillBase (Abstract Base Class)
+
+**Required Methods:**
+
+- `setup()` - Initialize the skill
+- `register_tools()` - Register SWAIG functions
+
+**Optional Methods:**
+
+- `get_hints()` - Speech recognition hints
+- `get_global_data()` - Session data
+- `get_prompt_sections()` - Prompt additions
+- `cleanup()` - Resource cleanup
+
+### SkillRegistry (Discovery & Loading)
+
+- Discovers skills from directories
+- Loads skills on-demand (lazy loading)
+- Validates requirements (packages, env vars)
+- Supports external skill paths
+
+## How Skills Work
+
+Skills are a convenience layer built on top of SWAIG functions. When you add a skill, it registers one or more SWAIG functions with the agent, adds relevant prompts, and configures hints—all from a single `add_skill()` call.
+
+Understanding this helps when debugging: a skill's function behaves exactly like a SWAIG function you'd define yourself. The only difference is that the skill packages everything together.
+
+When you call `add_skill()`:
+
+<Frame caption="Skill Loading Process">
+  <img className="diagram" src={require("@image/agents-sdk-manual/05_01_understanding-skills_diagram1.webp").default} alt="Skill Loading Process." />
+</Frame>
+
+## Skill Directory Structure
+
+Built-in skills live in the SDK:
+
+<Files>
+  <Folder name="signalwire_agents" defaultOpen>
+    <Folder name="skills" defaultOpen>
+      <Folder name="datetime" defaultOpen>
+        <File name="__init__.py" />
+        <File name="skill.py" />
+      </Folder>
+      <Folder name="math">
+        <File name="__init__.py" />
+        <File name="skill.py" />
+      </Folder>
+      <Folder name="web_search">
+        <File name="__init__.py" />
+        <File name="skill.py" />
+        <File name="requirements.txt" />
+      </Folder>
+      <Folder name="..." comment="more skills" />
+    </Folder>
+  </Folder>
+</Files>
+
+Each skill directory contains:
+
+| File | Purpose |
+|------|---------|
+| `skill.py` | Skill class implementation |
+| `__init__.py` | Python package marker |
+| `requirements.txt` | Optional extra dependencies |
+
+## SkillBase Class
+
+All skills inherit from `SkillBase`:
+
+```python
+from signalwire_agents.skills import SkillBase
+from signalwire_agents.core.function_result import SwaigFunctionResult
+
+
+class MySkill(SkillBase):
+    # Required class attributes
+    SKILL_NAME = "my_skill"
+    SKILL_DESCRIPTION = "Does something useful"
+    SKILL_VERSION = "1.0.0"
+
+    # Optional requirements
+    REQUIRED_PACKAGES = []      # Python packages needed
+    REQUIRED_ENV_VARS = []      # Environment variables needed
+
+    # Multi-instance support
+    SUPPORTS_MULTIPLE_INSTANCES = False
+
+    def setup(self) -> bool:
+        """Initialize the skill. Return True if successful."""
+        return True
+
+    def register_tools(self) -> None:
+        """Register SWAIG tools with the agent."""
+        self.define_tool(
+            name="my_function",
+            description="Does something",
+            parameters={},
+            handler=self.my_handler
+        )
+
+    def my_handler(self, args, raw_data):
+        """Handle function calls."""
+        return SwaigFunctionResult("Result")
+```
+
+## Skill Lifecycle
+
+```
+Discover → Load → Setup → Register → Active → Cleanup
+```
+
+| Stage | Description |
+|-------|-------------|
+| **Discover** | Registry finds skill class in directory |
+| **Load** | Skill class is imported and validated |
+| **Setup** | `setup()` validates requirements, initializes resources |
+| **Register** | `register_tools()` adds functions to agent |
+| **Active** | Skill is ready, functions can be called |
+| **Cleanup** | `cleanup()` releases resources on shutdown |
+
+## Skill Contributions
+
+Skills can contribute to the agent in multiple ways:
+
+### 1. Tools (Functions)
+
+```python
+def register_tools(self) -> None:
+    self.define_tool(
+        name="get_time",
+        description="Get current time",
+        parameters={
+            "timezone": {
+                "type": "string",
+                "description": "Timezone name"
+            }
+        },
+        handler=self.get_time_handler
+    )
+```
+
+### 2. Prompt Sections
+
+```python
+def get_prompt_sections(self):
+    return [
+        {
+            "title": "Time Information",
+            "body": "You can tell users the current time.",
+            "bullets": [
+                "Use get_time for time queries",
+                "Support multiple timezones"
+            ]
+        }
+    ]
+```
+
+### 3. Speech Hints
+
+```python
+def get_hints(self):
+    return ["time", "date", "clock", "timezone"]
+```
+
+### 4. Global Data
+
+```python
+def get_global_data(self):
+    return {
+        "datetime_enabled": True,
+        "default_timezone": "UTC"
+    }
+```
+
+## Skill Discovery Paths
+
+Skills are discovered from multiple locations in priority order:
+
+| Priority | Source | Example |
+|----------|--------|---------|
+| 1 | Already registered skills (in memory) | - |
+| 2 | Entry points (pip installed packages) | `entry_points={'signalwire_agents.skills': ['my_skill = pkg:Skill']}` |
+| 3 | Built-in skills directory | `signalwire_agents/skills/` |
+| 4 | External paths | `skill_registry.add_skill_directory('/opt/custom_skills')` |
+| 5 | Environment variable paths | `SIGNALWIRE_SKILL_PATHS=/path1:/path2` |
+
+## Lazy Loading
+
+Skills are loaded on-demand to minimize startup time:
+
+```python
+# Skill NOT loaded yet
+agent = MyAgent()
+
+# Skill loaded when first referenced
+agent.add_skill("datetime")  # datetime skill loaded here
+
+# Already loaded, reused
+agent.add_skill("datetime")  # Uses cached class
+```
+
+## Multi-Instance Skills
+
+Some skills support multiple instances with different configurations:
+
+```python
+class MySkill(SkillBase):
+    SUPPORTS_MULTIPLE_INSTANCES = True
+
+    def get_instance_key(self) -> str:
+        # Unique key for this instance
+        tool_name = self.params.get('tool_name', self.SKILL_NAME)
+        return f"{self.SKILL_NAME}_{tool_name}"
+```
+
+Usage:
+
+```python
+# Add two instances with different configs
+agent.add_skill("web_search", {
+    "tool_name": "search_news",
+    "search_engine_id": "NEWS_ENGINE_ID",
+    "api_key": "KEY"
+})
+
+agent.add_skill("web_search", {
+    "tool_name": "search_docs",
+    "search_engine_id": "DOCS_ENGINE_ID",
+    "api_key": "KEY"
+})
+```
+
+## Parameter Passing
+
+Parameters flow through skills in a structured way:
+
+**At add_skill() time:**
+```python
+self.add_skill("web_search", {
+    "api_key": "your-key",
+    "tool_name": "custom_search",
+    "max_results": 5
+})
+```
+
+The skill receives these in `self.params` during setup:
+```python
+def setup(self) -> bool:
+    self.api_key = self.params.get("api_key")
+    self.max_results = self.params.get("max_results", 3)
+    return True
+```
+
+**At function call time:**
+The AI calls the function with arguments:
+```python
+def search_handler(self, args, raw_data):
+    query = args.get("query")  # From AI's function call
+    max_results = self.max_results  # From skill config
+    # ...
+```
+
+## Result Handling
+
+Skill handlers return `SwaigFunctionResult` just like regular SWAIG functions:
+
+```python
+def my_handler(self, args, raw_data):
+    # Success case
+    return SwaigFunctionResult("The result is 42")
+
+    # With actions
+    return (
+        SwaigFunctionResult("Updated your preferences")
+        .update_global_data({"preference": "value"})
+    )
+
+    # Error case - still return a result for the AI
+    return SwaigFunctionResult("I couldn't complete that request. Please try again.")
+```
+
+The result goes back to the AI, which uses it to formulate a response to the user.
+
+## Error Handling and Propagation
+
+Skills should handle errors gracefully and return meaningful messages:
+
+```python
+def api_handler(self, args, raw_data):
+    try:
+        result = self.call_external_api(args)
+        return SwaigFunctionResult(f"Result: {result}")
+    except requests.Timeout:
+        return SwaigFunctionResult(
+            "The service is taking too long to respond. Please try again."
+        )
+    except requests.RequestException as e:
+        self.agent.log.error(f"API error: {e}")
+        return SwaigFunctionResult(
+            "I'm having trouble connecting to the service right now."
+        )
+    except Exception as e:
+        self.agent.log.error(f"Unexpected error: {e}")
+        return SwaigFunctionResult(
+            "Something went wrong. Please try again."
+        )
+```
+
+**Error handling principles:**
+
+- Always return a `SwaigFunctionResult`, even on errors
+- Make error messages user-friendly (the AI will relay them)
+- Log technical details for debugging
+- Don't expose internal errors to users
+
+## Debugging Skills
+
+When skills don't work as expected:
+
+**1. Check if the skill loaded:**
+```python
+# In your agent
+print(f"Skills loaded: {list(self._skill_manager._skills.keys())}")
+```
+
+**2. Verify functions are registered:**
+```bash
+swaig-test your_agent.py --dump-swml | grep -A 5 "functions"
+```
+
+**3. Test the function directly:**
+```bash
+swaig-test your_agent.py --function skill_function_name --args '{"param": "value"}'
+```
+
+**4. Check for missing requirements:**
+Skills log warnings if required packages or environment variables are missing. Check your logs during agent startup.
+
+**5. Look at skill source:**
+Built-in skills are in the SDK source. Examine them to understand how they work:
+```bash
+pip show signalwire-agents
+# Find location, then look in signalwire_agents/skills/
+```
+
+

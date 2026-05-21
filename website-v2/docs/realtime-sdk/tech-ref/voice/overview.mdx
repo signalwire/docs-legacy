@@ -1,0 +1,80 @@
+---
+title: "Voice"
+sidebar_label: Overview
+sidebar_position: 0
+keywords:
+  - SignalWire
+  - Realtime SDK
+  - Node.js
+  - voice API
+  - telephony
+  - VoIP
+slug: /node/reference/voice
+description: Access the Voice API to make and receive phone calls programmatically. Includes methods for call control, playback, recording, and speech detection.
+toc_max_heading_level: 3
+---
+
+[voice-client-1]: /docs/server-sdk/node/reference/voice/client
+[voice-client]: /docs/server-sdk/node/reference/voice/client/events
+
+Access the Voice API. You can instantiate a [Voice.Client][voice-client-1] to make or receive calls. 
+
+<Info>
+Refer to [Events][voice-client] for a full list of events emitted by a [Voice.Client][voice-client-1] object.
+</Info>
+
+#### Example
+
+The following example answers any call in the `office` topic, and immediately plays some speech.
+
+```javascript
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+await client.voice.listen({
+  topics: ["office"],
+  onCallReceived: (call) => {
+    call.answer();
+    call.playTTS({ text: "Hello world" });
+  }
+});
+```
+
+## **Classes**
+
+<CardGroup cols={2}>
+  <Card title="Call" icon="fa-solid fa-phone-volume" href="/docs/server-sdk/node/reference/voice/call">
+    Represents an active voice call with methods for playback, recording, speech detection, and call control.
+  </Card>
+  <Card title="CallCollect" icon="fa-solid fa-keyboard" href="/docs/server-sdk/node/reference/voice/call-collect">
+    Represents a collect operation for gathering user input via DTMF or speech during a call.
+  </Card>
+  <Card title="CallDetect" icon="fa-solid fa-magnifying-glass" href="/docs/server-sdk/node/reference/voice/call-detect">
+    Represents a detect operation for identifying answering machines, fax tones, or digits during a call.
+  </Card>
+  <Card title="CallPlayback" icon="fa-solid fa-play" href="/docs/server-sdk/node/reference/voice/call-playback">
+    Represents a playback operation for playing audio, TTS, silence, or ringtones during a call.
+  </Card>
+  <Card title="CallPrompt" icon="fa-solid fa-comment-dots" href="/docs/server-sdk/node/reference/voice/call-prompt">
+    Represents a prompt operation that combines playback with input collection during a call.
+  </Card>
+  <Card title="CallRecording" icon="fa-solid fa-microphone" href="/docs/server-sdk/node/reference/voice/call-recording">
+    Represents a recording operation for capturing audio during a call.
+  </Card>
+  <Card title="CallState" icon="fa-solid fa-circle-info" href="/docs/server-sdk/node/reference/voice/call-state">
+    Represents the state of a call with properties for tracking call progress and status.
+  </Card>
+  <Card title="CallTap" icon="fa-solid fa-ear-listen" href="/docs/server-sdk/node/reference/voice/call-tap">
+    Represents a tap operation for streaming call audio to an external destination.
+  </Card>
+  <Card title="Client" icon="fa-solid fa-server" href="/docs/server-sdk/node/reference/voice/client">
+    The main Voice client for making outbound calls and listening for inbound call events.
+  </Card>
+  <Card title="DeviceBuilder" icon="fa-solid fa-wrench" href="/docs/server-sdk/node/reference/voice/device-builder">
+    Helper class for building device configurations when dialing multiple endpoints.
+  </Card>
+  <Card title="Playlist" icon="fa-solid fa-list" href="/docs/server-sdk/node/reference/voice/playlist">
+    Helper class for building playlists of audio, TTS, silence, and ringtones for playback.
+  </Card>
+</CardGroup>

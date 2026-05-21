@@ -1,0 +1,162 @@
+---
+title: handlePushNotification
+slug: /signalwire-client/handle-push-notification
+---
+
+import APIField from '@site/src/components/APIField';
+
+Processes incoming push notifications for call or message events, decrypting the encrypted payload and preparing the client to handle the incoming event.
+
+## How it works
+
+The `handlePushNotification` method processes encrypted push notification payloads received from the platform's notification system (APNS for iOS, FCM for Android). SignalWire sends all push notifications encrypted using AES-256-GCM encryption.
+
+The method:
+1. Retrieves the `push_notification_key` that was stored during device registration
+2. Extracts the encrypted invite from the platform-specific payload structure
+3. Decrypts the invite using the encryption key, IV, and authentication tag
+4. Decompresses the decrypted invite to get the SDP information
+5. Returns a Call object that can be answered or declined
+
+## Parameters
+
+<APIField name="payload" type="object" required>
+  The push notification payload received from the platform's notification system.
+</APIField>
+
+### iOS payload structure
+
+<APIField name="payload.aps.alert" type="object">
+  Contains the encrypted notification data on iOS devices.
+</APIField>
+
+<APIField name="payload.aps.alert.invite" type="string">
+  Base64-encoded encrypted invite data.
+</APIField>
+
+<APIField name="payload.aps.alert.encryption_type" type="'aes_256_gcm'">
+  The encryption algorithm used (always 'aes_256_gcm').
+</APIField>
+
+<APIField name="payload.aps.alert.iv" type="string">
+  Base64-encoded initialization vector for decryption.
+</APIField>
+
+<APIField name="payload.aps.alert.tag" type="string">
+  Base64-encoded authentication tag for AES-GCM.
+</APIField>
+
+### Android payload structure
+
+<APIField name="payload.notification.body" type="string">
+  JSON string containing the encrypted notification data on Android devices.
+</APIField>
+
+## Signature
+
+```typescript
+handlePushNotification(payload: IHandlePushNotificationParams): Promise<Call | null>
+```
+
+## Returns
+
+**Type:** `Promise<Call | null>`
+
+Returns a Promise that resolves with a Call object if successful, or null if the notification couldn't be processed.
+
+## Examples
+
+### Handle iOS push notification
+
+```typescript
+async function onNotificationReceived(notification) {
+  const pnKey = await AsyncStorage.getItem(
+    '@signalwire_push_notification_key'
+  )
+  
+  if (!pnKey) {
+    console.error('Push notification key not found. Did you call registerDevice()?')
+    return
+  }
+  
+  const call = await client.handlePushNotification(notification)
+  
+  if (call) {
+    console.log('Incoming call from:', call.remotePeer)
+  }
+}
+```
+
+### Handle Android push notification
+
+```typescript
+messaging().setBackgroundMessageHandler(async (remoteMessage) => {
+  const call = await client.handlePushNotification(remoteMessage)
+  
+  if (call) {
+    await call.answer()
+  }
+})
+```
+
+### Complete implementation with decryption
+
+```typescript
+client.handlePushNotification = async (payload) => {
+  const pnKeyB64 = await AsyncStorage.getItem(
+    '@signalwire_push_notification_key'
+  )
+  
+  if (!pnKeyB64) {
+    console.error('Push notification decryption key not found')
+    return null
+  }
+
+  let corePayload
+  if (payload?.aps?.alert) {
+    corePayload = payload.aps.alert
+  } else if (typeof payload?.notification?.body === 'string') {
+    try {
+      corePayload = JSON.parse(payload.notification.body)
+    } catch (e) {
+      console.error('Failed to parse notification body')
+      return null
+    }
+  }
+
+  if (!corePayload?.invite) {
+    console.error('Push notification payload is ill-formed')
+    return null
+  }
+
+  let invite = corePayload.invite
+
+  if (corePayload.encryption_type === 'aes_256_gcm') {
+    const ivHex = Buffer.from(corePayload.iv, 'base64').toString('hex')
+    const tagHex = Buffer.from(corePayload.tag, 'base64').toString('hex')
+
+    try {
+      invite = await AesGcmCrypto.decrypt(
+        corePayload.invite,
+        pnKeyB64,
+        ivHex,
+        tagHex,
+        true
+      )
+    } catch (e) {
+      console.error('Decryption failed:', e)
+      return null
+    }
+  }
+
+  const decompressedInvite = pako.inflate(Buffer.from(invite, 'base64'))
+  const sdpJson = JSON.parse(Buffer.from(decompressedInvite).toString('utf8'))
+
+  const call = client._handlePushNotification({
+    ...corePayload,
+    decrypted: sdpJson,
+  })
+  
+  return call
+}
+```

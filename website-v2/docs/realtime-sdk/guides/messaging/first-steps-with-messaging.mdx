@@ -1,0 +1,151 @@
+---
+title: First Steps with Messaging with the Realtime SDK
+sidebar_label: Get started
+slug: /node/guides/get-started-with-messaging
+toc_max_heading_level: 3
+x-custom:
+  ported_from_readme: true
+  tags:
+    - language:nodejs
+    - sdk:relayrealtime
+    - product:messaging
+description: Learn how to send and receive SMS messages with the SignalWire Realtime SDK.
+keywords:
+  - SignalWire
+  - Realtime SDK
+  - Node.js
+  - SMS tutorial
+  - getting started messaging
+  - first SMS app
+sidebar_custom_props:
+  platform: javascript
+---
+
+[buy-a-new-phone-number]: /docs/platform/phone-numbers
+[campaign-registry-everything-you-need-to-know]: /docs/platform/messaging/campaign-registry
+[log-in]: https://signalwire.com/signin
+
+Send and receive SMS messages from your own Node.js application.
+
+## Installation
+
+First, you need to obtain the Realtime SDK. If you are using npm or yarn, from
+your terminal you can run the following command:
+
+```shell npm2yarn
+npm install @signalwire/realtime-api
+```
+
+Then, you can include the package in JavaScript as follows:
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+let messageClient = client.messaging;
+```
+
+## Obtaining and configuring a number
+
+[Log in][log-in] to your SignalWire Space.
+From the Phone Numbers section, you can
+[buy a new phone number][buy-a-new-phone-number].
+You will need at least one number to send and receive messages.
+After you have acquired a number, open its settings by clicking on "Edit Settings".
+Scroll down until you reach "Messaging Settings", as shown in the next figure, and configure it to:
+
+- handle messages using a RELAY application,
+- forward the call to the "office" RELAY topic
+
+<Frame caption="Number configuration setting for handling Messages.">
+
+![The Messaging Settings page.](@image/dashboard/relay/app_message_handler.webp)
+
+</Frame>
+
+<Info title="Topic">
+In RELAY V4, a topic is a named scope that allows you to organize and categorize
+your resources. When you configure a phone number to handle messages with a RELAY
+application and specify a topic, all messages to that number will be delivered
+to RELAY clients listening on that topic.
+</Info>
+
+<Info title="Ensuring message delivery">
+
+If you are sending messages to the US from a 10DLC number, you _must_ register your traffic with the Campaign Registry.
+Otherwise, the carriers will not deliver your messages.
+Please see our [**Campaign Registry - Everything You Need To Know**][campaign-registry-everything-you-need-to-know]
+guide for more information.
+
+</Info>
+
+## Sending your first message
+
+To send a message from Node.js you need to instantiate a Messaging client, and then call its `send` method.
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({
+  project: "your-project-id",
+  token: "your-api-token",
+  topics: ["office"],
+});
+
+let messageClient = client.messaging;
+
+try {
+  const sendResult = await messageClient.send({
+    topic: "office",
+    from: "+1xxx",
+    to: "+1yyy",
+    body: "Hello World!",
+  });
+
+  console.log(sendResult);
+} catch (e) {
+  console.error(e.message);
+}
+```
+
+We used the "office" topic in two places: first, when initializing the
+Messaging client. Then, when calling `send`. You use the `topics` array in the
+Client constructor to specify the list of contexts you want to listen to for
+events. Instead, the `topic` in the `send` method determines the `topic` to
+associate to the message. If the two topics match, your Client will receive
+events (`message.updated`) for this outgoing message too.
+
+You also need to specify a Project ID and API token: find these in the API
+section of your Space, as shown in the following figure. Make sure that your
+token has the "Messaging" scope enabled.
+
+<Frame caption="You can find your Project ID and Token from the API tab in your SignalWire Space. Make sure your token has the 'Messaging' scope enabled." >
+
+![The API page.](@image/dashboard/credentials/api-credentials.webp)
+
+</Frame>
+
+## Receiving incoming messages
+
+Once a Client is initialized, you can listen for incoming messages on the
+selected topic (in our example, just "office"). For example:
+
+```js
+await messageClient.listen({
+  topics: ["office"],
+  onMessageReceived: async (message) => {
+    console.log("Message received", message);
+  },
+});
+```
+
+We used the "office" topic when listening to the messaging client's events.
+The `topics` array is used only listen to the phone numbers that you have
+put in that specific topic from the SignalWire dashboard.
+
+Your event handler receives a message object, which you can use to access fields
+such as `message.body`, `message.from`, `message.to`, etc.
+
+## Next steps
+
+Congratulations!
+You can now send and receive messages with your Node.js application.
+You are now ready to explore the advanced guides in the Messaging section from the left menu.

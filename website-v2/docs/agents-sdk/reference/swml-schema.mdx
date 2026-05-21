@@ -1,0 +1,424 @@
+---
+title: "Swml Schema"
+sidebar_label: "Swml Schema"
+slug: /python/reference/swml-schema
+toc_max_heading_level: 3
+---
+
+## SWML Schema
+
+Reference for SWML (SignalWire Markup Language) document structure and validation.
+
+### Overview
+
+SWML (SignalWire Markup Language) is a JSON format for defining call flows and AI agent behavior.
+
+**Key Components:**
+- `version`: Schema version (always "1.0.0")
+- `sections`: Named groups of verbs
+- `Verbs`: Actions like ai, play, connect, transfer
+
+### Basic Structure
+
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      { "verb_name": { "param": "value" } }
+    ]
+  }
+}
+```
+
+### Required Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `version` | string | Must be "1.0.0" |
+| `sections` | object | Contains named section arrays |
+| `main` | array | Default entry section (required) |
+
+### AI Verb
+
+The `ai` verb creates an AI agent:
+
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "ai": {
+          "prompt": {
+            "text": "You are a helpful assistant."
+          },
+          "post_prompt": {
+            "text": "Summarize the conversation."
+          },
+          "post_prompt_url": "https://example.com/summary",
+          "params": {
+            "temperature": 0.7
+          },
+          "languages": [
+            {
+              "name": "English",
+              "code": "en-US",
+              "voice": "rime.spore"
+            }
+          ],
+          "hints": ["SignalWire", "SWAIG"],
+          "SWAIG": {
+            "functions": [],
+            "native_functions": [],
+            "includes": []
+          }
+        }
+      }
+    ]
+  }
+}
+```
+
+### AI Verb Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `prompt` | object | Main prompt configuration |
+| `post_prompt` | object | Summary/completion prompt |
+| `post_prompt_url` | string | URL for summary delivery |
+| `params` | object | AI model parameters |
+| `languages` | array | Supported languages and voices |
+| `hints` | array | Speech recognition hints |
+| `SWAIG` | object | Function definitions |
+| `pronounce` | array | Pronunciation rules |
+| `global_data` | object | Initial session data |
+
+### SWAIG Object
+
+```json
+{
+  "SWAIG": {
+    "functions": [
+      {
+        "function": "search",
+        "description": "Search for information",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "query": {
+              "type": "string",
+              "description": "Search query"
+            }
+          },
+          "required": ["query"]
+        },
+        "web_hook_url": "https://example.com/swaig"
+      }
+    ],
+    "native_functions": [
+      "check_time"
+    ],
+    "includes": [
+      {
+        "url": "https://example.com/shared_functions",
+        "functions": ["shared_search", "shared_lookup"]
+      }
+    ]
+  }
+}
+```
+
+### Function Definition
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `function` | string | Yes | Function name |
+| `description` | string | Yes | What the function does |
+| `parameters` | object | No | JSON Schema for parameters |
+| `web_hook_url` | string | * | Webhook URL (if not data_map) |
+| `data_map` | object | * | DataMap definition |
+| `meta_data` | object | No | Custom metadata |
+| `meta_data_token` | string | No | Token scope for metadata |
+| `fillers` | array | No | Processing phrases |
+| `wait_file` | string | No | Hold audio URL |
+
+### Common Verbs
+
+#### answer
+
+```json
+{ "answer": {} }
+```
+
+#### play
+
+```json
+{
+  "play": {
+    "url": "https://example.com/audio.mp3"
+  }
+}
+```
+
+#### connect
+
+```json
+{
+  "connect": {
+    "to": "+15551234567",
+    "from": "+15559876543"
+  }
+}
+```
+
+#### transfer
+
+```json
+{
+  "transfer": {
+    "dest": "https://example.com/other_agent"
+  }
+}
+```
+
+#### hangup
+
+```json
+{ "hangup": {} }
+```
+
+#### record_call
+
+```json
+{
+  "record_call": {
+    "stereo": true,
+    "format": "mp3"
+  }
+}
+```
+
+#### record
+
+```json
+{
+  "record": {
+    "format": "mp3"
+  }
+}
+```
+
+### Contexts Structure
+
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [{
+      "ai": {
+        "contexts": {
+          "default": "main",
+          "main": {
+            "steps": [
+              {
+                "name": "greeting",
+                "text": "Welcome the caller.",
+                "valid_steps": ["collect"]
+              },
+              {
+                "name": "collect",
+                "text": "Collect information.",
+                "functions": ["lookup_account"],
+                "valid_steps": ["confirm"]
+              }
+            ]
+          }
+        }
+      }
+    }]
+  }
+}
+```
+
+### Step Structure
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `name` | string | Step identifier |
+| `text` | string | Step prompt text |
+| `step_criteria` | string | Completion criteria |
+| `functions` | string \| array | "none" or list of function names |
+| `valid_steps` | array | Allowed next steps |
+| `valid_contexts` | array | Allowed context switches |
+
+### DataMap Structure
+
+```json
+{
+  "function": "get_weather",
+  "description": "Get weather information",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "city": {
+        "type": "string",
+        "description": "City name"
+      }
+    },
+    "required": ["city"]
+  },
+  "data_map": {
+    "webhooks": [
+      {
+        "url": "https://api.weather.com/current?q=${enc:args.city}",
+        "method": "GET",
+        "output": {
+          "response": "Weather: ${response.condition}"
+        }
+      }
+    ]
+  }
+}
+```
+
+### Prompt Object (POM)
+
+```json
+{
+  "prompt": {
+    "pom": [
+      {
+        "section": "Role",
+        "body": "You are a helpful assistant."
+      },
+      {
+        "section": "Guidelines",
+        "bullets": [
+          "Be concise",
+          "Be helpful",
+          "Be accurate"
+        ]
+      }
+    ]
+  }
+}
+```
+
+### Language Configuration
+
+```json
+{
+  "languages": [
+    {
+      "name": "English",
+      "code": "en-US",
+      "voice": "rime.spore",
+      "speech_fillers": ["um", "uh"],
+      "function_fillers": ["Let me check..."]
+    },
+    {
+      "name": "Spanish",
+      "code": "es-ES",
+      "voice": "rime.spore"
+    }
+  ]
+}
+```
+
+### Model Parameters
+
+```json
+{
+  "params": {
+    "temperature": 0.7,
+    "top_p": 0.9,
+    "max_tokens": 150,
+    "frequency_penalty": 0.0,
+    "presence_penalty": 0.0,
+    "confidence": 0.6,
+    "barge_confidence": 0.1
+  }
+}
+```
+
+### Schema Validation
+
+The SDK includes a schema.json file for validation:
+
+```python
+from signalwire_agents.utils.schema_utils import SchemaUtils
+
+schema = SchemaUtils()
+schema.validate(swml_document)
+```
+
+### Full Example
+
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      { "answer": {} },
+      {
+        "ai": {
+          "prompt": {
+            "pom": [
+              {
+                "section": "Role",
+                "body": "You are a customer service agent."
+              },
+              {
+                "section": "Guidelines",
+                "bullets": [
+                  "Be helpful and professional",
+                  "Verify customer identity",
+                  "Resolve issues efficiently"
+                ]
+              }
+            ]
+          },
+          "post_prompt": {
+            "text": "Summarize the customer interaction."
+          },
+          "post_prompt_url": "https://example.com/swaig/summary",
+          "params": {
+            "temperature": 0.7
+          },
+          "languages": [
+            {
+              "name": "English",
+              "code": "en-US",
+              "voice": "rime.spore"
+            }
+          ],
+          "hints": ["account", "billing", "support"],
+          "SWAIG": {
+            "functions": [
+              {
+                "function": "lookup_account",
+                "description": "Look up customer account",
+                "parameters": {
+                  "type": "object",
+                  "properties": {
+                    "account_id": {
+                      "type": "string",
+                      "description": "Account number"
+                    }
+                  },
+                  "required": ["account_id"]
+                },
+                "web_hook_url": "https://example.com/swaig"
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}
+```
+
+
+

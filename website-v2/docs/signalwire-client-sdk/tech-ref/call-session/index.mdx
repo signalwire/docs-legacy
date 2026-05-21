@@ -1,0 +1,368 @@
+---
+slug: /call-session
+title: CallSession
+---
+
+import APIField from '@site/src/components/APIField';
+
+# CallSession
+
+A `CallSession` object represents an active voice or video call. You get instances of a CallSession from the SignalWire Client by dialing, answering, or reattaching to calls.
+
+## How It Works
+
+The CallSession provides real-time control over an active call through both method calls and events. When you call methods like `audioMute()` or `setLayout()`, the SDK sends commands over the WebRTC connection and returns promises with the results. Simultaneously, you can listen for events like member updates or layout changes.
+
+### Getting a CallSession
+
+You receive a `CallSession` object when you dial, answer, or reattach to a call:
+
+```typescript
+// Outbound call
+const call = await client.dial({ to: 'user@example.com' })
+
+// Answer incoming call
+client.on('call.received', async (incomingCall) => {
+  const call = await incomingCall.answer()
+})
+
+// Reattach to existing call
+const call = await client.reattach({ call_id: 'existing-call-id' })
+```
+
+## Key Concepts
+
+### Member Targeting
+
+Many CallSession methods accept an optional `memberId` parameter:
+
+- **No `memberId`** - Action applies to yourself
+- **Specific ID** - Action applies to that member (requires permission)
+
+```typescript
+// Mute yourself
+await call.audioMute()
+
+// Mute another member
+await call.audioMute({ memberId: 'member-123' })
+```
+
+### Capabilities and Permissions
+
+Before calling control methods that affect other members, check your `capabilities` to ensure you have permission.
+
+```typescript
+if (call.capabilities?.member.remove) {
+  await call.removeMember({ memberId: 'member-123' })
+}
+```
+
+### Lifecycle
+
+Always call `hangup()` when done with a call to properly clean up resources. Listen to the `destroy` event to know when cleanup is complete.
+
+```typescript
+await call.hangup()
+
+call.on('destroy', () => {
+  console.log('Call cleaned up')
+})
+```
+
+## Properties
+
+<APIField name="memberId" type="string | undefined">
+  Your unique member ID within this call session. Set when you successfully join the call.
+
+  ```typescript
+  call.on('call.joined', () => {
+    console.log('My member ID:', call.memberId)
+  })
+  ```
+</APIField>
+
+<APIField name="currentLayoutEvent" type="[CallLayoutChangedEventParams](types#calllayoutchangedeventparams)">
+  The full layout changed event object containing the current layout and all member positions. Updated automatically when the room layout changes.
+
+  ```typescript
+  const layoutEvent = call.currentLayoutEvent
+  console.log('Current layout:', layoutEvent.layout.name)
+  console.log('Layout layers:', layoutEvent.layout.layers)
+  ```
+</APIField>
+
+<APIField name="currentLayout" type="CallLayoutChangedEventParams['layout']">
+  The current video layout object (convenience accessor from `currentLayoutEvent.layout`). Updated automatically when the room layout changes.
+
+  ```typescript
+  const layout = call.currentLayout
+  console.log('Current layout:', layout.name)
+  ```
+</APIField>
+
+<APIField name="currentPosition" type="[VideoPosition](types#videoposition) | undefined">
+  Your current position within the video layout, or `undefined` if not found in any layer.
+
+  ```typescript
+  const position = call.currentPosition
+  if (position) {
+    console.log('My position:', position)
+  }
+  ```
+</APIField>
+
+<APIField name="capabilities" type="[CallCapabilitiesContract](types#callcapabilitiescontract) | undefined">
+  Defines what actions are allowed for this call session based on your role and permissions.
+
+  ```typescript
+  // Check before performing actions
+  if (call.capabilities?.self.muteAudio.on) {
+    await call.audioMute()
+  }
+
+  if (call.capabilities?.member.remove) {
+    await call.removeMember({ memberId: 'member-id' })
+  }
+  ```
+</APIField>
+
+<APIField name="screenShareList" type="[RoomSessionScreenShare](types#roomsessionscreenshare)[]">
+  Array of active screen sharing sessions in this call.
+
+  ```typescript
+  console.log('Active screen shares:', call.screenShareList.length)
+  ```
+</APIField>
+
+<APIField name="callId" type="string">
+  The underlying connection ID for this call.
+
+  ```typescript
+  console.log('Call ID:', call.callId)
+  ```
+</APIField>
+
+<APIField name="roomId" type="string">
+  The unique identifier for the room.
+
+  ```typescript
+  console.log('Room ID:', call.roomId)
+  ```
+</APIField>
+
+<APIField name="roomSessionId" type="string">
+  The unique identifier for the room session.
+
+  ```typescript
+  console.log('Room Session ID:', call.roomSessionId)
+  ```
+</APIField>
+
+<APIField name="id" type="string">
+  Unique id for this room session.
+
+  ```typescript
+  console.log('Session ID:', call.id)
+  ```
+</APIField>
+
+<APIField name="active" type="boolean">
+  Whether the connection is currently active.
+
+  ```typescript
+  if (call.active) {
+    console.log('Call is active')
+  }
+  ```
+</APIField>
+
+<APIField name="localStream" type="MediaStream | undefined">
+  Provides access to the local MediaStream.
+
+  ```typescript
+  const stream = call.localStream
+  if (stream) {
+    console.log('Local stream tracks:', stream.getTracks())
+  }
+  ```
+</APIField>
+
+<APIField name="remoteStream" type="MediaStream | undefined">
+  Provides access to the remote MediaStream.
+
+  ```typescript
+  const stream = call.remoteStream
+  if (stream) {
+    console.log('Remote stream tracks:', stream.getTracks())
+  }
+  ```
+</APIField>
+
+<APIField name="localAudioTrack" type="MediaStreamTrack | null">
+  Provides access to the local audio MediaStreamTrack.
+
+  ```typescript
+  const audioTrack = call.localAudioTrack
+  if (audioTrack) {
+    console.log('Audio enabled:', audioTrack.enabled)
+  }
+  ```
+</APIField>
+
+<APIField name="localVideoTrack" type="MediaStreamTrack | null">
+  Provides access to the local video MediaStreamTrack.
+
+  ```typescript
+  const videoTrack = call.localVideoTrack
+  if (videoTrack) {
+    console.log('Video enabled:', videoTrack.enabled)
+  }
+  ```
+</APIField>
+
+<APIField name="cameraId" type="string | null">
+  The id of the video device, or null if not available.
+
+  ```typescript
+  console.log('Camera ID:', call.cameraId)
+  ```
+</APIField>
+
+<APIField name="cameraLabel" type="string | null">
+  The label of the video device, or null if not available.
+
+  ```typescript
+  console.log('Camera:', call.cameraLabel)
+  ```
+</APIField>
+
+<APIField name="cameraConstraints" type="MediaTrackConstraints | null">
+  The constraints applied to the video device, or null if not available.
+
+  ```typescript
+  console.log('Camera constraints:', call.cameraConstraints)
+  ```
+</APIField>
+
+<APIField name="microphoneId" type="string | null">
+  The id of the audio input device, or null if not available.
+
+  ```typescript
+  console.log('Microphone ID:', call.microphoneId)
+  ```
+</APIField>
+
+<APIField name="microphoneLabel" type="string | null">
+  The label of the audio input device, or null if not available.
+
+  ```typescript
+  console.log('Microphone:', call.microphoneLabel)
+  ```
+</APIField>
+
+<APIField name="microphoneConstraints" type="MediaTrackConstraints | null">
+  The constraints applied to the audio input device, or null if not available.
+
+  ```typescript
+  console.log('Microphone constraints:', call.microphoneConstraints)
+  ```
+</APIField>
+
+<APIField name="withAudio" type="boolean">
+  Indicates if there is any receiving audio.
+
+  ```typescript
+  if (call.withAudio) {
+    console.log('Receiving audio')
+  }
+  ```
+</APIField>
+
+<APIField name="withVideo" type="boolean">
+  Indicates if there is any receiving video.
+
+  ```typescript
+  if (call.withVideo) {
+    console.log('Receiving video')
+  }
+  ```
+</APIField>
+
+<APIField name="previewUrl" type="string | undefined">
+  The preview URL for the room. Only available with `enable_room_previews: true` on room configuration.
+
+  ```typescript
+  if (call.previewUrl) {
+    console.log('Preview URL:', call.previewUrl)
+  }
+  ```
+</APIField>
+
+## Examples
+
+### Muting Audio and Video
+
+```typescript
+// Mute your own audio
+await call.audioMute()
+
+// Unmute your video
+await call.videoUnmute()
+
+// Mute a specific member (requires permission)
+await call.audioMute({ memberId: 'member-123' })
+```
+
+### Managing Call Members
+
+```typescript
+// Get all members in the call
+const { members } = await call.getMembers()
+members.forEach(member => {
+  console.log(`${member.name}: ${member.audio_muted ? 'muted' : 'unmuted'}`)
+})
+
+// Remove a member (requires permission)
+await call.removeMember({ memberId: 'member-123' })
+```
+
+### Changing Video Layouts
+
+```typescript
+// Change the video layout
+await call.setLayout({ name: 'grid-responsive' })
+
+// Get available layouts
+const { layouts } = await call.getLayouts()
+
+// Position members in the layout
+await call.setPositions({
+  positions: {
+    'member-1': { layer: 0, position: 'standard-1' },
+    'member-2': { layer: 0, position: 'standard-2' }
+  }
+})
+```
+
+### Listening to Call Events
+
+```typescript
+// Listen for member updates
+call.on('member.updated', (event) => {
+  console.log('Member updated:', event.member)
+})
+
+// Listen for layout changes
+call.on('layout.changed', (event) => {
+  console.log('New layout:', event.layout.name)
+})
+
+// Track call lifecycle
+call.on('call.joined', () => {
+  console.log('Successfully joined the call')
+})
+
+call.on('destroy', () => {
+  console.log('Call ended and cleaned up')
+})
+```

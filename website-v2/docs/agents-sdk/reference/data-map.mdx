@@ -1,0 +1,425 @@
+---
+title: "Data Map"
+sidebar_label: "Data Map"
+slug: /python/reference/data-map
+toc_max_heading_level: 3
+---
+
+## DataMap API
+
+API reference for DataMap, enabling serverless REST API integration without webhooks.
+
+### Class Definition
+
+```python
+from signalwire_agents.core.data_map import DataMap
+
+class DataMap:
+    """Builder class for creating SWAIG data_map configurations."""
+```
+
+### Overview
+
+DataMap enables SWAIG functions that execute on SignalWire servers without requiring your own webhook endpoints.
+
+**Use Cases:**
+
+- Call external APIs directly from SWML
+- Pattern-based responses without API calls
+- Reduce infrastructure requirements
+- Serverless function execution
+
+### Constructor
+
+```python
+DataMap(function_name: str)
+```
+
+Create a new DataMap builder.
+
+### Core Methods
+
+#### purpose / description
+
+```python
+def purpose(self, description: str) -> 'DataMap'
+def description(self, description: str) -> 'DataMap'  # Alias
+```
+
+Set the function description shown to the AI.
+
+```python
+data_map = DataMap("get_weather").purpose("Get current weather for a city")
+```
+
+#### parameter
+
+```python
+def parameter(
+    self,
+    name: str,                      # Parameter name
+    param_type: str,                # JSON schema type
+    description: str,               # Parameter description
+    required: bool = False,         # Is required
+    enum: Optional[List[str]] = None  # Allowed values
+) -> 'DataMap'
+```
+
+Add a function parameter.
+
+```python
+data_map = (
+    DataMap("search")
+    .purpose("Search for items")
+    .parameter("query", "string", "Search query", required=True)
+    .parameter("limit", "integer", "Max results", required=False)
+    .parameter("category", "string", "Category filter",
+               enum=["electronics", "clothing", "food"])
+)
+```
+
+### Parameter Types
+
+| Type | JSON Schema | Description |
+|------|-------------|-------------|
+| string | string | Text values |
+| integer | integer | Whole numbers |
+| number | number | Decimal numbers |
+| boolean | boolean | True/False |
+| array | array | List of items |
+| object | object | Key-value pairs |
+
+### Webhook Methods
+
+#### webhook
+
+```python
+def webhook(
+    self,
+    method: str,                          # HTTP method
+    url: str,                             # API endpoint
+    headers: Optional[Dict[str, str]] = None,  # HTTP headers
+    form_param: Optional[str] = None,     # Form parameter name
+    input_args_as_params: bool = False,   # Merge args to params
+    require_args: Optional[List[str]] = None  # Required args
+) -> 'DataMap'
+```
+
+Add an API call.
+
+```python
+data_map = (
+    DataMap("get_weather")
+    .purpose("Get weather information")
+    .parameter("city", "string", "City name", required=True)
+    .webhook("GET", "https://api.weather.com/v1/current?q=${enc:args.city}&key=API_KEY")
+)
+```
+
+#### body
+
+```python
+def body(self, data: Dict[str, Any]) -> 'DataMap'
+```
+
+Set request body for POST/PUT.
+
+```python
+data_map = (
+    DataMap("create_ticket")
+    .purpose("Create support ticket")
+    .parameter("subject", "string", "Ticket subject", required=True)
+    .parameter("message", "string", "Ticket message", required=True)
+    .webhook("POST", "https://api.support.com/tickets",
+             headers={"Authorization": "Bearer TOKEN"})
+    .body({
+        "subject": "${args.subject}",
+        "body": "${args.message}",
+        "priority": "normal"
+    })
+)
+```
+
+#### params
+
+```python
+def params(self, data: Dict[str, Any]) -> 'DataMap'
+```
+
+Set request parameters (alias for body).
+
+### Output Methods
+
+#### output
+
+```python
+def output(self, result: SwaigFunctionResult) -> 'DataMap'
+```
+
+Set the output for the most recent webhook.
+
+```python
+from signalwire_agents.core.function_result import SwaigFunctionResult
+
+data_map = (
+    DataMap("get_weather")
+    .purpose("Get weather")
+    .parameter("city", "string", "City", required=True)
+    .webhook("GET", "https://api.weather.com/current?q=${enc:args.city}")
+    .output(SwaigFunctionResult(
+        "The weather in ${args.city} is ${response.condition} with a temperature of ${response.temp}°F"
+    ))
+)
+```
+
+#### fallback_output
+
+```python
+def fallback_output(self, result: SwaigFunctionResult) -> 'DataMap'
+```
+
+Set output when all webhooks fail.
+
+```python
+data_map = (
+    DataMap("search")
+    .purpose("Search multiple sources")
+    .webhook("GET", "https://api.primary.com/search?q=${enc:args.query}")
+    .output(SwaigFunctionResult("Found: ${response.title}"))
+    .webhook("GET", "https://api.backup.com/search?q=${enc:args.query}")
+    .output(SwaigFunctionResult("Backup result: ${response.title}"))
+    .fallback_output(SwaigFunctionResult("Sorry, search is unavailable"))
+)
+```
+
+### Variable Patterns
+
+| Pattern | Description |
+|---------|-------------|
+| `${args.param}` | Function argument value |
+| `${enc:args.param}` | URL-encoded argument (use in webhook URLs) |
+| `${lc:args.param}` | Lowercase argument value |
+| `${fmt_ph:args.phone}` | Format as phone number |
+| `${response.field}` | API response field |
+| `${response.arr[0]}` | Array element in response |
+| `${global_data.key}` | Global session data |
+| `${meta_data.key}` | Call metadata |
+| `${this.field}` | Current item in foreach |
+
+#### Chained Modifiers
+
+Modifiers are applied right-to-left:
+
+| Pattern | Result |
+|---------|--------|
+| `${enc:lc:args.param}` | First lowercase, then URL encode |
+| `${lc:enc:args.param}` | First URL encode, then lowercase |
+
+#### Examples
+
+| Pattern | Result |
+|---------|--------|
+| `${args.city}` | "Seattle" (in body/output) |
+| `${enc:args.city}` | "Seattle" URL-encoded (in URLs) |
+| `${lc:args.city}` | "seattle" (lowercase) |
+| `${enc:lc:args.city}` | "seattle" lowercased then URL-encoded |
+| `${fmt_ph:args.phone}` | "+1 (555) 123-4567" |
+| `${response.temp}` | "65" |
+| `${response.items[0].name}` | "First item" |
+| `${global_data.user_id}` | "user123" |
+
+### Expression Methods
+
+#### expression
+
+```python
+def expression(
+    self,
+    test_value: str,                        # Template to test
+    pattern: Union[str, Pattern],           # Regex pattern
+    output: SwaigFunctionResult,            # Match output
+    nomatch_output: Optional[SwaigFunctionResult] = None  # No-match output
+) -> 'DataMap'
+```
+
+Add pattern-based response (no API call needed).
+
+```python
+data_map = (
+    DataMap("control_playback")
+    .purpose("Control media playback")
+    .parameter("command", "string", "Playback command", required=True)
+    .expression(
+        "${args.command}",
+        r"play|start",
+        SwaigFunctionResult("Starting playback").add_action("playback_bg", "music.mp3")
+    )
+    .expression(
+        "${args.command}",
+        r"stop|pause",
+        SwaigFunctionResult("Stopping playback").add_action("stop_playback_bg", True)
+    )
+)
+```
+
+### Array Processing
+
+#### foreach
+
+```python
+def foreach(self, foreach_config: Dict[str, Any]) -> 'DataMap'
+```
+
+Process array from API response.
+
+```python
+data_map = (
+    DataMap("search_products")
+    .purpose("Search product catalog")
+    .parameter("query", "string", "Search query", required=True)
+    .webhook("GET", "https://api.store.com/products?q=${enc:args.query}")
+    .foreach({
+        "input_key": "products",
+        "output_key": "product_list",
+        "max": 3,
+        "append": "- ${this.name}: $${this.price}\n"
+    })
+    .output(SwaigFunctionResult("Found products:\n${product_list}"))
+)
+```
+
+### Foreach Configuration
+
+| Key | Type | Description |
+|-----|------|-------------|
+| `input_key` | string | Key in response containing array |
+| `output_key` | string | Variable name for built string |
+| `max` | integer | Maximum items to process (optional) |
+| `append` | string | Template for each item |
+
+### Webhook Expressions
+
+#### webhook_expressions
+
+```python
+def webhook_expressions(
+    self,
+    expressions: List[Dict[str, Any]]
+) -> 'DataMap'
+```
+
+Add expressions to run after webhook completes.
+
+### Registering with Agent
+
+```python
+from signalwire_agents import AgentBase
+from signalwire_agents.core.data_map import DataMap
+from signalwire_agents.core.function_result import SwaigFunctionResult
+
+agent = AgentBase(name="weather-agent")
+
+## Create DataMap
+weather_map = (
+    DataMap("get_weather")
+    .purpose("Get current weather for a location")
+    .parameter("city", "string", "City name", required=True)
+    .webhook("GET", "https://api.weather.com/v1/current?q=${enc:args.city}&key=YOUR_KEY")
+    .output(SwaigFunctionResult(
+        "The weather in ${args.city} is ${response.current.condition.text} "
+        "with ${response.current.temp_f}°F"
+    ))
+)
+
+## Register with agent - convert DataMap to SWAIG function dictionary
+agent.register_swaig_function(weather_map.to_swaig_function())
+```
+
+### Complete Example
+
+```python
+#!/usr/bin/env python3
+## datamap_api_agent.py - Agent using DataMap for API calls
+from signalwire_agents import AgentBase
+from signalwire_agents.core.data_map import DataMap
+from signalwire_agents.core.function_result import SwaigFunctionResult
+
+agent = AgentBase(name="api-agent", route="/api")
+agent.add_language("English", "en-US", "rime.spore")
+
+## Weather lookup
+weather = (
+    DataMap("check_weather")
+    .purpose("Check weather conditions")
+    .parameter("location", "string", "City or zip code", required=True)
+    .webhook("GET", "https://api.weather.com/v1/current?q=${enc:args.location}")
+    .output(SwaigFunctionResult(
+        "Current conditions in ${args.location}: ${response.condition}, ${response.temp}°F"
+    ))
+    .fallback_output(SwaigFunctionResult("Weather service is currently unavailable"))
+)
+
+## Order status lookup
+order_status = (
+    DataMap("check_order")
+    .purpose("Check order status")
+    .parameter("order_id", "string", "Order number", required=True)
+    .webhook("GET", "https://api.orders.com/status/${enc:args.order_id}",
+             headers={"Authorization": "Bearer ${env.API_KEY}"})
+    .output(SwaigFunctionResult(
+        "Order ${args.order_id}: ${response.status}. "
+        "Expected delivery: ${response.delivery_date}"
+    ))
+)
+
+## Expression-based control
+volume_control = (
+    DataMap("set_volume")
+    .purpose("Control audio volume")
+    .parameter("level", "string", "Volume level", required=True)
+    .expression("${args.level}", r"high|loud|up",
+                SwaigFunctionResult("Volume increased").add_action("volume", 100))
+    .expression("${args.level}", r"low|quiet|down",
+                SwaigFunctionResult("Volume decreased").add_action("volume", 30))
+    .expression("${args.level}", r"mute|off",
+                SwaigFunctionResult("Audio muted").add_action("mute", True))
+)
+
+## Register all - convert DataMap to SWAIG function dictionary
+agent.register_swaig_function(weather.to_swaig_function())
+agent.register_swaig_function(order_status.to_swaig_function())
+agent.register_swaig_function(volume_control.to_swaig_function())
+
+if __name__ == "__main__":
+    agent.run()
+```
+
+### When to Use DataMap
+
+| Scenario | Use DataMap? | Alternative |
+|----------|-------------|-------------|
+| Simple REST API calls | Yes | - |
+| Pattern-based responses | Yes | - |
+| Complex business logic | No | SWAIG function with webhook |
+| Database access | No | SWAIG function |
+| Multiple conditional paths | Maybe | Consider SWAIG for complex logic |
+
+### See Also
+
+| Topic | Reference |
+|-------|-----------|
+| DataMap guide | [DataMap Functions](/docs/agents-sdk/python/guides/data-map) |
+| SWAIG functions | [SWAIG Function API](/docs/agents-sdk/python/reference/swaig-function) |
+| Function results | [SwaigFunctionResult API](/docs/agents-sdk/python/reference/function-result) |
+| Testing DataMap | [swaig-test CLI](/docs/agents-sdk/python/reference/cli-swaig-test) - DataMap functions make live HTTP calls |
+
+### Troubleshooting
+
+| Issue | Solution |
+|-------|----------|
+| Variable not substituting | Check parameter name matches `${args.param}` exactly |
+| API returns error | Use `fallback_output()` to handle failures gracefully |
+| URL encoding issues | Use `${enc:args.param}` for URL parameters |
+| Response field not found | Check API response structure; use `${response.nested.field}` for nested data |
+
+

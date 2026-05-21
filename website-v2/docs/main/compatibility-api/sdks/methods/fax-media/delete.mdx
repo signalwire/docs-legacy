@@ -1,0 +1,70 @@
+---
+slug: /compatibility-api/sdks/reference/fax-media/delete
+title: Delete
+sidebar_label: Delete
+toc_max_heading_level: 3
+---
+
+Use this endpoint for the Fax Media method to delete a fax media instance.
+If the delete is successful, a 204 response, with no body, will be returned.
+
+<Warning title="This action cannot be undone.">
+</Warning>
+
+<EndpointSchemaSnippet endpoint="DELETE /Accounts/{AccountSid}/Faxes/{FaxSid}/Media/{Sid}" selector="request" />
+
+## Request examples
+
+<CodeBlocks>
+```javascript title="Node.js"
+const { RestClient } = require('@signalwire/compatibility-api')
+const client = RestClient('YourProjectID', 'YourAuthToken', { signalwireSpaceUrl: 'example.signalwire.com' })
+
+client.fax.faxes('FaxSid')
+      .media('MediaSid')
+      .remove()
+      .then(media => console.log(media.sid))
+      .done();
+```
+```csharp
+using System;
+using System.Collections.Generic;
+using Twilio;
+using Twilio.Rest.Fax.V1.Fax;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        TwilioClient.Init("YourProjectID", "YourAuthToken", new Dictionary<string, object> { ["signalwireSpaceUrl"] = "{SPACE}.signalwire.com" });
+
+        FaxMediaResource.Delete(
+            pathFaxSid: "FaxSid",
+            pathSid: "MediaSid"
+        );
+    }
+}
+```
+```python
+from signalwire.rest import Client as signalwire_client
+
+client = signalwire_client("YourProjectID", "YourAuthToken", signalwire_space_url = 'example.signalwire.com')
+
+client.fax.faxes('FaxSid') \
+      .media('MediaSid') \
+      .delete()
+```
+```ruby
+require 'signalwire/sdk'
+
+@client = Signalwire::REST::Client.new 'YourProjectID', 'YourAuthToken', signalwire_space_url: "example.signalwire.com"
+
+@client.faxes('FaxSid')
+       .media('MediaSid')
+       .delete
+```
+</CodeBlocks>
+
+## Response
+
+A successful request returns a 204 status code with no body.

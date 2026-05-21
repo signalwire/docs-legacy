@@ -1,0 +1,29 @@
+---
+title: "detect"
+slug: /node/reference/voice/call/detect
+description: detect method for the Call class.
+toc_max_heading_level: 3
+---
+
+[calldetect-8]: /docs/server-sdk/v3/node/reference/voice/call-detect
+[link-2]: /docs/server-sdk/v3/node/reference/voice/call/amd
+[link-3]: /docs/server-sdk/v3/node/reference/voice/call/detect-fax
+[link-4]: /docs/server-sdk/v3/node/reference/voice/call/detect-digit
+[link]: /docs/server-sdk/v3/node/reference/voice/call/detect-answering-machine
+
+### detect
+
+- **detect**(`params`): `Promise<CallDetect>` - See [CallDetect][calldetect-8] for more details.
+
+Generic method. Please see [amd][link-2], [detectFax][link-3], [detectDigit][link-4].
+
+#### Parameters
+
+| Name          | Type                                            | Description                                                                                                                                                                                                                                                                                                                                                                                    |
+|:--------------|:------------------------------------------------|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `params`      | `object`                                        | -                                                                                                                                                                                                                                                                                                                                                                                              |
+| `params.type` | `"fax"` \| `"machine"` \| `"digit"` \| `"beep"` | <ul> <li>if type="digit", see the method parameters for [detectDigit][link-4]</li><li> if type="fax", see the method parameters for [detectFax][link-3]</li><li>if type="machine", see the method parameters for [detectAnsweringMachine][link]</li><li>if type="beep", see the method parameters for [detectAnsweringMachine][link]</li></ul> |
+
+#### Returns
+
+`Promise<CallDetect>` - See [CallDetect][calldetect-8] for more details.

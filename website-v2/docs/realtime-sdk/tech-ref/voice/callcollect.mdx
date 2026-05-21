@@ -1,0 +1,379 @@
+---
+title: "CallCollect"
+keywords:
+  - SignalWire
+  - Realtime SDK
+  - Node.js
+  - DTMF
+  - digit collection
+  - IVR
+  - speech input
+  - user input
+slug: /node/reference/voice/call-collect
+sidebar_label: CallCollect
+description: CallCollect object reference for collecting user input during voice calls. Gather DTMF digits and speech input with configurable prompts and timeouts.
+toc_max_heading_level: 3
+---
+
+[callcollect]: #
+[callingcallcollectresult]: #callingcallcollectresult
+[result]: #properties
+[type]: #properties
+[voice-call]: /docs/server-sdk/node/reference/voice/call/collect
+
+Represents a current or past collect session in a call. You can obtain instances of this class by starting at Collect with the following method:
+
+- [`Call.collect`][voice-call]
+
+#### Example
+
+In this example, we collect digits from the caller. Once the collect session is ended, we print the collected digits
+and hangup the call.
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+const voiceClient = client.voice;
+
+const call = await voiceClient.dialPhone({
+  from: "+YYYYYYYYYY",
+  to: "+XXXXXXXXXX",
+});
+
+// start Collect
+await call.collect({
+  partialResults: true,
+  sendStartOfInput: true,
+  digits: {
+    max: 5,
+    digitTimeout: 4,
+    terminators: "#*",
+  },
+  listen: {
+    onStarted: async () => {
+      console.log("Collect started");
+      await call.playTTS({
+        text: "Please enter your PIN"
+      });
+    },
+    onInputStarted: () => {
+      console.log("Collect input started");
+    },
+    onUpdated: (collect) => {
+      console.log("Collect updated:", collect.digits);
+    },
+    onEnded: async (collect) => {
+      console.log("Collect ended:", collect.result);
+      console.log("PIN collected:", collect.digits);
+      call.hangup();
+    },
+    onFailed: () => {
+      console.log("Collect failed")
+    }
+  }
+}).onStarted();
+```
+
+## **Properties**
+
+<ParamField path="confidence" type="number">
+  Confidence level for the speech recognition result (if [`type`][type] is `"speech"`), from 0 to 100. For example, `83.2`.
+</ParamField>
+
+<ParamField path="digits" type="string">
+  The digits that have been collected (if [`type`][type] is `"digit"`). For example, `"12345"`.
+</ParamField>
+
+<ParamField path="final" type="boolean">
+  Whether this is the final result of the collect session. When `partialResults` is `true`, intermediate results will have `final` set to `false`. With `continuous: true`, `final` means the utterance detection has completed but the detector will continue to the next utterance.
+</ParamField>
+
+<ParamField path="id" type="string">
+  The unique id for this collect session.
+</ParamField>
+
+<ParamField path="reason" type='"no_match" | "no_input" | "error"'>
+  Alias for [`type`][type], in case of errors. Use this field to check the reason of the error.
+</ParamField>
+
+<ParamField path="result" type="CallingCallCollectResult">
+  The result object containing the collect session outcome. See [`CallingCallCollectResult`][callingcallcollectresult].
+</ParamField>
+
+<ParamField path="speech" type="string | undefined">
+  The text that has been collected (if [`type`][type] is `"speech"`). Alias for [`text`](#field-text).
+</ParamField>
+
+<ParamField path="terminator" type="string">
+  The terminator used to complete the collect (if [`type`][type] is `"digit"`). For example, `"#"`.
+</ParamField>
+
+<ParamField path="text" type="string">
+  The text that has been collected (if [`type`][type] is `"speech"`). For example, `"hello who's there"`.
+</ParamField>
+
+<ParamField path="type" type='"error" | "no_input" | "no_match" | "digit" | "speech" | "start_of_input"'>
+  The type of this collect session.
+</ParamField>
+
+<ParamField path="state" type='"collecting" | "finished" | "error"'>
+  The state of this collect session. Only present when [`type`][type] is `"speech"` and the [`continuous`][voice-call] parameter is set to `true`. Otherwise, the collect state is always `"undefined"`.
+</ParamField>
+
+<ParamField path="hasEnded" type="boolean">
+  Whether the collect has ended. Returns `true` when the state is not `"collecting"`, `final` is not `false`, and the result type is one of: `"error"`, `"no_input"`, `"no_match"`, `"digit"`, or `"speech"`.
+</ParamField>
+
+## **Methods**
+
+### ended
+
+- **ended**(): `Promise`\<[`CallCollect`][callcollect]>
+
+Returns a promise that is resolved only after this collect finishes (or is stopped).
+
+#### Returns
+
+`Promise`\<[`CallCollect`][callcollect]>
+
+A promise that resolves to the [`CallCollect`][callcollect] object when the collect session is ended.
+
+#### Example
+
+```js
+const collect = await call.collect({
+  digits: {
+    max: 4,
+    digitTimeout: 10,
+    terminators: "#",
+  },
+  partialResults: true,
+  sendStartOfInput: true,
+}).onStarted();
+await collect.ended();
+```
+
+---
+
+### startInputTimers
+
+- **startInputTimers**(): `Promise`\<[`CallCollect`][callcollect]>
+
+Start the `initialTimeout` timer on an active collect.
+
+#### Returns
+
+`Promise`\<[`CallCollect`][callcollect]>
+
+A promise that resolves to the [`CallCollect`][callcollect] object when the collect session `InputTimer` is started.
+
+#### Example
+
+```js
+const collect = await call.collect({
+  digits: {
+    max: 4,
+    digitTimeout: 10,
+    terminators: "#",
+  },
+  partialResults: true,
+  sendStartOfInput: true,
+  startInputTimers: false,
+}).onStarted();
+// You can add some logic before starting input timers.
+await collect.startInputTimers();
+```
+
+---
+
+### stop
+
+- **stop**(): `Promise`\<[`CallCollect`][callcollect]>
+
+Stops the collect session.
+
+#### Returns
+
+`Promise`\<[`CallCollect`][callcollect]>
+
+A promise that resolves to the [`CallCollect`][callcollect] object when the collect session is stopped.
+
+#### Example
+
+```js
+const collect = await call.collect({
+  speech: {
+    endSilenceTimeout: 2,
+    speechTimeout: 10,
+    language: "en-US",
+    hints: ["sales", "support", "representative"]
+  },
+  partialResults: true,
+  sendStartOfInput: true
+}).onStarted();
+await collect.stop();
+```
+
+---
+
+## **Alias Types**
+
+### CallingCallCollectResult
+
+Ƭ **CallingCallCollectResult**: `Promise`\<[`CallCollect`][callcollect]>
+
+The [result][result] of the collect session.
+Depending on the [`type`][type] of the collect session,
+the result will return different fields.
+
+#### Digit Collect Results
+
+The result of a collect session when [`type`][type] is `"digit"`.
+
+#### Properties
+
+<ParamField path="type" type='"digit"'>
+  The type of this collect session.
+</ParamField>
+
+<ParamField path="params" type="object">
+  The parameters of this collect session.
+</ParamField>
+
+<Indent>
+<ParamField path="digits" type="string">
+  The digits that have been collected.
+</ParamField>
+
+<ParamField path="terminator" type="string">
+  The terminator used to complete the collect.
+</ParamField>
+</Indent>
+
+#### Speech Collect Results
+
+The result of a collect session when [`type`][type] is `"speech"`.
+
+#### Properties
+
+<ParamField path="type" type='"speech"'>
+  The type of this collect session.
+</ParamField>
+
+<ParamField path="params" type="object">
+  The parameters of this collect session.
+</ParamField>
+
+<Indent>
+<ParamField path="text" type="string">
+  The text that has been collected.
+</ParamField>
+
+<ParamField path="confidence" type="number">
+  The confidence level for the speech recognition result.
+</ParamField>
+</Indent>
+
+#### Start of Input Collect Results
+
+The result of a collect session when [`type`][type] is `"start_of_input"`.
+
+#### Properties
+
+<ParamField path="type" type='"start_of_input"'>
+  The type of this collect session.
+</ParamField>
+
+#### No Input Collect Results
+
+The result of a collect session when [`type`][type] is `"no_input"`.
+
+#### Properties
+
+<ParamField path="type" type='"no_input"'>
+  The type of this collect session.
+</ParamField>
+
+#### No Match Collect Results
+
+The result of a collect session when [`type`][type] is `"no_match"`.
+
+#### Properties
+
+<ParamField path="type" type='"no_match"'>
+  The type of this collect session.
+</ParamField>
+
+#### Error Collect Results
+
+The result of a collect session when [`type`][type] is `"error"`.
+
+#### Properties
+
+<ParamField path="type" type='"error"'>
+  The type of this collect session.
+</ParamField>
+
+## **Events**
+
+### onStarted
+
+- **CallCollect.listen**(`{ onStarted: Callback }`)
+
+Emitted when the collect session is started. Your event handler will receive the [`CallCollect`][callcollect] object.
+
+#### Parameters
+
+<ParamField path="collect" type="CallCollect" required>
+  The [`CallCollect`][callcollect] object that emitted the event.
+</ParamField>
+
+### onInputStarted
+
+- **CallCollect.listen**(`{ onInputStarted: Callback }`)
+
+Emitted when the collect session starts receiving input. Your event handler will receive the [`CallCollect`][callcollect] object.
+
+#### Parameters
+
+<ParamField path="collect" type="CallCollect" required>
+  The [`CallCollect`][callcollect] object that emitted the event.
+</ParamField>
+
+### onUpdated
+
+- **CallCollect.listen**(`{ onUpdated: Callback }`)
+
+Emitted when the collect session is updated. Your event handler will receive the [`CallCollect`][callcollect] object.
+
+#### Parameters
+
+<ParamField path="collect" type="CallCollect" required>
+  The [`CallCollect`][callcollect] object that emitted the event.
+</ParamField>
+
+### onFailed
+
+- **CallCollect.listen**(`{ onFailed: Callback }`)
+
+Emitted when the collect session fails. Your event handler will receive the [`CallCollect`][callcollect] object.
+
+#### Parameters
+
+<ParamField path="collect" type="CallCollect" required>
+  The [`CallCollect`][callcollect] object that emitted the event.
+</ParamField>
+
+### onEnded
+
+- **CallCollect.listen**(`{ onEnded: Callback }`)
+
+Emitted when the collect session ends. Your event handler will receive the [`CallCollect`][callcollect] object.
+
+#### Parameters
+
+<ParamField path="collect" type="CallCollect" required>
+  The [`CallCollect`][callcollect] object that emitted the event.
+</ParamField>

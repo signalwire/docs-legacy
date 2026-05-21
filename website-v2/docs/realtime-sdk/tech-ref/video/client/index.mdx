@@ -1,0 +1,45 @@
+---
+title: "Video Client"
+sidebar_label: Client
+sidebar_position: 1
+slug: /node/reference/video/client
+description: Video Client reference for subscribing to video room events.
+toc_max_heading_level: 3
+---
+
+[events]: /docs/server-sdk/node/reference/video/client/events
+[getroomsessions]: /docs/server-sdk/node/reference/video/client/get-room-sessions
+[listen]: /docs/server-sdk/node/reference/video/client/listen
+[signalwire-realtime-client]: /docs/server-sdk/node/reference/realtime-client
+
+The Video Client allows you to monitor video room activity. Access it via the `video` property on a [`SignalWire Client`][signalwire-realtime-client].
+
+```javascript
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "<project-id>", token: "<api-token>" });
+const videoClient = client.video;
+```
+
+Use [`getRoomSessions`][getroomsessions] to list active rooms, or [`listen`][listen] to subscribe to room events. See [Events][events] for all available events.
+
+## Examples
+
+### Listening for room events
+
+```javascript
+await videoClient.listen({
+  onRoomStarted: async (roomSession) => {
+    console.log("Room started:", roomSession.name);
+  },
+  onRoomEnded: async (roomSession) => {
+    console.log("Room ended:", roomSession.id);
+  }
+});
+```
+
+### Getting active rooms
+
+```javascript
+const { roomSessions } = await videoClient.getRoomSessions();
+```

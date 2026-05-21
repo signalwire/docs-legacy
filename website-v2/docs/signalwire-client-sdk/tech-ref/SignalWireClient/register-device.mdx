@@ -1,0 +1,108 @@
+---
+title: registerDevice
+slug: /signalwire-client/register-device
+---
+
+import APIField from '@site/src/components/APIField';
+
+Registers a device for push notifications, enabling the client to receive calls when the app is in the background or closed.
+
+## How it works
+
+The `registerDevice` method registers your device with SignalWire's push notification system. You call this method AFTER receiving the push notification token from your device's operating system (APNS for iOS, FCM for Android).
+
+Once registered, your device can receive encrypted push notifications for incoming calls and messages. The response includes a `push_notification_key` that you must store securely, as it's required to decrypt incoming push notifications.
+
+## Parameters
+
+<APIField name="options" type="object" required>
+  Configuration for device registration.
+</APIField>
+
+<APIField name="options.deviceToken" type="string" required>
+  The token you receive from the device after getting notification permission from the user.
+</APIField>
+
+<APIField name="options.deviceType" type="'iOS' | 'Android' | 'Desktop'" required>
+  The device platform type.
+</APIField>
+
+## Signature
+
+```typescript
+registerDevice(options: RegisterDeviceParams): Promise<RegisterDeviceResponse>
+```
+
+## Returns
+
+**Type:** `Promise<RegisterDeviceResponse>`
+
+Returns a Promise that resolves with device registration details including the encryption key for push notifications.
+
+### Response structure
+
+<APIField name="id" type="string">
+  ID of the current device registration. Use this when unregistering the device.
+</APIField>
+
+<APIField name="device_token" type="string">
+  Echo of the deviceToken that was sent during registration.
+</APIField>
+
+<APIField name="device_type" type="'iOS' | 'Android' | 'Desktop'">
+  Echo of the deviceType that was sent during registration.
+</APIField>
+
+<APIField name="device_name" type="null">
+  Not yet implemented.
+</APIField>
+
+<APIField name="push_notification_key" type="string">
+  Encryption key for decrypting push notifications. Store this securely as it's required by handlePushNotification().
+</APIField>
+
+<APIField name="date_registered" type="string">
+  ISO 8601 timestamp when the device was registered.
+</APIField>
+
+## Examples
+
+### Register iOS device
+
+```typescript
+async function onTokenReceived(token) {
+  const registrationInfo = await client.registerDevice({
+    deviceToken: token,
+    deviceType: 'iOS'
+  })
+  
+  await AsyncStorage.setItem(
+    '@signalwire_device_id', 
+    registrationInfo.id
+  )
+  await AsyncStorage.setItem(
+    '@signalwire_push_notification_key',
+    registrationInfo.push_notification_key
+  )
+}
+```
+
+### Register Android device
+
+```typescript
+const registrationInfo = await client.registerDevice({
+  deviceToken: 'fcm-token-here',
+  deviceType: 'Android'
+})
+
+console.log('Device registered:', registrationInfo.id)
+```
+
+### Register desktop device
+
+```typescript
+const registrationInfo = await client.registerDevice({
+  deviceToken: 'desktop-token',
+  deviceType: 'Desktop'
+})
+```

@@ -1,0 +1,28 @@
+---
+title: on
+slug: /js/reference/chat/client/on
+toc_max_heading_level: 3
+---
+
+- **on**(`event`, `fn`)
+
+Attaches an event handler to the specified event.
+
+#### Parameters
+
+| Name    | Type     | Description                                                     |
+| :------ | :------- | :-------------------------------------------------------------- |
+| `event` | `string` | Name of the event. See the list of [events](/docs/browser-sdk/js/reference/chat/client/events).        |
+| `fn`    | Function | An event handler.                                               |
+
+
+#### Example
+
+In the below example, we are listening for the `call.state` event and logging the current call state to the console.
+This means this will be triggered every time the call state changes.
+
+```js
+call.on("call.state", (call) => {
+    console.log("call state changed:", call.state);
+});
+```

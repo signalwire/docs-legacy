@@ -1,0 +1,20 @@
+---
+title: PlayResult
+slug: /ruby/reference/calling/results/play
+description: The PlayResult object is returned when a play operation is completed.
+toc_max_heading_level: 3
+---
+
+[play]: /docs/server-sdk/v2/ruby/reference/calling/actions/play
+[relay-event]: /docs/server-sdk/v2/ruby/reference/event
+
+# Relay::Calling::PlayResult
+
+This object is returned by the [`play`][play] methods and represents the final result of a playing action.
+
+## Properties
+
+| Property | Type | Description |
+| :------- | :--- | :---------- |
+| `successful` | Boolean | Whether the playing has completed successfully. |
+| `event` | [Relay::Event][relay-event] | Last event that completed the operation. |

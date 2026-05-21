@@ -1,0 +1,42 @@
+swml:
+  label: SWML
+  description: SignalWire Markup Language
+compatibility-api:
+  label: Compatibility API
+  description: API compatibility for Twilio-like functionality
+rest-api:
+  label: REST API
+  description: SignalWire REST API
+voice:
+  label: Voice
+  description: Voice functionality and APIs
+messaging:
+  label: Messaging
+  description: Messaging and SMS functionality
+fax:
+  label: Fax
+  description: Fax functionality
+video:
+  label: Video
+  description: Video calling and conferencing
+home:
+  label: Home
+  description: Getting started and overview
+platform:
+  label: Platform
+  description: SignalWire platform concepts
+tools:
+  label: Tools
+  description: Development tools and utilities
+guides:
+  label: Guides
+  description: How-to guides and tutorials
+agents-sdk:
+  label: Agents SDK
+  description: SDK for building AI agents
+python:
+  description: Python based functionality
+  label: Python
+cxml:
+  label: CXML
+  description: Compatible XML markup language

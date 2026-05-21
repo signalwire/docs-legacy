@@ -1,0 +1,130 @@
+---
+title: "Events"
+slug: /node/reference/video/room-session/events
+description: Events available on the RoomSession class.
+toc_max_heading_level: 3
+---
+
+[roomsession]: /docs/server-sdk/v3/node/reference/video/room-session
+[roomsessionmember-6]: /docs/server-sdk/v3/node/reference/video/room-session-member
+[roomsessionplayback-5]: /docs/server-sdk/v3/node/reference/video/room-session-playback
+[roomsessionrecording-5]: /docs/server-sdk/v3/node/reference/video/room-session-recording
+[roomsessionstream-6]: /docs/server-sdk/v3/node/reference/video/room-session-stream
+
+## Events
+
+### Room events
+
+- **room.started**,
+- **room.updated**,
+- **room.ended**:
+
+Emitted when the room session is, respectively, started, updated, or ended. Your event handler receives an object which is an instance of [RoomSession][roomsession].
+
+- **recording.started**,
+- **recording.updated**,
+- **recording.ended**:
+
+Emitted when a recording is, respectively, started, updated, or ended. Your event handler receives an object which is an instance of [RoomSessionRecording][roomsessionrecording-5].
+
+- **playback.started**,
+- **playback.updated**,
+- **playback.ended**:
+
+Emitted when a playback is, respectively, started, updated, or ended. Your event handler receives an object which is an instance of [RoomSessionPlayback][roomsessionplayback-5].
+
+- **layout.changed**:
+
+Emitted when the layout of the room changes.
+
+### Member events
+
+- **member.joined**:
+
+Emitted when a member joins the room. Your event handler receives an object of type [RoomSessionMember][roomsessionmember-6].
+
+- **member.left**:
+
+Emitted when a member leaves the room. Your event handler receives an object of type [RoomSessionMember][roomsessionmember-6].
+
+- **member.talking**:
+
+Emitted when a member starts or stops talking. Your event handler receives an object of type [RoomSessionMember][roomsessionmember-6].
+
+- **member.talking.started**:
+
+Emitted when a member starts talking. Your event handler receives an object of type [RoomSessionMember][roomsessionmember-6].
+
+- **member.talking.ended**:
+
+Emitted when a member stops talking. Your event handler receives an object of type [RoomSessionMember][roomsessionmember-6].
+
+- **member.updated**:
+
+Emitted when any property of one of the members is updated. Your event handler receives an object `member` of type [RoomSessionMember][roomsessionmember-6]. Use
+`member.updated` to access the list of updated properties. Example:
+
+```typescript
+roomSession.on('member.updated', (member) => {
+    console.log(member.updated)
+    // [ 'audioMuted' ]
+}
+```
+
+- **member.updated.audioMuted**,
+- **member.updated.videoMuted**,
+- **member.updated.deaf**,
+- **member.updated.onHold**,
+- **member.updated.visible**,
+- **member.updated.inputVolume**,
+- **member.updated.outputVolume**,
+- **member.updated.inputSensitivity**:
+
+Each of the above events is emitted when the associated property changes. Your event handler receives an object `member` of type [RoomSessionMember][roomsessionmember-6].
+
+---
+
+### room.audience_count
+
+- **room.audience_count**(`e`)
+
+This event is received periodically, and contains a total count of audience members.
+
+Audience members joining and leaving trigger this event.
+
+#### Parameters
+
+| Name                | Type     | Description                       |
+|:--------------------|:---------|:----------------------------------|
+| `e`                 | `Object` | -                                 |
+| `e.room_session_id` | `string` | Id of the room session.           |
+| `e.room_id`         | `string` | Id of the room.                   |
+| `e.total`           | `number` | Total number of audience members. |
+
+---
+
+### stream.ended
+
+- **stream.ended**(`stream`)
+
+A stream ended (e.g., it was stopped).
+
+#### Parameters
+
+| Name     | Type                                                 |
+|:---------|:-----------------------------------------------------|
+| `stream` | [`RoomSessionStream`][roomsessionstream-6] |
+
+---
+
+### stream.started
+
+- **stream.started**(`stream`)
+
+A new stream started.
+
+#### Parameters
+
+| Name     | Type                                                 |
+|:---------|:-----------------------------------------------------|
+| `stream` | [`RoomSessionStream`][roomsessionstream-6] |

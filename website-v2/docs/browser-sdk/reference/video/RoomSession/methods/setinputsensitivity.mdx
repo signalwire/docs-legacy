@@ -1,0 +1,55 @@
+---
+title: "setInputSensitivity"
+slug: /js/reference/video/room-session/set-input-sensitivity
+description: setInputSensitivity method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+### setInputSensitivity
+
+- **setInputSensitivity**(`params`): `Promise<void>`
+
+Sets the input level at which the participant is identified as currently speaking. You can use this method to set the input sensitivity for either yourself or another participant in the room.
+
+#### Parameters
+
+<ParamField path="params" type="object">
+  Object containing the parameters of the method.
+</ParamField>
+
+<Indent>
+<ParamField path="memberId" type="string" required={false}>
+  Id of the member to affect. If omitted, affects the default device in the local client.
+</ParamField>
+
+<ParamField path="value" type="number">
+  Desired sensitivity from 0 (lowest sensitivity, essentially muted) to 100 (highest sensitivity). The default value is 30.
+</ParamField>
+</Indent>
+
+#### Returns
+
+`Promise<void>`
+
+#### Permissions
+
+- `room.self.set_input_sensitivity`: to set the sensitivity for a local device.
+- `room.member.set_input_sensitivity`: to set the sensitivity for a remote member.
+
+You need to specify the permissions when [creating the Video Room Token](/docs/apis/video/create-room-token) on the server side.
+
+#### Examples
+
+Setting your own input sensitivity:
+
+```javascript
+await roomSession.setInputSensitivity({ value: 80 });
+```
+
+Setting the input sensitivity of another participant:
+
+```javascript
+const id = "de550c0c-3fac-4efd-b06f-b5b8614b8966"; // you can get this from getMembers()
+await roomSession.setInputSensitivity({ memberId: id, value: 80 });
+```
+

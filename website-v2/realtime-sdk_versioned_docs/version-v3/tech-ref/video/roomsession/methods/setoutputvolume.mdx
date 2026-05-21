@@ -1,0 +1,32 @@
+---
+title: "setOutputVolume"
+slug: /node/reference/video/room-session/set-output-volume
+description: setOutputVolume method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+
+### setOutputVolume
+
+- **setOutputVolume**(`params`): `Promise<void>`
+
+Sets the output volume for the member (e.g., the speaker output level).
+
+#### Parameters
+
+| Name              | Type     | Description                                                       |
+|:------------------|:---------|:------------------------------------------------------------------|
+| `params`          | `Object` | -                                                                 |
+| `params.memberId` | `string` | Id of the member to affect.                                       |
+| `params.volume`   | `number` | Desired volume. Values range from -50 to 50, with a default of 0. |
+
+#### Returns
+
+`Promise<void>`
+
+#### Example
+
+```typescript
+const id = "de550c0c-3fac-4efd-b06f-b5b8614b8966"; // you can get this from getMembers()
+await roomSession.setOutputVolume({ memberId: id, volume: -10 });
+```

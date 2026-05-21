@@ -1,0 +1,601 @@
+---
+title: "Function Result"
+sidebar_label: "Function Result"
+slug: /python/reference/function-result
+toc_max_heading_level: 3
+---
+
+## SwaigFunctionResult API
+
+Complete API reference for SwaigFunctionResult, the class for returning responses and actions from SWAIG functions.
+
+### Class Definition
+
+```python
+from signalwire_agents.core.function_result import SwaigFunctionResult
+
+class SwaigFunctionResult:
+    """Wrapper around SWAIG function responses."""
+```
+
+### Constructor
+
+```python
+SwaigFunctionResult(
+    response: Optional[str] = None,  # Text for AI to speak
+    post_process: bool = False       # Let AI respond before actions
+)
+```
+
+### Core Concept
+
+| Component | Purpose |
+|-----------|---------|
+| `response` | Text the AI should say back to the user |
+| `action` | List of structured actions to execute |
+| `post_process` | Let AI respond once more before executing actions |
+
+**Post-Processing Behavior:**
+
+- `post_process=False` (default): Execute actions immediately
+- `post_process=True`: AI responds first, then actions execute
+
+### Basic Methods
+
+#### set_response
+
+```python
+def set_response(self, response: str) -> 'SwaigFunctionResult'
+```
+
+Set the response text.
+
+#### set_post_process
+
+```python
+def set_post_process(self, post_process: bool) -> 'SwaigFunctionResult'
+```
+
+Set post-processing behavior.
+
+#### add_action
+
+```python
+def add_action(self, name: str, data: Any) -> 'SwaigFunctionResult'
+```
+
+Add a single action.
+
+#### add_actions
+
+```python
+def add_actions(self, actions: List[Dict[str, Any]]) -> 'SwaigFunctionResult'
+```
+
+Add multiple actions.
+
+### Call Control Actions
+
+#### connect
+
+```python
+def connect(
+    self,
+    destination: str,              # Phone number or SIP address
+    final: bool = True,            # Permanent (True) or temporary (False)
+    from_addr: Optional[str] = None  # Caller ID override
+) -> 'SwaigFunctionResult'
+```
+
+Transfer the call to another destination.
+
+```python
+## Permanent transfer
+return SwaigFunctionResult("Transferring you now").connect("+15551234567")
+
+## Temporary transfer (returns to agent when far end hangs up)
+return SwaigFunctionResult("Connecting you").connect("+15551234567", final=False)
+
+## With custom caller ID
+return SwaigFunctionResult("Transferring").connect(
+    "support@company.com",
+    final=True,
+    from_addr="+15559876543"
+)
+```
+
+#### hangup
+
+```python
+def hangup(self) -> 'SwaigFunctionResult'
+```
+
+End the call.
+
+```python
+return SwaigFunctionResult("Goodbye!").hangup()
+```
+
+#### hold
+
+```python
+def hold(self, timeout: int = 300) -> 'SwaigFunctionResult'
+```
+
+Put the call on hold (max 900 seconds).
+
+```python
+return SwaigFunctionResult("Please hold").hold(timeout=120)
+```
+
+#### stop
+
+```python
+def stop(self) -> 'SwaigFunctionResult'
+```
+
+Stop agent execution.
+
+```python
+return SwaigFunctionResult("Stopping now").stop()
+```
+
+### Speech Actions
+
+#### say
+
+```python
+def say(self, text: str) -> 'SwaigFunctionResult'
+```
+
+Make the agent speak specific text.
+
+```python
+return SwaigFunctionResult().say("Important announcement!")
+```
+
+#### wait_for_user
+
+```python
+def wait_for_user(
+    self,
+    enabled: Optional[bool] = None,  # Enable/disable
+    timeout: Optional[int] = None,   # Seconds to wait
+    answer_first: bool = False       # Special mode
+) -> 'SwaigFunctionResult'
+```
+
+Control how agent waits for user input.
+
+```python
+return SwaigFunctionResult("Take your time").wait_for_user(timeout=30)
+```
+
+### Data Actions
+
+#### update_global_data
+
+```python
+def update_global_data(self, data: Dict[str, Any]) -> 'SwaigFunctionResult'
+```
+
+Update global session data.
+
+```python
+return SwaigFunctionResult("Account verified").update_global_data({
+    "verified": True,
+    "user_id": "12345"
+})
+```
+
+#### remove_global_data
+
+```python
+def remove_global_data(self, keys: Union[str, List[str]]) -> 'SwaigFunctionResult'
+```
+
+Remove keys from global data.
+
+```python
+return SwaigFunctionResult("Cleared").remove_global_data(["temp_data", "cache"])
+```
+
+#### set_metadata
+
+```python
+def set_metadata(self, data: Dict[str, Any]) -> 'SwaigFunctionResult'
+```
+
+Set metadata scoped to the function's token.
+
+```python
+return SwaigFunctionResult("Saved").set_metadata({"last_action": "search"})
+```
+
+#### remove_metadata
+
+```python
+def remove_metadata(self, keys: Union[str, List[str]]) -> 'SwaigFunctionResult'
+```
+
+Remove metadata keys.
+
+### Media Actions
+
+#### play_background_file
+
+```python
+def play_background_file(
+    self,
+    filename: str,       # Audio/video URL
+    wait: bool = False   # Suppress attention-getting
+) -> 'SwaigFunctionResult'
+```
+
+Play background audio.
+
+```python
+return SwaigFunctionResult().play_background_file(
+    "https://example.com/music.mp3",
+    wait=True
+)
+```
+
+#### stop_background_file
+
+```python
+def stop_background_file(self) -> 'SwaigFunctionResult'
+```
+
+Stop background playback.
+
+### Recording Actions
+
+#### record_call
+
+```python
+def record_call(
+    self,
+    control_id: Optional[str] = None,  # Recording identifier
+    stereo: bool = False,              # Stereo recording
+    format: str = "wav",               # "wav", "mp3", or "mp4"
+    direction: str = "both",           # "speak", "listen", or "both"
+    terminators: Optional[str] = None, # Digits to stop recording
+    beep: bool = False,                # Play beep before recording
+    input_sensitivity: float = 44.0,   # Input sensitivity
+    initial_timeout: float = 0.0,      # Wait for speech start
+    end_silence_timeout: float = 0.0,  # Silence before ending
+    max_length: Optional[float] = None,  # Max duration
+    status_url: Optional[str] = None   # Status webhook URL
+) -> 'SwaigFunctionResult'
+```
+
+Start call recording.
+
+```python
+return SwaigFunctionResult("Recording started").record_call(
+    control_id="main_recording",
+    stereo=True,
+    format="mp3"
+)
+```
+
+#### stop_record_call
+
+```python
+def stop_record_call(
+    self,
+    control_id: Optional[str] = None  # Recording to stop
+) -> 'SwaigFunctionResult'
+```
+
+Stop recording.
+
+### Messaging Actions
+
+#### send_sms
+
+```python
+def send_sms(
+    self,
+    to_number: str,                    # Destination (E.164)
+    from_number: str,                  # Sender (E.164)
+    body: Optional[str] = None,        # Message text
+    media: Optional[List[str]] = None, # Media URLs
+    tags: Optional[List[str]] = None,  # Tags for searching
+    region: Optional[str] = None       # Origin region
+) -> 'SwaigFunctionResult'
+```
+
+Send SMS message.
+
+```python
+return SwaigFunctionResult("Confirmation sent").send_sms(
+    to_number="+15551234567",
+    from_number="+15559876543",
+    body="Your order has been confirmed!"
+)
+```
+
+### Payment Actions
+
+#### pay
+
+```python
+def pay(
+    self,
+    payment_connector_url: str,        # Payment endpoint (required)
+    input_method: str = "dtmf",        # "dtmf" or "voice"
+    payment_method: str = "credit-card",
+    timeout: int = 5,                  # Digit timeout
+    max_attempts: int = 1,             # Retry attempts
+    security_code: bool = True,        # Prompt for CVV
+    postal_code: Union[bool, str] = True,  # Prompt for zip
+    charge_amount: Optional[str] = None,   # Amount to charge
+    currency: str = "usd",
+    language: str = "en-US",
+    voice: str = "woman",
+    valid_card_types: str = "visa mastercard amex",
+    ai_response: Optional[str] = None  # Post-payment response
+) -> 'SwaigFunctionResult'
+```
+
+Process payment.
+
+```python
+return SwaigFunctionResult("Processing payment").pay(
+    payment_connector_url="https://pay.example.com/process",
+    charge_amount="49.99",
+    currency="usd"
+)
+```
+
+### Context Actions
+
+#### swml_change_step
+
+```python
+def swml_change_step(self, step_name: str) -> 'SwaigFunctionResult'
+```
+
+Change conversation step.
+
+```python
+return SwaigFunctionResult("Moving to confirmation").swml_change_step("confirm")
+```
+
+#### swml_change_context
+
+```python
+def swml_change_context(self, context_name: str) -> 'SwaigFunctionResult'
+```
+
+Change conversation context.
+
+```python
+return SwaigFunctionResult("Switching to support").swml_change_context("support")
+```
+
+#### switch_context
+
+```python
+def switch_context(
+    self,
+    system_prompt: Optional[str] = None,  # New system prompt
+    user_prompt: Optional[str] = None,    # User message to add
+    consolidate: bool = False,            # Summarize conversation
+    full_reset: bool = False              # Complete reset
+) -> 'SwaigFunctionResult'
+```
+
+Advanced context switching.
+
+### Conference Actions
+
+#### join_room
+
+```python
+def join_room(self, name: str) -> 'SwaigFunctionResult'
+```
+
+Join a RELAY room.
+
+#### join_conference
+
+```python
+def join_conference(
+    self,
+    name: str,                    # Conference name (required)
+    muted: bool = False,          # Join muted
+    beep: str = "true",           # Beep config
+    start_on_enter: bool = True,  # Start when joining
+    end_on_exit: bool = False,    # End when leaving
+    max_participants: int = 250,  # Max attendees
+    record: str = "do-not-record" # Recording mode
+) -> 'SwaigFunctionResult'
+```
+
+Join audio conference.
+
+### Tap/Stream Actions
+
+#### tap
+
+```python
+def tap(
+    self,
+    uri: str,                        # Destination URI (required)
+    control_id: Optional[str] = None,
+    direction: str = "both",         # "speak", "hear", "both"
+    codec: str = "PCMU",             # "PCMU" or "PCMA"
+    rtp_ptime: int = 20
+) -> 'SwaigFunctionResult'
+```
+
+Start media tap/stream.
+
+#### stop_tap
+
+```python
+def stop_tap(self, control_id: Optional[str] = None) -> 'SwaigFunctionResult'
+```
+
+Stop media tap.
+
+### SIP Actions
+
+#### sip_refer
+
+```python
+def sip_refer(self, to_uri: str) -> 'SwaigFunctionResult'
+```
+
+Send SIP REFER for call transfer.
+
+### Advanced Actions
+
+#### execute_swml
+
+```python
+def execute_swml(
+    self,
+    swml_content,           # String, Dict, or SWML object
+    transfer: bool = False  # Exit agent after execution
+) -> 'SwaigFunctionResult'
+```
+
+Execute raw SWML.
+
+```python
+swml_doc = {
+    "version": "1.0.0",
+    "sections": {
+        "main": [{"play": {"url": "https://example.com/audio.mp3"}}]
+    }
+}
+return SwaigFunctionResult().execute_swml(swml_doc)
+```
+
+#### toggle_functions
+
+```python
+def toggle_functions(
+    self,
+    function_toggles: List[Dict[str, Any]]
+) -> 'SwaigFunctionResult'
+```
+
+Enable/disable specific functions.
+
+```python
+return SwaigFunctionResult("Functions updated").toggle_functions([
+    {"function": "transfer_call", "active": True},
+    {"function": "cancel_order", "active": False}
+])
+```
+
+### Settings Actions
+
+#### update_settings
+
+```python
+def update_settings(self, settings: Dict[str, Any]) -> 'SwaigFunctionResult'
+```
+
+Update AI runtime settings.
+
+```python
+return SwaigFunctionResult().update_settings({
+    "temperature": 0.5,
+    "confidence": 0.8
+})
+```
+
+#### set_end_of_speech_timeout
+
+```python
+def set_end_of_speech_timeout(self, milliseconds: int) -> 'SwaigFunctionResult'
+```
+
+Adjust speech detection timeout.
+
+### Method Chaining
+
+All methods return `self` for chaining:
+
+```python
+return (
+    SwaigFunctionResult("Processing your order")
+    .update_global_data({"order_id": "12345"})
+    .send_sms(
+        to_number="+15551234567",
+        from_number="+15559876543",
+        body="Order confirmed!"
+    )
+    .swml_change_step("confirmation")
+)
+```
+
+### to_dict Method
+
+```python
+def to_dict(self) -> Dict[str, Any]
+```
+
+Convert to SWAIG response format. Called automatically when returning from functions.
+
+### Action Execution Order
+
+Actions execute in the order they're added. Some actions are **terminal** and end the call flow:
+
+| Terminal Actions | Non-Terminal Actions |
+|-----------------|---------------------|
+| `.connect(final=True)` | `.update_global_data()` |
+| `.hangup()` | `.send_sms()` |
+| `.swml_transfer(final=True)` | `.say()` |
+| | `.set_metadata()` |
+
+**Best practice**: Put terminal actions last so preceding actions can execute.
+
+```python
+# Good: data saved before transfer
+return (
+    SwaigFunctionResult("Transferring...")
+    .update_global_data({"transferred": True})
+    .send_sms(to_number=phone, from_number=agent_num, body="Call transferred")
+    .connect("+15551234567", final=True)  # Terminal - goes last
+)
+```
+
+### See Also
+
+| Topic | Reference |
+|-------|-----------|
+| Defining SWAIG functions | [SWAIG Function API](/docs/agents-sdk/python/reference/swaig-function) |
+| Results and actions guide | [Results [Results & Actions](/docs/agents-sdk/python/guides/result-actions) Actions](/docs/agents-sdk/python/guides/result-actions) |
+| Call transfer options | [Call Transfers](/docs/agents-sdk/python/guides/call-transfer) |
+| State management | [State Management](/docs/agents-sdk/python/guides/state-management) |
+
+### Common Patterns
+
+**Conditional transfer:**
+
+```python
+if caller_verified:
+    return SwaigFunctionResult("Connecting...").connect("+15551234567")
+else:
+    return SwaigFunctionResult("Please verify your identity first.")
+```
+
+**Multi-action response:**
+
+```python
+return (
+    SwaigFunctionResult("Order confirmed!")
+    .update_global_data({"order_id": order_id})
+    .send_sms(to_number=phone, from_number="+15559876543", body=f"Order {order_id} confirmed")
+    .swml_change_step("confirmation")
+)
+```
+
+

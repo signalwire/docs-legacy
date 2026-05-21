@@ -1,0 +1,128 @@
+
+<Steps>
+
+<Step title="Install the SDK">
+
+Choose your preferred installation method:
+
+```bash
+npm install @signalwire/js
+```
+
+Or include it via CDN:
+
+```html
+<script src="https://cdn.signalwire.com/@signalwire/js"></script>
+```
+
+</Step>
+
+<Step title="Obtain tokens from your server">
+
+Browser applications require tokens from SignalWire's REST APIs for security. Create these server-side:
+
+```javascript
+// Server-side: Get a Video Room token
+// Replace <YOUR_SPACE>, <username>, and <password> with your actual values
+const response = await fetch('https://<YOUR_SPACE>.signalwire.com/api/video/room_tokens', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+    'Authorization': 'Basic ' + btoa('<PROJECT_ID>:<API_TOKEN>')  // Your SignalWire credentials
+  },
+  body: JSON.stringify({
+    room_name: "my_room",
+    user_name: "John Smith",
+    permissions: [
+      "room.self.audio_mute",
+      "room.self.audio_unmute",
+      "room.self.video_mute",
+      "room.self.video_unmute",
+      "room.self.deaf",
+      "room.self.undeaf",
+      "room.self.set_input_volume",
+      "room.self.set_output_volume",
+      "room.self.set_input_sensitivity"
+    ],
+    room_display_name: "My Room",
+    join_as: "member"
+  })
+});
+
+const { token } = await response.json();
+```
+
+</Step>
+
+<Step title="Test your setup">
+
+Create a simple video room to test your setup:
+
+<Tabs>
+<TabItem value="npm-package" label="NPM Package">
+
+```javascript
+import { Video } from "@signalwire/js";
+
+// Join a video room
+const roomSession = new Video.RoomSession({
+  token: "your-room-token",  // From your server
+  rootElement: document.getElementById("video-container")
+});
+
+// Listen for events
+roomSession.on("member.joined", (e) => {
+  console.log(`${e.member.name} joined the room`);
+});
+
+roomSession.on("room.joined", () => {
+  console.log("Successfully joined the room!");
+});
+
+// Join the room
+await roomSession.join();
+```
+
+</TabItem>
+<TabItem value="cdn" label="CDN">
+
+```html
+<script src="https://cdn.signalwire.com/@signalwire/js"></script>
+<script>
+// Access SignalWire from the global window object
+const { Video } = window.SignalWire;
+
+// Join a video room
+const roomSession = new Video.RoomSession({
+  token: "your-room-token",  // From your server
+  rootElement: document.getElementById("video-container")
+});
+
+// Listen for events
+roomSession.on("member.joined", (e) => {
+  console.log(`${e.member.name} joined the room`);
+});
+
+roomSession.on("room.joined", () => {
+  console.log("Successfully joined the room!");
+});
+
+// Join the room
+roomSession.join().then(() => {
+  console.log("Join initiated");
+});
+</script>
+```
+
+</TabItem>
+</Tabs>
+
+Add this HTML element to your page:
+```html
+<div id="video-container"></div>
+```
+
+</Step>
+
+</Steps>

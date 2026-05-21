@@ -1,0 +1,49 @@
+---
+title: "getMembers"
+slug: /node/reference/video/room-session/get-members
+description: getMembers method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+[roomsession-41]: /docs/server-sdk/node/reference/video/room-session
+[roomsessionmembers]: /docs/server-sdk/node/reference/video/room-session-member
+
+### getMembers
+
+- **getMembers**(): `Promise`\<\{ `members:` [`RoomSessionMember[]`](/docs/server-sdk/node/reference/video/room-session-member) }>
+
+Returns a list of members currently in the room.
+
+#### Returns
+
+`Promise`\<\{ `members:` [`RoomSessionMemberEntity[]`](/docs/server-sdk/node/reference/video/room-session-member) }>
+
+A promise that resolves to an object containing the list of [`RoomSessionMembers`][roomsessionmembers] in the room.
+
+#### Example
+
+In this example, we wait for a room to start and then get the members in that room.
+This example assumes that there is a [`RoomSession`][roomsession-41]
+already active and that members are joining the room.
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+// Initialize the SignalWire client
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+// Access the video client from the main client
+const videoClient = client.video;
+
+// Setup listener for when a room starts
+await videoClient.listen({
+  onRoomStarted: async (roomsession) => {
+    console.log("Room started", roomsession.displayName);
+    // get all members in the room
+    const members = await roomsession.getMembers();
+
+    // log the members names
+    members.members.forEach((member) => console.log(member.name));
+  }
+})
+```

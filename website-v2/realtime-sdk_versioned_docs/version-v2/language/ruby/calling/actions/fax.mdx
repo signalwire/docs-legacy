@@ -1,0 +1,38 @@
+---
+title: FaxAction
+slug: /ruby/reference/calling/actions/fax
+description: The FaxAction object is returned when starting a fax operation on a call.
+toc_max_heading_level: 3
+---
+
+[relay-calling-faxresult]: /docs/server-sdk/v2/ruby/reference/calling/results/fax
+[relay-calling-stopresult]: /docs/server-sdk/v2/ruby/reference/calling/results/stop
+
+# Relay::Calling::FaxAction
+
+This object returned from the asynchronous `fax_send!` and `fax_receive!` methods that represents a `receiving` or `sending` fax on the call.
+
+## Properties
+
+| Property | Type | Description |
+| :------- | :--- | :---------- |
+| `result` | [`Relay::Calling::FaxResult`][relay-calling-faxresult] | Final result for the fax action. |
+| `completed` | Boolean | Whether the action has finished. |
+| `payload` | Hash | Payload sent to Relay to start faxing. |
+| `controlId` | String | UUID to identify the fax action. |
+
+## Methods
+
+### stop
+
+Stop the action immediately.
+
+
+
+**Parameters**
+
+None
+
+**Returns**
+
+[`Relay::Calling::StopResult`][relay-calling-stopresult] - A `StopResult` object with a `successful` property.

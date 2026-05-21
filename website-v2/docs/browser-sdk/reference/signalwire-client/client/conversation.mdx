@@ -1,0 +1,279 @@
+---
+title: "Conversation Namespace"
+slug: /js/reference/signalwire/client/conversation
+toc_max_heading_level: 3
+---
+
+The Conversation namespace includes methods that give you access to Conversation and ConversationMessage objects.
+
+## **The Conversation Object**
+
+Conversation objects represent interaction pairs between Subscribers and Addresses. Each Conversation object has the following properties:
+
+| Field             | Description                                                 |
+| ----------------- | ----------------------------------------------------------- |
+| `id`              | A unique identifier for the conversation.                   |
+| `name`            | The name of the conversation.                               |
+| `metadata`        | Additional metadata associated with the conversation.       |
+| `created_at`      | The UNIX timestamp when the conversation was created.       |
+| `last_message_at` | The UNIX timestamp of the last message in the conversation. |
+
+Here is an example of a `Conversation` object:
+
+```json
+{
+  "id": "9dbe9e94-c797-461e-b5a3-af6d095deaf4",
+  "name": "conversation-office",
+  "metadata": {},
+  "created_at": 1708192187729,
+  "last_message_at": 1708192187823
+}
+```
+
+## **The ConversationMessage object**
+
+ConversationMessage objects represent the specific interactions that have taken place in the Conversation:
+
+- `id`: A unique identifier for the conversation message.
+- `conversation_id`: A unique identifier of the parent conversation.
+- `user_id`: A unique identifier for the subscriber.
+- `ts`: The timestamp, in Unix Epoch, when the message was created.
+- `details`: Additional metadata associated with the conversation.
+- `type`: The type of the conversation message.
+- `subtype`: The subtype of the conversation message.
+- `kind`: The kind of the conversation message.
+
+Here is an example of a `ConversationMessage` object:
+
+```json
+{
+  "id": "3c114417-5cc0-4d03-a30f-c90659028d73",
+  "conversation_id": "9dbe9e94-c797-461e-b5a3-af6d095deaf4",
+  "user_id": "cecbe021-ff86-4ac6-bdf3-399ca477ad6f",
+  "ts": 1708192187.6779745,
+  "details": {},
+  "type": "message",
+  "subtype": "log",
+  "kind": "call_started"
+}
+```
+
+## **Methods**
+
+### getConversations
+
+- **getConversations**(): `Promise<{ data: Conversation[], hasNext, hasPrev }>` -
+
+Returns a list of Conversation objects.
+
+#### Returns
+
+`Promise<{ data: Conversation[], hasNext, hasPrev }>`
+
+#### Example
+
+```javascript
+await client.conversation.getConversations();
+```
+
+```json
+{
+  "data": [
+    {
+      "id": "9dbe9e94-c797-461e-b5a3-af6d095deaf4",
+      "name": "conversation-office",
+      "metadata": {},
+      "created_at": 1708192187729,
+      "last_message_at": 1708192187823
+    }
+  ],
+  "hasNext": false,
+  "hasPrev": false
+}
+```
+
+---
+
+### getConversationMessages
+
+- **getConversationMessages**(`options`): `Promise<{ data: ConversationMessage[], hasNext, hasPrev }>`
+
+Returns a list of ConversationMessage objects inside a Conversation with an Address ID.
+
+#### Parameters
+
+| Name                | Type     | Default value | Description                                                               |
+| :------------------ | :------- | :------------ | :------------------------------------------------------------------------ |
+| `options`           | `object` | -             |
+| `options.addressId` | `string` | `undefined`   | Get Conversation Messages for between the Subscriber and this Address ID. |
+| `options.limit?`    | `number` | `undefined`   | The maximum number of messages to retrieve.                               |
+| `options.since?`    | `number` | `undefined`   | The Unix timestamp in seconds to retrieve messages since.                 |
+| `options.until?`    | `number` | `undefined`   | The Unix timestamp in seconds to retrieve messages until.                 |
+
+#### Returns
+
+`Promise<{ data: ConversationMessage[], hasNext, hasPrev }>`
+
+#### Example
+
+```javascript
+await client.conversation.getConversationMessages({
+  addressId: "9dbe9e94-c797-461e-b5a3-af6d095deaf4",
+});
+```
+
+```json
+{
+  "data": [
+    {
+      "id": "3c114417-5cc0-4d03-a30f-c90659028d73",
+      "conversation_id": "9dbe9e94-c797-461e-b5a3-af6d095deaf4",
+      "user_id": "cecbe021-ff86-4ac6-bdf3-399ca477ad6f",
+      "ts": 1708192187.6779745,
+      "details": {},
+      "type": "message",
+      "subtype": "log",
+      "kind": "call_started"
+    }
+  ],
+  "hasNext": false,
+  "hasPrev": false
+}
+```
+
+---
+
+### getMessages
+
+- **getMessages**(`options`): `Promise<{ data: ConversationMessage[], hasNext, hasPrev }>`
+
+Returns a list of ConversationMessage objects without filtering by Address ID.
+
+#### Parameters
+
+| Name             | Type     | Default value | Description                                               |
+| :--------------- | :------- | :------------ | :-------------------------------------------------------- |
+| `options`        | `object` | -             |
+| `options.limit?` | `number` | `undefined`   | The maximum number of messages to retrieve.               |
+| `options.since?` | `number` | `undefined`   | The Unix timestamp in seconds to retrieve messages since. |
+| `options.until?` | `number` | `undefined`   | The Unix timestamp in seconds to retrieve messages until. |
+
+#### Returns
+
+`Promise<{ data: ConversationMessage[], hasNext, hasPrev }>`
+
+#### Example
+
+```javascript
+await client.conversation.getMessages();
+```
+
+```json
+{
+  "data": [
+    {
+      "id": "3c114417-5cc0-4d03-a30f-c90659028d73",
+      "conversation_id": "9dbe9e94-c797-461e-b5a3-af6d095deaf4",
+      "user_id": "cecbe021-ff86-4ac6-bdf3-399ca477ad6f",
+      "ts": 1708192187.6779745,
+      "details": {},
+      "type": "message",
+      "subtype": "log",
+      "kind": "call_started"
+    }
+  ],
+  "hasNext": false,
+  "hasPrev": false
+}
+```
+
+---
+
+### subscribe
+
+- **subscribe**(): `Promise<void>`
+
+Subscribe to receive new ConversationMessage objects as they happen.
+
+#### Returns
+
+`Promise<void>`
+
+#### Example
+
+```js
+client.conversation.subscribe((conversationMessage) => {
+  console.log("New message received!", conversationMessage);
+  // Add conversationMessage to the UI
+});
+```
+
+```json
+{
+  "id": "916ea1c0-3381-42a3-8ca1-1095f13b4af0",
+  "type": "message",
+  "subtype": "log",
+  "kind": "call_started",
+  "hidden": "false",
+  "address_id": "9dbe9e94-c797-461e-b5a3-af6d095deaf4",
+  "conversation_id": "9dbe9e94-c797-461e-b5a3-af6d095deaf4",
+  "user_id": "cecbe021-ff86-4ac6-bdf3-399ca477ad6f",
+  "ts": 1708621363.211084,
+  "metadata": {},
+  "details": {},
+  "text": null,
+  "conversation_name": "conversation-office",
+  "user_name": "Jim Carrey"
+}
+```
+
+---
+
+### sendMessage
+
+- **sendMessage**(`options`): `Promise<Conversation>`
+
+Sends a Chat Message to the Conversation. This is the same function as [`chat.sendMessage`](/docs/browser-sdk/js/reference/signalwire/client/chat#sendmessage).
+
+#### Parameters
+
+| Name                | Type     | Description                                                                    |
+| :------------------ | :------- | :----------------------------------------------------------------------------- |
+| `options`           | `object` |                                                                                |
+| `options.addressId` | `string` | The `id` of the address to send the message to.                                |
+| `options.text`      | `string` | The Message text content.                                                      |
+| `options.metadata?` | `object` | Metadata to go along with the Message.                                         |
+| `options.details?`  | `object` | Extra Message event details. Can be used to construct custom UIs, for example. |
+
+#### Example
+
+```javascript
+await conversation.sendMessage({
+  text: "Hello from SignalWire!",
+});
+```
+
+### join
+
+- **join**(`options`): `Promise<JoinConversationResponse>`
+
+Joins a conversation given an address, without having to send a message. Does nothing if you
+were already joined to the conversation. This is the same function as [`chat.join`](/docs/browser-sdk/js/reference/signalwire/client/chat#join).
+
+You automatically join a conversation when you send the first message to an address. The `join`
+method allows you to join a conversation **without** sending a message.
+
+#### Parameters
+
+| Name                | Type     | Description                                          |
+| :------------------ | :------- | :--------------------------------------------------- |
+| `options`           | `object` |                                                      |
+| `options.addressId` | `string` | The `id` of the address to join the conversation of. |
+
+#### Example
+
+```javascript
+await conversation.join({
+  addressId: "9dbe9e94-c797-461e-b5a3-af6d095deaf4",
+});
+```

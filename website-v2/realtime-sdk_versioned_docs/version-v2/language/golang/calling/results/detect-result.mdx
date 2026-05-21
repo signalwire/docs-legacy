@@ -1,0 +1,70 @@
+---
+title: Relay.Calling.DetectResult
+slug: /go/reference/calling/results/detect
+description: The result object that is returned when detecting a call.
+toc_max_heading_level: 3
+---
+
+[relay-event]: /docs/server-sdk/v2/go/reference/event
+
+## Relay.Calling.DetectResult
+
+This object returned from one of _synchronous_ detect methods that represents the final result of a detector.
+
+## Methods-submenu
+
+
+### GetEvent
+
+Returns the last Relay Event arrived for this operation.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+[`Relay.Event`][relay-event] - Last Relay Event.
+
+
+### GetResult
+
+Returns the result of the detector. It could be the digits or the type (`machine` or `human`) detected.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`string` - Detector result.
+
+
+#### GetType
+
+Returns the `type` of detector.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`string` - Detector type: `digit`, `machine` or `fax`.
+
+
+### GetSuccessful
+
+Return `true` if detector succeeded, `false` otherwise.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`Boolean` - True/False accordingly to the state.

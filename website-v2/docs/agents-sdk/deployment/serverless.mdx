@@ -1,0 +1,383 @@
+---
+title: "Serverless"
+sidebar_label: "Serverless"
+slug: /python/guides/serverless
+toc_max_heading_level: 3
+---
+
+## Serverless Deployment
+
+Deploy agents to AWS Lambda, Google Cloud Functions, or Azure Functions. The SDK automatically detects serverless environments and adapts accordingly.
+
+### Serverless Overview
+
+| Platform | Runtime | Entry Point | Max Timeout | Free Tier |
+|----------|---------|-------------|-------------|-----------|
+| AWS Lambda | Python 3.11 | `lambda_handler` | 15 min | 1M requests/mo |
+| Google Cloud Functions | Python 3.11 | `main` | 60 min (Gen 2) | 2M invocations/mo |
+| Azure Functions | Python 3.11 | `main` | 10 min (Consumption) | 1M executions/mo |
+
+**Benefits:**
+- Auto-scaling
+- Pay per invocation
+- No server management
+- High availability
+
+### AWS Lambda
+
+#### Lambda Handler
+
+`handler.py`:
+
+```python
+from signalwire_agents import AgentBase, SwaigFunctionResult
+
+
+class MyAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="my-agent")
+        self.add_language("English", "en-US", "rime.spore")
+        self.prompt_add_section("Role", "You are a helpful assistant.")
+        self._setup_functions()
+
+    def _setup_functions(self):
+        @self.tool(
+            description="Say hello to a user",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "Name of the person to greet"
+                    }
+                },
+                "required": ["name"]
+            }
+        )
+        def say_hello(args, raw_data):
+            name = args.get("name", "World")
+            return SwaigFunctionResult(f"Hello {name}!")
+
+
+# Create agent instance outside handler for warm starts
+agent = MyAgent()
+
+
+def lambda_handler(event, context):
+    """AWS Lambda entry point."""
+    return agent.run(event, context)
+```
+
+#### Lambda requirements.txt
+
+```
+signalwire-agents>=1.0.15
+```
+
+#### Lambda with API Gateway (Serverless Framework)
+
+```yaml
+## serverless.yml
+service: signalwire-agent
+
+provider:
+  name: aws
+  runtime: python3.11
+  region: us-east-1
+  environment:
+    SWML_BASIC_AUTH_USER: ${env:SWML_BASIC_AUTH_USER}
+    SWML_BASIC_AUTH_PASSWORD: ${env:SWML_BASIC_AUTH_PASSWORD}
+
+functions:
+  agent:
+    handler: handler.lambda_handler
+    events:
+      - http:
+          path: /
+          method: any
+      - http:
+          path: /{proxy+}
+          method: any
+```
+
+#### Lambda Request Flow
+
+<Frame caption="Lambda Request Flow">
+  <img className="diagram" src={require("@image/agents-sdk-manual/07_03_serverless_diagram1.webp").default} alt="Lambda Request Flow." />
+</Frame>
+
+### Google Cloud Functions
+
+#### Cloud Functions Handler
+
+`main.py`:
+
+```python
+from signalwire_agents import AgentBase, SwaigFunctionResult
+
+
+class MyAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="my-agent")
+        self.add_language("English", "en-US", "rime.spore")
+        self.prompt_add_section("Role", "You are a helpful assistant.")
+        self._setup_functions()
+
+    def _setup_functions(self):
+        @self.tool(
+            description="Say hello to a user",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "Name of the person to greet"
+                    }
+                },
+                "required": ["name"]
+            }
+        )
+        def say_hello(args, raw_data):
+            name = args.get("name", "World")
+            return SwaigFunctionResult(f"Hello {name}!")
+
+
+# Create agent instance outside handler for warm starts
+agent = MyAgent()
+
+
+def main(request):
+    """Google Cloud Functions entry point."""
+    return agent.run(request)
+```
+
+#### Cloud Functions requirements.txt
+
+```
+signalwire-agents>=1.0.15
+functions-framework>=3.0.0
+```
+
+#### Deploying to Cloud Functions (Gen 2)
+
+```bash
+gcloud functions deploy signalwire-agent \
+  --gen2 \
+  --runtime python311 \
+  --trigger-http \
+  --allow-unauthenticated \
+  --entry-point main \
+  --region us-central1 \
+  --set-env-vars SWML_BASIC_AUTH_USER=user,SWML_BASIC_AUTH_PASSWORD=pass
+```
+
+### Azure Functions
+
+#### Azure Functions Handler
+
+`function_app/__init__.py`:
+
+```python
+import azure.functions as func
+from signalwire_agents import AgentBase, SwaigFunctionResult
+
+
+class MyAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="my-agent")
+        self.add_language("English", "en-US", "rime.spore")
+        self.prompt_add_section("Role", "You are a helpful assistant.")
+        self._setup_functions()
+
+    def _setup_functions(self):
+        @self.tool(
+            description="Say hello to a user",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "Name of the person to greet"
+                    }
+                },
+                "required": ["name"]
+            }
+        )
+        def say_hello(args, raw_data):
+            name = args.get("name", "World")
+            return SwaigFunctionResult(f"Hello {name}!")
+
+
+# Create agent instance outside handler for warm starts
+agent = MyAgent()
+
+
+def main(req: func.HttpRequest) -> func.HttpResponse:
+    """Azure Functions entry point."""
+    return agent.run(req)
+```
+
+#### Azure Functions requirements.txt
+
+```
+azure-functions>=1.17.0
+signalwire-agents>=1.0.15
+```
+
+#### function.json
+
+```json
+{
+    "scriptFile": "__init__.py",
+    "bindings": [
+        {
+            "authLevel": "anonymous",
+            "type": "httpTrigger",
+            "direction": "in",
+            "name": "req",
+            "methods": ["get", "post"],
+            "route": "{*path}"
+        },
+        {
+            "type": "http",
+            "direction": "out",
+            "name": "$return"
+        }
+    ]
+}
+```
+
+#### host.json
+
+```json
+{
+    "version": "2.0",
+    "extensionBundle": {
+        "id": "Microsoft.Azure.Functions.ExtensionBundle",
+        "version": "[4.*, 5.0.0)"
+    }
+}
+```
+
+### Testing Serverless
+
+#### Local Testing with swaig-test
+
+```bash
+## Simulate AWS Lambda
+swaig-test handler.py --simulate-serverless lambda --dump-swml
+
+## Simulate Google Cloud Functions
+swaig-test main.py --simulate-serverless cloud_function --dump-swml
+
+## Simulate Azure Functions
+swaig-test function_app/__init__.py --simulate-serverless azure_function --dump-swml
+```
+
+#### Testing Deployed Endpoints
+
+```bash
+## Test SWML output (replace with your endpoint and credentials)
+curl -u username:password https://your-endpoint/
+
+## Test SWAIG function
+curl -u username:password -X POST https://your-endpoint/swaig \
+    -H 'Content-Type: application/json' \
+    -d '{"function": "say_hello", "argument": {"parsed": [{"name": "Alice"}]}}'
+```
+
+### Authentication
+
+The SDK automatically enables HTTP Basic Authentication. You can:
+
+1. **Let the SDK generate credentials** - Secure random credentials are created automatically
+2. **Set your own credentials** - Via environment variables:
+
+```bash
+export SWML_BASIC_AUTH_USER=myuser
+export SWML_BASIC_AUTH_PASSWORD=mypassword
+```
+
+### Force Mode Override
+
+For testing, you can force a specific execution mode:
+
+```python
+## Force Lambda mode
+agent.run(event={}, context=None, force_mode='lambda')
+
+## Force Cloud Functions mode
+agent.run(request, force_mode='google_cloud_function')
+
+## Force Azure mode
+agent.run(req, force_mode='azure_function')
+```
+
+### Serverless Best Practices
+
+#### Cold Starts
+- Keep dependencies minimal
+- Initialize agent outside handler function
+- Use provisioned concurrency for low latency
+
+#### Timeouts
+- Set appropriate timeout (Lambda: up to 15 min)
+- Account for external API calls
+- Monitor and optimize slow functions
+
+#### Memory
+- Allocate sufficient memory
+- More memory = more CPU in Lambda
+- Monitor memory usage
+
+#### State
+- Design for statelessness
+- Use external storage for persistent data
+- Don't rely on local filesystem
+
+### Multi-Agent Serverless
+
+Deploy multiple agents with AgentServer:
+
+```python
+from signalwire_agents import AgentBase, AgentServer
+
+
+class SalesAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="sales-agent")
+        self.add_language("English", "en-US", "rime.spore")
+
+
+class SupportAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="support-agent")
+        self.add_language("English", "en-US", "rime.spore")
+
+
+server = AgentServer()
+server.register(SalesAgent(), "/sales")
+server.register(SupportAgent(), "/support")
+
+
+def lambda_handler(event, context):
+    """Lambda handler for multi-agent server"""
+    return server.run(event, context)
+```
+
+### Environment Detection
+
+The SDK detects serverless environments automatically:
+
+| Environment Variable | Platform |
+|---------------------|----------|
+| `AWS_LAMBDA_FUNCTION_NAME` | AWS Lambda |
+| `LAMBDA_TASK_ROOT` | AWS Lambda |
+| `FUNCTION_TARGET` | Google Cloud Functions |
+| `K_SERVICE` | Google Cloud Functions |
+| `GOOGLE_CLOUD_PROJECT` | Google Cloud Functions |
+| `AZURE_FUNCTIONS_ENVIRONMENT` | Azure Functions |
+| `FUNCTIONS_WORKER_RUNTIME` | Azure Functions |
+
+
+

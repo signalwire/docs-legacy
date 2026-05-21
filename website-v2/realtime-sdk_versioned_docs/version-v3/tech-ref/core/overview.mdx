@@ -1,0 +1,241 @@
+---
+title: "RELAY Realtime SDK v3"
+sidebar_label: Overview
+sidebar_position: 0
+slug: /node
+description: Node.js server SDK for real-time communication (deprecated - consider upgrading to v4)
+
+toc_max_heading_level: 3
+---
+
+<Warning>
+The [RELAY v4](/docs/server-sdk/node) is the most up-to-date version of the Realtime RELAY SDK.
+Consider reading the [Upgrading to RELAY v4](/docs/server-sdk/v3/node/guides/realtime-relay-v4-vs-v3) page to understand the benefits of
+[RELAY v4](/docs/server-sdk/node) and how to upgrade.
+</Warning>
+
+<CardGroup cols={2}>
+  <Card title="npm" icon="brands npm" href="https://www.npmjs.com/package/@signalwire/realtime-api">
+    @signalwire/realtime-api@~3
+  </Card>
+  <Card title="GitHub" icon="brands github" href="https://github.com/signalwire/signalwire-js">
+    signalwire/signalwire-js
+  </Card>
+</CardGroup>
+
+```bash
+npm install @signalwire/realtime-api@~3
+```
+
+The SignalWire Realtime SDK v3 is a Node.js server SDK that enables real-time communication through WebSocket connections. Built on an event-driven architecture, it provides dedicated namespaces for voice, video, messaging, chat, pub/sub, and task management.
+
+## Getting Started
+
+<Steps>
+
+<Step title="Install the SDK">
+
+```bash
+npm install @signalwire/realtime-api@~3
+```
+
+</Step>
+
+<Step title="Create a RELAY Application">
+
+For Voice, Messaging, and Task namespaces, create a RELAY Application resource in your dashboard:
+
+1. Set a name for your application
+2. Choose a reference (e.g., "support", "sales") that matches your client's topics
+3. Assign [phone numbers](/docs/platform/phone-numbers) or [SIP addresses](/docs/platform/addresses) to route calls to this application
+
+</Step>
+
+<Step title="Set up authentication">
+
+Get your project credentials from the [SignalWire Dashboard](/docs/platform/your-signalwire-api-space):
+
+```javascript
+import { Voice } from "@signalwire/realtime-api";
+
+const client = new Voice.Client({
+  project: "your-project-id",
+  token: "your-api-token",
+  topics: ["support"]  // Must match your RELAY Application reference
+});
+```
+
+</Step>
+
+<Step title="Test your setup">
+
+Create a simple inbound call handler to test your setup:
+
+```javascript
+import { Voice } from "@signalwire/realtime-api";
+
+const client = new Voice.Client({
+  project: "your-project-id",
+  token: "your-api-token",
+  topics: ["support"]  // Must match your RELAY Application reference
+});
+
+// Answer incoming calls and play a greeting
+client.on("call.received", async (call) => {
+  console.log("Incoming call from:", call.from);
+
+  await call.answer();
+  await call.playTTS({ text: "Welcome to SignalWire!" });
+});
+
+console.log("Waiting for calls...");
+```
+
+Now call the SignalWire phone number or SIP address you assigned to your RELAY Application in step 2. Your application will answer and play the greeting!
+
+</Step>
+
+</Steps>
+
+## Core Concepts
+
+### WebSocket Event Architecture
+
+The SDK operates on a bidirectional WebSocket connection between your application and SignalWire's servers. This enables real-time communication through a structured event system:
+
+```mermaid
+graph LR
+    A["SDK Client<br/>(Your Application)"] <-->|"Method Calls<br/>client.dial(), client.send()<br/>roomSession.join()"| B[WebSocket<br/>Connection] <-->|"Process & Respond"| C[SignalWire]
+
+    C -->|"Real-time Events<br/>call.received, message.received<br/>room.started"| B -->|"Event Data<br/>client.on('events')"| A
+```
+
+When you call a method like `client.dial()`, the SDK sends your request over the WebSocket connection and SignalWire processes it and responds immediately. These method calls follow a request-response pattern - the returned promise resolves with the result data, such as a `Call` object containing all the details of your newly created call.
+
+The `.on()` methods handle a different communication pattern: real-time event notifications. These are asynchronous events triggered by external actions - like when someone calls your number (`call.received`), sends you a message (`message.received`), or when something happens in a video room you're monitoring (`member.joined`). Unlike method responses, these events arrive whenever the triggering action occurs, not as a direct response to your code.
+
+### Authentication and Access Control
+
+All SDK clients authenticate using project credentials. Voice, Messaging, and Task namespaces also require topic subscriptions that control event routing:
+
+```javascript
+const client = new Voice.Client({
+  project: "your-project-id",     // SignalWire project identifier
+  token: "your-project-token",    // API token from project settings
+  topics: ["support", "sales"]    // Required for Voice, Messaging, Task
+});
+```
+
+Your `project` ID and `token` are available in the [SignalWire Dashboard](/docs/platform/your-signalwire-api-space). These authenticate your WebSocket connection and establish your access permissions.
+
+Topics (formerly contexts) work with RELAY Application resources to route events. When you assign a phone number or a SIP address to a RELAY Application with reference "support", SignalWire routes all calls from that number or SIP address to SDK clients authenticated with the "support" topic. This creates strict access control - a client subscribed to "support" cannot receive events intended for "sales".
+
+The routing process is straightforward: incoming calls hit a phone number or a SIP address, SignalWire checks the RELAY Application's reference, then delivers the event only to clients with matching topics. This happens automatically based on your authentication.
+
+```javascript
+// Topic-based client (receives events only for subscribed topics)
+const voice = new Voice.Client({
+  project: "project-id",
+  token: "token",
+  topics: ["support", "sales"]  // Only receive calls for these topics
+});
+
+// Non-topic client (receives all events for the project)
+const video = new Video.Client({
+  project: "project-id",
+  token: "token"  // No topics needed
+});
+```
+
+## Available Namespaces
+
+<CardGroup cols={3}>
+  <Card
+    title="Voice"
+    href="/docs/server-sdk/v3/node/reference/voice"
+    icon="fa-solid fa-phone"
+  >
+    Make and receive calls, play audio, record, and build IVRs
+  </Card>
+  <Card
+    title="Video"
+    href="/docs/server-sdk/v3/node/reference/video"
+    icon="fa-solid fa-video"
+  >
+    Monitor video rooms, members, recordings, and streams
+  </Card>
+  <Card
+    title="PubSub"
+    href="/docs/server-sdk/v3/node/reference/pubsub"
+    icon="fa-solid fa-tower-broadcast"
+  >
+    Publish and subscribe to real-time message channels
+  </Card>
+  <Card
+    title="Chat"
+    href="/docs/server-sdk/v3/node/reference/chat"
+    icon="fa-solid fa-comments"
+  >
+    Build chat applications with members and messages
+  </Card>
+  <Card
+    title="Task"
+    href="/docs/server-sdk/v3/node/reference/task"
+    icon="fa-solid fa-list-check"
+  >
+    Distribute tasks to workers via topic routing
+  </Card>
+</CardGroup>
+
+## Classes
+
+<CardGroup cols={2}>
+  <Card title="RealtimeClient" href="/docs/server-sdk/v3/node/reference/realtime-client">
+    The core client for establishing WebSocket connections and accessing all SDK namespaces.
+  </Card>
+</CardGroup>
+
+## Functions
+
+### ~~createClient~~
+
+- `Const` **createClient**(`userOptions`): `Promise<RealtimeClient>` - **Deprecated** — See [RealtimeClient](/docs/server-sdk/v3/node/reference/realtime-client) for more details.
+
+> **Deprecated**
+> You no longer need to create the client manually. You can use the product constructors, like [Video.Client](/docs/server-sdk/v3/node/reference/video/room-session), to access the same functionality.
+
+Creates a real-time Client.
+
+#### Parameters
+
+| Name                    | Type                                                                      | Description                                                                                    |
+| :---------------------- | :------------------------------------------------------------------------ | :--------------------------------------------------------------------------------------------- |
+| `userOptions`           | `Object`                                                                  |                                                                                                |
+| `userOptions.logLevel?` | `"debug"` \| `"trace"` \| `"info"` \| `"warn"` \| `"error"` \| `"silent"` | logging level                                                                                  |
+| `userOptions.project?`  | `string`                                                                  | SignalWire project id, e.g. `a10d8a9f-2166-4e82-56ff-118bc3a4840f`                          |
+| `userOptions.token`     | `string`                                                                  | SignalWire project token, e.g. `PT9e5660c101cd140a1c93a0197640a369cf5f16975a0079c9`         |
+
+#### Returns
+
+`Promise<RealtimeClient>` - **Deprecated** — See [RealtimeClient](/docs/server-sdk/v3/node/reference/realtime-client) for more details.
+
+an instance of a real-time Client.
+
+#### Example
+
+```typescript
+const client = await createClient({
+  project: "<project-id>",
+  token: "<project-token>",
+});
+```
+
+---
+
+### getConfig
+
+- `Const` **getConfig**(): `GlobalConfig`
+
+#### Returns
+
+`GlobalConfig`

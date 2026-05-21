@@ -1,0 +1,258 @@
+---
+title: Prompt engineering
+sidebar_label: Prompt engineering
+description: Master the craft of writing effective prompts for SignalWire AI agents
+slug: /platform/ai/prompt-engineering
+
+---
+
+[swml-docs]: /docs/swml
+[context-steps]: /docs/platform/ai/prompt-engineering/where-to-apply#context-steps
+[swaig]: /docs/platform/ai/prompt-engineering/where-to-apply#swaig-functions
+[conscience]: /docs/platform/ai/prompt-engineering/where-to-apply#conscience
+[post-prompt]: /docs/platform/ai/prompt-engineering/where-to-apply#post-prompt
+
+## Introduction
+
+SignalWire AI Agents combine 
+<Tooltip tip="ASR, or 'Automatic Speech Recognition', is also known as 'Speech-to-Text' (STT).">ASR</Tooltip>, 
+conversational intelligence, 
+[function calling](/docs/swml/reference/ai/swaig),
+<Tooltip tip="'Retrieval Augmented Generation' systems, like SignalWire's Datasphere, empower AI Agents with structured data to improve quality and reliability.">integrated RAG</Tooltip>, and 
+<Tooltip tip="'Text-to-Speech' models speak text in a variety of languages and voices.">TTS</Tooltip>,
+all in a powerful and easy-to use tool that is integrated with and optimized for telecommunications.
+
+[Prompts](/docs/platform/ai/prompt-engineering/where-to-apply) are used to design and configure an AI Agent. 
+In addition to its primary (or "Main") prompt, each SignalWire AI Agent has additional areas that accept prompts, like 
+[Context Steps][context-steps], 
+[SWAIG Functions][swaig], 
+[Conscience][conscience],
+and the [Post-Prompt][post-prompt].
+
+Think of prompt engineering like giving detailed instructions to a new team member: for them to succeed,
+you need to be clear about what you want them to do, how to do it, and what boundaries to respect. 
+A good prompt tells the AI exactly how to handle user questions, what tone to use, what information to focus on, and what topics to avoid.
+
+<Warning>
+You can use all these prompt engineering techniques with either [SWML][swml-docs] or the AI agent resource.
+</Warning>
+
+## The art of prompt engineering
+
+Prompt engineering isn't just about writing instructions - it's about crafting them in a way that gets the best results from your AI. It's part technical skill, part creative problem-solving. The goal is to write prompts that are crystal clear and leave no room for confusion.
+
+Here's what goes into making great prompts:
+
+- **Writing clear instructions** - Being specific and leaving nothing to chance
+- **Organizing information logically** - Making sure everything flows in a way the AI can follow
+- **Setting clear boundaries** - Making sure the AI stays within ethical, legal, and brand guidelines
+- **Testing and improving** - Constantly refining based on real-world results
+
+For SignalWire users, getting prompt engineering right is crucial. It's what turns a basic AI into a reliable team member that can handle complex customer conversations day in and day out.
+
+## Why this matters
+
+The way you write your prompts makes or breaks your AI's performance. 
+Good prompts create AI agents that stay consistent - whether they're talking to a first-time customer or someone who's been around for years.
+
+The goal is to help AI handle real conversations, understand context, manage back-and-forth discussions, and recover smoothly when things get confusing.
+
+The impact of good prompt engineering touches everything:
+
+- **Brand voice** - Making sure your AI sounds like your company
+- **Trust and safety** - Keeping everything above board and compliant
+- **Growth** - Handling more conversations without losing quality
+- **Customer satisfaction** - Creating smooth, helpful interactions
+
+## What makes prompts work?
+
+The best prompts for SignalWire AI agents share some common traits that make them effective in real conversations. Here's what to look for:
+
+- **Crystal clear language** - Be specific and leave no room for confusion. AI takes instructions literally, so vague language leads to unexpected results. Use concrete examples and clear directions.
+
+- **Smart organization** - Structure information in a way that makes sense. Use headers, subheaders, and consistent formatting to help the AI understand how everything fits together.
+
+- **Flexibility** - Real conversations rarely follow a script. Your prompts should help the AI handle different ways of asking questions, topic changes, and misunderstandings naturally.
+
+- **Brand voice** - Make sure your AI sounds like your company. This means using your terminology, keeping the right tone, and focusing on what matters to your business.
+
+
+### Technical considerations
+
+Avoid over-prompting when designing your AI agents. Excessive instructions and constraints can degrade both performance and reliability. When prompts become too lengthy or complex, the AI may struggle to prioritize information, leading to inconsistent responses and reduced effectiveness. Focus on clear, essential guidance rather than exhaustive details - this creates AI agents that respond more consistently and handle conversations with greater flexibility.
+
+Context awareness is crucial too. Good prompts help your AI remember what was said earlier in the conversation, making sure responses make sense throughout longer interactions.
+
+And when things go wrong? Your prompts should help the AI recover gracefully - asking for clarification when needed, offering alternatives, or steering the conversation back on track without frustrating users.
+
+
+## Building your prompt structure
+
+A solid prompt is like a well-organized recipe - it has all the right ingredients in the right order. Here's how to structure your prompts for SignalWire AI agents:
+
+### Role definition
+**Role definition** forms the foundation of your prompt. Begin by establishing who your AI is supposed to be. This identity sets the tone and expertise level for all interactions. When you tell your AI "You're a telecom support specialist with five years under your belt," you're giving it a clear persona to embody throughout the conversation.
+
+### Context
+Every conversation happens within a **context** that shapes understanding. Your AI needs critical background information to perform effectively - details about user demographics and technical knowledge, system capabilities and limitations, or relevant history that might influence the interaction. This contextual awareness prevents the AI from making inappropriate assumptions.
+
+### Response guidelines
+**Response guidelines** shape how your AI communicates. By defining whether you want "friendly, simple language with clear steps" or "professional but approachable, getting straight to the point," you ensure the conversation feels natural and aligned with your brand voice. These guidelines maintain consistency across all interactions.
+
+### Boundaries
+Finally, **boundaries** protect both users and your business. By clearly stating what the AI shouldn't do - "Don't ask for passwords," "Don't promise specific delivery times," or "Don't compare us to competitors unless asked" - you prevent potential problems while maintaining the flexibility needed for natural conversation.
+
+### Example structure
+
+Here's a real-world example of a well-structured prompt for a pizza ordering AI:
+
+```markdown
+## Role
+You are a friendly pizza restaurant assistant responsible for taking orders and providing information about our menu. You have extensive knowledge of our pizzas, toppings, and policies.
+
+## Knowledge base
+- Menu Items: All pizza sizes (small, medium, large), available toppings, speciality pizzas
+- Operating Hours: Monday-Sunday 11am-10pm
+- Policies: Delivery radius (5 miles), minimum order for delivery ($15), modification limits
+- Dietary Information: Vegetarian options, gluten-free crust availability
+
+## Task structure
+1. Greet customer warmly and establish if ordering or asking questions
+2. For orders:
+   - Get pizza size (small/medium/large)
+   - Collect topping preferences
+   - Confirm order details
+   - Handle delivery/pickup choice
+3. For inquiries:
+   - Answer menu questions
+   - Provide policy information
+   - Address dietary concerns
+
+## Response guidelines
+- Use friendly, conversational tone
+- Confirm understanding of customer requests
+- Provide clear pricing information
+- Suggest popular topping combinations when asked
+- Guide customers through options step-by-step
+
+## Boundaries
+- Don't accept orders outside operating hours which is 11am-10pm
+- Don't promise delivery times
+- Don't modify set specialty pizza recipes
+- Don't offer discounts or special prices
+- Don't discuss internal operations or competitors
+```
+
+### Visual representation of prompt impact
+
+The following diagram illustrates the above prompt in a real conversation and how it influences the AI's responses:
+
+```mermaid
+%%{init: {
+    'theme': 'mc',
+    'themeVariables': {
+        'fontFamily': 'Inter',
+        'fontSize': '14px',
+        'nodeBorder': '2px',
+        'nodeTextColor': '#000000'
+    },
+    'flowchart': {
+        'wrappingWidth': 160
+    }
+}}%%
+flowchart TD
+    %% Define styles with text wrapping
+    classDef customer fill:#fff0f0,stroke:#c0392b,stroke-width:2px,color:#000000,fontFamily:Inter
+    classDef assistant fill:#f0fff0,stroke:#27ae60,stroke-width:2px,color:#000000,fontFamily:Inter
+    classDef note fill:#f0f8ff,stroke:#666,stroke-width:1px,color:#666,font-style:italic,fontFamily:Inter
+    classDef start fill:#ffffd0,stroke:#666,stroke-width:1px,color:#666,font-style:italic,fontFamily:Inter
+
+    Start([Inbound Call]):::start
+    Start --> R1["Welcome to Joe's pizza! How may I help you today?"]
+    R1 --> Q1["I'd like to order a pizza"]
+    Q1 --> R2["What size would you like? Small, medium, or large?"]
+    R2 --> Q2["I'd like a large pizza"]
+    Q2 --> R3["Great! For toppings, our most popular are pepperoni, mushrooms & extra cheese"]
+    R3 --> Q3["Any discounts available?"]
+    Q3 --> R4["We don't offer discounts, but I can help find menu options that work for you. What toppings would you like?"]
+
+    %% Add notes showing prompt influence with line breaks
+    Note1["Role + guidelines:<br/>Friendly welcome"]:::note
+    Note2["Task + knowledge:<br/>Size options"]:::note
+    Note3["Guidelines:<br/>Suggesting popular items"]:::note
+    Note4["Boundaries:<br/>Polite redirection"]:::note
+
+    %% Connect notes to conversation with dotted lines
+    Note1 -.-> R1
+    Note2 -.-> R2
+    Note3 -.-> R3
+    Note4 -.-> R4
+
+    %% Apply styles
+    class Q1,Q2,Q3 customer
+    class R1,R2,R3,R4 assistant
+
+    %% Style for links - using a blue-gray color for better visibility
+    linkStyle default stroke:#666666,stroke-width:2px,color:#666666
+```
+
+This diagram demonstrates how:
+- The **role** shapes the AI's friendly greeting and professional demeanor
+- The **knowledge base** informs accurate responses about menu options and policies
+- The **task structure** ensures a logical order flow from size selection to toppings
+- **Response guidelines** maintain consistent, helpful interaction throughout
+- **Boundaries** keep the conversation within appropriate service parameters
+
+Each component plays a crucial role in creating a natural, efficient ordering experience while maintaining service standards.
+
+## Get started
+
+Follow these steps to create a basic set of prompts, then test and iterate until your agent is ready for production.
+
+
+<Steps>
+#### Define clear objectives
+
+Start by establishing specific, measurable goals for your AI agent. Create a mission statement that defines its purpose, scope,
+ and success criteria.
+
+#### Research your target audience
+
+Gather detailed information about your audience and their experiences:
+- Technical proficiency levels (beginner, intermediate, expert)
+- Familiarity with industry-specific terminology
+- Common challenges and pain points they face
+- Communication preferences and interaction styles
+- Typical scenarios and use cases relevant to your service
+
+Use these audience insights to enhance your prompts and test them from different user perspectives.
+
+#### Build an iterative prompt framework
+
+1. **Core functionality**: Start with a minimal viable prompt (MVP) that handles the most common use cases
+2. **Expansion phase**: Expand the prompt incrementally to cover more use cases
+3. **Edge case handling**: Incorporate instructions for unusual scenarios
+4. **Refinement**: Trim unnecessary instructions that don't improve performance
+
+This layered approach prevents prompt bloat while ensuring comprehensive coverage.
+
+#### Implement rigorous testing protocols
+
+Develop a systematic testing framework:
+- **Functional testing**: Verify responses to standard queries match expectations
+- **Adversarial testing**: Deliberately try to confuse or mislead the AI
+- **Boundary testing**: Explore the limits of the AI's knowledge and capabilities
+- **A/B testing**: Compare different prompt versions with real users
+
+Document all test cases and results to track improvements over time.
+
+#### Establish a continuous improvement cycle
+
+Make continuous improvement part of your process. Watch how real users interact with your AI,
+spot patterns of success and failure, and adjust your prompts accordingly. This cycle of improvement
+helps your AI get better and better at handling real-world situations.
+</Steps>
+
+## What's next?
+
+Now that you've got the basics down, you're ready to dive deeper into advanced prompt engineering techniques. Explore our guides on [best practices](/docs/platform/ai/prompt-engineering/best-practices), [where to apply prompts](/docs/platform/ai/prompt-engineering/where-to-apply), and [advanced techniques](/docs/platform/ai/prompt-engineering).

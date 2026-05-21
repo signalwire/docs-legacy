@@ -1,0 +1,22 @@
+---
+title: DialResult
+slug: /dotnet/reference/calling/results/dial
+description: The DialResult object is returned after a dial operation.
+toc_max_heading_level: 3
+---
+
+[call]: /docs/server-sdk/v2/dotnet/reference/calling/call#dial
+[signalwire-relay-calling-call]: /docs/server-sdk/v2/dotnet/reference/calling/call
+[signalwire-relay-event]: /docs/server-sdk/v2/dotnet/reference/event
+
+# SignalWire.Relay.Calling.DialResult
+
+This object returned from [`Dial`][call] method.
+
+## Properties
+
+| Property | Type | Description |
+| :-------- | :---- | :----------- |
+| `Successful` | bool | Whether the call has been answered successfully. |
+| `Event` | [`SignalWire.Relay.Event`][signalwire-relay-event] | The last event that completed the call. |
+| `Call` | [`SignalWire.Relay.Calling.Call`][signalwire-relay-calling-call] | Reference to the call. |

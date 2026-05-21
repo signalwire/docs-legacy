@@ -1,0 +1,101 @@
+---
+title: Relay.Calling
+slug: /go/reference/calling
+toc_max_heading_level: 3
+---
+
+[link-1]: #dial
+[relay-calling-call]: /docs/server-sdk/v2/go/reference/calling/call
+[relay-calling-dialresult]: /docs/server-sdk/v2/go/reference/calling/results/dial
+
+## Relay.Calling
+
+This represents the API interface for the Calling Relay Service. This object is used to make requests related to managing end to end calls.
+
+## Methods
+
+### Dial
+
+Make an outbound Call and waits until it has been answered or hung up.
+
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `newCall` | `*signalwire.CallObj` | **required** | A Call Object created with NewCall() |
+
+**Returns**
+
+[`*signalwire.DialResult`][relay-calling-dialresult] - The result of the dial operation.
+
+**Examples**
+
+Make an outbound Call:
+
+```go
+newCall := consumer.Client.Calling.NewCall(fromNumber, toNumber)
+resultDial := consumer.Client.Calling.Dial(newCall)
+if !resultDial.Successful {
+    return
+}
+```
+
+### DialPhone
+
+Make an outbound Phone Call and return when it has been answered, hung up or timed out.
+
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `from` | `string` | **required** | The party the call is coming from. Must be a SignalWire number or SIP endpoint that you own. |
+| `to` | `string` | **required** | The party you are attempting to call. |
+
+**Returns**
+
+[`*signalwire.DialResult`][relay-calling-dialresult] - The result of the dial operation.
+
+**Examples**
+
+Make an outbound Call:
+
+```go
+resultDial := consumer.Client.Calling.DialPhone(fromNumber, toNumber)
+if !resultDial.Successful {
+    return
+}
+playAction, err := resultDial.Call.PlayAudioAsync("https://cdn.signalwire.com/default-music/welcome.mp3")
+if err != nil {
+    signalwire.Log.Error("Error occurred while trying to play audio\n")
+}
+```
+
+### NewCall
+
+Create a new `Call` object. The call has not started yet allowing you to attach event listeners on it.
+
+
+**Parameters**
+
+See [`Relay.Calling.Dial`][link-1] for the parameter list.
+
+**Returns**
+
+[`*signalwire.CallObj`][relay-calling-call] - A new Call object.
+
+**Examples**
+
+Create a new Call object:
+
+```go
+newCall := consumer.Client.Calling.NewCall(fromNumber, toNumber)
+resultDial := consumer.Client.Calling.Dial(newCall)
+if !resultDial.Successful {
+    if err := consumer.Stop(); err != nil {
+        signalwire.Log.Error("Error occurred while trying to stop Consumer")
+    }
+    return
+}
+```

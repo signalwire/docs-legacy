@@ -1,0 +1,447 @@
+---
+title: Switch AI context mid-call
+slug: /swml/guides/context-switch
+description: Learn how to use `context_switch` to shift the focus of the conversation.
+x-custom:
+  tags:
+    - favorite
+    - sdk:swml
+    - product:ai
+    - product:voice
+---
+
+In this example, we will demonstrate how to use `context_switch` to shift the focus of the conversation.
+The AI agent will switch between a `StarWars` and `StarTrek` context. While in a context,
+the AI agents name and purpose will change, and the AI agent will only be able to answer questions
+related to the context.
+
+## Initial prompt
+
+<Warning>
+Providing too much information in the initial prompt can cause the AI agent to get confused
+during a context switch. It is recommended to keep the initial prompt short and simple. Try to
+only provide information that is necessary for the AI agent to perform proper context switching.
+</Warning>
+
+In our initial prompt, we will declare the AI as a multi-personality bot, and explain to the AI
+its name and purpose will change depending on the context. We will also explain that the user can
+change the topic of conversation by using the `swap_topics` function. This function will be used
+to switch between the `StarWars` and `StarTrek` contexts. Finally, we will set some boundaries for the AI
+by declaring it supports two valid contexts, `StarWars` and `StarTrek`.
+
+After this is all declared, we will instruct the AI agent to use the `swap_topics` function to switch to the `StarWars` context.
+This will cause the AI agent to start the call in the `StarWars` context.
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+sections:
+  main:
+    - ai:
+        prompt:
+          text: |
+            You are a multi-personality bot.
+            You support two valid contexts. 'Star Wars' and 'Star Trek.'
+            The context dictates your name and purpose.
+            If the user asks about changing topics, use the `swap_topics` function.
+
+            To begin, use the 'swap_topics` function to switch to 'Star Wars'.
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "sections": {
+    "main": [
+      {
+        "ai": {
+          "prompt": {
+            "text": "You are a multi-personality bot.\nYou support two valid contexts. 'Star Wars' and 'Star Trek.'\nThe context dictates your name and purpose.\nIf the user asks about changing topics, use the `swap_topics` function.\n\nTo begin, use the 'swap_topics` function to switch to 'Star Wars'."
+          }
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+## Context switching
+
+In this example, we will use the `swap_topics` function to switch between the `StarWars` and `StarTrek` contexts.
+The `swap_topics` function will take in a `topic` argument, which will be used to determine which context to switch to.
+The `topic` argument will be used to match against the `pattern` in the `data_map.expressions` array. If a match is found,
+the `output.action` will be executed. If no match is found, we will fall back to the `".*"` expression, which will inform the user
+that the intended context switch was unsuccessful and will end the call.
+
+**Example Function**:
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+- function: swap_topics
+  description: To change topics.
+  parameters:
+    type: object
+    properties:
+      topic:
+        type: string
+        description: The topic being changed to.
+  data_map:
+    expressions:
+      - string: '${lc:args.topic}'
+        pattern: /trek/i
+        output:
+          response: OK
+          action:
+            - say: Let me find someone who can help you with StarTrek. Please
+                hold.
+            - context_switch: ...
+      - string: '${lc:args.topic}'
+        pattern: /wars/i
+        output:
+          response: OK
+          action:
+            - say: Let me find someone who can help you with StarWars. Please
+                hold.
+            - context_switch: ...
+      - string: .*
+        pattern: .*
+        output:
+          response: OK
+          action:
+            - say: "I'm sorry, I was unable to change topics to ${input.args.topic}. End call."
+            - stop: true
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+[
+  {
+    "function": "swap_topics",
+    "description": "To change topics.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "topic": {
+          "type": "string",
+          "description": "The topic being changed to."
+        }
+      }
+    },
+    "data_map": {
+      "expressions": [
+        {
+          "string": "${lc:args.topic}",
+          "pattern": "/trek/i",
+          "output": {
+            "response": "OK",
+            "action": [
+              {
+                "say": "Let me find someone who can help you with StarTrek. Please hold."
+              },
+              {
+                "context_switch": "..."
+              }
+            ]
+          }
+        },
+        {
+          "string": "${lc:args.topic}",
+          "pattern": "/wars/i",
+          "output": {
+            "response": "OK",
+            "action": [
+              {
+                "say": "Let me find someone who can help you with StarWars. Please hold."
+              },
+              {
+                "context_switch": "..."
+              }
+            ]
+          }
+        },
+        {
+          "string": ".*",
+          "pattern": ".*",
+          "output": {
+            "response": "OK",
+            "action": [
+              {
+                "say": "I'm sorry, I was unable to change topics to ${input.args.topic}. End call."
+              },
+              {
+                "stop": true
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+]
+```
+</CodeBlock>
+</CodeBlocks>
+
+### Context switching options
+
+In the `data_map.expressions.output.action` array, we will use the `context_switch` action to switch our current context of the AI.
+The `context_switch` action will take in a `system_prompt`, `user_prompt`, and a `consolidate` parameter.
+
+- **`system_prompt`** will be the new prompt for the AI agent to use, in other-words its new `context`.
+- **`user_prompt`** will be used as user input. It will tell the AI agent that it wants to talk about the new context.
+- **`consolidate`** will guide the AI agent's behavior regarding the integration of contexts.
+  When set to `true`, the AI agent combines the previous context with the new one. If false, only the new context is considered.
+
+## StarWars context
+
+In the `StarWars` context, the AI agent will be named `Luke`. The AI agent will only be able to answer questions related to `StarWars`.
+The `user_prompt` argument is set to `I want to talk about StarWars`. This will be used as user input.
+The `consolidate` argument is set to `false`, so the AI agent will only use the new prompt.
+
+### Example
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+- context_switch:
+    system_prompt: |
+      Your name is Luke. You are a bot that knows only about StarWars.
+      ## Handling the user
+      - Greet the user, introduce yourself and mention you are a StarWars expert.
+      - Help answer any questions the user has about StarWars to the best of your ability.
+    user_prompt: I want to talk about StarWars.
+    consolidate: false
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+[
+  {
+    "context_switch": {
+      "system_prompt": "Your name is Luke. You are a bot that knows only about StarWars.\n## Handling the user\n- Greet the user, introduce yourself and mention you are a StarWars expert.\n- Help answer any questions the user has about StarWars to the best of your ability.\n",
+      "user_prompt": "I want to talk about StarWars.",
+      "consolidate": false
+    }
+  }
+]
+```
+</CodeBlock>
+</CodeBlocks>
+
+## StarTrek context
+
+In the `StarTrek` context, the AI agent will be named `Leonard`. The AI agent will only be able to answer questions related to `StarTrek`.
+The `user_prompt` argument is set to `I want to talk about StarTrek`. This will be used as user input.
+The `consolidate` argument is set to `false`, so the AI agent will only use the new prompt.
+
+### Example
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+- context_switch:
+    system_prompt: |
+      Your name is Leonard. You are a bot that knows only about StarTrek.
+      ## Handling the user
+      - Greet the user, introduce yourself and mention you are a StarTrek expert.
+      - Help answer any questions the user has about StarTrek to the best of your ability.
+    user_prompt: I want to talk about StarTrek.
+    consolidate: false
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+[
+  {
+    "context_switch": {
+      "system_prompt": "Your name is Leonard. You are a bot that knows only about StarTrek.\n## Handling the user\n- Greet the user, introduce yourself and mention you are a StarTrek expert.\n- Help answer any questions the user has about StarTrek to the best of your ability.\n",
+      "user_prompt": "I want to talk about StarTrek.",
+      "consolidate": false
+    }
+  }
+]
+```
+</CodeBlock>
+</CodeBlocks>
+
+## Final example
+
+<Warning>
+It's important to remember the boundaries of the AI agent that you have set in the initial prompt, and in the new context.
+If a user asks a question about StarTrek while in the StarWars context, the AI agent will not be able to answer the question.
+The user will need to switch to the StarTrek context before asking the question.
+</Warning>
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+sections:
+  main:
+    - ai:
+        prompt:
+          text: |
+            You are a multi-personality bot.
+            You support two valid contexts. 'Star Wars' and 'Star Trek.'
+            The context dictates your name and purpose.
+            If the user asks about changing topics, use the `swap_topics` function.
+
+            To begin, use the 'swap_topics` function to switch to 'Star Wars'.
+        post_prompt_url: https://example.com/post_prompt_url
+        SWAIG:
+          functions:
+            - function: swap_topics
+              description: To change topics.
+              parameters:
+                type: object
+                properties:
+                  topic:
+                    type: string
+                    description: The topic being changed to.
+              data_map:
+                expressions:
+                  - string: '${lc:args.topic}'
+                    pattern: /trek/i
+                    output:
+                      response: OK
+                      action:
+                        - say: Let me find someone who can help you with StarTrek. Please
+                            hold.
+                        - context_switch:
+                            system_prompt: |
+                              Your name is Leonard. You are a bot that knows only about StarTrek.
+                              ## Handling the user
+                              - Greet the user, introduce yourself and mention you are a StarTrek expert.
+                              - Help answer any questions the user has about StarTrek to the best of your ability.
+                            user_prompt: I want to talk about StarTrek.
+                            consolidate: false
+                  - string: '${lc:args.topic}'
+                    pattern: /wars/i
+                    output:
+                      response: OK
+                      action:
+                        - say: Let me find someone who can help you with StarWars. Please
+                            hold.
+                        - context_switch:
+                            system_prompt: |
+                              Your name is Luke. You are a bot that knows only about StarWars.
+                              ## Handling the user
+                              - Greet the user, introduce yourself and mention you are a StarWars expert.
+                              - Help answer any questions the user has about StarWars to the best of your ability.
+                            user_prompt: I want to talk about StarWars.
+                            consolidate: false
+                  - string: '${lc:args.topic}'
+                    pattern: .*
+                    output:
+                      response: OK
+                      action:
+                        - say:
+                            "I'm sorry, I don't know anything about ${args.topic}. Ending
+                            call."
+                        - stop: true
+        hints:
+          - StarWars
+          - StarTrek
+          - topic
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "sections": {
+    "main": [
+      {
+        "ai": {
+          "prompt": {
+            "text": "You are a multi-personality bot.\nYou support two valid contexts. 'Star Wars' and 'Star Trek.'\nThe context dictates your name and purpose.\nIf the user asks about changing topics, use the `swap_topics` function.\n\nTo begin, use the 'swap_topics` function to switch to 'Star Wars'.\n"
+          },
+          "post_prompt_url": "https://example.com/post_prompt_url",
+          "SWAIG": {
+            "functions": [
+              {
+                "function": "swap_topics",
+                "description": "To change topics.",
+                "parameters": {
+                  "type": "object",
+                  "properties": {
+                    "topic": {
+                      "type": "string",
+                      "description": "The topic being changed to."
+                    }
+                  }
+                },
+                "data_map": {
+                  "expressions": [
+                    {
+                      "string": "${lc:args.topic}",
+                      "pattern": "/trek/i",
+                      "output": {
+                        "response": "OK",
+                        "action": [
+                          {
+                            "say": "Let me find someone who can help you with StarTrek. Please hold."
+                          },
+                          {
+                            "context_switch": {
+                              "system_prompt": "Your name is Leonard. You are a bot that knows only about StarTrek.\n## Handling the user\n- Greet the user, introduce yourself and mention you are a StarTrek expert.\n- Help answer any questions the user has about StarTrek to the best of your ability.\n",
+                              "user_prompt": "I want to talk about StarTrek.",
+                              "consolidate": false
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "string": "${lc:args.topic}",
+                      "pattern": "/wars/i",
+                      "output": {
+                        "response": "OK",
+                        "action": [
+                          {
+                            "say": "Let me find someone who can help you with StarWars. Please hold."
+                          },
+                          {
+                            "context_switch": {
+                              "system_prompt": "Your name is Luke. You are a bot that knows only about StarWars.\n## Handling the user\n- Greet the user, introduce yourself and mention you are a StarWars expert.\n- Help answer any questions the user has about StarWars to the best of your ability.\n",
+                              "user_prompt": "I want to talk about StarWars.",
+                              "consolidate": false
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "string": "${lc:args.topic}",
+                      "pattern": ".*",
+                      "output": {
+                        "response": "OK",
+                        "action": [
+                          {
+                            "say": "I'm sorry, I don't know anything about ${args.topic}. Ending call."
+                          },
+                          {
+                            "stop": true
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          "hints": [
+            "StarWars",
+            "StarTrek",
+            "topic"
+          ]
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>

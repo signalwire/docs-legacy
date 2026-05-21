@@ -1,0 +1,34 @@
+---
+title: "undeaf"
+slug: /node/reference/video/room-session/undeaf
+description: undeaf method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+[video-roomsession-7]: /docs/server-sdk/v3/node/reference/video/room-session/audio-mute
+
+### undeaf
+
+- **undeaf**(`params`): `Promise<void>`
+
+Unmutes the incoming audio for a given member. The affected participant will start hearing audio from the other participants again.
+
+Note that in addition to allowing a participants to hear the others, this will also automatically unmute the microphone of the target participant. If you want, you can then manually mute it by calling [audioMute][video-roomsession-7].
+
+#### Parameters
+
+| Name              | Type     | Description                 |
+|:------------------|:---------|:----------------------------|
+| `params`          | `Object` | -                           |
+| `params.memberId` | `string` | Id of the member to affect. |
+
+#### Returns
+
+`Promise<void>`
+
+#### Example
+
+```typescript
+const id = "de550c0c-3fac-4efd-b06f-b5b8614b8966"; // you can get this from getMembers()
+await roomSession.undeaf({ memberId: id });
+```

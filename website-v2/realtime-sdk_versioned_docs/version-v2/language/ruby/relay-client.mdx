@@ -1,0 +1,104 @@
+---
+title: RELAY Client
+slug: /ruby/reference/relay-client
+toc_max_heading_level: 3
+---
+
+[link]: #events
+[relay-calling-1]: /docs/server-sdk/v2/ruby/reference/calling
+[relay-messaging]: /docs/server-sdk/v2/ruby/reference/messaging
+
+`Relay::Client` is the basic connection to RELAY, allowing you send commands to RELAY and setup handlers for inbound events.
+
+## Constructor
+
+Constructs a client object to interact with RELAY.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `project` | String | Yes | Project ID from your SignalWire Space |
+| `token` | String | Yes | Token from your SignalWire Space |
+
+**Examples**
+
+Create a Client to interact with the RELAY API.
+
+```ruby
+Signalwire::Relay::Client.new(project: "your-project-id", token: "your-project-token")
+```
+
+## Properties
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `connected` | Boolean | Returns `true` if the client has connected to RELAY. |
+| `calling` | [`Relay::Calling`][relay-calling-1] | Returns a [`Relay::Calling`][relay-calling-1] instance associated with the client. |
+| `messaging` | [`Relay::Messaging`][relay-messaging] | Returns a `Relay::Messaging` instance associated with the client. |
+
+## Methods
+
+### connect!
+
+Starts the connection to the RELAY API. The connection to RELAY does not happen automatically so that you can setup handlers to events that might occur before the connection is successfully established.
+
+**Returns**
+
+`Promise<void>`
+
+**Examples**
+
+```ruby
+# Make sure you have attached the listeners you need before connecting the client, or you might miss some events.
+client.connect!
+```
+
+### disconnect!
+
+Disconnect the client from RELAY.
+
+**Returns**
+
+`nil`
+
+**Examples**
+
+```ruby
+client.disconnect!
+```
+
+### on
+
+Attach an event handler for a specific type of event.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `event` | Symbol | Yes | Event name. Full list of events [RELAY Client Events][link] |
+| `guards` | Array | No | Guard clauses for the event. |
+| `handler` | Block | No | Block to call when the event is received. It will be passed in as an argument. |
+
+**Returns**
+
+`String` - A low-level handler ID.
+
+**Examples**
+
+Subscribe to the `ready` event.
+
+```ruby
+client.on :ready do
+  # do something on ready
+end
+```
+
+## Events
+
+All available events you can attach a listener on.
+
+| Event | Description |
+| ----- | ----------- |
+| `:ready` | The session has been established and all other methods can now be used. |
+| `:event` | The session has received a Relay event. |

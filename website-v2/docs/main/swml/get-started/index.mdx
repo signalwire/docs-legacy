@@ -1,0 +1,410 @@
+---
+title: Introduction to SWML
+description: Build powerful communication applications with the SignalWire Markup Language
+
+slug: /swml
+---
+
+
+SWML is a markup and scripting language for quickly writing powerful communication applications in YAML or JSON documents. 
+SWML is easy to use, and enables you to create powerful voice and messaging applications using a descriptive format. 
+
+SWML scripts can be deployed serverlessly via the SignalWire Dashboard, via your own server, or using the 
+[Agents SDK](/docs/agents-sdk/python).
+For a comprehensive breakdown, see our [SWML deployment guide](/docs/swml/guides/deployment).
+
+- **Server or serverless**: Serve SWML from your own server or via the SignalWire platform
+- **Powerful**: Handle voice calls, messaging, AI agents, and more
+- **Simple**: Declarative, composable format that's easy to learn, maintain, and scale
+- **Extensible**: Integrate native AI, functions, and external APIs
+
+Whether you're building simple call forwarding systems or complex AI-powered customer service agents, SWML provides the tools you need to deploy sophisticated communication workflows. 
+
+## Core concepts
+
+### Document structure
+
+Every SWML script follows this basic structure in either YAML or JSON format:
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - method1: {}
+    - method2:
+        parameter: value
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "method1": {}
+      },
+      {
+        "method2": {
+          "parameter": "value"
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+<ParamField path="version" type="string" optional>
+  Always use `1.0.0` (the only supported version).
+</ParamField>
+
+<ParamField path="sections" type="object" required>
+  Contains all script sections.
+</ParamField>
+<Indent>
+  <ParamField path="main" type="object[]" required>
+    Required starting section where execution always begins.
+    Accepts an array of [SWML methods](/docs/swml/reference).
+  </ParamField>
+  <ParamField path="*" type="object[]" optional>
+    Additional user-defined sections, invoked from `main` using [program flow control methods](/docs/swml/guides/goto-execute-transfer-disambiguation-will-it-blend).
+    
+    User-defined sections can use any text string as the property. Like `main`, user-defined sections accept an array of [SWML methods](/docs/swml/reference).
+  </ParamField>
+</Indent>
+
+### Sections
+
+**Sections** are named blocks of code that organize your script.
+Each section is an array of 
+[methods](/docs/swml/reference)
+to execute.
+
+All SWML scripts start with the `main` section, but you can create additional sections for different tasks (like `sales`, `support`, `menu`). Use the following methods to move between sections:
+
+- **[`execute`](/docs/swml/reference/execute)**: Calls a section like a function and returns to the current section
+- **[`transfer`](/docs/swml/reference/transfer)**: Transfers control permanently to another section
+
+### Methods
+
+[Methods](/docs/swml/reference) are the commands that tell SWML what to do during a call - 
+like answering, playing audio, collecting input, or instantiating an AI Agent. 
+Think of them as the instructions in your script.
+
+## Document-fetching webhook {#document-fetching-webhook}
+
+When a SWML script is hosted on an external URL (set in phone number settings, or invoked via [`execute`](/docs/swml/reference/execute) or [`transfer`](/docs/swml/reference/transfer)),
+SignalWire sends a POST request to that URL to fetch the SWML document. The request body contains the current call state and any variables or parameters set by the calling script.
+
+Several SWML methods also use this same request format when fetching SWML from a URL (e.g., [`join_conference.wait_url`](/docs/swml/reference/join-conference#properties), [`enter_queue.wait_url`](/docs/swml/reference/enter-queue#properties), [`connect.confirm`](/docs/swml/reference/connect#properties)).
+
+### Request body
+
+<ParamField path="call" type="object">
+  Information about the current call, including `call_id`, `from`, `to`, `type`, `headers`, and more. See the [Variables reference](/docs/swml/reference/variables) for all `call` properties.
+</ParamField>
+
+
+<ParamField path="vars" type="object">
+  Script variables set by prior SWML execution (via [`set`](/docs/swml/reference/set) or method outputs). Empty on a fresh incoming call.
+</ParamField>
+
+
+<ParamField path="params" type="object">
+  Parameters explicitly passed by [`execute`](/docs/swml/reference/execute) or [`transfer`](/docs/swml/reference/transfer). Empty on a fresh incoming call.
+</ParamField>
+
+
+<ParamField path="envs" type="object">
+  Environment variables configured at the account or project level.
+</ParamField>
+
+
+### Raw JSON example
+
+```json
+{
+  "call": {
+    "call_id": "xxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "node_id": "xxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "segment_id": "xxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "call_state": "created",
+    "direction": "inbound",
+    "type": "phone",
+    "from": "+15551231234",
+    "to": "+15553214321",
+    "headers": [],
+    "project_id": "xxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "space_id": "xxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+  },
+  "vars": {},
+  "params": {},
+  "envs": {}
+}
+```
+
+### Expected response
+
+Your server must respond with a valid SWML document using one of these content types: `application/json`, `application/yaml`, or `text/x-yaml`.
+
+For the full variable reference and a detailed JSON example, see [Variables](/docs/swml/reference/variables#example-variables-in-json-format).
+For server setup instructions, see the [Deployment guide](/docs/swml/guides/deployment).
+
+## Basic SWML examples
+
+Here are some basic SWML examples utilizing these core concepts for Text to Speech and Call Forwarding:
+
+<Tabs>
+<TabItem value="text-to-speech" label="Text to Speech">
+
+Create a simple text-to-speech greeting:
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - play:
+        url: "say:Hello from Signal Wire! Have a great day!"
+    - hangup
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "play": {
+          "url": "say:Hello from Signal Wire! Have a great day!"
+        }
+      },
+      "hangup"
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+This script will answer the incoming call, play a greeting message using text-to-speech, and then hang up.
+
+</TabItem>
+<TabItem value="call-forwarding" label="Call Forwarding">
+
+Forward incoming calls to another number:
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - connect:
+        to: "+18888888888"
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "connect": {
+          "to": "+18888888888"
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+This script will forward the incoming call to the specified phone number.
+
+</TabItem>
+</Tabs>
+
+## Basic IVR
+
+An Interactive Voice Response (IVR) system routes callers to different departments based on their input. 
+This example demonstrates a complete IVR that answers the call, plays a welcome message, records the conversation, collects user input (via keypress or speech), and routes callers to sales or support. 
+
+This pattern is one of the most common use cases for SWML and demonstrates how multiple methods work together to create a professional phone system.
+For an extensive breakdown of this example, see our [IVR Creation Guide](/docs/swml/guides/ivr).
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - answer: {}
+    - play:
+        url: "say:Welcome to Acme Corporation. This call may be recorded."
+    - record_call:
+        stereo: true
+        format: wav
+    - prompt:
+        play: "say:Press 1 for sales, Press 2 for support"
+        max_digits: 1
+        speech_hints:
+          - one
+          - two
+    - switch:
+        variable: prompt_value
+        case:
+          '1':
+            - execute:
+                dest: sales
+          '2':
+            - execute:
+                dest: support
+          one:
+            - execute:
+                dest: sales
+          two:
+            - execute:
+                dest: support
+        default:
+          - execute:
+              dest: sales
+  sales:
+    - play:
+        url: "say:You have reached sales"
+    - connect:
+        to: "+15551234567"
+  support:
+    - play:
+        url: "say:You have reached support"
+    - connect:
+        to: "+15551234568"
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "answer": {}
+      },
+      {
+        "play": {
+          "url": "say:Welcome to Acme Corporation. This call may be recorded."
+        }
+      },
+      {
+        "record_call": {
+          "stereo": true,
+          "format": "wav"
+        }
+      },
+      {
+        "prompt": {
+          "play": "say:Press 1 for sales, Press 2 for support",
+          "max_digits": 1,
+          "speech_hints": [
+            "one",
+            "two"
+          ]
+        }
+      },
+      {
+        "switch": {
+          "variable": "prompt_value",
+          "case": {
+            "1": [
+              {
+                "execute": {
+                  "dest": "sales"
+                }
+              }
+            ],
+            "2": [
+              {
+                "execute": {
+                  "dest": "support"
+                }
+              }
+            ],
+            "one": [
+              {
+                "execute": {
+                  "dest": "sales"
+                }
+              }
+            ],
+            "two": [
+              {
+                "execute": {
+                  "dest": "support"
+                }
+              }
+            ]
+          },
+          "default": [
+            {
+              "execute": {
+                "dest": "sales"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "sales": [
+      {
+        "play": {
+          "url": "say:You have reached sales"
+        }
+      },
+      {
+        "connect": {
+          "to": "+15551234567"
+        }
+      }
+    ],
+    "support": [
+      {
+        "play": {
+          "url": "say:You have reached support"
+        }
+      },
+      {
+        "connect": {
+          "to": "+15551234568"
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+**Variable substitution**: Notice how `prompt_value` in the switch statement automatically contains the user's input from the prompt. SWML supports dynamic values using the `%{variable_name}` format. For example, you can reference call information with `%{call.from}` or parameters with `%{params.audio_file}`.
+
+## Next steps
+
+  <Cards>
+    <Card title="Quickstart" href="/docs/swml/guides">
+      Quickly create and deploy SWML through the SignalWire Dashboard
+    </Card>
+    <Card title="Methods reference" href="/docs/swml/reference">
+      Explore all available SWML methods
+    </Card>
+    <Card title="AI guides" href="/docs/swml/guides">
+      Learn how AI methods are used in SWML
+    </Card>
+  </Cards>
+

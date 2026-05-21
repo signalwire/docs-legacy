@@ -1,0 +1,95 @@
+---
+title: "updateMemberMeta"
+slug: /node/reference/video/room-session/update-member-meta
+description: updateMemberMeta method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+[link-5]: /docs/server-sdk/node/reference/video/room-session/set-member-meta
+[roomsession-41]: /docs/server-sdk/node/reference/video/room-session
+
+### updateMemberMeta
+
+- **updateMemberMeta**(`params`): `Promise<void>`
+
+Updates a member's metadata in only the specified fields. This is different from
+[setMemberMeta][link-5], which replaces the whole metadata object.
+
+#### Parameters
+
+<ParamField path="params" type="object" required>
+  Object containing the parameters of the method.
+</ParamField>
+
+<Indent>
+<ParamField path="memberId" type="string">
+  ID of the member to affect. If omitted, affects the current member.
+</ParamField>
+
+<ParamField path="meta" type="Record<string, unknown>" required>
+  The update to the metadata.
+</ParamField>
+</Indent>
+
+#### Returns
+
+`Promise<void>`
+
+#### Example
+
+In this example, we set metadata for a member as soon as they join the room.
+After 5 seconds, we update the metadata for that member.
+This example assumes that there is a [`RoomSession`][roomsession-41]
+already active and that members are joining the room.
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+// Initialize the SignalWire client
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" });
+
+// Access video client from the main client
+const videoClient = client.video;
+
+// Setup listener for when a room starts
+await videoClient.listen({
+  onRoomStarted: async (roomsession) => {
+    console.log("Room started", roomsession.displayName);
+
+    roomsession.listen({
+      onMemberJoined: async (member) => {
+        console.log("Member joined", member.name);
+        // set metadta for the member
+        await roomsession.setMemberMeta({
+          memberId: member.id,
+          meta: {
+            name: member.name,
+            foo: "bar",
+          },
+        });
+        // get member meta
+        const memberMeta = await roomsession.getMemberMeta({
+          memberId: member.id
+        });
+        console.log("Member meta", memberMeta.meta);
+
+        // update member meta after 5 seconds
+
+        setTimeout(async () => {
+          await roomsession.updateMemberMeta({
+            memberId: member.id,
+            meta: {
+              name: "New name",
+              foo: "foobar",
+            },
+          });
+          // get member meta
+          console.log("Member meta after update", await roomsession.getMemberMeta({
+            memberId: member.id
+          }));
+        }, 5000)
+      },
+    })
+  }
+})
+```

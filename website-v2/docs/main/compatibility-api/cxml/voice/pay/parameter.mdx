@@ -1,0 +1,31 @@
+---
+title: Parameter
+sidebar_label: Parameter
+slug: /compatibility-api/cxml/reference/voice/pay/parameter
+sidebar_position: 1
+toc_max_heading_level: 3
+---
+
+The `<Parameter>` noun within the `<Pay>` verb enables you to:
+- Pass custom parameters to your payment processor when using a Generic Pay Connector
+- Include additional ACH payment details not covered by the standard `<Pay>` verb attributes
+
+## Attributes
+
+| Attribute | Type | Default | Description |
+|-----------|-------------|----------|-------------|
+| `name`<span className="required-arg">required</span> | string | - | The identifier for your custom parameter. |
+| `value`<span className="required-arg">required</span> | string | - | The value associated with the parameter name. |
+
+## Examples
+
+### Adding custom parameters for generic transaction
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Pay chargeAmount="10.00" paymentConnector="https://example/signalwire/parameter/pay" action="https://example/signalwire/parameter/pay/action">
+        <Parameter name="my_custom_parameter_1" value="my_custom_value_1" />
+    </Pay>
+</Response>
+```

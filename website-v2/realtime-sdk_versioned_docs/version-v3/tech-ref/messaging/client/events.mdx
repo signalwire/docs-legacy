@@ -1,0 +1,61 @@
+---
+title: "Events"
+slug: /node/reference/messaging/client/events
+description: Events available on the Client class.
+toc_max_heading_level: 3
+---
+
+[messagecontract-1]: /docs/server-sdk/v3/node/reference/messaging/message-contract
+
+## Events
+
+### message.received
+
+- **message.received**(`message`)
+
+Emitted whenever a message is received. Your event handler receives a message object. Example:
+
+```javascript
+const client = new Messaging.Client(...)
+client.on('message.received', (message) => {
+  console.log('Message received:', message)
+  // message.from
+  // message.to
+  // message.body
+  // ...
+})
+```
+
+#### Parameters
+
+| Name      | Type                                                | Description                         |
+|:----------|:----------------------------------------------------|:------------------------------------|
+| `message` | [`MessageContract`][messagecontract-1] | The message that has been received. |
+
+---
+
+### message.updated
+
+- **message.updated**(`message`)
+
+Emitted when the status of a message is updated. You can use this event to track the different stages that an outbound message goes through for delivery. Example:
+
+```javascript
+const client = new Messaging.Client(...)
+client.on('message.updated', (message) => {
+  console.log('Message updated:', message)
+  // message.from
+  // message.to
+  // message.direction
+  // message.state
+  // ...
+})
+
+client.send(...)
+```
+
+#### Parameters
+
+| Name      | Type                                                | Description  |
+|:----------|:----------------------------------------------------|:-------------|
+| `message` | [`MessageContract`][messagecontract-1] | The message. |

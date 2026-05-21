@@ -1,0 +1,140 @@
+---
+title: Pause
+sidebar_label: Pause
+slug: /compatibility-api/cxml/reference/voice/pause
+sidebar_position: 1
+toc_max_heading_level: 3
+---
+
+The `<Pause>` verb waits silently for a distinctive number of seconds.
+
+## Verb attributes
+
+<ParamField path="length" type="integer" default="1">
+  The number of seconds SignalWire will pause silently before moving on.
+</ParamField>
+
+## Nesting
+
+No other verbs can be nested within `<Pause>`. However, `<Pause>` can be nested within a `<Gather>`.
+
+## Examples
+
+### A simple pause
+
+<CodeBlocks>
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Say>Please wait one moment while I check that for you.</Say>
+    <Pause length="8"/>
+    <Say>Yes, we are open Monday through Friday.</Say>
+</Response>
+```
+```javascript title="Node.js"
+const { RestClient } = require("@signalwire/compatibility-api");
+const response = new RestClient.LaML.VoiceResponse();
+
+response.say("Please wait one moment while I check that for you.");
+response.pause({ length: 8 });
+response.say("Yes, we are open Monday through Friday.");
+console.log(response.toString());
+```
+```csharp
+using Twilio.TwiML;
+using System;
+
+
+class Example
+{
+    static void Main()
+    {
+        var response = new VoiceResponse();
+        response.Say("Please wait one moment while I check that for you.");
+        response.Pause(length: 8);
+        response.Say("Yes, we are open Monday through Friday.");
+
+        Console.WriteLine(response.ToString());;
+    }
+}
+```
+```python
+from signalwire.voice_response import VoiceResponse, Say, Pause
+
+response = VoiceResponse()
+response.say('Please wait one moment while I check that for you.')
+response.pause(length=8)
+response.say('Yes, we are open Monday through Friday.')
+
+print(response)
+```
+```ruby
+require 'signalwire/sdk'
+
+response = Signalwire::Sdk::VoiceResponse.new do |response|
+  response.say(message: 'Please wait one moment while I check that for you.')
+  response.pause(length: 10)
+  response.say(message: 'Yes, we are open Monday through Friday.')
+end
+
+puts response.to_s
+```
+</CodeBlocks>
+This illustrates the wait time between two statements.
+
+### Delaying a response
+
+<CodeBlocks>
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Pause length="3"/>
+    <Say>Hello, how can I help you?</Say>
+</Response>
+```
+```javascript title="Node.js"
+const { RestClient } = require("@signalwire/compatibility-api");
+const response = new RestClient.LaML.VoiceResponse();
+
+response.pause({ length: 3 });
+response.say("Hello, how can I help you?");
+console.log(response.toString());
+```
+```csharp
+using Twilio.TwiML;
+using System;
+
+
+class Example
+{
+    static void Main()
+    {
+        var response = new VoiceResponse();
+        response.Pause(length: 3);
+        response.Say("Hello, how can I help you?");
+
+        Console.WriteLine(response.ToString());;
+    }
+}
+```
+```python
+from signalwire.voice_response import VoiceResponse, Say, Pause
+
+response = VoiceResponse()
+response.pause(length=3)
+response.say('Hello, how can I help you?')
+
+print(response)
+```
+```ruby
+require 'signalwire/sdk'
+
+response = Signalwire::Sdk::VoiceResponse.new do |response|
+  response.pause(length: 3)
+  response.say(message: 'Hello, how can I help you?')
+end
+
+puts response.to_s
+```
+</CodeBlocks>
+SignalWire waits 3 seconds before answering a call.

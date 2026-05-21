@@ -1,0 +1,40 @@
+---
+title: "subscribe"
+slug: /node/reference/chat/client/subscribe
+description: subscribe method for the Client class.
+toc_max_heading_level: 3
+---
+
+[link-2]: /docs/server-sdk/v3/node/reference/chat/client/unsubscribe
+
+### subscribe
+
+- **subscribe**(`channels`): `Promise<void>`
+
+List of channels for which you want to receive messages.
+
+Note that the `subscribe` function is idempotent, and calling it again with a different set of channels _will not_ unsubscribe you from the old ones. To unsubscribe, use [unsubscribe][link-2].
+
+#### Parameters
+
+| Name       | Type                   | Description                                                                                            |
+|:-----------|:-----------------------|:-------------------------------------------------------------------------------------------------------|
+| `channels` | `string` \| `string[]` | The channels to subscribe to, either in the form of a string (for one channel) or an array of strings. |
+
+#### Returns
+
+`Promise<void>`
+
+#### Example
+
+```js
+const chatClient = new Chat.Client({
+  project: "<project-id>",
+  token: "<api-token>",
+});
+
+chatClient.on("message", (m) => console.log(m));
+
+await chatClient.subscribe("my-channel");
+await chatClient.subscribe(["chan-2", "chan-3"]);
+```

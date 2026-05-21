@@ -1,0 +1,186 @@
+---
+title: offline
+slug: /signalwire-client/offline
+description: Takes the client offline, preventing reception of new incoming calls and messages while maintaining the connection.
+---
+
+import APIField from '@site/src/components/APIField';
+
+The `offline` method changes the client's availability state to offline. Unlike `disconnect`, which terminates the connection entirely, `offline` keeps the connection active but stops receiving notifications.
+
+This method is the opposite of the client.[`online`](./online.mdx) method.
+
+## Parameters
+
+None
+
+## Signature
+
+```typescript
+offline(): Promise<void>
+```
+
+## Returns
+
+**Type:** `Promise<void>`
+
+Returns a Promise that resolves when the client is successfully offline.
+
+## Examples
+
+### Basic offline
+
+```typescript
+await client.offline()
+console.log('Client is now offline')
+```
+
+### Toggle availability
+
+```typescript
+const toggleButton = document.getElementById('toggle-availability')
+let isOnline = true
+
+toggleButton.addEventListener('click', async () => {
+  if (isOnline) {
+    await client.offline()
+    toggleButton.textContent = 'Go Online'
+    console.log('Now offline')
+  } else {
+    await client.online({
+      incomingCallHandlers: {
+        onCallReceived: (call) => {
+          console.log('Incoming call:', call.id)
+        }
+      }
+    })
+    toggleButton.textContent = 'Go Offline'
+    console.log('Now online')
+  }
+  
+  isOnline = !isOnline
+})
+```
+
+### Go offline during busy periods
+
+```typescript
+async function startBusyMode() {
+  await client.offline()
+  console.log('Do Not Disturb enabled')
+}
+
+async function endBusyMode() {
+  await client.online({
+    incomingCallHandlers: {
+      onCallReceived: (call) => {
+        handleIncomingCall(call)
+      }
+    }
+  })
+  console.log('Do Not Disturb disabled')
+}
+```
+
+### Auto-offline on visibility change
+
+```typescript
+document.addEventListener('visibilitychange', async () => {
+  if (document.hidden) {
+    await client.offline()
+    console.log('Page hidden, going offline')
+  } else {
+    await client.online({
+      incomingCallHandlers: {
+        onCallReceived: (call) => {
+          console.log('Incoming call:', call.id)
+        }
+      }
+    })
+    console.log('Page visible, going online')
+  }
+})
+```
+
+### Offline with status indicator
+
+```typescript
+const statusIndicator = document.getElementById('status')
+
+async function goOffline() {
+  await client.offline()
+  statusIndicator.textContent = 'Offline'
+  statusIndicator.className = 'status-offline'
+}
+
+async function goOnline() {
+  await client.online({
+    incomingCallHandlers: {
+      onCallReceived: (call) => {
+        console.log('Incoming call:', call.id)
+      }
+    }
+  })
+  statusIndicator.textContent = 'Online'
+  statusIndicator.className = 'status-online'
+}
+```
+
+### Error handling
+
+```typescript
+try {
+  await client.offline()
+  console.log('Successfully went offline')
+} catch (error) {
+  console.error('Failed to go offline:', error)
+}
+```
+
+### Scheduled offline periods
+
+```typescript
+function scheduleOfflineHours() {
+  const now = new Date()
+  const hour = now.getHours()
+  
+  if (hour >= 22 || hour < 8) {
+    client.offline()
+    console.log('Outside business hours, going offline')
+  } else {
+    client.online({
+      incomingCallHandlers: {
+        onCallReceived: (call) => {
+          console.log('Incoming call:', call.id)
+        }
+      }
+    })
+    console.log('Business hours, going online')
+  }
+}
+
+setInterval(scheduleOfflineHours, 60000)
+```
+
+### Temporary offline for maintenance
+
+```typescript
+async function performMaintenance() {
+  console.log('Starting maintenance...')
+  
+  await client.offline()
+  
+  await updateClientSettings()
+  
+  await client.online({
+    incomingCallHandlers: {
+      onCallReceived: (call) => {
+        console.log('Incoming call:', call.id)
+      }
+    }
+  })
+  
+  console.log('Maintenance complete, back online')
+}
+```
+

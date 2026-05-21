@@ -1,0 +1,128 @@
+/*
+
+These styles target the appearance of elements inside docs/articles only.
+
+*/
+
+.markdown {
+  h1,
+  h2 {
+    font-weight: var(--ifm-font-weight-semibold);
+  }
+
+  /** Custom styling for text links **/
+  // Exclude classes used by link cards in docs/guides/voice-api/overview/voice-overview.module.scss
+  a:not(.product a):not(.title a):not(.card):not(.badge-link):not(.button) {
+    text-decoration: underline solid;
+    text-decoration-thickness: 0.05rem;
+    text-underline-offset: 4px;
+    transition: 100ms;
+    color: var(--sw-link-color);
+    text-decoration-color: var(--sw-link-decoration-color);
+
+    &,
+    strong & {
+      font-weight: 500 !important;
+    }
+
+    // Use this to not apply underline to `backticked` words.
+    // &:has(code) {
+    //   text-decoration: none;
+    // }
+
+    &:hover {
+      text-decoration: underline solid;
+      text-decoration-thickness: 0.15rem; /* Increase the thickness on hover */
+      text-decoration-color: var(--sw-link-decoration-color);
+      color: var(--sw-link-color-hover);
+    }
+  }
+
+  & > figure {
+    text-align: center;
+
+    & > img {
+      margin-bottom: 1em;
+      width: 100%;
+      max-width: 800px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      margin-top: 2em;
+      margin-bottom: 2em;
+    }
+
+    & > figcaption {
+      text-align: center;
+      font-style: italic;
+    }
+  }
+
+  iframe {
+    width: 100%;
+    max-width: 100%;
+    aspect-ratio: 16/9;
+    border: 0;
+  }
+
+  /* Custom style for argument metadata in tables */
+  table .optional-arg {
+    display: block;
+    font-size: 13px;
+    color: #a8a8a8 !important;
+  }
+
+  table .required-arg {
+    display: block;
+    font-size: 13px;
+    color: #fa383e;
+  }
+  table .deprecated-arg {
+    display: block;
+    text-decoration: line-through;
+    color: #6e6e6e;
+  }
+
+  table .deprecated-desc {
+    color: #fa383e;
+    font-size: 13px;
+  }
+
+  table .conditional-arg {
+    display: block;
+    font-size: 13px;
+    color: var(--ifm-color-warning-dark);
+  }
+}
+
+/** Custom table of contents styling **/
+.table-of-contents li > .table-of-contents__link {
+  // Bold top-level TOC items
+  font-weight: bold;
+}
+
+.table-of-contents li ul .table-of-contents__link {
+  // Normal weight for nested items
+  font-weight: normal;
+}
+
+[data-theme="dark"] .required-arg {
+  color: var(--ifm-color-primary);
+}
+
+[data-theme="dark"] .conditional-arg {
+  color: var(--ifm-warning-color);
+}
+
+[data-theme="dark"] .optional-arg {
+  color: #4f4f4f;
+}
+
+
+figure {
+  text-align: center;
+  figcaption {
+    font-style: italic;
+    text-align: center;
+  }
+}

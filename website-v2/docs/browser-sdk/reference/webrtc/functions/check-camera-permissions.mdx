@@ -1,0 +1,24 @@
+---
+title: "checkCameraPermissions"
+slug: /js/reference/webrtc/check-camera-permissions
+description: checkCameraPermissions function in the WebRTC namespace.
+toc_max_heading_level: 3
+---
+
+### checkCameraPermissions
+
+- `Const` **checkCameraPermissions**(): `Promise<null | boolean>`
+
+Asynchronously returns whether we have permissions to access the camera.
+
+#### Returns
+
+`Promise<null | boolean>`
+
+#### Example
+
+```javascript
+await SignalWire.WebRTC.checkCameraPermissions();
+// true
+```
+

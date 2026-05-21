@@ -1,0 +1,19 @@
+---
+title: Relay.Calling.ConnectResult
+slug: /node/reference/calling/results/connect
+description: The result object that is returned when connecting a call.
+toc_max_heading_level: 3
+---
+
+[connect]: /docs/server-sdk/v2/node/reference/calling/call#connect
+[relay-calling-call]: /docs/server-sdk/v2/node/reference/calling/call
+[relay-event]: /docs/server-sdk/v2/node/reference/event
+This object returned from [`connect`][connect] method that represents the final result of a connection between your call and a remote one.
+
+## Properties
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `successful` | `boolean` | Whether the call has been connected successfully |
+| `event` | [`Relay.Event`][relay-event] | Last event that completed the operation |
+| `call` | [`Relay.Calling.Call`][relay-calling-call] | Remote Call connected with yours |
