@@ -32,7 +32,11 @@ model Pay {
     @example("Monthly subscription payment")
     description?: string;
 
-    @doc("The method of how to collect the payment details. Currently only `dtmf` mode is supported.")
+    @doc("""
+      The method of how to collect the payment details. Currently only `dtmf` mode is supported.
+
+      While entering a value (card number, expiration date, security code, or postal code), the caller can press `#` to submit the entry immediately instead of waiting for the `timeout`. Pressing `*` cancels the payment (the `pay_result` is then `caller-interrupted-with-star`).
+      """)
     @example("dtmf")
     input?: "dtmf" = "dtmf";
 
@@ -74,7 +78,7 @@ model Pay {
     @example("https://example.com/payment-status")
     status_url?: url;
 
-    @doc("Limit in seconds that pay method waits for the caller to press another digit before moving on to validate the digits captured.")
+    @doc("Limit in seconds that pay method waits for the caller to press another digit before moving on to validate the digits captured. The caller can press `#` to finish an entry immediately rather than waiting for this timeout.")
     @example(5)
     timeout?: integer | SWMLVar = 5;
 
