@@ -155,7 +155,11 @@ def test_redirect(source: str, expected_dest: str, port: int) -> TestResult:
 
         # nginx appends $args_suffix — strip any query string before comparing
         location_base = location.split("?")[0]
-        redirect_ok = (status == 301 and location_base == expected_dest)
+        # Map value 0 bypasses the catch-all for pages without a replacement.
+        if expected_dest == "0":
+            redirect_ok = (status == 404 and not location)
+        else:
+            redirect_ok = (status == 301 and location_base == expected_dest)
 
         return TestResult(
             source=source,
@@ -227,7 +231,7 @@ def write_report(
         f"Redirect Test Report - {today}",
         "=" * 54,
         f"Total pairs tested      : {len(results)}",
-        f"Redirect (301) check    : {len(redirect_pass)} passed, {len(redirect_fail)} failed",
+        f"Redirect / exclusion check    : {len(redirect_pass)} passed, {len(redirect_fail)} failed",
     ]
     if check_dest:
         lines.append(
@@ -315,7 +319,7 @@ def main() -> None:
 
     # 4. Check destinations (deduplicated)
     if check_dest:
-        unique_dests = sorted({r.expected_dest for r in results if r.redirect_ok})
+        unique_dests = sorted({r.expected_dest for r in results if r.redirect_ok and r.expected_dest != "0"})
         print(f"Checking {len(unique_dests)} unique destination URLs ...")
         dest_items = [(d,) for d in unique_dests]
         dest_statuses_list = run_parallel(
@@ -326,7 +330,7 @@ def main() -> None:
         )
         dest_status_map = dict(dest_statuses_list)
         for r in results:
-            if r.redirect_ok:
+            if r.redirect_ok and r.expected_dest != "0":
                 r.dest_status = dest_status_map.get(r.expected_dest, -1)
 
     # 5. (container cleanup is manual)
