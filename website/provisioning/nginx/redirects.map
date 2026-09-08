@@ -1546,8 +1546,8 @@
 /rest/signalwire-rest/endpoints/space/create-number-group-membership/ https://signalwire.com/docs/apis/rest/number-group-membership/create-number-group-membership;
 /rest/signalwire-rest/endpoints/space/create-order https://signalwire.com/docs/apis/rest/campaign-registry/phone-number-assignments/create-order;
 /rest/signalwire-rest/endpoints/space/create-order/ https://signalwire.com/docs/apis/rest/campaign-registry/phone-number-assignments/create-order;
-/rest/signalwire-rest/endpoints/space/create-sip-endpoint https://signalwire.com/docs/apis/rest/sip-endpoints/create-sip-endpoint;
-/rest/signalwire-rest/endpoints/space/create-sip-endpoint/ https://signalwire.com/docs/apis/rest/sip-endpoints/create-sip-endpoint;
+/rest/signalwire-rest/endpoints/space/create-sip-endpoint https://signalwire.com/docs/apis/rest/sip-credentials/create-sip-credential;
+/rest/signalwire-rest/endpoints/space/create-sip-endpoint/ https://signalwire.com/docs/apis/rest/sip-credentials/create-sip-credential;
 /rest/signalwire-rest/endpoints/space/create-verified-caller-id https://signalwire.com/docs/apis/rest/verified-caller-id/create-verified-caller-id;
 /rest/signalwire-rest/endpoints/space/create-verified-caller-id/ https://signalwire.com/docs/apis/rest/verified-caller-id/create-verified-caller-id;
 /rest/signalwire-rest/endpoints/space/delete-a-queue https://signalwire.com/docs/apis/rest/queues/delete-queue;
@@ -1562,8 +1562,8 @@
 /rest/signalwire-rest/endpoints/space/delete-number-group/ https://signalwire.com/docs/apis/rest/number-groups/delete-number-group;
 /rest/signalwire-rest/endpoints/space/delete-number-group-membership https://signalwire.com/docs/apis/rest/number-group-membership/delete-number-group-membership;
 /rest/signalwire-rest/endpoints/space/delete-number-group-membership/ https://signalwire.com/docs/apis/rest/number-group-membership/delete-number-group-membership;
-/rest/signalwire-rest/endpoints/space/delete-sip-endpoint https://signalwire.com/docs/apis/rest/sip-endpoints/delete-sip-endpoint;
-/rest/signalwire-rest/endpoints/space/delete-sip-endpoint/ https://signalwire.com/docs/apis/rest/sip-endpoints/delete-sip-endpoint;
+/rest/signalwire-rest/endpoints/space/delete-sip-endpoint https://signalwire.com/docs/apis/rest/sip-credentials/delete-sip-credential;
+/rest/signalwire-rest/endpoints/space/delete-sip-endpoint/ https://signalwire.com/docs/apis/rest/sip-credentials/delete-sip-credential;
 /rest/signalwire-rest/endpoints/space/delete-verified-caller-id https://signalwire.com/docs/apis/rest/verified-caller-id/delete-verified-caller-id;
 /rest/signalwire-rest/endpoints/space/delete-verified-caller-id/ https://signalwire.com/docs/apis/rest/verified-caller-id/delete-verified-caller-id;
 /rest/signalwire-rest/endpoints/space/domain-applications https://signalwire.com/docs/apis/rest/domain-applications/create-domain-application;
@@ -1594,8 +1594,8 @@
 /rest/signalwire-rest/endpoints/space/list-queue-members/ https://signalwire.com/docs/apis/rest/queue-members/list-queue-members;
 /rest/signalwire-rest/endpoints/space/list-queues https://signalwire.com/docs/apis/rest/queues/list-queues;
 /rest/signalwire-rest/endpoints/space/list-queues/ https://signalwire.com/docs/apis/rest/queues/list-queues;
-/rest/signalwire-rest/endpoints/space/list-sip-endpoints https://signalwire.com/docs/apis/rest/sip-endpoints/list-sip-endpoints;
-/rest/signalwire-rest/endpoints/space/list-sip-endpoints/ https://signalwire.com/docs/apis/rest/sip-endpoints/list-sip-endpoints;
+/rest/signalwire-rest/endpoints/space/list-sip-endpoints https://signalwire.com/docs/apis/rest/sip-credentials/list-sip-credentials;
+/rest/signalwire-rest/endpoints/space/list-sip-endpoints/ https://signalwire.com/docs/apis/rest/sip-credentials/list-sip-credentials;
 /rest/signalwire-rest/endpoints/space/list-verified-caller-ids https://signalwire.com/docs/apis/rest/verified-caller-id/list-verified-caller-ids;
 /rest/signalwire-rest/endpoints/space/list-verified-caller-ids/ https://signalwire.com/docs/apis/rest/verified-caller-id/list-verified-caller-ids;
 /rest/signalwire-rest/endpoints/space/lookup-phone-number https://signalwire.com/docs/apis/rest/phone-numbers/lookup-phone-number;
@@ -1652,8 +1652,8 @@
 /rest/signalwire-rest/endpoints/space/retrieve-phone-number/ https://signalwire.com/docs/apis/rest/phone-numbers/retrieve-phone-number;
 /rest/signalwire-rest/endpoints/space/retrieve-queue-member https://signalwire.com/docs/apis/rest/queue-members/retrieve-queue-member;
 /rest/signalwire-rest/endpoints/space/retrieve-queue-member/ https://signalwire.com/docs/apis/rest/queue-members/retrieve-queue-member;
-/rest/signalwire-rest/endpoints/space/retrieve-sip-endpoint https://signalwire.com/docs/apis/rest/sip-endpoints/retrieve-sip-endpoint;
-/rest/signalwire-rest/endpoints/space/retrieve-sip-endpoint/ https://signalwire.com/docs/apis/rest/sip-endpoints/retrieve-sip-endpoint;
+/rest/signalwire-rest/endpoints/space/retrieve-sip-endpoint https://signalwire.com/docs/apis/rest/sip-credentials/get-sip-credential;
+/rest/signalwire-rest/endpoints/space/retrieve-sip-endpoint/ https://signalwire.com/docs/apis/rest/sip-credentials/get-sip-credential;
 /rest/signalwire-rest/endpoints/space/retrieve-sip-profile https://signalwire.com/docs/apis/rest/sip-profile/retrieve-sip-profile;
 /rest/signalwire-rest/endpoints/space/retrieve-sip-profile/ https://signalwire.com/docs/apis/rest/sip-profile/retrieve-sip-profile;
 /rest/signalwire-rest/endpoints/space/retrieve-verified-caller-id https://signalwire.com/docs/apis/rest/verified-caller-id/retrieve-verified-caller-id;
@@ -1674,8 +1674,8 @@
 /rest/signalwire-rest/endpoints/space/update-number-group/ https://signalwire.com/docs/apis/rest/number-groups/update-number-group;
 /rest/signalwire-rest/endpoints/space/update-phone-number https://signalwire.com/docs/apis/rest/phone-numbers/update-phone-number;
 /rest/signalwire-rest/endpoints/space/update-phone-number/ https://signalwire.com/docs/apis/rest/phone-numbers/update-phone-number;
-/rest/signalwire-rest/endpoints/space/update-sip-endpoint https://signalwire.com/docs/apis/rest/sip-endpoints/update-sip-endpoint;
-/rest/signalwire-rest/endpoints/space/update-sip-endpoint/ https://signalwire.com/docs/apis/rest/sip-endpoints/update-sip-endpoint;
+/rest/signalwire-rest/endpoints/space/update-sip-endpoint https://signalwire.com/docs/apis/rest/sip-credentials/update-sip-credential;
+/rest/signalwire-rest/endpoints/space/update-sip-endpoint/ https://signalwire.com/docs/apis/rest/sip-credentials/update-sip-credential;
 /rest/signalwire-rest/endpoints/space/update-sip-profile https://signalwire.com/docs/apis/rest/sip-profile/update-sip-profile;
 /rest/signalwire-rest/endpoints/space/update-sip-profile/ https://signalwire.com/docs/apis/rest/sip-profile/update-sip-profile;
 /rest/signalwire-rest/endpoints/space/update-verified-caller-id https://signalwire.com/docs/apis/rest/verified-caller-id/update-verified-caller-id;
