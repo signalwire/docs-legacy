@@ -1,0 +1,144 @@
+---
+slug: /compatibility-api/sdks/reference/messaging/list
+title: List
+sidebar_label: List
+toc_max_heading_level: 3
+---
+
+Use this endpoint for the Media method to return a [paged list](/docs/compatibility-api/rest/paging)
+of messages sorted with the most recent messages appearing first.
+
+<EndpointSchemaSnippet endpoint="GET /Accounts/{AccountSid}/Messages" />
+
+<EndpointResponseSnippet endpoint="GET /Accounts/{AccountSid}/Messages" />
+
+## Request examples
+
+<CodeBlocks>
+
+```javascript title="Node.js"
+const { RestClient } = require('@signalwire/compatibility-api')
+const client = RestClient('YourProjectID', 'YourAuthToken', { signalwireSpaceUrl: 'example.signalwire.com' })
+
+client.messages.each(messages => console.log(messages.sid));
+```
+
+```csharp
+using System;
+using System.Collections.Generic;
+using Twilio;
+using Twilio.Rest.Api.V2010.Account;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        TwilioClient.Init("YourProjectID", "YourAuthToken", new Dictionary<string, object> { ["signalwireSpaceUrl"] = "{SPACE}.signalwire.com" });
+
+        var messages = MessageResource.Read();
+
+        foreach(var record in messages)
+        {
+           Console.WriteLine(record.Sid);
+        }
+    }
+}
+```
+
+```python
+from signalwire.rest import Client as signalwire_client
+
+client = signalwire_client("YourProjectID", "YourAuthToken", signalwire_space_url = 'example.signalwire.com')
+
+messages = client.messages.list()
+
+for record in messages:
+    print(record.sid)
+```
+
+```ruby
+require 'signalwire/sdk'
+
+@client = Signalwire::REST::Client.new 'YourProjectID', 'YourAuthToken', signalwire_space_url: "example.signalwire.com"
+
+messages = @client.messages.list
+
+messages.each do |record|
+  puts record.sid
+end
+```
+
+</CodeBlocks>
+
+---
+
+### Request: filter by date and from
+
+In this example, we will filter messages to return only those sent from `+15551234567` on or after `2018-08-01`.
+
+<CodeBlocks>
+
+```javascript title="Node.js"
+const { RestClient } = require('@signalwire/compatibility-api')
+const client = RestClient('YourProjectID', 'YourAuthToken', { signalwireSpaceUrl: 'example.signalwire.com' })
+
+client.messages.each({ dateSent: new Date(Date.UTC(2018, 8, 1, 0, 0, 0)), from: '+15551234567' },
+                      messages => console.log(messages.sid)
+                    );
+```
+
+```csharp
+using System;
+using System.Collections.Generic;
+using Twilio;
+using Twilio.Rest.Api.V2010.Account;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        TwilioClient.Init("YourProjectID", "YourAuthToken", new Dictionary<string, object> { ["signalwireSpaceUrl"] = "{SPACE}.signalwire.com" });
+
+        var messages = MessageResource.Read(
+            dateSent: new DateTime(2018, 8, 1, 0, 0, 0),
+            from: new Twilio.Types.PhoneNumber("+15551234567")
+        );
+
+        foreach(var record in messages)
+        {
+           Console.WriteLine(record.Sid);
+        }
+    }
+}
+```
+
+```python
+from signalwire.rest import Client as signalwire_client
+
+client = signalwire_client("YourProjectID", "YourAuthToken", signalwire_space_url = 'example.signalwire.com')
+
+messages = client.messages.list(
+                               date_sent=datetime(2018, 8, 1, 0, 0),
+                               from_='+15551234567'
+                           )
+
+for record in messages:
+    print(record.sid)
+```
+
+```ruby
+require 'signalwire/sdk'
+
+@client = Signalwire::REST::Client.new 'YourProjectID', 'YourAuthToken', signalwire_space_url: "example.signalwire.com"
+
+messages = @client.messages.list(
+                              date_sent: Date.new(2018, 8, 1),
+                              from: '+15551234567'
+                            )
+
+messages.each do |record|
+  puts record.sid
+end
+```
+
+</CodeBlocks>

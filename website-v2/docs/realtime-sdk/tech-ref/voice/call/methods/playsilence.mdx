@@ -1,0 +1,72 @@
+---
+title: "playSilence"
+slug: /node/reference/voice/call/play-silence
+description: playSilence method for the Call class.
+toc_max_heading_level: 3
+---
+
+[callplayback-events]: /docs/server-sdk/node/reference/voice/call-playback#events
+[callplayback-onstarted]: /docs/server-sdk/node/reference/voice/call-playback#onstarted
+[callplayback]: /docs/server-sdk/node/reference/voice/call-playback
+
+### playSilence
+
+- **playSilence**(`params`): `Promise`\<[`CallPlayback`][callplayback]>
+
+Plays some silence.
+
+#### Parameters
+
+<ParamField path="params" type="object" required>
+  Object containing the parameters for playing silence.
+</ParamField>
+
+<Indent>
+<ParamField path="duration" type="number" required>
+  Seconds of silence to play.
+</ParamField>
+
+<ParamField path="listen" type="object">
+  Callback to listen for events. List of playback events can be found [here][callplayback-events]. Example event: [`onStarted`][callplayback-onstarted].
+</ParamField>
+</Indent>
+
+#### Returns
+
+`Promise`\<[`CallPlayback`][callplayback]>
+
+A promise that resolves to a [`CallPlayback`][callplayback] object that you can use to
+view the current state and results of the `play` session.
+
+#### Example
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+const voiceClient = client.voice;
+
+// Listen for incoming calls
+await voiceClient.listen({
+  topics: ["office"],
+  onCallReceived: async (call) => {
+    console.log("Call received");
+    // Answer the call
+    call.answer();
+    // Play Silence on the call for a duration of 3 seconds. Listens for playback events. Ends the call after the silence is finished playing.
+    await call.playSilence({
+      duration: 3,
+      listen: {
+        onStarted: () => console.log("Silence started"),
+        onFailed: () => console.log("Silence failed"),
+        onUpdated: (event) => console.log("Silence updated", event.state),
+        onEnded: (event) => {
+          console.log("Silence ended", event.state);
+          call.hangup();
+        }
+      }
+    }).onStarted();
+  }
+});
+```

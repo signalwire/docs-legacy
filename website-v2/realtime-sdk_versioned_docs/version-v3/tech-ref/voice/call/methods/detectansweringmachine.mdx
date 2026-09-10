@@ -1,0 +1,40 @@
+---
+title: "detectAnsweringMachine"
+slug: /node/reference/voice/call/detect-answering-machine
+description: detectAnsweringMachine method for the Call class.
+toc_max_heading_level: 3
+---
+
+[calldetect-8]: /docs/server-sdk/v3/node/reference/voice/call-detect
+
+### detectAnsweringMachine
+
+- **detectAnsweringMachine**(`params?`): `Promise<CallDetect>` - See [CallDetect][calldetect-8] for more details.
+
+Detects the presence of an answering machine.
+
+#### Parameters
+
+| Name                            | Type      | Description                                                                                                                                                                              |
+|:--------------------------------|:----------|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `params?`                       | `Object`  | -                                                                                                                                                                                        |
+| `params.endSilenceTimeout?`     | `number`  | Number of seconds to wait for voice to finish. Defaults to 1.0.                                                                                                                          |
+| `params.initialTimeout?`        | `number`  | Number of seconds to wait for initial voice before giving up. Defaults to 4.5.                                                                                                           |
+| `params.machineVoiceThreshold?` | `number`  | How many seconds of voice to decide it is a machine. Defaults to 1.25.                                                                                                                   |
+| `params.machineWordsThreshold?` | `number`  | How many words to count to decide it is a machine. Defaults to 6.                                                                                                                        |
+| `params.timeout?`               | `number`  | Number of seconds to run the detector for. Defaults to 30.0.                                                                                                                             |
+| `params.waitForBeep?`           | `boolean` | Whether to wait until the device is ready for voicemail delivery. Defaults to false.                                                                                                     |
+| `params.detect_interruptions?`  | `boolean` | If set to true, a `NOT_READY` event is fired if speech is detected after the `READY` event. This allows application to restart message delivery to answering machine. Defaults to false. |
+
+#### Returns
+
+`Promise<CallDetect>` - See [CallDetect][calldetect-8] for more details.
+
+#### Example
+
+```js
+const detect = await call.detectAnsweringMachine();
+const result = await detect.ended();
+
+console.log("Detect result:", result.type);
+```

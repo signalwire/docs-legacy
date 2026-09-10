@@ -1,0 +1,48 @@
+---
+title: "Messaging Client"
+sidebar_label: Client
+sidebar_position: 1
+slug: /node/reference/messaging/client
+description: Messaging Client reference for sending and receiving messages.
+toc_max_heading_level: 3
+---
+
+[events]: /docs/server-sdk/node/reference/messaging/client/events
+[send]: /docs/server-sdk/node/reference/messaging/client/send
+[listen]: /docs/server-sdk/node/reference/messaging/client/listen
+[signalwire-realtime-client]: /docs/server-sdk/node/reference/realtime-client
+
+The Messaging Client enables sending and receiving SMS and MMS messages. Access it via the `messaging` property on a [`SignalWire Client`][signalwire-realtime-client].
+
+```javascript
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "<project-id>", token: "<api-token>" });
+const messagingClient = client.messaging;
+```
+
+Use [`send`][send] to send outbound messages, or [`listen`][listen] to receive inbound messages on specific topics. See [Events][events] for all available events.
+
+## Examples
+
+### Receiving messages
+
+```javascript
+await messagingClient.listen({
+  topics: ["office"],
+  onMessageReceived: (message) => {
+    console.log("From:", message.from, "Body:", message.body);
+  }
+});
+```
+
+### Sending messages
+
+```javascript
+await messagingClient.send({
+  from: "+15551234567",
+  to: "+15559876543",
+  body: "Hello from SignalWire!",
+});
+```
+

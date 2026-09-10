@@ -1,0 +1,46 @@
+---
+title: Set Variables
+description: Call Flow Builder node to set variables in the call flow.
+slug: /call-flow-builder/reference/set-variables
+# image: "/assets/images/call-flow/nodes/set-variables.webP"
+---
+Use this node to set variables that can be accessed from other nodes in the Call Flow.
+
+The value can be a static value set as a string (`"value"`), 
+a variable from another node such as a request response ( `%{request_response.<object_field>}` ), 
+or a call parameter ( `%{call.from} `).
+
+Access these variables in other blocks with `%{<Key>}` and unset variables with the [Unset Variables](/docs/call-flow-builder/reference/unset-variables) node.
+
+For a more in-depth explanation of using variables, see the
+[Using Variables](/docs/call-flow-builder/reference/set-variables)
+section of our introduction to Call Flow Builder.
+
+
+## **Node Settings**
+
+<ParamField path="Key" type="string">
+  The name of the variable to set.
+</ParamField>
+
+<ParamField path="Value" type="string">
+  The value to set the variable to. This can be a static value, a variable from another node, or a call parameter.
+</ParamField>
+
+## **Example**
+
+Use Set Variables if you plan to use multiple 
+[Request](/docs/call-flow-builder/reference/request) 
+nodes in the same Flow and you need the variables to carry across the entire Flow.
+
+This example makes a request to an API for temperature and location.
+The request’s response is saved in variables called `my_temperature` and `my_location`.
+
+In order to make a new request to a new webhook, the Set Variables node is essential because
+the second Request node will overwrite the `request_response`.
+Your first variables will remain accessible using `%{vars.my_temperature}` and `%{vars.my_location}`.
+
+<Frame caption="Set variables from a request response." ogImage>
+![Set variables from a request response.](@image/call-flow/nodes/set-variables.webp)
+</Frame>
+

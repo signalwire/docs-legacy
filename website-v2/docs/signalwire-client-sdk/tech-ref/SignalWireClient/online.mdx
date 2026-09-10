@@ -1,0 +1,59 @@
+---
+title: online
+slug: /signalwire-client/online
+---
+
+import APIField from '@site/src/components/APIField';
+
+Brings the client online to receive incoming calls and messages. This method registers callback handlers for incoming call events.
+
+## How it works
+
+The `online` method establishes the client's availability on the SignalWire network. Once online, the client can receive incoming calls and other real-time events through the provided callback handlers.
+
+### Callback handlers
+
+You must provide handlers for incoming calls. These callbacks are invoked when events occur, allowing you to manage incoming calls appropriately.
+
+## Parameters
+
+<APIField name="incomingCallHandlers" type="OnlineParams" required>
+  Configuration object containing callback handlers for incoming call events.
+</APIField>
+
+<APIField name="incomingCallHandlers.onCallReceived" type="(call: CallSession) => void" required>
+  Called when an incoming call is received. Provides a CallSession object for the incoming call.
+</APIField>
+
+<APIField name="incomingCallHandlers.onCallEnded" type="(call: CallSession) => void">
+  Called when an incoming call ends before being answered.
+</APIField>
+
+## Signature
+
+```typescript
+online(incomingCallHandlers: OnlineParams): Promise<void>
+```
+
+## Returns
+
+**Type:** `Promise<void>`
+
+Returns a Promise that resolves when the client is successfully online.
+
+## Examples
+
+### Basic online setup
+
+```typescript
+await client.online({
+  incomingCallHandlers: {
+    onCallReceived: (call) => {
+      console.log('Incoming call from:', call.from)
+      call.answer()
+    }
+  }
+})
+
+console.log('Client is now online')
+```

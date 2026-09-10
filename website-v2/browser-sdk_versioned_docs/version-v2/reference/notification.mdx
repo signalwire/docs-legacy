@@ -1,0 +1,75 @@
+---
+title: Notification
+availability: deprecated
+toc_max_heading_level: 3
+slug: /js/reference/notification
+---
+
+A **notification** is an event that SignalWire dispatches to notify the Client about different cases. A notification can refer to the JWT expiration, Call changes or Conference updates.
+
+## Types
+
+Every notification has a property `type` that identify the case and the structure of the data.<br/>The available type are:
+
+| Value | Description |
+| ---: | ----------- |
+| `refreshToken` | The JWT is going to expire. Refresh it or your session will be disconnected. |
+| `callUpdate` | A Call's state has been changed. Update the UI accordingly. |
+| `participantData` | New participant's data (i.e. name, number) to update the UI. |
+| `userMediaError` | The browser does not have permission to access media devices. Check the `audio` and `video` constraints you are using. |
+
+
+### refreshToken
+
+Your JWT is going to expire. Refresh it or your session will be disconnected.
+
+> Anatomy of a `refreshToken` notification.
+
+```javascript
+{
+  type: 'refreshToken',
+  session: RelayInstance
+}
+```
+
+### callUpdate
+
+A Call's state has been changed. It is useful to update the UI of your application.s
+
+> Anatomy of a `callUpdate` notification.
+
+```javascript
+{
+  type: 'callUpdate',
+  call: CallObject
+}
+```
+
+### participantData
+
+This notification contains the participant data for the current Call. This is useful when updating the UI.
+
+> Anatomy of a `participantData` notification.
+
+```javascript
+{
+  type: 'participantData',
+  call: CallObject,
+  displayName: 'David Roe',
+  displayNumber: '1777888800'
+  displayDirection: 'inbound'
+}
+```
+
+### userMediaError
+
+The browser lacks of permissions to access microphone or webcam. You should check which audio/video constraints you are using and make sure they are supported by the browser.
+
+> Anatomy of a `userMediaError` notification.
+
+```javascript
+{
+  type: 'userMediaError',
+  error: error
+}
+```

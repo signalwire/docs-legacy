@@ -1,0 +1,58 @@
+---
+title: "play"
+slug: /js/reference/video/room-session/play
+description: play method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+### play
+
+- **play**(`params`): `Promise<RoomSessionPlayback>` - See [RoomSessionPlayback documentation](/docs/browser-sdk/js/reference/video/room-session-playback) for more details.
+
+Starts a playback in the room. You can use the returned [RoomSessionPlayback](/docs/browser-sdk/js/reference/video/room-session-playback) object to control the playback (e.g., pause, resume, setVolume and stop).
+
+#### Parameters
+
+<ParamField path="params" type="object">
+  Object containing the parameters of the method.
+</ParamField>
+
+<Indent>
+<ParamField path="url" type="string">
+  The url (http, https, rtmp, rtmps) of the stream to reproduce.
+</ParamField>
+
+<ParamField path="volume" type="number" required={false}>
+  The audio volume at which to play the stream. Values range from -50 to 50, with a default of 0.
+</ParamField>
+
+<ParamField path="seekPosition" type="number" required={false}>
+  The starting timecode in milliseconds for playback. Defaults to `0`.
+</ParamField>
+
+<ParamField path="positions" type="VideoPositions" required={false}>
+  Positions to assign as soon as the playback starts. You can use the special keyword `"self"` to refer to the id of the playback.
+</ParamField>
+
+<ParamField path="layout" type="string" required={false}>
+  Layout to change to when the playback starts.
+</ParamField>
+</Indent>
+
+#### Returns
+
+`Promise<RoomSessionPlayback>` - See [RoomSessionPlayback documentation](/docs/browser-sdk/js/reference/video/room-session-playback) for more details.
+
+#### Permissions
+
+- `room.playback`
+
+You need to specify the permissions when [creating the Video Room Token](/docs/apis/video/create-room-token) on the server side.
+
+#### Example
+
+```javascript
+const playback = await roomSession.play({ url: "rtmp://example.com/foo" });
+await playback.stop();
+```
+

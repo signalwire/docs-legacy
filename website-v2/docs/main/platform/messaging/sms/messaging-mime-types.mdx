@@ -1,0 +1,46 @@
+---
+title: Messaging MIME types
+sidebar_label: MIME types
+slug: /platform/messaging/mime-types
+x-custom:
+  ported_from_readme: true
+  hideInGuideShowcase: true
+---
+
+
+To send MMS, you must include a media attachment. The content-type header must have an accepted content type, or SignalWire will have to reject the request. 
+
+Media Size Limits
+-----------------
+
+The overall size limit is 1.2MB for local numbers and 750KB for toll-free numbers. Most carriers support message attachments with a total size of 1MB-1.2MB. However, to maximize deliverability across all carriers, limit your attachment size to 500KB. 
+
+Accepted MIME Types
+-------------------
+
+All of the following MIME types are accepted. SignalWire will not modify the body content for device compatibility. 
+
+| Type            | Description                                 |
+| :-------------- | :------------------------------------------ |
+| audio/mp4       | mpeg layer 4 audio                          |
+| audio/mpeg      | mpeg layer 3 audio                          |
+| audio/mpeg3     | mpeg layer 3 audio                          |
+| audio/ogg       | ogg audio                                   |
+| audio/vorbis    | audio compression format                    |
+| audio/vnd.wav   | wav format audio                            |
+| audio/ac3       | codec format audio                          |
+| audio/amr       | codec format audio                          |
+| audio/midi      | musical instrument digital interface format |
+| image/jpeg      | jpeg format image                           |
+| image/gif       | graphics interchange format                 |
+| image/png       | portable network graphics format            |
+| image/bmp       | bitmap image format                         |
+| text/plain      | text file format                            |
+| text/calendar   | text file format                            |
+| text/vcard      | text file format                            |
+| text/x-vcard    | text file format                            |
+| video/mpeg      | mpeg video format                           |
+| video/mp4       | mpeg layer 4 video format                   |
+| video/quicktime | quicktime video                             |
+| video/h264      | video compression format                    |
+| video/3gp       | media container format                      |

@@ -1,0 +1,63 @@
+---
+title: RecordAction
+slug: /dotnet/reference/calling/actions/record
+description: The RecordAction is used to record a call.
+toc_max_heading_level: 3
+---
+
+[call]: /docs/server-sdk/v2/dotnet/reference/calling/call#recordasync
+[signalwire-relay-calling-callrecord]: /docs/server-sdk/v2/dotnet/reference/calling/call-record
+[signalwire-relay-calling-callrecordstate]: /docs/server-sdk/v2/dotnet/reference/calling/call-record-state
+[signalwire-relay-calling-recordresult]: /docs/server-sdk/v2/dotnet/reference/calling/results/record
+[signalwire-relay-calling-stopresult]: /docs/server-sdk/v2/dotnet/reference/calling/results/stop
+
+# SignalWire.Relay.Calling.RecordAction
+
+This object returned from [`RecordAsync`][call] method that represents a record operation that is currently active on a call.
+
+## Properties
+
+| Property | Type | Description |
+| :-------- | :---- | :----------- |
+| `ControlID` | string | The identifier used to control the operation. |
+| `Result` | [`SignalWire.Relay.Calling.RecordResult`][signalwire-relay-calling-recordresult] | Final result of recording. |
+| `State` | [`SignalWire.Relay.Calling.CallRecordState`][signalwire-relay-calling-callrecordstate] | Current state of the record operation. |
+| `Completed` | bool | Whether the record operation has completed. |
+| `Payload` | [`SignalWire.Relay.Calling.CallRecord`][signalwire-relay-calling-callrecord] | Payload sent to Relay to start the record operation. |
+| `Url` | string | Url of the recording provided by Relay, the file may not be present at the URL until the recording is finished. |
+
+## Methods
+
+### Stop
+
+Stop the action immediately.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+[`SignalWire.Relay.Calling.StopResult`][signalwire-relay-calling-stopresult] - The result object to interact with.
+
+**Examples**
+
+> Start recording in stereo mode and stop it if `agent` is not available in 3 seconds.
+
+```csharp
+RecordAction actionRecord = call.RecordAsync(
+    new CallRecord
+    {
+        Audio = CallRecord.AudioParams
+        {
+            Stereo = true,
+        }
+    });
+
+Thread.Sleep(3000);
+
+if (!agent.IsAvailable)
+{
+    StopResult resultStop = actionRecord.Stop();
+}
+```

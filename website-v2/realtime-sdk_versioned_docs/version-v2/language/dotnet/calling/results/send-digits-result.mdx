@@ -1,0 +1,20 @@
+---
+title: SendDigitsResult
+slug: /dotnet/reference/calling/results/send-digits
+description: The SendDigitsResult object is returned after a send digits operation.
+toc_max_heading_level: 3
+---
+
+[call]: /docs/server-sdk/v2/dotnet/reference/calling/call#senddigits
+[signalwire-relay-event]: /docs/server-sdk/v2/dotnet/reference/event
+
+# SignalWire.Relay.Calling.SendDigitsResult
+
+This object returned from [`SendDigits`][call] method, which represents the result of a send digits operation.
+
+## Properties
+
+| Property | Type | Description |
+| :-------- | :---- | :----------- |
+| `Event` | [`SignalWire.Relay.Event`][signalwire-relay-event] | The last event that completed the call. |
+| `Successful` | bool | Whether the send operation has successfully sent the digits. |

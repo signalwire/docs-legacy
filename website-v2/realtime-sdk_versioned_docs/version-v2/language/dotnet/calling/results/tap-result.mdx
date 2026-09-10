@@ -1,0 +1,26 @@
+---
+title: TapResult
+slug: /dotnet/reference/calling/results/tap
+description: The TapResult object is returned after a tap operation.
+toc_max_heading_level: 3
+---
+
+[call-1]: /docs/server-sdk/v2/dotnet/reference/calling/call#tapasync
+[call]: /docs/server-sdk/v2/dotnet/reference/calling/call#tap
+[signalwire-relay-calling-calltap]: /docs/server-sdk/v2/dotnet/reference/calling/call-tap
+[signalwire-relay-calling-calltapdevice-1]: /docs/server-sdk/v2/dotnet/reference/calling/call-tap-device
+[signalwire-relay-event]: /docs/server-sdk/v2/dotnet/reference/event
+
+# SignalWire.Relay.Calling.TapResult
+
+This object returned from [`Tap`][call] method or part of the action when [`TapAsync`][call-1] completes, which represents the final result of a tap operation.
+
+## Properties
+
+| Property | Type | Description |
+| :-------- | :---- | :----------- |
+| `Successful` | bool | Whether the tap operation has completed successfully. |
+| `Event` | [`SignalWire.Relay.Event`][signalwire-relay-event] | The last event that completed the call. |
+| `Tap` | [`SignalWire.Relay.Calling.CallTap`][signalwire-relay-calling-calltap] | The call tap configuration. |
+| `SourceDevice` | [`SignalWire.Relay.Calling.CallTapDevice`][signalwire-relay-calling-calltapdevice-1] | The source tap device details. |
+| `DestinationDevice` | [`SignalWire.Relay.Calling.CallTapDevice`][signalwire-relay-calling-calltapdevice-1] | The destination tap device details. |

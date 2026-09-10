@@ -1,0 +1,20 @@
+---
+title: PlayPauseResult
+slug: /dotnet/reference/calling/results/play-pause
+description: The PlayPauseResult object is returned after a play pause operation.
+toc_max_heading_level: 3
+---
+
+[play]: /docs/server-sdk/v2/dotnet/reference/calling/actions/play#pause
+[signalwire-relay-event]: /docs/server-sdk/v2/dotnet/reference/event
+
+# SignalWire.Relay.Calling.PlayPauseResult
+
+This object returned from the _synchronous_ [`Pause`][play] method, which represent the final result of a play pause operation.
+
+## Properties
+
+| Property | Type | Description |
+| :-------- | :---- | :----------- |
+| `Successful` | bool | Whether the play pause operation has completed successfully. |
+| `Event` | [`SignalWire.Relay.Event`][signalwire-relay-event] | The last event that completed the call. |

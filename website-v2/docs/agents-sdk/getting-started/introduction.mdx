@@ -1,0 +1,210 @@
+---
+title: "Agents SDK"
+sidebar_label: "Agents SDK"
+description: Everything you need to install the SignalWire Agents SDK, create your first voice AI agent, and connect it to the SignalWire platform.
+slug: /python
+toc_max_heading_level: 3
+---
+
+```bash
+pip install signalwire-agents
+```
+
+<CardGroup cols={2}>
+  <Card title="PyPI Package" icon="brands python" href="https://pypi.org/project/signalwire-agents/">
+    signalwire-agents
+  </Card>
+  <Card title="GitHub Repository" icon="brands github" href="https://github.com/signalwire/signalwire-agents">
+    Source code and examples
+  </Card>
+</CardGroup>
+
+## What You'll Learn
+
+This chapter walks you through the complete setup process:
+
+1. **Introduction** - Understand what the SDK does and key concepts
+2. **Installation** - Install the SDK and verify it works
+3. **Quick Start** - Build your first agent in under 5 minutes
+4. **Development Environment** - Set up a professional development workflow
+5. **Exposing Your Agent** - Make your agent accessible to SignalWire using ngrok
+
+## Prerequisites
+
+Before starting, ensure you have:
+
+- **Python 3.8 or higher** installed on your system
+- **pip** (Python package manager)
+- A **terminal/command line** interface
+- A **text editor or IDE** (VS Code, PyCharm, etc.)
+- (Optional) A **SignalWire account** for testing with real phone calls
+
+## Time to Complete
+
+| Section | Time |
+|---------|------|
+| Introduction | 5 min read |
+| Installation | 5 min |
+| Quick Start | 5 min |
+| Dev Environment | 10 min |
+| Exposing Agents | 10 min |
+| **Total** | **~35 minutes** |
+
+## By the End of This Chapter
+
+You will have:
+
+- A working voice AI agent
+- Accessible via public URL
+- Ready to connect to SignalWire phone numbers
+
+<Frame caption="SignalWire">
+  <img className="diagram" src={require("@image/agents-sdk-manual/01_01_introduction_diagram1.webp").default} alt="SignalWire." />
+</Frame>
+
+## What is the SignalWire Agents SDK?
+
+The SignalWire Agents SDK lets you create **voice AI agents** - intelligent phone-based assistants that can:
+
+- Answer incoming phone calls automatically
+- Have natural conversations using AI (GPT-4, Claude, etc.)
+- Execute custom functions (check databases, call APIs, etc.)
+- Transfer calls, play audio, and manage complex call flows
+- Scale from development to production seamlessly
+
+## How It Works
+
+<Frame caption="High-Level Architecture">
+  <img className="diagram" src={require("@image/agents-sdk-manual/01_01_introduction_diagram2.webp").default} alt="High-Level Architecture." />
+</Frame>
+
+**The flow:**
+
+1. A caller dials your SignalWire phone number
+2. SignalWire requests instructions from your agent (via HTTP)
+3. Your agent returns **SWML** (SignalWire Markup Language) - a JSON document describing how to handle the call
+4. SignalWire's AI talks to the caller based on your configuration
+5. When the AI needs to perform actions, it calls your **SWAIG functions** (webhooks)
+6. Your functions return results, and the AI continues the conversation
+
+## Key Concepts
+
+### Agent
+
+An **Agent** is your voice AI application. It's a Python class that:
+
+- Defines the AI's personality and behavior (via prompts)
+- Provides functions the AI can call (SWAIG functions)
+- Configures voice, language, and AI parameters
+- Runs as a web server that responds to SignalWire requests
+
+```python
+from signalwire_agents import AgentBase
+
+
+class MyAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="my-agent")
+        # Configure your agent here
+```
+
+### SWML (SignalWire Markup Language)
+
+**SWML** is a JSON format that tells SignalWire how to handle calls. Your agent generates SWML automatically - you don't write it by hand.
+
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {"answer": {}},
+      {"ai": {
+        "prompt": {"text": "You are a helpful assistant..."},
+        "SWAIG": {"functions": [...]}
+      }}
+    ]
+  }
+}
+```
+
+### SWAIG Functions
+
+**SWAIG** (SignalWire AI Gateway) functions are tools your AI can use during a conversation. When a caller asks something that requires action, the AI calls your function.
+
+```python
+@agent.tool(description="Look up a customer by phone number")
+def lookup_customer(args: dict, raw_data: dict = None) -> SwaigFunctionResult:
+    phone_number = args.get("phone_number", "")
+    customer = database.find(phone_number)
+    return SwaigFunctionResult(f"Customer: {customer.name}, Account: {customer.id}")
+```
+
+### Skills
+
+**Skills** are reusable plugins that add capabilities to your agent. The SDK includes built-in skills for common tasks:
+
+- `datetime` - Get current time and date
+- `web_search` - Search the web
+- `weather_api` - Get weather information
+- `math` - Perform calculations
+
+```python
+agent.add_skill("datetime")
+agent.add_skill("web_search", google_api_key="...")
+```
+
+## What You Can Build
+
+| Use Case | Description |
+|----------|-------------|
+| **Customer Service** | Answer FAQs, route calls, collect information |
+| **Appointment Scheduling** | Book, reschedule, and cancel appointments |
+| **Surveys & Feedback** | Conduct phone surveys, collect responses |
+| **IVR Systems** | Interactive voice menus with AI intelligence |
+| **Receptionist** | Screen calls, take messages, transfer to staff |
+| **Notifications** | Outbound calls for alerts, reminders, confirmations |
+
+The SDK includes prefab agents for common scenarios (InfoGatherer, FAQBot, Survey, Receptionist) that you can customize or use as starting points.
+
+## SDK Features
+
+| Category | Features |
+|----------|----------|
+| Core | AgentBase class, SWAIG function decorators, Prompt building (POM), Voice & language config, Speech hints, Built-in skills |
+| Advanced | Multi-step workflows (Contexts), Multi-agent servers, Call recording, Call transfer (SIP, PSTN), State management, Vector search integration |
+| Deployment | Local dev server, Production (uvicorn), AWS Lambda, Google Cloud Functions, Azure Functions, CGI mode, Docker/Kubernetes |
+| Developer Tools | swaig-test CLI, SWML debugging, Function testing, Serverless simulation |
+| Prefab Agents | InfoGathererAgent, FAQBotAgent, SurveyAgent, ReceptionistAgent, ConciergeAgent |
+| DataMap | Direct API calls from SignalWire, No webhook server needed, Variable expansion, Response mapping |
+
+## Minimal Example
+
+Here's the simplest possible agent:
+
+```python
+from signalwire_agents import AgentBase
+
+
+class HelloAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="hello")
+        self.prompt_add_section("Role", "You are a friendly assistant.")
+
+
+if __name__ == "__main__":
+    agent = HelloAgent()
+    agent.run()
+```
+
+This agent:
+
+- Starts a web server on port 3000
+- Returns SWML that configures an AI assistant
+- Uses the default voice and language settings
+- Has no custom functions (just conversation)
+
+## Next Steps
+
+Now that you understand what the SDK does, let's install it and build something real.
+
+

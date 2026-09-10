@@ -1,0 +1,38 @@
+---
+title: "setHideVideoMuted"
+slug: /js/reference/video/room-session/set-hide-video-muted
+description: setHideVideoMuted method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+### setHideVideoMuted
+
+- **setHideVideoMuted**(`value`): `Promise<void>`
+
+Show or hide muted videos in the room layout. Members that have been muted via [videoMute](/docs/browser-sdk/js/reference/video/room-session/video-mute) will not appear in the video stream, instead of appearing as a mute image, if this setting is enabled.
+
+Muted videos are shown by default.
+
+#### Parameters
+
+<ParamField path="value" type="boolean">
+  Whether to hide muted videos in the room layout.
+</ParamField>
+
+#### Returns
+
+`Promise<void>`
+
+#### Permissions
+
+- `room.hide_video_muted`
+- `room.show_video_muted`
+
+You need to specify the permissions when [creating the Video Room Token](/docs/apis/video/create-room-token) on the server side.
+
+#### Example
+
+```javascript
+await roomSession.setHideVideoMuted(false);
+```
+

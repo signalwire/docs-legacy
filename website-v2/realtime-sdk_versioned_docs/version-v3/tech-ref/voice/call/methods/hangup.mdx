@@ -1,0 +1,29 @@
+---
+title: "hangup"
+slug: /node/reference/voice/call/hangup
+description: hangup method for the Call class.
+toc_max_heading_level: 3
+---
+
+
+### hangup
+
+- **hangup**(`reason?`): `Promise<void>`
+
+Hangs up the call.
+
+#### Parameters
+
+| Name      | Type                                                                             | Description                     |
+|:----------|:---------------------------------------------------------------------------------|:--------------------------------|
+| `reason?` | `"error"` \| `"hangup"` \| `"cancel"` \| `"busy"` \| `"noAnswer"` \| `"decline"` | Optional reason for hanging up. |
+
+#### Returns
+
+`Promise<void>`
+
+#### Example
+
+```js
+call.hangup();
+```

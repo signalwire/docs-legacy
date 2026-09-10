@@ -1,0 +1,73 @@
+---
+slug: /compatibility-api/sdks/reference/queue-members/retrieve
+title: Retrieve
+sidebar_label: Retrieve
+toc_max_heading_level: 3
+---
+
+Use this endpoint for the Queue Members method to retrieve a single queue member.
+
+<EndpointSchemaSnippet endpoint="GET /Accounts/{AccountSid}/Queues/{QueueSid}/Members/{CallSid}" />
+
+## Request examples
+
+<CodeBlocks>
+```javascript title="Node.js"
+```javascript title="Node.js"
+const { RestClient } = require('@signalwire/compatibility-api')
+const client = RestClient('YourProjectID', 'YourAuthToken', { signalwireSpaceUrl: 'example.signalwire.com' })
+
+client.queues('QueueSid')
+      .members('CallSid')
+      .fetch()
+      .then(member => console.log(member.callSid))
+      .done();
+```
+
+```csharp
+using System;
+using System.Collections.Generic;
+using Twilio;
+using Twilio.Rest.Api.V2010.Account.Queue;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        TwilioClient.Init("YourProjectID", "YourAuthToken", new Dictionary<string, object> { ["signalwireSpaceUrl"] = "{SPACE}.signalwire.com" });
+
+        var member = MemberResource.Fetch(
+            pathQueueSid: "QueueSid",
+            pathCallSid: "CallSid"
+        );
+
+        Console.WriteLine(member.CallSid);
+    }
+}
+```
+
+```python
+from signalwire.rest import Client as signalwire_client
+
+client = signalwire_client("YourProjectID", "YourAuthToken", signalwire_space_url = 'example.signalwire.com')
+
+member = client.queues('QueueSid') \
+               .members('CallSid') \
+               .fetch()
+
+print(member.call_sid)
+```
+
+```ruby
+require 'signalwire/sdk'
+
+@client = Signalwire::REST::Client.new 'YourProjectID', 'YourAuthToken', signalwire_space_url: "example.signalwire.com"
+
+member = @client.queues('QueueSid')
+                .members('CallSid')
+                .fetch
+
+puts member.call_sid
+```
+
+</CodeBlocks>

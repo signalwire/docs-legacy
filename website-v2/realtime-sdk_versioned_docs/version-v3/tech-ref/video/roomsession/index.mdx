@@ -1,0 +1,119 @@
+---
+title: "RoomSession"
+slug: /node/reference/video/room-session
+description: Video Room Session reference for managing video rooms.
+toc_max_heading_level: 3
+---
+
+[link]: /docs/server-sdk/v3/node/reference/video/room-session/get-recordings
+[video-client]: /docs/server-sdk/v3/node/reference/video/client
+[video-roomsession]: /docs/server-sdk/v3/node/reference/video/room-session/set-hide-video-muted
+
+Represents a room session. You can obtain instances of this class by subscribing to the appropriate events from [Video.Client][video-client].
+
+#### Example
+
+```javascript
+const video = new Video.Client({
+  project: "<project-id>",
+  token: "<project-token>",
+});
+
+video.on("room.started", async (roomSession) => {
+  console.log("This is my RoomSession object:", roomSession);
+});
+```
+
+## Properties
+
+### displayName
+
+- **displayName**: `string`
+
+Display name for this room. Defaults to the value of `name`
+
+---
+
+### hideVideoMuted
+
+- **hideVideoMuted**: `boolean`
+
+Whether muted videos are shown in the room layout. See [setHideVideoMuted][video-roomsession]
+
+---
+
+### id
+
+- **id**: `string`
+
+Unique id for this room session
+
+---
+
+### layoutName
+
+- **layoutName**: `string`
+
+Current layout name used in the room.
+
+---
+
+### meta
+
+- **meta**: `Record``<string, unknown>`
+
+Metadata associated to this room session.
+
+---
+
+### name
+
+- **name**: `string`
+
+Name of this room
+
+---
+
+### previewUrl
+
+- `Optional` **previewUrl**: `string`
+
+URL to the room preview.
+
+---
+
+### layoutName
+
+- `Optional` **layoutName**: `string`
+
+Current layout name used in the room.
+
+---
+
+### recording
+
+- **recording**: `boolean`
+
+Whether recording is active
+
+---
+
+### recordings
+
+- `Optional` **recordings**: `any[]`
+
+<Warning title="Deprecated">
+
+Please use [getRecordings][link] instead.
+
+</Warning>
+
+List of active recordings in the room
+
+---
+
+### roomId
+
+- **roomId**: `string`
+
+Id of the room associated to this room session

@@ -1,0 +1,339 @@
+---
+title: Best practices
+description: Essential techniques for AI Agent prompt engineering
+slug: /platform/ai/prompt-engineering/best-practices
+
+---
+
+
+[markdown-guide]: https://www.markdownguide.org/
+[xml-guide]: https://www.w3schools.com/xml/xml_whatis.asp
+
+Effective prompt engineering requires careful thought and attention to detail. 
+Improved structure, clarity, and precision can transform an unreliable prompt to a successful one.
+This guide explores proven techniques for creating consistent and reliable prompts.
+
+## The foundation: Clarity and precision
+
+AI models interpret instructions literally, making clarity and precision essential elements of effective prompts. Consider these instructions as a technical specification - every detail matters, and ambiguity can lead to unexpected results.
+
+### Establish clear parameters
+
+When crafting prompts, precision and specificity are crucial. It is important to clearly define what you aim to achieve, set the boundaries and limitations of your project, specify the desired output formats, and outline the criteria for measuring success.
+
+Here are examples demonstrating effective and ineffective approaches:
+
+<Tabs>
+<TabItem value="❌-ineffective-approach" label="❌ Ineffective Approach">
+This type of vague, unstructured prompt leads to inconsistent results and lacks the necessary parameters for reliable AI responses.
+
+```markdown
+Hey, we need help with our customer support. Just handle whatever questions come in and try to be helpful. Make sure customers are happy and don't say anything wrong.
+```
+</TabItem>
+<TabItem value="✅-effective-approach" label="✅ Effective Approach">
+This structured prompt provides clear parameters, specific guidelines, and measurable outcomes that enable consistent, reliable AI responses.
+
+```markdown
+## Support Agent Role
+You're part of WonderTech's customer support team, handling our enterprise software inquiries.
+
+## Response Framework
+1. Issue Categories
+   - Installation problems (check system compatibility first)
+   - Account access (verify identity before proceeding)
+   - Feature requests (log for product team)
+   - Billing questions (route to billing team if complex)
+
+2. Response Structure
+   - Start with a warm greeting
+   - Acknowledge the specific issue
+   - Provide step-by-step solutions
+   - End with a clear next action
+
+3. Key Policies
+   - 48-hour response guarantee
+   - Full refund within 30 days
+   - Premium support for enterprise clients
+
+## Communication Guidelines
+- Use clear, jargon-free language
+- Include relevant documentation links
+- Escalate critical issues to supervisors
+- Follow up within 24 hours
+```
+</TabItem>
+</Tabs>
+
+### Critical context elements
+
+The effectiveness of a prompt is shaped by several factors, including its overall purpose and end goals, 
+the characteristics of the target audience, 
+the necessary background information, 
+and the requirements of the interaction medium.
+
+### Defining boundaries
+
+Successful prompts require clear parameters that define measurable criteria for success, establish specific operational constraints, set any response length requirements, and prioritize key information.
+
+## Leverage common knowledge
+
+Think about asking someone to hang a picture in your home. 
+You wouldn't need to explain how to use a hammer or what a nail is - that's common knowledge. 
+However, you would need to specify where you want the picture hung, which frame to use, and how high to place it. 
+These specific details are crucial for achieving the desired outcome.
+
+This same principle applies when working with AI. 
+Like a capable assistant, AI systems come with a foundation of general knowledge. 
+The key is understanding what information you need to provide versus what the AI already knows.
+
+### Avoid overprompting
+
+When someone asks "Can you hang this picture?", they assume the person understands how to use basic tools, 
+which ones are needed, basic safety precautions, and standard hanging techniques. 
+However, it remains essential to specify where exactly the picture should be hung, 
+the desired height and layout, the frame to be used, and any special mounting instructions.
+
+Similarly, when prompting an AI, you don't need to explain:
+- Basic grammar and formatting
+- Common professional conventions
+- Standard writing structures
+- General knowledge concepts
+
+Instead, focus on providing:
+- Specific requirements for your use case
+- Unique constraints or parameters
+- Domain-specific context
+- Special formatting needs
+
+### Examples in practice
+
+<Tabs>
+<TabItem value="❌-over-prompting" label="❌ Over-prompting">
+Including unnecessary common knowledge dilutes the important specific requirements.
+
+```markdown
+# Role definition
+You are the receptionist at Bright Smile Dental.
+
+## Communication guidelines
+- Use proper English and maintain professional tone
+- Speak clearly and listen carefully to patients
+- Be polite and courteous at all times
+- Use complete sentences with appropriate pauses
+- Ask clarifying questions when needed
+- End conversations professionally
+
+## Scheduling information
+- Available appointments: Tuesday-Friday, 9 AM to 5 PM
+- Verify patient identity:
+  * Date of birth
+  * Phone number
+- Handle with extra care and politeness
+- Confirm details clearly with patient
+
+## Emergency protocol
+- Listen carefully for mentions of tooth pain
+- Understand this requires urgent attention
+- Prioritize scheduling within 24 hours
+- Show empathy and concern
+
+## Special instructions
+- Direct insurance inquiries politely to extension 2
+- Explain doctor specialties clearly:
+  * Dr. Smith: Cosmetic dentistry
+  * Dr. Chen: Pediatrics
+- Inform professionally about 90-minute new patient appointments
+- Always end by asking if they need anything else
+```
+</TabItem>
+<TabItem value="✅-balanced-prompting" label="✅ Balanced prompting">
+Focuses on specific requirements while trusting the AI's baseline capabilities.
+
+```markdown
+# Role definition
+You are the receptionist at Bright Smile Dental.
+
+## Scheduling information
+- Available appointments: Tuesday-Friday, 9 AM to 5 PM
+- Verify patient identity:
+  * Date of birth
+  * Phone number
+
+## Emergency protocol
+- Priority scheduling within 24 hours for tooth pain
+
+## Special instructions
+- Direct insurance inquiries to extension 2
+- Doctor specialties:
+  * Dr. Smith: Cosmetic dentistry
+  * Dr. Chen: Pediatrics
+- New patient appointments: 90 minutes
+```
+</TabItem>
+</Tabs>
+
+## Structure prompts with Markdown or XML
+
+AI Agents can interpret instructions in plain text. 
+However, structuring your prompt in a consistent and recognizable way increases the AI Agent's adherence to your intended structure,
+and embeds additional information about order, precedence, and hierarchies of content.
+
+Rather than relying solely on bullet points, consider that a well-structured prompt is composed of several components: a clearly defined role, a comprehensive knowledge base, clear response guidelines, a precise task definition, and any necessary constraints. 
+This integrated approach helps ensure that both humans and AI understand the intended context and desired outcomes.
+
+[Markdown][markdown-guide] and [XML][xml-guide] are both recognized by AI Agents and are appropriate for structuring prompts.
+This added structure helps the AI understand relationships between concepts and prioritize information appropriately.
+
+<Tabs>
+<TabItem value="markdown-format" label="Markdown format">
+
+```markdown title="test"
+# Task overview
+Create a customer response template for common support queries.
+
+## Context
+Support team needs standardized responses for frequently asked questions.
+
+## Requirements
+- Maintain professional tone
+- Include relevant documentation links
+- Provide step-by-step instructions
+
+## Constraints
+- Keep responses under 200 words
+- Use simple, clear language
+```
+
+</TabItem>
+<TabItem value="xml-format" label="XML format">
+
+```xml
+<context>
+This is a customer support interaction for a technical product.
+</context>
+
+<task>
+<!-- Clear task definition with specific goal -->
+Analyze the customer's issue and provide a solution.
+</task>
+
+<constraints>
+<!-- Define boundaries and requirements -->
+- Use technical but approachable language
+- Include step-by-step troubleshooting steps
+- Reference relevant documentation when needed
+</constraints>
+```
+
+</TabItem>
+</Tabs>
+
+<Note>
+If you're not sure, pick the one you're more familiar with.
+</Note>
+
+## Iterative refinement process
+
+Prompt development benefits from systematic refinement. Begin by establishing essential requirements by defining the core functionality, identifying critical components, and setting a clear baseline for success. Next, focus on testing and optimization by evaluating the prompt in various scenarios, carefully documenting response patterns, and addressing any emerging edge cases. Finally, implement quality control by resolving any contradictions, maintaining thorough version control, and continuously tracking the effectiveness of your prompt.
+
+
+
+<Warning>
+Avoid over-optimization. Complex prompts can impede natural interaction or cause hallucinations. Sometimes a simple prompt is more effective.
+</Warning>
+
+### Example of iterative refinement
+
+Let's examine how iterative refinement works in practice. Below is an example showing the evolution of a prompt through several refinement stages:
+
+<Tabs>
+<TabItem value="initial-prompt" label="Initial prompt">
+
+```markdown
+Handle customer support inquiries about billing issues.
+```
+
+</TabItem>
+<TabItem value="first-refinement" label="First refinement">
+
+```markdown
+Handle customer support inquiries about billing issues.
+  Steps:
+  1. Greet the customer
+  2. Get account information
+  3. Identify billing issue
+  4. Provide solution
+```
+
+</TabItem>
+<TabItem value="second-refinement" label="Second refinement">
+
+```markdown
+Handle customer support inquiries about billing issues.
+  Steps:
+  1. Greet customer professionally
+  2. Collect information:
+     - Account number
+     - Issue description
+     - Last payment date
+  3. Identify issue type:
+     - Payment processing
+     - Subscription status
+     - Invoice discrepancy
+  4. Provide appropriate solution
+  5. Confirm resolution
+```
+
+</TabItem>
+<TabItem value="final-version" label="Final version">
+
+```markdown
+Handle customer support inquiries about billing issues.
+  
+  Initial Greeting:
+  - Professional and friendly tone
+  - Identify yourself as billing support
+  - Ask how you can help
+  
+  Information Collection:
+  - Account number (required)
+  - Issue description
+  - Last payment date
+  - Payment method used
+  
+  Issue Classification:
+  - Payment processing errors
+    * Failed transactions
+    * Declined cards
+    * Processing delays
+  - Subscription issues
+    * Status verification
+    * Renewal problems
+    * Plan changes
+  - Invoice discrepancies
+    * Wrong amount
+    * Missing credits
+    * Duplicate charges
+    
+  Resolution Process:
+  - Verify issue details
+  - Explain solution steps
+  - Confirm customer understanding
+  - Document resolution
+  
+  Closing:
+  - Summarize actions taken
+  - Provide reference number
+  - Ask if further assistance needed
+  
+  Security Requirements:
+  - Verify identity before sharing details
+  - Never display full card numbers
+  - Log all account changes
+```
+
+</TabItem>
+</Tabs>
+
+

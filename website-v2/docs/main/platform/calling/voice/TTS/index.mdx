@@ -1,0 +1,97 @@
+---
+title: Voices and languages
+sidebar_label: TTS
+sidebar_position: 1
+slug: /platform/voice/tts
+author: Devon White, August Lindgren-Ruby
+x-custom:
+  tags:
+    - favorite
+description: Detailed list of all the TTS providers and voices SignalWire supports.
+---
+
+
+[polly]: /docs/platform/voice/tts/amazon-polly
+[azure]: /docs/platform/voice/tts/azure
+[cartesia]: /docs/platform/voice/tts/cartesia
+[deepgram]: /docs/platform/voice/tts/deepgram
+[elevenlabs]: /docs/platform/voice/tts/elevenlabs
+[gcloud]: /docs/platform/voice/tts/gcloud
+[openai]: /docs/platform/voice/tts/openai
+[rime]: /docs/platform/voice/tts/rime
+
+<Frame>
+  ![A grid of logos for TTS providers on the SignalWire platform.](@image/external/tts.webp)
+</Frame>
+
+SignalWire integrates natively with leading third-party text-to-speech (TTS) providers.
+This guide describes supported engines, voices, and languages.
+Refer to each provider's documentation for up-to-date model details and service information.
+
+## Compare providers and models {#providers}
+
+SignalWire's TTS providers offer a wide range of voice engines optimized for various applications.
+Select a provider, model, and voice according to the following considerations:
+
+**Language support:** 
+At time of writing, engine language support is as follows.
+Consult each provider's reference documentation for the most up-to-date information.
+- [Rime][rime] voices support 
+English, Spanish, French, German, and Hindi (Arcana model only).
+- [Deepgram][deepgram] voices support 
+English, Spanish, German, French, Dutch, Italian, and Japanese.
+- [Amazon Polly][polly], [Azure][azure], [Cartesia][cartesia], and [Google Cloud][gcloud]
+offer a wide range of supported languages.
+- All [ElevenLabs][elevenlabs] and [OpenAI][openai] voices are fully multilingual.
+
+**SSML support:** Google Cloud and Amazon Polly support
+SSML (Speech Synthesis Markup Language) as a string wrapped in `<speak>` tags.
+Consult [Google Cloud's SSML docs](https://cloud.google.com/text-to-speech/docs/ssml) for details.
+Refer to the Amazon Polly docs for more information on
+[using SSML](https://docs.aws.amazon.com/polly/latest/dg/ssml.html)
+and [supported SSML tags.](https://docs.aws.amazon.com/polly/latest/dg/supportedtags.html)
+
+## Use voice identifier strings
+
+Compose voice identifier strings using the following general format:
+
+```
+engine.voice:model
+```
+
+| Identifier                                              | Description                                                 |
+| ------------------------------------------------------- | ----------------------------------------------------------- |
+| `engine`<br/><span className="required-arg">required</span> | The TTS provider (e.g., `elevenlabs`, `rime`, `openai`)     |
+| `voice`<br/><span className="required-arg">required</span>  | The voice identifier (name or ID depending on engine)       |
+| `model`<br/><span className="optional-arg">optional</span>  | Model variant (not all engines support this)                |
+
+<Info>
+
+Since voice ID strings are case insensitive, the following strings are equivalent:
+```
+gcloud.en-US-Neural2-A
+gcloud.en-us-neural2-a
+GCLOUD.EN-US-NEURAL2-A
+```
+</Info>
+
+For detailed instructions for each provider, consult the voice ID references linked in the **Usage** column of the below table.
+
+| TTS provider    | Engine code  | Sample voice ID string                          | Usage                                          |
+| :-------------- | :----------- | :---------------------------------------------- | ---------------------------------------------- |
+| Amazon Polly    | `amazon`     | `amazon.Joanna-Neural`                          | [Reference](/docs/platform/voice/tts/amazon-polly#usage)     |
+| Azure           | `azure`      | `en-US-AvaNeural`                               | [Reference](/docs/platform/voice/tts/azure#usage)            |
+| Cartesia        | `cartesia`   | `cartesia.a167e0f3-df7e-4d52-a9c3-f949145efdab` | [Reference](/docs/platform/voice/tts/cartesia#usage)         |
+| Deepgram        | `deepgram`   | `deepgram.aura-asteria-en`                      | [Reference](/docs/platform/voice/tts/deepgram#usage)         |
+| ElevenLabs      | `elevenlabs` | `elevenlabs.thomas`                             | [Reference](/docs/platform/voice/tts/elevenlabs#usage)       |
+| Google Cloud    | `gcloud`     | `gcloud.en-US-Casual-K`                         | [Reference](/docs/platform/voice/tts/gcloud#usage)           |
+| OpenAI          | `openai`     | `openai.alloy`                                  | [Reference](/docs/platform/voice/tts/openai#usage)           |
+| Rime            | `rime`       | `rime.luna:arcana`                              | [Reference](/docs/platform/voice/tts/rime#voices)            |
+
+<br/>
+
+---
+
+## **Pricing**
+
+See the [Voice API Pricing](https://signalwire.com/pricing/voice) page for up-to-date pricing information.

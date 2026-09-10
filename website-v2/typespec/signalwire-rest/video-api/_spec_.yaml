@@ -1,0 +1,4494 @@
+openapi: 3.0.3
+info:
+  version: 1.0.0
+  title: Video API
+  description: An API to programmatically create and control your own Video Applications.
+  termsOfService: https://signalwire.com/legal/signalwire-cloud-agreement
+externalDocs:
+  url: https://developer.signalwire.com
+  description: Find more information about this and other SignalWire APIs.
+servers:
+  - url: https://{space_name}.signalwire.com/api/video
+    variables:
+      space_name:
+        default: YOUR_SPACE
+        description: Your SignalWire Space's subdomain.
+security:
+  - basic_auth: []
+components:
+  securitySchemes:
+    basic_auth:
+      type: http
+      scheme: basic
+  responses:
+    '204':
+      description: No Content
+    '400':
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/error'
+    '401':
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/error'
+    '422':
+      description: Unprocessable Entity
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/error'
+  schemas:
+    error:
+      type: object
+      properties:
+        type:
+          type: string
+        code:
+          type: string
+        message:
+          type: string
+        attribute:
+          type: string
+        url:
+          type: string
+          format: uri
+      required:
+        - type
+        - code
+        - message
+        - url
+      example:
+        type: validation_error
+        code: invalid_parameter
+        message: Name must be present
+        attribute: name
+        url: https://developer.signalwire.com/rest/signalwire-rest/overview/error-codes#field-invalid-parameter
+    pagination:
+      type: object
+      properties:
+        self:
+          type: string
+        first:
+          type: string
+        next:
+          type: string
+        prev:
+          type: string
+
+tags:
+  - name: Rooms
+  - name: Streams
+  - name: Room Sessions
+  - name: Room Tokens
+  - name: Room Recordings
+  - name: Conferences
+  - name: Conference Tokens
+  - name: Logs
+paths:
+  /rooms:
+    post:
+      operationId: create_room
+      summary: Create a Room
+      description: |
+        Create a room.
+
+        #### Permissions
+        The API token must include the following scopes: _Video_.
+      tags:
+        - Rooms
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - type: object
+                  properties:
+                    name:
+                      type: string
+                      description: >-
+                        A named unique identifier for the room. Allowed
+                        characters: `A-Za-z0-9_-`. Maximum of 100 characters.
+                      example: my_room
+                - type: object
+                  properties:
+                    display_name:
+                      type: string
+                      description: >-
+                        Display name of the room. Maximum of 200 characters.
+                        Defaults to the value of name.
+                      example: My Room's Name
+                    description:
+                      type: string
+                      description: Description of the room. Maximum of 3000 characters.
+                      example: >-
+                        This room will be used for full company all hands
+                        meetings
+                    max_members:
+                      type: integer
+                      description: >-
+                        The maximum number of members in the room at a time.
+                        Must be at least one to a maximum of 300. Defaults to
+                        20.
+                      example: 20
+                    quality:
+                      type: string
+                      description: >-
+                        The room's resolution. Allowed values are `720p` or
+                        `1080p`. Defaults to `720p`.
+                      example: 720p
+                    join_from:
+                      type: string
+                      format: date-time
+                      description: >-
+                        Room does not accept new participants before this time.
+                        Overridable by token. Expects RFC 3339 datetime:
+                        `2022-01-01T23:59:60Z`. Date only: `2022-01-01` will be
+                        converted to `2022-01-01T00:00:00Z`
+                    join_until:
+                      type: string
+                      format: date-time
+                      description: >-
+                        Room stops accepting new participants at this time, but
+                        keeps running until all participants leave. Overridable
+                        by token. Expects RFC 3339 datetime:
+                        `2022-01-01T23:59:60Z`. Date only: `2022-01-01` will be
+                        converted to `2022-01-01T00:00:00Z`
+                    remove_at:
+                      type: string
+                      format: date-time
+                      description: >-
+                        Remove users from the room at this time. Overridable by
+                        token. Expects RFC 3339 datetime:
+                        `2022-01-01T23:59:60Z`. Date only: `2022-01-01` will be
+                        converted to `2022-01-01T00:00:00Z`
+                    remove_after_seconds_elapsed:
+                      type: integer
+                      format: int32
+                      description: >-
+                        Remove users after they are in the room for N seconds.
+                        Overridable by token.
+                      example: 120
+                    layout:
+                      type: string
+                      description: >-
+                        The room's initial layout. Defaults to
+                        `grid-responsive`. See documentation for a full list of
+                        supported layouts.
+                      example: grid-responsive
+                    record_on_start:
+                      type: boolean
+                      description: >-
+                        Specifies whether to start recording a Room Session when
+                        one is started for this Room
+                    enable_room_previews:
+                      type: boolean
+                      description: >-
+                        Whether a video with a preview of the content of the
+                        room is to be generated.
+                    audio_video_sync:
+                      type: boolean
+                      description: Enable/disable jitter buffer audio-video sync.
+                      example: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                        description: A unique identifier for the room
+                  - type: object
+                    properties:
+                      name:
+                        type: string
+                        description: >-
+                          A named unique identifier for the room. Allowed
+                          characters: `A-Za-z0-9_-`. Maximum of 100 characters.
+                        example: my_room
+                  - type: object
+                    properties:
+                      display_name:
+                        type: string
+                        description: >-
+                          Display name of the room. Maximum of 200 characters.
+                          Defaults to the value of name.
+                        example: My Room's Name
+                      description:
+                        type: string
+                        description: Description of the room. Maximum of 3000 characters.
+                        example: >-
+                          This room will be used for full company all hands
+                          meetings
+                      max_members:
+                        type: integer
+                        description: >-
+                          The maximum number of members in the room at a time.
+                          Must be at least one to a maximum of 300. Defaults to
+                          20.
+                        example: 20
+                      quality:
+                        type: string
+                        description: >-
+                          The room's resolution. Allowed values are `720p` or
+                          `1080p`. Defaults to `720p`.
+                        example: 720p
+                      join_from:
+                        type: string
+                        format: date-time
+                        description: >-
+                          Room does not accept new participants before this
+                          time. Overridable by token. Expects RFC 3339 datetime:
+                          `2022-01-01T23:59:60Z`. Date only: `2022-01-01` will
+                          be converted to `2022-01-01T00:00:00Z`
+                      join_until:
+                        type: string
+                        format: date-time
+                        description: >-
+                          Room stops accepting new participants at this time,
+                          but keeps running until all participants leave.
+                          Overridable by token. Expects RFC 3339 datetime:
+                          `2022-01-01T23:59:60Z`. Date only: `2022-01-01` will
+                          be converted to `2022-01-01T00:00:00Z`
+                      remove_at:
+                        type: string
+                        format: date-time
+                        description: >-
+                          Remove users from the room at this time. Overridable
+                          by token. Expects RFC 3339 datetime:
+                          `2022-01-01T23:59:60Z`. Date only: `2022-01-01` will
+                          be converted to `2022-01-01T00:00:00Z`
+                      remove_after_seconds_elapsed:
+                        type: integer
+                        format: int32
+                        description: >-
+                          Remove users after they are in the room for N seconds.
+                          Overridable by token.
+                        example: 120
+                      layout:
+                        type: string
+                        description: >-
+                          The room's initial layout. Defaults to
+                          `grid-responsive`. See documentation for a full list
+                          of supported layouts.
+                        example: grid-responsive
+                      record_on_start:
+                        type: boolean
+                        description: >-
+                          Specifies whether to start recording a Room Session
+                          when one is started for this Room
+                      enable_room_previews:
+                        type: boolean
+                        description: >-
+                          Whether a video with a preview of the content of the
+                          room is to be generated.
+                      audio_video_sync:
+                        type: boolean
+                        description: Enable/disable jitter buffer audio-video sync.
+                        example: true
+                  - type: object
+                    properties:
+                      fps:
+                        type: integer
+                        example: 20
+                        description: Frames Per Second parameter of room video quality
+                      active_session:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            format: uuid
+                            description: Unique ID of the session
+                          room_id:
+                            type: string
+                            format: uuid
+                            description: >-
+                              Unique ID of the Room if the Session was created
+                              from a Room and was not an auto-created Session.
+                          name:
+                            type: string
+                            description: The named identifier of room session.
+                            example: my_example_room
+                          display_name:
+                            type: string
+                            description: >-
+                              Display name of room, no character limitations.
+                              Maxium of 200 characters. Defaults to the value of
+                              name.
+                            example: My Room's Name
+                          join_from:
+                            type: string
+                            format: date-time
+                            description: >-
+                              Room Session does not accept new Members before
+                              this time.
+                          join_until:
+                            type: string
+                            format: date-time
+                            description: >-
+                              Room Session stops accepting new Members at this
+                              time.
+                          remove_at:
+                            type: string
+                            format: date-time
+                            description: Remove Members from the Room Session at this time.
+                          remove_after_seconds_elapsed:
+                            type: integer
+                            format: int32
+                            description: >-
+                              Remove Members after they are in the Room Session
+                              for N seconds.
+                            example: 120
+                          layout:
+                            type: string
+                            description: >-
+                              The Room Session's initial layout. Defaults to
+                              `grid-responsive`. See documentation for a full
+                              list of supported layouts.
+                            example: grid-responsive
+                          max_members:
+                            type: integer
+                            description: >-
+                              The maximum number of members allowed in the room
+                              at a time.
+                            example: 20
+                          fps:
+                            type: integer
+                            example: 20
+                            description: >-
+                              The Room Session's frames per second. Possible
+                              values are `20` or `30`.
+                          quality:
+                            type: string
+                            description: >-
+                              The Room Session's resolution. Possible values are
+                              `720p` or `1080p`.
+                            example: 720p
+                          start_time:
+                            type: string
+                            format: date-time
+                          end_time:
+                            type: string
+                            format: date-time
+                          duration:
+                            type: integer
+                            description: How long, in seconds, the Room Session lasted.
+                            example: 120
+                          status:
+                            type: string
+                            example: completed
+                          record_on_start:
+                            type: boolean
+                            description: >-
+                              Whether a recording was automatically started when
+                              this Room Session began.
+                          enable_room_previews:
+                            type: boolean
+                            description: >-
+                              Whether a video with a preview of the content of
+                              the room is to be generated.
+                          preview_url:
+                            type: string
+                            description: >-
+                              If room previews are enabled and the room session
+                              is in progress, this is the URL of the preview
+                              video.
+                            example: https://...
+                          audio_video_sync:
+                            type: boolean
+                            description: Enable/disable jitter buffer audio-video sync.
+                            example: true
+                            default: false
+                      created_at:
+                        type: string
+                        format: date-time
+                      updated_at:
+                        type: string
+                        format: date-time
+    get:
+      operationId: list_rooms
+      summary: List Rooms
+      description: |
+        List rooms.
+
+        #### Permissions
+        The API token must include the following scopes: _Video_.
+      tags:
+        - Rooms
+      parameters:
+        - name: include_active_session
+          in: query
+          description: >-
+            Specifies whether or not to include information about the room's
+            active session (if any)
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  links:
+                    type: object
+                    properties:
+                      self:
+                        type: string
+                      first:
+                        type: string
+                      next:
+                        type: string
+                      prev:
+                        type: string
+                  data:
+                    type: array
+                    items:
+                      allOf:
+                        - type: object
+                          properties:
+                            id:
+                              type: string
+                              format: uuid
+                              description: A unique identifier for the room
+                        - type: object
+                          properties:
+                            name:
+                              type: string
+                              description: >-
+                                A named unique identifier for the room. Allowed
+                                characters: `A-Za-z0-9_-`. Maximum of 100
+                                characters.
+                              example: my_room
+                        - type: object
+                          properties:
+                            display_name:
+                              type: string
+                              description: >-
+                                Display name of the room. Maximum of 200
+                                characters. Defaults to the value of name.
+                              example: My Room's Name
+                            description:
+                              type: string
+                              description: >-
+                                Description of the room. Maximum of 3000
+                                characters.
+                              example: >-
+                                This room will be used for full company all
+                                hands meetings
+                            max_members:
+                              type: integer
+                              description: >-
+                                The maximum number of members in the room at a
+                                time. Must be at least one to a maximum of 300.
+                                Defaults to 20.
+                              example: 20
+                            quality:
+                              type: string
+                              description: >-
+                                The room's resolution. Allowed values are `720p`
+                                or `1080p`. Defaults to `720p`.
+                              example: 720p
+                            join_from:
+                              type: string
+                              format: date-time
+                              description: >-
+                                Room does not accept new participants before
+                                this time. Overridable by token. Expects RFC
+                                3339 datetime: `2022-01-01T23:59:60Z`. Date
+                                only: `2022-01-01` will be converted to
+                                `2022-01-01T00:00:00Z`
+                            join_until:
+                              type: string
+                              format: date-time
+                              description: >-
+                                Room stops accepting new participants at this
+                                time, but keeps running until all participants
+                                leave. Overridable by token. Expects RFC 3339
+                                datetime: `2022-01-01T23:59:60Z`. Date only:
+                                `2022-01-01` will be converted to
+                                `2022-01-01T00:00:00Z`
+                            remove_at:
+                              type: string
+                              format: date-time
+                              description: >-
+                                Remove users from the room at this time.
+                                Overridable by token. Expects RFC 3339 datetime:
+                                `2022-01-01T23:59:60Z`. Date only: `2022-01-01`
+                                will be converted to `2022-01-01T00:00:00Z`
+                            remove_after_seconds_elapsed:
+                              type: integer
+                              format: int32
+                              description: >-
+                                Remove users after they are in the room for N
+                                seconds. Overridable by token.
+                              example: 120
+                            layout:
+                              type: string
+                              description: >-
+                                The room's initial layout. Defaults to
+                                `grid-responsive`. See documentation for a full
+                                list of supported layouts.
+                              example: grid-responsive
+                            record_on_start:
+                              type: boolean
+                              description: >-
+                                Specifies whether to start recording a Room
+                                Session when one is started for this Room
+                            enable_room_previews:
+                              type: boolean
+                              description: >-
+                                Whether a video with a preview of the content of
+                                the room is to be generated.
+                            audio_video_sync:
+                              type: boolean
+                              description: Enable/disable jitter buffer audio-video sync.
+                              example: true
+                        - type: object
+                          properties:
+                            fps:
+                              type: integer
+                              example: 20
+                              description: >-
+                                Frames Per Second parameter of room video
+                                quality
+                            active_session:
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                                  format: uuid
+                                  description: Unique ID of the session
+                                room_id:
+                                  type: string
+                                  format: uuid
+                                  description: >-
+                                    Unique ID of the Room if the Session was
+                                    created from a Room and was not an
+                                    auto-created Session.
+                                name:
+                                  type: string
+                                  description: The named identifier of room session.
+                                  example: my_example_room
+                                display_name:
+                                  type: string
+                                  description: >-
+                                    Display name of room, no character
+                                    limitations. Maxium of 200 characters.
+                                    Defaults to the value of name.
+                                  example: My Room's Name
+                                join_from:
+                                  type: string
+                                  format: date-time
+                                  description: >-
+                                    Room Session does not accept new Members
+                                    before this time.
+                                join_until:
+                                  type: string
+                                  format: date-time
+                                  description: >-
+                                    Room Session stops accepting new Members at
+                                    this time.
+                                remove_at:
+                                  type: string
+                                  format: date-time
+                                  description: >-
+                                    Remove Members from the Room Session at this
+                                    time.
+                                remove_after_seconds_elapsed:
+                                  type: integer
+                                  format: int32
+                                  description: >-
+                                    Remove Members after they are in the Room
+                                    Session for N seconds.
+                                  example: 120
+                                layout:
+                                  type: string
+                                  description: >-
+                                    The Room Session's initial layout. Defaults
+                                    to `grid-responsive`. See documentation for
+                                    a full list of supported layouts.
+                                  example: grid-responsive
+                                max_members:
+                                  type: integer
+                                  description: >-
+                                    The maximum number of members allowed in the
+                                    room at a time.
+                                  example: 20
+                                fps:
+                                  type: integer
+                                  example: 20
+                                  description: >-
+                                    The Room Session's frames per second.
+                                    Possible values are `20` or `30`.
+                                quality:
+                                  type: string
+                                  description: >-
+                                    The Room Session's resolution. Possible
+                                    values are `720p` or `1080p`.
+                                  example: 720p
+                                start_time:
+                                  type: string
+                                  format: date-time
+                                end_time:
+                                  type: string
+                                  format: date-time
+                                duration:
+                                  type: integer
+                                  description: >-
+                                    How long, in seconds, the Room Session
+                                    lasted.
+                                  example: 120
+                                status:
+                                  type: string
+                                  example: completed
+                                record_on_start:
+                                  type: boolean
+                                  description: >-
+                                    Whether a recording was automatically
+                                    started when this Room Session began.
+                                enable_room_previews:
+                                  type: boolean
+                                  description: >-
+                                    Whether a video with a preview of the
+                                    content of the room is to be generated.
+                                preview_url:
+                                  type: string
+                                  description: >-
+                                    If room previews are enabled and the room
+                                    session is in progress, this is the URL of
+                                    the preview video.
+                                  example: https://...
+                                audio_video_sync:
+                                  type: boolean
+                                  description: >-
+                                    Enable/disable jitter buffer audio-video
+                                    sync.
+                                  example: true
+                                  default: false
+                            created_at:
+                              type: string
+                              format: date-time
+                            updated_at:
+                              type: string
+                              format: date-time
+  /rooms/{name}:
+    get:
+      operationId: get_room_by_name
+      summary: Find a Room by its unique name.
+      description: |
+        Find a room by its unique name.
+
+        #### Permissions
+        The API token must include the following scopes: _Video_.
+      tags:
+        - Rooms
+      parameters:
+        - name: name
+          in: path
+          description: Unique name of the room
+          required: true
+          schema:
+            type: string
+        - name: include_active_session
+          in: query
+          description: >-
+            Specifies whether or not to include information about the room's
+            active session (if any)
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                        description: A unique identifier for the room
+                  - type: object
+                    properties:
+                      name:
+                        type: string
+                        description: >-
+                          A named unique identifier for the room. Allowed
+                          characters: `A-Za-z0-9_-`. Maximum of 100 characters.
+                        example: my_room
+                  - type: object
+                    properties:
+                      display_name:
+                        type: string
+                        description: >-
+                          Display name of the room. Maximum of 200 characters.
+                          Defaults to the value of name.
+                        example: My Room's Name
+                      description:
+                        type: string
+                        description: Description of the room. Maximum of 3000 characters.
+                        example: >-
+                          This room will be used for full company all hands
+                          meetings
+                      max_members:
+                        type: integer
+                        description: >-
+                          The maximum number of members in the room at a time.
+                          Must be at least one to a maximum of 300. Defaults to
+                          20.
+                        example: 20
+                      quality:
+                        type: string
+                        description: >-
+                          The room's resolution. Allowed values are `720p` or
+                          `1080p`. Defaults to `720p`.
+                        example: 720p
+                      join_from:
+                        type: string
+                        format: date-time
+                        description: >-
+                          Room does not accept new participants before this
+                          time. Overridable by token. Expects RFC 3339 datetime:
+                          `2022-01-01T23:59:60Z`. Date only: `2022-01-01` will
+                          be converted to `2022-01-01T00:00:00Z`
+                      join_until:
+                        type: string
+                        format: date-time
+                        description: >-
+                          Room stops accepting new participants at this time,
+                          but keeps running until all participants leave.
+                          Overridable by token. Expects RFC 3339 datetime:
+                          `2022-01-01T23:59:60Z`. Date only: `2022-01-01` will
+                          be converted to `2022-01-01T00:00:00Z`
+                      remove_at:
+                        type: string
+                        format: date-time
+                        description: >-
+                          Remove users from the room at this time. Overridable
+                          by token. Expects RFC 3339 datetime:
+                          `2022-01-01T23:59:60Z`. Date only: `2022-01-01` will
+                          be converted to `2022-01-01T00:00:00Z`
+                      remove_after_seconds_elapsed:
+                        type: integer
+                        format: int32
+                        description: >-
+                          Remove users after they are in the room for N seconds.
+                          Overridable by token.
+                        example: 120
+                      layout:
+                        type: string
+                        description: >-
+                          The room's initial layout. Defaults to
+                          `grid-responsive`. See documentation for a full list
+                          of supported layouts.
+                        example: grid-responsive
+                      record_on_start:
+                        type: boolean
+                        description: >-
+                          Specifies whether to start recording a Room Session
+                          when one is started for this Room
+                      enable_room_previews:
+                        type: boolean
+                        description: >-
+                          Whether a video with a preview of the content of the
+                          room is to be generated.
+                      audio_video_sync:
+                        type: boolean
+                        description: Enable/disable jitter buffer audio-video sync.
+                        example: true
+                  - type: object
+                    properties:
+                      fps:
+                        type: integer
+                        example: 20
+                        description: Frames Per Second parameter of room video quality
+                      active_session:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            format: uuid
+                            description: Unique ID of the session
+                          room_id:
+                            type: string
+                            format: uuid
+                            description: >-
+                              Unique ID of the Room if the Session was created
+                              from a Room and was not an auto-created Session.
+                          name:
+                            type: string
+                            description: The named identifier of room session.
+                            example: my_example_room
+                          display_name:
+                            type: string
+                            description: >-
+                              Display name of room, no character limitations.
+                              Maxium of 200 characters. Defaults to the value of
+                              name.
+                            example: My Room's Name
+                          join_from:
+                            type: string
+                            format: date-time
+                            description: >-
+                              Room Session does not accept new Members before
+                              this time.
+                          join_until:
+                            type: string
+                            format: date-time
+                            description: >-
+                              Room Session stops accepting new Members at this
+                              time.
+                          remove_at:
+                            type: string
+                            format: date-time
+                            description: Remove Members from the Room Session at this time.
+                          remove_after_seconds_elapsed:
+                            type: integer
+                            format: int32
+                            description: >-
+                              Remove Members after they are in the Room Session
+                              for N seconds.
+                            example: 120
+                          layout:
+                            type: string
+                            description: >-
+                              The Room Session's initial layout. Defaults to
+                              `grid-responsive`. See documentation for a full
+                              list of supported layouts.
+                            example: grid-responsive
+                          max_members:
+                            type: integer
+                            description: >-
+                              The maximum number of members allowed in the room
+                              at a time.
+                            example: 20
+                          fps:
+                            type: integer
+                            example: 20
+                            description: >-
+                              The Room Session's frames per second. Possible
+                              values are `20` or `30`.
+                          quality:
+                            type: string
+                            description: >-
+                              The Room Session's resolution. Possible values are
+                              `720p` or `1080p`.
+                            example: 720p
+                          start_time:
+                            type: string
+                            format: date-time
+                          end_time:
+                            type: string
+                            format: date-time
+                          duration:
+                            type: integer
+                            description: How long, in seconds, the Room Session lasted.
+                            example: 120
+                          status:
+                            type: string
+                            example: completed
+                          record_on_start:
+                            type: boolean
+                            description: >-
+                              Whether a recording was automatically started when
+                              this Room Session began.
+                          enable_room_previews:
+                            type: boolean
+                            description: >-
+                              Whether a video with a preview of the content of
+                              the room is to be generated.
+                          preview_url:
+                            type: string
+                            description: >-
+                              If room previews are enabled and the room session
+                              is in progress, this is the URL of the preview
+                              video.
+                            example: https://...
+                          audio_video_sync:
+                            type: boolean
+                            description: Enable/disable jitter buffer audio-video sync.
+                            example: true
+                            default: false
+                      created_at:
+                        type: string
+                        format: date-time
+                      updated_at:
+                        type: string
+                        format: date-time
+  /rooms/{id}:
+    get:
+      operationId: get_room
+      summary: Find a Room by ID
+      description: |
+        Find a room by ID.
+
+        #### Permissions
+        The API token must include the following scopes: _Video_.
+      tags:
+        - Rooms
+      parameters:
+        - name: id
+          in: path
+          description: Unique ID of the room
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                        description: A unique identifier for the room
+                  - type: object
+                    properties:
+                      name:
+                        type: string
+                        description: >-
+                          A named unique identifier for the room. Allowed
+                          characters: `A-Za-z0-9_-`. Maximum of 100 characters.
+                        example: my_room
+                  - type: object
+                    properties:
+                      display_name:
+                        type: string
+                        description: >-
+                          Display name of the room. Maximum of 200 characters.
+                          Defaults to the value of name.
+                        example: My Room's Name
+                      description:
+                        type: string
+                        description: Description of the room. Maximum of 3000 characters.
+                        example: >-
+                          This room will be used for full company all hands
+                          meetings
+                      max_members:
+                        type: integer
+                        description: >-
+                          The maximum number of members in the room at a time.
+                          Must be at least one to a maximum of 300. Defaults to
+                          20.
+                        example: 20
+                      quality:
+                        type: string
+                        description: >-
+                          The room's resolution. Allowed values are `720p` or
+                          `1080p`. Defaults to `720p`.
+                        example: 720p
+                      join_from:
+                        type: string
+                        format: date-time
+                        description: >-
+                          Room does not accept new participants before this
+                          time. Overridable by token. Expects RFC 3339 datetime:
+                          `2022-01-01T23:59:60Z`. Date only: `2022-01-01` will
+                          be converted to `2022-01-01T00:00:00Z`
+                      join_until:
+                        type: string
+                        format: date-time
+                        description: >-
+                          Room stops accepting new participants at this time,
+                          but keeps running until all participants leave.
+                          Overridable by token. Expects RFC 3339 datetime:
+                          `2022-01-01T23:59:60Z`. Date only: `2022-01-01` will
+                          be converted to `2022-01-01T00:00:00Z`
+                      remove_at:
+                        type: string
+                        format: date-time
+                        description: >-
+                          Remove users from the room at this time. Overridable
+                          by token. Expects RFC 3339 datetime:
+                          `2022-01-01T23:59:60Z`. Date only: `2022-01-01` will
+                          be converted to `2022-01-01T00:00:00Z`
+                      remove_after_seconds_elapsed:
+                        type: integer
+                        format: int32
+                        description: >-
+                          Remove users after they are in the room for N seconds.
+                          Overridable by token.
+                        example: 120
+                      layout:
+                        type: string
+                        description: >-
+                          The room's initial layout. Defaults to
+                          `grid-responsive`. See documentation for a full list
+                          of supported layouts.
+                        example: grid-responsive
+                      record_on_start:
+                        type: boolean
+                        description: >-
+                          Specifies whether to start recording a Room Session
+                          when one is started for this Room
+                      enable_room_previews:
+                        type: boolean
+                        description: >-
+                          Whether a video with a preview of the content of the
+                          room is to be generated.
+                      audio_video_sync:
+                        type: boolean
+                        description: Enable/disable jitter buffer audio-video sync.
+                        example: true
+                  - type: object
+                    properties:
+                      fps:
+                        type: integer
+                        example: 20
+                        description: Frames Per Second parameter of room video quality
+                      active_session:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            format: uuid
+                            description: Unique ID of the session
+                          room_id:
+                            type: string
+                            format: uuid
+                            description: >-
+                              Unique ID of the Room if the Session was created
+                              from a Room and was not an auto-created Session.
+                          name:
+                            type: string
+                            description: The named identifier of room session.
+                            example: my_example_room
+                          display_name:
+                            type: string
+                            description: >-
+                              Display name of room, no character limitations.
+                              Maxium of 200 characters. Defaults to the value of
+                              name.
+                            example: My Room's Name
+                          join_from:
+                            type: string
+                            format: date-time
+                            description: >-
+                              Room Session does not accept new Members before
+                              this time.
+                          join_until:
+                            type: string
+                            format: date-time
+                            description: >-
+                              Room Session stops accepting new Members at this
+                              time.
+                          remove_at:
+                            type: string
+                            format: date-time
+                            description: Remove Members from the Room Session at this time.
+                          remove_after_seconds_elapsed:
+                            type: integer
+                            format: int32
+                            description: >-
+                              Remove Members after they are in the Room Session
+                              for N seconds.
+                            example: 120
+                          layout:
+                            type: string
+                            description: >-
+                              The Room Session's initial layout. Defaults to
+                              `grid-responsive`. See documentation for a full
+                              list of supported layouts.
+                            example: grid-responsive
+                          max_members:
+                            type: integer
+                            description: >-
+                              The maximum number of members allowed in the room
+                              at a time.
+                            example: 20
+                          fps:
+                            type: integer
+                            example: 20
+                            description: >-
+                              The Room Session's frames per second. Possible
+                              values are `20` or `30`.
+                          quality:
+                            type: string
+                            description: >-
+                              The Room Session's resolution. Possible values are
+                              `720p` or `1080p`.
+                            example: 720p
+                          start_time:
+                            type: string
+                            format: date-time
+                          end_time:
+                            type: string
+                            format: date-time
+                          duration:
+                            type: integer
+                            description: How long, in seconds, the Room Session lasted.
+                            example: 120
+                          status:
+                            type: string
+                            example: completed
+                          record_on_start:
+                            type: boolean
+                            description: >-
+                              Whether a recording was automatically started when
+                              this Room Session began.
+                          enable_room_previews:
+                            type: boolean
+                            description: >-
+                              Whether a video with a preview of the content of
+                              the room is to be generated.
+                          preview_url:
+                            type: string
+                            description: >-
+                              If room previews are enabled and the room session
+                              is in progress, this is the URL of the preview
+                              video.
+                            example: https://...
+                          audio_video_sync:
+                            type: boolean
+                            description: Enable/disable jitter buffer audio-video sync.
+                            example: true
+                            default: false
+                      created_at:
+                        type: string
+                        format: date-time
+                      updated_at:
+                        type: string
+                        format: date-time
+    put:
+      operationId: update_room
+      summary: Update a Room
+      description: |
+        Update a room.
+
+        #### Permissions
+        The API token must include the following scopes: _Video_.
+      tags:
+        - Rooms
+      parameters:
+        - name: id
+          in: path
+          description: Unique ID of the room
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - type: object
+                  properties:
+                    display_name:
+                      type: string
+                      description: >-
+                        Display name of the room. Maximum of 200 characters.
+                        Defaults to the value of name.
+                      example: My Room's Name
+                    description:
+                      type: string
+                      description: Description of the room. Maximum of 3000 characters.
+                      example: >-
+                        This room will be used for full company all hands
+                        meetings
+                    max_members:
+                      type: integer
+                      description: >-
+                        The maximum number of members in the room at a time.
+                        Must be at least one to a maximum of 300. Defaults to
+                        20.
+                      example: 20
+                    quality:
+                      type: string
+                      description: >-
+                        The room's resolution. Allowed values are `720p` or
+                        `1080p`. Defaults to `720p`.
+                      example: 720p
+                    join_from:
+                      type: string
+                      format: date-time
+                      description: >-
+                        Room does not accept new participants before this time.
+                        Overridable by token. Expects RFC 3339 datetime:
+                        `2022-01-01T23:59:60Z`. Date only: `2022-01-01` will be
+                        converted to `2022-01-01T00:00:00Z`
+                    join_until:
+                      type: string
+                      format: date-time
+                      description: >-
+                        Room stops accepting new participants at this time, but
+                        keeps running until all participants leave. Overridable
+                        by token. Expects RFC 3339 datetime:
+                        `2022-01-01T23:59:60Z`. Date only: `2022-01-01` will be
+                        converted to `2022-01-01T00:00:00Z`
+                    remove_at:
+                      type: string
+                      format: date-time
+                      description: >-
+                        Remove users from the room at this time. Overridable by
+                        token. Expects RFC 3339 datetime:
+                        `2022-01-01T23:59:60Z`. Date only: `2022-01-01` will be
+                        converted to `2022-01-01T00:00:00Z`
+                    remove_after_seconds_elapsed:
+                      type: integer
+                      format: int32
+                      description: >-
+                        Remove users after they are in the room for N seconds.
+                        Overridable by token.
+                      example: 120
+                    layout:
+                      type: string
+                      description: >-
+                        The room's initial layout. Defaults to
+                        `grid-responsive`. See documentation for a full list of
+                        supported layouts.
+                      example: grid-responsive
+                    record_on_start:
+                      type: boolean
+                      description: >-
+                        Specifies whether to start recording a Room Session when
+                        one is started for this Room
+                    enable_room_previews:
+                      type: boolean
+                      description: >-
+                        Whether a video with a preview of the content of the
+                        room is to be generated.
+                    audio_video_sync:
+                      type: boolean
+                      description: Enable/disable jitter buffer audio-video sync.
+                      example: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                        description: A unique identifier for the room
+                  - type: object
+                    properties:
+                      name:
+                        type: string
+                        description: >-
+                          A named unique identifier for the room. Allowed
+                          characters: `A-Za-z0-9_-`. Maximum of 100 characters.
+                        example: my_room
+                  - type: object
+                    properties:
+                      display_name:
+                        type: string
+                        description: >-
+                          Display name of the room. Maximum of 200 characters.
+                          Defaults to the value of name.
+                        example: My Room's Name
+                      description:
+                        type: string
+                        description: Description of the room. Maximum of 3000 characters.
+                        example: >-
+                          This room will be used for full company all hands
+                          meetings
+                      max_members:
+                        type: integer
+                        description: >-
+                          The maximum number of members in the room at a time.
+                          Must be at least one to a maximum of 300. Defaults to
+                          20.
+                        example: 20
+                      quality:
+                        type: string
+                        description: >-
+                          The room's resolution. Allowed values are `720p` or
+                          `1080p`. Defaults to `720p`.
+                        example: 720p
+                      join_from:
+                        type: string
+                        format: date-time
+                        description: >-
+                          Room does not accept new participants before this
+                          time. Overridable by token. Expects RFC 3339 datetime:
+                          `2022-01-01T23:59:60Z`. Date only: `2022-01-01` will
+                          be converted to `2022-01-01T00:00:00Z`
+                      join_until:
+                        type: string
+                        format: date-time
+                        description: >-
+                          Room stops accepting new participants at this time,
+                          but keeps running until all participants leave.
+                          Overridable by token. Expects RFC 3339 datetime:
+                          `2022-01-01T23:59:60Z`. Date only: `2022-01-01` will
+                          be converted to `2022-01-01T00:00:00Z`
+                      remove_at:
+                        type: string
+                        format: date-time
+                        description: >-
+                          Remove users from the room at this time. Overridable
+                          by token. Expects RFC 3339 datetime:
+                          `2022-01-01T23:59:60Z`. Date only: `2022-01-01` will
+                          be converted to `2022-01-01T00:00:00Z`
+                      remove_after_seconds_elapsed:
+                        type: integer
+                        format: int32
+                        description: >-
+                          Remove users after they are in the room for N seconds.
+                          Overridable by token.
+                        example: 120
+                      layout:
+                        type: string
+                        description: >-
+                          The room's initial layout. Defaults to
+                          `grid-responsive`. See documentation for a full list
+                          of supported layouts.
+                        example: grid-responsive
+                      record_on_start:
+                        type: boolean
+                        description: >-
+                          Specifies whether to start recording a Room Session
+                          when one is started for this Room
+                      enable_room_previews:
+                        type: boolean
+                        description: >-
+                          Whether a video with a preview of the content of the
+                          room is to be generated.
+                      audio_video_sync:
+                        type: boolean
+                        description: Enable/disable jitter buffer audio-video sync.
+                        example: true
+                  - type: object
+                    properties:
+                      fps:
+                        type: integer
+                        example: 20
+                        description: Frames Per Second parameter of room video quality
+                      active_session:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            format: uuid
+                            description: Unique ID of the session
+                          room_id:
+                            type: string
+                            format: uuid
+                            description: >-
+                              Unique ID of the Room if the Session was created
+                              from a Room and was not an auto-created Session.
+                          name:
+                            type: string
+                            description: The named identifier of room session.
+                            example: my_example_room
+                          display_name:
+                            type: string
+                            description: >-
+                              Display name of room, no character limitations.
+                              Maxium of 200 characters. Defaults to the value of
+                              name.
+                            example: My Room's Name
+                          join_from:
+                            type: string
+                            format: date-time
+                            description: >-
+                              Room Session does not accept new Members before
+                              this time.
+                          join_until:
+                            type: string
+                            format: date-time
+                            description: >-
+                              Room Session stops accepting new Members at this
+                              time.
+                          remove_at:
+                            type: string
+                            format: date-time
+                            description: Remove Members from the Room Session at this time.
+                          remove_after_seconds_elapsed:
+                            type: integer
+                            format: int32
+                            description: >-
+                              Remove Members after they are in the Room Session
+                              for N seconds.
+                            example: 120
+                          layout:
+                            type: string
+                            description: >-
+                              The Room Session's initial layout. Defaults to
+                              `grid-responsive`. See documentation for a full
+                              list of supported layouts.
+                            example: grid-responsive
+                          max_members:
+                            type: integer
+                            description: >-
+                              The maximum number of members allowed in the room
+                              at a time.
+                            example: 20
+                          fps:
+                            type: integer
+                            example: 20
+                            description: >-
+                              The Room Session's frames per second. Possible
+                              values are `20` or `30`.
+                          quality:
+                            type: string
+                            description: >-
+                              The Room Session's resolution. Possible values are
+                              `720p` or `1080p`.
+                            example: 720p
+                          start_time:
+                            type: string
+                            format: date-time
+                          end_time:
+                            type: string
+                            format: date-time
+                          duration:
+                            type: integer
+                            description: How long, in seconds, the Room Session lasted.
+                            example: 120
+                          status:
+                            type: string
+                            example: completed
+                          record_on_start:
+                            type: boolean
+                            description: >-
+                              Whether a recording was automatically started when
+                              this Room Session began.
+                          enable_room_previews:
+                            type: boolean
+                            description: >-
+                              Whether a video with a preview of the content of
+                              the room is to be generated.
+                          preview_url:
+                            type: string
+                            description: >-
+                              If room previews are enabled and the room session
+                              is in progress, this is the URL of the preview
+                              video.
+                            example: https://...
+                          audio_video_sync:
+                            type: boolean
+                            description: Enable/disable jitter buffer audio-video sync.
+                            example: true
+                            default: false
+                      created_at:
+                        type: string
+                        format: date-time
+                      updated_at:
+                        type: string
+                        format: date-time
+    delete:
+      operationId: delete_room
+      summary: Delete a Room
+      description: |
+        Delete a room.
+
+        #### Permissions
+        The API token must include the following scopes: _Video_.
+      tags:
+        - Rooms
+      parameters:
+        - name: id
+          in: path
+          description: Unique ID of the room
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: No Content
+  /rooms/{id}/streams:
+    get:
+      operationId: list_streams_by_room_id
+      summary: List Streams by Room Id
+      description: |
+        #### Permissions
+        The API token must include the following scopes: _Video_.
+      tags:
+        - Streams
+      parameters:
+        - name: id
+          in: path
+          description: Unique id of a video room
+          required: true
+          schema:
+            type: string
+            format: uuid
+          example: fe4093d9-58c2-4931-b4b9-5679f82652c6
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      allOf:
+                        - type: object
+                          properties:
+                            id:
+                              type: string
+                              format: uuid
+                              description: A unique identifier for the stream
+                        - type: object
+                          properties:
+                            url:
+                              type: string
+                              example: rtmp://broadcaster
+                              description: >-
+                                RTMP or RTMPS url. This must be the address of a
+                                server accepting incoming RTMP/RTMPS streams.
+                            stream_type:
+                              type: string
+                              example: rtmp
+                              description: The type of stream.
+                            width:
+                              type: integer
+                              description: The stream's width.
+                            height:
+                              type: integer
+                              description: The stream's height.
+                            fps:
+                              type: integer
+                              example: '20'
+                              description: The stream's fps
+                            created_at:
+                              type: string
+                              format: date-time
+                            updated_at:
+                              type: string
+                              format: date-time
+    post:
+      operationId: create_stream_by_room_id
+      summary: Create a Stream for a Room
+      description: |
+        #### Permissions
+        The API token must include the following scopes: _Video_.
+      tags:
+        - Streams
+      parameters:
+        - name: id
+          in: path
+          description: Unique id of a video room
+          required: true
+          schema:
+            type: string
+            format: uuid
+          example: fe4093d9-58c2-4931-b4b9-5679f82652c6
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - type: object
+                  properties:
+                    url:
+                      type: string
+                      description: >-
+                        RTMP or RTMPS url. This must be the address of a server
+                        accepting incoming RTMP/RTMPS streams.
+                      example: rtmp://broadcaster
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                        description: A unique identifier for the stream
+                  - type: object
+                    properties:
+                      url:
+                        type: string
+                        example: rtmp://broadcaster
+                        description: >-
+                          RTMP or RTMPS url. This must be the address of a
+                          server accepting incoming RTMP/RTMPS streams.
+                      stream_type:
+                        type: string
+                        example: rtmp
+                        description: The type of stream.
+                      width:
+                        type: integer
+                        description: The stream's width.
+                      height:
+                        type: integer
+                        description: The stream's height.
+                      fps:
+                        type: integer
+                        example: '20'
+                        description: The stream's fps
+                      created_at:
+                        type: string
+                        format: date-time
+                      updated_at:
+                        type: string
+                        format: date-time
+  /room_sessions:
+    get:
+      operationId: list_room_sessions
+      summary: List Room Sessions
+      description: |
+        A list of past and in-progress Room Sessions.
+
+        #### Permissions
+        The API token must include the following scopes: _Video_.
+      parameters:
+        - name: room_id
+          in: query
+          description: Return Sessions started from this Room.
+          required: false
+          schema:
+            type: string
+            format: uuid
+          example: fe4093d9-58c2-4931-b4b9-5679f82652c6
+        - name: room_name
+          in: query
+          description: Return Sessions with a matching room name.
+          required: false
+          schema:
+            type: string
+          example: my_example_room
+        - name: status
+          in: query
+          description: >-
+            Return Sessions currently in this state. Possible values are:
+            completed and in-progress.
+          required: false
+          schema:
+            type: string
+          example: completed
+      tags:
+        - Room Sessions
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  links:
+                    type: object
+                    properties:
+                      self:
+                        type: string
+                      first:
+                        type: string
+                      next:
+                        type: string
+                      prev:
+                        type: string
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+                          description: Unique ID of the session
+                        room_id:
+                          type: string
+                          format: uuid
+                          description: >-
+                            Unique ID of the Room if the Session was created
+                            from a Room and was not an auto-created Session.
+                        name:
+                          type: string
+                          description: The named identifier of room session.
+                          example: my_example_room
+                        display_name:
+                          type: string
+                          description: >-
+                            Display name of room, no character limitations.
+                            Maxium of 200 characters. Defaults to the value of
+                            name.
+                          example: My Room's Name
+                        join_from:
+                          type: string
+                          format: date-time
+                          description: >-
+                            Room Session does not accept new Members before this
+                            time.
+                        join_until:
+                          type: string
+                          format: date-time
+                          description: >-
+                            Room Session stops accepting new Members at this
+                            time.
+                        remove_at:
+                          type: string
+                          format: date-time
+                          description: Remove Members from the Room Session at this time.
+                        remove_after_seconds_elapsed:
+                          type: integer
+                          format: int32
+                          description: >-
+                            Remove Members after they are in the Room Session
+                            for N seconds.
+                          example: 120
+                        layout:
+                          type: string
+                          description: >-
+                            The Room Session's initial layout. Defaults to
+                            `grid-responsive`. See documentation for a full list
+                            of supported layouts.
+                          example: grid-responsive
+                        max_members:
+                          type: integer
+                          description: >-
+                            The maximum number of members allowed in the room at
+                            a time.
+                          example: 20
+                        fps:
+                          type: integer
+                          example: 20
+                          description: >-
+                            The Room Session's frames per second. Possible
+                            values are `20` or `30`.
+                        quality:
+                          type: string
+                          description: >-
+                            The Room Session's resolution. Possible values are
+                            `720p` or `1080p`.
+                          example: 720p
+                        start_time:
+                          type: string
+                          format: date-time
+                        end_time:
+                          type: string
+                          format: date-time
+                        duration:
+                          type: integer
+                          description: How long, in seconds, the Room Session lasted.
+                          example: 120
+                        status:
+                          type: string
+                          example: completed
+                        record_on_start:
+                          type: boolean
+                          description: >-
+                            Whether a recording was automatically started when
+                            this Room Session began.
+                        enable_room_previews:
+                          type: boolean
+                          description: >-
+                            Whether a video with a preview of the content of the
+                            room is to be generated.
+                        preview_url:
+                          type: string
+                          description: >-
+                            If room previews are enabled and the room session is
+                            in progress, this is the URL of the preview video.
+                          example: https://...
+                        audio_video_sync:
+                          type: boolean
+                          description: Enable/disable jitter buffer audio-video sync.
+                          example: true
+                          default: false
+  /room_sessions/{id}:
+    get:
+      operationId: get_room_session
+      summary: Find a Room Session by ID
+      description: |
+        Find a Room Session by ID.
+
+        #### Permissions
+        The API token must include the following scopes: _Video_.
+      parameters:
+        - name: id
+          in: path
+          description: Unique ID of the Room Session
+          required: true
+          schema:
+            type: string
+            format: uuid
+      tags:
+        - Room Sessions
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                    description: Unique ID of the session
+                  room_id:
+                    type: string
+                    format: uuid
+                    description: >-
+                      Unique ID of the Room if the Session was created from a
+                      Room and was not an auto-created Session.
+                  name:
+                    type: string
+                    description: The named identifier of room session.
+                    example: my_example_room
+                  display_name:
+                    type: string
+                    description: >-
+                      Display name of room, no character limitations. Maxium of
+                      200 characters. Defaults to the value of name.
+                    example: My Room's Name
+                  join_from:
+                    type: string
+                    format: date-time
+                    description: Room Session does not accept new Members before this time.
+                  join_until:
+                    type: string
+                    format: date-time
+                    description: Room Session stops accepting new Members at this time.
+                  remove_at:
+                    type: string
+                    format: date-time
+                    description: Remove Members from the Room Session at this time.
+                  remove_after_seconds_elapsed:
+                    type: integer
+                    format: int32
+                    description: >-
+                      Remove Members after they are in the Room Session for N
+                      seconds.
+                    example: 120
+                  layout:
+                    type: string
+                    description: >-
+                      The Room Session's initial layout. Defaults to
+                      `grid-responsive`. See documentation for a full list of
+                      supported layouts.
+                    example: grid-responsive
+                  max_members:
+                    type: integer
+                    description: >-
+                      The maximum number of members allowed in the room at a
+                      time.
+                    example: 20
+                  fps:
+                    type: integer
+                    example: 20
+                    description: >-
+                      The Room Session's frames per second. Possible values are
+                      `20` or `30`.
+                  quality:
+                    type: string
+                    description: >-
+                      The Room Session's resolution. Possible values are `720p`
+                      or `1080p`.
+                    example: 720p
+                  start_time:
+                    type: string
+                    format: date-time
+                  end_time:
+                    type: string
+                    format: date-time
+                  duration:
+                    type: integer
+                    description: How long, in seconds, the Room Session lasted.
+                    example: 120
+                  status:
+                    type: string
+                    example: completed
+                  record_on_start:
+                    type: boolean
+                    description: >-
+                      Whether a recording was automatically started when this
+                      Room Session began.
+                  enable_room_previews:
+                    type: boolean
+                    description: >-
+                      Whether a video with a preview of the content of the room
+                      is to be generated.
+                  preview_url:
+                    type: string
+                    description: >-
+                      If room previews are enabled and the room session is in
+                      progress, this is the URL of the preview video.
+                    example: https://...
+                  audio_video_sync:
+                    type: boolean
+                    description: Enable/disable jitter buffer audio-video sync.
+                    example: true
+                    default: false
+  /room_sessions/{id}/recordings:
+    get:
+      operationId: list_room_recordings_by_session
+      summary: List a Room Session's Recordings
+      description: |
+        A list of Room Recordings for a particular Room Session.
+
+        #### Permissions
+        The API token must include the following scopes: _Video_.
+      parameters:
+        - name: id
+          in: path
+          description: Unique ID of the Room Session
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: media_ttl
+          in: query
+          description: >-
+            Generated media links will be valid for this many seconds. Default
+            is 900 (15 minutes).
+          required: false
+          schema:
+            type: integer
+          example: 900
+      tags:
+        - Room Sessions
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  links:
+                    type: object
+                    properties:
+                      self:
+                        type: string
+                      first:
+                        type: string
+                      next:
+                        type: string
+                      prev:
+                        type: string
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+                          description: Unique ID of the Room Recording
+                        room_session_id:
+                          type: string
+                          format: uuid
+                          description: >-
+                            Unique ID of the Room Session the Room Recording was
+                            made in.
+                        status:
+                          type: string
+                          example: completed
+                        started_at:
+                          type: string
+                          format: date-time
+                          description: Timestamp of when the Room Recording started.
+                        finished_at:
+                          type: string
+                          format: date-time
+                          description: Timestamp of when the Room Recording stopped.
+                        duration:
+                          type: integer
+                          example: 120
+                          description: The length of the Room Recording in seconds.
+                        size_in_bytes:
+                          type: integer
+                          example: 20971520
+                          description: The number of bytes of the Room Recording file.
+                        format:
+                          type: string
+                          example: video/mp4
+                          description: The MIME type of the Room Recording file.
+                        uri:
+                          type: string
+                          description: >-
+                            A temporary URL for accessing your recording file.
+                            This URL, by default, is only valid for 15 minutes.
+                          example: >-
+                            https://files.signalwire.com/temporary/link/to/the/recording/file
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+  /room_sessions/{id}/members:
+    get:
+      operationId: list_room_session_members_by_session
+      summary: List a Room Session's Members
+      description: |
+        A list of Members for a particular Room Session.
+
+        #### Permissions
+        The API token must include the following scopes: _Video_.
+      parameters:
+        - name: id
+          in: path
+          description: Unique ID of the Room Session
+          required: true
+          schema:
+            type: string
+            format: uuid
+      tags:
+        - Room Sessions
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  links:
+                    type: object
+                    properties:
+                      self:
+                        type: string
+                      first:
+                        type: string
+                      next:
+                        type: string
+                      prev:
+                        type: string
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+                          description: Unique ID of the Member
+                        name:
+                          type: string
+                          format: uuid
+                          description: Display name of the Member
+                        room_session_id:
+                          type: string
+                          format: uuid
+                          description: Unique ID of the Room Session.
+                        join_time:
+                          type: string
+                          format: date-time
+                          description: Timestamp of when the Member joined the Room Session
+                        leave_time:
+                          type: string
+                          format: date-time
+                          description: Timestamp of when the Member left the Room Session
+                        duration:
+                          type: integer
+                          example: 120
+                          description: >-
+                            How long the Member stayed in the Room Session, in
+                            seconds.
+  /room_tokens:
+    post:
+      operationId: create_room_token
+      summary: Generate a new Video Room Token
+      description: |
+        Generate a Room Token allowing a client to join a Room.
+
+        #### Permissions
+        The API token must include the following scopes: _Video_.
+      tags:
+        - Room Tokens
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - type: object
+                  required:
+                    - room_name
+                - type: object
+                  properties:
+                    room_name:
+                      type: string
+                      description: >-
+                        Room's unique named identifier. Allowed characters:
+                        A-Za-z0-9_-. Up to 100 characters. The room does not
+                        have to exist when the token is created, but must exist
+                        prior to joining, or ensure auto_create_room is set to
+                        true.
+                      example: my_room
+                    user_name:
+                      type: string
+                      description: >-
+                        A display name to use for the user. Up to 100
+                        characters. (If not supplied, a random alphanumeric
+                        string will be returned for each authorization with this
+                        token.)
+                      example: John Smith
+                    permissions:
+                      type: array
+                      description: >-
+                        A list of permissions, which define what user can do
+                        once they join the room.
+                      items:
+                        type: string
+                      example:
+                        - room.self.audio_mute
+                        - room.self.audio_unmute
+                        - room.self.video_mute
+                        - room.self.video_unmute
+                        - room.self.deaf
+                        - room.self.undeaf
+                        - room.self.set_input_volume
+                        - room.self.set_output_volume
+                        - room.self.set_input_sensitivity
+                    join_from:
+                      type: string
+                      format: date-time
+                      description: >-
+                        The user can't join the room before this time. Expects
+                        RFC 3339 datetime: `2022-01-01T23:59:60Z`. Date only:
+                        `2022-01-01` will be converted to `2022-01-01T00:00:00Z`
+                    join_until:
+                      type: string
+                      format: date-time
+                      description: >-
+                        The user can't join the room after this time. Expects
+                        RFC 3339 datetime: `2022-01-01T23:59:60Z`. Date only:
+                        `2022-01-01` will be converted to `2022-01-01T00:00:00Z`
+                    remove_at:
+                      type: string
+                      format: date-time
+                      description: >-
+                        Remove user from the room at this time. Expects RFC 3339
+                        datetime: `2022-01-01T23:59:60Z`. Date only:
+                        `2022-01-01` will be converted to `2022-01-01T00:00:00Z`
+                    remove_after_seconds_elapsed:
+                      type: integer
+                      description: Remove user after they are in the room for N seconds.
+                      example: 900
+                    join_audio_muted:
+                      type: boolean
+                      description: Whether the user joins the room with their audio muted.
+                      example: false
+                    join_video_muted:
+                      type: boolean
+                      description: Whether the user joins the room with their video muted.
+                      example: false
+                    auto_create_room:
+                      type: boolean
+                      description: >-
+                        By default, if the user tries to use this token to join
+                        a room that doesn't exist, it will be created with
+                        default configuration. Set this to false to require the
+                        room to exist beforehand.
+                      example: false
+                    enable_room_previews:
+                      type: boolean
+                      description: >-
+                        Whether to generate a video with a preview of the
+                        content of the room. This parameter has effect only if
+                        this token auto-creates the room, thus it will be
+                        ignored if the room already exists.
+                      example: true
+                    room_display_name:
+                      type: string
+                      description: >-
+                        Display name used if a room is auto-created when the
+                        token joins. Maximum of 200 characters. Defaults to the
+                        value of room_name.
+                      example: My Room
+                    end_room_session_on_leave:
+                      type: boolean
+                      description: >-
+                        Whether to end the room session when the member using
+                        this token leaves the room.
+                      example: false
+                      default: false
+                    join_as:
+                      type: string
+                      enum:
+                        - audience
+                        - member
+                      example: member
+                      description: >-
+                        Whether the user should join as a member or as a
+                        non-interactive audience participant. Audience
+                        participants cannot send audio or video.
+                      default: member
+                    media_allowed:
+                      type: string
+                      enum:
+                        - all
+                        - video-only
+                        - audio-only
+                      description: Indicates what media the user is allowed to receive.
+                      example: video-only
+                      default: all
+                    room_meta:
+                      type: object
+                      description: Set the room meta.
+                      example:
+                        key: value
+                      default: {}
+                    meta:
+                      type: object
+                      description: Set the member meta.
+                      example:
+                        key: value
+                      default: {}
+                    audio_video_sync:
+                      type: boolean
+                      description: Enable/disable jitter buffer audio-video sync.
+                      example: true
+                      default: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    description: A Room Token to be used by clients to connect to the Room.
+                    example: >-
+                      eyJ0eXAiOiJWUlQiLCJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE2MjIxMjAxMjMsImp0aSI6ImRmMzFjYTQ4LWRiZGMtNGJjZi1hYWU2LTQ1NWEwOGM5NDg2YSIsInN1YiI6IjBjOTdmNjM1LTFjMTMtNGZjMS04NmY3LWJiMmJlODU5ZDhiOSIsInUiOiJKb2huIERvZSIsInIiOiJteV9zdXBlcl9hd2Vzb21lX3Jvb20iLCJzIjpbInJvb20uc2VsZi5hdWRpb191bm11dGUiXSwiYWNyIjp0cnVlLCJqZiI6MTYyMDg5NjQwMCwianUiOjE2MjA5MDU5NjgsInJhdCI6MTYyMDkwMDAwMCwicnNlIjo5MDB9.5mu_H2PjQLtNBbMsBlS0c91EgsDjJzvZUFgj5-tP4VA0VoHZPIGgV_DLRGKt-BqG-DqC5LhpsdMWEFjhVkTBpQ
+        '422':
+          description: Unprocessable Entity. You may have specified invalid parameters.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    description: A list of errors
+                    items:
+                      type: object
+                      properties:
+                        type:
+                          type: string
+                        code:
+                          type: string
+                        message:
+                          type: string
+                        attribute:
+                          type: string
+                        url:
+                          type: string
+  /room_recordings:
+    get:
+      operationId: list_room_recordings
+      summary: List Room Recordings
+      description: |
+        A list of all Room Recordings.
+
+        #### Permissions
+        The API token must include the following scopes: _Video_.
+      parameters:
+        - name: media_ttl
+          in: query
+          description: >-
+            Generated media links will be valid for this many seconds. Default
+            is 900 (15 minutes).
+          required: false
+          schema:
+            type: integer
+          example: 900
+      tags:
+        - Room Recordings
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  links:
+                    type: object
+                    properties:
+                      self:
+                        type: string
+                      first:
+                        type: string
+                      next:
+                        type: string
+                      prev:
+                        type: string
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+                          description: Unique ID of the Room Recording
+                        room_session_id:
+                          type: string
+                          format: uuid
+                          description: >-
+                            Unique ID of the Room Session the Room Recording was
+                            made in.
+                        status:
+                          type: string
+                          example: completed
+                        started_at:
+                          type: string
+                          format: date-time
+                          description: Timestamp of when the Room Recording started.
+                        finished_at:
+                          type: string
+                          format: date-time
+                          description: Timestamp of when the Room Recording stopped.
+                        duration:
+                          type: integer
+                          example: 120
+                          description: The length of the Room Recording in seconds.
+                        size_in_bytes:
+                          type: integer
+                          example: 20971520
+                          description: The number of bytes of the Room Recording file.
+                        format:
+                          type: string
+                          example: video/mp4
+                          description: The MIME type of the Room Recording file.
+                        uri:
+                          type: string
+                          description: >-
+                            A temporary URL for accessing your recording file.
+                            This URL, by default, is only valid for 15 minutes.
+                          example: >-
+                            https://files.signalwire.com/temporary/link/to/the/recording/file
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+  /room_recordings/{id}:
+    get:
+      operationId: get_room_recording
+      summary: Find a Room Recording by ID
+      description: |
+        A detailed summary of a particular Room Recording.
+
+        #### Permissions
+        The API token must include the following scopes: _Video_.
+      parameters:
+        - name: id
+          in: path
+          description: ID of room recording to return
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: media_ttl
+          in: query
+          description: >-
+            Generated media links will be valid for this many seconds. Default
+            is 900 (15 minutes).
+          required: false
+          schema:
+            type: integer
+          example: 900
+      tags:
+        - Room Recordings
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                    description: Unique ID of the Room Recording
+                  room_session_id:
+                    type: string
+                    format: uuid
+                    description: >-
+                      Unique ID of the Room Session the Room Recording was made
+                      in.
+                  status:
+                    type: string
+                    example: completed
+                  started_at:
+                    type: string
+                    format: date-time
+                    description: Timestamp of when the Room Recording started.
+                  finished_at:
+                    type: string
+                    format: date-time
+                    description: Timestamp of when the Room Recording stopped.
+                  duration:
+                    type: integer
+                    example: 120
+                    description: The length of the Room Recording in seconds.
+                  size_in_bytes:
+                    type: integer
+                    example: 20971520
+                    description: The number of bytes of the Room Recording file.
+                  format:
+                    type: string
+                    example: video/mp4
+                    description: The MIME type of the Room Recording file.
+                  uri:
+                    type: string
+                    description: >-
+                      A temporary URL for accessing your recording file. This
+                      URL, by default, is only valid for 15 minutes.
+                    example: >-
+                      https://files.signalwire.com/temporary/link/to/the/recording/file
+                  created_at:
+                    type: string
+                    format: date-time
+                  updated_at:
+                    type: string
+                    format: date-time
+    delete:
+      operationId: delete_room_recording
+      summary: Delete a Room Recording.
+      description: |
+        Delete a Room Recording.
+
+        #### Permissions
+        The API token must include the following scopes: _Video_.
+      tags:
+        - Room Recordings
+      parameters:
+        - name: id
+          in: path
+          description: ID of room recording to return
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: No Content
+  /conferences:
+    post:
+      operationId: create_video_conference
+      summary: Create a Video Conference
+      description: |
+        Create a Video Conference.
+
+        #### Permissions
+        The API token must include the following scopes: _Video_.
+      tags:
+        - Conferences
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - type: object
+                  properties:
+                    name:
+                      type: string
+                      description: >-
+                        A named unique identifier for the room. Allowed
+                        characters: `A-Za-z0-9_-`. Maximum of 100 characters.
+                      example: my_room
+                    display_name:
+                      type: string
+                      description: >-
+                        Display name of the video conference. Maximum of 200
+                        characters. Defaults to the value of name.
+                      example: My Conference's Name
+                    description:
+                      type: string
+                      description: Description of the room. Maximum of 3000 characters.
+                      example: >-
+                        This room will be used for full company all hands
+                        meetings
+                    join_from:
+                      type: string
+                      format: date-time
+                      description: >-
+                        Conference does not accept new participants before this
+                        time. Expects RFC 3339 datetime: `2022-01-01T23:59:60Z`.
+                        Date only: `2022-01-01` will be converted to
+                        `2022-01-01T00:00:00Z`
+                    join_until:
+                      type: string
+                      format: date-time
+                      description: >-
+                        Conference stops accepting new participants at this
+                        time, but keeps running until all participants leave.
+                        Expects RFC 3339 datetime: `2022-01-01T23:59:60Z`. Date
+                        only: `2022-01-01` will be converted to
+                        `2022-01-01T00:00:00Z`
+                    quality:
+                      type: string
+                      description: >-
+                        The conference's resolution. Allowed values are `720p`
+                        or `1080p`. Defaults to `720p`.
+                      example: 720p
+                    layout:
+                      type: string
+                      description: >-
+                        The conference's initial layout. Defaults to
+                        `grid-responsive`. See documentation for a full list of
+                        supported layouts.
+                      example: grid-responsive
+                    size:
+                      type: string
+                      description: >-
+                        The size of the video conference. Allowed values are
+                        `small`, `medium` and `large`. Defaults to `medium`. See
+                        documentation for a list of size limitations.
+                      example: small
+                    record_on_start:
+                      type: boolean
+                      description: >-
+                        Specifies whether to start recording a Conference
+                        Session when one is started for this Conference
+                    enable_room_previews:
+                      type: boolean
+                      description: >-
+                        Whether a video with a preview of the content of the
+                        conference is to be generated.
+                    enable_chat:
+                      type: boolean
+                      description: >-
+                        Enables group chat for all participants of the room.
+                        Defaults to `true`.
+                    dark_primary:
+                      type: string
+                      description: >-
+                        Used for CTA buttons and selected items. Defaults to
+                        `#044EF4`
+                      example: '#044EF4'
+                    dark_background:
+                      type: string
+                      description: Main background color. Defaults to `#FFFFFF`
+                      example: '#FFFFFF'
+                    dark_foreground:
+                      type: string
+                      description: Main foreground color. Defaults to `#1D2127`
+                      example: '#1D2127'
+                    dark_success:
+                      type: string
+                      description: Used for success indications. Defaults to `#17BB58`
+                      example: '#17BB58'
+                    dark_negative:
+                      type: string
+                      description: ' Used for error indications. Defaults to `#F42C50`'
+                      example: '#F42C50'
+                    light_primary:
+                      type: string
+                      description: >-
+                        Used for CTA buttons and selected items. Defaults to
+                        `#044EF4`
+                      example: '#044EF4'
+                    light_background:
+                      type: string
+                      description: Main background color. Defaults to `#FFFFFF`
+                      example: '#FFFFFF'
+                    light_foreground:
+                      type: string
+                      description: Main foreground color. Defaults to `#1D2127`
+                      example: '#1D2127'
+                    light_success:
+                      type: string
+                      description: Used for success indications. Defaults to `#17BB58`
+                      example: '#17BB58'
+                    light_negative:
+                      type: string
+                      description: Used for error indications. Defaults to `#F42C50`
+                      example: '#F42C50'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                        description: A unique identifier for the video conference
+                  - type: object
+                    properties:
+                      name:
+                        type: string
+                        description: >-
+                          A named unique identifier for the room. Allowed
+                          characters: `A-Za-z0-9_-`. Maximum of 100 characters.
+                        example: my_room
+                      display_name:
+                        type: string
+                        description: >-
+                          Display name of the video conference. Maximum of 200
+                          characters. Defaults to the value of name.
+                        example: My Conference's Name
+                      description:
+                        type: string
+                        description: Description of the room. Maximum of 3000 characters.
+                        example: >-
+                          This room will be used for full company all hands
+                          meetings
+                      join_from:
+                        type: string
+                        format: date-time
+                        description: >-
+                          Conference does not accept new participants before
+                          this time. Expects RFC 3339 datetime:
+                          `2022-01-01T23:59:60Z`. Date only: `2022-01-01` will
+                          be converted to `2022-01-01T00:00:00Z`
+                      join_until:
+                        type: string
+                        format: date-time
+                        description: >-
+                          Conference stops accepting new participants at this
+                          time, but keeps running until all participants leave.
+                          Expects RFC 3339 datetime: `2022-01-01T23:59:60Z`.
+                          Date only: `2022-01-01` will be converted to
+                          `2022-01-01T00:00:00Z`
+                      quality:
+                        type: string
+                        description: >-
+                          The conference's resolution. Allowed values are `720p`
+                          or `1080p`. Defaults to `720p`.
+                        example: 720p
+                      layout:
+                        type: string
+                        description: >-
+                          The conference's initial layout. Defaults to
+                          `grid-responsive`. See documentation for a full list
+                          of supported layouts.
+                        example: grid-responsive
+                      size:
+                        type: string
+                        description: >-
+                          The size of the video conference. Allowed values are
+                          `small`, `medium` and `large`. Defaults to `medium`.
+                          See documentation for a list of size limitations.
+                        example: small
+                      record_on_start:
+                        type: boolean
+                        description: >-
+                          Specifies whether to start recording a Conference
+                          Session when one is started for this Conference
+                      enable_room_previews:
+                        type: boolean
+                        description: >-
+                          Whether a video with a preview of the content of the
+                          conference is to be generated.
+                      enable_chat:
+                        type: boolean
+                        description: >-
+                          Enables group chat for all participants of the room.
+                          Defaults to `true`.
+                      dark_primary:
+                        type: string
+                        description: >-
+                          Used for CTA buttons and selected items. Defaults to
+                          `#044EF4`
+                        example: '#044EF4'
+                      dark_background:
+                        type: string
+                        description: Main background color. Defaults to `#FFFFFF`
+                        example: '#FFFFFF'
+                      dark_foreground:
+                        type: string
+                        description: Main foreground color. Defaults to `#1D2127`
+                        example: '#1D2127'
+                      dark_success:
+                        type: string
+                        description: Used for success indications. Defaults to `#17BB58`
+                        example: '#17BB58'
+                      dark_negative:
+                        type: string
+                        description: ' Used for error indications. Defaults to `#F42C50`'
+                        example: '#F42C50'
+                      light_primary:
+                        type: string
+                        description: >-
+                          Used for CTA buttons and selected items. Defaults to
+                          `#044EF4`
+                        example: '#044EF4'
+                      light_background:
+                        type: string
+                        description: Main background color. Defaults to `#FFFFFF`
+                        example: '#FFFFFF'
+                      light_foreground:
+                        type: string
+                        description: Main foreground color. Defaults to `#1D2127`
+                        example: '#1D2127'
+                      light_success:
+                        type: string
+                        description: Used for success indications. Defaults to `#17BB58`
+                        example: '#17BB58'
+                      light_negative:
+                        type: string
+                        description: Used for error indications. Defaults to `#F42C50`
+                        example: '#F42C50'
+                  - type: object
+                    properties:
+                      created_at:
+                        type: string
+                        format: date-time
+                      updated_at:
+                        type: string
+                        format: date-time
+                      active_session:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            format: uuid
+                            description: Unique ID of the session
+                          room_id:
+                            type: string
+                            format: uuid
+                            description: >-
+                              Unique ID of the Room if the Session was created
+                              from a Room and was not an auto-created Session.
+                          name:
+                            type: string
+                            description: The named identifier of room session.
+                            example: my_example_room
+                          display_name:
+                            type: string
+                            description: >-
+                              Display name of room, no character limitations.
+                              Maxium of 200 characters. Defaults to the value of
+                              name.
+                            example: My Room's Name
+                          join_from:
+                            type: string
+                            format: date-time
+                            description: >-
+                              Room Session does not accept new Members before
+                              this time.
+                          join_until:
+                            type: string
+                            format: date-time
+                            description: >-
+                              Room Session stops accepting new Members at this
+                              time.
+                          remove_at:
+                            type: string
+                            format: date-time
+                            description: Remove Members from the Room Session at this time.
+                          remove_after_seconds_elapsed:
+                            type: integer
+                            format: int32
+                            description: >-
+                              Remove Members after they are in the Room Session
+                              for N seconds.
+                            example: 120
+                          layout:
+                            type: string
+                            description: >-
+                              The Room Session's initial layout. Defaults to
+                              `grid-responsive`. See documentation for a full
+                              list of supported layouts.
+                            example: grid-responsive
+                          max_members:
+                            type: integer
+                            description: >-
+                              The maximum number of members allowed in the room
+                              at a time.
+                            example: 20
+                          fps:
+                            type: integer
+                            example: 20
+                            description: >-
+                              The Room Session's frames per second. Possible
+                              values are `20` or `30`.
+                          quality:
+                            type: string
+                            description: >-
+                              The Room Session's resolution. Possible values are
+                              `720p` or `1080p`.
+                            example: 720p
+                          start_time:
+                            type: string
+                            format: date-time
+                          end_time:
+                            type: string
+                            format: date-time
+                          duration:
+                            type: integer
+                            description: How long, in seconds, the Room Session lasted.
+                            example: 120
+                          status:
+                            type: string
+                            example: completed
+                          record_on_start:
+                            type: boolean
+                            description: >-
+                              Whether a recording was automatically started when
+                              this Room Session began.
+                          enable_room_previews:
+                            type: boolean
+                            description: >-
+                              Whether a video with a preview of the content of
+                              the room is to be generated.
+                          preview_url:
+                            type: string
+                            description: >-
+                              If room previews are enabled and the room session
+                              is in progress, this is the URL of the preview
+                              video.
+                            example: https://...
+                          audio_video_sync:
+                            type: boolean
+                            description: Enable/disable jitter buffer audio-video sync.
+                            example: true
+                            default: false
+    get:
+      operationId: list_video_conferences
+      summary: List Video Conferences
+      description: |
+        List Video Conferences.
+
+        #### Permissions
+        The API token must include the following scopes: _Video_.
+      tags:
+        - Conferences
+      parameters:
+        - name: include_active_session
+          in: query
+          description: >-
+            Specifies whether or not to include information about the
+            conference's active session (if any)
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  links:
+                    type: object
+                    properties:
+                      self:
+                        type: string
+                      first:
+                        type: string
+                      next:
+                        type: string
+                      prev:
+                        type: string
+                  data:
+                    type: array
+                    items:
+                      allOf:
+                        - type: object
+                          properties:
+                            id:
+                              type: string
+                              format: uuid
+                              description: A unique identifier for the video conference
+                        - type: object
+                          properties:
+                            name:
+                              type: string
+                              description: >-
+                                A named unique identifier for the room. Allowed
+                                characters: `A-Za-z0-9_-`. Maximum of 100
+                                characters.
+                              example: my_room
+                            display_name:
+                              type: string
+                              description: >-
+                                Display name of the video conference. Maximum of
+                                200 characters. Defaults to the value of name.
+                              example: My Conference's Name
+                            description:
+                              type: string
+                              description: >-
+                                Description of the room. Maximum of 3000
+                                characters.
+                              example: >-
+                                This room will be used for full company all
+                                hands meetings
+                            join_from:
+                              type: string
+                              format: date-time
+                              description: >-
+                                Conference does not accept new participants
+                                before this time. Expects RFC 3339 datetime:
+                                `2022-01-01T23:59:60Z`. Date only: `2022-01-01`
+                                will be converted to `2022-01-01T00:00:00Z`
+                            join_until:
+                              type: string
+                              format: date-time
+                              description: >-
+                                Conference stops accepting new participants at
+                                this time, but keeps running until all
+                                participants leave. Expects RFC 3339 datetime:
+                                `2022-01-01T23:59:60Z`. Date only: `2022-01-01`
+                                will be converted to `2022-01-01T00:00:00Z`
+                            quality:
+                              type: string
+                              description: >-
+                                The conference's resolution. Allowed values are
+                                `720p` or `1080p`. Defaults to `720p`.
+                              example: 720p
+                            layout:
+                              type: string
+                              description: >-
+                                The conference's initial layout. Defaults to
+                                `grid-responsive`. See documentation for a full
+                                list of supported layouts.
+                              example: grid-responsive
+                            size:
+                              type: string
+                              description: >-
+                                The size of the video conference. Allowed values
+                                are `small`, `medium` and `large`. Defaults to
+                                `medium`. See documentation for a list of size
+                                limitations.
+                              example: small
+                            record_on_start:
+                              type: boolean
+                              description: >-
+                                Specifies whether to start recording a
+                                Conference Session when one is started for this
+                                Conference
+                            enable_room_previews:
+                              type: boolean
+                              description: >-
+                                Whether a video with a preview of the content of
+                                the conference is to be generated.
+                            enable_chat:
+                              type: boolean
+                              description: >-
+                                Enables group chat for all participants of the
+                                room. Defaults to `true`.
+                            dark_primary:
+                              type: string
+                              description: >-
+                                Used for CTA buttons and selected items.
+                                Defaults to `#044EF4`
+                              example: '#044EF4'
+                            dark_background:
+                              type: string
+                              description: Main background color. Defaults to `#FFFFFF`
+                              example: '#FFFFFF'
+                            dark_foreground:
+                              type: string
+                              description: Main foreground color. Defaults to `#1D2127`
+                              example: '#1D2127'
+                            dark_success:
+                              type: string
+                              description: >-
+                                Used for success indications. Defaults to
+                                `#17BB58`
+                              example: '#17BB58'
+                            dark_negative:
+                              type: string
+                              description: ' Used for error indications. Defaults to `#F42C50`'
+                              example: '#F42C50'
+                            light_primary:
+                              type: string
+                              description: >-
+                                Used for CTA buttons and selected items.
+                                Defaults to `#044EF4`
+                              example: '#044EF4'
+                            light_background:
+                              type: string
+                              description: Main background color. Defaults to `#FFFFFF`
+                              example: '#FFFFFF'
+                            light_foreground:
+                              type: string
+                              description: Main foreground color. Defaults to `#1D2127`
+                              example: '#1D2127'
+                            light_success:
+                              type: string
+                              description: >-
+                                Used for success indications. Defaults to
+                                `#17BB58`
+                              example: '#17BB58'
+                            light_negative:
+                              type: string
+                              description: >-
+                                Used for error indications. Defaults to
+                                `#F42C50`
+                              example: '#F42C50'
+                        - type: object
+                          properties:
+                            created_at:
+                              type: string
+                              format: date-time
+                            updated_at:
+                              type: string
+                              format: date-time
+                            active_session:
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                                  format: uuid
+                                  description: Unique ID of the session
+                                room_id:
+                                  type: string
+                                  format: uuid
+                                  description: >-
+                                    Unique ID of the Room if the Session was
+                                    created from a Room and was not an
+                                    auto-created Session.
+                                name:
+                                  type: string
+                                  description: The named identifier of room session.
+                                  example: my_example_room
+                                display_name:
+                                  type: string
+                                  description: >-
+                                    Display name of room, no character
+                                    limitations. Maxium of 200 characters.
+                                    Defaults to the value of name.
+                                  example: My Room's Name
+                                join_from:
+                                  type: string
+                                  format: date-time
+                                  description: >-
+                                    Room Session does not accept new Members
+                                    before this time.
+                                join_until:
+                                  type: string
+                                  format: date-time
+                                  description: >-
+                                    Room Session stops accepting new Members at
+                                    this time.
+                                remove_at:
+                                  type: string
+                                  format: date-time
+                                  description: >-
+                                    Remove Members from the Room Session at this
+                                    time.
+                                remove_after_seconds_elapsed:
+                                  type: integer
+                                  format: int32
+                                  description: >-
+                                    Remove Members after they are in the Room
+                                    Session for N seconds.
+                                  example: 120
+                                layout:
+                                  type: string
+                                  description: >-
+                                    The Room Session's initial layout. Defaults
+                                    to `grid-responsive`. See documentation for
+                                    a full list of supported layouts.
+                                  example: grid-responsive
+                                max_members:
+                                  type: integer
+                                  description: >-
+                                    The maximum number of members allowed in the
+                                    room at a time.
+                                  example: 20
+                                fps:
+                                  type: integer
+                                  example: 20
+                                  description: >-
+                                    The Room Session's frames per second.
+                                    Possible values are `20` or `30`.
+                                quality:
+                                  type: string
+                                  description: >-
+                                    The Room Session's resolution. Possible
+                                    values are `720p` or `1080p`.
+                                  example: 720p
+                                start_time:
+                                  type: string
+                                  format: date-time
+                                end_time:
+                                  type: string
+                                  format: date-time
+                                duration:
+                                  type: integer
+                                  description: >-
+                                    How long, in seconds, the Room Session
+                                    lasted.
+                                  example: 120
+                                status:
+                                  type: string
+                                  example: completed
+                                record_on_start:
+                                  type: boolean
+                                  description: >-
+                                    Whether a recording was automatically
+                                    started when this Room Session began.
+                                enable_room_previews:
+                                  type: boolean
+                                  description: >-
+                                    Whether a video with a preview of the
+                                    content of the room is to be generated.
+                                preview_url:
+                                  type: string
+                                  description: >-
+                                    If room previews are enabled and the room
+                                    session is in progress, this is the URL of
+                                    the preview video.
+                                  example: https://...
+                                audio_video_sync:
+                                  type: boolean
+                                  description: >-
+                                    Enable/disable jitter buffer audio-video
+                                    sync.
+                                  example: true
+                                  default: false
+  /conferences/{id}:
+    get:
+      operationId: get_video_conference
+      summary: Find a Video Conference by ID
+      description: |
+        Find a Video Conference by ID.
+
+        #### Permissions
+        The API token must include the following scopes: _Video_.
+      tags:
+        - Conferences
+      parameters:
+        - name: id
+          in: path
+          description: Unique ID of the video conference
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: include_active_session
+          in: query
+          description: >-
+            Specifies whether or not to include information about the
+            conference's active session (if any)
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                        description: A unique identifier for the video conference
+                  - type: object
+                    properties:
+                      name:
+                        type: string
+                        description: >-
+                          A named unique identifier for the room. Allowed
+                          characters: `A-Za-z0-9_-`. Maximum of 100 characters.
+                        example: my_room
+                      display_name:
+                        type: string
+                        description: >-
+                          Display name of the video conference. Maximum of 200
+                          characters. Defaults to the value of name.
+                        example: My Conference's Name
+                      description:
+                        type: string
+                        description: Description of the room. Maximum of 3000 characters.
+                        example: >-
+                          This room will be used for full company all hands
+                          meetings
+                      join_from:
+                        type: string
+                        format: date-time
+                        description: >-
+                          Conference does not accept new participants before
+                          this time. Expects RFC 3339 datetime:
+                          `2022-01-01T23:59:60Z`. Date only: `2022-01-01` will
+                          be converted to `2022-01-01T00:00:00Z`
+                      join_until:
+                        type: string
+                        format: date-time
+                        description: >-
+                          Conference stops accepting new participants at this
+                          time, but keeps running until all participants leave.
+                          Expects RFC 3339 datetime: `2022-01-01T23:59:60Z`.
+                          Date only: `2022-01-01` will be converted to
+                          `2022-01-01T00:00:00Z`
+                      quality:
+                        type: string
+                        description: >-
+                          The conference's resolution. Allowed values are `720p`
+                          or `1080p`. Defaults to `720p`.
+                        example: 720p
+                      layout:
+                        type: string
+                        description: >-
+                          The conference's initial layout. Defaults to
+                          `grid-responsive`. See documentation for a full list
+                          of supported layouts.
+                        example: grid-responsive
+                      size:
+                        type: string
+                        description: >-
+                          The size of the video conference. Allowed values are
+                          `small`, `medium` and `large`. Defaults to `medium`.
+                          See documentation for a list of size limitations.
+                        example: small
+                      record_on_start:
+                        type: boolean
+                        description: >-
+                          Specifies whether to start recording a Conference
+                          Session when one is started for this Conference
+                      enable_room_previews:
+                        type: boolean
+                        description: >-
+                          Whether a video with a preview of the content of the
+                          conference is to be generated.
+                      enable_chat:
+                        type: boolean
+                        description: >-
+                          Enables group chat for all participants of the room.
+                          Defaults to `true`.
+                      dark_primary:
+                        type: string
+                        description: >-
+                          Used for CTA buttons and selected items. Defaults to
+                          `#044EF4`
+                        example: '#044EF4'
+                      dark_background:
+                        type: string
+                        description: Main background color. Defaults to `#FFFFFF`
+                        example: '#FFFFFF'
+                      dark_foreground:
+                        type: string
+                        description: Main foreground color. Defaults to `#1D2127`
+                        example: '#1D2127'
+                      dark_success:
+                        type: string
+                        description: Used for success indications. Defaults to `#17BB58`
+                        example: '#17BB58'
+                      dark_negative:
+                        type: string
+                        description: ' Used for error indications. Defaults to `#F42C50`'
+                        example: '#F42C50'
+                      light_primary:
+                        type: string
+                        description: >-
+                          Used for CTA buttons and selected items. Defaults to
+                          `#044EF4`
+                        example: '#044EF4'
+                      light_background:
+                        type: string
+                        description: Main background color. Defaults to `#FFFFFF`
+                        example: '#FFFFFF'
+                      light_foreground:
+                        type: string
+                        description: Main foreground color. Defaults to `#1D2127`
+                        example: '#1D2127'
+                      light_success:
+                        type: string
+                        description: Used for success indications. Defaults to `#17BB58`
+                        example: '#17BB58'
+                      light_negative:
+                        type: string
+                        description: Used for error indications. Defaults to `#F42C50`
+                        example: '#F42C50'
+                  - type: object
+                    properties:
+                      created_at:
+                        type: string
+                        format: date-time
+                      updated_at:
+                        type: string
+                        format: date-time
+                      active_session:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            format: uuid
+                            description: Unique ID of the session
+                          room_id:
+                            type: string
+                            format: uuid
+                            description: >-
+                              Unique ID of the Room if the Session was created
+                              from a Room and was not an auto-created Session.
+                          name:
+                            type: string
+                            description: The named identifier of room session.
+                            example: my_example_room
+                          display_name:
+                            type: string
+                            description: >-
+                              Display name of room, no character limitations.
+                              Maxium of 200 characters. Defaults to the value of
+                              name.
+                            example: My Room's Name
+                          join_from:
+                            type: string
+                            format: date-time
+                            description: >-
+                              Room Session does not accept new Members before
+                              this time.
+                          join_until:
+                            type: string
+                            format: date-time
+                            description: >-
+                              Room Session stops accepting new Members at this
+                              time.
+                          remove_at:
+                            type: string
+                            format: date-time
+                            description: Remove Members from the Room Session at this time.
+                          remove_after_seconds_elapsed:
+                            type: integer
+                            format: int32
+                            description: >-
+                              Remove Members after they are in the Room Session
+                              for N seconds.
+                            example: 120
+                          layout:
+                            type: string
+                            description: >-
+                              The Room Session's initial layout. Defaults to
+                              `grid-responsive`. See documentation for a full
+                              list of supported layouts.
+                            example: grid-responsive
+                          max_members:
+                            type: integer
+                            description: >-
+                              The maximum number of members allowed in the room
+                              at a time.
+                            example: 20
+                          fps:
+                            type: integer
+                            example: 20
+                            description: >-
+                              The Room Session's frames per second. Possible
+                              values are `20` or `30`.
+                          quality:
+                            type: string
+                            description: >-
+                              The Room Session's resolution. Possible values are
+                              `720p` or `1080p`.
+                            example: 720p
+                          start_time:
+                            type: string
+                            format: date-time
+                          end_time:
+                            type: string
+                            format: date-time
+                          duration:
+                            type: integer
+                            description: How long, in seconds, the Room Session lasted.
+                            example: 120
+                          status:
+                            type: string
+                            example: completed
+                          record_on_start:
+                            type: boolean
+                            description: >-
+                              Whether a recording was automatically started when
+                              this Room Session began.
+                          enable_room_previews:
+                            type: boolean
+                            description: >-
+                              Whether a video with a preview of the content of
+                              the room is to be generated.
+                          preview_url:
+                            type: string
+                            description: >-
+                              If room previews are enabled and the room session
+                              is in progress, this is the URL of the preview
+                              video.
+                            example: https://...
+                          audio_video_sync:
+                            type: boolean
+                            description: Enable/disable jitter buffer audio-video sync.
+                            example: true
+                            default: false
+    put:
+      operationId: update_video_conference
+      summary: Update a Video Conference
+      description: |
+        Update a Video conference.
+
+        #### Permissions
+        The API token must include the following scopes: _Video_.
+      tags:
+        - Conferences
+      parameters:
+        - name: id
+          in: path
+          description: Unique ID of the video conference
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - type: object
+                  properties:
+                    name:
+                      type: string
+                      description: >-
+                        A named unique identifier for the room. Allowed
+                        characters: `A-Za-z0-9_-`. Maximum of 100 characters.
+                      example: my_room
+                    display_name:
+                      type: string
+                      description: >-
+                        Display name of the video conference. Maximum of 200
+                        characters. Defaults to the value of name.
+                      example: My Conference's Name
+                    description:
+                      type: string
+                      description: Description of the room. Maximum of 3000 characters.
+                      example: >-
+                        This room will be used for full company all hands
+                        meetings
+                    join_from:
+                      type: string
+                      format: date-time
+                      description: >-
+                        Conference does not accept new participants before this
+                        time. Expects RFC 3339 datetime: `2022-01-01T23:59:60Z`.
+                        Date only: `2022-01-01` will be converted to
+                        `2022-01-01T00:00:00Z`
+                    join_until:
+                      type: string
+                      format: date-time
+                      description: >-
+                        Conference stops accepting new participants at this
+                        time, but keeps running until all participants leave.
+                        Expects RFC 3339 datetime: `2022-01-01T23:59:60Z`. Date
+                        only: `2022-01-01` will be converted to
+                        `2022-01-01T00:00:00Z`
+                    quality:
+                      type: string
+                      description: >-
+                        The conference's resolution. Allowed values are `720p`
+                        or `1080p`. Defaults to `720p`.
+                      example: 720p
+                    layout:
+                      type: string
+                      description: >-
+                        The conference's initial layout. Defaults to
+                        `grid-responsive`. See documentation for a full list of
+                        supported layouts.
+                      example: grid-responsive
+                    size:
+                      type: string
+                      description: >-
+                        The size of the video conference. Allowed values are
+                        `small`, `medium` and `large`. Defaults to `medium`. See
+                        documentation for a list of size limitations.
+                      example: small
+                    record_on_start:
+                      type: boolean
+                      description: >-
+                        Specifies whether to start recording a Conference
+                        Session when one is started for this Conference
+                    enable_room_previews:
+                      type: boolean
+                      description: >-
+                        Whether a video with a preview of the content of the
+                        conference is to be generated.
+                    enable_chat:
+                      type: boolean
+                      description: >-
+                        Enables group chat for all participants of the room.
+                        Defaults to `true`.
+                    dark_primary:
+                      type: string
+                      description: >-
+                        Used for CTA buttons and selected items. Defaults to
+                        `#044EF4`
+                      example: '#044EF4'
+                    dark_background:
+                      type: string
+                      description: Main background color. Defaults to `#FFFFFF`
+                      example: '#FFFFFF'
+                    dark_foreground:
+                      type: string
+                      description: Main foreground color. Defaults to `#1D2127`
+                      example: '#1D2127'
+                    dark_success:
+                      type: string
+                      description: Used for success indications. Defaults to `#17BB58`
+                      example: '#17BB58'
+                    dark_negative:
+                      type: string
+                      description: ' Used for error indications. Defaults to `#F42C50`'
+                      example: '#F42C50'
+                    light_primary:
+                      type: string
+                      description: >-
+                        Used for CTA buttons and selected items. Defaults to
+                        `#044EF4`
+                      example: '#044EF4'
+                    light_background:
+                      type: string
+                      description: Main background color. Defaults to `#FFFFFF`
+                      example: '#FFFFFF'
+                    light_foreground:
+                      type: string
+                      description: Main foreground color. Defaults to `#1D2127`
+                      example: '#1D2127'
+                    light_success:
+                      type: string
+                      description: Used for success indications. Defaults to `#17BB58`
+                      example: '#17BB58'
+                    light_negative:
+                      type: string
+                      description: Used for error indications. Defaults to `#F42C50`
+                      example: '#F42C50'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                        description: A unique identifier for the video conference
+                  - type: object
+                    properties:
+                      name:
+                        type: string
+                        description: >-
+                          A named unique identifier for the room. Allowed
+                          characters: `A-Za-z0-9_-`. Maximum of 100 characters.
+                        example: my_room
+                      display_name:
+                        type: string
+                        description: >-
+                          Display name of the video conference. Maximum of 200
+                          characters. Defaults to the value of name.
+                        example: My Conference's Name
+                      description:
+                        type: string
+                        description: Description of the room. Maximum of 3000 characters.
+                        example: >-
+                          This room will be used for full company all hands
+                          meetings
+                      join_from:
+                        type: string
+                        format: date-time
+                        description: >-
+                          Conference does not accept new participants before
+                          this time. Expects RFC 3339 datetime:
+                          `2022-01-01T23:59:60Z`. Date only: `2022-01-01` will
+                          be converted to `2022-01-01T00:00:00Z`
+                      join_until:
+                        type: string
+                        format: date-time
+                        description: >-
+                          Conference stops accepting new participants at this
+                          time, but keeps running until all participants leave.
+                          Expects RFC 3339 datetime: `2022-01-01T23:59:60Z`.
+                          Date only: `2022-01-01` will be converted to
+                          `2022-01-01T00:00:00Z`
+                      quality:
+                        type: string
+                        description: >-
+                          The conference's resolution. Allowed values are `720p`
+                          or `1080p`. Defaults to `720p`.
+                        example: 720p
+                      layout:
+                        type: string
+                        description: >-
+                          The conference's initial layout. Defaults to
+                          `grid-responsive`. See documentation for a full list
+                          of supported layouts.
+                        example: grid-responsive
+                      size:
+                        type: string
+                        description: >-
+                          The size of the video conference. Allowed values are
+                          `small`, `medium` and `large`. Defaults to `medium`.
+                          See documentation for a list of size limitations.
+                        example: small
+                      record_on_start:
+                        type: boolean
+                        description: >-
+                          Specifies whether to start recording a Conference
+                          Session when one is started for this Conference
+                      enable_room_previews:
+                        type: boolean
+                        description: >-
+                          Whether a video with a preview of the content of the
+                          conference is to be generated.
+                      enable_chat:
+                        type: boolean
+                        description: >-
+                          Enables group chat for all participants of the room.
+                          Defaults to `true`.
+                      dark_primary:
+                        type: string
+                        description: >-
+                          Used for CTA buttons and selected items. Defaults to
+                          `#044EF4`
+                        example: '#044EF4'
+                      dark_background:
+                        type: string
+                        description: Main background color. Defaults to `#FFFFFF`
+                        example: '#FFFFFF'
+                      dark_foreground:
+                        type: string
+                        description: Main foreground color. Defaults to `#1D2127`
+                        example: '#1D2127'
+                      dark_success:
+                        type: string
+                        description: Used for success indications. Defaults to `#17BB58`
+                        example: '#17BB58'
+                      dark_negative:
+                        type: string
+                        description: ' Used for error indications. Defaults to `#F42C50`'
+                        example: '#F42C50'
+                      light_primary:
+                        type: string
+                        description: >-
+                          Used for CTA buttons and selected items. Defaults to
+                          `#044EF4`
+                        example: '#044EF4'
+                      light_background:
+                        type: string
+                        description: Main background color. Defaults to `#FFFFFF`
+                        example: '#FFFFFF'
+                      light_foreground:
+                        type: string
+                        description: Main foreground color. Defaults to `#1D2127`
+                        example: '#1D2127'
+                      light_success:
+                        type: string
+                        description: Used for success indications. Defaults to `#17BB58`
+                        example: '#17BB58'
+                      light_negative:
+                        type: string
+                        description: Used for error indications. Defaults to `#F42C50`
+                        example: '#F42C50'
+                  - type: object
+                    properties:
+                      created_at:
+                        type: string
+                        format: date-time
+                      updated_at:
+                        type: string
+                        format: date-time
+                      active_session:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            format: uuid
+                            description: Unique ID of the session
+                          room_id:
+                            type: string
+                            format: uuid
+                            description: >-
+                              Unique ID of the Room if the Session was created
+                              from a Room and was not an auto-created Session.
+                          name:
+                            type: string
+                            description: The named identifier of room session.
+                            example: my_example_room
+                          display_name:
+                            type: string
+                            description: >-
+                              Display name of room, no character limitations.
+                              Maxium of 200 characters. Defaults to the value of
+                              name.
+                            example: My Room's Name
+                          join_from:
+                            type: string
+                            format: date-time
+                            description: >-
+                              Room Session does not accept new Members before
+                              this time.
+                          join_until:
+                            type: string
+                            format: date-time
+                            description: >-
+                              Room Session stops accepting new Members at this
+                              time.
+                          remove_at:
+                            type: string
+                            format: date-time
+                            description: Remove Members from the Room Session at this time.
+                          remove_after_seconds_elapsed:
+                            type: integer
+                            format: int32
+                            description: >-
+                              Remove Members after they are in the Room Session
+                              for N seconds.
+                            example: 120
+                          layout:
+                            type: string
+                            description: >-
+                              The Room Session's initial layout. Defaults to
+                              `grid-responsive`. See documentation for a full
+                              list of supported layouts.
+                            example: grid-responsive
+                          max_members:
+                            type: integer
+                            description: >-
+                              The maximum number of members allowed in the room
+                              at a time.
+                            example: 20
+                          fps:
+                            type: integer
+                            example: 20
+                            description: >-
+                              The Room Session's frames per second. Possible
+                              values are `20` or `30`.
+                          quality:
+                            type: string
+                            description: >-
+                              The Room Session's resolution. Possible values are
+                              `720p` or `1080p`.
+                            example: 720p
+                          start_time:
+                            type: string
+                            format: date-time
+                          end_time:
+                            type: string
+                            format: date-time
+                          duration:
+                            type: integer
+                            description: How long, in seconds, the Room Session lasted.
+                            example: 120
+                          status:
+                            type: string
+                            example: completed
+                          record_on_start:
+                            type: boolean
+                            description: >-
+                              Whether a recording was automatically started when
+                              this Room Session began.
+                          enable_room_previews:
+                            type: boolean
+                            description: >-
+                              Whether a video with a preview of the content of
+                              the room is to be generated.
+                          preview_url:
+                            type: string
+                            description: >-
+                              If room previews are enabled and the room session
+                              is in progress, this is the URL of the preview
+                              video.
+                            example: https://...
+                          audio_video_sync:
+                            type: boolean
+                            description: Enable/disable jitter buffer audio-video sync.
+                            example: true
+                            default: false
+    delete:
+      operationId: delete_video_conference
+      summary: Delete a Video Conference
+      description: |
+        Delete a Video Conference.
+
+        #### Permissions
+        The API token must include the following scopes: _Video_.
+      tags:
+        - Conferences
+      parameters:
+        - name: id
+          in: path
+          description: Unique ID of the video conference
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: No Content
+  /conferences/{id}/streams:
+    get:
+      operationId: list_streams_by_conference_id
+      summary: List Streams by Conference
+      description: |
+        #### Permissions
+        The API token must include the following scopes: _Video_.
+      tags:
+        - Streams
+      parameters:
+        - name: id
+          in: path
+          description: Unique id of a video conference
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      allOf:
+                        - type: object
+                          properties:
+                            id:
+                              type: string
+                              format: uuid
+                              description: A unique identifier for the stream
+                        - type: object
+                          properties:
+                            url:
+                              type: string
+                              example: rtmp://broadcaster
+                              description: >-
+                                RTMP or RTMPS url. This must be the address of a
+                                server accepting incoming RTMP/RTMPS streams.
+                            stream_type:
+                              type: string
+                              example: rtmp
+                              description: The type of stream.
+                            width:
+                              type: integer
+                              description: The stream's width.
+                            height:
+                              type: integer
+                              description: The stream's height.
+                            fps:
+                              type: integer
+                              example: '20'
+                              description: The stream's fps
+                            created_at:
+                              type: string
+                              format: date-time
+                            updated_at:
+                              type: string
+                              format: date-time
+    post:
+      operationId: create_stream_by_conference_id
+      summary: Create a Stream for a Conference
+      description: |
+        #### Permissions
+        The API token must include the following scopes: _Video_.
+      tags:
+        - Streams
+      parameters:
+        - name: id
+          in: path
+          description: Unique id of a video conference
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - type: object
+                  properties:
+                    url:
+                      type: string
+                      description: >-
+                        RTMP or RTMPS url. This must be the address of a server
+                        accepting incoming RTMP/RTMPS streams.
+                      example: rtmp://broadcaster
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                        description: A unique identifier for the stream
+                  - type: object
+                    properties:
+                      url:
+                        type: string
+                        example: rtmp://broadcaster
+                        description: >-
+                          RTMP or RTMPS url. This must be the address of a
+                          server accepting incoming RTMP/RTMPS streams.
+                      stream_type:
+                        type: string
+                        example: rtmp
+                        description: The type of stream.
+                      width:
+                        type: integer
+                        description: The stream's width.
+                      height:
+                        type: integer
+                        description: The stream's height.
+                      fps:
+                        type: integer
+                        example: '20'
+                        description: The stream's fps
+                      created_at:
+                        type: string
+                        format: date-time
+                      updated_at:
+                        type: string
+                        format: date-time
+  /conferences/{id}/conference_tokens:
+    get:
+      operationId: list_conference_tokens
+      summary: List Conference Tokens
+      description: |
+        List conference tokens.
+
+        #### Permissions
+        The API token must include the following scopes: _Video_.
+      tags:
+        - Conference Tokens
+      parameters:
+        - name: id
+          in: path
+          description: Unique id of a video conference
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  links:
+                    type: object
+                    properties:
+                      self:
+                        type: string
+                      first:
+                        type: string
+                      next:
+                        type: string
+                      prev:
+                        type: string
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+                          description: Unique ID of the Conference Token
+                        name:
+                          type: string
+                          description: Name of the Conference Token
+                          example: My First Token
+                        token:
+                          type: string
+                          description: Conference Token's randomly generated sequence
+                          example: vpt_62c65414de4d067d07415a7ced8183be
+                        scopes:
+                          type: array
+                          description: List of permissions
+                          items:
+                            type: string
+                            example: room.member.audio_mute
+  /conference_tokens/{id}:
+    get:
+      operationId: get_conference_token
+      summary: Find a Conference Token by ID
+      description: |
+        Find a conference token by ID.
+
+        #### Permissions
+        The API token must include the following scopes: _Video_.
+      tags:
+        - Conference Tokens
+      parameters:
+        - name: id
+          in: path
+          description: Unique ID of the Conference Token
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                    description: Unique ID of the Conference Token
+                  name:
+                    type: string
+                    description: Name of the Conference Token
+                    example: My First Token
+                  token:
+                    type: string
+                    description: Conference Token's randomly generated sequence
+                    example: vpt_62c65414de4d067d07415a7ced8183be
+                  scopes:
+                    type: array
+                    description: List of permissions
+                    items:
+                      type: string
+                      example: room.member.audio_mute
+  /conference_tokens/{id}/reset:
+    post:
+      operationId: reset_conference_token
+      summary: Reset a Conference Token by ID
+      description: |
+        Reset a conference token by ID.
+
+        #### Permissions
+        The API token must include the following scopes: _Video_.
+      tags:
+        - Conference Tokens
+      parameters:
+        - name: id
+          in: path
+          description: Unique ID of the Conference Token
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                    description: Unique ID of the Conference Token
+                  name:
+                    type: string
+                    description: Name of the Conference Token
+                    example: My First Token
+                  token:
+                    type: string
+                    description: Conference Token's randomly generated sequence
+                    example: vpt_62c65414de4d067d07415a7ced8183be
+                  scopes:
+                    type: array
+                    description: List of permissions
+                    items:
+                      type: string
+                      example: room.member.audio_mute
+  /logs:
+    get:
+      operationId: list_logs
+      summary: List Logs
+      description: |
+        List the available logs.
+
+        #### Permissions
+        The API token must include the following scopes: _Video_.
+      tags:
+        - Logs
+      parameters:
+        - name: include_deleted
+          in: query
+          description: Include logs for deleted activity.
+          required: false
+          schema:
+            type: boolean
+          example: false
+        - name: created_before
+          in: query
+          description: Return logs for activity prior to this date.
+          required: false
+          schema:
+            type: string
+          example: '2022-04-30'
+        - name: created_on
+          in: query
+          description: Return logs for activity on this date.
+          required: false
+          schema:
+            type: string
+          example: '2022-04-30'
+        - name: created_after
+          in: query
+          description: Return logs for activity after this date.
+          required: false
+          schema:
+            type: string
+          example: '2022-04-30'
+        - name: page_size
+          in: query
+          description: >-
+            Specify the number of results to return on a single page. The
+            default page size is `50` and the maximum is `1000`.
+          required: false
+          schema:
+            type: integer
+          example: 20
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  links:
+                    type: object
+                    properties:
+                      self:
+                        type: string
+                      first:
+                        type: string
+                      next:
+                        type: string
+                      prev:
+                        type: string
+                  data:
+                    type: array
+                    items:
+                      allOf:
+                        - type: object
+                          properties:
+                            id:
+                              type: string
+                              format: uuid
+                              description: A unique identifier for the log
+                        - type: object
+                          properties:
+                            source:
+                              type: string
+                              description: Source of this log entry.
+                              example: realtime-api
+                            type:
+                              type: string
+                              description: Type of this log entry.
+                              example: video_conference_session
+                            url:
+                              type: string
+                              description: >-
+                                URL for the resource associated with this log
+                                entry (if available)
+                            room_name:
+                              type: string
+                              description: >-
+                                A named unique identifier for the room. Allowed
+                                characters: `A-Za-z0-9_-`. Maximum of 100
+                                characters.
+                              example: my_room
+                            status:
+                              type: string
+                              example: completed
+                            start_time:
+                              type: string
+                              format: date-time
+                            end_time:
+                              type: string
+                              format: date-time
+                            charge:
+                              type: number
+                              example: '0.01'
+                            charge_details:
+                              type: array
+                              description: Details on charges associated with this log.
+                              items:
+                                type: object
+                                properties:
+                                  description:
+                                    type: string
+                                    description: Description for this charge.
+                                  charge:
+                                    type: number
+                                    description: Charged amount.
+                              example: []
+                        - type: object
+                          properties:
+                            created_at:
+                              type: string
+                              format: date-time
+                            updated_at:
+                              type: string
+                              format: date-time
+  /logs/{id}:
+    get:
+      operationId: get_log
+      summary: Find a Log by ID
+      description: |
+        Find a log by ID.
+
+        #### Permissions
+        The API token must include the following scopes: _Video_.
+      tags:
+        - Logs
+      parameters:
+        - name: id
+          in: path
+          description: Unique ID of the log
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                        description: A unique identifier for the log
+                  - type: object
+                    properties:
+                      source:
+                        type: string
+                        description: Source of this log entry.
+                        example: realtime-api
+                      type:
+                        type: string
+                        description: Type of this log entry.
+                        example: video_conference_session
+                      url:
+                        type: string
+                        description: >-
+                          URL for the resource associated with this log entry
+                          (if available)
+                      room_name:
+                        type: string
+                        description: >-
+                          A named unique identifier for the room. Allowed
+                          characters: `A-Za-z0-9_-`. Maximum of 100 characters.
+                        example: my_room
+                      status:
+                        type: string
+                        example: completed
+                      start_time:
+                        type: string
+                        format: date-time
+                      end_time:
+                        type: string
+                        format: date-time
+                      charge:
+                        type: number
+                        example: '0.01'
+                      charge_details:
+                        type: array
+                        description: Details on charges associated with this log.
+                        items:
+                          type: object
+                          properties:
+                            description:
+                              type: string
+                              description: Description for this charge.
+                            charge:
+                              type: number
+                              description: Charged amount.
+                        example: []
+                  - type: object
+                    properties:
+                      created_at:
+                        type: string
+                        format: date-time
+                      updated_at:
+                        type: string
+                        format: date-time
+  /streams/{id}:
+    get:
+      operationId: get_stream
+      summary: Find a Stream by ID
+      description: |
+        #### Permissions
+        The API token must include the following scopes: _Video_.
+      tags:
+        - Streams
+      parameters:
+        - name: id
+          in: path
+          description: Unique ID of the stream
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                        description: A unique identifier for the stream
+                  - type: object
+                    properties:
+                      url:
+                        type: string
+                        example: rtmp://broadcaster
+                        description: >-
+                          RTMP or RTMPS url. This must be the address of a
+                          server accepting incoming RTMP/RTMPS streams.
+                      stream_type:
+                        type: string
+                        example: rtmp
+                        description: The type of stream.
+                      width:
+                        type: integer
+                        description: The stream's width.
+                      height:
+                        type: integer
+                        description: The stream's height.
+                      fps:
+                        type: integer
+                        example: '20'
+                        description: The stream's fps
+                      created_at:
+                        type: string
+                        format: date-time
+                      updated_at:
+                        type: string
+                        format: date-time
+    delete:
+      operationId: delete_stream
+      summary: Delete a Stream
+      description: |
+        #### Permissions
+        The API token must include the following scopes: _Video_.
+      tags:
+        - Streams
+      parameters:
+        - name: id
+          in: path
+          description: Unique ID of the stream
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: No Content
+    put:
+      operationId: update_stream
+      summary: Update a Stream
+      description: |
+        #### Permissions
+        The API token must include the following scopes: _Video_.
+      tags:
+        - Streams
+      parameters:
+        - name: id
+          in: path
+          description: Unique ID of the stream
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - type: object
+                  properties:
+                    url:
+                      type: string
+                      description: >-
+                        RTMP or RTMPS url. This must be the address of a server
+                        accepting incoming RTMP/RTMPS streams.
+                      example: rtmp://broadcaster
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                        description: A unique identifier for the stream
+                  - type: object
+                    properties:
+                      url:
+                        type: string
+                        example: rtmp://broadcaster
+                        description: >-
+                          RTMP or RTMPS url. This must be the address of a
+                          server accepting incoming RTMP/RTMPS streams.
+                      stream_type:
+                        type: string
+                        example: rtmp
+                        description: The type of stream.
+                      width:
+                        type: integer
+                        description: The stream's width.
+                      height:
+                        type: integer
+                        description: The stream's height.
+                      fps:
+                        type: integer
+                        example: '20'
+                        description: The stream's fps
+                      created_at:
+                        type: string
+                        format: date-time
+                      updated_at:
+                        type: string
+                        format: date-time

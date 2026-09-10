@@ -1,0 +1,133 @@
+---
+title: PlayAction
+slug: /dotnet/reference/calling/actions/play
+description: The PlayAction is used to play audio files on a call.
+toc_max_heading_level: 3
+---
+
+[call]: /docs/server-sdk/v2/dotnet/reference/calling/call#play
+[signalwire-relay-calling-callmedia]: /docs/server-sdk/v2/dotnet/reference/calling/call-media
+[signalwire-relay-calling-callplaystate]: /docs/server-sdk/v2/dotnet/reference/calling/call-play-state
+[signalwire-relay-calling-playpauseresult]: /docs/server-sdk/v2/dotnet/reference/calling/results/play-pause
+[signalwire-relay-calling-playresult]: /docs/server-sdk/v2/dotnet/reference/calling/results/play
+[signalwire-relay-calling-playresumeresult]: /docs/server-sdk/v2/dotnet/reference/calling/results/play-resume
+[signalwire-relay-calling-playvolumeresult]: /docs/server-sdk/v2/dotnet/reference/calling/results/play-volume
+[signalwire-relay-calling-stopresult]: /docs/server-sdk/v2/dotnet/reference/calling/results/stop
+
+# SignalWire.Relay.Calling.PlayAction
+
+This object returned from one of the _asynchronous_ [`Play`][call] methods that represent a play operation that is currently active on a call.
+
+## Properties
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `ControlID` | string | The identifier used for controlling the operation. |
+| `Result` | [`SignalWire.Relay.Calling.PlayResult`][signalwire-relay-calling-playresult] | Final result of playing. |
+| `State` | [`SignalWire.Relay.Calling.CallPlayState`][signalwire-relay-calling-callplaystate] | Current state of the play operation. |
+| `Completed` | bool | Whether the play operation has completed. |
+| `Payload` | List&lt;[`SignalWire.Relay.Calling.CallMedia`][signalwire-relay-calling-callmedia]&gt; | Payload sent to Relay to start playing. |
+
+## Methods
+
+### Stop
+
+Stop the action immediately.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+[`SignalWire.Relay.Calling.StopResult`][signalwire-relay-calling-stopresult] - The result object to interact with.
+
+**Examples**
+
+> Start playing an audio file and stop it after 5 seconds.
+
+```csharp
+PlayAction actionPlay = call.PlayAudioAsync("https://cdn.signalwire.com/default-music/welcome.mp3");
+
+Thread.Sleep(5000);
+
+StopResult resultStop = actionPlay.Stop();
+```
+
+### Volume
+
+Change the volume of the action immediately.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `volume` | double | <span className="required-arg">required</span> | The volume from -40dB to +40dB where 0 is unchanged.
+
+**Returns**
+
+[`SignalWire.Relay.Calling.PlayVolumeResult`][signalwire-relay-calling-playvolumeresult] - The result object to interact with.
+
+**Examples**
+
+> Start playing an audio file and change the volume after after 5 seconds.
+
+```csharp
+PlayAction actionPlay = call.PlayAudioAsync("https://cdn.signalwire.com/default-music/welcome.mp3");
+
+Thread.Sleep(5000);
+
+actionPlay.Volume(4.0);
+```
+
+### Pause
+
+Pause playback of the action immediately.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+[`SignalWire.Relay.Calling.PlayPauseResult`][signalwire-relay-calling-playpauseresult] - The result object to interact with.
+
+**Examples**
+
+> Start playing an audio file and pause it after 5 seconds.
+
+```csharp
+PlayAction actionPlay = call.PlayAudioAsync("https://cdn.signalwire.com/default-music/welcome.mp3");
+
+Thread.Sleep(5000);
+
+actionPlay.Pause();
+```
+
+### Resume
+
+Resume playback of the action immediately.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+[`SignalWire.Relay.Calling.PlayResumeResult`][signalwire-relay-calling-playresumeresult] - The result object to interact with.
+
+**Examples**
+
+> Start playing an audio file and pause it after 5 seconds, then resume it after 5 seconds.
+
+```csharp
+PlayAction actionPlay = call.PlayAudioAsync("https://cdn.signalwire.com/default-music/welcome.mp3");
+
+Thread.Sleep(5000);
+
+actionPlay.Pause();
+
+Thread.Sleep(5000);
+
+actionPlay.Resume();
+```

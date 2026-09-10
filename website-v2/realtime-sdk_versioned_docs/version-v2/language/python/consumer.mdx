@@ -1,0 +1,220 @@
+---
+title: Relay.Consumer
+slug: /python/reference/consumer
+toc_max_heading_level: 3
+---
+
+[relay-calling-call]: /docs/server-sdk/v2/python/reference/calling/call
+[relay-client]: /docs/server-sdk/v2/python/reference/relay-client
+[relay-consumer]: /docs/server-sdk/v2/python/reference/consumer
+[relay-messaging-message]: /docs/server-sdk/v2/python/reference/messaging/message
+[relay-task]: /docs/server-sdk/v2/python/reference/task
+
+## Relay.Consumer
+
+A [`Relay.Consumer`][relay-consumer] is a simple object that runs in its own process along side your application to handle calling and messaging events in realtime. RELAY Consumers abstract all the setup of connecting to RELAY and automatically dispatch workers to handle requests. Consumers will receive requests and delegate them to their own worker thread, allowing you to focus on your business logic without having to worry about multi-threading or blocking, everything just works. Think of RELAY Consumers like a background worker system for all your calling and messaging needs.
+
+### Creating Consumers
+
+A RELAY Consumer is a simple object, customized by specifying contexts and event handlers to respond to incoming events.
+
+A consumer has 2 required properties: `project`, `token`, and usually requires at least one `contexts` for incoming events. Project and Token are used to authenticate your Consumer to your SignalWire account. Contexts are a list of contexts you want this Consumer to listen for.
+
+```python
+from signalwire.relay.consumer import Consumer
+
+class CustomConsumer(Consumer):
+  def setup(self):
+    self.project = 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX'
+    self.token = 'PTXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
+    self.contexts = ['default']
+
+  async def ready(self):
+    print('Your consumer is ready!')
+
+  async def on_incoming_call(self, call):
+    result = await call.answer()
+    if result.successful:
+      print('Call answered..')
+
+# Run your consumer..
+consumer = CustomConsumer()
+consumer.run()
+```
+
+### Initializing Consumers
+
+Within `setup` method you set the `project`, `token` and `contexts`. You can also do any initialization work before processing messages. This is useful to do any one-off work that you wouldn't want to do for each and every event, such as setting up logging or connecting to a datastore.
+
+```python
+from signalwire.relay.consumer import Consumer
+
+class CustomConsumer(Consumer):
+  def setup(self):
+    self.project = 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX'
+    self.token = 'PTXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
+    self.contexts = ['support', 'office']
+
+  async def on_incoming_call(self, call):
+    pass
+
+# Run your consumer..
+consumer = CustomConsumer()
+consumer.run()
+```
+
+## Properties
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `client` | [`Relay.Client`][relay-client] | The underlying Relay client object. |
+
+## Event Handlers
+
+Event handlers are where you will write most of your code. They are executed when your consumer receives a matching event for the contexts specified by your Consumer.
+
+### ready
+
+Executed once your Consumer is connected to RELAY and the session has been established.
+
+```python
+from signalwire.relay.consumer import Consumer
+
+class CustomConsumer(Consumer):
+  def setup(self):
+    self.project = 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX'
+    self.token = 'PTXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
+    self.contexts = ['default']
+
+  async def ready(self):
+    result = await self.client.calling.dial(from_number='+1XXXXXXXXXX', to_number='+1YYYYYYYYYY')
+    if result.successful:
+      # Call has been answered and is now active. Use 'result.call' to access the Call object.
+      print(result.call)
+
+# Run your consumer..
+consumer = CustomConsumer()
+consumer.run()
+```
+
+### on_incoming_call
+
+Executed when you receive an inbound call, passes in the inbound [`Call`][relay-calling-call] object.
+
+```python
+from signalwire.relay.consumer import Consumer
+
+class CustomConsumer(Consumer):
+  def setup(self):
+    self.project = 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX'
+    self.token = 'PTXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
+    self.contexts = ['default']
+
+  async def on_incoming_call(self, call):
+    result = await call.answer()
+    if result.successful:
+      print('Call answered..')
+
+# Run your consumer..
+consumer = CustomConsumer()
+consumer.run()
+```
+
+### on_task
+
+Executed with your message sent through a [`Relay.Task`][relay-task].
+
+```python
+from signalwire.relay.consumer import Consumer
+
+class CustomConsumer(Consumer):
+  def setup(self):
+    self.project = 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX'
+    self.token = 'PTXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
+    self.contexts = ['office']
+
+  async def on_task(self, message):
+    print('Handle inbound task in the office context')
+    print(message)
+
+consumer = CustomConsumer()
+consumer.run()
+```
+
+### on_incoming_message
+
+Executed when you receive an inbound SMS or MMS, passes in the inbound [`Message`][relay-messaging-message] object.
+
+```python
+from signalwire.relay.consumer import Consumer
+
+class CustomConsumer(Consumer):
+  def setup(self):
+    self.project = 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX'
+    self.token = 'PTXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
+    self.contexts = ['office']
+
+  async def on_incoming_message(self, message):
+    print('Handle inbound message')
+    print(message)
+
+consumer = CustomConsumer()
+consumer.run()
+```
+
+### on_message_state_change
+
+Executed when a message state changes, passes in the inbound [`Message`][relay-messaging-message] object.
+
+```python
+from signalwire.relay.consumer import Consumer
+
+class CustomConsumer(Consumer):
+  def setup(self):
+    self.project = 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX'
+    self.token = 'PTXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
+    self.contexts = ['office']
+
+  async def on_message_state_change(self, message):
+    print('A message state changed')
+    print(message)
+
+consumer = CustomConsumer()
+consumer.run()
+```
+
+### Cleaning Up on Exit
+
+When a RELAY Consumer shuts down, you have the opportunity to clean up any resources held by the consumer. For example, you could close any open files, network connections, or send a notification to your monitoring service.
+
+Just implement a `teardown` method in your consumer and it will be called during the shutdown procedure.
+
+```python
+from signalwire.relay.consumer import Consumer
+
+class CustomConsumer(Consumer):
+  def setup(self):
+    self.project = 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX'
+    self.token = 'PTXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
+    self.contexts = ['office']
+
+  def teardown(self):
+    print('Consumer teardown..')
+
+  async def on_task(self, message):
+    pass
+
+  async def on_incoming_call(self, call):
+    pass
+
+consumer = CustomConsumer()
+consumer.run()
+```
+
+### Running Consumers
+
+Running a consumer is just like running any Python script, simply execute the script as a separate process and ensure you have `.run()` at the end of your script. The process will stay up until you shut it down.
+
+### Shutting Down Consumers
+
+In order to gracefully shut down a RELAY consumer process, send it the `SIGTERM` signal. Most process supervisors such as Runit, Docker and Kubernetes send this signal when shutting down a process, so using those systems will make things easier.

@@ -1,0 +1,22 @@
+---
+title: "Events"
+slug: /node/reference/pubsub/client/events
+description: Events available on the Client class.
+toc_max_heading_level: 3
+---
+
+[pubsubmessage]: /docs/server-sdk/node/reference/pubsub/pubsub-message
+
+## Events
+
+### onMessageReceived
+
+- **client.pubSub.listen**(`{ onMessageReceived: Callback }`)
+
+Emitted when a message is received on a channel. Your event handler will be called with an instance of [`PubSubMessage`][pubsubmessage].
+
+#### Parameters
+
+<ParamField path="message" type="PubSubMessage" required>
+  The message that has been received. See [`PubSubMessage`][pubsubmessage].
+</ParamField>

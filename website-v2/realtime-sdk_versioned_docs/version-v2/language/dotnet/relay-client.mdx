@@ -1,0 +1,75 @@
+---
+title: SignalWire.Relay.Client
+slug: /dotnet/reference/relay-client
+toc_max_heading_level: 3
+---
+
+[signalwire-relay-callingapi]: /docs/server-sdk/v2/dotnet/reference/calling
+[signalwire-relay-messagingapi]: /docs/server-sdk/v2/dotnet/reference/messaging
+`SignalWire.Relay.Client` is the basic connection to RELAY, allowing you send commands to RELAY and set up handlers for inbound events.
+
+## Constructor
+
+Constructs a client object to interact with RELAY.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `project` | string | <span className="required-arg">required</span> | Project ID from your SignalWire Space |
+| `token` | string | <span className="required-arg">required</span> | Token from your SignalWire Space |
+
+**Examples**
+
+> Create a Client to interact with the RELAY API.
+
+```csharp
+Client client = new Client("my-project-id", "my-project-token");
+```
+
+## Properties
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `Calling` | [**SignalWire.Relay.CallingAPI**][signalwire-relay-callingapi] | Returns a `SignalWire.Relay.CallingAPI` instance associated with the client. |
+| `Messaging` | [**SignalWire.Relay.MessagingAPI**][signalwire-relay-messagingapi] | Returns a `SignalWire.Relay.MessagingAPI` instance associated with the client. |
+
+## Methods
+
+### Connect
+
+Activates the connection to the RELAY API. The connection to RELAY does not happen automatically so that you can setup handlers to events that might occur before the connection is successfully established.
+
+**Returns**
+
+`void`
+
+**Examples**
+
+```csharp
+// Make sure you have attached the listeners you need before connecting the client, or you might miss some events.
+client.Connect()
+```
+
+### Disconnect
+
+Disconnect the client from RELAY.
+
+**Returns**
+
+`void`
+
+**Examples**
+
+```csharp
+client.Disconnect()
+```
+
+## Events
+
+All available events you can attach a listener on.
+
+| Property | Description |
+| :-------- | :----------- |
+| `OnReady` | The client has connected and may proceed with signalwire protocol setup. |
+| `OnDisconnected` | The client has disconnected. |

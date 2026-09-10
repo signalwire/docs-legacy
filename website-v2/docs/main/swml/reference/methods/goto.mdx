@@ -1,0 +1,130 @@
+---
+slug: /swml/reference/goto
+title: goto
+description: Jumps to a defined label in the current SWML section.
+toc_max_heading_level: 3
+---
+
+Jump to a `label` within the current section, optionally based on a condition.
+The `goto` method will only navigate to a label within the same section.
+
+## **Properties**
+
+<ParamField path="goto" type="object" required={true}>
+  An object that accepts the following properties.
+</ParamField>
+
+<Indent>
+
+<ParamField path="goto.label" type="string" required={true}>
+  The label in section to jump to.
+</ParamField>
+
+
+<ParamField path="goto.when" type="string">
+  A JavaScript condition that determines whether to perform the jump. If the condition evaluates to true, the jump is executed. If omitted, the jump is unconditional.
+</ParamField>
+
+
+<ParamField path="goto.max" type="integer" default="100">
+  The maximum number of times to jump, from the minimum of `1` to max `100` jumps.
+</ParamField>
+
+</Indent>
+
+## **Examples**
+
+### Loop with max
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - label: foo
+    - play:
+        url: 'say: This speech will be repeated 4 times.'
+    - goto:
+        label: foo
+        max: 3
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "label": "foo"
+      },
+      {
+        "play": {
+          "url": "say: This speech will be repeated 4 times."
+        }
+      },
+      {
+        "goto": {
+          "label": "foo",
+          "max": 3
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+### Loop if a condition is satisfied
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - label: foo
+    - play:
+        url: 'say: This is some text that will be repeated 4 times.'
+    - set:
+        do_loop: true
+    - goto:
+        label: foo
+        when: do_loop === true
+        max: 3
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "label": "foo"
+      },
+      {
+        "play": {
+          "url": "say: This is some text that will be repeated 4 times."
+        }
+      },
+      {
+        "set": {
+          "do_loop": true
+        }
+      },
+      {
+        "goto": {
+          "label": "foo",
+          "when": "do_loop === true",
+          "max": 3
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>

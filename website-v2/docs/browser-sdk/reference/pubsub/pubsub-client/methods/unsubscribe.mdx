@@ -1,0 +1,30 @@
+---
+title: "unsubscribe"
+slug: /js/reference/pubsub/client/unsubscribe
+description: unsubscribe method for the PubSub.Client class.
+toc_max_heading_level: 3
+---
+
+### unsubscribe
+
+- **unsubscribe**(`channels`): `Promise<void>`
+
+List of channels from which you want to unsubscribe.
+
+#### Parameters
+
+<ParamField path="channels" type="string | string[]" required={true}>
+  The channels to unsubscribe from, either in the form of a string (for one channel) or an array of strings.
+</ParamField>
+
+#### Returns
+
+`Promise<void>`
+
+#### Example
+
+```js
+await pubSub.unsubscribe("my-channel");
+await pubSub.unsubscribe(["chan-2", "chan-3"]);
+```
+

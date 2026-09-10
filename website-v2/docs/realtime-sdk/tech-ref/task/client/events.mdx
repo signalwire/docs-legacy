@@ -1,0 +1,21 @@
+---
+title: "Events"
+slug: /node/reference/task/client/events
+description: Events available on the Client class.
+toc_max_heading_level: 3
+---
+
+
+## Events
+
+### onTaskReceived
+
+- **client.task.listen**(`{ onTaskReceived: Callback }`)
+
+Emitted whenever a task is received. Your event handler receives the payload.
+
+#### Parameters
+
+<ParamField path="payload" type="Record<string, unknown>" required>
+  The message payload.
+</ParamField>

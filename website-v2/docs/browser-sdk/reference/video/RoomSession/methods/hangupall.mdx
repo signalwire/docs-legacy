@@ -1,0 +1,50 @@
+---
+title: "hangupAll"
+slug: /js/reference/video/room-session/hangup-all
+description: hangupAll method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+### hangupAll
+
+- **hangupAll**(): `Promise<void>`
+
+Hangs up the active calls in the `RoomSession` and will send a `REJECT_ALL` message to the rejected participant(s).
+
+#### REJECT_ALL message
+
+When a participant is rejected, the `causeCode` will be `825` and the `cause` will be `REJECT_ALL`.
+Below is an example of the JSON response when a participant is rejected:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": "cbcbe519-39db-4585-9a89-f0e1fdf036e9",
+  "result": {
+    "node_id": "105f2e4f-69a7-4907-bc01-36399fe34bdd@west-us",
+    "result": {
+      "jsonrpc": "2.0",
+      "id": "f4a9c207-e1de-49bb-98bf-e8f4b243c4e0",
+      "result": {
+        "callID": "fc456094-6f0e-44b5-8209-7a474cac7ef7",
+        "message": "CALL ENDED",
+        "causeCode": 825,
+        "cause": "REJECT_ALL"
+      }
+    },
+    "code": "200"
+  }
+}
+```
+
+#### Returns
+
+`Promise<void>`
+
+
+#### Example
+
+```javascript
+await roomSession.hangupAll();
+```
+

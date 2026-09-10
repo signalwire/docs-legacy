@@ -1,0 +1,127 @@
+---
+title: Reject
+sidebar_label: Reject
+slug: /compatibility-api/cxml/reference/voice/reject
+sidebar_position: 1
+toc_max_heading_level: 3
+---
+
+The `<Reject>` verb rejects a call to your SignalWire number. It is effectively an exit statement from the current document, as there is no way to return to any instructions listed after the `<Reject>` verb.
+
+## Verb attributes
+
+<ParamField path="reason" type="string" default="rejected">
+  The `reason` attribute takes in the following values: **busy** and **rejected**. These values specify what message is to be played when SignalWire rejects a call. If this value is set to `busy`, the caller receives a busy signal and the call is terminated with the status `busy`. If this value is set to `rejected`, the call is terminated with the status `no answer`.
+</ParamField>
+
+## Nesting
+
+No other verbs can be nested within `<Reject>` and you cannot nest `<Reject>` within any other verbs.
+
+## Examples
+
+### A simple rejection of a call
+
+<CodeBlocks>
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Reject />
+</Response>
+```
+```javascript title="Node.js"
+const { RestClient } = require("@signalwire/compatibility-api");
+const response = new RestClient.LaML.VoiceResponse();
+
+response.reject();
+console.log(response.toString());
+```
+```csharp
+using Twilio.TwiML;
+using System;
+
+
+class Example
+{
+    static void Main()
+    {
+        var response = new VoiceResponse();
+        response.Reject();
+
+        Console.WriteLine(response.ToString());;
+    }
+}
+```
+```python
+from signalwire.voice_response import VoiceResponse, Reject
+
+response = VoiceResponse()
+response.reject()
+
+print(response)
+```
+```ruby
+require 'signalwire/sdk'
+
+response = Signalwire::Sdk::VoiceResponse.new do |response|
+  response.reject
+end
+
+puts response.to_s
+```
+</CodeBlocks>
+
+SignalWire will reject the call and the caller will receive a standard "This number is not in service" response.
+
+### Busy signal rejection
+
+<CodeBlocks>
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Reject reason="busy" />
+</Response>
+```
+```javascript title="Node.js"
+const { RestClient } = require("@signalwire/compatibility-api");
+const response = new RestClient.LaML.VoiceResponse();
+
+response.reject({ reason: "busy" });
+console.log(response.toString());
+```
+```csharp
+using Twilio.TwiML;
+using System;
+
+
+class Example
+{
+    static void Main()
+    {
+        var response = new VoiceResponse();
+        response.Reject(reason: "busy");
+
+        Console.WriteLine(response.ToString());;
+    }
+}
+```
+```python
+from signalwire.voice_response import VoiceResponse, Reject
+
+response = VoiceResponse()
+response.reject(reason='busy')
+
+print(response)
+```
+```ruby
+require 'signalwire/sdk'
+
+response = Signalwire::Sdk::VoiceResponse.new do |response|
+  response.reject(reason: busy)
+end
+
+puts response.to_s
+```
+</CodeBlocks>
+
+SignalWire will reject the call and the caller will receive a busy signal.

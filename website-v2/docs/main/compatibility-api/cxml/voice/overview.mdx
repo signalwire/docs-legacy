@@ -1,0 +1,271 @@
+---
+title: Voice Overview
+sidebar_label: Overview
+slug: /compatibility-api/cxml/reference/voice
+sidebar_position: 0
+toc_max_heading_level: 3
+---
+
+SignalWire cXML is a set of actions defined in an XML document you can use to tell SignalWire what to do when you receive an incoming call or instructions for outbound calls.
+
+When a call is made to one of your SignalWire phone numbers, SignalWire looks up the SignalWire cXML document from the URL you configured and reads the instructions you provided to determine what to do.
+
+SignalWire cXML allows you to dynamically control what happens, responding with specific instructions based on the caller, time of day, incoming call, and much more.
+
+<Info title="Not making a call? Check out [Messaging XML](/docs/platform/messaging) for more details."/>
+
+### Request for XML
+
+SignalWire makes an HTTP request to your configured endpoint just like a regular web form submission (POST) or page load (GET). The request includes contextual information about the call, allowing you to respond dynamically and fluidly to the call to meet the needs of your application.
+
+You can configure the endpoint URL and HTTP Method in your phone number settings panel on your SignalWire Dashboard, or via the REST API.
+
+### Request parameters
+
+SignalWire sends the following parameters, as either URL query parameters or POST parameters, to your endpoint when it receives a call:
+
+<ParamField path="AccountSid" type="string">
+  The unique ID of the Account this call is associated with.
+</ParamField>
+
+<ParamField path="ApiVersion" type="string">
+  The version of the SignalWire API. Incoming calls use the API version placed on the number called. Outgoing calls use the version of the REST API request.
+</ParamField>
+
+<ParamField path="CallSid" type="string">
+  A unique identifier for the call.
+</ParamField>
+
+<ParamField path="CallStatus" type="string">
+  The status of the call. Can be one of the following values: ringing, in-progress, queued, failed, busy, no-answer, or completed.
+</ParamField>
+
+<ParamField path="Direction" type="string">
+  An identifier to describe the direction of the call: **outbound-dial:** calls launched through the `<Dial>` verb, **outbound-api:** calls launched through the REST API, **inbound:** for inbound calls.
+</ParamField>
+
+<ParamField path="From" type="string">
+  The phone number that sent this call, in E.164 format.
+</ParamField>
+
+<ParamField path="ParentCallSid" type="string">
+  A unique identifier for the call that created this call.
+</ParamField>
+
+<ParamField path="To" type="string">
+  The phone number of the call recipient, in E.164 format.
+</ParamField>
+
+#### CallStatus values
+
+The following are the possible **CallStatus** parameter values. These are also used in `<Dial>`'s **DialCallStatus**:
+
+|         Value |                                                                                   |
+|--------------:|-----------------------------------------------------------------------------------|
+|     `ringing` | The call is ringing.                                                              |
+| `in-progress` | The call was answered and is in progress.                                         |
+|      `queued` | The call is ready and in line to initiate.                                        |
+|      `failed` | The call could not be completed. Usually occurs when phone number does not exist. |
+|        `busy` | The caller encountered a busy signal.                                             |
+|   `no-answer` | The call ended without an answer.                                                 |
+|   `completed` | The call was answered and ended normally.                                         |
+|    `canceled` | The REST API canceled the call while it was ringing or queued.                    |
+
+### Responding to SignalWire
+
+An example of a SignalWire cXML document that reads a message to the caller before playing an audio file:
+
+<CodeBlocks>
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Say>Hello, World!</Say>
+    <Play>https://your-application.com/audio.mp3</Play>
+</Response>
+```
+
+```javascript title="Node.js"
+const { RestClient } = require("@signalwire/compatibility-api");
+const response = new RestClient.LaML.VoiceResponse();
+
+response.say("Hello, World!");
+response.play("https://your-application.com/audio.mp3");
+console.log(response.toString());
+```
+
+```csharp
+using Twilio.TwiML;
+using System;
+
+
+class Example
+{
+    static void Main()
+    {
+        var response = new VoiceResponse();
+        response.Say("Hello, World!");
+        response.Play(new Uri("https://your-application.com/audio.mp3"));
+
+        Console.WriteLine(response.ToString());;
+    }
+}
+```
+
+```python
+from signalwire.voice_response import VoiceResponse, Say, Play
+
+response = VoiceResponse()
+response.say('Hello, World!')
+response.play('https://your-application.com/audio.mp3')
+
+print(response)
+```
+
+```ruby
+require 'signalwire/sdk'
+
+response = Signalwire::Sdk::VoiceResponse.new do |response|
+  response.say(message: 'Hello World!')
+  response.play(url: 'https://your-application.com/audio.mp3')
+end
+
+puts response.to_s
+```
+
+</CodeBlocks>
+
+When a message comes into one of your SignalWire phone numbers, SignalWire makes an HTTP request to the URL endpoint you configured for that number. Your response to that request instructs SignalWire on what to do next.
+
+Responses to the HTTP request are in SignalWire cXML. SignalWire starts at the top of your Compatibility XML document and executes your XML commands in order, from top to bottom.
+
+<Tip title="SignalWire cXML verbs and their attributes are case-sensitive, so using `<play>`instead of `<Play>` will result in an error."/>
+
+#### Status callbacks
+
+SignalWire can send your application callbacks at various lifecycle stages of your call. Status callbacks do not allow you to change the application execution directly, so callbacks do not have to respond with SignalWire cXML, but they allow your application to get updates as a call is happening.
+
+You should respond to any callbacks with a `200 OK` or `204 No Content`, otherwise you will see failures in your application log on SignalWire.
+
+The `StatusCallback` request contains the [Standard Request Parameters](#request-parameters) plus the following optional parameters:
+
+<ParamField path="AudioInMos" type="string">
+  The mean opinion score that helps to determine audio quality. The scale is from 1-5 with 1 being worst and 5 being best.
+</ParamField>
+
+<ParamField path="CallbackSource" type="string">
+  The source of the status callback.
+</ParamField>
+
+<ParamField path="CallDuration" type="integer">
+  The duration, in seconds, of the finished call. Only present on the `completed` event.
+</ParamField>
+
+<ParamField path="CallerName" type="string">
+  The name of the caller. Only available if Caller ID lookup is enabled.
+</ParamField>
+
+<ParamField path="ForwardedFrom" type="string">
+  The number this call was forwarded from.
+</ParamField>
+
+<ParamField path="HangupBy" type="string">
+  An indicator of which number ended the call.
+</ParamField>
+
+<ParamField path="HangupDirection" type="string">
+  An indicator of which direction ended the call.
+</ParamField>
+
+<ParamField path="RecordingDuration" type="integer">
+  The duration, in seconds, of the recording.
+</ParamField>
+
+<ParamField path="RecordingSid" type="string">
+  The unique identifier for the audio recording.
+</ParamField>
+
+<ParamField path="RecordingUrl" type="string">
+  The URL of the recorded audio call.
+</ParamField>
+
+<ParamField path="SequenceNumber" type="integer">
+  The order in which events occur. Starts at 0. Although events are fired in order, they each take time and may not appear in the order you expect.
+</ParamField>
+
+<ParamField path="Timestamp" type="string">
+  The timestamp, in RFC 2822 format, of when the event occurred.
+</ParamField>
+
+## Instructions
+
+Instructions (verbs and nouns) tell SignalWire what actions to take during a call. They are executed sequentially, so one instruction must complete fully before the next one is executed. Some instructions have optional attributes that can override the flow of execution, allowing you to dynamically change what happens based on events within the call.
+
+All instructions are case-sensitive, so calling `<ThisAction>` is different from calling `<thisaction>`.
+
+### Call actions
+
+The following instructions cause the specified action to take place during the call:
+
+<CardGroup cols={3}>
+  <Card title="Connect" icon="plug" href="/docs/compatibility-api/cxml/reference/voice/connect">
+    Connect a call to another resource like a video room or stream.
+  </Card>
+  <Card title="Denoise" icon="waveform-lines" href="/docs/compatibility-api/cxml/reference/voice/denoise">
+    Enable or disable noise reduction.
+  </Card>
+  <Card title="Dial" icon="phone-arrow-up-right" href="/docs/compatibility-api/cxml/reference/voice/dial">
+    Initiate a call to another phone number.
+  </Card>
+  <Card title="Echo" icon="repeat" href="/docs/compatibility-api/cxml/reference/voice/echo">
+    Echo audio back to the call.
+  </Card>
+  <Card title="Gather" icon="keyboard" href="/docs/compatibility-api/cxml/reference/voice/gather">
+    Collect input from the caller as pressed digits or speech.
+  </Card>
+  <Card title="Pay" icon="credit-card" href="/docs/compatibility-api/cxml/reference/voice/pay">
+    Securely collect payment information during a call.
+  </Card>
+  <Card title="Play" icon="circle-play" href="/docs/compatibility-api/cxml/reference/voice/play">
+    Play an audio file in the call.
+  </Card>
+  <Card title="Record" icon="circle-dot" href="/docs/compatibility-api/cxml/reference/voice/record">
+    Record and save the audio in the call.
+  </Card>
+  <Card title="Say" icon="comment" href="/docs/compatibility-api/cxml/reference/voice/say">
+    Read the supplied text into the call.
+  </Card>
+  <Card title="Sms" icon="message" href="/docs/compatibility-api/cxml/reference/voice/sms">
+    Send an SMS message during a call.
+  </Card>
+  <Card title="Stream" icon="tower-broadcast" href="/docs/compatibility-api/cxml/reference/voice/stream">
+    Stream a call to a websocket.
+  </Card>
+</CardGroup>
+
+### Call control
+
+The following instructions control what happens to the call itself:
+
+<CardGroup cols={3}>
+  <Card title="Enqueue" icon="bars-staggered" href="/docs/compatibility-api/cxml/reference/voice/enqueue">
+    Place the call into a queue.
+  </Card>
+  <Card title="Hangup" icon="phone-slash" href="/docs/compatibility-api/cxml/reference/voice/hangup">
+    Disconnect the call.
+  </Card>
+  <Card title="Leave" icon="right-from-bracket" href="/docs/compatibility-api/cxml/reference/voice/leave">
+    Remove the call from the queue it is currently in.
+  </Card>
+  <Card title="Pause" icon="circle-pause" href="/docs/compatibility-api/cxml/reference/voice/pause">
+    Wait before continuing to execute further instructions.
+  </Card>
+  <Card title="Redirect" icon="arrows-turn-right" href="/docs/compatibility-api/cxml/reference/voice/redirect">
+    Stop executing the current document and start executing another.
+  </Card>
+  <Card title="Refer" icon="share" href="/docs/compatibility-api/cxml/reference/voice/refer">
+    Send SIP REFER to transfer the call from SignalWire control.
+  </Card>
+  <Card title="Reject" icon="ban" href="/docs/compatibility-api/cxml/reference/voice/reject">
+    Decline an incoming call.
+  </Card>
+</CardGroup>

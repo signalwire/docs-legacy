@@ -1,0 +1,20 @@
+---
+title: AnswerResult
+slug: /dotnet/reference/calling/results/answer
+description: The AnswerResult object is returned after an answer operation.
+toc_max_heading_level: 3
+---
+
+[call]: /docs/server-sdk/v2/dotnet/reference/calling/call#answer
+[signalwire-relay-event]: /docs/server-sdk/v2/dotnet/reference/event
+
+# SignalWire.Relay.Calling.AnswerResult
+
+This object returned from [`Answer`][call] method.
+
+## Properties
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `Successful` | bool | Indicates the action has completed successfully. |
+| `Event` | [`SignalWire.Relay.Event`][signalwire-relay-event] | The last event to complete the operation. |

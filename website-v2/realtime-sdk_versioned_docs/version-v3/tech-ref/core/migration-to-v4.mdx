@@ -1,0 +1,714 @@
+---
+title: Upgrading to RELAY v4
+sidebar_label: Migration to v4
+slug: /node/guides/realtime-relay-v4-vs-v3
+description: Easily upgrade to the version 4 of the Realtime SDK.
+toc_max_heading_level: 3
+layout: guide
+---
+
+[automated-appointment-reminders]: https://signalwire.com/blogs/developers/build-a-call-appointment-reminder-using-signalwire-relay
+[interactive-voice-response]: https://signalwire.com/blogs/industry/what-is-ivr-interactive-voice-response
+
+_Read this article for a breakdown of the upgrades in Version 4 of
+SignalWire's flagship RELAY product, as well as code comparisons to
+show how v4 will make development **easier**, **more intuitive**,
+and **more efficient**._
+
+---
+
+## **Introduction**
+
+With RELAY, SignalWire is building the next generation of interactive
+communication APIs. RELAY arms developers with the most powerful and
+flexible tools to build cutting-edge communication applications using
+new real-time web service protocols.
+
+Version 4 of RELAY delivers the next chapter in this evolution of
+interactive communication. This upgrade is not just a step but a
+significant leap forward. RELAY v4 introduces a plethora of
+enhancements and new features that streamline the development process,
+expand capabilities, and offer unprecedented control and flexibility.
+
+---
+
+## **Unified Client Architecture**
+
+For the first time, RELAY v4 introduces a Unified Client Architecture.
+The new unified client evolves RELAY's system design, streamlining
+the way clients are handled for different functionalities.
+
+<Tip>
+
+In these examples, notice how the **Unified Client** for all
+namespaces (like voice, messaging, and so on) reduces complexity and
+redundancy in your code.
+
+</Tip>
+
+Let's explore this by comparing code examples from both versions:
+
+### RELAY v3: Separate Clients for Each Namespace
+
+- In RELAY v3, you needed to create a separate client for each namespace. For example, if you were using both voice and messaging functionalities, you would establish individual clients for each.
+
+**Setting Up Multiple Clients in v3:**
+
+```javascript
+const { Voice, Messaging } = require("@signalwire/node");
+
+// define voice client
+const voice = new Voice.Client({
+  project: "<project-id>",
+  token: "<project-token>",
+  contexts: ["<context>"],
+});
+
+// define messaging client
+const message = new Messaging.Client({
+  project: "<project-id>",
+  token: "<project-token>",
+  contexts: ["<context>"],
+});
+```
+
+### RELAY v4: Unified Client for All Functionalities
+
+- In RELAY v4, a single client instance provides access to all namespaces, simplifying the development process and reducing code complexity. V4's unified client architecture increases system maintainability and efficiency, consolodating and integrating the RELAY ecosystem's many different communicactions functionalities.
+- This shift in architecture reflects a more modern and developer-friendly approach, focusing on ease of integration and simplicity, which are key in modern development environments.
+
+**Setting Up a Single Client in v4:**
+
+```javascript
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" });
+
+// Access voice functionalities through the unified client
+const voiceClient = client.voice;
+const messagingClient = client.messaging;
+```
+
+---
+
+## **Event Listening**
+
+A pivotal enhancement in RELAY v4 over its predecessor is the advanced method
+of listening to events. While RELAY v3 provided ways to listen to events with the `.on` method,
+it was limited to events that occurred directly on the `Call` or `RoomSession`.
+
+RELAY v4 introduces a new approach, offering more granular control over applications by allowing
+listening to events not only on the `Call` and `RoomSession` but also on particular sessions.
+This section compares these two approaches to highlight the advancements in event handling in RELAY v4.
+
+### Event Listening in RELAY v3:
+
+- In RELAY v3, the .on method was used to listen to events, as shown in the following example:
+
+**RELAY v3: Event Listening Example**
+
+```javascript
+import { Voice } from "@signalwire/realtime-api";
+
+const client = new Voice.Client({
+  project: "<project-id>",
+  token: "<api-token>",
+  contexts: ["office"],
+});
+
+client.on("call.received", async (call) => {
+  console.log("Got call", call.from, call.to);
+
+  try {
+    await call.answer();
+    console.log("Inbound call answered");
+
+    await call.playTTS({ text: "Hello! This is a test call." });
+  } catch (error) {
+    console.error("Error answering inbound call", error);
+  }
+});
+```
+
+This method provided straightforward event handling but was somewhat limited in scope and flexibility.
+
+What if you wanted to listen to events on a particular session, such as a `Collect` or `Playback` session?
+How would you differentiate between events on different sessions? RELAY v3 didn’t provide a way to do this.
+
+### Advanced Event Listening in RELAY v4:
+
+- RELAY v4 enhances event listening capabilities by introducing a new method/parameter (`listen`) on particular sessions like
+  `Collects`, `Recordings`, `Playback`, `Detects`, etc. This is illustrated in the following v4 code example:
+
+**RELAY v4: Advanced Event Listening Example**
+
+```javascript
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" });
+
+const voiceClient = client.voice;
+
+// Setup a Voice Client and listen for incoming calls
+await voiceClient.listen({
+  topics: ["office"],
+  onCallReceived: async (call) => {
+    call.answer();
+    console.log("Call received", call.id);
+
+    // Start a call collect session
+    await call
+      .collect({
+        digits: {
+          max: 4,
+          digitTimeout: 10,
+          terminators: "#",
+        },
+        partialResults: true,
+        sendStartOfInput: true,
+        listen: {
+          onStarted: () => {
+            console.log("Collect started");
+          },
+          onInputStarted: (collect) => {
+            console.log("Collect input started:", collect.result);
+          },
+          onUpdated: (collect) => {
+            console.log("Collect updated:", collect.result);
+          },
+          onFailed: (collect) => {
+            console.log("Collect failed:", collect.result);
+          },
+          onEnded: async (collect) => {
+            console.log("Collect ended:", collect.result);
+
+            // Play back the digits collected
+            await call.playTTS({ text: `You entered ${collect.digits}` });
+            call.hangup();
+          },
+        },
+      })
+      .onStarted();
+  },
+});
+```
+
+The v4 approach, using `listen` both as a method and a parameter,
+provides more comprehensive event handling. It allows for listening to a broader range
+of events and offers more detailed control over the application's behavior in response to these events.
+
+This comparison underscores the significant advancements in event handling from RELAY v3 to RELAY v4,
+marking a leap forward in the flexibility and control available to developers.
+
+---
+
+## **Promise Resolution**
+
+One of the key advancements in RELAY v4 is the enhanced control over promise resolution.
+
+To accomplish this, RELAY v4 introduces new methods that allow developers to specify exactly when a promise should resolve.
+These methods include `.onStarted()`, `.onEnded()`.
+
+Let’s take a closer look at these methods:
+
+- **`.onStarted():`** This method allows a promise to resolve as soon as
+  the operation starts. This is particularly useful in scenarios where
+  you need to perform other actions immediately after the initiation
+  of an operation, without waiting for its completion.
+
+- **`.onEnded():`** Conversely, the `.onEnded()` method ensures that the
+  promise resolves only after the operation has fully completed. This
+  is beneficial when subsequent actions depend on the successful
+  completion of the operation.
+
+### Promise Resolution in RELAY v3 and v4
+
+In RELAY v3, the resolution of promises was tied directly to the
+initiation of an action. This meant that developers had to wait for the promise to
+resolve before they could proceed with subsequent actions. While this
+approach was effective, it offered limited flexibility and control
+over the timing of promise resolution.
+
+RELAY v4 introduces advanced promise resolution methods, giving
+developers unprecedented control over when a promise should resolve.
+This allows for more dynamic and responsive application behavior,
+and offers a more granular and flexible approach to managing
+asynchronous operations. By default, promises resolve when an action is completed.
+
+Let’s illustrate this with examples from both versions:
+
+**RELAY v3: Promise Resolution Example**
+
+In RELAY v3, the `.ended` method on a `collect` session was used to resolve the promise when the collect session ended.
+Developers had to await the resolution of the promise before proceeding.
+
+```javascript
+const collect = await call.collect({
+  digits: {
+    max: 4,
+    digitTimeout: 10,
+    terminators: "#",
+  },
+});
+await collect.ended();
+console.log("Collect ended:", collect.result);
+```
+
+**RELAY v4: Promise Resolution Example**
+
+In contrast, RELAY v4 allows developers to use the `.onEnded` method to resolve the promise when the `collect` session ends.
+This can be done without awaiting the resolution of the promise, allowing subsequent actions to proceed in parallel.
+
+```javascript
+const collect = await call
+  .collect({
+    digits: {
+      max: 4,
+      digitTimeout: 10,
+      terminators: "#",
+    },
+  })
+  .onEnded();
+console.log("Collect ended:", collect.result);
+```
+
+This enhanced promise resolution capability is a testament to the advancements in RELAY v4, offering developers a more granular and flexible approach to managing asynchronous operations.
+
+---
+
+## **Detailed Code Comparison: RELAY v3 and RELAY v4**
+
+Now that we've explored the high-level differences between RELAY v3 and RELAY v4 client,
+let's dive into a detailed code comparison. We'll start with a simple example of making a phone call using RELAY v3, then we'll show how the same functionality is achieved in RELAY v4.
+
+### Voice
+
+SignalWire's Voice namespace has many available methods to help you build powerful and full-featured voice applications like an [Interactive Voice Response][interactive-voice-response] (IVR) and [automated appointment reminders][automated-appointment-reminders].
+
+We will utilize several of these methods as we demonstrate how to make, receive, and record calls. We will even look at more complex methods like playing text-to-speech messages over an audio track. Then you can mix and match any of these methods to best suit your needs.
+
+#### Making a Phone Call
+
+Let's start with a simple example of making a phone call using RELAY v3. We'll use the `call` method to initiate a call to a phone number.
+We'll also use the `on` method to listen for events and log them to the console.
+
+**RELAY v3: Making a Phone Call**
+
+```javascript
+import { Voice } from "@signalwire/realtime-api";
+
+const client = new Voice.Client({
+  project: "<project-id>", // SignalWire Project ID Here
+  token: "<auth-token>", // SignalWire API Auth Token Here
+  contexts: ["<context>"],
+});
+
+try {
+  const call = await client.dialPhone({
+    from: "+1XXXXXXXXXX", // Must be a number in your SignalWire Space
+    to: "+1YYYYYYYYYY",
+  });
+
+  console.log(call.device);
+
+  call.on("answered", () => {
+    console.log("Call answered");
+  });
+} catch (error) {
+  console.error(error);
+}
+```
+
+**RELAY v4: Making a Phone Call**
+
+```javascript
+import { SignalWire, Voice } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" });
+
+const voiceClient = client.voice;
+
+try {
+  const call = await voiceClient.dialPhone({
+    from: "+YYYYYYYYYY", // Must be a number in your SignalWire Space
+    to: "+XXXXXXXXXX",
+    timeout: 30,
+  });
+  console.log("Call answered.", call);
+} catch (e) {
+  console.log("Call not answered.", e);
+}
+```
+
+#### Receiving a Phone Call
+
+Now let's look at how to receive a phone call using RELAY v3.
+We'll use the `answer` method to answer an incoming call, then we'll use the `play` method to play a text-to-speech message to the caller.
+
+**RELAY v3: Receiving a Phone Call**
+
+```javascript
+import { Voice } from "@signalwire/realtime-api";
+const client = new Voice.Client({
+  project: "<project-id>", // SignalWire Project ID Here
+  token: "<auth-token>", // SignalWire API Auth Token Here
+  contexts: ["<context>"],
+});
+client.on("call.received", async (call) => {
+  try {
+    await call.answer();
+    console.log("Inbound call answered");
+    call.hangup();
+  } catch (error) {
+    console.error("Error answering inbound call", error);
+  }
+});
+```
+
+**RELAY v4: Receiving a Phone Call**
+
+```javascript
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" });
+
+const voiceClient = client.voice;
+
+await voiceClient.listen({
+  topics: ["office"],
+  onCallReceived: async (call) => {
+    await call.answer();
+    console.log("Inbound call answered");
+    call.hangup();
+  },
+});
+```
+
+#### Playing a Text-to-Speech Message over Audio
+
+Now let's look at how to play a text-to-speech message over an audio track using RELAY v3.
+As stated above, in RELAY v3, we were unable to listen to events on particular sessions. The best way to achieve this was to use the `on`
+method to listen for events on the `Call` object, or to use the `.ended` method on the `Playback` object to see when the playback has ended.
+
+**RELAY v3: Playing a Text-to-Speech Message over Audio**
+
+```javascript
+import { Voice } from "@signalwire/realtime-api";
+const client = new Voice.Client({
+  project: "<project-id>", // SignalWire Project ID Here
+  token: "<auth-token>", // SignalWire API Auth Token Here
+  contexts: ["<context>"],
+});
+
+client.on("call.received", async (call) => {
+  try {
+    await call.answer();
+    console.log("Inbound call answered");
+    const playAction = await call.playTTS({ text: "Welcome to SignalWire!" });
+    await playAction.ended();
+    console.log("playAction 1 has finished!");
+    const playAction2 = await call.playTTS({
+      text: "Now playing playAction 2 and then ending call...",
+    });
+    await playAction2.ended();
+    console.log("playAction 2 has finished!");
+    await call.hangup();
+  } catch (error) {
+    console.error("Error answering inbound call", error);
+  }
+});
+```
+
+**RELAY v4: Playing a Text-to-Speech Message over Audio**
+
+In RELAY v4, we can listen to events on particular sessions. This allows us to listen to events on the `Playback` object,
+which is a session that is returned when we call the `playTTS` method.
+
+```javascript
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({
+  project: `<project-id>`, // SignalWire Project ID Here
+  token: "<auth-token>", // SignalWire API Auth Token Here
+});
+
+const voiceClient = client.voice;
+
+await voiceClient.listen({
+  topics: ["office"],
+  onCallReceived: async (call) => {
+    call.answer();
+    console.log("Inbound call answered");
+
+    // Play a TTS message
+    await call
+      .playTTS({
+        text: "Welcome to SignalWire!",
+        listen: {
+          onStarted: () => {
+            console.log("playback has started!");
+          },
+          onEnded: async () => {
+            console.log("playback has finished!");
+            await call.playTTS({
+              text: "Now playing playAction 2 and then ending call...",
+            });
+            call.hangup();
+          },
+        },
+      })
+      .onStarted();
+  },
+});
+```
+
+---
+
+### Messaging
+
+Messaging is much less complex than voice because the only interactive methods available are sending and receiving.
+So, let’s look at the differences in examples of outbound messages and inbound messages.
+
+#### Sending an Outbound Message
+
+Let's start with a simple example of sending an outbound message using RELAY v3. We'll use the `send` method to send a message to a phone number.
+
+**RELAY v3: Sending an Outbound Message**
+
+```javascript
+import { Messaging } from "@signalwire/realtime-api";
+const client = new Messaging.Client({
+  project: "<project-id>", // SignalWire Project ID Here
+  token: "<api-token>", // SignalWire API Auth Token Here
+  contexts: ["<context>"],
+});
+async function main() {
+  let sendResult = await client.send({
+    context: "<context>",
+    from: "+1XXXXXXXXXX", // Must be a number in your SignalWire Space
+    to: "+1YYYYYYYYYY",
+    body: "Hello World!",
+  });
+  console.log("Message ID:", sendResult.messageId);
+}
+main().catch(console.error);
+```
+
+**RELAY v4: Sending an Outbound Message**
+
+```javascript
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" });
+
+let messageClient = client.messaging;
+
+try {
+  const sendResult = await messageClient.send({
+    from: "+1xxx",
+    to: "+1yyy",
+    body: "Hello World!",
+  });
+  console.log("Message ID: ", sendResult.messageId);
+} catch (e) {
+  console.error(e.message);
+}
+```
+
+#### Receiving an Inbound Message
+
+Now let's look at how to receive an inbound message using RELAY v3. We'll use the `on` method to listen for events and log them to the console.
+
+**RELAY v3: Receiving an Inbound Message**
+
+```javascript
+import { Messaging } from "@signalwire/realtime-api";
+
+const client = new Messaging.Client({
+  project: "<project-id>", // SignalWire Project ID Here
+  token: "<api-token>", // SignalWire API Auth Token Here
+  contexts: ["<context>"],
+});
+
+client.on("message.received", async (message) => {
+  console.log("Message received", message);
+});
+```
+
+For RELAY v4, we can listen for incoming messages using the `listen` method.
+
+**RELAY v4: Receiving an Inbound Message**
+
+```javascript
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" });
+
+let messageClient = client.messaging;
+
+await messageClient.listen({
+  topics: ["office"],
+  onMessageReceived: async (message) => {
+    console.log("Message received", message);
+  },
+});
+```
+
+---
+
+### Chat
+
+The Chat namespace is used to create and manage chat rooms, send and receive messages, and manage users in a chat room.
+We will look at how to send a message and listen for incoming messages.
+
+#### Chat Example
+
+In this chat example, we will look at how to send a messages, listen for incoming messages, and listen for when a member joins or leaves the chat room.
+The below examples will demonstrate how both RELAY v3 and RELAY v4 handle these functionalities.
+
+**RELAY v3: Chat Example**
+
+```javascript
+import { Chat } from "@signalwire/realtime-api";
+
+// Create a new chat client
+const client = new Chat.Client({
+  project: "<project-id>", // SignalWire Project ID Here
+  token: "<api-token>", // SignalWire API Auth Token Here
+});
+
+// Subscribe to a chat channel
+await client.subscribe("channel1");
+
+// Listen for when a member joins the chat
+client.on("member.joined", async (member) => {
+  console.log("Member joined chat", member.id);
+
+  // Publish a message to the chat
+  await client.publish({
+    channel: member.channel,
+    content: `Hello ${member.id}!`,
+  });
+});
+
+// Listen for when a member leaves the chat
+client.on("member.left", async (member) => {
+  console.log("Member left chat", member.id);
+});
+
+// Listen for incoming messages
+client.on("message", async (message) => {
+  console.log("Message received", message);
+});
+```
+
+**RELAY v4: Chat Example**
+
+Now let's look at how to achieve the same functionalities using RELAY v4.
+
+```javascript
+import { SignalWire } from "@signalwire/realtime-api";
+
+// Create a new chat client
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" });
+
+const chatClient = client.chat;
+
+// Listen
+await chatClient.listen({
+  channels: ["channel1"],
+  // Listen for when a member joins the chat
+  onMemberJoined: async (member) => {
+    // Publish a message to the chat
+    await chatClient.publish({
+      channel: member.channel,
+      content: `Hello ${member.id}!`,
+    });
+  },
+  // Listen for when a member leaves the chat
+  onMemberLeft: async (member) => {
+    console.log("Member left chat", member.id);
+  },
+  // Listen for incoming messages
+  onMessageReceived: async (message) => {
+    console.log("Message received", message);
+  },
+});
+```
+
+---
+
+### Video
+
+The Video namespace is used to create and manage video rooms, send and receive video streams, and manage users in a video room.
+Below, we will look at how to listen when a video room starts, and when a user joins or leaves the video room.
+
+**RELAY v3: Video Example**
+
+```javascript
+import { Video } from "@signalwire/realtime-api";
+
+// Create a new video client
+const client = new Video.Client({
+  project: "<project-id>", // SignalWire Project ID Here
+  token: "<api token>", // SignalWire API Auth Token Here
+});
+
+// Listen for when a video room starts
+
+client.on("room.started", async (roomSession) => {
+  console.log("Room started", roomSession.id);
+
+  // Listen for when a user joins the video room
+  roomSession.on("member.joined", async (member) => {
+    console.log("User joined room", member.id);
+  });
+
+  // Listen for when a user leaves the video room
+  roomSession.on("member.left", async (member) => {
+    console.log("User left room", member.id);
+  });
+});
+```
+
+**RELAY v4: Video Example**
+
+```javascript
+import { SignalWire } from "@signalwire/realtime-api";
+
+// Create a new video client
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" });
+const videoClient = client.video;
+
+// Listen for when a video room starts
+await videoClient.listen({
+  onRoomStarted: async (roomSession) => {
+    console.log("Room started", roomSession.id);
+
+    // Listen for when a user joins the video room
+    await roomSession.listen({
+      onMemberJoined: async (member) => {
+        console.log("User joined room", member.id);
+      },
+      // Listen for when a user leaves the video room
+      onMemberLeft: async (member) => {
+        console.log("User left room", member.id);
+      },
+    });
+  },
+});
+```
+
+---
+
+## **Conclusion**
+
+The transition from RELAY v3 to RELAY v4 is not just an upgrade but
+a significant leap forward. RELAY v4 introduces a unified client
+architecture, advanced event listening, and a host of additional new
+features that streamline the development process, expand
+capabilities, and offer unprecedented control and flexibility.
+
+This upgrade is a testament to SignalWire's commitment to providing developers with powerful tools to create cutting-edge communication applications.
+
+The code comparisons in this post illustrate the advancements in RELAY v4 over its predecessor, highlighting the enhanced capabilities and flexibility available to developers.

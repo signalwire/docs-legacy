@@ -1,0 +1,11 @@
+# Chat API - outputs to specs/chat
+extends: ../../tspconfig.yaml
+emit:
+  - "@typespec/openapi3"
+
+options:
+  "@typespec/openapi3":
+    emitter-output-dir: "{cwd}/../../../specs/chat"
+    output-file: openapi.yaml
+    openapi-versions:
+      - "3.1.0"

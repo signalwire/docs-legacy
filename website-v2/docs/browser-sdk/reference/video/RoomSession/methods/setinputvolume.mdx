@@ -1,0 +1,55 @@
+---
+title: "setInputVolume"
+slug: /js/reference/video/room-session/set-input-volume
+description: setInputVolume method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+### setInputVolume
+
+- **setInputVolume**(`params`): `Promise<void>`
+
+Sets the input volume level (e.g. for the microphone). You can use this method to set the input volume for either yourself or another participant in the room.
+
+#### Parameters
+
+<ParamField path="params" type="object">
+  Object containing the parameters of the method.
+</ParamField>
+
+<Indent>
+<ParamField path="memberId" type="string" required={false}>
+  Id of the member for which to set input volume. If omitted, sets the volume of the default device in the local client.
+</ParamField>
+
+<ParamField path="volume" type="number">
+  Desired volume. Values range from -50 to 50, with a default of 0.
+</ParamField>
+</Indent>
+
+#### Returns
+
+`Promise<void>`
+
+#### Permissions
+
+- `room.self.set_input_volume`: to set the volume for a local device.
+- `room.member.set_input_volume`: to set the volume for a remote member.
+
+You need to specify the permissions when [creating the Video Room Token](/docs/apis/video/create-room-token) on the server side.
+
+#### Examples
+
+Setting your own microphone volume:
+
+```javascript
+await roomSession.setInputVolume({ volume: -10 });
+```
+
+Setting the microphone volume of another participant:
+
+```javascript
+const id = "de550c0c-3fac-4efd-b06f-b5b8614b8966"; // you can get this from getMembers()
+await roomSession.setInputVolume({ memberId: id, volume: -10 });
+```
+

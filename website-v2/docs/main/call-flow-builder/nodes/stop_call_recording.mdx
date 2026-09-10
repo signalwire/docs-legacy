@@ -1,0 +1,28 @@
+---
+title: Stop Call Recording
+description: Call Flow Builder node to stop recording a call.
+slug: /call-flow-builder/reference/stop-call-recording
+# image: "/assets/images/call-flow/nodes/record-call.webP"
+---
+Stops the specified recording action. 
+Reference the recording URL in other nodes in the Flow using the variable `%{record_call_url}`.
+You can also access the recording URL from the call log details in your [RELAY Space](https://my.signalwire.com/?page=relay).
+
+
+## **Node Settings**
+
+<ParamField path="Recording Name" type="string">
+  The name of the recording to stop. This should be connected to a [Start Call Recording](/docs/call-flow-builder/reference/start-call-recording) node and match the recording name.
+</ParamField>
+
+## **Example**
+
+You can pair this node with a [Request](/docs/call-flow-builder/reference/request) node to send the recording URL to the webhook of your choice. 
+
+Please note that any later recordings in the Flow will overwrite the `%{record_call_url}` variable, 
+so the Request node should immediately follow this Stop Call Recording node or use 
+[Set Variables](/docs/call-flow-builder/reference/set-variables) to save this URL for a later request.
+
+<Frame caption="Record a call and save the URL to a variable." ogImage>
+![Record a call and save the URL to a variable.](@image/call-flow/nodes/record-call.webp)
+</Frame>

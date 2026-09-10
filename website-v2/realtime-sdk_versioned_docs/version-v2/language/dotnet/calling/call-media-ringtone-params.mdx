@@ -1,0 +1,48 @@
+---
+title: "CallMedia.RingtoneParams"
+slug: /dotnet/reference/calling/call-media-ringtone-params
+toc_max_heading_level: 3
+---
+
+# SignalWire.Relay.Calling.CallMedia.RingtoneParams
+
+This object represents the parameters specific to ringtone media.
+
+## Constructor
+
+The only constructor is the default constructor, properties should all be assigned by initializer or after construction.
+
+**Parameters**
+
+None
+
+**Examples**
+
+> Basic Example
+
+```csharp
+CallMedia media = new CallMedia
+{
+    Type = CallMedia.MediaType.ringtone,
+    Parameters = new CallMedia.RingtoneParams
+    {
+        Name = "us",
+        Duration = 5.0
+    }
+};
+```
+
+## Properties
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `Name` | string | The name of the ringtone to play, based on short country codes.<br />_Values: at au bg br be ch cl cn cz de dk ee es fi fr gr hu il in it lt jp_<br />_mx my nl no nz ph pl pt ru se sg th uk us tw ve za_ |
+| `Duration` | double? | How long to play the ringtone in seconds.<br />_Default: null, which plays one full ring iteration_ |
+
+## Methods
+
+None
+
+## Events
+
+None

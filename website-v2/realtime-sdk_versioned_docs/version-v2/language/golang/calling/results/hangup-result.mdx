@@ -1,0 +1,38 @@
+---
+title: Relay.Calling.HangupResult
+slug: /go/reference/calling/results/hangup
+description: The result object that is returned when hanging up a call.
+toc_max_heading_level: 3
+---
+
+[link]: /docs/server-sdk/v2/go/reference/calling/call#hangup
+
+## Relay.Calling.HangupResult
+
+This object returned from [`hangup`][link] method.
+
+## Methods-submenu
+
+### GetSuccessful
+
+Return `true` if the hangup has succeeded, `false` otherwise.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`boolean` - Whether the hangup has finished successfully.
+
+```go
+	hangupResult, err := call.Hangup()
+	if err != nil {
+		signalwire.Log.Error("Error occurred while trying to hangup call\n")
+	}
+	  
+	if hangupResult.GetSuccessful() {
+		signalwire.Log.Info("Call disconnect result: %s\n", hangupResult.GetReason().String())
+	} 
+```

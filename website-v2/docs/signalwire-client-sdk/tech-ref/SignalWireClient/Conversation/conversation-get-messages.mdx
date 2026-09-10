@@ -1,0 +1,52 @@
+---
+title: conversation.getMessages
+slug: /signalwire-client/conversation-get-messages
+---
+
+import APIField from '@site/src/components/APIField';
+
+Retrieves messages across all conversations, providing a unified view of messages from multiple conversations.
+
+## How it works
+
+The `conversation.getMessages` method fetches messages from all conversations the subscriber has access to. This is useful for displaying a combined message feed or searching across conversations.
+
+## Parameters
+
+<APIField name="params" type="GetMessagesParams">
+  Optional configuration for retrieving messages.
+</APIField>
+
+<APIField name="params.limit" type="number" default="50">
+  Maximum number of messages to retrieve.
+</APIField>
+
+<APIField name="params.offset" type="number" default="0">
+  Number of messages to skip (for pagination).
+</APIField>
+
+<APIField name="params.filter" type="string">
+  Optional filter criteria for messages.
+</APIField>
+
+## Signature
+
+```typescript
+conversation.getMessages(params?: GetMessagesParams): Promise<GetMessagesResult>
+```
+
+## Returns
+
+**Type:** `Promise<GetMessagesResult>`
+
+Returns a Promise that resolves with an array of messages from all conversations.
+
+## Examples
+
+### Get recent messages
+
+```typescript
+const result = await client.conversation.getMessages()
+
+console.log('Recent messages:', result.messages)
+```

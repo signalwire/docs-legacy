@@ -1,0 +1,45 @@
+---
+title: "createMicrophoneAnalyzer"
+slug: /js/reference/webrtc/create-microphone-analyzer
+description: createMicrophoneAnalyzer function in the WebRTC namespace.
+toc_max_heading_level: 3
+---
+
+### createMicrophoneAnalyzer
+
+- `Const` **createMicrophoneAnalyzer**(`options`): `Promise<MicrophoneAnalyzer>`
+
+Initializes a microphone analyzer. You can use a `MicrophoneAnalyzer` to track the input audio volume.
+
+To stop the analyzer, call the `destroy()` method on the returned object.
+
+The returned object emits the following events:
+
+- `volumeChanged`: Instantaneous volume from 0 to 100.
+- `destroyed`: The object has been destroyed. The parameter describes the reason: `null` (if you called `destroy()`), `"error"` (in case of errors), or `"disconnected"` (if the device was disconnected).
+
+#### Parameters
+
+<ParamField path="options" type="string | MediaStream | MediaTrackConstraints" required={true}>
+  Either the id of the device to analyze, a [MediaStreamConstraints](https://developer.mozilla.org/en-US/docs/Web/API/MediaStreamConstraints) object, or a [MediaStream](https://developer.mozilla.org/en-US/docs/Web/API/MediaStream).
+</ParamField>
+
+#### Returns
+
+`Promise<MicrophoneAnalyzer>`
+
+#### Example
+
+```js
+const micAnalyzer = await createMicrophoneAnalyzer("device-id");
+
+micAnalyzer.on("volumeChanged", (vol) => {
+  console.log("Volume: ", vol);
+});
+micAnalyzer.on("destroyed", (reason) => {
+  console.log("Microphone analyzer destroyed", reason);
+});
+
+micAnalyzer.destroy();
+```
+

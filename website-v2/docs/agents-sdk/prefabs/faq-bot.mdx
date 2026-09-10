@@ -1,0 +1,163 @@
+---
+title: "Faq Bot"
+sidebar_label: "Faq Bot"
+slug: /python/guides/faq-bot
+toc_max_heading_level: 3
+---
+
+## FAQBot
+
+FAQBotAgent answers frequently asked questions from a provided knowledge base. It matches user questions to FAQs and optionally suggests related questions.
+
+### Basic Usage
+
+```python
+from signalwire_agents.prefabs import FAQBotAgent
+
+agent = FAQBotAgent(
+    faqs=[
+        {
+            "question": "What are your business hours?",
+            "answer": "We're open Monday through Friday, 9 AM to 5 PM."
+        },
+        {
+            "question": "Where are you located?",
+            "answer": "Our main office is at 123 Main Street, Downtown."
+        },
+        {
+            "question": "How do I contact support?",
+            "answer": "Email support@example.com or call 555-1234."
+        }
+    ]
+)
+
+if __name__ == "__main__":
+    agent.run()
+```
+
+### FAQ Format
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `question` | string | Yes | The FAQ question |
+| `answer` | string | Yes | The answer to provide |
+| `categories` | list[string] | No | Category tags for filtering |
+
+### Constructor Parameters
+
+```python
+FAQBotAgent(
+    faqs=[...],                # List of FAQ dictionaries (required)
+    suggest_related=True,      # Suggest related questions
+    persona=None,              # Custom personality description
+    name="faq_bot",            # Agent name
+    route="/faq",              # HTTP route
+    **kwargs                   # Additional AgentBase arguments
+)
+```
+
+### With Categories
+
+Use categories to organize FAQs:
+
+```python
+from signalwire_agents.prefabs import FAQBotAgent
+
+agent = FAQBotAgent(
+    faqs=[
+        {
+            "question": "How do I reset my password?",
+            "answer": "Click 'Forgot Password' on the login page.",
+            "categories": ["account", "security"]
+        },
+        {
+            "question": "How do I update my email?",
+            "answer": "Go to Settings > Account > Email.",
+            "categories": ["account", "settings"]
+        },
+        {
+            "question": "What payment methods do you accept?",
+            "answer": "We accept Visa, Mastercard, and PayPal.",
+            "categories": ["billing", "payments"]
+        }
+    ]
+)
+```
+
+### Built-in Functions
+
+FAQBot provides this SWAIG function automatically:
+
+| Function | Description |
+|----------|-------------|
+| `search_faqs` | Search FAQs by query or category |
+
+### Custom Persona
+
+Customize the bot's personality:
+
+```python
+agent = FAQBotAgent(
+    faqs=[...],
+    persona="You are a friendly and knowledgeable support agent for Acme Corp. "
+            "You speak in a warm, professional tone and always try to be helpful."
+)
+```
+
+### Complete Example
+
+```python
+#!/usr/bin/env python3
+## product_faq_bot.py - FAQ bot for product questions
+from signalwire_agents.prefabs import FAQBotAgent
+
+
+agent = FAQBotAgent(
+    faqs=[
+        {
+            "question": "What is the warranty period?",
+            "answer": "All products come with a 2-year warranty.",
+            "categories": ["warranty", "products"]
+        },
+        {
+            "question": "How do I return a product?",
+            "answer": "Start a return within 30 days at returns.example.com.",
+            "categories": ["returns", "products"]
+        },
+        {
+            "question": "Do you ship internationally?",
+            "answer": "Yes, we ship to over 50 countries.",
+            "categories": ["shipping"]
+        }
+    ],
+    suggest_related=True,
+    persona="You are a helpful product specialist for TechGadgets Inc.",
+    name="product-faq"
+)
+
+## Add language
+agent.add_language("English", "en-US", "rime.spore")
+
+if __name__ == "__main__":
+    agent.run()
+```
+
+### Best Practices
+
+#### FAQ Content
+- Write questions as users would ask them
+- Keep answers concise but complete
+- Include variations of common questions
+- Update FAQs based on actual user queries
+
+#### Categories
+- Use consistent category naming
+- Limit to 2-3 categories per FAQ
+- Use categories for related question suggestions
+
+#### Scaling
+- For large FAQ sets, consider native_vector_search skill
+- FAQBot works best with 50 or fewer FAQs
+- Use categories to help matching
+
+

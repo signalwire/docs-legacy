@@ -1,0 +1,107 @@
+---
+title: "promptTTS"
+slug: /node/reference/voice/call/prompt-tts
+description: promptTTS method for the Call class.
+toc_max_heading_level: 3
+---
+
+[callprompt-7]: /docs/server-sdk/v3/node/reference/voice/call-prompt
+[here-3]: /docs/platform/voice/tts
+[supported-voices-and-languages-1]: /docs/platform/voice/tts
+[types-1]: /docs/server-sdk/v3/node/reference/voice/types#collectdigitsconfig
+[types-2]: /docs/server-sdk/v3/node/reference/voice/types#collectspeechconfig
+
+### promptTTS
+
+- **promptTTS**(`params`): `Promise<CallPrompt>` - See [CallPrompt][callprompt-7] for more details.
+
+Play text-to-speech while collecting user input from the call, such as `digits` or `speech`.
+
+#### Parameters
+
+| Name                     | Type                                                     | Description                                                                                                                                                                                      |
+|:-------------------------|:---------------------------------------------------------|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `params`                 | `Object`                                                 | -                                                                                                                                                                                                |
+| `params.text`            | `string`                                                 | Text to play. SSML may be entered as a string wrapped in `<speak>` tags.<br /> See our [supported voices and languages][supported-voices-and-languages-1] documentation for usage and supported tags. |
+| `params.digits?`         | [`CollectDigitsConfig`][types-1] | Configuration for collecting digits. You must either set this, or `speech`.                                                                                                                      |
+| `params.speech?`         | [`CollectSpeechConfig`][types-2] | Configuration for collecting speech. You must either set this, or `digits`. Pass an empty object to use the default configuration.                                                               |
+| `params.gender?`         | `"male"` \| `"female"`                                   | Gender of the voice (`male` or `female`). Defaults to `female`.                                                                                                                                  |
+| `params.initialTimeout?` | `number`                                                 | Initial timeout in seconds. Default is 4 seconds.                                                                                                                                                |
+| `params.language?`       | `string`                                                 | Language of the text in `ISO 639-1` (language name) + `ISO 3166` (country code). Defaults to `en-US`.<br />Supported languages can be found [here][here-3]                 |
+| `params.volume?`         | `number`                                                 | Volume value between -40dB and +40dB where 0 is unchanged. Default is 0.                                                                                                                         |
+| `params.voice?`          | `string`                                                 | Voice to use (takes precedence on `gender`).<br />Supported voices can be found [here][here-3]                                                                             |
+
+#### Returns
+
+`Promise<CallPrompt>` - See [CallPrompt][callprompt-7] for more details.
+
+#### Examples
+
+Prompting for digits and waiting for a result:
+
+```js
+const prompt = await call.promptTTS({
+  text: "Please enter your PIN",
+  digits: {
+    max: 5,
+    digitTimeout: 2,
+    terminators: "#*",
+  },
+});
+const { type, digits, terminator } = await prompt.ended();
+```
+
+Prompting for speech and waiting for a result:
+
+```js
+const prompt = await call.promptTTS({
+  text: "Please enter your PIN",
+  speech: {
+    endSilenceTimeout: 1,
+    speechTimeout: 60,
+    language: "en-US",
+    hints: [],
+  },
+});
+const { type, text, terminator } = await prompt.ended();
+```
+
+Prompting for speech and listening for results using the events:
+
+```js
+call.on("prompt.started", (p) => {
+  console.log("prompt.started", p.id);
+});
+call.on("prompt.updated", (p) => {
+  console.log("prompt.updated", p.id);
+});
+call.on("prompt.failed", (p) => {
+  console.log("prompt.failed", p.id, p.reason);
+});
+call.on("prompt.ended", (p) => {
+  console.log(prompt.ended, p.id, p.text);
+});
+
+const prompt = await call.promptTTS({
+  text: "Please enter your PIN",
+  speech: {},
+});
+```
+
+Prompting for digits with SSML and waiting for a result:
+
+```js
+const prompt = await call.promptTTS({
+  text: `<speak>
+      Please enter your <say-as interpret-as="characters">UUID</say-as>.
+      It should be a <say-as interpret-as="cardinal">10</say-as> digit number.
+    </speak>`,
+  voice: "polly.Joey",
+  digits: {
+    max: 5,
+    digitTimeout: 2,
+    terminators: "#*",
+  },
+});
+const { type, speech, terminator } = await prompt.ended();
+```

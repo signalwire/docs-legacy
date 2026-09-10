@@ -1,0 +1,45 @@
+---
+title: Conditions
+description: Call Flow Builder node to add conditions to your call flow.
+slug: /call-flow-builder/reference/conditions
+# image: "/assets/images/call-flow/nodes/block-condition.webp"
+---
+A Conditions node works like a 
+[JavaScript if statement](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Control_flow_and_error_handling#if...else_statement). 
+
+A condition field can reference variables that have been set in the flow with `%{Key}`, 
+Request node responses accessed with `%{request_response.<object_field>}`,
+or call parameters such as `%{call.from}`.
+Add additional conditions to create `else if` conditions.
+
+The `Cond #` path will be executed for a truthy condition. The `Else` path will be executed for a falsy condition.
+
+## Output Node Connectors
+
+<ParamField path="Condition" type="string">
+  The condition that is evaluated to determine which path to take. Additional conditions can be added by clicking the `Add condition` button. Additional conditions will act as JavaScript `else-if` statements.
+</ParamField>
+
+<ParamField path="Else" type="string">
+  The path to take if none of the conditions are met.
+</ParamField>
+
+## Node Settings
+
+<ParamField path="Conditions" type="string">
+  The conditions that are evaluated to determine which path to take. Additional conditions can be added by clicking the `Add condition` button. Additional conditions will act as JavaScript `else-if` statements.
+</ParamField>
+
+## Example
+
+### Use conditions to create a block list
+
+In this example, we immediately hang up calls from specific numbers on our block list and forward call from a VIP directly to our administration number. 
+All other calls will connect to the main reception number.
+
+
+<Frame caption="Block or pass through calls based on caller number." ogImage>
+
+![Block or pass through calls based on caller number.](@image/call-flow/nodes/block-condition.webp)
+
+</Frame>

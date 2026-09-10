@@ -1,0 +1,79 @@
+---
+title: Voicemail Recording
+description: Call Flow Builder node to record voicemail messages.
+slug: /call-flow-builder/reference/voicemail-recording
+# image: "/assets/images/call-flow/nodes/simple-voicemail.webP"
+---
+This node uses the asynchronous recording method to record a voicemail.
+Reference the recording URL in other nodes in the Flow using the variable `%{record_url}`.
+You can also access the recording URL from the call log details in your [RELAY Space](https://my.signalwire.com?page=relay).
+
+
+## **Node Settings**
+
+<ParamField path="Stereo" type="boolean">
+  Record in stereo. Toggle this on to separate the two legs of the call recording into left and right channels.<br /><br />**Default Value:** `Toggled Off`
+</ParamField>
+
+<ParamField path="Beep" type="boolean">
+  Play a beep before recording starts. <br /><br />**Default Value:** `Toggled Off`
+</ParamField>
+
+<ParamField path="Terminators" type="string">
+  DTMF digits that will stop the recording. Multiple DTMF tones can be added by being seperated by a comma.<br /><br />**Default Value:** `None`<br /><br />**Possible Values:** Digits `0-9`, `*`, `#`
+</ParamField>
+
+<ParamField path="Maximum Recording Length" type="integer">
+  The maximum length of the recording in seconds.<br /><br /> **Possible Values:** `1-3600` seconds
+</ParamField>
+
+<ParamField path="Initial Timeout" type="integer">
+  The time in seconds to wait for the first DTMF digit before starting the recording.<br /><br />**Possible Values:** `1-99` seconds
+</ParamField>
+
+<ParamField path="End Silence Timeout" type="integer">
+  The time in seconds to wait for the end of the call before ending the recording.<br /><br />**Possible Values:** `1-99` seconds
+</ParamField>
+
+<ParamField path="Format" type="string">
+  The format of the recording.<br /><br />**Possible Values:** `wav`, `mp3`
+</ParamField>
+
+
+## **Examples**
+
+
+### Simple voicemail with goodbye message
+
+For a traditional voicemail experience, we recommend pairing the Voicemail Recording node with a 
+[Play Audio or TTS](/docs/call-flow-builder/reference/play-audio-or-tts) node and including a beep before recording. 
+Including a terminator (in this case, a `#` sign) will allow nodes to run after the caller is finished leaving their voicemail.
+
+<Frame caption="Play TTS and record voicemail." ogImage>
+![Play TTS and record voicemail.](@image/call-flow/nodes/simple-voicemail.webp)
+</Frame>
+
+---
+
+### Record voicemail and send recording URL as a POST request
+
+You can pair this node with a [Request](/docs/call-flow-builder/reference/request) node to send the recording URL to the webhook of your choice. 
+Please note that any later recordings in the Flow will overwrite the `%{record_url}` variable,
+so the Request node should immediately follow this Voicemail Recording node or use 
+[Set Variables](/docs/call-flow-builder/reference/set-variables) to save this URL for a later request.
+
+<Frame caption="Record voicemail and send URL and call data as a POST request.">
+![Record voicemail and send URL and call data as a POST request.](@image/call-flow/nodes/post-voicemail.webp)
+</Frame>
+
+---
+
+### Record voicemail and send recording URL as SMS
+
+You may want to be notified about a new voicemail with an SMS. 
+You can follow the Voicemail Recording node with a Send SMS node and again access call data and the recording URL with 
+the `{call.}` and `{record_url}` variables.
+
+<Frame caption="Record voicemail and send URL and call data as an SMS.">
+![Record voicemail and send URL and call data as an SMS.](@image/call-flow/nodes/voicemail-sms.webp)
+</Frame>

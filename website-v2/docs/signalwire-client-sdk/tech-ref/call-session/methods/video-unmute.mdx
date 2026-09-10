@@ -1,0 +1,221 @@
+---
+title: videoUnmute
+slug: /call-session/videounmute
+---
+
+import APIField from '@site/src/components/APIField';
+
+Unmutes the video for yourself or another participant in the call.
+
+## Parameters
+
+<APIField name="params" type="MemberCommandParams">
+  Configuration for the unmute operation.
+</APIField>
+
+<APIField name="params.memberId" type="string" default="Your member ID">
+  Member to unmute. Omit to unmute your own video, provide specific ID to unmute another member.
+</APIField>
+
+## Signature
+
+```typescript
+videoUnmute(params?: MemberCommandParams): Promise<void>
+```
+
+## Returns
+
+**Type:** `Promise<void>`
+
+## Permissions
+
+- **Unmute yourself:** Requires `call.capabilities.self.muteVideo.off`
+- **Unmute another member:** Requires `call.capabilities.member.muteVideo.off`
+
+## Events
+
+- `member.updated` - General member update event
+- `member.updated.videoMuted` - Specific event for video mute state change
+
+## Important Notes
+
+**Member Targeting:**
+
+The `memberId` parameter follows the standard member targeting pattern:
+- **No parameter** - Unmutes your own video
+- **Specific member ID** - Unmutes that member's video (requires permission)
+
+```typescript
+// Unmute your own video
+await call.videoUnmute()
+
+// Unmute a specific member's video
+await call.videoUnmute({ memberId: 'de550c0c-3fac-4efd-b06f-b5b8614b8966' })
+```
+
+**Visual Effect:**
+
+When video is unmuted, the live video stream replaces the placeholder image.
+
+## Examples
+
+### Unmute your own video
+
+```typescript
+// Unmute your own video
+await call.videoUnmute()
+console.log('Your video is now unmuted')
+```
+
+### Unmute another participant's video
+
+```typescript
+// Get the list of members
+const { members } = await call.getMembers()
+
+// Find a specific member
+const member = members.find(m => m.name === 'John Doe')
+
+if (member) {
+  // Unmute that member's video (requires permission)
+  await call.videoUnmute({ memberId: member.id })
+  console.log(`Unmuted ${member.name}'s video`)
+}
+```
+
+### Toggle video on/off
+
+```typescript
+let isVideoMuted = false
+
+async function toggleVideo() {
+  if (isVideoMuted) {
+    await call.videoUnmute()
+    console.log('Video enabled')
+  } else {
+    await call.videoMute()
+    console.log('Video disabled')
+  }
+  isVideoMuted = !isVideoMuted
+}
+
+// Toggle video
+toggleVideo()
+```
+
+### With event listeners
+
+```typescript
+// Listen for video unmute events
+call.on('member.updated.videoMuted', (event) => {
+  if (!event.member.video_muted) {
+    console.log(`Member ${event.member.id} turned on their video`)
+  }
+})
+
+// Unmute your video
+await call.videoUnmute()
+```
+
+### Check capabilities before unmuting
+
+```typescript
+// Check if you can unmute your own video
+if (call.capabilities?.self.muteVideo.off) {
+  await call.videoUnmute()
+  console.log('Successfully unmuted your video')
+} else {
+  console.log('You do not have permission to unmute your video')
+}
+
+// Check if you can unmute other members' video
+if (call.capabilities?.member.muteVideo.off) {
+  await call.videoUnmute({ memberId: 'member-id' })
+  console.log('Successfully unmuted member video')
+} else {
+  console.log('You do not have permission to unmute other members')
+}
+```
+
+### Provide UI feedback
+
+```typescript
+const videoButton = document.getElementById('video-btn')
+
+videoButton.addEventListener('click', async () => {
+  const isVideoMuted = videoButton.classList.contains('muted')
+
+  try {
+    if (isVideoMuted) {
+      await call.videoUnmute()
+      videoButton.textContent = 'Stop Video'
+      videoButton.classList.remove('muted')
+    } else {
+      await call.videoMute()
+      videoButton.textContent = 'Start Video'
+      videoButton.classList.add('muted')
+    }
+  } catch (error) {
+    console.error('Failed to toggle video:', error)
+  }
+})
+```
+
+### Track video state with events
+
+```typescript
+let isVideoMuted = false
+
+call.on('member.updated.videoMuted', (event) => {
+  if (event.member.id === call.memberId) {
+    isVideoMuted = event.member.video_muted
+    updateVideoUI(isVideoMuted)
+  }
+})
+
+function updateVideoUI(muted) {
+  const button = document.getElementById('video-btn')
+  button.textContent = muted ? 'Start Video' : 'Stop Video'
+  button.classList.toggle('muted', muted)
+}
+```
+
+### Request camera permissions when unmuting
+
+```typescript
+async function unmuteVideo() {
+  try {
+    // Ensure camera access before unmuting
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true })
+
+    // Unmute video
+    await call.videoUnmute()
+    console.log('Video unmuted')
+  } catch (error) {
+    console.error('Camera access denied or unmute failed:', error)
+  }
+}
+```
+
+### Handle video element display
+
+```typescript
+call.on('member.updated.videoMuted', (event) => {
+  const videoElement = document.getElementById(`video-${event.member.id}`)
+
+  if (videoElement) {
+    if (event.member.video_muted) {
+      // Show placeholder when video is muted
+      videoElement.style.display = 'none'
+      showPlaceholder(event.member.id)
+    } else {
+      // Show video stream when unmuted
+      videoElement.style.display = 'block'
+      hidePlaceholder(event.member.id)
+    }
+  }
+})
+
+// Unmute video
+await call.videoUnmute()
+```

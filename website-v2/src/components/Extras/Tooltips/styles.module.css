@@ -1,0 +1,123 @@
+.tooltipContainer {
+  position: relative;
+  display: inline-block;
+  cursor: help;
+  font-weight: 600;
+  text-decoration: underline solid;
+  text-decoration-thickness: 0.05rem;
+  text-underline-offset: 4px;
+  text-decoration-color: var(--sw-link-decoration-color);
+}
+
+.tooltip {
+  position: absolute;
+  z-index: 100;
+  bottom: calc(100% + 15px);
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--ifm-background-surface-color);
+  color: var(--ifm-text-color);
+  border-radius: 8px;
+  font-size: 14px;
+  width: max-content;
+  max-width: min(90vw, 400px);
+  max-height: 40vh;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--sw-card-border-color);
+  user-select: text;
+  cursor: text;
+  font-weight: normal;
+  overflow: visible;
+  display: none;
+  visibility: hidden;
+  opacity: 0;
+  /* Ensure focusable elements inside are not tabbable when hidden */
+  pointer-events: none;
+}
+
+.tooltipContent {
+  padding: 8px 12px;
+  text-align: left;
+  line-height: 1.5;
+  overflow-y: auto;
+  overflow-x: hidden;
+  max-height: inherit;
+  white-space: normal;
+  word-wrap: break-word;
+}
+
+.tooltipArrow {
+  position: absolute;
+  bottom: -15px;
+  left: 50%;
+  height: 15px;
+  width: 30px;
+  transform: translateX(-50%);
+  overflow: hidden;
+  z-index: 1;
+}
+
+.tooltipArrow::after {
+  content: "";
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  width: 16px;
+  height: 16px;
+  background-color: var(--ifm-background-surface-color);
+  border: 1px solid var(--sw-card-border-color);
+  transform: translateX(-50%) rotate(45deg);
+  box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.tooltip.visible {
+  visibility: visible;
+  opacity: 1;
+  display: block;
+  pointer-events: auto; /* Re-enable pointer events when visible */
+}
+
+/* Mobile Styles */
+.tooltipMobile {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  bottom: auto;
+  transform: translate(-50%, -50%);
+  width: auto;
+  max-width: 85vw;
+  min-width: 280px;
+  font-size: 16px;
+  max-height: 80vh;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+}
+
+.tooltipMobile .tooltipContent {
+  padding: 16px;
+}
+
+.tooltipMobile .tooltipArrow {
+  display: none;
+}
+
+.tooltipMobile.visible {
+  transform: translate(-50%, -50%);
+}
+
+.tooltipBackdrop {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 999;
+}
+
+.tooltipBackdrop.visible {
+  display: block;
+} 

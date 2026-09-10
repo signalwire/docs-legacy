@@ -1,0 +1,57 @@
+.stepped {
+  position: relative;
+  margin-left: 60px;
+  margin-bottom: 45px;
+
+  // Styling for headers with the numbered steps
+  h1:not(details h1):not(:global(.card) h1),
+  h2:not(details h2):not(:global(.card) h2),
+  h3:not(details h3):not(:global(.card) h3),
+  h4:not(details h4):not(:global(.card) h4),
+  h5:not(details h5):not(:global(.card) h5),
+  h6:not(details h6):not(:global(.card) h6) {
+    counter-increment: step;
+    margin-left: -33px;
+    margin-top: 40px;
+    position: relative;
+  }
+
+  h1:not(details h1):not(:global(.card) h1)::before,
+  h2:not(details h2):not(:global(.card) h2)::before,
+  h3:not(details h3):not(:global(.card) h3)::before,
+  h4:not(details h4):not(:global(.card) h4)::before,
+  h5:not(details h5):not(:global(.card) h5)::before,
+  h6:not(details h6):not(:global(.card) h6)::before {
+    content: counter(step);
+    margin-left: -14px;
+    margin-right: 13px;
+    font-weight: bold;
+    background-color: var(--sw-card-border-color);
+    border-radius: 20px;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 30px;
+    height: 30px;
+    font-size: 1rem;
+    color: var(--sw-category-menu-color);
+    outline: 5px solid var(--ifm-card-background-color);
+  }
+
+  // Vertical line container (applied to the entire stepped section)
+  &::before {
+    content: "";
+    position: absolute;
+    width: 3px;
+    background-color: var(--sw-card-border-color);
+    top: 1rem;
+    bottom: 0;
+    left: -34px;
+    z-index: -1; // Ensures the line stays behind the content
+  }
+
+  // Ensure that the line continues smoothly through the section until the next header
+  > *:not(h1):not(h2):not(h3):not(h4):not(h5):not(h6) {
+    position: relative;
+  }
+}

@@ -1,0 +1,22 @@
+---
+title: "Relay.Calling.DialResult"
+slug: /python/reference/calling/results/dial
+description: The result object that is returned when dialing a call.
+toc_max_heading_level: 3
+---
+
+[dial]: /docs/server-sdk/v2/python/reference/calling/call#dial
+[relay-calling-call]: /docs/server-sdk/v2/python/reference/calling/call
+[relay-event]: /docs/server-sdk/v2/python/reference/event
+
+## Relay.Calling.DialResult
+
+This object is returned by the [`dial`][dial] method.
+
+### Properties
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `successful` | boolean | Whether the remote party has picked up your call. |
+| `event` | [`Relay.Event`][relay-event] | Last event that completed the operation. |
+| `call` | [`Relay.Calling.Call`][relay-calling-call] | Reference to the Call. |

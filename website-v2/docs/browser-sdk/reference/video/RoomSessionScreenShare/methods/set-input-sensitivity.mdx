@@ -1,0 +1,40 @@
+---
+title: "setInputSensitivity"
+slug: /js/reference/video/room-session-screen-share/set-input-sensitivity
+description: setInputSensitivity method for the RoomSessionScreenShare class.
+toc_max_heading_level: 3
+---
+
+### setInputSensitivity
+
+▸ **setInputSensitivity**(`params`): `Promise<void>`
+
+Sets the input level at which the participant is identified as currently speaking.
+
+#### Parameters
+
+<ParamField path="params" type="object" required={true}>
+  Configuration object for input sensitivity
+</ParamField>
+<Indent>
+  <ParamField path="params.value" type="number" required={true}>
+    Desired sensitivity. The default value is 30 and the scale goes from 0 (lowest sensitivity, essentially muted) to 100 (highest sensitivity).
+  </ParamField>
+</Indent>
+
+#### Returns
+
+`Promise<void>`
+
+#### Permissions
+
+- `room.self.set_input_sensitivity`
+
+You need to specify the permissions when [creating the Video Room Token](/docs/apis/video/create-room-token) on the server side.
+
+#### Example
+
+```javascript
+await roomdevice.setInputSensitivity({ value: 80 });
+```
+

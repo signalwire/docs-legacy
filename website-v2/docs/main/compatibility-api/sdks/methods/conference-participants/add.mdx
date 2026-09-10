@@ -1,0 +1,21 @@
+---
+slug: /compatibility-api/sdks/reference/conference-participants/add
+title: Add
+sidebar_label: Add
+toc_max_heading_level: 3
+---
+
+In order to add a participant to a conference call, from the cXML REST API, create an 
+[outbound call](/docs/compatibility-api/sdks/reference/calls/create) 
+to the participant's phone number and specify a cXML document that consists of something similar to:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+  <Dial>
+    <Conference>your-conference-name</Conference>
+  </Dial>
+</Response>
+```
+
+When the call is connected, the desired participant will be added to the conference call.

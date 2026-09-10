@@ -1,0 +1,32 @@
+---
+title: "connect"
+slug: /node/reference/realtime-client/connect
+description: connect method for the Realtime Client.
+toc_max_heading_level: 3
+---
+
+### connect
+
+▸ **connect**(): `Promise<void>`
+
+<Note>
+The client automatically connects when created. You only need to call this method if you have previously disconnected.
+</Note>
+
+Connects this client to the SignalWire Realtime API. The client will start receiving events.
+
+#### Returns
+
+`Promise<void>` - Resolves when the connection is established.
+
+#### Example
+
+```javascript
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" });
+
+await client.connect().then(() => {
+  console.log("connected");
+});
+```

@@ -1,0 +1,271 @@
+openapi: 3.0.3
+info:
+  version: 1.0.0
+  title: Message API
+  description: >-
+    An API to programmatically access information about SignalWire Message
+    activity.
+  termsOfService: https://signalwire.com/legal/signalwire-cloud-agreement
+externalDocs:
+  url: https://developers.signalwire.com
+  description: Find more information about this and other SignalWire APIs.
+servers:
+  - url: https://{space_name}.signalwire.com/api/messaging
+    variables:
+      space_name:
+        default: YOUR_SPACE
+        description: Your SignalWire Space's subdomain.
+security:
+  - basic_auth: []
+components:
+  securitySchemes:
+    basic_auth:
+      type: http
+      scheme: basic
+  schemas:
+    pagination:
+      type: object
+      properties:
+        self:
+          type: string
+        first:
+          type: string
+        next:
+          type: string
+        prev:
+          type: string
+tags:
+  - name: Logs
+paths:
+  /logs:
+    get:
+      operationId: list_logs
+      summary: List Logs
+      description: |
+        List the available logs.
+
+        #### Permissions
+        The API token must include the following scopes: _Messaging_.
+      tags:
+        - Logs
+      parameters:
+        - name: include_deleted
+          in: query
+          description: Include logs for deleted activity.
+          required: false
+          schema:
+            type: boolean
+          example: false
+        - name: created_before
+          in: query
+          description: Return logs for activity prior to this date.
+          required: false
+          schema:
+            type: string
+          example: '2022-04-30'
+        - name: created_on
+          in: query
+          description: Return logs for activity on this date.
+          required: false
+          schema:
+            type: string
+          example: '2022-04-30'
+        - name: created_after
+          in: query
+          description: Return logs for activity after this date.
+          required: false
+          schema:
+            type: string
+          example: '2022-04-30'
+        - name: page_size
+          in: query
+          description: >-
+            Specify the number of results to return on a single page. The
+            default page size is `50` and the maximum is `1000`.
+          required: false
+          schema:
+            type: integer
+          example: 20
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  links:
+                    type: object
+                    properties:
+                      self:
+                        type: string
+                      first:
+                        type: string
+                      next:
+                        type: string
+                      prev:
+                        type: string
+                  data:
+                    type: array
+                    items:
+                      allOf:
+                        - type: object
+                          properties:
+                            id:
+                              type: string
+                              format: uuid
+                              description: A unique identifier for the log
+                        - type: object
+                          properties:
+                            from:
+                              type: string
+                              description: The origin phone number.
+                              example: '+12065551212'
+                            to:
+                              type: string
+                              description: The destination phone number.
+                              example: '+12065553434'
+                            status:
+                              type: string
+                              description: The status of the message.
+                              example: sent
+                            direction:
+                              type: string
+                              description: The direction of the message.
+                              example: inbound
+                            kind:
+                              type: string
+                              description: The kind of message.
+                              example: sms
+                            source:
+                              type: string
+                              description: Source of this log entry.
+                              example: laml
+                            type:
+                              type: string
+                              description: Type of this log entry.
+                              example: laml_message
+                            url:
+                              type: string
+                              description: >-
+                                URL for the resource associated with this log
+                                entry (if available)
+                            number_of_segments:
+                              type: integer
+                              description: The number of segments.
+                              example: 1
+                            charge:
+                              type: number
+                              description: The charge in dollars.
+                              example: '0.01'
+                            charge_details:
+                              type: array
+                              description: Details on charges associated with this log.
+                              items:
+                                type: object
+                                properties:
+                                  description:
+                                    type: string
+                                    description: Description for this charge.
+                                  charge:
+                                    type: number
+                                    description: Charged amount.
+                              example: []
+                        - type: object
+                          properties:
+                            created_at:
+                              type: string
+                              format: date-time
+  /logs/{id}:
+    get:
+      operationId: get_log
+      summary: Find a Log by ID
+      description: |
+        Find a log by ID.
+
+        #### Permissions
+        The API token must include the following scopes: _Messaging_.
+      tags:
+        - Logs
+      parameters:
+        - name: id
+          in: path
+          description: Unique ID of the log
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                        description: A unique identifier for the log
+                  - type: object
+                    properties:
+                      from:
+                        type: string
+                        description: The origin phone number.
+                        example: '+12065551212'
+                      to:
+                        type: string
+                        description: The destination phone number.
+                        example: '+12065553434'
+                      status:
+                        type: string
+                        description: The status of the message.
+                        example: sent
+                      direction:
+                        type: string
+                        description: The direction of the message.
+                        example: inbound
+                      kind:
+                        type: string
+                        description: The kind of message.
+                        example: sms
+                      source:
+                        type: string
+                        description: Source of this log entry.
+                        example: laml
+                      type:
+                        type: string
+                        description: Type of this log entry.
+                        example: laml_message
+                      url:
+                        type: string
+                        description: >-
+                          URL for the resource associated with this log entry
+                          (if available)
+                      number_of_segments:
+                        type: integer
+                        description: The number of segments.
+                        example: 1
+                      charge:
+                        type: number
+                        description: The charge in dollars.
+                        example: '0.01'
+                      charge_details:
+                        type: array
+                        description: Details on charges associated with this log.
+                        items:
+                          type: object
+                          properties:
+                            description:
+                              type: string
+                              description: Description for this charge.
+                            charge:
+                              type: number
+                              description: Charged amount.
+                        example: []
+                  - type: object
+                    properties:
+                      created_at:
+                        type: string
+                        format: date-time

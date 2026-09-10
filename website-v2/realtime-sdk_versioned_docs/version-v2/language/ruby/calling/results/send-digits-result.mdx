@@ -1,0 +1,20 @@
+---
+title: SendDigitsResult
+slug: /ruby/reference/calling/results/send-digits
+description: The SendDigitsResult object is returned when a send digits operation is completed.
+toc_max_heading_level: 3
+---
+
+[relay-event]: /docs/server-sdk/v2/ruby/reference/event
+[send_digits]: /docs/server-sdk/v2/ruby/reference/calling/actions/send-digits
+
+# Relay::Calling::SendDigitsResult
+
+This object is returned by the [`send_digits`][send_digits] methods and represents the final result of an action sending digits.
+
+## Properties
+
+| Property | Type | Description |
+| :------- | :--- | :---------- |
+| `successful` | Boolean | Whether the action has completed successfully. |
+| `event` | [Relay::Event][relay-event] | Last event that completed the action. |

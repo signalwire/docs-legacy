@@ -1,0 +1,65 @@
+---
+title: "disconnected"
+slug: /node/reference/voice/call/disconnected
+description: disconnected method for the Call class.
+toc_max_heading_level: 3
+---
+
+[call]: /docs/server-sdk/node/reference/voice/call
+[connect]: /docs/server-sdk/node/reference/voice/call/connect
+[connectphone]: /docs/server-sdk/node/reference/voice/call/connect-phone
+[connectsip]: /docs/server-sdk/node/reference/voice/call/connect-sip
+
+### disconnected
+
+- **disconnected**(): `Promise`\<[`Call`][call]>
+
+Call this method after connecting a peer (e.g., using [connect][connect],
+[connectPhone][connectphone], or [connectSip][connectsip]) to wait until the
+peer disconnects.
+
+This is equivalent to calling `peer.waitFor("ended")` on the connected peer.
+
+#### Returns
+
+`Promise`\<[`Call`][call]>
+
+A promise that resolves to the [`Call`][call] object that you can use to control the call.
+
+#### Example
+
+In this example, we answer an incoming call and connect the call to a peer call.
+After connecting to the peer, we wait 3 seconds and then disconnect the peer.
+Once the peer is disconnected, we play a TTS message to the inbound call leg and then hangup the call.
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+const voiceClient = client.voice;
+
+await voiceClient.listen({
+  topics: ['office'],
+  onCallReceived: async (call) => {
+    // Answer the call
+    call.answer();
+    // Connect call to a new peer
+    let peer = await call.connectPhone({
+      from: call.from,
+      to: "Destination Number Here",
+    })
+
+    // wait 3 seconds then disconnect the peer
+    setTimeout(() => {
+      console.log('Disconnecting Peer');
+      peer.hangup();
+    }, 3000);
+
+    await call.disconnected();
+
+    await call.playTTS({ text: 'Peer disconnected, ending call.' });
+    call.hangup();
+  }
+})
+```

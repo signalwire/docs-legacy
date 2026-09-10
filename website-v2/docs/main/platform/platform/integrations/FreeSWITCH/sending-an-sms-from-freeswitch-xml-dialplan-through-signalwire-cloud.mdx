@@ -1,0 +1,57 @@
+---
+title: Sending an SMS from FreeSWITCH XML dialplan
+slug: /platform/freeswitch/sending-an-sms
+x-custom:
+  ported_from_readme: true
+  tags:
+    - product:freeswitch
+    - product:messaging
+---
+
+
+In order to send an SMS from a FreeSWITCH dialplan extension, we need to do a few things:
+
+1. Fill out the **space_name**, **project_key**, **api_token**, **signalwire_number**, and **cellphone** channel variables.
+
+2. Substitute all the spaces in the **sms_body** for the url encoded equivalent of %20:  
+   `sms_body=${system(printf 'aleg ${uuid} is calling bleg ${bleg_uuid}' | sed -r 's/ /%20/g')}`
+
+3. Calculate the base64 equivalent of your authorization credentials so **auth** is properly setup for curl header **append_headers** `Authorization:'basic ${auth}'`:
+
+`auth=${system(printf '${project_key}:${api_token}' | base64 --wrap 0)`
+
+4. Then, you have the Dialplan Extension. Dial 792 from any registered sip phone, or from bash do: **fs_cli -x 'originate loopback/792 echo inline'**. Then, your cellphone should receive a text. Review the comments in the extension for additional notes.
+
+```xml
+<extension name="signalwire sms curl">
+      <condition field="destination_number" expression="^792$">
+
+        <!-- setup bleg uuid of this call so we we know it before hand -->
+        <action application="set" inline="true" data="bleg_uuid=${create_uuid()}"/>
+
+        <!-- setup signalwire credentials -->
+        <action application="set" inline="true" data="space_name=XXXXXX"/>
+        <action application="set" inline="true" data="project_key=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXX"/>
+        <action application="set" inline="true" data="api_token=PTXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"/>
+
+        <!-- not using '+' here, just the 11 digit number itself, see curl line below -->
+        <action application="set" inline="true" data="signalwire_number=1XXXXXXXXXX"/>
+        <action application="set" inline="true" data="cellphone=1XXXXXXXXXX"/>
+
+        <!-- urlencode your 'spaces' to '%20' so the text body will work in the url, may need to consider other untested puncuations -->
+        <action application="set" inline="true" data="sms_body=${system(printf 'aleg ${uuid} is calling bleg ${bleg_uuid}' | sed -r 's/ /%20/g')}"/>
+
+        <!-- We need to base64 encode the basic authorization -->
+        <action application="set" inline="true" data="auth=${system(printf '${project_key}:${api_token}' | base64 --wrap 0)}"/>
+
+        <!-- notice for E.164 formatting we encode the '+' to '%2B' for the 'From' and 'To' params on the URL -->
+        <action application="curl" data="https://${space_name}.signalwire.com/api/laml/2010-04-01/Accounts/${project_key}/Messages.json?From=%2B${signalwire_number}&To=%2B${cellphone}&Body=${sms_body} append_headers Authorization:'basic ${auth}' post"/>
+
+        <action application="hangup"/>
+      </condition>
+    </extension>
+```
+
+From this example, your cellphone should receive an SMS that looks like this:
+
+`​​​​​​​aleg 0739c067-c8b3-4a1d-bc8d-76f4a7e71c55 is calling bleg 426cd62b-fbcf-4fb2-a10a-9226dff5ac5d`

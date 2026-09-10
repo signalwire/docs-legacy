@@ -1,0 +1,41 @@
+---
+title: "lock"
+slug: /node/reference/video/room-session/lock
+description: lock method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+[roomsession-41]: /docs/server-sdk/node/reference/video/room-session
+
+### lock
+
+- **lock**(`params`): `Promise<void>`
+
+Locks the room. This prevents new participants from joining the room.
+
+#### Returns
+
+`Promise<void>`
+
+#### Example
+
+In this example, we wait for a room to start and then lock the room. This prevents
+new participants from joining the room. This example assumes that there is a [`RoomSession`][roomsession-41]
+already active and that members are joining the room.
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+const videoClient = client.video;
+
+// Setup listener for when a room starts
+await videoClient.listen({
+  onRoomStarted: async (roomsession) => {
+      // Lock the room
+      console.log('Locking room');
+      await roomsession.lock();
+  }
+})
+```

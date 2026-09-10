@@ -1,0 +1,493 @@
+---
+title: "MCP Gateway"
+sidebar_label: "MCP Gateway"
+slug: /python/guides/mcp-gateway
+toc_max_heading_level: 3
+---
+
+## MCP Gateway
+
+The MCP Gateway bridges Model Context Protocol (MCP) servers with SignalWire AI agents, enabling your agents to use any MCP-compatible tool through a managed gateway service.
+
+### What is MCP?
+
+The Model Context Protocol (MCP) is an open standard for connecting AI systems to external tools and data sources. MCP servers expose "tools" (functions) that AI models can call—similar to SWAIG functions but using a standardized protocol.
+
+The MCP Gateway acts as a bridge: it runs MCP servers and exposes their tools as SWAIG functions that SignalWire agents can call. This lets you leverage the growing ecosystem of MCP tools without modifying your agent code.
+
+### Architecture Overview
+
+<Frame caption="MCP Gateway Flow">
+  <img className="diagram" src={require("@image/agents-sdk-manual/06_07_mcp-gateway_diagram1.webp").default} alt="MCP Gateway Flow." />
+</Frame>
+
+### When to Use MCP Gateway
+
+**Good use cases:**
+
+- Integrating existing MCP tools without modification
+- Using community MCP servers (database connectors, APIs, etc.)
+- Isolating tool execution in sandboxed processes
+- Managing multiple tool services from one gateway
+- Session-based tools that maintain state across calls
+
+**Consider alternatives when:**
+
+- You need simple, stateless functions (use SWAIG directly)
+- You're building custom tools from scratch (SWAIG is simpler)
+- Low latency is critical (gateway adds network hop)
+- You don't need MCP ecosystem compatibility
+
+### Components
+
+The MCP Gateway consists of:
+
+| Component | Purpose |
+|-----------|---------|
+| Gateway Service | HTTP server that manages MCP servers and sessions |
+| MCP Manager | Spawns and communicates with MCP server processes |
+| Session Manager | Tracks per-call sessions with automatic cleanup |
+| mcp_gateway Skill | SignalWire skill that connects agents to the gateway |
+
+### Installation
+
+The MCP Gateway is included in the SignalWire Agents SDK. Install with the gateway dependencies:
+
+```bash
+pip install "signalwire-agents[mcp-gateway]"
+```
+
+Once installed, the `mcp-gateway` CLI command is available:
+
+```bash
+mcp-gateway --help
+```
+
+### Setting Up the Gateway
+
+#### 1. Configuration
+
+Create a configuration file for the gateway:
+
+```json
+{
+    "server": {
+        "host": "0.0.0.0",
+        "port": 8080,
+        "auth_user": "admin",
+        "auth_password": "your-secure-password"
+    },
+    "services": {
+        "todo": {
+            "command": ["python3", "./todo_mcp.py"],
+            "description": "Todo list management",
+            "enabled": true,
+            "sandbox": {
+                "enabled": true,
+                "resource_limits": true
+            }
+        },
+        "calculator": {
+            "command": ["node", "./calc_mcp.js"],
+            "description": "Mathematical calculations",
+            "enabled": true
+        }
+    },
+    "session": {
+        "default_timeout": 300,
+        "max_sessions_per_service": 100,
+        "cleanup_interval": 60
+    }
+}
+```
+
+Configuration supports environment variable substitution:
+
+```json
+{
+    "server": {
+        "auth_password": "${MCP_AUTH_PASSWORD|changeme}"
+    }
+}
+```
+
+#### 2. Start the Gateway
+
+```bash
+# Using the installed CLI command
+mcp-gateway -c config.json
+
+# Or with Docker (in the mcp_gateway directory)
+cd mcp_gateway
+./mcp-docker.sh start
+```
+
+The gateway starts on the configured port (default 8080).
+
+#### 3. Connect Your Agent
+
+```python
+from signalwire_agents import AgentBase
+
+class MCPAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="mcp-agent")
+        self.add_language("English", "en-US", "rime.spore")
+
+        # Connect to MCP Gateway
+        self.add_skill("mcp_gateway", {
+            "gateway_url": "http://localhost:8080",
+            "auth_user": "admin",
+            "auth_password": "your-secure-password",
+            "services": [
+                {"name": "todo", "tools": "*"},      # All tools
+                {"name": "calculator", "tools": ["add", "multiply"]}  # Specific tools
+            ]
+        })
+
+        self.prompt_add_section(
+            "Role",
+            "You are an assistant with access to a todo list and calculator."
+        )
+
+if __name__ == "__main__":
+    agent = MCPAgent()
+    agent.run()
+```
+
+### Skill Configuration
+
+The `mcp_gateway` skill accepts these parameters:
+
+| Parameter | Type | Description | Default |
+|-----------|------|-------------|---------|
+| `gateway_url` | string | Gateway service URL | Required |
+| `auth_user` | string | Basic auth username | None |
+| `auth_password` | string | Basic auth password | None |
+| `auth_token` | string | Bearer token (alternative to basic auth) | None |
+| `services` | array | Services and tools to enable | All services |
+| `session_timeout` | integer | Session timeout in seconds | 300 |
+| `tool_prefix` | string | Prefix for SWAIG function names | "mcp_" |
+| `retry_attempts` | integer | Connection retry attempts | 3 |
+| `request_timeout` | integer | Request timeout in seconds | 30 |
+| `verify_ssl` | boolean | Verify SSL certificates | true |
+
+#### Service Configuration
+
+Each service in the `services` array specifies:
+
+```python
+{
+    "name": "service_name",    # Service name from gateway config
+    "tools": "*"               # All tools, or list: ["tool1", "tool2"]
+}
+```
+
+Tools are exposed as SWAIG functions with names like `mcp_{service}_{tool}`.
+
+### Gateway API
+
+The gateway exposes these REST endpoints:
+
+| Endpoint | Method | Purpose |
+|----------|--------|---------|
+| `/health` | GET | Health check (no auth) |
+| `/services` | GET | List available services |
+| `/services/{name}/tools` | GET | List tools for a service |
+| `/services/{name}/call` | POST | Call a tool |
+| `/sessions` | GET | List active sessions |
+| `/sessions/{id}` | DELETE | Close a session |
+
+#### Example API Calls
+
+```bash
+# List services
+curl -u admin:password http://localhost:8080/services
+
+# Get tools for a service
+curl -u admin:password http://localhost:8080/services/todo/tools
+
+# Call a tool
+curl -u admin:password -X POST http://localhost:8080/services/todo/call \
+  -H "Content-Type: application/json" \
+  -d '{
+    "tool": "add_todo",
+    "arguments": {"text": "Buy groceries"},
+    "session_id": "call-123",
+    "timeout": 300
+  }'
+```
+
+### Session Management
+
+Sessions are tied to SignalWire call IDs:
+
+1. **First tool call**: Gateway creates new MCP process and session
+2. **Subsequent calls**: Same session reused (process stays alive)
+3. **Call ends**: Hangup hook closes session and terminates process
+
+This enables stateful tools—a todo list MCP can maintain items across multiple tool calls within the same phone call.
+
+```python
+# Session persists across multiple tool calls in same call
+# Call 1: "Add milk to my list" → mcp_todo_add_todo(text="milk")
+# Call 2: "What's on my list?"  → mcp_todo_list_todos() → Returns "milk"
+# Call 3: "Add eggs"            → mcp_todo_add_todo(text="eggs")
+# Call 4: "Read my list"        → mcp_todo_list_todos() → Returns "milk, eggs"
+```
+
+### Security Features
+
+#### Authentication
+
+The gateway supports two authentication methods:
+
+```json
+{
+    "server": {
+        "auth_user": "admin",
+        "auth_password": "secure-password",
+        "auth_token": "optional-bearer-token"
+    }
+}
+```
+
+#### Sandbox Isolation
+
+MCP processes run in sandboxed environments:
+
+```json
+{
+    "services": {
+        "untrusted_tool": {
+            "command": ["python3", "tool.py"],
+            "sandbox": {
+                "enabled": true,
+                "resource_limits": true,
+                "restricted_env": true
+            }
+        }
+    }
+}
+```
+
+**Sandbox levels:**
+
+| Level | Settings | Use Case |
+|-------|----------|----------|
+| High | `enabled: true, resource_limits: true, restricted_env: true` | Untrusted tools |
+| Medium | `enabled: true, resource_limits: true, restricted_env: false` | Tools needing env vars |
+| None | `enabled: false` | Trusted internal tools |
+
+**Resource limits (when enabled):**
+
+- CPU: 300 seconds
+- Memory: 512 MB
+- Processes: 10
+- File size: 10 MB
+
+#### Rate Limiting
+
+Configure rate limits per endpoint:
+
+```json
+{
+    "rate_limiting": {
+        "default_limits": ["200 per day", "50 per hour"],
+        "tools_limit": "30 per minute",
+        "call_limit": "10 per minute"
+    }
+}
+```
+
+### Writing MCP Servers
+
+MCP servers communicate via JSON-RPC 2.0 over stdin/stdout. The gateway spawns these as child processes and communicates with them via stdin/stdout. Here's a minimal example:
+
+```python
+#!/usr/bin/env python3
+# greeter_mcp.py - Simple MCP server that the gateway can spawn
+"""Simple MCP server example"""
+import json
+import sys
+
+def handle_request(request):
+    method = request.get("method")
+    req_id = request.get("id")
+
+    if method == "initialize":
+        return {
+            "jsonrpc": "2.0",
+            "id": req_id,
+            "result": {
+                "protocolVersion": "2024-11-05",
+                "serverInfo": {"name": "example", "version": "1.0.0"},
+                "capabilities": {"tools": {}}
+            }
+        }
+
+    elif method == "tools/list":
+        return {
+            "jsonrpc": "2.0",
+            "id": req_id,
+            "result": {
+                "tools": [
+                    {
+                        "name": "greet",
+                        "description": "Greet someone by name",
+                        "inputSchema": {
+                            "type": "object",
+                            "properties": {
+                                "name": {"type": "string", "description": "Name to greet"}
+                            },
+                            "required": ["name"]
+                        }
+                    }
+                ]
+            }
+        }
+
+    elif method == "tools/call":
+        tool_name = request["params"]["name"]
+        args = request["params"].get("arguments", {})
+
+        if tool_name == "greet":
+            name = args.get("name", "World")
+            return {
+                "jsonrpc": "2.0",
+                "id": req_id,
+                "result": {
+                    "content": [{"type": "text", "text": f"Hello, {name}!"}]
+                }
+            }
+
+    return {"jsonrpc": "2.0", "id": req_id, "error": {"code": -32601, "message": "Method not found"}}
+
+def main():
+    for line in sys.stdin:
+        request = json.loads(line)
+        response = handle_request(request)
+        print(json.dumps(response), flush=True)
+
+if __name__ == "__main__":
+    main()
+```
+
+### Testing
+
+#### Test with swaig-test
+
+```bash
+# List available tools (including MCP tools)
+swaig-test greeter_agent.py --list-tools
+
+# Execute the greet tool
+swaig-test greeter_agent.py --call-id test-session --exec mcp_greeter_greet --name "World"
+
+# Generate SWML
+swaig-test greeter_agent.py --dump-swml
+```
+
+#### Test Gateway Directly
+
+```bash
+# Health check (no auth required)
+curl http://localhost:8080/health
+
+# List services
+curl -u admin:secure-password http://localhost:8080/services
+
+# Get tools for the greeter service
+curl -u admin:secure-password http://localhost:8080/services/greeter/tools
+
+# Call the greet tool
+curl -u admin:secure-password -X POST http://localhost:8080/services/greeter/call \
+  -H "Content-Type: application/json" \
+  -d '{"tool": "greet", "session_id": "test", "arguments": {"name": "World"}}'
+
+# List active sessions
+curl -u admin:secure-password http://localhost:8080/sessions
+```
+
+### Docker Deployment
+
+The gateway includes Docker support:
+
+```bash
+cd mcp_gateway
+
+# Build and start
+./mcp-docker.sh build
+./mcp-docker.sh start
+
+# Or use docker-compose
+docker-compose up -d
+
+# View logs
+./mcp-docker.sh logs -f
+
+# Stop
+./mcp-docker.sh stop
+```
+
+### Complete Example
+
+```python
+#!/usr/bin/env python3
+# greeter_agent.py - Agent with MCP Gateway integration
+"""Agent with MCP Gateway integration using the greeter MCP server"""
+from signalwire_agents import AgentBase
+
+class GreeterAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="greeter-agent")
+        self.add_language("English", "en-US", "rime.spore")
+
+        # Connect to MCP Gateway
+        self.add_skill("mcp_gateway", {
+            "gateway_url": "http://localhost:8080",
+            "auth_user": "admin",
+            "auth_password": "secure-password",
+            "services": [
+                {"name": "greeter", "tools": "*"}
+            ]
+        })
+
+        self.prompt_add_section(
+            "Role",
+            "You are a friendly assistant that can greet people by name."
+        )
+
+        self.prompt_add_section(
+            "Guidelines",
+            bullets=[
+                "When users want to greet someone, use the mcp_greeter_greet function",
+                "Always be friendly and helpful",
+                "The greet function requires a name parameter"
+            ]
+        )
+
+if __name__ == "__main__":
+    agent = GreeterAgent()
+    agent.run()
+```
+
+### Troubleshooting
+
+| Issue | Solution |
+|-------|----------|
+| "Connection refused" | Verify gateway is running and URL is correct |
+| "401 Unauthorized" | Check auth credentials match gateway config |
+| "Service not found" | Verify service name and that it's enabled |
+| "Tool not found" | Check tool exists with `/services/{name}/tools` |
+| "Session timeout" | Increase `session_timeout` or `default_timeout` |
+| Tools not appearing | Verify `services` config includes the service |
+
+### See Also
+
+| Topic | Reference |
+|-------|-----------|
+| Built-in Skills | [Built-in Skills](/docs/agents-sdk/python/guides/builtin-skills) |
+| SWAIG Functions | [Defining Functions](/docs/agents-sdk/python/guides/defining-functions) |
+| Testing | [swaig-test CLI](/docs/agents-sdk/python/reference/cli-swaig-test) |
+

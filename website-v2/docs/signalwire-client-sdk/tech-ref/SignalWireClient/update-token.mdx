@@ -1,0 +1,247 @@
+---
+title: updateToken
+slug: /signalwire-client/update-token
+---
+
+import APIField from '@site/src/components/APIField';
+
+Updates the authentication token for the client session. This is useful for token refresh scenarios to maintain an active connection.
+
+## How it works
+
+The `updateToken` method replaces the current authentication token with a new one. This allows you to refresh expired tokens without disconnecting and reconnecting the client.
+
+## Key concepts
+
+### Token expiration
+
+JWT tokens have expiration times. Using `updateToken` allows:
+- Seamless token refresh
+- No interruption to active calls
+- Continuous authentication
+
+### Token refresh strategy
+
+Common approaches:
+- **Proactive refresh:** Refresh before expiration
+- **Reactive refresh:** Refresh on authentication error
+- **Scheduled refresh:** Refresh at regular intervals
+
+## Parameters
+
+<APIField name="token" type="string" required>
+  The new JWT authentication token to use.
+</APIField>
+
+## Signature
+
+```typescript
+updateToken(token: string): Promise<void>
+```
+
+## Returns
+
+**Type:** `Promise<void>`
+
+Returns a Promise that resolves when the token is successfully updated.
+
+## Examples
+
+### Basic token update
+
+```typescript
+const newToken = await fetchNewToken()
+
+await client.updateToken(newToken)
+console.log('Token updated successfully')
+```
+
+### Proactive token refresh
+
+```typescript
+async function refreshTokenBeforeExpiry() {
+  const tokenExpiryTime = getTokenExpiry()
+  const timeUntilExpiry = tokenExpiryTime - Date.now()
+  const refreshTime = timeUntilExpiry - (5 * 60 * 1000)
+  
+  setTimeout(async () => {
+    const newToken = await fetchNewToken()
+    await client.updateToken(newToken)
+    console.log('Token refreshed proactively')
+    
+    refreshTokenBeforeExpiry()
+  }, refreshTime)
+}
+
+refreshTokenBeforeExpiry()
+```
+
+### Handle token expiration error
+
+```typescript
+client.on('error', async (error) => {
+  if (error.code === 'TOKEN_EXPIRED') {
+    console.log('Token expired, refreshing...')
+    
+    const newToken = await fetchNewToken()
+    await client.updateToken(newToken)
+    
+    console.log('Token refreshed successfully')
+  }
+})
+```
+
+### Refresh on interval
+
+```typescript
+setInterval(async () => {
+  try {
+    const newToken = await fetchNewToken()
+    await client.updateToken(newToken)
+    console.log('Token refreshed')
+  } catch (error) {
+    console.error('Token refresh failed:', error)
+  }
+}, 30 * 60 * 1000)
+```
+
+### Update token with retry logic
+
+```typescript
+async function updateTokenWithRetry(newToken, maxRetries = 3) {
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      await client.updateToken(newToken)
+      console.log('Token updated successfully')
+      return
+    } catch (error) {
+      console.log(`Token update attempt ${i + 1} failed`)
+      
+      if (i < maxRetries - 1) {
+        await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)))
+      }
+    }
+  }
+  
+  throw new Error('Failed to update token after multiple attempts')
+}
+```
+
+### Store and refresh token
+
+```typescript
+async function refreshAndStoreToken() {
+  const newToken = await fetchNewToken()
+  
+  await client.updateToken(newToken)
+  
+  localStorage.setItem('authToken', newToken)
+  localStorage.setItem('tokenRefreshTime', Date.now().toString())
+  
+  console.log('Token refreshed and stored')
+}
+```
+
+### Error handling
+
+```typescript
+try {
+  await client.updateToken(newToken)
+  console.log('Token updated')
+} catch (error) {
+  console.error('Failed to update token:', error)
+  
+  await handleTokenUpdateFailure()
+}
+```
+
+### Decode and validate token before update
+
+```typescript
+function decodeJWT(token) {
+  const base64Url = token.split('.')[1]
+  const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/')
+  const jsonPayload = decodeURIComponent(
+    atob(base64).split('').map(c =>
+      '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
+    ).join('')
+  )
+  
+  return JSON.parse(jsonPayload)
+}
+
+async function updateTokenSafely(newToken) {
+  const decoded = decodeJWT(newToken)
+  
+  if (decoded.exp * 1000 < Date.now()) {
+    console.error('Token is already expired')
+    return
+  }
+  
+  await client.updateToken(newToken)
+  console.log('Token updated, expires at:', new Date(decoded.exp * 1000))
+}
+```
+
+### Update token on user action
+
+```typescript
+const refreshButton = document.getElementById('refresh-token-btn')
+
+refreshButton.addEventListener('click', async () => {
+  refreshButton.disabled = true
+  refreshButton.textContent = 'Refreshing...'
+  
+  try {
+    const newToken = await fetchNewToken()
+    await client.updateToken(newToken)
+    
+    refreshButton.textContent = 'Token Refreshed'
+    setTimeout(() => {
+      refreshButton.textContent = 'Refresh Token'
+      refreshButton.disabled = false
+    }, 2000)
+  } catch (error) {
+    refreshButton.textContent = 'Refresh Failed'
+    console.error(error)
+  }
+})
+```
+
+### Automatic background refresh
+
+```typescript
+class TokenRefreshManager {
+  constructor(client, tokenFetcher) {
+    this.client = client
+    this.tokenFetcher = tokenFetcher
+    this.refreshInterval = null
+  }
+  
+  start() {
+    this.refreshInterval = setInterval(async () => {
+      await this.refresh()
+    }, 25 * 60 * 1000)
+  }
+  
+  stop() {
+    if (this.refreshInterval) {
+      clearInterval(this.refreshInterval)
+    }
+  }
+  
+  async refresh() {
+    try {
+      const newToken = await this.tokenFetcher()
+      await this.client.updateToken(newToken)
+      console.log('Token auto-refreshed')
+    } catch (error) {
+      console.error('Auto-refresh failed:', error)
+    }
+  }
+}
+
+const refreshManager = new TokenRefreshManager(client, fetchNewToken)
+refreshManager.start()
+```
+

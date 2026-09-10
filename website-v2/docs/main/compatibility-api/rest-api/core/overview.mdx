@@ -1,0 +1,43 @@
+---
+title: Overview
+slug: /compatibility-api/rest
+sidebar_position: 0
+---
+
+SignalWire's REST API allows you to manage and modify calls and messages made to or from your SignalWire phone numbers.
+You also have the ability to retrieve and update your account information, retrieve your entire history of calls, messages, transcriptions, media and more.
+
+This can all be achieved by sending HTTP requests to the SignalWire REST API.
+
+<Tip title="The API formerly known as LaML">
+The Compatibility API and cXML were previously known as "LaML".
+`laml` still appears in endpoint URLs, and the cXML namespace of the REST Client is still titled `LaML`.
+Don't worry, it's all cXML!
+</Tip>
+
+<CardGroup cols={1}>
+<Card title="Postman collection" icon="brands github" href="https://github.com/signalwire/rest-apis">
+  Postman collection for SignalWire REST APIs.
+</Card>
+</CardGroup>
+
+## Base URL
+
+Each Space on SignalWire gets its own subdomain and each Space will have its own URLs for accessing the REST API.
+
+All calls in the provided examples use the following as the base URL:
+
+`https://example.signalwire.com/api/laml/2010-04-01`
+
+However, please note that the actual base URL you will use will differ for each Space, since it will be customized to include your unique Space name.
+For your own custom URL, replace "example" with your unique subdomain.
+
+## AccountSid vs ProjectID
+
+To support seamless migration and compatibility with other popular providers, the SignalWire Compatibility API often refers to the **AccountSid**.
+The AccountSid is a unique identifier on other providers. On SignalWire, this is known as the **Project ID**.
+
+Each project within your Space gets its own, unique Project ID and this is used to authenticate requests on the API.
+This will be the same value as your Project ID but is set as AccountSid for compatibility.
+
+On SignalWire's API, the AccountSid and Project ID are the same thing.

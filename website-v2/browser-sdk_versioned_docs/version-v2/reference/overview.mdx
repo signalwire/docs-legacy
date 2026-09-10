@@ -1,0 +1,215 @@
+---
+title: RELAY SDK for JavaScript
+sidebar_label: Overview
+sidebar_position: 0
+toc_max_heading_level: 3
+slug: /js/
+---
+
+The RELAY JavaScript SDK transforms your standard browser into a realtime media engine, enabling developers to directly make audio and video calls to phone numbers, SIP endpoints, and other browsers. Using the JavaScript SDK you can add immersive, scalable communication - from video conferences and softphones to click-to-call and mobile gaming - all available right in your own web pages and applications.
+
+SignalWire's simple and powerful authentication system, using JWT, allows you to set granular permissions, enabling some of your users to only join conference calls, while others could list on-going calls and jump in to assist from a support dashboard... the possibilities are endless.
+
+<CardGroup cols={2}>
+  <Card title="Source Code" icon="brands github" href="https://github.com/signalwire/signalwire-node/tree/main/packages/js">
+    signalwire/signalwire-js
+  </Card>
+  <Card title="Support" icon="brands slack" href="https://signalwire.community">
+    SignalWire Community Slack Channel
+  </Card>
+</CardGroup>
+
+## Installation
+
+The RELAY SDK for JavaScript is easy to use and only takes a few minute to setup and get running.
+
+### CDN
+
+You can directly include the bundle file from our CDN:
+
+```html
+<script src="https://unpkg.com/@signalwire/js@^1"></script>
+```
+
+Then, use the global `Relay` variable in your application.
+
+### NPM/Yarn
+
+NPM combined with a web application bundler like [Webpack](https://webpack.js.org/) or [Parcel](https://parceljs.org/):
+
+```shell
+npm install @signalwire/js@^1
+```
+
+Then, import `Relay` into your application:
+
+```javascript
+import { Relay } from "@signalwire/js";
+```
+
+## Using the SDK
+
+First step to using the SDK is to setup authentication. The JavaScript SDK is unique in that everything runs within the browser on the client side, which means you cannot safely use your **Project Token** for authentication as you do in the other, server-side SDKs.
+
+To get around this, the JavaScript SDK uses [JSON Web Tokens (JWT)](https://en.wikipedia.org/wiki/JSON_Web_Token) to authenticate with SignalWire and apply fine grained permissions to the end-user.
+
+Your server uses your **Project ID** and **Project Token** to make a request to generate a JWT with your specific requirements, such as expiration time, scopes and permissions, resource name, and give the resulting JWT Token to the browser. The JWT is safe to expose in the browser and to the end user, it is signed and cannot be edited. The browser can then safely log into SignalWire using the **Project ID** and the **JWT**.
+
+To learn more about generating and using JWT, including all the options available to you, see [Authentication for JavaScript SDK Documentation](#authentication-using-jwt).
+
+### Authentication using JWT
+
+The SDKs that run on the client side, like the [JS SDK](/docs/browser-sdk/js) or React Native SDK, cannot safely use the **Project Token** to authenticate your users as you do in the other, server-side SDKs.
+
+SignalWire uses [JSON Web Tokens (JWT)](https://en.wikipedia.org/wiki/JSON_Web_Token), an open-standard, to authorize browsers and mobile applications without exposing your secure Project Token and Keys in client-side applications.
+
+### How Does It Work?
+
+You start by creating a token on your server and specify what capabilities and permissions you'd like your endpoint to have. You can then connect to RELAY within the SDKs using your `Project ID` and `JWT`.
+
+Think of it as if you are generating a long, temporary password for each endpoint you want to connect. There is no limit to the number of JWTs you can generate.
+
+### Security
+
+Security is one of the basic principles of SignalWire and RELAY, and we use JSON Web Tokens for client-side authorization because they are an open, industry standard method of securely representing authorization between two parties.
+
+RELAY JWT allows you to specify find-grained permissions, or _scopes_, to determine what access rights are granted, as well as expiration and identification. These settings are determined by you and signed by SignalWire when the JWT is created and cannot be altered or tampered with on the client-side.
+
+### Expiration
+
+All RELAY JWT have an expiration time, to protect from abuse. When a token's expiration is up, the client will be disconnected from RELAY automatically.
+
+By default, all RELAY JWT have an expiration time of 15 minutes, but you should create tokens with the shortest possible expiration that makes sense for your application.
+
+RELAY JWT can also easily be _refreshed_, updating an existing token with a new expiration time. This allows you to create tokens with short expirations that can be frequently extended as required by your application.
+
+### Resource
+
+When a client connects using the JavaScript SDK, they are creating an endpoint, in which (assuming they have been granted permission) they can send and receive calls to. This is referred to as the `resource`.
+
+When generating a token, you can specify the resource name of the client. For example, if a user logs into your application with the username `alice`, you might want to generate tokens for them with the resource name set to `alice`. Now, another application can simply dial "alice", to reach her, or calls made by Alice's app would be seen as coming from "alice".
+
+If a resource is not set when generating a JWT, a random UUID will be used.
+
+### Creating Tokens
+
+To create a new JWT you send a `POST` request to the JWT REST endpoint. The response will contain a JWT and Refresh Token, which are valid immediately.
+
+**Note:** The JWT is safe to expose to the client, but the `refresh_token` should be kept secret.
+
+| Parameter | Required | Description |
+| -: | - | - |
+| `resource` | <span className="optional-arg">optional</span> | The endpoint's resource name. Defaults to a random UUID. |
+| `expires_in` | <span className="optional-arg">optional</span> | The number of minutes this token will expire in. Defaults to 15 minutes. |
+
+> `POST /api/relay/rest/jwt`
+
+```shell
+curl https://your-space.signalwire.com/api/relay/rest/jwt \
+  -X POST \
+  -u 'YourProjectID:YourAuthToken'
+```
+
+> Response `201 CREATED`
+
+```json
+{
+  "jwt_token": "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJleGFtcGxlIjoiYW4gZXhhbXBsZSBKV1QiLCJpYXQiOjE1NTk3NTk4MDQsImlzcyI6IlNpZ25hbFdpcmUgSldUIiwicmVzb3VyY2UiOiI1NWY1OThlOC1mNzdiLTQzMzktYTA0MC01YTMwNWJiMmRhYTUiLCJleHAiOjE1NTk3NjA3MDR9.8ReiwXsi8aIaQM4AyUErIe1WF8bTaFNO5e5h3_jxgUd4AqQpwHoUdl7nQJWskClEehBEXzEz8st5TQfOpWD8xg",
+  "refresh_token": "eyJhbGciOiJIUzUxMiIsInR5cCI6IlJlZnJlc2gifQ.eyJleGFtcGxlIjoiQW4gRXhhbXBsZSBSZWZyZXNoIFRva2VuIiwiaWF0IjoxNTU5NzU5ODA0LCJpc3MiOiJTaWduYWxXaXJlIEpXVCJ9.WP8af16vR8LlM5rZ8kFpILehcMQpP6TswW9VNtQf9eVPGmnQjUiHpbYWwevo9CRHhMpNLi3Mi3a3DsCl4XN-vQ"
+}
+```
+
+### Refreshing Tokens
+
+To extend an existing JWT, send a `PUT` request with the JWT's Refresh Token to the JWT REST endpoint. The response will contain a new JWT and Refresh Token, which are valid immediately.
+
+| Parameter | Required | Description |
+| -: | - | - |
+| `refresh_token` | <span className="required-arg">required</span> | A valid refresh token. |
+
+> `PUT /api/relay/rest/jwt`
+
+```shell
+curl https://your-space.signalwire.com/api/relay/rest/jwt \
+  -X PUT \
+  -u 'YourProjectID:YourAuthToken' \
+  -H 'Content-Type: application/json' \
+  -d '{ "refresh_token": "a_valid_refresh_token" }'
+```
+
+> Response `200 OK`
+
+```json
+{
+  "jwt_token": "a_new_jwt_token",
+  "refresh_token": "a_new_jwt_refresh_token"
+}
+```
+
+### Generate a JWT
+
+To generate a JWT, make a server-side `POST` request to the JWT endpoint on the RELAY REST API.
+
+```shell
+curl https://your-space.signalwire.com/api/relay/rest/jwt \
+  -X POST \
+  -u 'YourProjectID:YourProjectToken' \
+  -H 'Content-Type: application/json'
+```
+
+Will result in a JSON response like:
+
+```json
+{
+  "jwt_token": "a_long_jwt_token",
+  "refresh_token": "a_long_jwt_refresh_token"
+}
+```
+
+For more information and examples on generating JSON Web Tokens, see [Authentication for JavaScript SDK Documentation](#authentication-using-jwt)
+
+### Connect using JWT
+
+Using the JWT you received in the previous step, you can connect to RELAY using your **Project ID** and the **JWT**.
+
+```javascript
+const client = new Relay({
+  project: "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
+  token: "a_long_jwt_token",
+});
+```
+
+You can then use `client` to make RELAY requests.
+
+### Refresh JWT Token
+
+All tokens have an expiration, so that a user cannot stay logged in forever. You can use the refresh token you received in [Generate a JWT](#generate-a-jwt) to refresh a token you already generated.
+
+To refresh a JWT, make a server-side `PUT` request to the JWT endpoint with the refresh token:
+
+```shell
+curl https://your-space.signalwire.com/api/relay/rest/jwt \
+  -X PUT \
+  -u 'YourProjectID:YourProjectToken' \
+  -H 'Content-Type: application/json' \
+  -d '{
+        "refresh_token": "a_long_jwt_token"
+      }'
+```
+
+Will result in a JSON response like:
+
+```json
+{
+  "jwt_token": "a_new_jwt_token",
+  "refresh_token": "a_new_jwt_refresh_token"
+}
+```
+
+For more information about automatically refreshing JWT as they're about to expire, see [`refreshToken` Event Documentation](/docs/browser-sdk/v2/js/reference/relay-client#refreshtoken)
+
+## Examples
+
+Checkout our examples in Github to help you get started quickly.
+
+Visit the [examples on GitHub](https://github.com/signalwire/signalwire-node/tree/main/packages/js/examples) for our latest list of example implementations using the JavaScript SDK.

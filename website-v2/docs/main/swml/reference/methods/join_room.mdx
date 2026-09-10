@@ -1,0 +1,61 @@
+---
+title: join_room
+slug: /swml/reference/join-room
+description: Join a RELAY Room Session.
+toc_max_heading_level: 3
+---
+
+Join a RELAY room. If the room doesn't exist, it creates a new room.
+
+<ParamField path="join_room" type="object" required={true}>
+  An object that accepts the following properties.
+</ParamField>
+
+
+## **Properties**
+
+<ParamField path="join_room.name" type="string" required={true}>
+  Name of the room to join. Allowed characters: `A-Z | a-z | 0-9_-`
+
+  You can create a room via out REST API [here](/docs/apis/video/create-room)
+</ParamField>
+
+
+## **Variables**
+
+Set by the method:
+
+- **join_room_result:** (out) `joined` | `failed`
+
+## **Examples**
+
+### Joining a room
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - join_room:
+        name: my_room
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "join_room": {
+          "name": "my_room"
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+

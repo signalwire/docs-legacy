@@ -1,0 +1,41 @@
+---
+title: PlayTTSAction
+slug: /go/reference/calling/actions/play-tts
+description: The Play TTS Action is used to play text to speech on a call.
+toc_max_heading_level: 3
+---
+
+[link]: /docs/server-sdk/v2/go/reference/calling/call
+
+## Relay.Calling.PlayTTSAction
+
+This object represents a `TTS action` that is currently active on a call.
+
+### Properties
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `call` | [`Relay.Calling.Call`][link] | This is the call the action is occurring on. |
+
+
+### Methods
+
+<div className="method-definitions"></div>
+
+#### stop()
+
+Stop the action immediately.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+**Examples**
+
+> Play TTS in the call and stop it if `$agent` is not available.
+
+```go
+```

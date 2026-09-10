@@ -1,0 +1,52 @@
+---
+title: "join"
+slug: /js/reference/video/room-session/join
+description: join method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+### join
+
+- **join**(): `Promise<RoomSession>`
+
+Joins the room session.
+
+Depending on the token you passed to the constructor, the room could be joined
+as a _member_ or as an _audience_ participant.
+
+#### Parameters
+
+<ParamField path="params" type="object">
+  Object containing the parameters of the method.
+</ParamField>
+
+<Indent>
+<ParamField path="audio" type="MediaStreamConstraints['audio']" required={false}>
+  Audio constraints to use when joining the room. Default: `true`.
+</ParamField>
+
+<ParamField path="video" type="MediaStreamConstraints['video']" required={false}>
+  Video constraints to use when joining the room. Default: `true`.
+</ParamField>
+
+<ParamField path="receiveAudio" type="boolean" required={false}>
+  Whether to receive audio. Default: `true`.
+</ParamField>
+
+<ParamField path="receiveVideo" type="boolean" required={false}>
+  Whether to receive video. Default: `true`.
+</ParamField>
+
+<ParamField path="sendAudio" type="boolean" required={false}>
+  Whether to send audio. This is ignored if the token belongs to an audience member, since they cannot send audio. Default: `true`.
+</ParamField>
+
+<ParamField path="sendVideo" type="boolean" required={false}>
+  Whether to send video. This is ignored if the token belongs to an audience member, since they cannot send video. Default: `true`.
+</ParamField>
+</Indent>
+
+#### Returns
+
+`Promise<RoomSession>`
+

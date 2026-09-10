@@ -1,0 +1,269 @@
+---
+title: Play
+sidebar_label: Play
+slug: /compatibility-api/cxml/reference/voice/play
+sidebar_position: 1
+toc_max_heading_level: 3
+---
+
+The `<Play>` verb plays an audio file, which SignalWire fetches from the URL you configured, back to the caller.
+
+An example of an audio file set to loop 15 times:
+
+<CodeBlocks>
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Play loop="15">https://your-application.com/audio.mp3</Play>
+</Response>
+```
+```javascript title="Node.js"
+const { RestClient } = require("@signalwire/compatibility-api");
+const response = new RestClient.LaML.VoiceResponse();
+
+response.play({ loop: 15 }, "https://your-application.com/audio.mp3");
+console.log(response.toString());
+```
+```csharp
+using Twilio.TwiML;
+using System;
+
+
+class Example
+{
+    static void Main()
+    {
+        var response = new VoiceResponse();
+        response.Play(new Uri("https://your-application.com/audio.mp3"), loop: 15);
+
+        Console.WriteLine(response.ToString());;
+    }
+}
+```
+```python
+from signalwire.voice_response import VoiceResponse, Play
+
+response = VoiceResponse()
+response.play('https://your-application.com/audio.mp3', loop=15)
+
+print(response)
+```
+```ruby
+require 'signalwire/sdk'
+
+response = Signalwire::Sdk::VoiceResponse.new do |response|
+  response.play(loop: 15, url: 'https://your-application.com/audio.mp3')
+end
+
+puts response.to_s
+```
+</CodeBlocks>
+
+An example which plays an RTMP stream into the call:
+
+<CodeBlocks>
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Play loop="15">rtmp://example.com:1935/my-rtmp-stream</Play>
+</Response>
+```
+```javascript title="Node.js"
+const { RestClient } = require("@signalwire/compatibility-api");
+const response = new RestClient.LaML.VoiceResponse();
+
+response.play({ loop: 15 }, "rtmp://example.com:1935/my-rtmp-stream");
+console.log(response.toString());
+```
+```csharp
+using Twilio.TwiML;
+using System;
+
+
+class Example
+{
+    static void Main()
+    {
+        var response = new VoiceResponse();
+        response.Play(new Uri("rtmp://example.com:1935/my-rtmp-stream"), loop: 15);
+
+        Console.WriteLine(response.ToString());;
+    }
+}
+```
+```python
+from signalwire.voice_response import VoiceResponse, Play
+
+response = VoiceResponse()
+response.play('rtmp://example.com:1935/my-rtmp-stream', loop=15)
+
+print(response)
+```
+```ruby
+require 'signalwire/sdk'
+
+response = Signalwire::Sdk::VoiceResponse.new do |response|
+  response.play(loop: 15, url: 'rtmp://example.com:1935/my-rtmp-stream')
+end
+
+puts response.to_s
+```
+</CodeBlocks>
+
+## Verb attributes
+
+<ParamField path="digits" type="string">
+  The `digits` attribute allows you to play DTMF tones throughout a call. If pauses are required in between your DTMF tones, the character **w** can be used. **w** adds a pause of 0.5 seconds for each occurrence, so **www** would render a pause of 1.5 seconds. Note that this attribute simply plays tones into a call. To enter an extension when making a call, use the `sendDigits` attribute for the noun `<Number>` of the verb `<Dial>`.
+</ParamField>
+
+<ParamField path="loop" type="integer" default="1">
+  The `loop` attribute determines how many times an audio file is played. If `loop` is set to `0`, `<Play>` will continue looping until the call has ended.
+</ParamField>
+
+## Nouns
+
+The noun of an XML verb is nested within the verb upon which the verb acts. `<Play>` has the following noun:
+
+| Noun | Description |
+|:-----|:------------|
+| `plain text` | The URL of the audio file that will be played to the caller. Supported protocols are HTTP and RTMP. |
+
+## MIME types
+
+The following are the MIME types supported by SignalWire:
+
+| Type | Description |
+|:-----|:------------|
+| `audio/mpeg` | mpeg layer 3 audio |
+| `audio/wav` | wav format audio |
+| `audio/wave` | wav format audio |
+| `audio/x-wav` | wav format audio |
+| `audio/aiff` | audio interchange file format |
+| `audio/x-aifc` | audio interchange file format |
+| `audio/x-aiff` | audio interchange file format |
+| `audio/x-gsm` | GSM audio format |
+| `audio/gsm` | GSM audio format |
+| `audio/ulaw` | Î¼-law audio format |
+
+## Nesting
+
+No other verbs can be nested within `<Play>`. However, `<Play>` can be nested within `<Gather>`. In this case, the verb attribute `digits` is not supported.
+
+## Examples
+
+### Play a simple audio file
+
+<CodeBlocks>
+
+```javascript title="Node.js"
+const { RestClient } = require("@signalwire/compatibility-api");
+const response = new RestClient.LaML.VoiceResponse();
+
+response.play("https://your-application.com/audio.mp3");
+console.log(response.toString());
+```
+
+```csharp
+using Twilio.TwiML;
+using System;
+
+class Example
+{
+    static void Main()
+    {
+        var response = new VoiceResponse();
+        response.Play(new Uri("https://your-application.com/audio.mp3"));
+
+        Console.WriteLine(response.ToString());;
+    }
+}
+```
+
+```python
+from signalwire.voice_response import VoiceResponse, Play
+
+response = VoiceResponse()
+response.play('https://your-application.com/audio.mp3')
+
+print(response)
+```
+
+```ruby
+require 'signalwire/sdk'
+
+response = Signalwire::Sdk::VoiceResponse.new do |response|
+  response.play(url: 'https://your-application.com/audio.mp3')
+end
+
+puts response.to_s
+```
+
+</CodeBlocks>
+
+The simplest case for `<Play>`: SignalWire downloads the specified audio file and plays it to the caller.
+
+### Use DTMF tones in calls
+
+<CodeBlocks>
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Play digits="wwwww9"></Play>
+</Response>
+```
+
+```javascript title="Node.js"
+const { RestClient } = require("@signalwire/compatibility-api");
+const response = new RestClient.LaML.VoiceResponse();
+
+response.play({ digits: "wwwww9" });
+console.log(response.toString());
+```
+
+```csharp
+using Twilio.TwiML;
+
+
+class Example
+{
+    static void Main()
+    {
+        var response = new VoiceResponse();
+        response.Play("", digits: "wwwww9");
+
+        Console.WriteLine(response.ToString());;
+    }
+}
+```
+
+```python
+from signalwire.voice_response import VoiceResponse, Play
+
+response = VoiceResponse()
+response.play(digits='wwwww9')
+
+print(response)
+```
+
+```ruby
+require 'signalwire/sdk'
+
+response = Signalwire::Sdk::VoiceResponse.new do |response|
+  response.play(digits: 'wwwww9')
+end
+
+puts response.to_s
+```
+
+</CodeBlocks>
+
+As described in the attributes section, the character **w** produces a 0.5 second pause. In this example, SignalWire will wait 2.5 seconds before playing the digit '9'.
+
+## Notes on usage
+
+- Audio files that are longer than 40 minutes should be split into smaller files, as it may result in a dropped call.
+- Since it takes some time to download and cache files from your server, slight delays may occur the first time an audio file is played. In this case, SignalWire may play a tone during download.
+- SignalWire attempts to cache files only when allowed by HTTP headers (ETag and Last-Modified). Always check for a new version of the file with a response of `Cache-Control: no-cache`. This enables your server to respond with a new version, or with a '304 Not Modified', which tells SignalWire to use the cached version.
+- The degradation that occurs when transcoding high bitrate, lossy encoded files, such as 128kbps MP3 files, can take a long time, resulting in audio that sounds worse than those in lossless 8kbps formats.
+- SignalWire transcodes all audio files into a format that is identifiable by the telephone network. Telephones typically do not support high bitrate audio, so playback results in lower-quality audio.

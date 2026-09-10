@@ -1,0 +1,34 @@
+---
+title: "setMemberPosition"
+slug: /node/reference/video/room-session/set-member-position
+description: setMemberPosition method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+
+### setMemberPosition
+
+- **setMemberPosition**(`params`): `Promise<void>`
+
+Assigns a position in the layout to the specified member.
+
+#### Parameters
+
+| Name              | Type            | Description                       |
+|:------------------|:----------------|:----------------------------------|
+| `params`          | `Object`        | -                                 |
+| `params.memberId` | `string`        | Id of the member to affect.       |
+| `params.position` | `VideoPosition` | Position to assign in the layout. |
+
+#### Returns
+
+`Promise<void>`
+
+#### Example
+
+```js
+await roomSession.setMemberPosition({
+  memberId: "1bf4d4fb-a3e4-4d46-80a8-3ebfdceb2a60",
+  position: "off-canvas",
+});
+```

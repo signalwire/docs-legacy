@@ -1,0 +1,48 @@
+---
+title: "getMembers"
+slug: /node/reference/chat/client/get-members
+description: getMembers method for the Client class.
+toc_max_heading_level: 3
+---
+
+
+### getMembers
+
+- **getMembers**(`params`): `Promise<{ members: ChatMemberEntity[] }>`
+
+Returns the list of members in the given channel.
+
+#### Parameters
+
+<ParamField path="params" type="object" required>
+  Object containing the parameters of the method.
+</ParamField>
+
+<Indent>
+<ParamField path="channel" type="string" required>
+  The channel for which to get the list of members.
+</ParamField>
+</Indent>
+
+#### Returns
+
+`Promise<{ members: ChatMemberEntity[] }>`
+
+A promise that resolves to an object containing the list of members in the given channel.
+
+#### Example
+In this example, we fetch all the members in the channel `channel1` and print the
+number of members and the list of members to the console.
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+const chatClient = client.chat;
+
+const m = await chatClient.getMembers({ channel: "channel1" });
+
+console.log(`There are a total of ${m.members.length} members in channel1.
+The list of members are: ${m.members.map(m => m.id).join(", ")}`);
+```

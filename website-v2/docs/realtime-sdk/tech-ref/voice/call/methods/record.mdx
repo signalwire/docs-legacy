@@ -1,0 +1,97 @@
+---
+title: "record"
+slug: /node/reference/voice/call/record
+description: record method for the Call class.
+toc_max_heading_level: 3
+---
+
+[callrecording-onstarted]: /docs/server-sdk/node/reference/voice/call-recording#onstarted
+[callrecording]: /docs/server-sdk/node/reference/voice/call-recording
+[recordaudio]: /docs/server-sdk/node/reference/voice/call/record-audio
+
+### record
+
+- **record**(`params`): `Promise`\<[`CallRecording`][callrecording]>
+
+Generic method to record a call. 
+
+<Tip>
+
+Please use [`recordAudio`][recordaudio].
+
+</Tip>
+
+#### Parameters
+
+<ParamField path="params" type="object" required>
+  Object containing the parameters for recording the call.
+</ParamField>
+
+<Indent>
+<ParamField path="audio" type="object" required>
+  Audio recording configuration. See the parameters for [recordAudio][recordaudio].
+</ParamField>
+
+<ParamField path="listen" type="object">
+  Callback to listen for events. List of recording events can be found [here][callrecording]. Example event: [`onStarted`][callrecording-onstarted].
+</ParamField>
+</Indent>
+
+#### Returns
+
+`Promise`\<[`CallRecording`][callrecording]>
+
+A promise that resolves to a [`CallRecording`][callrecording] object that you can use to
+view the current state and results of the `recording` session.
+
+#### Example
+
+In this example, we dial a phone number and record the call audio.
+During the recording, we play a TTS message. Once the TTS message is finished, we hangup the call
+and print the URL of the recording to console.
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+const voiceClient = client.voice;
+
+// Listen for incoming calls
+await voiceClient.listen({
+
+  topics: ["office"],
+  onCallReceived: async (call) => {
+    console.log("Call received");
+    // Answer the call
+    call.answer();
+
+    await call.record({
+      audio: {
+        format: "mp3",
+        direction: "both",
+        stereo: true,
+        beep: true,
+        terminators: "#",
+        endSilenceTimeout: 0,
+        initialTimeout: 0
+      },
+      listen: {
+        onStarted: async (recording) => {
+          console.log("Recording started");
+          await call.playTTS({
+            text: "This is a call recording test."
+          });
+          recording.stop();
+        },
+        onFailed: () => console.log("Recording failed"),
+        onUpdated: (event) => console.log("Recording updated", event.state),
+        onEnded: (event) => {
+          console.log("Recording ended",  event.url, event.state)
+          call.hangup();
+        }
+      }
+    }).onStarted();
+  }
+});
+```

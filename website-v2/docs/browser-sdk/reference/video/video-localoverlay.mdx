@@ -1,0 +1,38 @@
+---
+title: "LocalOverlay"
+sidebar_position: 1
+slug: /js/reference/video/local-overlay
+toc_max_heading_level: 3
+---
+
+Represents the local overlay, which displays the user's local camera feed.
+
+## Properties
+
+<ParamField path="mirrored" type="boolean" required={true}>
+  Whether the local video overlay is mirrored.
+</ParamField>
+
+## Methods
+
+### setMirrored
+
+▸ **setMirrored**(): `void`
+
+Mirror the local video overlay when `true`. The mirrored stream is sent to the SignalWire server and is visible to all participants.
+
+#### Parameters
+
+<ParamField path="mirror" type="boolean" required={true}>
+  Whether to mirror the local video overlay.
+</ParamField>
+
+#### Returns
+
+`void`
+
+#### Example
+
+```javascript
+await roomSession.localOverlay.setMirrored(true);
+```

@@ -1,0 +1,265 @@
+---
+title: "Swml Service"
+sidebar_label: "Swml Service"
+slug: /python/reference/swml-service
+toc_max_heading_level: 3
+---
+
+## SWMLService API
+
+API reference for SWMLService, the base class for creating and serving SWML documents.
+
+### Class Definition
+
+```python
+from signalwire_agents.core.swml_service import SWMLService
+
+class SWMLService:
+    """Base class for creating and serving SWML documents."""
+```
+
+### Constructor
+
+```python
+SWMLService(
+    name: str,                              # Service name (required)
+    route: str = "/",                       # HTTP route path
+    host: str = "0.0.0.0",                  # Host to bind
+    port: int = 3000,                       # Port to bind
+    basic_auth: Optional[Tuple[str, str]] = None,  # (username, password)
+    schema_path: Optional[str] = None,      # SWML schema path
+    config_file: Optional[str] = None       # Config file path
+)
+```
+
+### Core Responsibilities
+
+**SWML Generation:**
+- Create and validate SWML documents
+- Add verbs to document sections
+- Render complete SWML JSON output
+
+**Web Server:**
+- Serve SWML documents via FastAPI
+- Handle SWAIG webhook callbacks
+- Manage authentication
+
+**Schema Validation:**
+- Load and validate SWML schema
+- Auto-generate verb methods from schema
+- Validate document structure
+
+### Document Methods
+
+#### reset_document
+
+```python
+def reset_document(self) -> None
+```
+
+Reset the SWML document to a clean state.
+
+#### add_verb
+
+```python
+def add_verb(
+    self,
+    verb_name: str,           # Verb name (e.g., "ai", "play")
+    params: Dict[str, Any]    # Verb parameters
+) -> 'SWMLService'
+```
+
+Add a verb to the current document section.
+
+#### get_document
+
+```python
+def get_document(self) -> Dict[str, Any]
+```
+
+Get the current SWML document as a dictionary.
+
+#### render
+
+```python
+def render(self) -> str
+```
+
+Render the SWML document as a JSON string.
+
+### Auto-Generated Verb Methods
+
+SWMLService automatically generates methods for all SWML verbs defined in the schema:
+
+```python
+## These methods are auto-generated from schema
+service.ai(...)          # AI verb
+service.play(...)        # Play audio
+service.record(...)      # Record audio
+service.connect(...)     # Connect call
+service.transfer(...)    # Transfer call
+service.hangup(...)      # End call
+service.sleep(...)       # Pause execution
+## ... many more
+```
+
+### Server Methods
+
+#### run
+
+```python
+def run(
+    self,
+    host: str = None,  # Override host
+    port: int = None   # Override port
+) -> None
+```
+
+Start the development server.
+
+#### get_app
+
+```python
+def get_app(self) -> FastAPI
+```
+
+Get the FastAPI application instance.
+
+### Authentication Methods
+
+#### get_basic_auth_credentials
+
+```python
+def get_basic_auth_credentials(self) -> Tuple[str, str]
+```
+
+Get the current basic auth credentials.
+
+### URL Building Methods
+
+#### _build_full_url
+
+```python
+def _build_full_url(
+    self,
+    endpoint: str = "",           # Endpoint path
+    include_auth: bool = False    # Include credentials
+) -> str
+```
+
+Build a full URL for an endpoint.
+
+#### _build_webhook_url
+
+```python
+def _build_webhook_url(
+    self,
+    endpoint: str,                    # Endpoint path
+    query_params: Dict[str, str] = None  # Query parameters
+) -> str
+```
+
+Build a webhook URL with authentication.
+
+### Routing Methods
+
+#### register_routing_callback
+
+```python
+def register_routing_callback(
+    self,
+    callback: Callable,   # Routing callback
+    path: str = "/"       # Path to register
+) -> None
+```
+
+Register a routing callback for dynamic request handling.
+
+### Security Configuration
+
+| Attribute | Type | Description |
+|-----------|------|-------------|
+| `ssl_enabled` | bool | Whether SSL is enabled |
+| `domain` | str | Domain for SSL certificates |
+| `ssl_cert_path` | str | Path to SSL certificate |
+| `ssl_key_path` | str | Path to SSL private key |
+| `security` | SecurityConfig | Unified security configuration |
+
+### Schema Utils
+
+The `schema_utils` attribute provides access to SWML schema validation:
+
+```python
+## Access schema utilities
+service.schema_utils.validate(document)
+service.schema_utils.get_all_verb_names()
+service.schema_utils.get_verb_schema("ai")
+```
+
+### Verb Registry
+
+The `verb_registry` manages SWML verb handlers:
+
+```python
+## Access verb registry
+service.verb_registry.register_handler("custom_verb", handler)
+service.verb_registry.get_handler("ai")
+```
+
+### Instance Attributes
+
+| Attribute | Type | Description |
+|-----------|------|-------------|
+| `name` | str | Service name |
+| `route` | str | HTTP route path |
+| `host` | str | Bind host |
+| `port` | int | Bind port |
+| `schema_utils` | SchemaUtils | Schema validation utilities |
+| `verb_registry` | VerbRegistry | Verb handler registry |
+| `log` | Logger | Structured logger |
+
+### Usage Example
+
+```python
+from signalwire_agents.core.swml_service import SWMLService
+
+
+## Create a basic SWML service
+service = SWMLService(
+    name="my-service",
+    route="/swml",
+    port=8080
+)
+
+## Add verbs to build a document
+service.reset_document()
+service.play(url="https://example.com/welcome.mp3")
+service.ai(
+    prompt={"text": "You are a helpful assistant"},
+    SWAIG={"functions": []}
+)
+
+## Get the rendered SWML
+swml_json = service.render()
+print(swml_json)
+```
+
+### Relationship to AgentBase
+
+AgentBase extends SWMLService with higher-level abstractions:
+
+**SWMLService provides:**
+- SWML document generation
+- Schema validation
+- Basic web server
+- Authentication
+
+**AgentBase adds:**
+- Prompt management (POM)
+- Tool/function definitions
+- Skills system
+- AI configuration
+- Serverless support
+- State management
+
+

@@ -1,0 +1,42 @@
+---
+title: setMemberState
+slug: /js/reference/chat/client/set-member-state
+toc_max_heading_level: 3
+---
+
+- **setMemberState**(`params`): `Promise<void>`
+
+Sets a state object for a member, for the specified channels. The previous state object will be completely replaced.
+
+## Parameters
+
+<ParamField path="params" type="object" required={true}>
+  Configuration object for setting member state
+</ParamField>
+<Indent>
+  <ParamField path="params.channels" type="string | string[]" required={true}>
+    Channels for which to set the state.
+  </ParamField>
+  <ParamField path="params.memberId" type="string" required={true}>
+    Id of the member to affect. If not provided, defaults to the current member.
+  </ParamField>
+  <ParamField path="params.state" type="Record<any, any>" required={true}>
+    The state to set. There are no requirements on the content of the state.
+  </ParamField>
+</Indent>
+
+## Returns
+
+`Promise<void>`
+
+## Example
+
+```js
+await chatClient.setMemberState({
+  channels: ["chan1", "chan2"],
+  state: {
+    online: true,
+    typing: false,
+  },
+});
+```

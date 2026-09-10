@@ -1,0 +1,17 @@
+{
+  "extends": "../../../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./out",
+    "jsx": "react-jsx",
+    "skipLibCheck": false,
+    "lib": ["ES2016", "DOM"],
+    "types": ["react"]
+  },
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "out"
+  ]
+}

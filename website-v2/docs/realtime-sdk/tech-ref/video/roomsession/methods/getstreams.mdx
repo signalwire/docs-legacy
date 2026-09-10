@@ -1,0 +1,76 @@
+---
+title: "getStreams"
+slug: /node/reference/video/room-session/get-streams
+description: getStreams method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+[roomsession-41]: /docs/server-sdk/node/reference/video/room-session
+[roomsessionstream]: /docs/server-sdk/node/reference/video/room-session-stream
+
+### getStreams
+
+- **getStreams**(): `Promise<\{ streams: RoomSessionStream \}>`
+
+Obtains a list of active streams for this RoomSession. These are RTMP streams of
+the audio/video content of this room, which will be sent to an external party
+(e.g., to YouTube).
+
+#### Returns
+
+`Promise<\{ streams: RoomSessionStream \}>` - See [RoomSessionStream][roomsessionstream] for more information.
+
+#### Example
+
+In this example, we wait for a room to start and then start a stream in that room.
+We then use `getStreams` to get the list of stream objects. We then loop through
+the list of streams and print out the `state` and `id` of each stream.
+Afterwards, we stop the stream after 10 seconds. This example assumes that there is a [`RoomSession`][roomsession-41]
+already active and that members are joining the room.
+
+```javascript
+import { SignalWire } from "@signalwire/realtime-api";
+
+// Initialize the SignalWire client
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+// Access video client from the main client
+const videoClient = client.video;
+
+// Setup listener for when a room starts
+await videoClient.listen({
+  onRoomStarted: async (roomSession) => {
+    console.log("Room started", roomSession.displayName);
+
+    roomSession.startStream({
+      url: "rtmp://example.com/stream"
+    })
+    
+    await roomSession.listen({
+      onStreamStarted: async (stream) => {
+        console.log("Stream started", stream.state);
+
+        // get active streams
+        const activeStreams = roomSession.getStreams();
+
+        (await activeStreams).streams.forEach((stream) => {
+          console.log(`Active Steam: ${stream.id}, ${stream.state}`);
+        });
+
+        // Wait 10 seconds and stop the stream
+
+        setTimeout(() => {
+          console.log("Stopping stream");
+          stream.stop();
+        }, 10000);
+      },
+      onStreamEnded: (stream) => {
+        console.log("Stream ended", stream.id, stream.state);
+      },
+    });
+  },
+  onRoomEnded: async (roomSession) => {
+    console.log("Room ended", roomSession.displayName);
+  }
+});
+```

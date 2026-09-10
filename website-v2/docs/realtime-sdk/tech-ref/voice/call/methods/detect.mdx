@@ -1,0 +1,41 @@
+---
+title: "detect"
+slug: /node/reference/voice/call/detect
+description: detect method for the Call class.
+toc_max_heading_level: 3
+---
+
+[amd]: /docs/server-sdk/node/reference/voice/call/amd
+[calldetect]: /docs/server-sdk/node/reference/voice/call-detect
+[detectansweringmachine]: /docs/server-sdk/node/reference/voice/call/detect-answering-machine
+[detectdigit]: /docs/server-sdk/node/reference/voice/call/detect-digit
+[detectfax]: /docs/server-sdk/node/reference/voice/call/detect-fax
+
+### detect
+
+- **detect**(`params`): `Promise`\<[`CallDetect`][calldetect]>
+
+Generic method. Please see [amd][amd], [detecFax][detectfax], and [detectDigit][detectdigit].
+
+#### Parameters
+
+<ParamField path="params" type="object" required>
+  Object containing the parameters for detection.
+</ParamField>
+
+<Indent>
+<ParamField path="type" type='"fax" | "machine" | "digit" | "beep"' required>
+  The type of detection to perform:
+  - `"digit"`: see [detectDigit][detectdigit]
+  - `"fax"`: see [detectFax][detectfax]
+  - `"machine"`: see [detectAnsweringMachine][detectansweringmachine]
+  - `"beep"`: see [detectAnsweringMachine][detectansweringmachine]
+</ParamField>
+</Indent>
+
+#### Returns
+
+`Promise`\<[`CallDetect`][calldetect]>
+
+A promise that resolves to a [`CallDetect`][calldetect] object that you can use to
+view the current state and results of the `detect` session.

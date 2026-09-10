@@ -1,0 +1,129 @@
+---
+title: PlayAction
+slug: /ruby/reference/calling/actions/play
+description: The PlayAction object is returned when starting a play operation on a call.
+toc_max_heading_level: 3
+---
+
+[call]: /docs/server-sdk/v2/ruby/reference/calling/call#play
+[relay-calling-playpauseresult]: /docs/server-sdk/v2/ruby/reference/calling/results/play-pause
+[relay-calling-playresult]: /docs/server-sdk/v2/ruby/reference/calling/results/play
+[relay-calling-playresumeresult]: /docs/server-sdk/v2/ruby/reference/calling/results/play-resume
+[relay-calling-playvolumeresult]: /docs/server-sdk/v2/ruby/reference/calling/results/play-volume
+[relay-calling-stopresult]: /docs/server-sdk/v2/ruby/reference/calling/results/stop
+
+# Relay::Calling::PlayAction
+
+This object is returned by the asynchronous [`play!`][call] family of methods and represents a playing action that is currently active on a call.
+
+## Properties
+
+| Property | Type | Description |
+| :------- | :--- | :---------- |
+| `result` | [`Relay::Calling::PlayResult`][relay-calling-playresult] | Final result of playing. |
+| `state` | String | Current state of playing. |
+| `completed` | Boolean | Whether the playing has finished. |
+| `payload` | Hash | Payload sent to Relay to start playing. |
+| `control_id` | String | UUID to identify the playing. |
+
+## Methods
+
+### stop
+
+Stop the action immediately.
+
+
+
+**Parameters**
+
+None
+
+**Returns**
+
+[`Relay::Calling::StopResult`][relay-calling-stopresult] - A `StopResult` object with a `successful` property.
+
+### pause
+
+Pause the playback immediately.
+
+
+
+**Parameters**
+
+None
+
+**Returns**
+
+[`Relay::Calling::PlayPauseResult`][relay-calling-playpauseresult] - A `PlayPauseResult` object with a `successful` property.
+
+**Examples**
+
+Play some audio and pause after 2 seconds.
+
+```ruby
+play_action = call.play_audio('https://cdn.signalwire.com/default-music/welcome.mp3')
+
+sleep 2
+result = play_action.pause
+
+puts "Pause was successful" if result.successful
+```
+
+### resume
+
+Resume the playback immediately.
+
+
+
+**Parameters**
+
+None
+
+**Returns**
+
+[`Relay::Calling::PlayResumeResult`][relay-calling-playresumeresult] - A `PlayResumeResult` object with a `successful` property.
+
+**Examples**
+
+Play some audio and pause after 2 seconds, then resume playing after 2 more seconds
+
+```ruby
+play_action = call.play_audio('https://cdn.signalwire.com/default-music/welcome.mp3')
+
+sleep 2
+play_action.pause
+sleep 2
+result = play_action.resume
+
+puts "Resume was successful" if result.successful
+```
+
+### volume
+
+Sets the volume for the playback.
+
+Uses a value from -40dB to +40dB where 0 is original audio and -40 is muted. It follows the standard amplitude voltage gain factor: `10 pow (value / 20)`.
+
+
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| :-------- | :--- | :------- | :---------- |
+| `setting` | Numeric | Yes | Volume setting |
+
+**Returns**
+
+[`Relay::Calling::PlayVolumeResult`][relay-calling-playvolumeresult] - A `PlayVolumeResult` object with a `successful` property.
+
+**Examples**
+
+Play some audio and change the volume
+
+```ruby
+play_action = call.play_audio('https://cdn.signalwire.com/default-music/welcome.mp3')
+
+result = play_action.volume 20
+
+puts "Volume change was successful" if result.successful
+```

@@ -1,0 +1,201 @@
+---
+title: Number
+sidebar_label: Number
+slug: /compatibility-api/cxml/reference/voice/number
+sidebar_position: 1
+toc_max_heading_level: 3
+---
+
+[`<Dial>`](/docs/compatibility-api/cxml/reference/voice/dial) verb's `<Number>` noun specifies what phone number to dial. You can use up to 10 `<Number>`s within a `<Dial>` to simultaneously call several people. The first person to answer the call will be connected to the caller and the rest of the called numbers will be hung up.
+
+## Noun attributes
+
+<ParamField path="method" type="string" default="POST">
+  The `method` attribute specifies whether the request to action is a `GET` or a `POST`. Valid values are `GET` or `POST`.
+</ParamField>
+
+<ParamField path="sendDigits" type="string">
+  Play DTMF tones when a call is answered. Useful when dialing numbers with extensions. SignalWire will initially dial the main phone number, then send the DTMF tones for the extension when the automated system answers.
+</ParamField>
+
+<ParamField path="statusCallback" type="string">
+  The URL to make requests to for each `statusCallbackEvent` event. See [below](#number_statusCallback) for request parameters.
+</ParamField>
+
+<ParamField path="statusCallbackEvent" type="string">
+  The current status of the call. The call moves from `initiated` to `ringing` when the phone starts ringing. It moves from `ringing` to `answered` when the phone call is answered. Finally, it moves from `answered` to `completed` when the call is terminated. The status will be set to `completed` through the following reasons: **busy**, **canceled**, **completed**, **failed**, or **no-answer**. To specify multiple events, separate each one with a space. See [below](#number_statusCallbackEvent) for the different call statuses.
+</ParamField>
+
+<ParamField path="statusCallbackMethod" type="string" default="POST">
+  The type of HTTP request to use when requesting a `statusCallback`.
+</ParamField>
+
+<ParamField path="url" type="string">
+  A specified URL for a document that runs on the callee's end after the dialed number answers but before the call is connected. This allows the caller to provide information to the dialed number, giving them the opportunity to decline the call, before they answer the call.
+</ParamField>
+
+
+
+
+### Status values for the `statusCallbackEvent` attribute {#number_statusCallbackEvent}
+
+The `statusCallbackEvent` attribute has the following call status values:
+
+| Value | Description |
+|:------|:------------|
+| `initiated` | Dialing of a call has begun. |
+| `ringing` | The call has begun ringing. |
+| `answered` | The call has been answered. |
+| `completed` | The call has been terminated. The status will be set to `completed` through the following reasons: **busy**, **canceled**, **completed**, **failed**, or **no-answer**. |
+
+
+
+
+### Request parameters for the `statusCallback` URL {#number_statusCallback}
+
+<WebhookPayloadSnippet webhook="voiceStatusCallback" />
+
+## Examples
+
+### Dialing an extension
+
+<CodeBlocks>
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Dial>
+        <Number sendDigits="www5645">
+            123-456-7890
+        </Number>
+    </Dial>
+</Response>
+```
+```javascript title="Node.js"
+const { RestClient } = require("@signalwire/compatibility-api");
+const response = new RestClient.LaML.VoiceResponse();
+
+dial = response.dial();
+dial.number({ sendDigits: "www5645" }, "123-456-7890");
+console.log(response.toString());
+```
+```csharp
+using System;
+using Twilio.TwiML;
+using Twilio.TwiML.Voice;
+
+
+class Example
+{
+    static void Main()
+    {
+        var response = new VoiceResponse();
+        var dial = new Dial();
+        dial.Number("123-456-7890", sendDigits: "www5645");
+
+        response.Append(dial);
+        Console.WriteLine(response.ToString());;
+    }
+}
+```
+```python
+from signalwire.voice_response import VoiceResponse, Dial, Number
+
+response = VoiceResponse()
+dial = Dial()
+dial.number('123-456-7890', send_digits='www5645')
+response.append(dial)
+
+print(response)
+```
+```ruby
+require 'signalwire/sdk'
+
+response = Signalwire::Sdk::VoiceResponse.new do |response|
+  response.dial do |dial|
+    dial.number('123-456-7890', send_digits: 'www5645')
+  end
+end
+
+puts response.to_s
+```
+</CodeBlocks>
+
+After entering the phone number, we want to wait a little before entering in the extension. In order to do this, a `w` can be placed in front of the extension number. Each `w` will wait **0.5 seconds** before dialing the extension. In this example, SignalWire will wait **1.5 seconds** before dialing the extension **5645**.
+
+### Concurrent phone calls
+
+<CodeBlocks>
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Dial>
+        <Number>123-456-7890</Number>
+        <Number>987-654-3210</Number>
+        <Number>102-938-4750</Number>
+    </Dial>
+</Response>
+```
+```javascript title="Node.js"
+const { RestClient } = require("@signalwire/compatibility-api");
+const response = new RestClient.LaML.VoiceResponse();
+
+dial = response.dial();
+dial.number("123-456-7890");
+dial.number("987-654-3210");
+dial.number("102-938-4750");
+console.log(response.toString());
+```
+```csharp
+using Twilio.TwiML;
+using Twilio.TwiML.Voice;
+using System;
+
+
+class Example
+{
+    static void Main()
+    {
+        var response = new VoiceResponse();
+        var dial = new Dial();
+        dial.Number("123-456-7890");
+        dial.Number("987-654-3210");
+        dial.Number("102-938-4750");
+
+        response.Append(dial);
+        Console.WriteLine(response.ToString());;
+    }
+}
+```
+```python
+from signalwire.voice_response import VoiceResponse, Dial, Number
+
+response = VoiceResponse()
+dial = Dial()
+dial.number('123-456-7890')
+dial.number('987-654-3210')
+dial.number('102-938-4750')
+response.append(dial)
+
+print(response)
+```
+```ruby
+require 'signalwire/sdk'
+
+response = Signalwire::Sdk::VoiceResponse.new do |response|
+  response.dial do |dial|
+    dial.number('123-456-7890')
+    dial.number('987-654-3210')
+    dial.number('102-938-4750')
+  end
+end
+
+puts response.to_s
+```
+</CodeBlocks>
+
+You can simultaneously call up to 10 `<Number>`s. The first caller to pick up the phone will be connected to the caller and the rest of the called numbers will be hung up.
+
+## Notes on usage
+
+- You can have up to 10 `<Number>`s within a `<Dial>`.
+- If you dial an office number or a phone on airplane mode, the call will be picked up within the first ring and all other calls will be hung up.

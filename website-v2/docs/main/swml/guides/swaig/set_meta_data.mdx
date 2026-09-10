@@ -1,0 +1,406 @@
+---
+slug: /swml/guides/set-meta-data
+title: Store data outside LLM context
+description: Learn how to use the `set_meta_data` action to store function metadata without exposing it to the LLM.
+x-custom:
+  tags:
+    - favorite
+    - sdk:swml
+    - product:ai
+    - product:voice
+---
+
+In this example, we demonstrate how to use `set_meta_data` to store metadata to reference later.
+The AI agent, will store a user's name and then look up any additional stored information.
+
+The benefit of storing information in `meta_data` is that the information it can be referenced from any function with the same `meta_data_token`, while also
+never being exposing the information to the language model. This allows for the AI agent to store sensitive information without
+the risk of it being exposed to the AI agent.
+
+## 1. Storing user information
+
+The `store_user` function is used to store the user's name. The user's name and a secret associated with them are stored as `meta_data`.
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+- function: store_user
+  description: Store the user information
+  parameters:
+    type: object
+    properties:
+      name:
+        type: string
+        description: The name of the user
+  data_map:
+    webhooks:
+      - url: 'https://example.com/name_bank?name=${lc:args.name}'
+        method: GET
+        output:
+          response: The user information was stored. User information can now be looked up with the "get_user_info" function.
+          action:
+            - set_meta_data:
+                '${lc:input.args.name}: ${Records[0].secret}'
+            - toggle_functions:
+                - active: true
+                  function: get_user_info
+            - say: Your info was stored.
+  meta_data_token: example_token
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+[
+  {
+    "function": "store_user",
+    "description": "Store the user information",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The name of the user"
+        }
+      }
+    },
+    "data_map": {
+      "webhooks": [
+        {
+          "url": "https://example.com/name_bank?name=${lc:args.name}",
+          "method": "GET",
+          "output": {
+            "response": "The user information was stored. User information can now be looked up with the \"get_user_info\" function.",
+            "action": [
+              {
+                "set_meta_data": "${lc:input.args.name}: ${Records[0].secret}"
+              },
+              {
+                "toggle_functions": [
+                  {
+                    "active": true,
+                    "function": "get_user_info"
+                  }
+                ]
+              },
+              {
+                "say": "Your info was stored."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "meta_data_token": "example_token"
+  }
+]
+```
+</CodeBlock>
+</CodeBlocks>
+
+This will send a request to `data_map.webhooks.url` with the user's name as a query parameter.
+In this example, we have our server responding with a `Records` array in the response. This will contain information on the user.
+
+**Server Response**:
+
+```json
+{
+  "response": "The user information was stored.",
+  "Records": [{ "secret": ["Info about user here"] }]
+}
+```
+
+Once the response has returned from the webhook, the `meta_data` will be set using `set_meta_data` in the `data_map.webhooks.output.action` of the function, the
+`get_user_info` function will be toggled on using `toggle_functions`, and the user will be notified that their information was stored.
+
+The `meta_data` key is set to the users name and the value is set to the first value in the `Records` array.
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+- set_meta_data:
+    '${lc:input.args.name}: ${Records[0].secret}'
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+[
+  {
+    "set_meta_data": "${lc:input.args.name}: ${Records[0].secret}"
+  }
+]
+```
+</CodeBlock>
+</CodeBlocks>
+
+## 2. Looking up user information
+
+After storing the user information in `meta_data`, we can now look up the user information with the `get_user_info` function.
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+- function: get_user_info
+  description: lookup user information
+  parameters:
+    type: object
+    properties:
+      name:
+        type: string
+        description: The name of the user
+  data_map:
+    expressions:
+      - string: '${lc:args.name}'
+        pattern: /\\w+/i
+        output:
+          response: The meta_data is valid.
+          action:
+            - say: 'Your info is ${meta_data.${lc:args.name}}'
+            - stop: true
+      - string: .*
+        pattern: .*
+        output:
+          response: The meta_data is invalid. User has not been told their information.
+  active: false
+  meta_data_token: example_token
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+[
+  {
+    "function": "get_user_info",
+    "description": "lookup user information",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The name of the user"
+        }
+      }
+    },
+    "data_map": {
+      "expressions": [
+        {
+          "string": "${lc:args.name}",
+          "pattern": "/\\\\w+/i",
+          "output": {
+            "response": "The meta_data is valid.",
+            "action": [
+              {
+                "say": "Your info is ${meta_data.${lc:args.name}}"
+              },
+              {
+                "stop": true
+              }
+            ]
+          }
+        },
+        {
+          "string": ".*",
+          "pattern": ".*",
+          "output": {
+            "response": "The meta_data is invalid. User has not been told their information."
+          }
+        }
+      ]
+    },
+    "active": false,
+    "meta_data_token": "example_token"
+  }
+]
+```
+</CodeBlock>
+</CodeBlocks>
+
+This function will check if the `meta_data` is valid by checking if the user's name is a key in the `meta_data` object.
+If the `meta_data` is valid, the user will be told their information. If the `meta_data` is invalid, the user will be told that their information has not been stored.
+
+## Full example
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+sections:
+  main:
+    - ai:
+        prompt:
+          text: >-
+            Your name is Mr. Blabbermouth. You help the user.
+            ## Handling The User
+            - You are asked to store a user's information.
+              - You ask for their name.
+            - You use the 'store_user' function to store the users name.
+            ### Looking up user information
+            - You can only look up a users information after storing it.
+        post_prompt:
+          text: Summarize the call in JSON format.
+          temperature: 0.1
+          top_p: 0.1
+        post_prompt_url: https://example.com/post_prompt_url
+        params:
+          swaig_allow_swml: true
+        SWAIG:
+          functions:
+            - function: store_user
+              description: Store the user information
+              parameters:
+                type: object
+                properties:
+                  name:
+                    type: string
+                    description: The name of the user
+              data_map:
+                webhooks:
+                  - url: 'https://example/name_bank?name=${lc:args.name}'
+                    method: GET
+                    output:
+                      response: The user information was stored. User information can now
+                        be looked up with the "get_user_info" function.
+                      action:
+                        - set_meta_data:
+                            '${lc:input.args.name}: ${Records[0].secret}'
+                        - toggle_functions:
+                            - active: true
+                              function: get_user_info
+                        - say: Your info was stored.
+              meta_data_token: example_token
+            - function: get_user_info
+              description: lookup user information
+              parameters:
+                type: object
+                properties:
+                  name:
+                    type: string
+                    description: The name of the user
+              data_map:
+                expressions:
+                  - string: '${lc:args.name}'
+                    pattern: /\w+/i
+                    output:
+                      response: The meta_data is valid. User has already been told their
+                        information. Do no repeat it.
+                      action:
+                        - say: 'Your info is ${meta_data.${lc:args.name}}'
+                        - stop: true
+                  - string: /.*/
+                    pattern: /.*/
+                    output:
+                      response: The meta_data is invalid. User has not been told their information.
+              active: "false"
+              meta_data_token: example_token
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "sections": {
+    "main": [
+      {
+        "ai": {
+          "prompt": {
+            "text": "Your name is Mr. Blabbermouth. You help the user. ## Handling The User - You are asked to store a user's information.\n  - You ask for their name.\n- You use the 'store_user' function to store the users name. ### Looking up user information - You can only look up a users information after storing it."
+          },
+          "post_prompt": {
+            "text": "Summarize the call in JSON format.",
+            "temperature": 0.1,
+            "top_p": 0.1
+          },
+          "post_prompt_url": "https://example.com/post_prompt_url",
+          "params": {
+            "swaig_allow_swml": true
+          },
+          "SWAIG": {
+            "functions": [
+              {
+                "function": "store_user",
+                "description": "Store the user information",
+                "parameters": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "description": "The name of the user"
+                    }
+                  }
+                },
+                "data_map": {
+                  "webhooks": [
+                    {
+                      "url": "https://example/name_bank?name=${lc:args.name}",
+                      "method": "GET",
+                      "output": {
+                        "response": "The user information was stored. User information can now be looked up with the \"get_user_info\" function.",
+                        "action": [
+                          {
+                            "set_meta_data": "${lc:input.args.name}: ${Records[0].secret}"
+                          },
+                          {
+                            "toggle_functions": [
+                              {
+                                "active": true,
+                                "function": "get_user_info"
+                              }
+                            ]
+                          },
+                          {
+                            "say": "Your info was stored."
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                "meta_data_token": "example_token"
+              },
+              {
+                "function": "get_user_info",
+                "description": "lookup user information",
+                "parameters": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "description": "The name of the user"
+                    }
+                  }
+                },
+                "data_map": {
+                  "expressions": [
+                    {
+                      "string": "${lc:args.name}",
+                      "pattern": "/\\w+/i",
+                      "output": {
+                        "response": "The meta_data is valid. User has already been told their information. Do no repeat it.",
+                        "action": [
+                          {
+                            "say": "Your info is ${meta_data.${lc:args.name}}"
+                          },
+                          {
+                            "stop": true
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "string": "/.*/",
+                      "pattern": "/.*/",
+                      "output": {
+                        "response": "The meta_data is invalid. User has not been told their information."
+                      }
+                    }
+                  ]
+                },
+                "active": "false",
+                "meta_data_token": "example_token"
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>

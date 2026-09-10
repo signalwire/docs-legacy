@@ -1,0 +1,136 @@
+---
+title: "Address Namespace"
+slug: /js/reference/signalwire/client/address
+toc_max_heading_level: 3
+---
+
+The Address namespace includes methods that give you access to Address objects.
+
+## **The `address` object**
+
+The `Address` object represents a unique identifier for different types of entities
+in the system. Each address has the following properties:
+
+| Field          | Description                                                                                                                |
+| -------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `id`           | A unique identifier for the address.                                                                                       |
+| `name`         | The name of the address.                                                                                                   |
+| `display_name` | The display name of the address.                                                                                           |
+| `type`         | The type of the address. It can be one of the following: `subscriber`, `room`, `app`, `call`.                              |
+| `cover_url`    | The URL of the cover image for the address. This can be `null`.                                                            |
+| `preview_url`  | The URL of the preview image for the address. This can be `null`.                                                          |
+| `channels`     | An object containing the `audio`, `video`, and `messaging` channels for the address. Each channel is represented by a URL. |
+
+Here is an example of an `Address` object:
+
+```json
+{
+  "id": "39e38f64-d694-4b62-ace8-a2b91359abca",
+  "name": "jim-carrey",
+  "display_name": "Jim Carrey",
+  "type": "subscriber",
+  "cover_url": "null",
+  "preview_url": null,
+  "channels": {
+    "audio": "/private/jim-carrey?channel=audio",
+    "video": "/private/jim-carrey?channel=video"
+  }
+}
+```
+
+## **Methods**
+
+### getAddresses
+
+- **getAddresses**(`options`): `Promise<{ data: Address[], hasNext, hasPrev }>`
+
+Returns a list of Addresses.
+
+#### Parameters
+
+| Name                   | Type     | Default value | Description                                                                           |
+| :--------------------- | :------- | :------------ | :------------------------------------------------------------------------------------ |
+| `options`              | `object` | -             |
+| `options.type?`        | `string` | `undefined`   | The address type to filter for. Possible values: `subscriber`, `room`, `app`, `call`. |
+| `options.displayName?` | `string` | `undefined`   | The address display name to filter for                                                |
+
+#### Returns
+
+`Promise<{ data: Address[], hasNext, hasPrev }>`
+
+#### Example
+
+```javascript
+await client.address.getAddresses();
+```
+
+```json
+{
+  "data": [
+    {
+      "id": "39e38f64-d694-4b62-ace8-a2b91359abca",
+      "name": "jim-carrey",
+      "display_name": "Jim Carrey",
+      "type": "subscriber",
+      "cover_url": "null",
+      "preview_url": null,
+      "channels": {
+        "audio": "/private/jim-carrey?channel=audio",
+        "video": "/private/jim-carrey?channel=video"
+      }
+    },
+    {
+      "id": "39e38f64-d694-4b62-ace8-a2b91359abca",
+      "name": "john-travolta",
+      "display_name": "John Travolta",
+      "type": "subscriber",
+      "cover_url": "null",
+      "preview_url": null,
+      "channels": {
+        "audio": "/private/john-travolta?channel=audio",
+        "video": "/private/john-travolta?channel=video"
+      }
+    }
+  ],
+  "hasNext": false,
+  "hasPrev": false
+}
+```
+
+### getAddress
+
+- **getAddress**(`options`): `Promise<Address>`
+
+Get the details of a particular address ID.
+
+#### Parameters
+
+| Name         | Type     | Default value | Description                        |
+| :----------- | :------- | :------------ | :--------------------------------- |
+| `options`    | `object` | -             |
+| `options.id` | `string` | `undefined`   | The ID to get address details for. |
+
+#### Returns
+
+`Promise<Address>`
+
+#### Example
+
+```javascript
+await client.address.getAddress({ id: "39e38f64-d694-4b62-ace8-a2b91359abca" });
+```
+
+```json
+{
+  "id": "39e38f64-d694-4b62-ace8-a2b91359abca",
+  "name": "jim-carrey",
+  "display_name": "Jim Carrey",
+  "type": "subscriber",
+  "cover_url": "null",
+  "preview_url": null,
+  "channels": {
+    "audio": "/private/jim-carrey?channel=audio",
+    "video": "/private/jim-carrey?channel=video"
+  }
+}
+```

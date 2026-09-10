@@ -1,0 +1,141 @@
+---
+title: "Chat Namespace"
+slug: /js/reference/signalwire/client/chat
+toc_max_heading_level: 3
+---
+
+The Chat namespace includes methods that allows you to send and receive chat messages.
+
+## **The `ConversationChatMessage` object**
+
+`ConversationChatMessage` objects represent the specific interactions that have taken place in the Chat:
+
+- `id`: A unique identifier for the conversation message.
+- `conversation_id`: A unique identifier of the parent conversation.
+- `user_id`: A unique identifier for the subscriber.
+- `ts`: The timestamp, in Unix Epoch, when the message was created.
+- `details`: Additional metadata associated with the conversation.
+- `type`: The type of the conversation message.
+- `subtype`: The subtype of the conversation message.
+
+Here is an example of a `ConversationChatMessage` object:
+
+```json
+{
+  "id": "3c114417-5cc0-4d03-a30f-c90659028d73",
+  "conversation_id": "9dbe9e94-c797-461e-b5a3-af6d095deaf4",
+  "user_id": "cecbe021-ff86-4ac6-bdf3-399ca477ad6f",
+  "ts": 1708192187.6779745,
+  "details": {},
+  "type": "message",
+  "subtype": "log"
+}
+```
+
+## **Methods**
+
+### getMessages
+
+- **getMessages**(`options`): `Promise<{ data: ConversationChatMessage[], hasNext, hasPrev, nextPage(), prevPage() }>`
+
+Returns the list of chat messages for a given `addressId`.
+
+#### Parameters
+
+| Name                 | Type     | Default value | Description                                                              |
+| :------------------- | :------- | :------------ | :----------------------------------------------------------------------- |
+| `options`            | `object` | -             |
+| `options.addressId?` | `string` | `undefined`   | Chat messages exchanged with this particular address id will be fetched. |
+| `options.pageSize?`  | `number` | `10`          | The amount of messages per pagination page.                              |
+
+#### Returns
+
+`Promise<{ data: Address[], hasNext, hasPrev, nextPage(), prevPage() }>`
+
+#### Example
+
+```javascript
+await client.chat.getMessages({ addressId: "9dbe9e94-c797-461e-b5a3-af6d095deaf4" });
+```
+
+### subscribe
+
+- **subscribe**(`options`): `{cancel()}`
+
+Returns a list of Addresses.
+
+#### Parameters
+
+| Name                | Type                              | Default value | Description                                                    |
+| :------------------ | :-------------------------------- | :------------ | :------------------------------------------------------------- |
+| `options`           | `object`                          | -             |
+| `options.addressId` | `string`                          | -             | The address to subscribe to                                    |
+| `options.onMessage` | `(ConversationEventParams)=>void` | -             | The callback that gets called when a new message event happens |
+
+#### Returns
+
+An object will be returned with a `cancel()` function which can be used to unsubscribe to the event.
+
+#### Example
+
+```javascript
+const { cancel } = await client.chat.subscribe({
+  addressId: "9dbe9e94-c797-461e-b5a3-af6d095deaf4",
+  onMessage(msg) {
+    console.log(msg);
+  },
+});
+
+cancel();
+```
+
+### sendMessage
+
+- **sendMessage**(`options`): `Promise<Conversation>`
+
+Send a Chat Message to a given Address ID. If no Conversation exists with that Address ID, one will be created.
+This is the same function as [`conversation.sendMessage`](/docs/browser-sdk/js/reference/signalwire/client/conversation#sendmessage).
+
+#### Parameters
+
+| Name                | Type     | Description                                                                    |
+| :------------------ | :------- | :----------------------------------------------------------------------------- |
+| `options`           | `object` |                                                                                |
+| `options.addressId` | `string` | The ID of the Address where to send the message.                               |
+| `options.text`      | `string` | The Message text content.                                                      |
+| `options.metadata?` | `object` | Metadata to go along with the Message.                                         |
+| `options.details?`  | `object` | Extra Message event details. Can be used to construct custom UIs, for example. |
+
+#### Example
+
+```javascript
+await client.chat.sendMessage({
+  addressId: "12345",
+  text: "Hello from SignalWire!",
+});
+```
+
+### join
+
+- **join**(`options`): `Promise<JoinConversationResponse>`
+
+Joins a conversation given an address without having to send a message. Does nothing if you
+were already joined to the conversation. This is the same function as [`conversation.join`](/docs/browser-sdk/js/reference/signalwire/client/conversation#join).
+
+You automatically join a conversation when you send the first message to an address. The `join`
+method allows you to join a conversation **without** first sending a message.
+
+#### Parameters
+
+| Name                | Type     | Description                                          |
+| :------------------ | :------- | :--------------------------------------------------- |
+| `options`           | `object` |                                                      |
+| `options.addressId` | `string` | The `id` of the address to join the conversation of. |
+
+#### Example
+
+```javascript
+await chat.join({
+  addressId: "9dbe9e94-c797-461e-b5a3-af6d095deaf4",
+});
+```

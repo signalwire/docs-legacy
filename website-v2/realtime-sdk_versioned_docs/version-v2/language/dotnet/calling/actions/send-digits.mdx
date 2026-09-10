@@ -1,0 +1,24 @@
+---
+title: SendDigitsAction
+slug: /dotnet/reference/calling/actions/send-digits
+description: The SendDigitsAction is used to send DTMF tones to a call.
+toc_max_heading_level: 3
+---
+
+[call]: /docs/server-sdk/v2/dotnet/reference/calling/call#senddigitsasync
+[signalwire-relay-calling-callsenddigitsstate]: /docs/server-sdk/v2/dotnet/reference/calling/call-send-digits-state
+[signalwire-relay-calling-senddigitsresult]: /docs/server-sdk/v2/dotnet/reference/calling/results/send-digits
+
+# SignalWire.Relay.Calling.SendDigitsAction
+
+This object returned from [`SendDigitsAsync`][call] method that represents a send digits operation that is currently active on a call.
+
+## Properties
+
+| Property | Type | Description |
+| :-------- | :---- | :----------- |
+| `ControlID` | string | The identifier used to control the operation. |
+| `Completed` | bool | Whether the operation has completed. |
+| `Payload` | string | Payload sent to [`SendDigitsAsync`][call] to perform a send digits operation. |
+| `Result` | [`SignalWire.Relay.Calling.SendDigitsResult`][signalwire-relay-calling-senddigitsresult] | Final result of the send digits operation. |
+| `State` | [`SignalWire.Relay.Calling.CallSendDigitsState`][signalwire-relay-calling-callsenddigitsstate] | The state of the operation. |

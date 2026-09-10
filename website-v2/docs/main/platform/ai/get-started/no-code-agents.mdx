@@ -1,0 +1,149 @@
+---
+slug: /platform/ai/no-code-agents
+title: No-code agent
+
+description: Deploy and test a no-code AI Agent in your SignalWire Space
+
+---
+
+
+<Frame caption="A new SignalWire AI Agent.">
+
+![A new SignalWire AI Agent.](@image/dashboard/resources/ai-agent/new-agent.webp) 
+
+</Frame>
+
+
+SignalWire AI Agents are powerful, programmable, and infinitely customizable. 
+Initialize your agent in the Dashboard without code, assign a phone number, and SignalWire's platform takes care of the rest.
+
+<Steps>
+
+### Sign up for a new SignalWire account
+
+To begin, sign up for a SignalWire account. If you already have an account, log in.
+
+Once logged in, create a Space or select an existing Space.
+
+<a 
+  className="button button--lg button--primary button--outline"
+  href="https://signalwire.com/signup"
+  target="_blank"
+>Create account</a>
+
+### Create an AI Agent Resource
+
+
+    <ul>
+      <li>Open the [Resources][1] tab in your SignalWire Space.</li>
+      <li>Click <kbd>+ Add New</kbd> to create a new Resource.</li>
+      <li>Select **AI Agent** from the menu.</li>
+    </ul>
+    If prompted, choose **Custom AI Agent**.
+  
+  
+<Info title="What's a Resource?"><a href="/docs/platform/resources">Resources</a> are the building blocks of every SignalWire communication application. Resources include AI Agents, Subscribers, RELAY applications, FreeSWITCH connectors, and more.</Info>
+  
+
+<Frame>
+  ![Resources selection.](@image/dashboard/resources/add-new-resource.webp)
+</Frame>
+
+### Configure the agent
+
+For this simple demo, add the below Prompt text and leave the other settings at their default.
+
+```plaintext
+You are a knowledgeable developer. Have an open-ended discussion with the caller about SignalWire and programmable communications.
+```
+
+<Tip>
+To see live debug logs, set up a webhook from a service like [Webhook.site](https://webhook.site/). Paste your webhook URL in the **Debug Webhook URL** field in the **Params** tab. Ensure that **Debug Webhook Level** is set to `1`.
+</Tip>
+
+### Fund your account
+
+
+Add funds to your SignalWire Space in order to purchase a phone number and initialize your AI Agent.
+
+- Click on the name of your Space to open the drop-down menu in the top-left corner
+- Click **[Usage & Billing][3]**
+- Click <kbd>Add a Payment Method</kbd>
+- Add a new payment method
+- From the Billing page, click [Top Up Your Balance][3]
+- Add funds
+
+
+![The left drop-down menu for your SignalWire Space.](@image/dashboard/left-menu/menu.webp)
+
+
+### Assign a phone number
+
+- Click on the **Addresses** tab of your AI Agent.
+- Click <kbd>+ Add</kbd>
+
+<Frame>
+  ![Add a new Address to your AI Agent.](@image/dashboard/resources/ai-agent/addresses/add-address.webp)
+</Frame>
+
+
+- In the **Add an Address** menu, select **Phone Number**
+- If you have an unassigned phone number you'd like to use, select it
+- Otherwise, select **Buy a Phone Number**
+- Choose a **Local** phone number and click **Buy**
+
+Your new phone number is now ready to use!
+
+
+<Card
+    title="Buying a phone number"
+    href="/docs/platform/phone-numbers"
+    icon="solid phone"
+>
+    In-depth guide to purchasing a phone number on the SignalWire platform
+</Card>
+
+
+### Give it a call
+
+Dial your newly configured AI Agent over the PSTN from your cell phone or a VoIP dialer.
+
+</Steps>
+
+---
+
+## Next steps
+
+Congratulations, you've created and tested your first SignalWire AI Agent!
+
+Next, dive into our guide to prompting and other best practices, or learn about using AI Agents in SWML and Call Flow Builder.
+
+<CardGroup cols={3}>
+<Card
+    title="Best practices"
+    href="/docs/platform/ai/best-practices"
+    icon="solid book"
+>
+    Optimize your SignalWire AI Agent
+</Card>
+
+<Card
+    title="Use AI with SWML"
+    href="/docs/swml/guides"
+    icon="solid code"
+>
+    Build advanced AI applications using SignalWire Markup Language
+</Card>
+
+<Card
+    title="Use AI with Call Flow Builder"
+    href="/docs/call-flow-builder/reference/ai-agent"
+    icon="solid gears"
+>
+    Deploy your AI Agent within our drag-and-drop calling application builder
+</Card>
+</CardGroup>
+
+{/* Links */}
+[1]: https://my.signalwire.com?page=resources "View Resources in your SignalWire Space."
+[3]: https://my.signalwire.com?page=top-ups/new "Add funds to your SignalWire Space."

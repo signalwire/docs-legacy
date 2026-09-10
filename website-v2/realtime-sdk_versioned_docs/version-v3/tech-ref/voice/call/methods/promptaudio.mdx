@@ -1,0 +1,84 @@
+---
+title: "promptAudio"
+slug: /node/reference/voice/call/prompt-audio
+description: promptAudio method for the Call class.
+toc_max_heading_level: 3
+---
+
+[callprompt-7]: /docs/server-sdk/v3/node/reference/voice/call-prompt
+[types-1]: /docs/server-sdk/v3/node/reference/voice/types#collectdigitsconfig
+[types-2]: /docs/server-sdk/v3/node/reference/voice/types#collectspeechconfig
+
+### promptAudio
+
+- **promptAudio**(`params`): `Promise<CallPrompt>` - See [CallPrompt][callprompt-7] for more details.
+
+Play an audio while collecting user input from the call, such as `digits` or `speech`.
+
+#### Parameters
+
+| Name                     | Type                                                     | Description                                                                                                                        |
+|:-------------------------|:---------------------------------------------------------|:-----------------------------------------------------------------------------------------------------------------------------------|
+| `params`                 | `Object`                                                 | -                                                                                                                                  |
+| `params.digits?`         | [`CollectDigitsConfig`][types-1] | Configuration for collecting digits. You must either set this, or <code>speech</code>.                                             |
+| `params.speech?`         | [`CollectSpeechConfig`][types-2] | Configuration for collecting speech. You must either set this, or `digits`. Pass an empty object to use the default configuration. |
+| `params.initialTimeout?` | `number`                                                 | Initial timeout in seconds. Default is 4 seconds.                                                                                  |
+| `params.url`             | `string`                                                 | HTTP(s) URL to an audio resource to play.                                                                                          |
+| `params.volume?`         | `number`                                                 | Volume value between -40dB and +40dB where 0 is unchanged. Default is 0.                                                           |
+
+#### Returns
+
+`Promise<CallPrompt>` - See [CallPrompt][callprompt-7] for more details.
+
+#### Examples
+
+Prompting for digits and waiting for a result:
+
+```js
+const prompt = await call.promptAudio({
+  url: "https://cdn.signalwire.com/default-music/welcome.mp3",
+  digits: {
+    max: 5,
+    digitTimeout: 2,
+    terminators: "#*",
+  },
+});
+const { type, digits, terminator } = await prompt.ended();
+```
+
+Prompting for speech and waiting for a result:
+
+```js
+const prompt = await call.promptAudio({
+  url: "https://cdn.signalwire.com/default-music/welcome.mp3",
+  speech: {
+    endSilenceTimeout: 1,
+    speechTimeout: 60,
+    language: "en-US",
+    hints: [],
+  },
+});
+const { type, text, terminator } = await prompt.ended();
+```
+
+Prompting for speech and listening for results using the events:
+
+```js
+call.on("prompt.started", (p) => {
+  console.log("prompt.started", p.id);
+});
+call.on("prompt.updated", (p) => {
+  console.log("prompt.updated", p.id);
+});
+call.on("prompt.failed", (p) => {
+  console.log("prompt.failed", p.id, p.reason);
+});
+call.on("prompt.ended", (p) => {
+  console.log(prompt.ended, p.id, p.text);
+});
+
+const prompt = await call.promptAudio({
+  url: "https://cdn.signalwire.com/default-music/welcome.mp3",
+  speech: {},
+});
+```

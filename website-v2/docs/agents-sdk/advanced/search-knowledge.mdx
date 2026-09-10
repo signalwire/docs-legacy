@@ -1,0 +1,497 @@
+---
+title: "Search Knowledge"
+sidebar_label: "Search Knowledge"
+slug: /python/guides/search-knowledge
+toc_max_heading_level: 3
+---
+
+## Search & Knowledge
+
+Add RAG-style knowledge search to your agents using local vector indexes (.swsearch files) or PostgreSQL with pgvector. Build indexes with `sw-search` CLI and integrate using the `native_vector_search` skill.
+
+Knowledge search transforms your agent from a general-purpose assistant into a domain expert. By connecting your agent to documents—FAQs, product manuals, policies, API docs—it can answer questions based on your actual content rather than general knowledge.
+
+This is called RAG (Retrieval-Augmented Generation): when asked a question, the agent first retrieves relevant documents, then uses them to generate an accurate response. The result is more accurate, verifiable answers grounded in your authoritative sources.
+
+### When to Use Knowledge Search
+
+**Good use cases:**
+
+- Customer support with FAQ/knowledge base
+- Product information lookup
+- Policy and procedure questions
+- API documentation assistant
+- Internal knowledge management
+- Training and onboarding assistants
+
+**Not ideal for:**
+
+- Real-time data (use APIs instead)
+- Transactional operations (use SWAIG functions)
+- Content that changes very frequently
+- Highly personalized information (use database lookups)
+
+### Search System Overview
+
+**Build Time:**
+```
+Documents → sw-search CLI → .swsearch file (SQLite + vectors)
+```
+
+**Runtime:**
+```
+Agent → native_vector_search skill → SearchEngine → Results
+```
+
+**Backends:**
+
+| Backend | Description |
+|---------|-------------|
+| SQLite | `.swsearch` files - Local, portable, no infrastructure |
+| pgvector | PostgreSQL extension for production deployments |
+| Remote | Network mode for centralized search servers |
+
+### Building Search Indexes
+
+Use the `sw-search` CLI to create search indexes:
+
+```bash
+## Basic usage - index a directory
+sw-search ./docs --output knowledge.swsearch
+
+## Multiple directories
+sw-search ./docs ./examples --file-types md,txt,py
+
+## Specific files
+sw-search README.md ./docs/guide.md
+
+## Mixed sources
+sw-search ./docs README.md ./examples --file-types md,txt
+```
+
+### Chunking Strategies
+
+| Strategy | Best For | Parameters |
+|----------|----------|------------|
+| `sentence` | General text | `--max-sentences-per-chunk 5` |
+| `paragraph` | Structured docs | (default) |
+| `sliding` | Dense text | `--chunk-size 100 --overlap-size 20` |
+| `page` | PDFs | (uses page boundaries) |
+| `markdown` | Documentation | (header-aware, code detection) |
+| `semantic` | Topic clustering | `--semantic-threshold 0.6` |
+| `topic` | Long documents | `--topic-threshold 0.2` |
+| `qa` | Q&A applications | (optimized for questions) |
+
+#### Markdown Chunking (Recommended for Docs)
+
+```bash
+sw-search ./docs \
+  --chunking-strategy markdown \
+  --file-types md \
+  --output docs.swsearch
+```
+
+This strategy:
+
+- Chunks at header boundaries
+- Detects code blocks and extracts language
+- Adds "code" tags to chunks containing code
+- Preserves section hierarchy in metadata
+
+#### Sentence Chunking
+
+```bash
+sw-search ./docs \
+  --chunking-strategy sentence \
+  --max-sentences-per-chunk 10 \
+  --output knowledge.swsearch
+```
+
+### Installing Search Dependencies
+
+```bash
+## Query-only (smallest footprint)
+pip install signalwire-agents[search-queryonly]
+
+## Build indexes + vector search
+pip install signalwire-agents[search]
+
+## Full features (PDF, DOCX processing)
+pip install signalwire-agents[search-full]
+
+## All features including NLP
+pip install signalwire-agents[search-all]
+
+## PostgreSQL pgvector support
+pip install signalwire-agents[pgvector]
+```
+
+### Using Search in Agents
+
+Add the `native_vector_search` skill to enable search:
+
+```python
+from signalwire_agents import AgentBase
+
+
+class KnowledgeAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="knowledge-agent")
+        self.add_language("English", "en-US", "rime.spore")
+
+        self.prompt_add_section(
+            "Role",
+            "You are a helpful assistant with access to company documentation. "
+            "Use the search_documents function to find relevant information."
+        )
+
+        # Add search skill with local index
+        self.add_skill(
+            "native_vector_search",
+            index_file="./knowledge.swsearch",
+            count=5,  # Number of results
+            tool_name="search_documents",
+            tool_description="Search the company documentation"
+        )
+
+
+if __name__ == "__main__":
+    agent = KnowledgeAgent()
+    agent.run()
+```
+
+### Skill Configuration Options
+
+```python
+self.add_skill(
+    "native_vector_search",
+    # Index source (choose one)
+    index_file="./knowledge.swsearch",       # Local SQLite index
+    # OR
+    # remote_url="http://search-server:8001", # Remote search server
+    # index_name="default",
+
+    # Search parameters
+    count=5,                    # Results to return (1-20)
+    similarity_threshold=0.0,   # Min score (0.0-1.0)
+    tags=["docs", "api"],       # Filter by tags
+
+    # Tool configuration
+    tool_name="search_knowledge",
+    tool_description="Search the knowledge base for information"
+)
+```
+
+### pgvector Backend
+
+For production deployments, use PostgreSQL with pgvector:
+
+```python
+self.add_skill(
+    "native_vector_search",
+    backend="pgvector",
+    connection_string="postgresql://user:pass@localhost/db",
+    collection_name="knowledge_base",
+    count=5,
+    tool_name="search_docs"
+)
+```
+
+### Search Flow
+
+<Frame caption="Search Flow">
+  <img className="diagram" src={require("@image/agents-sdk-manual/06_06_search-knowledge_diagram1.webp").default} alt="Search Flow." />
+</Frame>
+
+### CLI Commands
+
+#### Build Index
+
+```bash
+## Basic build
+sw-search ./docs --output knowledge.swsearch
+
+## With specific file types
+sw-search ./docs --file-types md,txt,rst --output knowledge.swsearch
+
+## With chunking strategy
+sw-search ./docs --chunking-strategy markdown --output knowledge.swsearch
+
+## With tags
+sw-search ./docs --tags documentation,api --output knowledge.swsearch
+```
+
+#### Validate Index
+
+```bash
+sw-search validate knowledge.swsearch
+```
+
+#### Search Index
+
+```bash
+sw-search search knowledge.swsearch "how do I configure auth"
+```
+
+### Complete Example
+
+```python
+#!/usr/bin/env python3
+## documentation_agent.py - Agent that searches documentation
+from signalwire_agents import AgentBase
+from signalwire_agents.core.function_result import SwaigFunctionResult
+
+
+class DocumentationAgent(AgentBase):
+    """Agent that searches documentation to answer questions"""
+
+    def __init__(self):
+        super().__init__(name="docs-agent")
+        self.add_language("English", "en-US", "rime.spore")
+
+        self.prompt_add_section(
+            "Role",
+            "You are a documentation assistant. When users ask questions, "
+            "search the documentation to find accurate answers. Always cite "
+            "the source document when providing information."
+        )
+
+        self.prompt_add_section(
+            "Instructions",
+            """
+            1. When asked a question, use search_docs to find relevant information
+            2. Review the search results carefully
+            3. Synthesize an answer from the results
+            4. Mention which document the information came from
+            5. If nothing relevant is found, say so honestly
+            """
+        )
+
+        # Add a simple search function for demonstration
+        # In production, use native_vector_search skill with a .swsearch index:
+        # self.add_skill("native_vector_search", index_file="./docs.swsearch")
+        self.define_tool(
+            name="search_docs",
+            description="Search the documentation for information",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "query": {"type": "string", "description": "Search query"}
+                },
+                "required": ["query"]
+            },
+            handler=self.search_docs
+        )
+
+    def search_docs(self, args, raw_data):
+        """Stub search function for demonstration"""
+        query = args.get("query", "")
+        return SwaigFunctionResult(
+            f"Search results for '{query}': This is a demonstration. "
+            "In production, use native_vector_search skill with a .swsearch index file."
+        )
+
+
+if __name__ == "__main__":
+    agent = DocumentationAgent()
+    agent.run()
+```
+
+<Note>
+This example uses a stub function for demonstration. In production, use the `native_vector_search` skill with a `.swsearch` index file built using `sw-search`.
+</Note>
+
+### Multiple Knowledge Bases
+
+Add multiple search instances for different topics:
+
+```python
+## Product documentation
+self.add_skill(
+    "native_vector_search",
+    index_file="./products.swsearch",
+    tool_name="search_products",
+    tool_description="Search product catalog and specifications"
+)
+
+## Support articles
+self.add_skill(
+    "native_vector_search",
+    index_file="./support.swsearch",
+    tool_name="search_support",
+    tool_description="Search support articles and troubleshooting guides"
+)
+
+## API documentation
+self.add_skill(
+    "native_vector_search",
+    index_file="./api-docs.swsearch",
+    tool_name="search_api",
+    tool_description="Search API reference documentation"
+)
+```
+
+### Understanding Embeddings
+
+Search works by converting text into numerical vectors (embeddings) that capture semantic meaning. Similar concepts have similar vectors, enabling "meaning-based" search rather than just keyword matching.
+
+**How it works:**
+
+1. **At index time**: Each document chunk is converted to a vector and stored
+2. **At query time**: The search query is converted to a vector
+3. **Matching**: Chunks with vectors closest to the query vector are returned
+
+This means "return policy" will match documents about "refund process" or "merchandise exchange" even if they don't contain those exact words.
+
+**Embedding quality matters:**
+
+- Better embeddings = better search results
+- The SDK uses efficient embedding models optimized for search
+- Different chunking strategies affect how well content is embedded
+
+### Index Management
+
+#### When to Rebuild Indexes
+
+Rebuild your search index when:
+- Source documents are added, removed, or significantly changed
+- You change chunking strategy
+- You want to add or modify tags
+- Search quality degrades
+
+Rebuilding is fast for small document sets. For large collections, consider incremental updates.
+
+#### Keeping Indexes Updated
+
+For production systems, automate index rebuilding:
+
+```bash
+#!/bin/bash
+# rebuild_index.sh - Run on document updates
+
+sw-search ./docs \
+  --chunking-strategy markdown \
+  --output knowledge.swsearch.new
+
+# Atomic replacement
+mv knowledge.swsearch.new knowledge.swsearch
+
+echo "Index rebuilt at $(date)"
+```
+
+#### Index Size and Performance
+
+Index size depends on:
+- Number of documents
+- Chunking strategy (more chunks = larger index)
+- Embedding dimensions
+
+**Rough sizing:**
+
+- 100 documents (~50KB each) → ~10-20MB index
+- 1,000 documents → ~100-200MB index
+- 10,000+ documents → Consider pgvector for better performance
+
+### Query Optimization
+
+#### Writing Good Prompts for Search
+
+Help the AI use search effectively by being specific in your prompt:
+
+```python
+self.prompt_add_section(
+    "Search Instructions",
+    """
+    When users ask questions:
+    1. First search the documentation using search_docs
+    2. Review all results before answering
+    3. Cite which document your answer came from
+    4. If results aren't relevant, try a different search query
+    5. If no results help, acknowledge you couldn't find the answer
+    """
+)
+```
+
+#### Tuning Search Parameters
+
+Adjust these parameters based on your content and use case:
+
+**count**: Number of results to return
+- `count=3`: Focused answers, faster response
+- `count=5`: Good balance (default)
+- `count=10`: More comprehensive, but may include less relevant results
+
+**similarity_threshold**: Minimum relevance score (0.0 to 1.0)
+- `0.0`: Return all results regardless of relevance
+- `0.3`: Filter out clearly irrelevant results
+- `0.5+`: Only high-confidence matches (may miss relevant content)
+
+**tags**: Filter by document categories
+```python
+self.add_skill(
+    "native_vector_search",
+    index_file="./knowledge.swsearch",
+    tags=["policies", "returns"],  # Only search these categories
+    tool_name="search_policies"
+)
+```
+
+#### Handling Poor Search Results
+
+If search quality is low:
+
+1. **Check chunking**: Are chunks too large or too small?
+2. **Review content**: Is the source content well-written and searchable?
+3. **Try different strategies**: Markdown chunking for docs, sentence for prose
+4. **Add metadata**: Tags help filter irrelevant content
+5. **Tune threshold**: Too high filters good results, too low adds noise
+
+### Troubleshooting
+
+#### "No results found"
+- Check that the index file exists and is readable
+- Verify the query is meaningful (not too short or generic)
+- Lower similarity_threshold if set too high
+- Ensure documents were actually indexed (check with `sw-search validate`)
+
+#### Poor result relevance
+- Try different chunking strategies
+- Increase count to see more results
+- Review source documents for quality
+- Consider adding tags to filter by category
+
+#### Slow search performance
+- For large indexes, use pgvector instead of SQLite
+- Reduce count if you don't need many results
+- Consider a remote search server for shared access
+
+#### Index file issues
+- Validate with `sw-search validate knowledge.swsearch`
+- Rebuild if corrupted
+- Check file permissions
+
+### Search Best Practices
+
+#### Index Building
+- Use markdown chunking for documentation
+- Keep chunks reasonably sized (5-10 sentences)
+- Add meaningful tags for filtering
+- Rebuild indexes when source docs change
+- Test search quality after building
+- Version your indexes with your documentation
+
+#### Agent Configuration
+- Set count=3-5 for most use cases
+- Use similarity_threshold to filter noise
+- Give descriptive tool_name and tool_description
+- Tell AI when/how to use search in the prompt
+- Handle "no results" gracefully in your prompt
+
+#### Production
+- Use pgvector for high-volume deployments
+- Consider remote search server for shared indexes
+- Monitor search latency and result quality
+- Automate index rebuilding when docs change
+- Log search queries to understand user needs
+
+

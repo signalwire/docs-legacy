@@ -1,0 +1,69 @@
+---
+title: Permissions
+slug: /apis/permissions
+---
+
+A reference for the common permission identifiers.
+
+## Video
+
+A full list of possible permissions to be used when creating Room Tokens. Send a
+list of the names to specify fine grained permissions for each Room member.
+
+| Permission Name                     | Description                                                    |
+| ----------------------------------- | -------------------------------------------------------------- |
+| `room.hide_video_muted`             | Hide the videos of members with muted video.                   |
+| `room.show_video_muted`             | Show the videos of members with muted video.                   |
+| `room.list_available_layouts`       | Get a list of available layouts.                               |
+| `room.playback`                     | Play custom video streams in the room.                         |
+| `room.recording`                    | Record the room and obtain access to the recordings.           |
+| `room.set_layout`                   | Set the current layout.                                        |
+| `room.set_position`                 | Set the position for multiple members at once.                 |
+| `room.set_meta`                     | Set the metadata for multiple members at once.                 |
+| `room.stream`                       | Start and control outbound streams.                            |
+| `room.stream.start`                 | Start outbound streams.                                        |
+| `room.member.audio_mute`            | Mute the audio of any member in the room.                      |
+| `room.member.audio_unmute`          | Unmute the audio of any member in the room.                    |
+| `room.member.deaf`                  | Deaf the audio of any member in the room.                      |
+| `room.member.demote`                | Demotes a participant from member to audience.                 |
+| `room.member.promote`               | Promotes a participant from audience to member.                |
+| `room.member.undeaf`                | Undeaf the audio of any member in the room.                    |
+| `room.member.remove`                | Remove any member from the room.                               |
+| `room.member.set_input_sensitivity` | Set the audio input sensitivity of any member in the room.     |
+| `room.member.set_input_volume`      | Set the audio input volume of any member in the room.          |
+| `room.member.set_output_volume`     | Set the audio output volume of any member in the room.         |
+| `room.member.video_mute`            | Mute the video of any member in the room.                      |
+| `room.member.video_unmute`          | Unmute the video of any member in the room.                    |
+| `room.member.set_position`          | Set the position in layout for any member in the room.         |
+| `room.member.set_meta`              | Set the metadata for any member in the room.                   |
+| `room.self.additional_source`       | Add additional devices to the room to stream multiple sources. |
+| `room.self.audio_mute`              | Mute the audio of yourself.                                    |
+| `room.self.audio_unmute`            | Unmute the audio of yourself.                                  |
+| `room.self.deaf`                    | Deaf the audio of yourself.                                    |
+| `room.self.undeaf`                  | Undeaf the audio of yourself.                                  |
+| `room.self.screenshare`             | Share your screen.                                             |
+| `room.self.set_input_sensitivity`   | Set your own audio input sensitivity.                          |
+| `room.self.set_input_volume`        | Set your own audio input volume.                               |
+| `room.self.set_output_volume`       | Set your own audio output volume.                              |
+| `room.self.video_mute`              | Mute your own video.                                           |
+| `room.self.video_unmute`            | Unmute your own video.                                         |
+| `room.self.set_position`            | Set your position in the layout.                               |
+| `room.self.set_meta`                | Set your own metadata in the room.                             |
+
+### Default permissions
+
+By default, a token is created with the following permissions:
+
+- `room.self.audio_mute`
+- `room.self.audio_unmute`
+- `room.self.video_mute`
+- `room.self.video_unmute`
+- `room.self.deaf`
+- `room.self.undeaf`
+- `room.self.set_input_volume`
+- `room.self.set_output_volume`
+- `room.self.set_input_sensitivity`
+- `room.self.screenshare`
+- `room.self.additional_source`
+
+These default permissions allow the member to control their own audio and video settings without affecting the room settings or other members.

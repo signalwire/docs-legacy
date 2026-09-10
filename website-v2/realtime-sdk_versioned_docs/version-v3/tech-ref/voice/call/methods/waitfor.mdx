@@ -1,0 +1,31 @@
+---
+title: "waitFor"
+slug: /node/reference/voice/call/wait-for
+description: waitFor method for the Call class.
+toc_max_heading_level: 3
+---
+
+
+### waitFor
+
+- **waitFor**(`params`): `Promise<boolean>`
+
+Returns a promise that is resolved only after the current call is in one of the specified states.
+
+#### Parameters
+
+| Name     | Type                                                   |
+|:---------|:-------------------------------------------------------|
+| `params` | `"ended"` \| `"ending"` \| (`"ended"` \| `"ending"`)[] |
+
+#### Returns
+
+`Promise<boolean>`
+
+true if the requested states have been reached, false if they won't be reached because the call ended.
+
+#### Example
+
+```js
+await call.waitFor("ended");
+```

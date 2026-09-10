@@ -1,0 +1,121 @@
+---
+title: request
+slug: /swml/reference/request
+description: Send a HTTP request to a remote URL.
+toc_max_heading_level: 3
+---
+
+Send a GET, POST, PUT, or DELETE request to a remote URL.
+
+## **Properties**
+
+<ParamField path="request" type="object" required={true}>
+  An object containing the following properties.
+</ParamField>
+
+<Indent>
+
+<ParamField path="request.url" type="string" required={true}>
+  URL to send the HTTPS request to. Authentication can also be set in the url in the format of `username:password@url`.
+</ParamField>
+
+
+<ParamField path="request.method" type="string" required={true}>
+  Request type. `GET`\|`POST`\|`PUT`\|`DELETE`
+</ParamField>
+
+
+<ParamField path="request.headers" type="object">
+  Object containing HTTP headers to set. Valid header values are `Accept`, `Authorization`, `Content-Type`, `Range`, and custom `X-` headers
+</ParamField>
+
+
+<ParamField path="request.body" type="string | object">
+  Request body. `Content-Type` header should be explicitly set, but if not set, the most likely type will be set based on the first non-whitespace character.
+</ParamField>
+
+
+<ParamField path="request.connect_timeout" type="number" default="0">
+  Maximum time in seconds to wait for a connection. Default is `0` (no timeout).
+</ParamField>
+
+
+<ParamField path="request.timeout" type="number" default="0">
+  Maximum time in seconds to wait for a response. Default is `0` (no timeout).
+</ParamField>
+
+
+<ParamField path="request.save_variables" type="boolean" default="false">
+  Store parsed JSON response as variables
+</ParamField>
+
+</Indent>
+
+## **Variables**
+
+Set by the method:
+
+- **request_url:** (out) URL the request was sent to.
+- **request_result:** (out) `success` | `failed`.
+- **return_value:** (out) The same value as the `request_result`.
+- **request_response_code:** (out) HTTP response code from the request.
+- **request_response_headers.`<header name lowercase>`:** (out) HTTP response headers. Header names should be normalized to lowercase and trimmed of whitespace. A maximum of 64 headers are saved. Ex: `${request_response_headers.content-type}`.
+- **request_response_body:** (out) Raw HTTP response body. This is limited to 64KB.
+- **request_response.`<object_field>`:** (out) Variables saved from the response if `save_variables` is true and parsed as JSON.
+
+For example, if the server responds with the following JSON:
+
+```JSON
+  { "status": "created", "time": "2 seconds ago", "number": { "home": "n/a" } }
+```
+
+The variables `request_response.status`, `request_response.time`, and `request_response.number.home` are set.
+
+## **Examples**
+
+### Making a GET Request
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - answer: {}
+    - request:
+        url: 'https://jsonplaceholder.typicode.com/todos/1'
+        method: GET
+        save_variables: true
+        timeout: 10
+    - play:
+        url: 'say: the title is: ${request_response.title}'
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "answer": {}
+      },
+      {
+        "request": {
+          "url": "https://jsonplaceholder.typicode.com/todos/1",
+          "method": "GET",
+          "save_variables": true,
+          "timeout": 10
+        }
+      },
+      {
+        "play": {
+          "url": "say: the title is: ${request_response.title}"
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>

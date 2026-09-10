@@ -1,0 +1,120 @@
+---
+title: dial
+slug: /signalwire-client/dial
+---
+
+import APIField from '@site/src/components/APIField';
+
+Initiates an outbound call to a destination and returns a
+[CallSession](../call-session/index.mdx) object for managing the active call.
+
+The `dial()` method is one of the primary methods of initiating an interaction in SignalWire.
+You can use it to dial phone numbers, SIP addresses, or any address that is assigned to a resource. 
+
+## Signature
+
+```typescript
+dial(params: DialParams): Promise<CallSession>
+```
+
+## Parameters
+
+<APIField name="params" type="DialParams" required>
+  Configuration for the outbound call.
+</APIField>
+
+<APIField name="params.to" type="string" required>
+  The destination to call. Can be a phone number, SIP address, or resource name.
+</APIField>
+
+<APIField name="params.nodeId" type="string">
+  Specific node ID to use for the call routing.
+</APIField>
+
+<APIField name="params.listen" type="Partial<CallListeners>">
+  Optional event listeners for the call session.
+</APIField>
+
+<APIField name="params.rootElement" type="HTMLElement | null">
+  HTML element in which to display the video stream.
+</APIField>
+
+<APIField name="params.userVariables" type="Record<string, any>">
+  User and UserAgent metadata.
+</APIField>
+
+<APIField name="params.audio" type="MediaStreamConstraints['audio']" default="true">
+  Audio constraints to use when joining the call.
+</APIField>
+
+<APIField name="params.video" type="MediaStreamConstraints['video']" default="true">
+  Video constraints to use when joining the call.
+</APIField>
+
+<APIField name="params.negotiateAudio" type="boolean" default="true">
+  Negotiate the incoming audio from the RTC.
+</APIField>
+
+<APIField name="params.negotiateVideo" type="boolean" default="true">
+  Negotiate the incoming video from the RTC.
+</APIField>
+
+<APIField name="params.disableUdpIceServers" type="boolean">
+  Disable ICE UDP transport policy.
+</APIField>
+
+<APIField name="params.applyLocalVideoOverlay" type="boolean" default="true">
+  Whether to apply the local-overlay on top of your video.
+</APIField>
+
+<APIField name="params.applyMemberOverlay" type="boolean" default="true">
+  Whether to apply an overlay on top of each member.
+</APIField>
+
+<APIField name="params.mirrorLocalVideoOverlay" type="boolean" default="false">
+  Whether to mirror the local video overlay.
+</APIField>
+
+<APIField name="params.stopCameraWhileMuted" type="boolean" default="true">
+  Whether to stop the camera when the member is muted.
+</APIField>
+
+<APIField name="params.stopMicrophoneWhileMuted" type="boolean" default="true">
+  Whether to stop the microphone when the member is muted.
+</APIField>
+
+<APIField name="params.fromCallAddressId" type="string">
+  Call address ID matching one of the subscriber's addresses to attribute conversation API events in the INVITE.
+</APIField>
+
+
+## Returns
+
+**Type:** `Promise<CallSession>`
+
+Returns a Promise that resolves to a [CallSession](../call-session/index.mdx) object representing the active call.
+
+## Examples
+
+### Basic outbound call
+
+```typescript
+const callSession = await client.dial({
+  to: '+15551234567'
+})
+
+console.log('Call initiated:', callSession.id)
+```
+
+### Dial with video and event listeners
+
+```typescript
+const callSession = await client.dial({
+  to: '+15551234567',
+  rootElement: document.getElementById('video-container'),
+  audio: true,
+  video: true,
+})
+```
+
+{/* TODO better examples showcasing usecases */}

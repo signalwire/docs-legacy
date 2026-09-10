@@ -1,0 +1,17 @@
+---
+title: "createSpeakerDeviceWatcher"
+slug: /js/reference/webrtc/create-speaker-device-watcher
+description: createSpeakerDeviceWatcher function in the WebRTC namespace.
+toc_max_heading_level: 3
+---
+
+### createSpeakerDeviceWatcher
+
+- `Const` **createSpeakerDeviceWatcher**(): `Promise<EventEmitter<DeviceWatcherEvents, any>>`
+
+Asynchronously returns an event emitter that notifies changes in all speaker devices. This is equivalent to calling `createDeviceWatcher({ targets: ['speaker'] })`, so refer to [createDeviceWatcher](/docs/browser-sdk/js/reference/webrtc/create-device-watcher) for additional information about the returned event emitter.
+
+#### Returns
+
+`Promise<EventEmitter<DeviceWatcherEvents, any>>`
+

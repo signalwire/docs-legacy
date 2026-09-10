@@ -1,0 +1,70 @@
+---
+title: "audioUnmute"
+slug: /node/reference/video/room-session/audio-unmute
+description: audioUnmute method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+[roomsession-41]: /docs/server-sdk/node/reference/video/room-session
+
+### audioUnmute
+
+- **audioUnmute**(`params`): `Promise<void>`
+
+Unmutes the microphone of a given member if it had been previously muted.
+
+#### Parameters
+
+<ParamField path="params" type="object">
+  Object containing the parameters of the method.
+</ParamField>
+
+<Indent>
+<ParamField path="memberId" type="string">
+  ID of the member to unmute.
+</ParamField>
+</Indent>
+
+#### Returns
+
+`Promise<void>`
+
+#### Example
+
+In this example, we mute the audio of a member as soon as they join the room.
+After 5 seconds, we unmute the member's audio.
+This example assumes that there is a [`RoomSession`][roomsession-41]
+already active and that members are joining the room.
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+// Initialize the SignalWire client
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+// Access the video client from the main client
+const videoClient = client.video;
+
+// Setup listener for when a room starts
+await videoClient.listen({
+  onRoomStarted: async (roomSession) => {
+    console.log("Room started", roomSession.displayName);
+    await roomSession.listen({
+      // Listen for when a member joins the room
+      onMemberJoined: async (member) => {
+        // Mute member's audio
+        console.log(`Muting ${member.id}'s audio`);
+        await roomSession.audioMute({ memberId: member.id });
+        // Unmute member's audio after 5 seconds
+        setTimeout(() => {
+          console.log(`Unmuting ${member.id}'s audio`);
+          roomSession.audioUnmute({ memberId: member.id });
+        }, 5000);
+      }
+    });
+  },
+  onRoomEnded: async (roomSession) => {
+    console.log("Room ended", roomSession.displayName);
+  }
+});
+```

@@ -1,0 +1,37 @@
+---
+title: "getAllowedChannels"
+slug: /js/reference/pubsub/client/get-allowed-channels
+description: getAllowedChannels method for the PubSub.Client class.
+toc_max_heading_level: 3
+---
+
+### getAllowedChannels
+
+- **getAllowedChannels**(): `Promise<Object>`
+
+Returns the channels that the current token allows you to subscribe to.
+
+#### Returns
+
+`Promise<Object>`
+
+An object whose keys are the channel names, and whose values are the permissions. For example:
+
+```js
+{
+  "my-channel-1": { "read": true, "write": false },
+  "my-channel-2": { "read": true, "write": true },
+}
+```
+
+#### Example
+
+```js
+const pubSubClient = new PubSub.Client({
+  token: "<your chat token>",
+});
+
+const channels = await pubSubClient.getAllowedChannels();
+console.log(channels);
+```
+

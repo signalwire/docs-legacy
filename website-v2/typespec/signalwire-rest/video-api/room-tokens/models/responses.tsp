@@ -1,0 +1,6 @@
+@doc("Room token response object.")
+model RoomTokenResponse {
+  @doc("A Room Token to be used by clients to connect to the Room.")
+  @example("eyJ0eXAiOiJWUlQiLCJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE2MjIxMjAxMjMsImp0aSI6ImRmMzFjYTQ4LWRiZGMtNGJjZi1hYWU2LTQ1NWEwOGM5NDg2YSIsInN1YiI6IjBjOTdmNjM1LTFjMTMtNGZjMS04NmY3LWJiMmJlODU5ZDhiOSIsInUiOiJKb2huIERvZSIsInIiOiJteV9zdXBlcl9hd2Vzb21lX3Jvb20iLCJzIjpbInJvb20uc2VsZi5hdWRpb191bm11dGUiXSwiYWNyIjp0cnVlLCJqZiI6MTYyMDg5NjQwMCwianUiOjE2MjA5MDU5NjgsInJhdCI6MTYyMDkwMDAwMCwicnNlIjo5MDB9.5mu_H2PjQLtNBbMsBlS0c91EgsDjJzvZUFgj5-tP4VA0VoHZPIGgV_DLRGKt-BqG-DqC5LhpsdMWEFjhVkTBpQ")
+  token: string;
+}

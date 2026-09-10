@@ -1,0 +1,50 @@
+---
+title: chat.join
+slug: /signalwire-client/chat-join
+---
+
+import APIField from '@site/src/components/APIField';
+
+Joins a chat conversation, allowing you to send and receive messages in an active call or conversation.
+
+## How it works
+
+The `chat.join` method adds you as a participant to a chat conversation. Once joined, you can send messages and receive real-time updates for new messages.
+
+## Parameters
+
+<APIField name="params" type="JoinConversationParams" required>
+  Configuration for joining the conversation.
+</APIField>
+
+<APIField name="params.conversationId" type="string" required>
+  The unique identifier of the conversation to join.
+</APIField>
+
+<APIField name="params.memberId" type="string">
+  Optional member identifier for the participant.
+</APIField>
+
+## Signature
+
+```typescript
+chat.join(params: JoinConversationParams): Promise<JoinConversationResponse>
+```
+
+## Returns
+
+**Type:** `Promise<JoinConversationResponse>`
+
+Returns a Promise that resolves with conversation details and participant information.
+
+## Examples
+
+### Join a chat
+
+```typescript
+const response = await client.chat.join({
+  conversationId: 'conversation-id-here'
+})
+
+console.log('Joined conversation:', response.conversationId)
+```

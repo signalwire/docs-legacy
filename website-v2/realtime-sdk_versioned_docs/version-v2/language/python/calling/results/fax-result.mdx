@@ -1,0 +1,26 @@
+---
+title: "Relay.Calling.FaxResult"
+slug: /python/reference/calling/results/fax
+description: The result object that is returned when sending or receiving a fax.
+toc_max_heading_level: 3
+---
+
+[fax-receive]: /docs/server-sdk/v2/python/reference/calling/call#fax_receive
+[fax-send]: /docs/server-sdk/v2/python/reference/calling/call#fax_send
+[relay-event]: /docs/server-sdk/v2/python/reference/event
+
+## Relay.Calling.FaxResult
+
+This object returned from [`fax_receive`][fax-receive] and [`fax_send`][fax-send] methods that represents the final result of a sent or received Fax.
+
+### Properties
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `successful` | boolean | Whether the fax has been sent or received successfully. |
+| `event` | [`Relay.Event`][relay-event] | Last event that completed the operation. |
+| `direction` | string | `send` or `receive`. |
+| `identity` | string | Identity used to send the fax. |
+| `remote_identity` | string | Remote identity. |
+| `document` | string | Document URL. |
+| `pages` | number | Number of sent/received pages. |

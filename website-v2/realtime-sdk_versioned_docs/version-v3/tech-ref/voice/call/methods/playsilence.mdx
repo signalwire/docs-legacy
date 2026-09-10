@@ -1,0 +1,32 @@
+---
+title: "playSilence"
+slug: /node/reference/voice/call/play-silence
+description: playSilence method for the Call class.
+toc_max_heading_level: 3
+---
+
+[callplayback-9]: /docs/server-sdk/v3/node/reference/voice/call-playback
+
+### playSilence
+
+- **playSilence**(`params`): `Promise<CallPlayback>` - See [CallPlayback][callplayback-9] for more details.
+
+Plays some silence.
+
+#### Parameters
+
+| Name              | Type     | Description                 |
+|:------------------|:---------|:----------------------------|
+| `params`          | `Object` | -                           |
+| `params.duration` | `number` | Seconds of silence to play. |
+
+#### Returns
+
+`Promise<CallPlayback>` - See [CallPlayback][callplayback-9] for more details.
+
+#### Example
+
+```js
+const playback = await call.playSilence({ duration: 3 });
+await playback.ended();
+```

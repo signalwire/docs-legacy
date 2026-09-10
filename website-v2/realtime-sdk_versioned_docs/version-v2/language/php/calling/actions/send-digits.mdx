@@ -1,0 +1,138 @@
+---
+title: Relay.Calling.SendDigitsAction
+slug: /php/reference/calling/actions/send-digits
+description: The SendDigitsAction object is returned when sending digits to the call.
+toc_max_heading_level: 3
+---
+
+[call]: /docs/server-sdk/v2/php/reference/calling/call#senddigitsasync
+[relay-calling-senddigitsresult]: /docs/server-sdk/v2/php/reference/calling/results/send-digits
+
+This object is returned by [`sendDigitsAsync`][call] method that represents a _send digits_ operation currently active on a call.
+
+## Methods
+
+### getControlId
+
+Return the UUID to identify the operation.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`string` - UUID to identify the action.
+
+**Examples**
+
+Send some digits and print the controlId.
+
+```php
+<?php
+
+$call->sendDigitsAsync('1234')->done(function($action) {
+  echo $action->getControlId();
+});
+```
+
+### getPayload
+
+Return the payload sent to Relay to initiate the request. Useful to inspect what you sent to perform this action.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`Object` - Payload sent to Relay.
+
+**Examples**
+
+Send some digits and print out the payload.
+
+```php
+<?php
+
+$call->sendDigitsAsync('1234')->done(function($action) {
+  print_r($action->getPayload());
+});
+```
+
+### getResult
+
+Returns the final result of the send digits operation.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+[`Relay.Calling.SendDigitsResult`][relay-calling-senddigitsresult] - Final result of the operation.
+
+**Examples**
+
+Send some digits and grab the result when it's completed.
+
+```php
+<?php
+
+$call->sendDigitsAsync('1234')->done(function($action) {
+  // .. later in the code since it's an async method
+  if ($action->isCompleted()) {
+    $sendDigitsResult = $action->getResult();
+  }
+});
+```
+
+### getState
+
+Return the current state of the operation.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`string` - Current operation's state.
+
+**Examples**
+
+Send some digits and print the state.
+
+```php
+<?php
+
+$call->sendDigitsAsync('1234')->done(function($action) {
+  echo $action->getState();
+});
+```
+
+### isCompleted
+
+Return `true` if the operation has finished, `false` otherwise.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`Boolean` - True/False accordingly to the state.
+
+**Examples**
+
+Send some digits and check if it has finished.
+
+```php
+<?php
+
+$call->sendDigitsAsync('1234')->done(function($action) {
+  if ($action->isCompleted()) {
+
+  }
+});
+```

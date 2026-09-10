@@ -1,0 +1,797 @@
+---
+title: "Events"
+slug: /js/reference/video/room-session/events
+toc_max_heading_level: 3
+---
+
+The RoomSession object emits the events listed below. You can work with these events using the following methods:
+
+<CardGroup>
+  <Card title="on" href="/docs/browser-sdk/js/reference/video/room-session/on">
+    Subscribe to an event
+  </Card>
+  <Card title="once" href="/docs/browser-sdk/js/reference/video/room-session/once">
+    Subscribe to an event once
+  </Card>
+  <Card title="off" href="/docs/browser-sdk/js/reference/video/room-session/off">
+    Unsubscribe from an event
+  </Card>
+  <Card title="removeAllListeners" href="/docs/browser-sdk/js/reference/video/room-session/remove-all-listeners">
+    Remove all event listeners
+  </Card>
+</CardGroup>
+
+## Events
+
+### camera.disconnected
+
+- **camera.disconnected**(`event`)
+
+A camera device was disconnected.
+
+<Accordion title="Properties">
+
+<ParamField path="event" type="object">
+  Event object
+</ParamField>
+<Indent>
+  <ParamField path="event.label" type="string">
+    Label for the camera that was disconnected.
+  </ParamField>
+  <ParamField path="event.deviceId" type="string">
+    Device Id for the camera that was disconnected.
+  </ParamField>
+</Indent>
+
+</Accordion>
+
+### camera.updated
+
+- **camera.updated**(`event`)
+
+A camera device was updated.
+
+<Accordion title="Properties">
+
+<ParamField path="event" type="object">
+  Event object
+</ParamField>
+<Indent>
+  <ParamField path="event.current" type="object">
+    Incoming information on the camera that was updated.
+  </ParamField>
+  <Indent>
+    <ParamField path="event.current.label" type="string">
+      Current label for the camera.
+    </ParamField>
+    <ParamField path="event.current.deviceId" type="string">
+      Current device Id for the camera.
+    </ParamField>
+  </Indent>
+  <ParamField path="event.previous" type="object">
+    Previous information on the camera that was updated.
+  </ParamField>
+  <Indent>
+    <ParamField path="event.previous.label" type="string">
+      Previous label for the camera.
+    </ParamField>
+    <ParamField path="event.previous.deviceId" type="string">
+      Previous device Id for the camera.
+    </ParamField>
+  </Indent>
+</Indent>
+
+</Accordion>
+
+### layout.changed
+
+- **layout.changed**(`event`)
+
+The layout of the room has changed. This event is not limited to changes
+associated to the grid layout of the room: it also includes for example changes
+in the position of the participants within the grid of the room.
+
+<Accordion title="Properties">
+
+<ParamField path="event" type="object">
+  Event object
+</ParamField>
+<Indent>
+  <ParamField path="event.room_session_id" type="string">
+    Id of the room session.
+  </ParamField>
+  <ParamField path="event.room_id" type="string">
+    Id of the room.
+  </ParamField>
+  <ParamField path="event.layout" type="object">
+    Information on the current layout.
+  </ParamField>
+  <Indent>
+    <ParamField path="event.layout.name" type="string">
+      Name of the current layout.
+    </ParamField>
+    <ParamField path="event.layout.room_session_id" type="string">
+      Id of the room session.
+    </ParamField>
+    <ParamField path="event.layout.room_id" type="string">
+      Id of the room.
+    </ParamField>
+    <ParamField path="event.layout.layers" type="VideoLayoutLayer[]">
+      Array containing information on all the layers in the current layout.
+    </ParamField>
+  </Indent>
+</Indent>
+
+</Accordion>
+
+### media.connected
+
+- **media.connected**
+
+New media has been connected. There is no payload, as this event is used to troubleshoot advanced use cases when hooking into the media connection.
+
+### media.disconnected
+
+- **media.disconnected**
+
+Media has been disconnected from the session. There is no payload, as this event is used to troubleshoot advanced use cases when hooking into the media connection.
+
+### media.reconnecting
+
+- **media.reconnecting**
+
+Media is attempting to reconnect to the session. There is no payload, as this event is used to troubleshoot advanced use cases when hooking into the media connection.
+
+### member.demoted
+
+- **member.demoted**(`event`)
+
+A member has been demoted to audience, for example using [demote](/docs/browser-sdk/js/reference/video/room-session/demote).
+
+This event is only received by the client which gets demoted, but you should
+always check if the `member_id` parameter corresponds to the current participant
+to ensure future compatibility.
+
+<Accordion title="Properties">
+
+<ParamField path="event" type="object">
+  Event object
+</ParamField>
+<Indent>
+  <ParamField path="event.room_session_id" type="string">
+    Id of the room session.
+  </ParamField>
+  <ParamField path="event.room_id" type="string">
+    Id of the room.
+  </ParamField>
+  <ParamField path="event.member_id" type="string">
+    Id of the member that was demoted.
+  </ParamField>
+  <ParamField path="event.authorization" type="object">
+    Information about the room context.
+  </ParamField>
+</Indent>
+
+</Accordion>
+
+### member.joined
+
+- **member.joined**(`event`)
+
+A member has joined the room.
+
+<Accordion title="Properties">
+
+<ParamField path="event" type="object">
+  Event object
+</ParamField>
+<Indent>
+  <ParamField path="event.room_session_id" type="string">
+    Id of the room session.
+  </ParamField>
+  <ParamField path="event.room_id" type="string">
+    Id of the room.
+  </ParamField>
+  <ParamField path="event.member" type="object">
+    Information about the member that joined.
+  </ParamField>
+  <Indent>
+    <ParamField path="event.member.visible" type="boolean">
+      Whether the member is visible on the canvas.
+    </ParamField>
+    <ParamField path="event.member.room_session_id" type="string">
+      Id of the room session member is joining.
+    </ParamField>
+    <ParamField path="event.member.input_volume" type="number">
+      Volume for the member's microphone.
+    </ParamField>
+    <ParamField path="event.member.id" type="string">
+      Id of the joining member.
+    </ParamField>
+    <ParamField path="event.member.scope_id" type="string">
+      Id identifying the member's allowed scopes.
+    </ParamField>
+    <ParamField path="event.member.input_sensitivity" type="number">
+      Level at which the member is identified as currently speaking.
+    </ParamField>
+    <ParamField path="event.member.output_volume" type="number">
+      Volume for the member's speaker.
+    </ParamField>
+    <ParamField path="event.member.audio_muted" type="boolean">
+      Whether the member's microphone is muted.
+    </ParamField>
+    <ParamField path="event.member.name" type="string">
+      Friendly name for the member.
+    </ParamField>
+    <ParamField path="event.member.deaf" type="boolean">
+      Whether the member's speaker is muted.
+    </ParamField>
+    <ParamField path="event.member.video_muted" type="boolean">
+      Whether the member's camera is muted.
+    </ParamField>
+    <ParamField path="event.member.room_id" type="string">
+      Id of the room member is joining.
+    </ParamField>
+    <ParamField path="event.member.type" type="string">
+      The member type, either `audience` or `member`.
+    </ParamField>
+  </Indent>
+</Indent>
+
+</Accordion>
+
+### member.left
+
+- **member.left**(`event`)
+
+A member has left the room.
+
+<Accordion title="Properties">
+
+<ParamField path="event" type="object">
+  Event object
+</ParamField>
+<Indent>
+  <ParamField path="event.room_session_id" type="string">
+    Id of the room session.
+  </ParamField>
+  <ParamField path="event.room_id" type="string">
+    Id of the room.
+  </ParamField>
+  <ParamField path="event.member" type="object">
+    Information about the member that left.
+  </ParamField>
+  <Indent>
+    <ParamField path="event.member.room_session_id" type="string">
+      Id of the room session that the member left.
+    </ParamField>
+    <ParamField path="event.member.id" type="string">
+      Id of the leaving member.
+    </ParamField>
+    <ParamField path="event.member.room_id" type="string">
+      Id of the room that the member left.
+    </ParamField>
+    <ParamField path="event.member.type" type="string">
+      The member type, either `audience` or `member`.
+    </ParamField>
+  </Indent>
+</Indent>
+
+</Accordion>
+
+### member.promoted
+
+- **member.promoted**(`event`)
+
+An audience participant has been promoted to member, for example using [promote](/docs/browser-sdk/js/reference/video/room-session/promote).
+
+This event is only received by the client which gets promoted, but you should
+always check if the `member_id` parameter corresponds to the current participant
+to ensure future compatibility.
+
+<Accordion title="Properties">
+
+<ParamField path="event" type="object">
+  Event object
+</ParamField>
+<Indent>
+  <ParamField path="event.room_session_id" type="string">
+    Id of the room session.
+  </ParamField>
+  <ParamField path="event.room_id" type="string">
+    Id of the room.
+  </ParamField>
+  <ParamField path="event.member_id" type="string">
+    Id of the audience member that was promoted.
+  </ParamField>
+  <ParamField path="event.authorization" type="object">
+    Information about the room context.
+  </ParamField>
+</Indent>
+
+</Accordion>
+
+### member.talking
+
+- **member.talking**(`event`)
+
+A member is talking or has stopped talking.
+
+<Accordion title="Properties">
+
+<ParamField path="event" type="object">
+  Event object
+</ParamField>
+<Indent>
+  <ParamField path="event.room_session_id" type="string">
+    Id of the room session.
+  </ParamField>
+  <ParamField path="event.room_id" type="string">
+    Id of the room.
+  </ParamField>
+  <ParamField path="event.member" type="object">
+    Information about the member talking.
+  </ParamField>
+  <Indent>
+    <ParamField path="event.member.room_session_id" type="string">
+      Id of the room session.
+    </ParamField>
+    <ParamField path="event.member.id" type="string">
+      Id of the talking member.
+    </ParamField>
+    <ParamField path="event.member.room_id" type="string">
+      Id of the room.
+    </ParamField>
+    <ParamField path="event.member.talking" type="boolean">
+      Whether the member is speaking. A `true` value indicates the member has started speaking, while a `false` value indicates the member has stopped.
+    </ParamField>
+  </Indent>
+</Indent>
+
+</Accordion>
+
+### member.updated
+
+- **member.updated**(`event`)
+
+A property of a member of the room has been updated.
+
+<Accordion title="Properties">
+
+<ParamField path="event" type="object">
+  Event object
+</ParamField>
+<Indent>
+  <ParamField path="event.room_session_id" type="string">
+    Id for the room session that the updated member is in.
+  </ParamField>
+  <ParamField path="event.room_id" type="string">
+    Id for the room that the updated member is in.
+  </ParamField>
+  <ParamField path="event.member" type="object">
+    Information on the member that was updated.
+  </ParamField>
+  <Indent>
+    <ParamField path="event.member.updated" type="string[]">
+      Which room properties were updated.
+    </ParamField>
+    <ParamField path="event.member.id" type="string">
+      Id for the member that was updated.
+    </ParamField>
+    <ParamField path="event.member.room_session_id" type="string">
+      Id for the room session that the updated member is in.
+    </ParamField>
+    <ParamField path="event.member.room_id" type="string">
+      Id for the room that the updated member is in.
+    </ParamField>
+    <ParamField path="event.member.type" type="string">
+      The member type, either `audience` or `member`.
+    </ParamField>
+  </Indent>
+</Indent>
+
+</Accordion>
+
+In the field `member.updated` you find an array of all the properties that have been updated. The new values for those properties are available as additional fields of member.
+
+For example, say `visible` and `video_muted` have been updated. The received object will be:
+
+```javascript
+{
+  "room_session_id": "35e85417-09cf-4b07-8f21-d3c16809e5a8",
+  "room_id": "aae25822-892c-4832-b0b3-34aac3a0e8d1",
+  "member": {
+    "updated": ["visible", "video_muted"],
+    "room_session_id": "35e85417-09cf-4b07-8f21-d3c16809e5a8",
+    "visible": false,
+    "video_muted": true,
+    "id": "4a829c9f-812c-49d7-b272-e3077213c55e",
+    "room_id": "aae25822-892c-4832-b0b3-34aac3a0e8d1",
+    "type": "member"
+  }
+}
+```
+
+---
+
+### memberList.updated
+
+- **memberList.updated**(`event`)
+
+The set of members or one or more properties of a member have changed.
+
+<Accordion title="Properties">
+
+<ParamField path="event" type="object">
+  Event object
+</ParamField>
+<Indent>
+  <ParamField path="event.members" type="object[]">
+    A list of current members with the current values of their updatable properties as listed in the [`getMembers`](/docs/browser-sdk/js/reference/video/room-session/get-members) method.
+  </ParamField>
+</Indent>
+
+</Accordion>
+
+### microphone.disconnected
+
+- **microphone.disconnected**(`event`)
+
+A microphone device was disconnected.
+
+<Accordion title="Properties">
+
+<ParamField path="event" type="object">
+  Event object
+</ParamField>
+<Indent>
+  <ParamField path="event.label" type="string">
+    Label for the microphone that was disconnected.
+  </ParamField>
+  <ParamField path="event.deviceId" type="string">
+    Device Id for the microphone that was disconnected.
+  </ParamField>
+</Indent>
+
+</Accordion>
+
+### microphone.updated
+
+- **microphone.updated**(`event`)
+
+A microphone device was updated.
+
+<Accordion title="Properties">
+
+<ParamField path="event" type="object">
+  Event object
+</ParamField>
+<Indent>
+  <ParamField path="event.current" type="object">
+    Incoming information on the microphone that was updated.
+  </ParamField>
+  <Indent>
+    <ParamField path="event.current.label" type="string">
+      Current label for the microphone.
+    </ParamField>
+    <ParamField path="event.current.deviceId" type="string">
+      Current device Id for the microphone.
+    </ParamField>
+  </Indent>
+  <ParamField path="event.previous" type="object">
+    Previous information on the microphone that was updated.
+  </ParamField>
+  <Indent>
+    <ParamField path="event.previous.label" type="string">
+      Previous label for the microphone.
+    </ParamField>
+    <ParamField path="event.previous.deviceId" type="string">
+      Previous device Id for the microphone.
+    </ParamField>
+  </Indent>
+</Indent>
+
+</Accordion>
+
+### playback.ended
+
+- **playback.ended**
+
+A playback has ended. You only receive this event if your token has the `room.playback` permission. The event handler receives a [RoomSessionPlayback](/docs/browser-sdk/js/reference/video/room-session-playback) object.
+
+---
+
+### playback.started
+
+- **playback.started**
+
+A playback has been started. You only receive this event if your token has the `room.playback` permission. The event handler receives a [RoomSessionPlayback](/docs/browser-sdk/js/reference/video/room-session-playback) object.
+
+---
+
+### playback.updated
+
+- **playback.updated**
+
+A playback has been updated. You only receive this event if your token has the `room.playback` permission. The event handler receives a [RoomSessionPlayback](/docs/browser-sdk/js/reference/video/room-session-playback) object.
+
+---
+
+### recording.ended
+
+- **recording.ended**
+
+An active recording has been stopped. You only receive this event if your token has the `room.recording` permission. The event handler receives a [RoomSessionRecording](/docs/browser-sdk/js/reference/video/room-session-recording) object.
+
+---
+
+### recording.started
+
+- **recording.started**
+
+A recording has been started in the room. You only receive this event if your token has the `room.recording` permission. The event handler receives a [RoomSessionRecording](/docs/browser-sdk/js/reference/video/room-session-recording) object.
+
+---
+
+### recording.updated
+
+- **recording.updated**
+
+An active recording has been updated. You only receive this event if your token has the `room.recording` permission. The event handler receives a [RoomSessionRecording](/docs/browser-sdk/js/reference/video/room-session-recording) object.
+
+---
+
+### room.audience_count
+
+- **room.audience_count**(`event`)
+
+This event is received periodically, and contains a total count of audience members.
+
+Audience members joining and leaving trigger this event.
+
+<Accordion title="Properties">
+
+<ParamField path="event" type="object">
+  Event object
+</ParamField>
+<Indent>
+  <ParamField path="event.room_session_id" type="string">
+    Id of the room session.
+  </ParamField>
+  <ParamField path="event.room_id" type="string">
+    Id of the room.
+  </ParamField>
+  <ParamField path="event.total" type="number">
+    Total number of audience members.
+  </ParamField>
+</Indent>
+
+</Accordion>
+
+### room.joined
+
+- **room.joined**(`event`)
+
+The current client joined the room session. The event handler receives objects that contain information about the room and all its members (including the current client).
+
+<Accordion title="Properties">
+
+<ParamField path="event" type="object">
+  Event object
+</ParamField>
+<Indent>
+  <ParamField path="event.call_id" type="string">
+    Low level call identifier for the video room connection.
+  </ParamField>
+  <ParamField path="event.member_id" type="string">
+    Id for the current client member.
+  </ParamField>
+  <ParamField path="event.room_session" type="object">
+    Information about the room session that has been joined.
+  </ParamField>
+  <Indent>
+    <ParamField path="event.room_session.room_session_id" type="string">
+      Id for the current room session.
+    </ParamField>
+    <ParamField path="event.room_session.logos_visible" type="boolean">
+      Whether logos are visible in participant name banners.
+    </ParamField>
+    <ParamField path="event.room_session.members" type="object[]">
+      A list of current members with the current values of their updatable properties as listed in the [`getMembers`](/docs/browser-sdk/js/reference/video/room-session/get-members) method.
+    </ParamField>
+    <ParamField path="event.room_session.blind_mode" type="boolean">
+      Whether participants are allowed to turn off their camera.
+    </ParamField>
+    <ParamField path="event.room_session.recording" type="boolean">
+      Whether recording is active in the session.
+    </ParamField>
+    <ParamField path="event.room_session.silent_mode" type="boolean">
+      Whether participants are allowed to turn off their microphone.
+    </ParamField>
+    <ParamField path="event.room_session.name" type="string">
+      Friendly name of the room session.
+    </ParamField>
+    <ParamField path="event.room_session.hide_video_muted" type="boolean">
+      Whether participants with their cameras off are shown on the canvas.
+    </ParamField>
+    <ParamField path="event.room_session.locked" type="boolean">
+      Whether additional participants can join the room session.
+    </ParamField>
+    <ParamField path="event.room_session.meeting_mode" type="boolean">
+      Whether event feedback sounds (such as beeps when participants join or leave) are disabled in the session.
+    </ParamField>
+    <ParamField path="event.room_session.room_id" type="string">
+      Id for the current room.
+    </ParamField>
+    <ParamField path="event.room_session.event_channel" type="string">
+      Id for the event channel on which these room session's events are reported.
+    </ParamField>
+    <ParamField path="event.room_session.layout_name" type="string">
+      Name of the current canvas layout.
+    </ParamField>
+  </Indent>
+</Indent>
+
+</Accordion>
+
+### room.left
+
+- **room.left**(`event`)
+
+The current client left the room session.
+
+<Accordion title="Properties">
+
+<ParamField path="event" type="object">
+  Event object
+</ParamField>
+<Indent>
+  <ParamField path="event.reason" type="string">
+    Reason client left the session. Possible values are `RECONNECTION_ATTEMPT_TIMEOUT` and `undefined`.
+  </ParamField>
+</Indent>
+
+</Accordion>
+
+### room.updated
+
+- **room.updated**(`event`)
+
+The properties of the room have been updated.
+
+<Accordion title="Properties">
+
+<ParamField path="event" type="object">
+  Event object
+</ParamField>
+<Indent>
+  <ParamField path="event.room_session_id" type="string">
+    Id for the room session that was updated.
+  </ParamField>
+  <ParamField path="event.room_id" type="string">
+    Id for the room that was updated.
+  </ParamField>
+  <ParamField path="event.room" type="object">
+    Information on the room that was updated.
+  </ParamField>
+  <Indent>
+    <ParamField path="event.room.updated" type="string[]">
+      Which room properties were updated.
+    </ParamField>
+    <ParamField path="event.room.room_session_id" type="string">
+      Id for the room session that was updated.
+    </ParamField>
+    <ParamField path="event.room.room_id" type="string">
+      Id for the room that was updated.
+    </ParamField>
+  </Indent>
+</Indent>
+
+</Accordion>
+
+In the field `room.updated` you find an array of all the properties that have been updated. The new values for those properties are available as additional fields of `room`.
+
+For example, if `hide_video_muted` has been updated, the received object will be:
+
+```javascript
+{
+  "room_session_id": "fc695445-7f93-4597-b705-c0db6c21096a",
+  "room_id": "aae25822-892c-4832-b0b3-34aac3a0e8d1",
+  "room": {
+    "updated": [ "hide_video_muted" ],
+    "room_session_id": "fc695445-7f93-4597-b705-c0db6c21096a",
+    "room_id": "aae25822-892c-4832-b0b3-34aac3a0e8d1",
+    "hide_video_muted": true
+  }
+}
+```
+
+---
+
+### speaker.disconnected
+
+- **speaker.disconnected**(`event`)
+
+A speaker device was disconnected.
+
+<Accordion title="Properties">
+
+<ParamField path="event" type="object">
+  Event object
+</ParamField>
+<Indent>
+  <ParamField path="event.label" type="string">
+    Label for the speaker that was disconnected.
+  </ParamField>
+  <ParamField path="event.deviceId" type="string">
+    Device Id for the speaker that was disconnected.
+  </ParamField>
+</Indent>
+
+</Accordion>
+
+### speaker.updated
+
+- **speaker.updated**(`event`)
+
+A speaker device was updated.
+
+<Accordion title="Properties">
+
+<ParamField path="event" type="object">
+  Event object
+</ParamField>
+<Indent>
+  <ParamField path="event.current" type="object">
+    Incoming information on the speaker that was updated.
+  </ParamField>
+  <Indent>
+    <ParamField path="event.current.label" type="string">
+      Current label for the speaker.
+    </ParamField>
+    <ParamField path="event.current.deviceId" type="string">
+      Current device Id for the speaker.
+    </ParamField>
+  </Indent>
+  <ParamField path="event.previous" type="object">
+    Previous information on the speaker that was updated.
+  </ParamField>
+  <Indent>
+    <ParamField path="event.previous.label" type="string">
+      Previous label for the speaker.
+    </ParamField>
+    <ParamField path="event.previous.deviceId" type="string">
+      Previous device Id for the speaker.
+    </ParamField>
+  </Indent>
+</Indent>
+
+</Accordion>
+
+### stream.ended
+
+- **stream.ended**(`stream`)
+
+A stream ended (e.g., it was stopped).
+
+<Accordion title="Properties">
+
+<ParamField path="stream" type="RoomSessionStream">
+  The stream object. See [`RoomSessionStream`](/docs/browser-sdk/js/reference/video/room-session-stream).
+</ParamField>
+
+</Accordion>
+
+### stream.started
+
+- **stream.started**(`stream`)
+
+A new stream started.
+
+<Accordion title="Properties">
+
+<ParamField path="stream" type="RoomSessionStream">
+  The stream object. See [`RoomSessionStream`](/docs/browser-sdk/js/reference/video/room-session-stream).
+</ParamField>
+
+</Accordion>

@@ -1,0 +1,200 @@
+---
+title: "CallTap"
+keywords:
+  - SignalWire
+  - Realtime SDK
+  - Node.js
+  - call tap
+  - audio tap
+  - call monitoring
+slug: /node/reference/voice/call-tap
+sidebar_label: CallTap
+description: CallTap object reference for tapping voice call audio streams. Stream call audio to external destinations via RTP for monitoring or recording.
+toc_max_heading_level: 3
+---
+
+[calltap]: #
+[tap]: /docs/server-sdk/node/reference/voice/call/tap
+[tapAudio]: /docs/server-sdk/node/reference/voice/call/tap-audio
+
+Represents a current or past tapping of a call. 
+
+Obtain instances of this class by starting a Tap with one of the following methods:
+
+- [`Call.tap`][tap]
+- [`Call.tapAudio`][tapAudio]
+
+### Example
+
+As soon as the other party answers the phone, start transmitting the audio of
+the call to an external service.
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+const call = await client.voice.dialPhone({
+  to: process.env.TO_NUMBER,
+  from: process.env.FROM_NUMBER,
+  timeout: 30
+})
+
+const tap = await call.tapAudio({
+  direction: "both",
+  device: {
+    type: "ws",
+    uri: "wss://2769-100-7-113-61.ngrok-free.app",
+  }
+}).onStarted();
+
+// wait 10 seconds then stop the tap
+
+setTimeout(async () => {
+  console.log("Stopping tap");
+  await tap.stop();
+}, 10000);
+
+// wait for the tap to end
+await tap.ended();
+console.log("Tap ended");
+
+await call.playTTS({
+  text: "Tap ended"
+});
+
+// hangup the call
+call.hangup();
+```
+
+## **Properties**
+
+<ParamField path="id" type="string">
+  The unique ID for this tap session.
+</ParamField>
+
+<ParamField path="state" type='"tapping" | "finished"'>
+  The current state of the tap session.
+</ParamField>
+
+<ParamField path="hasEnded" type="boolean">
+  Whether the tap has ended. Returns `true` if the state is `"finished"`.
+</ParamField>
+
+## **Methods**
+
+### ended
+
+- **ended**(): `Promise`\<[`CallTap`][calltap]>
+
+Returns a promise that is resolved only after this tap finishes (or is stopped).
+
+#### Returns
+
+`Promise`\<[`CallTap`][calltap]>
+
+A promise that resolves to [`CallTap`][calltap] object when the tap session has been
+ended.
+
+#### Example
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "your-project-id", token: "your-api-token" });
+
+const call = await client.voice.dialPhone({
+  from: "+1xxxxxxxxxx",
+  to: "+1yyyyyyyyyy",
+  timeout: 30
+});
+
+const tap = await call.tapAudio({
+  direction: "both",
+  device: {
+    type: "ws",
+    uri: "wss://example.domain.com/endpoint"
+  },
+  listen: {
+    onStarted: () => console.log("Tap started"),
+    onEnded: () => console.log("Tap ended")
+  }
+}).onStarted();
+
+// Wait for tap to finish
+await tap.ended();
+console.log("Tap session completed");
+```
+
+---
+
+### stop
+
+- **stop**(): `Promise`\<[`CallTap`][calltap]>
+
+Stops the tapping.
+
+#### Returns
+
+`Promise`\<[`CallTap`][calltap]>
+
+A promise that resolves to [`CallTap`][calltap] object when the tap session has been stopped.
+
+#### Example
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "your-project-id", token: "your-api-token" });
+
+const call = await client.voice.dialPhone({
+  from: "+1xxxxxxxxxx",
+  to: "+1yyyyyyyyyy",
+  timeout: 30
+});
+
+// Start tapping audio to an RTP endpoint
+const tap = await call.tapAudio({
+  direction: "both",
+  device: {
+    type: "rtp",
+    addr: "192.0.2.1",
+    port: "5000",
+    codec: "PCMU"
+  }
+}).onStarted();
+
+console.log("Tap started with ID:", tap.id);
+
+// Stop the tap after processing
+await tap.stop();
+console.log("Tap stopped");
+```
+
+---
+
+## **Events**
+
+### onStarted
+
+- **CallTap.listen**(`{ onStarted: Callback }}`)
+
+Emitted when the tapping starts. Your event handler will receive an instance of [`CallTap`][calltap].
+
+#### Parameters
+
+<ParamField path="tap" type="CallTap" required>
+  The tap that started. See [`CallTap`][calltap].
+</ParamField>
+
+### onEnded
+
+- **CallTap.listen**(`{ onEnded: Callback }}`)
+
+Emitted when the tapping ends. Your event handler will receive an instance of [`CallTap`][calltap].
+
+#### Parameters
+
+<ParamField path="tap" type="CallTap" required>
+  The tap that ended. See [`CallTap`][calltap].
+</ParamField>

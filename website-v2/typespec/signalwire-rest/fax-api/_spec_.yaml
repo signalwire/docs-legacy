@@ -1,0 +1,336 @@
+openapi: 3.0.3
+info:
+  version: 1.0.0
+  title: Fax API
+  description: An API to programmatically access information about SignalWire fax activity.
+  termsOfService: https://signalwire.com/legal/signalwire-cloud-agreement
+externalDocs:
+  url: https://developers.signalwire.com
+  description: Find more information about this and other SignalWire APIs.
+servers:
+  - url: https://{space_name}.signalwire.com/api/fax
+    variables:
+      space_name:
+        default: YOUR_SPACE
+        description: Your SignalWire Space's subdomain.
+security:
+  - basic_auth: []
+components:
+  securitySchemes:
+    basic_auth:
+      type: http
+      scheme: basic
+  responses:
+    '204':
+      description: No Content
+    '400':
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/error'
+    '401':
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/error'
+    '422':
+      description: Unprocessable Entity
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/error'
+  schemas:
+    error:
+      type: object
+      properties:
+        type:
+          type: string
+        code:
+          type: string
+        message:
+          type: string
+        attribute:
+          type: string
+        url:
+          type: string
+          format: uri
+      required:
+        - type
+        - code
+        - message
+        - url
+      example:
+        type: validation_error
+        code: invalid_parameter
+        message: Name must be present
+        attribute: name
+        url: https://developer.signalwire.com/rest/signalwire-rest/overview/error-codes#field-invalid-parameter
+    pagination:
+      type: object
+      properties:
+        self:
+          type: string
+        first:
+          type: string
+        next:
+          type: string
+        prev:
+          type: string
+tags:
+  - name: Logs
+
+paths:
+  /logs:
+    get:
+      operationId: list_logs
+      summary: List Logs
+      description: |
+        List the available logs.
+
+        #### Permissions
+        The API token must include the following scopes: _Fax_.
+      tags:
+        - Logs
+      parameters:
+        - name: include_deleted
+          in: query
+          description: Include logs for deleted activity.
+          required: false
+          schema:
+            type: boolean
+          example: false
+        - name: created_before
+          in: query
+          description: Return logs for activity prior to this date.
+          required: false
+          schema:
+            type: string
+          example: '2022-04-30'
+        - name: created_on
+          in: query
+          description: Return logs for activity on this date.
+          required: false
+          schema:
+            type: string
+          example: '2022-04-30'
+        - name: created_after
+          in: query
+          description: Return logs for activity after this date.
+          required: false
+          schema:
+            type: string
+          example: '2022-04-30'
+        - name: page_size
+          in: query
+          description: >-
+            Specify the number of results to return on a single page. The
+            default page size is `50` and the maximum is `1000`.
+          required: false
+          schema:
+            type: integer
+          example: 20
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  links:
+                    type: object
+                    properties:
+                      self:
+                        type: string
+                      first:
+                        type: string
+                      next:
+                        type: string
+                      prev:
+                        type: string
+                  data:
+                    type: array
+                    items:
+                      allOf:
+                        - type: object
+                          properties:
+                            id:
+                              type: string
+                              format: uuid
+                              description: A unique identifier for the log
+                        - type: object
+                          properties:
+                            from:
+                              type: string
+                              description: The origin phone number in E.164 format.
+                              example: '+12065551212'
+                            to:
+                              type: string
+                              description: The destination phone number in E.164 format.
+                              example: '+12065553434'
+                            status:
+                              type: string
+                              description: The status of this fax call.
+                              example: completed
+                            direction:
+                              type: string
+                              description: The direction of this fax call.
+                              example: outbound
+                            source:
+                              type: string
+                              description: Source of this log entry.
+                              example: laml
+                            type:
+                              type: string
+                              description: Type of this log entry.
+                              example: laml_call
+                            url:
+                              type: string
+                              description: >-
+                                URL for the resource associated with this log
+                                entry (if available)
+                            remote_station:
+                              type: string
+                            charge:
+                              type: number
+                              example: '0.01'
+                            number_of_pages:
+                              type: integer
+                              example: '2'
+                            quality:
+                              type: string
+                              example: fine
+                            charge_details:
+                              type: array
+                              description: Details on charges associated with this log.
+                              items:
+                                type: object
+                                properties:
+                                  description:
+                                    type: string
+                                    description: Description for this charge.
+                                  charge:
+                                    type: number
+                                    description: Charged amount.
+                              example: []
+                        - type: object
+                          properties:
+                            created_at:
+                              type: string
+                              format: date-time
+                            updated_at:
+                              type: string
+                              format: date-time
+                            error_code:
+                              type: string
+                              description: Error code for this resource (if available).
+                              example: '34004'
+                            error_message:
+                              type: string
+                              description: The description of this error (if available).
+                              example: The call dropped prematurely
+  /logs/{id}:
+    get:
+      operationId: get_log
+      summary: Find a Log by ID
+      description: |
+        Find a log by ID.
+
+        #### Permissions
+        The API token must include the following scopes: _Fax_.
+      tags:
+        - Logs
+      parameters:
+        - name: id
+          in: path
+          description: Unique ID of the log
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                        description: A unique identifier for the log
+                  - type: object
+                    properties:
+                      from:
+                        type: string
+                        description: The origin phone number in E.164 format.
+                        example: '+12065551212'
+                      to:
+                        type: string
+                        description: The destination phone number in E.164 format.
+                        example: '+12065553434'
+                      status:
+                        type: string
+                        description: The status of this fax call.
+                        example: completed
+                      direction:
+                        type: string
+                        description: The direction of this fax call.
+                        example: outbound
+                      source:
+                        type: string
+                        description: Source of this log entry.
+                        example: laml
+                      type:
+                        type: string
+                        description: Type of this log entry.
+                        example: laml_call
+                      url:
+                        type: string
+                        description: >-
+                          URL for the resource associated with this log entry
+                          (if available)
+                      remote_station:
+                        type: string
+                      charge:
+                        type: number
+                        example: '0.01'
+                      number_of_pages:
+                        type: integer
+                        example: '2'
+                      quality:
+                        type: string
+                        example: fine
+                      charge_details:
+                        type: array
+                        description: Details on charges associated with this log.
+                        items:
+                          type: object
+                          properties:
+                            description:
+                              type: string
+                              description: Description for this charge.
+                            charge:
+                              type: number
+                              description: Charged amount.
+                        example: []
+                  - type: object
+                    properties:
+                      created_at:
+                        type: string
+                        format: date-time
+                      updated_at:
+                        type: string
+                        format: date-time
+                      error_code:
+                        type: string
+                        description: Error code for this resource (if available).
+                        example: '34004'
+                      error_message:
+                        type: string
+                        description: The description of this error (if available).
+                        example: The call dropped prematurely

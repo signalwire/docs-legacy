@@ -1,0 +1,209 @@
+---
+title: "promptTTS"
+slug: /node/reference/voice/call/prompt-tts
+description: promptTTS method for the Call class.
+toc_max_heading_level: 3
+---
+
+[callprompt-onstarted]: /docs/server-sdk/node/reference/voice/call-prompt#onstarted
+[callprompt]: /docs/server-sdk/node/reference/voice/call-prompt
+[collectdigitsconfig]: /docs/server-sdk/node/reference/voice/types#collectdigitsconfig
+[collectspeechconfig]: /docs/server-sdk/node/reference/voice/types#collectspeechconfig
+[ssml]: https://cloud.google.com/text-to-speech/docs/ssml
+[supported-voices-languages]: /docs/platform/voice/tts
+
+### promptTTS
+
+- **promptTTS**(`params`): `Promise`\<[`CallPrompt`][callprompt]>
+
+Play text-to-speech while collecting user input from the call, such as `digits` or `speech`.
+
+#### Parameters
+
+<ParamField path="params" type="object" required>
+  Object containing the parameters for prompting the user for input while playing text-to-speech.
+</ParamField>
+
+<Indent>
+<ParamField path="text" type="string" required>
+  Text to play. SSML may be entered as a string wrapped in `<speak>` tags. See our [supported voices and languages][supported-voices-languages] documentation for usage and supported tags.
+</ParamField>
+
+<ParamField path="digits" type="CollectDigitsConfig">
+  Configuration for collecting digits. You must either set this, or `speech`. See [`CollectDigitsConfig`][collectdigitsconfig].
+</ParamField>
+
+<ParamField path="speech" type="CollectSpeechConfig">
+  Configuration for collecting speech. You must either set this, or `digits`. Pass an empty object to use the default configuration. See [`CollectSpeechConfig`][collectspeechconfig].
+</ParamField>
+
+<ParamField path="language" type="string" default="en-US">
+  Language of the text in ISO 639-1 (language name) + ISO 3166 (country code). Supported languages can be found [here][supported-voices-languages].
+</ParamField>
+
+<ParamField path="gender" type='"male" | "female"' default="female">
+  Gender of the voice.
+</ParamField>
+
+<ParamField path="voice" type="string">
+  Voice to use (takes precedence over `gender`). Supported voices can be found [here][supported-voices-languages].
+</ParamField>
+
+<ParamField path="initialTimeout" type="number" default="4">
+  Initial timeout in seconds.
+</ParamField>
+
+<ParamField path="volume" type="number" default="0">
+  Volume value between -40dB and +40dB where 0 is unchanged.
+</ParamField>
+
+<ParamField path="listen" type="object">
+  Callback to listen for events. List of prompt events can be found [here][callprompt]. Example event: [`onStarted`][callprompt-onstarted].
+</ParamField>
+</Indent>
+
+#### Returns
+
+`Promise`\<[`CallPrompt`][callprompt]>
+
+A promise that resolves to a [`CallPrompt`][callprompt] object that you can use to
+view the current state and results of the `prompt` session.
+
+#### Examples
+
+**Digits Example**
+
+In this example, we dial a phone number and prompt for `digits` while playing TTS in the background.
+After the digits are entered or a timeout occurs, the prompt session will end and return the digits results,
+and the call will hangup.
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+const voiceClient = client.voice;
+
+// Listen for incoming calls
+await voiceClient.listen({
+  topics: ["office"],
+  onCallReceived: async (call) => {
+    console.log("Call received");
+    // Answer the call
+    call.answer();
+    // Play TTS on the call
+    await call.promptTTS({
+      text: "Please enter your 5 digit pin number.",
+      duration: 10,
+      digits: {
+        max: 5,
+        digitTimeout: 5,
+        terminators: "#*",
+      },
+      listen: {
+        onStarted: () => console.log("Prompt TTS started"),
+        onFailed: () => console.log("Prompt TTS failed"),
+        onUpdated: (event) => console.log("Prompt TTS updated", event.result),
+        onEnded: (event) => {
+          console.log("Prompt TTS ended", event.result);
+          // Hangup the call
+          call.hangup();
+        }
+      }
+    }).onStarted();
+  }
+});
+```
+
+**Speech Example**
+
+In this example, we dial a phone number and prompt for `speech` while playing TTS in the background.
+After the user speaks or a timeout occurs, the prompt session will end and return the speech results, 
+and the call will hangup.
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+const voiceClient = client.voice;
+
+// Listen for incoming calls
+await voiceClient.listen({
+
+  topics: ["office"],
+  onCallReceived: async (call) => {
+    console.log("Call received");
+    // Answer the call
+    call.answer();
+    // Play TTS on the call
+    await call.promptTTS({
+      text: "Please say your name.",
+      duration: 10,
+      speech: {
+        model: "enhanced.phone_call"
+      },
+      listen: {
+        onStarted: () => console.log("Prompt TTS started"),
+        onFailed: () => console.log("Prompt TTS failed"),
+        onUpdated: (event) => console.log("Prompt TTS updated", event.result),
+        onEnded: (event) => {
+          console.log("Prompt TTS ended", event.result)
+          // Hangup the call
+          call.hangup();
+        }
+      }
+    }).onStarted();
+  }
+});
+```
+
+**SSML Example**
+
+In this example, we are using [SSML][ssml] to play a TTS message.
+We dial a phone number and prompt for `digits` while playing TTS in the background.
+After the digits are entered or a timeout occurs, the prompt session will end and return the digits results,
+and the call will hangup.
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+const voiceClient = client.voice;
+
+// Listen for incoming calls
+await voiceClient.listen({
+
+  topics: ["office"],
+  onCallReceived: async (call) => {
+    console.log("Call received");
+    // Answer the call
+    call.answer();
+    // Play TTS on the call
+    await call.promptTTS({
+      text: `<speak>
+        Please enter your <say-as interpret-as="characters">UUID</say-as>.
+        It should be a <say-as interpret-as="cardinal">5</say-as> digit number.
+      </speak>`,
+      voice: "polly.Joey",
+      duration: 20,
+      digits: {
+        max: 5,
+        digitTimeout: 20,
+        terminators: "#*",
+      },
+      listen: {
+        onStarted: () => console.log("Prompt TTS started"),
+        onFailed: () => console.log("Prompt TTS failed"),
+        onUpdated: (event) => console.log("Prompt TTS updated", event.result),
+        onEnded: (event) => {
+          console.log("Prompt TTS ended", event.result)
+          // Hangup the call
+          call.hangup();
+        }
+      }
+    }).onStarted();
+  }
+});
+```

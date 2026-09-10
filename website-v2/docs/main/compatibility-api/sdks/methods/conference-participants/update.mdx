@@ -1,0 +1,375 @@
+---
+slug: /compatibility-api/sdks/reference/conference-participants/update
+title: Update
+sidebar_label: Update
+toc_max_heading_level: 3
+---
+
+Use this endpoint for the Conference Participants method to modify the properties of participant in an active conference call.
+
+<EndpointSchemaSnippet endpoint="POST /Accounts/{AccountSid}/Conferences/{ConferenceSid}/Participants/{CallSid}" />
+
+## Request examples
+
+### Update a participant
+
+<CodeBlocks>
+```javascript title="Node.js"
+const { RestClient } = require('@signalwire/compatibility-api')
+const client = RestClient('YourProjectID', 'YourAuthToken', { signalwireSpaceUrl: 'example.signalwire.com' })
+
+client.conferences('ConferenceSid')
+      .participants('CallSid')
+      .update()
+      .then(participant => console.log(participant.callSid))
+      .done();
+```
+```csharp
+using System;
+using System.Collections.Generic;
+using Twilio;
+using Twilio.Rest.Api.V2010.Account.Conference;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        TwilioClient.Init("YourProjectID", "YourAuthToken", new Dictionary<string, object> { ["signalwireSpaceUrl"] = "{SPACE}.signalwire.com" });
+
+        var participant = ParticipantResource.Update(
+            pathConferenceSid: "ConferenceSid",
+            pathCallSid: "CallSid"
+        );
+
+        Console.WriteLine(participant.CallSid);
+    }
+}
+```
+```python
+from signalwire.rest import Client as signalwire_client
+
+client = signalwire_client("YourProjectID", "YourAuthToken", signalwire_space_url = 'example.signalwire.com')
+
+participant = client.conferences('ConferenceSid') \
+                    .participants('CallSid') \
+                    .update()
+
+print(participant.call_sid)
+```
+```ruby
+require 'signalwire/sdk'
+
+@client = Signalwire::REST::Client.new 'YourProjectID', 'YourAuthToken', signalwire_space_url: "example.signalwire.com"
+
+participant = @client.conferences('ConferenceSid')
+                     .participants('CallSid')
+                     .update()
+
+puts participant.call_sid
+```
+</CodeBlocks>
+
+### Coaching a participant
+
+<CodeBlocks>
+```javascript title="Node.js"
+const { RestClient } = require('@signalwire/compatibility-api')
+const client = RestClient('YourProjectID', 'YourAuthToken', { signalwireSpaceUrl: 'example.signalwire.com' })
+
+client.conferences('ConferenceSid')
+.participants('CallSid')
+.update({Muted: false, Coaching: true, Beep: false, CallSidToCoach: 'CallSidToCoach'})
+.then(participant => console.log(participant.callSid))
+.done();
+```
+```csharp
+using System;
+using System.Collections.Generic;
+using Twilio;
+using Twilio.Rest.Api.V2010.Account.Conference;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        TwilioClient.Init("YourProjectID", "YourAuthToken", new Dictionary<string, object> { ["signalwireSpaceUrl"] = "{SPACE}.signalwire.com" });
+
+        var participant = ParticipantResource.Update(
+            muted: false,
+			coaching: true,
+			callSidToCoach: "CallSidToCoach",
+			beep: false,
+            pathConferenceSid: "ConferenceSid",
+            pathCallSid: "CallSid"
+        );
+
+        Console.WriteLine(participant.CallSid);
+    }
+}
+```
+```python
+from signalwire.rest import Client as signalwire_client
+
+client = signalwire_client("YourProjectID", "YourAuthToken", signalwire_space_url = 'example.signalwire.com')
+
+participant = client.conferences('ConferenceSid') \
+                    .participants('CallSid') \
+                    .update(muted=False, coaching=True, beep=False, callSidToCoach='callSidToCoach')
+
+print(participant.call_sid)
+```
+```ruby
+require 'signalwire/sdk'
+
+@client = Signalwire::REST::Client.new 'YourProjectID', 'YourAuthToken', signalwire_space_url: "example.signalwire.com"
+
+participant = @client.conferences('ConferenceSid')
+                     .participants('CallSid')
+                     .update(muted: false, coaching: true, beep: false, callSidToCoach: 'CallSidToCoach')
+
+puts participant.call_sid
+```
+</CodeBlocks>
+
+### Monitoring a conference
+
+<CodeBlocks>
+```javascript title="Node.js"
+const { RestClient } = require('@signalwire/compatibility-api')
+const client = RestClient('YourProjectID', 'YourAuthToken', { signalwireSpaceUrl: 'example.signalwire.com' })
+
+client.conferences('ConferenceSid')
+.participants('CallSid')
+.update({muted: true, coaching: true, beep: false, callSidToCoach: 'CallSidToCoach'})
+.then(participant => console.log(participant.callSid))
+.done();
+```
+```csharp
+using System;
+using System.Collections.Generic;
+using Twilio;
+using Twilio.Rest.Api.V2010.Account.Conference;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        TwilioClient.Init("YourProjectID", "YourAuthToken", new Dictionary<string, object> { ["signalwireSpaceUrl"] = "{SPACE}.signalwire.com" });
+
+        var participant = ParticipantResource.Update(
+            muted: true,
+			coaching: true,
+			beep: false,
+			callSidToCoach: "CallSidToCoach",
+            pathConferenceSid: "ConferenceSid",
+            pathCallSid: "CallSid"
+        );
+
+        Console.WriteLine(participant.CallSid);
+    }
+}
+```
+```python
+from signalwire.rest import Client as signalwire_client
+
+client = signalwire_client("YourProjectID", "YourAuthToken", signalwire_space_url = 'example.signalwire.com')
+
+participant = client.conferences('ConferenceSid') \
+                    .participants('CallSid') \
+                    .update(muted=True, coaching=True, beep=False, callSidToCoach='CallSidToCoach')
+
+print(participant.call_sid)
+```
+```ruby
+require 'signalwire/sdk'
+
+@client = Signalwire::REST::Client.new 'YourProjectID', 'YourAuthToken', signalwire_space_url: "example.signalwire.com"
+
+participant = @client.conferences('ConferenceSid')
+                     .participants('CallSid')
+                     .update(muted: true, coaching: true, beep: false, callSidToCoach: 'CallSidToCoach')
+
+puts participant.call_sid
+```
+</CodeBlocks>
+
+### Barge a conference
+
+<CodeBlocks>
+```javascript title="Node.js"
+const { RestClient } = require('@signalwire/compatibility-api')
+const client = RestClient('YourProjectID', 'YourAuthToken', { signalwireSpaceUrl: 'example.signalwire.com' })
+
+client.conferences('ConferenceSid')
+.participants('CallSid')
+.update({muted: false, coaching: false, callSidToCoach: ''})
+.then(participant => console.log(participant.callSid))
+.done();
+```
+```csharp
+using System;
+using System.Collections.Generic;
+using Twilio;
+using Twilio.Rest.Api.V2010.Account.Conference;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        TwilioClient.Init("YourProjectID", "YourAuthToken", new Dictionary<string, object> { ["signalwireSpaceUrl"] = "{SPACE}.signalwire.com" });
+
+        var participant = ParticipantResource.Update(
+            muted: false,
+			coaching: false,
+            pathConferenceSid: "ConferenceSid",
+            pathCallSid: "CallSid"
+        );
+
+        Console.WriteLine(participant.CallSid);
+    }
+}
+```
+```python
+from signalwire.rest import Client as signalwire_client
+
+client = signalwire_client("YourProjectID", "YourAuthToken", signalwire_space_url = 'example.signalwire.com')
+
+participant = client.conferences('ConferenceSid') \
+                    .participants('CallSid') \
+                    .update(muted=False, coaching=False)
+
+print(participant.call_sid)
+```
+```ruby
+require 'signalwire/sdk'
+
+@client = Signalwire::REST::Client.new 'YourProjectID', 'YourAuthToken', signalwire_space_url: "example.signalwire.com"
+
+participant = @client.conferences('ConferenceSid')
+                     .participants('CallSid')
+                     .update(muted: false, coaching: false)
+
+puts participant.call_sid
+```
+</CodeBlocks>
+
+### Mute a participant
+
+<CodeBlocks>
+```javascript title="Node.js"
+const { RestClient } = require('@signalwire/compatibility-api')
+const client = RestClient('YourProjectID', 'YourAuthToken', { signalwireSpaceUrl: 'example.signalwire.com' })
+
+client.conferences('ConferenceSid')
+      .participants('CallSid')
+      .update({muted: true})
+      .then(participant => console.log(participant.callSid))
+      .done();
+```
+```csharp
+using System;
+using System.Collections.Generic;
+using Twilio;
+using Twilio.Rest.Api.V2010.Account.Conference;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        TwilioClient.Init("YourProjectID", "YourAuthToken", new Dictionary<string, object> { ["signalwireSpaceUrl"] = "{SPACE}.signalwire.com" });
+
+        var participant = ParticipantResource.Update(
+            muted: true,
+            pathConferenceSid: "ConferenceSid",
+            pathCallSid: "CallSid"
+        );
+
+        Console.WriteLine(participant.CallSid);
+    }
+}
+```
+```python
+from signalwire.rest import Client as signalwire_client
+
+client = signalwire_client("YourProjectID", "YourAuthToken", signalwire_space_url = 'example.signalwire.com')
+
+participant = client.conferences('ConferenceSid') \
+                    .participants('CallSid') \
+                    .update(muted=True)
+
+print(participant.call_sid)
+```
+```ruby
+require 'signalwire/sdk'
+
+@client = Signalwire::REST::Client.new 'YourProjectID', 'YourAuthToken', signalwire_space_url: "example.signalwire.com"
+
+participant = @client.conferences('ConferenceSid')
+                     .participants('CallSid')
+                     .update(muted: true)
+
+puts participant.call_sid
+```
+</CodeBlocks>
+
+### Put a participant on hold
+
+In this example, we will place a participant in an active conference on hold and play hold music.
+
+<CodeBlocks>
+```javascript title="Node.js"
+const { RestClient } = require('@signalwire/compatibility-api')
+const client = RestClient('YourProjectID', 'YourAuthToken', { signalwireSpaceUrl: 'example.signalwire.com' })
+
+client.conferences('ConferenceSid')
+      .participants('CallSid')
+      .update({hold: true, holdUrl: 'http://www.your-application.com/hold'})
+      .then(participant => console.log(participant.callSid))
+      .done();
+```
+```csharp
+using System;
+using System.Collections.Generic;
+using Twilio;
+using Twilio.Rest.Api.V2010.Account.Conference;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        TwilioClient.Init("YourProjectID", "YourAuthToken", new Dictionary<string, object> { ["signalwireSpaceUrl"] = "{SPACE}.signalwire.com" });
+
+        var participant = ParticipantResource.Update(
+            hold: true,
+            holdUrl: new Uri("http://www.your-application.com/hold"),
+            pathConferenceSid: "ConferenceSid",
+            pathCallSid: "CallSid"
+        );
+
+        Console.WriteLine(participant.CallSid);
+    }
+}
+```
+```python
+from signalwire.rest import Client as signalwire_client
+
+client = signalwire_client("YourProjectID", "YourAuthToken", signalwire_space_url = 'example.signalwire.com')
+
+participant = client.conferences('ConferenceSid') \
+                    .participants('CallSid') \
+                    .update(hold=True, hold_url='http://www.your-application.com/hold')
+
+print(participant.call_sid)
+```
+```ruby
+require 'signalwire/sdk'
+
+@client = Signalwire::REST::Client.new 'YourProjectID', 'YourAuthToken', signalwire_space_url: "example.signalwire.com"
+
+participant = @client.conferences('ConferenceSid')
+                     .participants('CallSid')
+                     .update(hold: true, hold_url: 'http://www.your-application.com/hold')
+
+puts participant.call_sid
+```
+</CodeBlocks>

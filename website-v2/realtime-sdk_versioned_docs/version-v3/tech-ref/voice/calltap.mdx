@@ -1,0 +1,108 @@
+---
+title: "CallTap"
+slug: /node/reference/voice/call-tap
+sidebar_label: CallTap
+description: CallTap object reference for tapping voice call audio streams. Stream call audio to external destinations via RTP for monitoring or recording.
+toc_max_heading_level: 3
+---
+
+[calltap-3]: /docs/server-sdk/v3/node/reference/voice/call-tap
+[voice-call-1]: /docs/server-sdk/v3/node/reference/voice/call/tap-audio
+[voice-call]: /docs/server-sdk/v3/node/reference/voice/call/tap
+
+Represents a current or past tapping of a call. You can obtain instances of this class by starting a Tap with one of the following methods:
+
+- [`Call.tap`][voice-call]
+- [`Call.tapAudio`][voice-call-1]
+
+#### Example
+
+As soon as the other party answers the phone, start transmitting the audio of
+the call to an external service.
+
+```js
+import { Voice } from "@signalwire/realtime-api";
+
+const client = new Voice.Client({
+  project: "<project-id>",
+  token: "<api-token>",
+  topics: ["office"],
+});
+
+const call = await client.dialPhone({
+  from: "+YYYYYYYYYY",
+  to: "+XXXXXXXXXX",
+});
+
+// Start tapping the audio of the call
+const tap = await call.tapAudio({
+  direction: "both",
+  device: {
+    type: "ws",
+    uri: "wss://example.domain.com/endpoint",
+  },
+});
+console.log("Tap id:", tap.id);
+```
+
+## Properties
+
+### id
+
+The unique id for this tapping.
+
+**Syntax:** `CallTap.id()`
+
+**Returns:** `string`
+
+## Methods
+
+### ended
+
+- **ended**(): `Promise<CallTap>` - See [`CallTap`][calltap-3] for more details.
+
+Returns a promise that is resolved only after this tap finishes (or is stopped).
+
+#### Returns
+
+`Promise<CallTap>` - See [`CallTap`][calltap-3] for more details.
+
+#### Example
+
+```js
+const tap = await call.tapAudio({
+  direction: "both",
+  device: {
+    type: "ws",
+    uri: "wss://example.domain.com/endpoint",
+  },
+});
+
+await tap.ended();
+```
+
+---
+
+### stop
+
+- **stop**(): `Promise<CallTap>` - See [`CallTap`][calltap-3] for more details.
+
+Stops the tapping.
+
+#### Returns
+
+`Promise<CallTap>` - See [`CallTap`][calltap-3] for more details.
+
+#### Example
+
+```js
+const tap = await call.tapAudio({
+  direction: "both",
+  device: {
+    type: "ws",
+    uri: "wss://example.domain.com/endpoint"
+  },
+});
+
+await tap.stop();
+```

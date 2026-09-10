@@ -1,0 +1,24 @@
+---
+title: Unset Variables
+description: Call Flow Builder node to unset variables in the call flow.
+slug: /call-flow-builder/reference/unset-variables
+# image: "/assets/images/call-flow/nodes/unset_vars.webp"
+---
+The Unset Variables is used to clear any variable that was set using [Set Variables](/docs/call-flow-builder/reference/set-variables).
+All currently set variables are populated in the dropdown menu.
+You can unset multiple variables in one node by selecting multiple variables from the dropdown menu.
+
+## Node Settings
+
+<ParamField path="Variables" type="array">
+  The variables that you want to unset. Variables will show in the drop-down menu if they are set in the call flow. Variables are set by [Set Variables](/docs/call-flow-builder/reference/set-variables) node.
+</ParamField>
+
+## Example
+
+In the example below, we answer the call and set a variable `from_number` with the value
+of the caller's number. We then play a message to the caller and unset the `from_number` variable.
+
+<Frame caption="Unset a variable from a Call Flow node." ogImage>
+![Unset a variable from a Call Flow node.](@image/call-flow/nodes/unset_vars.webp)
+</Frame>

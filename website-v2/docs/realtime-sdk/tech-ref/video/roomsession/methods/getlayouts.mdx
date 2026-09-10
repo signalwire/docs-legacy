@@ -1,0 +1,46 @@
+---
+title: "getLayouts"
+slug: /node/reference/video/room-session/get-layouts
+description: getLayouts method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+[roomsession-41]: /docs/server-sdk/node/reference/video/room-session
+[video-roomsession-2]: /docs/server-sdk/node/reference/video/room-session/set-layout
+
+### getLayouts
+
+- **getLayouts**(): `Promise<\{ layouts: string[] \}>`
+
+Returns a list of available layouts for the room. To set a room layout, use [`setLayout`][video-roomsession-2].
+
+#### Returns
+
+`Promise<\{ layouts: string[] \}>`
+
+A promise that resolves to an object containing the list of available layouts for the room.
+
+#### Example
+
+In this example, we wait for a room to start and then get the available layouts for that room.
+This example assumes that there is a [`RoomSession`][roomsession-41]
+already active and that members are joining the room.
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+// Initialize the SignalWire client
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+// Access the video client from the main client
+const videoClient = client.video;
+
+// Setup listener for when a room starts
+await videoClient.listen({
+  onRoomStarted: async (roomsession) => {
+    console.log("Room started", roomsession.displayName);
+    const layouts = await roomsession.getLayouts();
+    console.log("Layouts", layouts.layouts);
+  }
+})
+```

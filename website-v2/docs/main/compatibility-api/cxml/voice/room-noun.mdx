@@ -1,0 +1,38 @@
+---
+title: Room
+sidebar_label: Room
+slug: /compatibility-api/cxml/reference/voice/room
+sidebar_position: 1
+toc_max_heading_level: 3
+---
+
+[`<Connect>`](/docs/compatibility-api/cxml/reference/voice/connect) verb's `<Room>` noun allows the connection to a video room.
+For example:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+  <Connect>
+    <Room>my-room-name</Room>
+  </Connect>
+</Response>
+```
+
+## Examples
+
+### Joining a video room by dialing a number
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+  <Connect>
+    <Room>my-room-name</Room>
+  </Connect>
+</Response>
+```
+
+## Notes on usage
+
+- Make sure to use the name of the room. This is generally different from the
+  display name. A display name may look like "My Office", while a room name
+  looks like "my-office".

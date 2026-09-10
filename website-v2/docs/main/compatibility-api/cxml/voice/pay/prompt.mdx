@@ -1,0 +1,149 @@
+---
+title: Prompt
+sidebar_label: Prompt
+sidebar_position: 1
+slug: /compatibility-api/cxml/reference/voice/pay/prompt
+toc_max_heading_level: 3
+---
+
+The `<Prompt>` noun allows you to customize the default prompts used by `<Pay>`.
+
+When SignalWire executes `<Pay>` CXML instructions without `<Prompt>`, the caller will hear default prompts for each step of the
+payment process. You can modify what the caller hears for a given payment step by nesting `<Prompt>` within `<Pay>`'s opening
+and closing tags.
+
+You can customize prompts using either:
+- Text-to-speech by nesting `<Say>` CXML within `<Prompt>`
+- Pre-recorded audio by nesting `<Play>` CXML within `<Prompt>`
+
+## Payment steps
+
+There are seven payment steps in the `<Pay>` process where prompts can be customized (see the `for` attribute section below).
+Each step that you wish to customize requires its own `<Prompt>` element.
+
+
+## Attributes
+
+<ParamField path="for" type="string" required={true}>
+  Specifies which payment step's prompt you wish to customize. Allowed values: `payment-card-number`, `expiration-date`, `security-code`, `postal-code`, `bank-routing-number`, `bank-account-number`, `payment-processing`. See [Payment Steps](#payment-steps) for details.
+</ParamField>
+
+<ParamField path="attempt" type="integer">
+  Specifies which attempt number this prompt should be used for. Value from 1 to 10. Useful for providing more detailed instructions after failed attempts.
+</ParamField>
+
+<ParamField path="cardType" type="string">
+  Space-separated list of card types. Allows customization of prompts for specific card types (e.g., different security code lengths). Allowed values: `visa`, `mastercard`, `amex`, `maestro`, `discover`, `optima`, `jcb`, `diners-club`, `enroute`.
+</ParamField>
+
+<ParamField path="errorType" type="string">
+  Space-separated list of error types. Customize error messages for specific failure scenarios. Allowed values: `timeout`, `invalid-card-number`, `invalid-card-type`, `invalid-date`, `invalid-security-code`, `invalid-bank-routing-number`, `invalid-bank-account-number`, `input-matching-failed`.
+</ParamField>
+
+### Payment step
+
+Specifies which payment step's prompt you wish to customize:
+
+| Payment Step | Description |
+|-------------|-------------|
+| `payment-card-number` | Prompt for credit/debit card number |
+| `expiration-date` | Prompt for card expiration date |
+| `security-code` | Prompt for card security code (CVV) |
+| `postal-code` | Prompt for billing postal code |
+| `bank-routing-number` | Prompt for bank routing number |
+| `bank-account-number` | Prompt for bank account number |
+| `payment-processing` | Message during payment processing |
+
+
+## Examples
+
+
+### Prompt for card number with TTS
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+  <Pay>
+   <Prompt for="payment-card-number">
+     <Say>Please enter your 16 digit Visa or Mastercard number.</Say>
+   </Prompt>
+  </Pay>
+</Response>
+```
+
+### Prompt for card number with MP3
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+  <Pay>
+   <Prompt for="payment-card-number">
+     <Play>https://example.com/signalwire/cxml/audio/card_number.mp3</Play>
+   </Prompt>
+  </Pay>
+</Response>
+```
+
+### Full transaction example
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+  <Pay paymentMethod="credit-card" validCardTypes="visa mastercard amex">
+    
+    <Prompt for="payment-card-number">
+      <Say>Welcome! To begin, enter the credit card number you'd like to use for payment.</Say>
+    </Prompt>
+    <Prompt for="payment-card-number" errorType="timeout">
+      <Say>I haven't received your card number yet. Please take a moment to enter your credit card number now.</Say>
+    </Prompt>
+    <Prompt for="payment-card-number" errorType="invalid-card-number">
+      <Say>That card number doesn't appear to be valid. Let's try entering it one more time.</Say>
+    </Prompt>
+    <Prompt for="payment-card-number" errorType="invalid-card-type">
+      <Say>We can only accept Visa, MasterCard, or American Express cards. Please enter a card number from one of these providers.</Say>
+    </Prompt>
+    
+    <Prompt for="expiration-date">
+      <Say>Great! Now enter your card's expiration date using two digits for the month followed by two digits for the year.</Say>
+    </Prompt>
+    <Prompt for="expiration-date" errorType="timeout">
+      <Say>I still need your card's expiration date. Please enter two digits for the month, then two digits for the year.</Say>
+    </Prompt>
+    <Prompt for="expiration-date" errorType="invalid-date">
+      <Say>That expiration date isn't valid. Remember to use two digits each for month and year - for example, March 2025 would be 0 3 2 5.</Say>
+    </Prompt>
+    
+    <Prompt for="security-code" cardType="visa mastercard">
+      <Say>Now for the security code - you'll find three digits on the back of your card.</Say>
+    </Prompt>
+    <Prompt for="security-code" errorType="timeout" cardType="visa mastercard">
+      <Say>I'm waiting for your three-digit security code. You can find it on the back of your card.</Say>
+    </Prompt>
+    <Prompt for="security-code" errorType="invalid-security-code" cardType="visa mastercard">
+      <Say>That security code wasn't quite right. Please enter all three digits from the back of your card.</Say>
+    </Prompt>
+    
+    <Prompt for="security-code" cardType="amex">
+      <Say>For American Express, please enter the four-digit security code from the front of your card.</Say>
+    </Prompt>
+    <Prompt for="security-code" errorType="timeout" cardType="amex">
+      <Say>I still need the four-digit security code from the front of your American Express card.</Say>
+    </Prompt>
+    <Prompt for="security-code" errorType="invalid-security-code" cardType="amex">
+      <Say>That security code wasn't valid. Please enter all four digits from the front of your American Express card.</Say>
+    </Prompt>
+    
+    <Prompt for="postal-code">
+      <Say>Almost done! Please enter the five-digit zip code for your billing address.</Say>
+    </Prompt>
+    <Prompt for="postal-code" errorType="timeout">
+      <Say>We still need your billing zip code. Please enter all five digits now.</Say>
+    </Prompt>
+    
+    <Prompt for="payment-processing">
+      <Say>Perfect! Just a moment while we securely process your payment.</Say>
+    </Prompt>
+  </Pay>
+</Response>
+```

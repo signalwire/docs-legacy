@@ -1,0 +1,50 @@
+---
+title: "hangup"
+slug: /node/reference/voice/call/hangup
+description: hangup method for the Call class.
+toc_max_heading_level: 3
+---
+
+
+### hangup
+
+- **hangup**(`reason?`): `Promise<void>`
+
+Hangup the call.
+
+#### Parameters
+
+<ParamField path="reason" type='"error" | "hangup" | "cancel" | "busy" | "noAnswer" | "decline"' default="hangup">
+  Reason for hanging up.
+</ParamField>
+
+#### Returns
+
+`Promise<void>`
+
+#### Example
+
+In this example, we listen for an incoming call and then hangup right away with a reason of `busy`.
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+const voiceClient = client.voice;
+
+// Listen for incoming calls
+await voiceClient.listen({
+  topics: ["office"],
+  onCallReceived: async (call) => {
+   // Listen for a status change event on the call
+   await call.listen({
+    onStateChanged: (call) => {
+        console.log("Call state changed:", call.state);
+      }
+   })
+    // Hangup the call
+    await call.hangup("busy");
+  }
+});
+```

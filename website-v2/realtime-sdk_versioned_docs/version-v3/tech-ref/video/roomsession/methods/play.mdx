@@ -1,0 +1,35 @@
+---
+title: "play"
+slug: /node/reference/video/room-session/play
+description: play method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+[roomsessionplayback-5]: /docs/server-sdk/v3/node/reference/video/room-session-playback
+
+### play
+
+- **play**(`params`): `Promise<RoomSessionPlayback>` - See [RoomSessionPlayback][roomsessionplayback-5] for more details.
+
+Starts a playback in the room. You can use the returned [RoomSessionPlayback][roomsessionplayback-5] object to control the playback (e.g., pause, resume, setVolume and stop).
+
+#### Parameters
+
+| Name                   | Type             | Description                                                                                                                    |
+|:-----------------------|:-----------------|:-------------------------------------------------------------------------------------------------------------------------------|
+| `params`               | `Object`         | -                                                                                                                              |
+| `params.url`           | `string`         | The url (http, https, rtmp, rtmps) of the stream to reproduce.                                                                 |
+| `params.seekPosition?` | `number`         | The starting timecode in milliseconds for playback. Defaults to `0`.                                                           |
+| `params.positions?`    | `VideoPositions` | Positions to assign as soon as the playback starts. You can use the special keyword `self` to refer to the id of the playback. |
+| `params.layout?`       | `string`         | Layout to change to when the playback starts.                                                                                  |
+
+#### Returns
+
+`Promise<RoomSessionPlayback>` - See [RoomSessionPlayback][roomsessionplayback-5] for more details.
+
+#### Example
+
+```typescript
+const playback = await roomSession.play({ url: "rtmp://example.com/foo" });
+await playback.stop();
+```

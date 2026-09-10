@@ -1,0 +1,55 @@
+---
+title: "setLocalStream"
+slug: /js/reference/video/room-session/set-local-stream
+description: setLocalStream method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+### setLocalStream
+
+- **setLocalStream**(`stream`): `void`
+
+Replaces the current local media stream with the one specified as a parameter.
+
+#### Parameters
+
+<ParamField path="stream" type="MediaStream">
+  The media stream to use.
+</ParamField>
+
+#### Returns
+
+`void`
+
+#### Example
+
+Drawing and streaming the picture of a face:
+
+```javascript
+const canvas = document.createElement("canvas");
+const ctx = canvas.getContext("2d");
+
+// Set canvas size
+canvas.width = 400;
+canvas.height = 400;
+
+// Draw circle
+ctx.beginPath();
+ctx.arc(200, 200, 150, 0, 2 * Math.PI);
+ctx.fillStyle = "lightblue";
+ctx.fill();
+
+// Draw eyes
+ctx.beginPath();
+ctx.arc(150, 150, 30, 0, 2 * Math.PI);
+ctx.arc(250, 150, 30, 0, 2 * Math.PI);
+ctx.fillStyle = "black";
+ctx.fill();
+
+// Get the media stream
+const stream = canvas.captureStream(25); // 25 FPS
+
+// Stream the canvas
+await roomSession.setLocalStream(stream);
+```
+

@@ -1,0 +1,106 @@
+/*
+
+This is temporarily here. In general, we don't want anyone using mixins. Use components where you can.
+
+*/
+
+@mixin clickable-box {
+  color: var(--ifm-text-color);
+  position: relative;
+  padding: 20px;
+  border-radius: 10px;
+  background: var(--ifm-card-background-color);
+  border: 2px solid var(--sw-card-border-color);
+  transition: 
+    color 200ms,
+    border 200ms,
+    box-shadow 200ms,
+    -webkit-box-shadow 200ms;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: -1;
+    margin: -2px;
+    border-radius: inherit;
+    background: var(--sw-gradient-border);
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: -1;
+    border-radius: 9px;
+    background: var(--ifm-card-background-color);
+  }
+
+  & > a {
+    text-decoration: none !important;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+  }
+
+  &:hover {
+    border: none;
+    -webkit-box-shadow: 0.2rem 0.2rem 1.5rem rgba(0, 0, 0, 0.1);
+    box-shadow: 0.2rem 0.2rem 1.5rem rgba(0, 0, 0, 0.1);
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      z-index: -1;
+      margin: -2px;
+      border-radius: inherit;
+      background: var(--sw-gradient-border);
+    }
+
+    &::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      z-index: -1;
+      border-radius: 9px;
+      background: var(--ifm-card-background-color);
+    }
+  }
+}
+
+@mixin faq-collapsible {
+  border-style: hidden;
+  background-color: white;
+  list-style: none;
+  box-shadow: none;
+  margin-top: 0;
+  margin-bottom: 0;
+
+  & summary::before {
+    border-style: solid;
+    border-color: transparent transparent transparent var(--ifm-color-primary);
+  }
+
+  & div {
+    border-color: var(--ifm-color-primary);
+  }
+
+  & p.answer a {
+    text-decoration-color: var(--ifm-color-primary);
+  }
+}

@@ -1,0 +1,57 @@
+---
+title: "dial"
+slug: /node/reference/voice/client/dial
+description: dial method for the Client class.
+toc_max_heading_level: 3
+---
+
+[call]: /docs/server-sdk/node/reference/voice/call
+[dialphone]: /docs/server-sdk/node/reference/voice/client/dial-phone
+[dialsip]: /docs/server-sdk/node/reference/voice/client/dial-sip
+[voicedevicebuilder]: /docs/server-sdk/node/reference/voice/device-builder
+
+### dial
+
+- **dial**(`params`): `Promise`\<[`Call`][call]>
+
+Makes an outbound Call and waits until it has been answered or hung up. This is an advanced method that lets you call multiple devices in parallel or series: for simpler use cases, see [dialPhone][dialphone] and [dialSip][dialsip].
+
+With this method you can specify a configuration of devices to call in series and/or in parallel: as soon as one device answers the call, the returned promise is resolved. You specify a configuration through a [VoiceDeviceBuilder][voicedevicebuilder] object.
+
+#### Parameters
+
+<ParamField path="params" type="VoiceDeviceBuilder" required>
+  The device builder specifying the devices to call. See [`VoiceDeviceBuilder`][voicedevicebuilder].
+</ParamField>
+
+#### Returns
+
+`Promise`\<[`Call`][call]>
+
+A call object.
+
+#### Example
+
+Calls a phone number. If the number doesn't answer within 30 seconds, calls two different SIP endpoints in parallel.
+
+```js
+import { SignalWire, Voice } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+const voiceClient = client.voice
+
+const devices = new Voice.DeviceBuilder()
+  .add(Voice.DeviceBuilder.Phone({ from: "+XXXXXX", to: "+YYYYYY", timeout: 30 }))
+  .add([
+    Voice.DeviceBuilder.Sip({ from: "sip:aaa@bbb.cc", to: "sip:xxx@yyy.zz" }),
+    Voice.DeviceBuilder.Sip({ from: "sip:aaa@bbb.cc", to: "sip:ppp@qqq.rr" })
+  ]);
+
+try {
+  const call = await voiceClient.dial(devices);
+  console.log("Call answered", call);
+} catch (e) {
+  console.log("Call not answered", e);
+}
+```

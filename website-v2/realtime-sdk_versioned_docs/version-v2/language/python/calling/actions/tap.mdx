@@ -1,0 +1,52 @@
+---
+title: Relay.Calling.TapAction
+slug: /python/reference/calling/actions/tap
+description: The Tap Action is used to tap a call.
+toc_max_heading_level: 3
+---
+
+[relay-calling-stopresult]: /docs/server-sdk/v2/python/reference/calling/results/stop
+[relay-calling-tapresult]: /docs/server-sdk/v2/python/reference/calling/results/tap
+[tap-async]: /docs/server-sdk/v2/python/reference/calling/call#tap_async
+
+## Relay.Calling.TapAction
+
+This object returned from [`tap_async`][tap-async] method that represents the running _media tapping_ active on a call.
+
+### Properties
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `result` | [`Relay.Calling.TapResult`][relay-calling-tapresult] | Final `tap` result. |
+| `state` | string | Current state of tapping. |
+| `completed` | boolean | Whether the tapping has finished. |
+| `payload` | dict | Payload sent to Relay to start tapping. |
+| `control_id` | string | UUID to identify the action. |
+| `source_device` | dict | Source device sending media. |
+
+### Methods
+
+#### stop
+
+Stop the action immediately.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`coroutine` - Coroutine that will return a [`Relay.Calling.StopResult`][relay-calling-stopresult] object.
+
+**Examples**
+
+> Start tapping using RTP and stop it after 5 seconds.
+
+```python
+import asyncio # to use sleep
+
+action = await call.tap_async(audio_direction='listen', target_type='rtp', target_addr='192.168.1.1', target_port=1234)
+# Do other things while tapping the media and then stop it..
+await asyncio.sleep(5)
+await action.stop()
+```

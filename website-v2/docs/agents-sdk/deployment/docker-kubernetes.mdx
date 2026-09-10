@@ -1,0 +1,333 @@
+---
+title: "Docker Kubernetes"
+sidebar_label: "Docker Kubernetes"
+slug: /python/guides/docker-kubernetes
+toc_max_heading_level: 3
+---
+
+## Docker & Kubernetes
+
+Containerize your agents with Docker and deploy to Kubernetes for scalable, manageable production deployments.
+
+### Dockerfile
+
+```dockerfile
+FROM python:3.11-slim
+
+WORKDIR /app
+
+## Install dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+## Copy application
+COPY . .
+
+## Create non-root user
+RUN useradd -m appuser && chown -R appuser:appuser /app
+USER appuser
+
+## Expose port
+EXPOSE 3000
+
+## Run with uvicorn
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "3000", "--workers", "4"]
+```
+
+### requirements.txt
+
+```
+signalwire-agents>=1.0.15
+uvicorn[standard]>=0.20.0
+```
+
+### Application Entry Point
+
+```python
+## app.py
+from signalwire_agents import AgentBase
+
+
+class MyAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="my-agent")
+        self.add_language("English", "en-US", "rime.spore")
+        self.prompt_add_section("Role", "You are a helpful assistant.")
+
+
+agent = MyAgent()
+app = agent._app
+```
+
+### Building and Running
+
+```bash
+## Build image
+docker build -t signalwire-agent .
+
+## Run container
+docker run -d \
+  -p 3000:3000 \
+  -e SWML_BASIC_AUTH_USER=myuser \
+  -e SWML_BASIC_AUTH_PASSWORD=mypassword \
+  --name agent \
+  signalwire-agent
+
+## View logs
+docker logs -f agent
+
+## Stop container
+docker stop agent
+```
+
+### Docker Compose
+
+```yaml
+## docker-compose.yml
+version: '3.8'
+
+services:
+  agent:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - SWML_BASIC_AUTH_USER=${SWML_BASIC_AUTH_USER}
+      - SWML_BASIC_AUTH_PASSWORD=${SWML_BASIC_AUTH_PASSWORD}
+      - SWML_PROXY_URL_BASE=${SWML_PROXY_URL_BASE}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "443:443"
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./certs:/etc/ssl/certs:ro
+    depends_on:
+      - agent
+    restart: unless-stopped
+```
+
+Run with:
+
+```bash
+docker-compose up -d
+```
+
+### Kubernetes Deployment
+
+#### Deployment Manifest
+
+```yaml
+## deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: signalwire-agent
+  labels:
+    app: signalwire-agent
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: signalwire-agent
+  template:
+    metadata:
+      labels:
+        app: signalwire-agent
+    spec:
+      containers:
+      - name: agent
+        image: your-registry/signalwire-agent:latest
+        ports:
+        - containerPort: 3000
+        env:
+        - name: SWML_BASIC_AUTH_USER
+          valueFrom:
+            secretKeyRef:
+              name: agent-secrets
+              key: auth-user
+        - name: SWML_BASIC_AUTH_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: agent-secrets
+              key: auth-password
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 10
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+```
+
+#### Service Manifest
+
+```yaml
+## service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: signalwire-agent
+spec:
+  selector:
+    app: signalwire-agent
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 3000
+  type: ClusterIP
+```
+
+#### Ingress Manifest
+
+```yaml
+## ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: signalwire-agent
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - agent.example.com
+    secretName: agent-tls
+  rules:
+  - host: agent.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: signalwire-agent
+            port:
+              number: 80
+```
+
+#### Secrets
+
+```yaml
+## secrets.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: agent-secrets
+type: Opaque
+stringData:
+  auth-user: your-username
+  auth-password: your-secure-password
+```
+
+### Kubernetes Architecture
+
+<Frame caption="Kubernetes Architecture">
+  <img className="diagram" src={require("@image/agents-sdk-manual/07_04_docker-kubernetes_diagram1.webp").default} alt="Kubernetes Architecture." />
+</Frame>
+
+### Deploying to Kubernetes
+
+```bash
+## Create secrets
+kubectl apply -f secrets.yaml
+
+## Deploy application
+kubectl apply -f deployment.yaml
+kubectl apply -f service.yaml
+kubectl apply -f ingress.yaml
+
+## Check status
+kubectl get pods -l app=signalwire-agent
+kubectl get svc signalwire-agent
+kubectl get ingress signalwire-agent
+
+## View logs
+kubectl logs -f -l app=signalwire-agent
+
+## Scale deployment
+kubectl scale deployment signalwire-agent --replicas=5
+```
+
+### Horizontal Pod Autoscaler
+
+```yaml
+## hpa.yaml
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: signalwire-agent
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: signalwire-agent
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+```
+
+### Multi-Architecture Builds
+
+```dockerfile
+## Build for multiple architectures
+FROM --platform=$TARGETPLATFORM python:3.11-slim
+
+## ... rest of Dockerfile
+```
+
+Build with:
+
+```bash
+docker buildx build --platform linux/amd64,linux/arm64 -t your-registry/agent:latest --push .
+```
+
+### Container Best Practices
+
+#### Security
+- Run as non-root user
+- Use minimal base images (slim, alpine)
+- Scan images for vulnerabilities
+- Don't store secrets in images
+
+#### Performance
+- Use multi-stage builds to reduce image size
+- Layer dependencies efficiently
+- Set appropriate resource limits
+
+#### Reliability
+- Add health checks
+- Use restart policies
+- Configure proper logging
+- Set graceful shutdown handling
+
+
+

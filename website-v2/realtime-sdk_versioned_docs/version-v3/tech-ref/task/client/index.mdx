@@ -1,0 +1,51 @@
+---
+title: "Task Client"
+sidebar_label: Client
+slug: /node/reference/task/client
+description: Task Client reference for task management.
+sidebar_position: 1
+toc_max_heading_level: 3
+---
+
+[events]: /docs/server-sdk/v3/node/reference/task/client/events
+[task-send]: /docs/server-sdk/v3/node/reference/task#send
+
+The Task Client enables server-side task processing. It connects to SignalWire and listens on one or more topics for tasks sent via [`Task.send`][task-send] from client applications.
+
+```javascript
+import { Task } from "@signalwire/realtime-api";
+
+const client = new Task.Client({
+  project: "<project-id>",
+  token: "<api-token>",
+  topics: ["office"],
+});
+```
+
+Once instantiated, listen for the `task.received` event to handle incoming tasks. See [Events][events] for all available events.
+
+## Constructor
+
+▸ **new Task.Client**(`opts`): `Task.Client`
+
+Creates a new Task Client instance.
+
+#### Parameters
+
+| Name | Type | Description |
+|:-----|:-----|:------------|
+| `opts.project` | `string` | **Required.** SignalWire project ID. |
+| `opts.token` | `string` | **Required.** SignalWire API token. |
+| `opts.topics` | `string[]` | **Required.** Topics to listen on for incoming tasks (e.g., `["office", "jobs"]`). |
+| `opts.debug.logWsTraffic?` | `boolean` | Log WebSocket traffic for debugging. Default: `false`. |
+
+## Examples
+
+### Receiving tasks
+
+```javascript
+client.on("task.received", (payload) => {
+  console.log("Task received:", payload);
+  // Process the task data...
+});
+```

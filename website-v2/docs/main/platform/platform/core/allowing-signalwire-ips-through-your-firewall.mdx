@@ -1,0 +1,20 @@
+---
+title: Allow SignalWire IPs through your firewall
+slug: /platform/allow-signalwire-ips-through-your-firewall
+x-custom:
+  ported_from_readme: true
+---
+
+SignalWire does not publish a static list of IP addresses. Customers should periodically resolve the following domains and update their firewall rules accordingly:
+
+```bash
+dig sip.signalwire.com | egrep ^sip | awk '{ print $5 }' | xargs -n1 -I{} iptables -A INPUT -s {} -j ACCEPT
+
+dig relay.signalwire.com | egrep ^relay | awk '{ print $5 }' | xargs -n1 -I{} iptables -A INPUT -s {} -j ACCEPT
+
+dig firewall.signalwire.com | egrep ^firewall | awk '{ print $5 }' | xargs -n1 -I{} iptables -A INPUT -s {} -j ACCEPT
+```
+
+<Warning>
+Use domain-based authorization rather than hardcoded IPs — addresses are subject to change. Media originates from a wide variety of locations and is non-deterministic.
+</Warning>

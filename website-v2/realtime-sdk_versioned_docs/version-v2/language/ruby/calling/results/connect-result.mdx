@@ -1,0 +1,22 @@
+---
+title: ConnectResult
+slug: /ruby/reference/calling/results/connect
+description: The ConnectResult object is returned when a call is connected.
+toc_max_heading_level: 3
+---
+
+[connect]: /docs/server-sdk/v2/ruby/reference/calling/actions/connect
+[relay-calling-call]: /docs/server-sdk/v2/ruby/reference/calling
+[relay-event]: /docs/server-sdk/v2/ruby/reference/event
+
+# Relay::Calling::ConnectResult
+
+This object is returned by the [`connect`][connect] method and represents the final result of a connection between your call and a remote one.
+
+## Properties
+
+| Property | Type | Description |
+| :------- | :--- | :---------- |
+| `successful` | Boolean | Whether the call has been connected successfully. |
+| `event` | [Relay::Event][relay-event] | Last event that completed the operation. |
+| `call` | [Relay::Calling::Call][relay-calling-call] | Remote Call connected with yours. |

@@ -1,0 +1,25 @@
+---
+title: PromptResult
+slug: /dotnet/reference/calling/results/prompt
+description: The PromptResult object is returned after a prompt operation.
+toc_max_heading_level: 3
+---
+
+[call]: /docs/server-sdk/v2/dotnet/reference/calling/call#prompt
+[signalwire-relay-calling-callcollecttype]: /docs/server-sdk/v2/dotnet/reference/calling/call-collect-type
+[signalwire-relay-event]: /docs/server-sdk/v2/dotnet/reference/event
+
+# SignalWire.Relay.Calling.PromptResult
+
+This object returned from one the _synchronous_ [`Prompt`][call] methods or part of the action when an _asynchronous_ equivalent completes, which represent the final result of a prompt operation.
+
+## Properties
+
+| Property | Type | Description |
+| :-------- | :---- | :----------- |
+| `Successful` | bool | Whether the play operation has completed successfully. |
+| `Event` | [`SignalWire.Relay.Event`][signalwire-relay-event] | The last event that completed the call. |
+| `Type` | [`SignalWire.Relay.Calling.CallCollectType`][signalwire-relay-calling-callcollecttype] | The type of the collected result. |
+| `Result` | string | Result of prompt operation. |
+| `Terminator` | string | User input that terminated a `digit` prompt. |
+| `Confidence` | double? | Confidence of the result on a `speech` prompt. |

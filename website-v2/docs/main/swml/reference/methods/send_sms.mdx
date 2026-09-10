@@ -1,0 +1,171 @@
+---
+title: send_sms
+slug: /swml/reference/send-sms
+description: Send an outbound message to a PSTN phone number.
+toc_max_heading_level: 3
+---
+
+Send an outbound message to a PSTN phone number.
+
+## **Properties**
+
+<ParamField path="send_sms" type="object" required={true}>
+  An object that accepts the following properties. Supports both SMS and MMS messages. See [message types](#message-types) below for the properties specific to each type.
+</ParamField>
+
+## **Message types**
+
+The `send_sms` object accepts the following properties depending on the message type:
+
+<Tabs>
+<TabItem value="sms" label="SMS">
+
+<ParamField path="send_sms.to_number" type="string" required={true}>
+  Phone number to send SMS message to in e.164 format
+</ParamField>
+
+
+<ParamField path="send_sms.from_number" type="string" required={true}>
+  Phone number SMS message will be sent from
+</ParamField>
+
+
+<ParamField path="send_sms.body" type="string" required={true}>
+  Body of the text message
+</ParamField>
+
+
+<ParamField path="send_sms.region" type="string" default="Chosen based on account preferences or device location">
+  Region of the world to originate the message from
+</ParamField>
+
+
+<ParamField path="send_sms.tags" type="string[]">
+  Array of tags to associate with the message to facilitate log searches
+</ParamField>
+
+
+</TabItem>
+<TabItem value="mms" label="MMS">
+
+<ParamField path="send_sms.to_number" type="string" required={true}>
+  Phone number to send SMS message to in e.164 format
+</ParamField>
+
+
+<ParamField path="send_sms.from_number" type="string" required={true}>
+  Phone number SMS message will be sent from
+</ParamField>
+
+
+<ParamField path="send_sms.media" type="string[]" required={true}>
+  Array of media URLs to include in the message
+</ParamField>
+
+
+<ParamField path="send_sms.body" type="string">
+  Optional text to accompany the media
+</ParamField>
+
+
+<ParamField path="send_sms.region" type="string" default="Chosen based on account preferences or device location">
+  Region of the world to originate the message from
+</ParamField>
+
+
+<ParamField path="send_sms.tags" type="string[]">
+  Array of tags to associate with the message to facilitate log searches
+</ParamField>
+
+
+</TabItem>
+</Tabs>
+
+## **Variables**
+
+Set by the method:
+
+- **send_sms_result:** (out) `success` | `failed`.
+
+## **Examples**
+
+<Tabs>
+<TabItem value="sms" label="SMS">
+
+Send a text-only message:
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - send_sms:
+        from_number: "+155512312345"
+        to_number: "+15555554321"
+        body: "Hi, I hope you're well."
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "send_sms": {
+          "from_number": "+155512312345",
+          "to_number": "+15555554321",
+          "body": "Hi, I hope you're well."
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+</TabItem>
+<TabItem value="mms" label="MMS">
+
+Send a message with media attachment:
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - send_sms:
+        from_number: "+155512312345"
+        to_number: "+15555554321"
+        media: ["https://example.com/image.jpg"]
+        body: "Check out this image!"
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "send_sms": {
+          "from_number": "+155512312345",
+          "to_number": "+15555554321",
+          "media": [
+            "https://example.com/image.jpg"
+          ],
+          "body": "Check out this image!"
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+</TabItem>
+</Tabs>

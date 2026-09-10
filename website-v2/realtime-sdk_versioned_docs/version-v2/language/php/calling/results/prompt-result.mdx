@@ -1,0 +1,208 @@
+---
+slug: /php/reference/calling/results/prompt
+hide_title: true
+toc_max_heading_level: 3
+---
+
+[relay-event]: /docs/server-sdk/v2/php/reference/event
+
+# Relay.Calling.PromptResult
+
+This object returned from one of _synchronous_ prompt methods that represents the final result of a prompting attempt.
+
+## Methods
+
+### getConfidence
+
+In a `prompt` action of type `speech`, it returns the confidence of the result.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`number` - Confidence of the result on a `speech` prompt.
+
+**Examples**
+
+> Start prompt and then check the result confidence.
+
+```php
+<?php
+
+$collect = [
+  'type' => 'speech',
+  'end_silence_timeout' => 1,
+  'speech_language' => 'en-US',
+  'text' => 'Please, tell me who you want to talk to'
+];
+$call->promptTTS($collect)->done(function($result) {
+  if ($result->isSuccessful()) {
+    $confidence = $result->getConfidence(); // => 83.2
+  }
+});
+```
+
+### getEvent
+
+Returns the last Relay Event arrived for this operation.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+[`Relay.Event`][relay-event] - Last Relay Event.
+
+**Examples**
+
+> Start the prompt while playing TTS and then inspect last Relay event payload.
+
+```php
+<?php
+
+$collect = [
+  'type' => 'digits',
+  'digits_max' => 3,
+  'initial_timeout' => 10,
+  'text' => 'Please, enter your 3 digits PIN'
+];
+$call->promptTTS($collect)->done(function($result) {
+  $event = $result->getEvent();
+  // Inspect $event->payload ..
+});
+```
+
+### getResult
+
+Returns the user's input in a prompt attempt. Could be both from `speech` or `digits` type.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`string` - User's input in a prompt attempt.
+
+**Examples**
+
+> Start recording and print the result in a `digits` prompt.
+
+```php
+<?php
+
+$collect = [
+  'type' => 'digits',
+  'digits_max' => 3,
+  'initial_timeout' => 10,
+  'text' => 'Please, enter your 3 digits PIN'
+];
+$call->promptTTS($collect)->done(function($result) {
+  if ($result->isSuccessful()) {
+    $result = $result->getResult();
+
+    echo "User enter the PIN: " . $result;
+  }
+});
+```
+
+### getTerminator
+
+In a `prompt` action of type `digits`, it returns the digit that has terminated the attempt.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`string` - Digit that has terminated the prompt attempt.
+
+**Examples**
+
+> Start prompt and then check the terminator digit.
+
+```php
+<?php
+
+$collect = [ "initial_timeout" => 10, "digits" => [ "max" => 3, "digit_timeout" => 5, "terminators" => "#*" ] ];
+$tts = [ "text" => "Please, enter your 3 digits PIN" ];
+$call->promptTTS($collect)->done(function($result) {
+  if ($result->isSuccessful()) {
+    $terminator = $result->getTerminator(); // => "#"
+  }
+});
+```
+
+### getType
+
+Returns the type of the attempt: `digits` or `speech`.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`string` - _digits_ or _speech_.
+
+**Examples**
+
+> Start prompt and then check the type of the prompt.
+
+```php
+<?php
+
+$collect = [
+  'type' => 'digits',
+  'digits_max' => 3,
+  'initial_timeout' => 10,
+  'text' => 'Please, enter your 3 digits PIN'
+];
+$call->promptTTS($collect)->done(function($result) {
+  if ($result->isSuccessful()) {
+    $type = $result->getType(); // => "digits"
+  }
+});
+```
+
+### isSuccessful
+
+Return `true` if the prompt attempt succeeded, `false` otherwise.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`boolean` - True/False accordingly to the state.
+
+**Examples**
+
+> Start the prompt while playing TTS and then check if it has ended successfully.
+
+```php
+<?php
+
+$collect = [
+  'type' => 'digits',
+  'digits_max' => 3,
+  'initial_timeout' => 10,
+  'text' => 'Please, enter your 3 digits PIN'
+];
+$call->promptTTS($collect)->done(function($result) {
+  if ($result->isSuccessful()) {
+    // Prompt completed with success..
+  }
+});
+```

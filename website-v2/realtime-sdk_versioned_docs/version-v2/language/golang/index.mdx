@@ -1,0 +1,56 @@
+---
+title: Go SDK
+slug: /go/reference
+toc_max_heading_level: 3
+---
+import V2IntroPartial from '@site/realtime-sdk_versioned_docs/version-v2/snippets/v2-intro.mdx';
+
+
+[link]: /docs/server-sdk/v2/go/reference/consumer
+
+<V2IntroPartial />
+
+
+## Getting Started
+
+The RELAY SDK for Go enables Go developers to connect and use SignalWire's RELAY APIs within their own Go code.
+
+
+
+## Installation
+
+Install the package using "go get".
+
+```shell
+go get github.com/signalwire/signalwire-golang
+```
+
+## Minimum Requirements
+
+The Go SDK requires **`Go 1.11`** or greater installed on your system.
+
+## Using the SDK
+
+To use the SDK, you need your **project** and **token** from your SignalWire dashboard.
+
+### RELAY Consumer
+
+A [`Relay.Consumer`][link] creates a long running process, allowing you to respond to incoming requests and events in realtime. RELAY Consumers abstract all the setup of connecting to RELAY and automatically dispatches workers to handle requests; so you can concentrate on writing your code without having to worry about multi-threading or blocking, everything just works. Think of RELAY Consumers like a background worker system for all your calling and messaging needs.
+
+RELAY Consumers can scale easily, simply by running multiple instances of your `Relay.Consumer` process. Each event will only be delivered to a single consumer, so as your volume increases, just scale up! This process works well whether you are using Docker Swarm, a Procfile on Heroku, your own webserver, and most other environments.
+
+> Setting up a new consumer is the easiest way to get up and running.
+
+```go
+consumer := new(signalwire.Consumer)
+// setup the Client
+consumer.Setup(PProjectID, PTokenID, Contexts)
+// register callback
+consumer.Ready = MyReady
+// start
+if err := consumer.Run(); err != nil {
+	signalwire.Log.Error("Error occurred while starting Signalwire Consumer\n")
+}
+```
+
+[Learn more about RELAY Consumers][link]

@@ -1,0 +1,40 @@
+---
+title: "setMediaElementSinkId"
+slug: /js/reference/webrtc/set-media-element-sink-id
+description: setMediaElementSinkId function in the WebRTC namespace.
+toc_max_heading_level: 3
+---
+
+### setMediaElementSinkId
+
+- `Const` **setMediaElementSinkId**(`el`, `deviceId`): `Promise<undefined>`
+
+Assigns the specified audio output device to the specified `HTMLMediaElement`. The device with id `deviceId` must be an audio output device. Asynchronously returns whether the operation succeeded.
+
+<Note>
+Some browsers do not support output device selection. You can check by calling [supportsMediaOutput](/docs/browser-sdk/js/reference/webrtc/supports-media-output).
+</Note>
+
+#### Parameters
+
+<ParamField path="el" type="HTMLMediaElement | null" required={true}>
+  Target element.
+</ParamField>
+
+<ParamField path="deviceId" type="string" required={true}>
+  Id of the audio output device.
+</ParamField>
+
+#### Returns
+
+`Promise<undefined>`
+
+#### Example
+
+```javascript
+const el = document.querySelector("video");
+const outDevices = await SignalWire.WebRTC.getSpeakerDevicesWithPermissions();
+await SignalWire.WebRTC.setMediaElementSinkId(el, outDevices[0].deviceId);
+// true
+```
+

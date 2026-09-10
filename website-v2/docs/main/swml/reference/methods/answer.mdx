@@ -1,0 +1,98 @@
+---
+slug: /swml/reference/answer
+title: answer
+description: Answer incoming call and set an optional maximum duration.
+toc_max_heading_level: 3
+---
+
+Answer incoming call and set an optional maximum duration.
+
+## **Properties**
+
+<ParamField path="answer" type="object">
+  An object that accepts the following properties.
+</ParamField>
+
+<Indent>
+
+<ParamField path="answer.max_duration" type="integer" default="14400 seconds (4 hours)">
+  Maximum duration in seconds for the call.
+</ParamField>
+
+
+<ParamField path="answer.codecs" type="string">
+  Comma-separated string of codecs to offer. Valid codecs are: `PCMU`, `PCMA`, `G722`, `G729`, `AMR-WB`, `OPUS`, `VP8`, `H264`.
+</ParamField>
+
+
+<ParamField path="answer.username" type="string">
+  Username to use for SIP authentication.
+</ParamField>
+
+
+<ParamField path="answer.password" type="string">
+  Password to use for SIP authentication.
+</ParamField>
+
+</Indent>
+
+## **Examples**
+
+### No parameters
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - answer: {}
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "answer": {}
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+---
+
+### Named parameter
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - answer:
+        max_duration: 60
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "answer": {
+          "max_duration": 60
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>

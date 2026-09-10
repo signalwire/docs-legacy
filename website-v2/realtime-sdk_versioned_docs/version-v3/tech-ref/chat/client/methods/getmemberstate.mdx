@@ -1,0 +1,37 @@
+---
+title: "getMemberState"
+slug: /node/reference/chat/client/get-member-state
+description: getMemberState method for the Client class.
+toc_max_heading_level: 3
+---
+
+
+### getMemberState
+
+- **getMemberState**(`params`): `Promise<{ channels: Record<string, ChatChannelState> }>`
+
+Returns the states of a member in the specified channels.
+
+#### Parameters
+
+| Name               | Type                   | Description                                  |
+|:-------------------|:-----------------------|:---------------------------------------------|
+| `params`           | `Object`               | -                                            |
+| `params.channels?` | `string` \| `string[]` | Channels for which to get the state.         |
+| `params.memberId`  | `string`               | Id of the member for which to get the state. |
+
+#### Returns
+
+`Promise<{ channels: Record<string, ChatChannelState> }>`
+
+#### Example
+
+```js
+const s = await chatClient.getMemberState({
+  channels: ["chan1", "chan2"],
+  memberId: "my-member-id",
+});
+
+s.channels.length; // 2
+s.channels.chan1.state; // the state object for chan1
+```

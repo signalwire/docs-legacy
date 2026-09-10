@@ -1,0 +1,37 @@
+---
+title: "Events"
+slug: /node/reference/video/client/events
+description: Events available on the Video Client class.
+toc_max_heading_level: 3
+---
+
+[roomsession]: /docs/server-sdk/node/reference/video/room-session
+[roomsessionfullstate]: /docs/server-sdk/node/reference/video/room-session-full-state
+
+## Events
+
+### onRoomEnded
+
+- **client.video.listen**(`{ onRoomEnded: Callback }`)
+
+Emitted when a room session ends. Your event handler receives an object which is an instance
+of [`RoomSessionFullState`][roomsessionfullstate].
+
+#### Parameters
+
+<ParamField path="roomSession" type="RoomSession" required>
+  The room session that ended. See [`RoomSession`][roomsession].
+</ParamField>
+
+### onRoomStarted
+
+- **client.video.listen**( `{ onRoomStarted: Callback }`)
+
+Emitted when a room session is started. Your event handler receives an object
+which is an instance of [`RoomSessionFullState`][roomsessionfullstate].
+
+#### Parameters
+
+<ParamField path="roomSession" type="RoomSession" required>
+  The room session that started. See [`RoomSession`][roomsession].
+</ParamField>

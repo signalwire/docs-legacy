@@ -1,0 +1,89 @@
+---
+title: Relay.Calling.SendDigitsAction
+slug: /go/reference/calling/actions/send-digits
+description: The Send Digits Action is used to send DTMF digits on a call.
+toc_max_heading_level: 3
+---
+
+[link-1]: /docs/server-sdk/v2/go/reference/calling/results/send-digits
+[link]: /docs/server-sdk/v2/go/reference/calling/call#senddigitsasync
+
+## Relay.Calling.SendDigitsAction
+
+This object is returned by [`sendDigitsAsync`][link] method that represents a _send digits_ operation currently active on a call.
+
+### Methods-submenu
+
+<div className="method-definitions"></div>
+
+#### GetResult
+
+Returns the final result of the send digits operation.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+[`Relay.Calling.SendDigitsResult`][link-1] - Final result of the operation.
+
+**Examples**
+
+> Show the Result.
+
+```go
+resultDial.Call.OnSendDigitsFinished = func(a *signalwire.SendDigitsAction) {
+	signalwire.Log.Info("SendDigits finished with result: [%v]\n", sendDigitsAction.GetResult())
+}
+```
+
+#### GetCompleted
+
+Return `true` if the operation has finished, `false` otherwise.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`Boolean` - True/False accordingly to the state.
+
+**Examples**
+
+> Send some digits and check if it has finished.
+
+```go
+/* use an anonymous function as CB */
+resultDial.Call.OnSendDigitsFinished = func(a *signalwire.SendDigitsAction) {
+	signalwire.Log.Info("SendDigits finished with successful result: [%v]\n", a.GetSuccessful())
+}
+
+sendDigitsAction, err := resultDial.Call.SendDigitsAsync("1234567890*#")
+if err != nil {
+	signalwire.Log.Error("Error occurred while trying to play audio\n")
+}
+
+// SendDigits does not need a Stop() command.
+
+if sendDigitsAction.GetCompleted() {
+	// just print this again
+	signalwire.Log.Info("SendDigits finished with successful result: [%v]\n", sendDigitsAction.GetSuccessful())
+}
+```
+
+#### GetControlID
+
+Return the UUID to identify the action.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`string` - UUID to identify the action.

@@ -1,0 +1,70 @@
+---
+title: "demote"
+slug: /node/reference/video/room-session/demote
+description: demote method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+[link]: /docs/server-sdk/node/reference/video/room-session/promote
+[roomsession-41]: /docs/server-sdk/node/reference/video/room-session
+
+### demote
+
+- **demote**(`params`): `Promise<void>`
+
+Demotes a participant from "member" to "audience". See [promote][link].
+
+#### Parameters
+
+<ParamField path="params" type="object" required>
+  Object containing the parameters of the method.
+</ParamField>
+
+<Indent>
+<ParamField path="memberId" type="string" required>
+  ID of the member to affect.
+</ParamField>
+
+<ParamField path="mediaAllowed" type='"all" | "audio-only" | "video-only"'>
+  Specifies the media that the client will be allowed to **receive**. An audience participant cannot send any media.
+</ParamField>
+</Indent>
+
+#### Returns
+
+`Promise<void>`
+
+#### Example
+
+In this example, we demote a member to audience as soon as they join the room.
+This example assumes that there is a [`RoomSession`][roomsession-41]
+already active and that members are joining the room.
+
+```javascript
+import { SignalWire } from "@signalwire/realtime-api";
+
+// Initialize the SignalWire client
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+// Access the video client from the main client
+const videoClient = client.video;
+
+// Setup listener for when a room starts
+await videoClient.listen({
+  onRoomStarted: async (roomsession) => {
+    console.log("Room started", roomsession.displayName);
+    await roomsession.listen({
+      // Listen for when a member is updated
+      onMemberJoined: async (member) => {
+        console.log("Member joined", member.name);
+        // Demote member to audience
+        console.log(`Demoting ${member.name} to audience`);
+        roomsession.demote({
+          memberId: member.id,
+          mediaAllowed: "audio-only"
+        });
+      }
+    });
+  }
+})
+```

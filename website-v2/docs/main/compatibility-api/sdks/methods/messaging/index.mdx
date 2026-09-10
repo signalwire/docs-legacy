@@ -1,0 +1,47 @@
+---
+slug: /compatibility-api/sdks/reference/messaging
+title: Messaging
+sidebar_label: Messaging
+toc_max_heading_level: 3
+---
+
+A **Message** is an inbound or outbound message sent or received by your SignalWire project. 
+Messages are identified by a unique, random ID, and can have attachments, called Media, associated with them. 
+These Media files are managed separately from the Messages themselves, and are stored in **[Media](/docs/compatibility-api/sdks/reference/media/list)** subresource objects.
+To retrieve a list of the media associated with a message, use the Media subresource for that Message instance.
+
+## The message object
+
+<Schema type="Message" />
+
+## Example object
+
+<SchemaSnippet type="Message" title="The Message Object" />
+
+## Message status
+
+The `status` attribute of a Message indicates the last known state of the Message.
+
+| State         | Description                                                                                                           |
+| :------------ | :-------------------------------------------------------------------------------------------------------------------- |
+| `queued`      | The API request to send this message was processed successfully, and the message is currently waiting to be sent out. |
+| `sending`     | The message is currently being transmitted by SignalWire to the nearest carrier upstream in the network.              |
+| `sent`        | The nearest carrier upstream in the network has accepted the message.                                                 |
+| `delivered`   | Confirmation of receipt of the message by the nearest carrier upstream in the network.                                |
+| `undelivered` | SignalWire has received notice from the nearest carrier upstream in the network that the message was not delivered.   |
+| `failed`      | SignalWire could not send the message.  There is no charge for failed messages.                                       |
+| `receiving`   | SignalWire has received and is currently processing an inbound message.                                               |
+| `received`    | The message has been received by one of the numbers in your account.  Applies to inbound messages only.               |
+
+## Subresources: media
+
+Any media associated with a message can be listed using the media URI in the Subresources object:
+
+`https://example.signalwire.com/api/laml/2010-04-01/Accounts/{AccountSid}/Messages/{MessageSid}/Media`
+
+## StatusCallback parameters
+
+In addition to the [standard request parameters](/docs/compatibility-api/cxml/reference/messaging#request-parameters),
+the following are parameters passed back to your application when SignalWire sends an update to a message's `StatusCallback` URL.
+
+<WebhookPayloadSnippet webhook="smsStatusCallback" />

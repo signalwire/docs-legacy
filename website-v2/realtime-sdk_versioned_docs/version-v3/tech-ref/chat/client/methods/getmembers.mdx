@@ -1,0 +1,34 @@
+---
+title: "getMembers"
+slug: /node/reference/chat/client/get-members
+description: getMembers method for the Client class.
+toc_max_heading_level: 3
+---
+
+[link]: /docs/server-sdk/v3/node/reference/chat/client/events#chatmemberentity
+
+### getMembers
+
+- **getMembers**(`params`): `Promise<{ members: ChatMemberEntity[] }>` - See [`ChatMemberEntity`][link] for more details.
+
+Returns the list of members in the given channel.
+
+#### Parameters
+
+| Name             | Type     | Description                                       |
+|:-----------------|:---------|:--------------------------------------------------|
+| `params`         | `Object` | -                                                 |
+| `params.channel` | `string` | The channel for which to get the list of members. |
+
+#### Returns
+
+`Promise<{ members: ChatMemberEntity[] }>` - See [`ChatMemberEntity`][link] for more details.
+
+#### Example
+
+```js
+const m = await chatClient.getMembers({ channel: "my-channel" });
+
+m.members.length; // 7
+m.members[0]; // { id: ..., channel: ..., state: ... }
+```

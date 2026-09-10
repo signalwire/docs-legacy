@@ -1,0 +1,29 @@
+---
+title: "audioUnmute"
+slug: /js/reference/video/room-session-screen-share/audio-unmute
+description: audioUnmute method for the RoomSessionScreenShare class.
+toc_max_heading_level: 3
+---
+
+### audioUnmute
+
+▸ **audioUnmute**(): `Promise<void>`
+
+Unmutes the microphone if it had been previously muted.
+
+#### Returns
+
+`Promise<void>`
+
+#### Permissions
+
+- `room.self.audio_unmute`
+
+You need to specify the permissions when [creating the Video Room Token](/docs/apis/video/create-room-token) on the server side.
+
+#### Example
+
+```javascript
+await roomdevice.audioUnmute();
+```
+

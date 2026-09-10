@@ -1,0 +1,101 @@
+---
+title: Relay.Calling.FaxAction
+slug: /go/reference/calling/actions/fax
+description: The Fax Action is used to send or receive fax documents.
+toc_max_heading_level: 3
+---
+
+[link-1]: /docs/server-sdk/v2/go/reference/calling/call#sendfaxasync
+[link-2]: /docs/server-sdk/v2/go/reference/calling/results/fax
+[link]: /docs/server-sdk/v2/go/reference/calling/call#receivefaxasync
+
+## Relay.Calling.FaxAction
+
+This object returned from [`faxReceiveAsync`][link] and [`faxSendAsync`][link-1] methods represents a receiving or sending Fax on the call.
+
+### Methods-submenu
+
+<div className="method-definitions"></div>
+
+#### GetResult
+
+Returns the final result of the faxing.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+[`Relay.Calling.FaxResult`][link-2] - Final result of the faxing.
+
+**Examples**
+
+> Trying receiving a Fax and grab the result when it's completed.
+
+```go
+call.OnFaxFinished = func(faxAction *signalwire.FaxAction) {
+	faxResult := faxAction.GetResult()
+	signalwire.Log.Info("Download Document from %s\n Pages #%d\n", faxResult.Document, faxResult.Pages)
+}
+_, err := call.ReceiveFaxAsync()
+if err != nil {
+	signalwire.Log.Error("Error occurred while trying to receive fax\n")
+}
+```
+
+#### GetCompleted
+
+Return `true` if faxing has finished, `false` otherwise.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`Boolean` - True/False accordingly to the state.
+
+**Examples**
+
+> Trying receiving a Fax and check if it has finished.
+
+```go
+faxAction, err := call.ReceiveFaxAsync()
+if err != nil {
+	signalwire.Log.Error("Error occurred while trying to receive fax\n")
+}
+for {
+	time.Sleep(1 * time.Second) 
+	if faxAction.GetCompleted() {
+			break
+		}
+	}
+```
+
+#### Stop
+
+Stop the action immediately.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+
+**Examples**
+
+> Trying to receive a Fax and then stop the attempt.
+
+```go
+faxAction, err := call.ReceiveFaxAsync()
+if err != nil {
+	signalwire.Log.Error("Error occurred while trying to receive fax\n")
+}
+time.Sleep(3 * time.Second)
+faxAction.Stop()
+```

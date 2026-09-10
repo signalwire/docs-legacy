@@ -1,0 +1,158 @@
+---
+title: "Click-to-Call"
+sidebar_label: Overview
+sidebar_position: 0
+description: "Embed real-time voice communication capabilities in your website with SignalWire Click-to-Call."
+slug: /click-to-call
+---
+
+
+[dashboard]: https://my.signalwire.com
+[dashboard-c2c]: https://my.signalwire.com?page=click_to_calls
+[browser-sdk]: /docs/browser-sdk/js
+[resource-address]: /docs/platform/addresses
+[technical-reference]: /docs/browser-sdk/click-to-call/reference
+
+## What is Click-to-Call?
+
+SignalWire Click-to-Call (C2C) is an embeddable script that adds real-time voice communication functionality directly to your
+website with minimal setup. With just a few lines of code, you can embed SignalWire's calling capabilities inside an HTML page,
+allowing your website visitors to initiate voice calls directly from your web pages without requiring any additional software
+or setup.
+
+
+<Info>
+Click-to-Call provides a simple way to embed voice communication on your website. If you need more advanced customization
+or features, the C2C widget uses the 
+[SignalWire Client SDK][browser-sdk]. 
+You can leverage this SDK directly to build more sophisticated communication applications with additional control and functionality.
+</Info>
+
+---
+
+
+## Prerequisites
+
+The C2C embeddable script requires:
+
+- A SignalWire account that has access to the [dashboard][dashboard]
+- A website where you can embed the C2C widget
+- Full support for embedded scripts
+
+---
+
+## Set up Click-to-Call
+
+<Steps>
+
+### Create the widget
+
+Start by creating a widget in your SignalWire Dashboard:
+
+- Log in to your [SignalWire Dashboard][dashboard]
+- Navigate to [Tools > Click To Call][dashboard-c2c]
+- Configure your widget settings:
+   - Give your widget a descriptive **name**
+   - Set a **destination** for incoming calls (this is the [resource address][resource-address] that will receive calls)
+   - Adjust any other settings as needed
+- Click **Save** to generate your widget
+- Click the **Copy Embeddable Widget** button to copy your personalized C2C script
+
+The copied script will look similar to this (but with your unique API key):
+
+```html
+<script>
+// Sample code - Do not use this example. Always use the script generated from your dashboard.
+(a => {
+  // Minified initialization code...
+})({ apiKey: "c2c_YOUR_UNIQUE_API_KEY", v: "0.0.1" });
+
+// Widget configuration
+sw.c2c.spawn('C2CButton', {
+  destination: '/private/example',
+  buttonParentSelector: '#click2call',
+  callParentSelector: '#call',
+  // Additional parameters...
+});
+</script>
+```
+
+### Prepare your website
+
+Before adding the script to your website, you need to add two HTML elements where the call button and interface will appear.
+Without these elements, the button and interface may appear in unintended locations, or not at all.
+
+```html
+<!-- Add these elements where you want the C2C components to appear -->
+  <!-- This will become your call button -->
+        <!-- This will display the call interface when active -->
+```
+
+These elements can be positioned anywhere in your HTML based on where you want the button and call interface to appear on your page.
+
+<Tip>
+If you prefer to use existing elements on your page instead of creating new ones, you can modify the script to target those elements in the next step. 
+Simply note the IDs of your existing elements and update the `buttonParentSelector` and `callParentSelector` parameters accordingly. 
+See the [Technical Reference][technical-reference] for more details on these and other configurable selectors.
+</Tip>
+
+### Add the C2C script to your website
+
+With your container elements in place, you're ready to add the Click-to-Call script to your website:
+
+- **Open your website's HTML file** in your preferred editor
+
+- **Choose the best location for the script:**
+   - **Head section** (recommended): Placing it in the `<head>` ensures the script loads early, making the button available as soon as possible
+   - **End of body**: Alternatively, you can place it just before the closing `</body>` tag if you prefer to load scripts last
+
+- **Add the script** you copied from the dashboard to your chosen location:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+< head>
+  <title>Your Website Title</title>
+  <!-- Your other head elements (stylesheets, meta tags, etc.) -->
+  
+  <!-- Option 1: Place script here in the head section -->
+  <!-- <script></script> -->
+
+</head>
+<body>
+  <!-- Your website content -->
+  
+  <!-- The container elements for the Click-to-Call components -->
+  
+  
+  <!-- More of your website content -->
+  
+  <!-- Option 2: Or place script here at the end of the body -->
+  <!-- <script></script> -->
+</body>
+</html>
+```
+
+The script will automatically find your container elements and render the call button and interface in those locations.
+
+### Test your implementation
+
+- Save your changes and open your website in a browser
+- You should see the Click-to-Call button in the location you specified
+- Click the button to test:
+   - A call interface should appear
+   - A call should be initiated to your configured destination
+- Try making a test call to ensure everything works properly
+
+If the button doesn't appear or calls don't connect, check:
+- That your element IDs match what's in the script
+- That the script is properly placed in your HTML
+- Your browser console for any JavaScript errors
+
+</Steps>
+
+---
+
+## Next Steps
+
+- [View the technical reference][technical-reference] for customization options

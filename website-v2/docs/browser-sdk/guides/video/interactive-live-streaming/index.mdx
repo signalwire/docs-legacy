@@ -1,0 +1,158 @@
+---
+author: danieleds
+x-custom:
+  tags:
+    - product:video
+    - language:javascript
+    - sdk:relaybrowser
+  repo: https://github.com/signalwire/examples/tree/main/Video/Interactive-Live-Streaming
+sidebar_custom_props:
+  github: https://github.com/signalwire/examples/tree/main/Video/Interactive-Live-Streaming
+  platform: javascript
+slug: /js/guides/interactive-live-streaming
+title: Interactive live streaming
+toc_max_heading_level: 3
+---
+
+In case of large events, scalability is key. If you need to broadcast your live
+video event to a large audience, we have a couple of solutions.
+
+As a first option, you can use [RTMP Streaming](/docs/browser-sdk/js/guides/interactive-live-streaming).
+With RTMP Streaming, you can stream the audio and video of the video room to an
+external service such as YouTube, from where your audience can watch.
+
+Streaming with RTMP works fine in many cases, but sometimes you may need more
+flexibility. What if you want to temporarily bring a member from the audience on
+stage, for example to ask or answer a question? What if you want your own custom
+UI? To address these advanced use cases, we support _Interactive Live Streaming_.
+
+## What is Interactive Live Streaming
+
+You can use Interactive Live Streaming with any of your video rooms. When
+streaming, a room can have two different kinds of participants: audience and
+members.
+
+An _audience participant_ can only watch and listen: their own media is not
+going to be shared. On the other hand, a _member_ is the typical videoconference
+room member: they can watch and listen, but their own media is also shared with
+all other participants in the room. Depending on their permissions, members can
+also perform other actions, such as changing the layout of the room or playing
+videos.
+
+When streaming, audience participants can be _promoted_ to members and,
+vice-versa, members can be _demoted_ to audience participants.
+
+
+<Card title="Source Code on GitHub" icon="brands github" href="https://github.com/signalwire/examples/tree/main/Video/Interactive-Live-Streaming">
+  The source code for this application is available on GitHub.
+</Card>
+
+## Joining a room
+
+When using the [Browser SDK](/docs/browser-sdk/js), the kind of
+[Video Room Token](/docs/apis/video/create-room-token) that you
+get determines whether you join the room as audience or as a member.
+
+### Joining as audience
+
+To join as audience, specify `"join_as": "audience"` when creating a token.
+
+{/* TODO: create examples to join as audience and member */}
+
+<EndpointRequestSnippet endpoint="POST /api/video/room_tokens" />
+
+```bash
+curl -L -X POST "https://$SPACE_URL/api/video/room_tokens" \
+  -H 'Content-Type: application/json' \
+  -H 'Accept: application/json' \
+  -u "$PROJECT_ID:$API_TOKEN" \
+  --data-raw '{
+    "room_name": "my_room",
+    "user_name": "John Smith",
+    "join_as": "audience"
+  }'
+```
+
+Then use the returned token to initialize a
+[RoomSession](/docs/browser-sdk/js/reference/video/room-session).
+
+### Joining as a member
+
+To join as an audience member, specify `"join_as": "member"` when creating a token.
+
+```bash
+curl -L -X POST "https://$SPACE_URL/api/video/room_tokens" \
+  -H 'Content-Type: application/json' \
+  -H 'Accept: application/json' \
+  -u "$PROJECT_ID:$API_TOKEN" \
+  --data-raw '{
+    "room_name": "my_room",
+    "user_name": "John Smith",
+    "join_as": "member"
+  }'
+```
+
+Then use the returned token to initialize a
+[RoomSession](/docs/browser-sdk/js/reference/video/room-session):
+
+```js
+import * as SignalWire from "@signalwire/js";
+
+const roomSession = new SignalWire.Video.RoomSession({
+  token: "<YourRoomToken>",
+  rootElement: document.getElementById("yourVideoElement"),
+});
+
+roomSession.join();
+```
+
+For more information about using tokens to join a video room, please refer to
+our [Simple Video Demo](/docs/browser-sdk/js/guides/build-a-video-app).
+Follow that guide to learn the basics about instantiating custom video rooms
+using the SDKs.
+
+## Promoting and demoting
+
+Using the SDKs, you can programmatically promote and demote participants,
+to allow the audience participants to interact with the room and vice-versa.
+
+To promote a member, use the
+[promote](/docs/browser-sdk/js/reference/video/room-session/promote)
+method:
+
+```js
+await roomSession.promote({
+  memberId: "de550c0c-3fac-4efd-b06f-b5b8614b8966",
+  mediaAllowed: "all",
+  permissions: [
+    "room.self.audio_mute",
+    "room.self.audio_unmute",
+    "room.self.video_mute",
+    "room.self.video_unmute",
+    "room.list_available_layouts",
+  ],
+});
+```
+
+Only members can promote other participants. As you can observe from the code
+snippet above, you can specify a set of permissions to assign to the new member.
+
+The `memberId` value identifies the id of the audience participant that you want to promote.
+
+Demoting a member back to the audience, instead, is performed by the
+[demote](/docs/browser-sdk/js/reference/video/room-session/demote)
+method:
+
+```js
+await roomSession.demote({
+  memberId: "de550c0c-3fac-4efd-b06f-b5b8614b8966",
+  mediaAllowed: "all",
+});
+```
+
+## Wrap up
+
+We have seen how to use Interactive Live Streaming to easily build next
+generation communication platforms. Make sure to check out our [technical documentation](/docs/browser-sdk/js/reference/video/room-session/promote).
+If, instead, you are just starting out, then we suggest reading our guide on
+[how to get started with the Video APIs](/docs/browser-sdk/js/guides/build-a-video-app).

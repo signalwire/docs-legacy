@@ -1,0 +1,92 @@
+---
+slug: /php/reference/examples
+toc_max_heading_level: 3
+---
+
+
+# Examples
+
+Follow the examples to see how's easy to use the Relay SDK to interact with inbound or outbound calls.
+
+### Inbound Calls
+
+> Using RelayConsumer to manage inbound calls from both `home` and `office` contexts. Answer the call, ask the user to enter his PIN and playback the digits he sent if successful.
+
+```php
+<?php
+
+require dirname(__FILE__) . '/vendor/autoload.php';
+
+use Generator as Coroutine;
+
+class CustomConsumer extends SignalWire\Relay\Consumer {
+  public $project = 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX';
+  public $token = 'PTXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX';
+  public $contexts = ['home', 'office'];
+
+  public function onIncomingCall($call): Coroutine {
+    $answerResult = yield $call->answer();
+    if (!$answerResult->isSuccessful()) {
+      echo "Error answering the call..";
+      return;
+    }
+    $promptParams = [
+      'type' => 'digits',
+      'initial_timeout' => 10
+      'digits_max' => 4,
+      'text' => 'Welcome to SignalWire! Please, enter your PIN'
+    ];
+    $promptResult = yield $call->promptTTS($promptParams);
+    if ($promptResult->isSuccessful()) {
+      $pin = $promptResult->getResult();
+      yield $call->playTTS([ "text" => "You entered: {$pin}. Thanks and good bye!" ]);
+    }
+    yield $call->hangup();
+  }
+}
+
+$consumer = new CustomConsumer();
+$consumer->run();
+```
+
+### Outbound Calls
+
+> Using RelayConsumer to make an outbound call and ask the user to enter his PIN. Once completed, print the collected digits.
+
+```php
+<?php
+
+require dirname(__FILE__) . '/vendor/autoload.php';
+
+use Generator as Coroutine;
+
+class CustomConsumer extends SignalWire\Relay\Consumer {
+  public $project = 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX';
+  public $token = 'PTXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX';
+  public $contexts = ['home', 'office'];
+
+  public function ready(): Coroutine {
+    $params = ['type' => 'phone', 'from' => '+1XXXXXXXXXX', 'to' => '+1YYYYYYYYYY'];
+    $dialResult = yield $this->client->calling->dial($params);
+    if (!$dialResult->isSuccessful()) {
+      echo "Dial error or call not answered by the remote peer..";
+      return;
+    }
+    $call = $dialResult->getCall();
+    $promptParams = [
+      'type' => 'digits',
+      'digits_max' => 4,
+      'digits_terminators' => '#',
+      'text' => 'Welcome at SignalWire. Please, enter your 4 digits PIN and then # to proceed'
+    ];
+    $promptResult = yield $call->promptTTS($promptParams);
+    if ($promptResult->isSuccessful()) {
+      $pin = $promptResult->getResult();
+      echo "User digits: {$pin} ..";
+    }
+  }
+}
+
+$consumer = new CustomConsumer();
+$consumer->run();
+```

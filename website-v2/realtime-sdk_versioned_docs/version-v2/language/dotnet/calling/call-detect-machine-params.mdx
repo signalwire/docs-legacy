@@ -1,0 +1,49 @@
+---
+title: "CallDetect.MachineParams"
+slug: /dotnet/reference/calling/call-detect-machine-params
+toc_max_heading_level: 3
+---
+
+# SignalWire.Relay.Calling.CallDetect.MachineParams
+
+This object represents the parameters specific to machine detection.
+
+## Constructor
+
+The only constructor is the default constructor, properties should all be assigned by initializer or after construction.
+
+**Parameters**
+
+None
+
+**Examples**
+
+> Basic Example
+
+```csharp
+CallDetect detect = new CallDetect
+{
+    Type = CallDetect.DetectType.machine,
+    Parameters = new CallDetect.MachineParams
+    {
+        // No required parameters
+    }
+};
+```
+
+## Properties
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `EndSilenceTimeout` | double? | The length of time in seconds to wait for the voice to finish.<br />_Default: 1.0_ |
+| `InitialTimeout` | double? | The length of time in seconds to wait for the initial voice before giving up.<br />_Default: 4.5_ |
+| `MachineVoiceThreshold` | double? | The length of time in seconds for the voice to trigger a machine detection.<br />_Default: 1.25_ |
+| `MachineWordsThreshold` | int? | The quantity of words to trigger a machine detection.<br />_Default: 6_ |
+
+## Methods
+
+None
+
+## Events
+
+None

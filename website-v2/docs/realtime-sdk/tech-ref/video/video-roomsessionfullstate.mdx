@@ -1,0 +1,106 @@
+---
+title: "RoomSessionFullState"
+keywords:
+  - SignalWire
+  - Realtime SDK
+  - Node.js
+  - room state
+  - session state
+slug: /node/reference/video/room-session-full-state
+sidebar_label: RoomSessionFullState
+description: RoomSessionFullState object containing the complete state of a video room session including members, recordings, streams, and playback status.
+toc_max_heading_level: 3
+---
+
+[video-roomsession-1]: /docs/server-sdk/node/reference/video/room-session
+[video-roomsession]: /docs/server-sdk/node/reference/video/room-session/set-hide-video-muted
+[video-roomsessionmember]: /docs/server-sdk/node/reference/video/room-session-member
+
+Objects of this type contain the full state of a RoomSession at a given point in time.
+
+## **Properties**
+
+<ParamField path="id" type="string" required>
+  Unique id for this room session.
+</ParamField>
+
+<ParamField path="roomId" type="string" required>
+  ID of the room associated to this room session.
+</ParamField>
+
+<ParamField path="name" type="string" required>
+  Name of this room.
+</ParamField>
+
+<ParamField path="displayName" type="string" required>
+  Display name for this room. Defaults to the value of `name`.
+</ParamField>
+
+<ParamField path="layoutName" type="string" required>
+  Current layout name used in the room.
+</ParamField>
+
+<ParamField path="hideVideoMuted" type="boolean" required>
+  Whether muted videos are shown in the room layout. See [setHideVideoMuted][video-roomsession].
+</ParamField>
+
+<ParamField path="recording" type="boolean" required>
+  Whether recording is active.
+</ParamField>
+
+<ParamField path="members" type="RoomSessionMember[]">
+  List of members that are part of this room session. See [`RoomSessionMember`][video-roomsessionmember].
+</ParamField>
+
+<ParamField path="meta" type="Record<string, unknown>" required>
+  Metadata associated to this room session.
+</ParamField>
+
+<ParamField path="previewUrl" type="string">
+  URL to the room preview.
+</ParamField>
+
+<ParamField path="recordings" type="any[]">
+  List of active recordings in the room.
+</ParamField>
+
+## **Example**
+
+Getting the full state of a room session when it starts:
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "your-project-id", token: "your-api-token" });
+
+const videoClient = client.video;
+
+await videoClient.listen({
+  onRoomStarted: async (roomSession) => {
+    // roomSession contains the full state
+    console.log("Room ID:", roomSession.roomId);
+    console.log("Room Session ID:", roomSession.id);
+    console.log("Room Name:", roomSession.name);
+    console.log("Display Name:", roomSession.displayName);
+    console.log("Current Layout:", roomSession.layoutName);
+    console.log("Recording Active:", roomSession.recording);
+    console.log("Hide Video Muted:", roomSession.hideVideoMuted);
+    console.log("Metadata:", roomSession.meta);
+
+    if (roomSession.members) {
+      console.log("Members in room:", roomSession.members.length);
+      roomSession.members.forEach(member => {
+        console.log("- Member:", member.name, "ID:", member.id);
+      });
+    }
+
+    if (roomSession.previewUrl) {
+      console.log("Preview URL:", roomSession.previewUrl);
+    }
+  }
+});
+```
+
+## **Methods**
+
+You get the same methods that are available on a [RoomSession][video-roomsession-1] object.

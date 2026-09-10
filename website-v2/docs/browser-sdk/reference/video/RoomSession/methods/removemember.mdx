@@ -1,0 +1,42 @@
+---
+title: "removeMember"
+slug: /js/reference/video/room-session/remove-member
+description: removeMember method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+### removeMember
+
+- **removeMember**(`params`): `Promise<void>`
+
+Removes a specific participant from the room.
+
+#### Parameters
+
+<ParamField path="params" type="object">
+  Object containing the parameters of the method.
+</ParamField>
+
+<Indent>
+<ParamField path="memberId" type="string">
+  Id of the member to remove.
+</ParamField>
+</Indent>
+
+#### Returns
+
+`Promise<void>`
+
+#### Permissions
+
+- `room.member.remove`: to remove a remote member.
+
+You need to specify the permissions when [creating the Video Room Token](/docs/apis/video/create-room-token) on the server side.
+
+#### Example
+
+```javascript
+const id = "de550c0c-3fac-4efd-b06f-b5b8614b8966"; // you can get this from getMembers()
+await roomSession.removeMember({ memberId: id });
+```
+

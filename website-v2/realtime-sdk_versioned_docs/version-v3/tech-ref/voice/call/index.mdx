@@ -1,0 +1,117 @@
+---
+title: "Call"
+slug: /node/reference/voice/call
+description: Voice Call reference for managing active phone calls.
+toc_max_heading_level: 3
+---
+
+[types]: /docs/server-sdk/v3/node/reference/voice/types#sipheader
+[voice-client]: /docs/server-sdk/v3/node/reference/voice/client
+
+A Call object represents an active call. You can get instances of a Call object from a [Voice.Client][voice-client], by answering or initiating calls.
+
+#### Examples
+
+Dialing a phone number and playing a message.
+
+```js
+import { Voice } from "@signalwire/realtime-api";
+
+const client = new Voice.Client({
+  project: "<project-id>",
+  token: "<api-token>",
+  topics: ["office"],
+});
+
+const call = await client.dialPhone({
+  from: "+YYYYYYYYYY",
+  to: "+XXXXXXXXXX",
+});
+
+await call.playTTS({ text: "Welcome to SignalWire!" });
+```
+
+Answering an incoming phone call and playing a message.
+
+```js
+import { Voice } from "@signalwire/realtime-api";
+
+const client = new Voice.Client({
+  project: "<project-id>",
+  token: "<api-token>",
+  topics: ["office"],
+});
+
+client.on("call.received", async (call) => {
+  console.log("Got call", call.from, call.to);
+
+  try {
+    await call.answer();
+    console.log("Inbound call answered");
+
+    await call.playTTS({ text: "Welcome to SignalWire!" });
+  } catch (error) {
+    console.error("Error answering inbound call", error);
+  }
+});
+```
+
+## Properties
+
+### device
+
+- **device**: `any`
+
+---
+
+### direction
+
+- **direction**: `"inbound"` \| `"outbound"`
+
+Whether you are making or receiving the call.
+
+---
+
+### from
+
+- **from**: `string`
+
+The phone number that the call is coming from.
+
+---
+
+### headers
+
+- `Optional` **headers**: [`SipHeader`][types][]
+
+---
+
+### id
+
+- `Readonly` **id**: `string`
+
+Unique id for this voice call
+
+---
+
+### state
+
+- **state**: `created` | `ringing` | `answered` | `ending` | `ended`
+
+The current state of the call.
+
+---
+
+### to
+
+- **to**: `string`
+
+The phone number you are attempting to call.
+
+---
+
+### type
+
+- **type**: `"phone"` \| `"sip"`
+
+The type of call. Only phone and sip are currently supported.

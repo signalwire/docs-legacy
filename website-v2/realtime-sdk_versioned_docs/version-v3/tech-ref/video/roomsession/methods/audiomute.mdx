@@ -1,0 +1,31 @@
+---
+title: "audioMute"
+slug: /node/reference/video/room-session/audio-mute
+description: audioMute method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+
+### audioMute
+
+- **audioMute**(`params`): `Promise<void>`
+
+Puts the microphone of a given member on mute. The other participants will not hear audio from the muted participant anymore.
+
+#### Parameters
+
+| Name              | Type     | Description               |
+|:------------------|:---------|:--------------------------|
+| `params`          | `Object` | -                         |
+| `params.memberId` | `string` | Id of the member to mute. |
+
+#### Returns
+
+`Promise<void>`
+
+#### Example
+
+```typescript
+const id = "de550c0c-3fac-4efd-b06f-b5b8614b8966"; // you can get this from getMembers()
+await roomSession.audioMute({ memberId: id });
+```

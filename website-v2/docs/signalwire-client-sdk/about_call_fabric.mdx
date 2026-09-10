@@ -1,0 +1,160 @@
+# Call Fabric in the SignalWire SDK
+
+Call Fabric is a great new way to build communication applications, be it a simple 
+chat app on your website, or a complex multi-channel multi-modal call center, or a complex set of AI agents to 
+manage customer interactions.
+
+To support this new paradigm, SignalWire has created a new SDK called the [SignalWire SDK](./index.mdx).
+This new SDK is designed to run on the user's browser and allow for communication to all resources via the assigned addresses.
+This new SDK replaces the older [SignalWire Browser SDK](/browser-sdk/).
+
+:::info Looking for more details?
+
+The [What is Call Fabric?](/platform/call-fabric) page has more details about the Call Fabric architecture.
+
+:::
+
+## Resources
+
+Resources are the primary entities for communication within the Call Fabric ecosystem. You can create resources
+either through the dashboard or through the REST API. 
+
+import { TbApi } from "react-icons/tb";
+import { TbUser } from "react-icons/tb";
+
+<CardGroup cols={2}>
+    <Card 
+    title="Create a Resource from the Dashboard" 
+    icon={<TbUser/>} 
+    href="/platform/call-fabric/resources"
+    />
+
+    <Card 
+    title="Manipulate Resources from the REST API" 
+    icon={<TbApi/>} 
+    href="/apis/fabric/resources"
+    > 
+    Each resource will have its own set of endpoints to manipulate it.
+    </Card>
+</CardGroup>
+
+To list a few important ones:
+
+- [AI Agents](/platform/call-fabric/resources/ai-agents)
+- [Subscribers](/platform/call-fabric/subscribers)
+- [SWML Scripts](/platform/call-fabric/resources/swml-scripts)
+- [cXML Scripts](/platform/call-fabric/resources/cxml-scripts)
+- [Video Conference Rooms](/platform/call-fabric/resources/video-rooms)
+- [SIP Gateways](/platform/call-fabric/resources/sip-gateways)
+
+These resources are accessible via their [Addresses](/platform/call-fabric/addresses). You can more than one address
+per resource. They can be:
+
+- Phone numbers you own
+- SIP addresses
+- Aliases (like `/private/support-queue` or `/public/chat-agent`)
+
+To call a resource using the SDK, you can use the `client.dial()` method.
+
+```javascript
+const client = await SignalWire({
+  token: 'YOUR_TOKEN',
+});
+
+const callSession = await client.dial({
+  to: '/private/support-queue',
+  rootElement: document.getElementById('call-container'),
+});
+```
+
+### Subscribers
+
+Subscribers are a special type of Resource that represent internal account-holders. 
+They can receive or initiate calls, messages, and other forms of interaction.
+
+The SignalWire Client SDK can only be used by a subscriber with a subscriber token. 
+For more details, see the [Authentication](./tech-ref/authentication) section.
+
+- each user of your communication application can be a subscriber, to manage billing and management, and allow OAuth2 sign-in
+- your scripts or backend systems can be subscribers, to allow for programmatic access to the resources via a token
+- a single subscriber can be an entry point to allow access to AI agents or connecting calls.
+
+Subscribers can be created through the dashboard or through the REST API.
+
+<CardGroup cols={3}>
+    <Card 
+    title="Create Subscriber from the Dashboard" 
+    icon={<TbUser/>} 
+    href="/platform/call-fabric/resources/subscribers"
+    / >
+
+    <Card 
+    title="Create Subscriber from the REST API" 
+    icon={<TbApi/>} 
+    href="/apis/fabric/subscribers-create"
+    /> 
+
+    <Card 
+    title="Create a Subscriber and get an access token from the REST API" 
+    icon={<TbApi/>} 
+    href="/apis/fabric/subscriber-tokens-create"
+    />
+</CardGroup>
+
+The [Authentication](/sdks/signalwire-client-sdk/tech-ref/authentication) section has more details about the authentication process.
+
+:::info Looking for more details?
+
+The [Subscribers](/platform/call-fabric/subscribers) page has more details about the Subscribers resource.
+
+:::
+
+## The Conversation API
+
+In the context of the Call Fabric, a conversation is a record of a Subscriber's interaction with another resource.
+
+The Conversation API, then, is the history of the interactions of a Subscriber with other addresses,
+It blends logs, events, and chats into a single personalized history. 
+A Subscriber's interaction with an address, even an address shared between many,
+can be specific to only them.
+
+From the Subscriber's perspective, the chronological list of conversations will completely capture their
+history of interactions with all other addresses. This makes making Subscriber-centric applications extremely simple.
+
+{/* ref: https://github.com/signalwire/cloud-product/issues/8857 */}
+
+The Conversation API allows you to interact with those conversations in two very important ways:
+
+1. a real-time inbound stream of conversations which can be subscribed to
+2. a Chat API which allows you to send, receive, and subscribe to messages
+
+Based on your program requirements, you can use one or both of these APIs.
+
+
+
+## Recommended Application Structure
+
+We recommend that you keep the following things in mind when building your application:
+
+### Keep the client instance global and maintain persistent connection
+
+Rather than instantiating new client instances for each action, keep a single global client instance and
+maintain a persistent connection to the SignalWire network. You can use it like a singleton.
+
+{/* TODO: once client manager is final, it WILL be a singleton unless multiple profiles, Update once that's out */}
+
+In some advanced cases, you might want to have multiple client instances with different tokens.
+
+### When using in a React application, ensure you don't create multiple instances.
+
+The `useEffect` hook makes it very easy to create multiple instances of the client or when dialing a call.
+That can create race conditions and other issues, and cause your client or the call to fail. Ensure your
+client instantiation and dial happens only once, and have proper cleanup.
+
+### Many APIs return paginated output, make sure you handle it properly
+
+{/* TODO: this might have to be a separate article or a guide */}
+
+Many APIs return paginated output, and you need to handle it properly. The SDK provides a `PaginatedResult`.
+
+### Ensure you `unregisterDevice` when the user logs out to ensure they don't get Push Notifications

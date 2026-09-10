@@ -1,0 +1,62 @@
+---
+title: Relay.Task
+slug: /python/reference/task
+toc_max_heading_level: 3
+---
+
+[relay-consumer]: /docs/server-sdk/v2/python/reference/consumer
+[relay-task]: /docs/server-sdk/v2/python/reference/task
+
+## Relay.Task
+
+A [`Relay.Task`][relay-task] is simple way to send jobs to your [`Relay.Consumers`][relay-consumer] from a short lived process, like a web framework. RELAY Tasks allow you to pass commands down to your Consumers without blocking your short lived request. Think of a RELAY Task as a way to queue a job for your background workers to processes asynchronously.
+
+### Creating Tasks
+
+A Task is a simple object with 2 required arguments: `project` and `token`. Project and Token are used to send the Task to your Consumers. Once created, the Task has only one method `deliver` to send jobs to your Consumer.
+
+```python
+from signalwire.relay.task import Task
+
+task = Task(project='<my-project>', token='<my-token>')
+success = task.deliver('context-here', { 'key': 'random data' })
+```
+
+## Methods
+
+### deliver
+
+Send a job to your [`Consumer`][relay-consumer] in a specific context.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `context` | `string` | **required** | Context where to send the Task. |
+| `message` | `dict` | **required** | Dict with your custom data that will be sent to your [`Consumer's`][relay-consumer] `onTask` method. |
+
+**Returns**
+
+`coroutine` - Coroutine that will be fulfilled with a boolean value.
+
+**Examples**
+
+Deliver a task to your Consumer with a message to then make an outbound Call:
+
+```python
+from signalwire.relay.task import Task
+
+project = 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX'
+token = 'PTXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
+task = Task(project=project, token=token)
+data = {
+  'action': 'call',
+  'from': '+18881112222'
+  'to': '+18881113333'
+}
+success = task.deliver('office', data)
+if success:
+  print('Task delivered')
+else:
+  print('Task not delivered')
+```

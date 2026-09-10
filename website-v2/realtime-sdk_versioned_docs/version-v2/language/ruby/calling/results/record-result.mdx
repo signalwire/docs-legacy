@@ -1,0 +1,23 @@
+---
+title: RecordResult
+slug: /ruby/reference/calling/results/record
+description: The RecordResult object is returned when a record operation is completed.
+toc_max_heading_level: 3
+---
+
+[record]: /docs/server-sdk/v2/ruby/reference/calling/actions/record
+[relay-event]: /docs/server-sdk/v2/ruby/reference/event
+
+# Relay::Calling::RecordResult
+
+This object is returned by the [`record`][record] method and represents the final result of a recording.
+
+## Properties
+
+| Property | Type | Description |
+| :------- | :--- | :---------- |
+| `successful` | Boolean | Whether the recording has completed successfully. |
+| `event` | [Relay::Event][relay-event] | Last event that completed the operation. |
+| `url` | String | HTTPS URL to the recording file. |
+| `duration` | Numeric | Duration of the recording in seconds. |
+| `size` | Numeric | Size of the recording. |

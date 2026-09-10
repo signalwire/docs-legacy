@@ -1,0 +1,56 @@
+---
+title: Relay.Calling.AnswerResult
+slug: /php/reference/calling/results/answer
+description: The AnswerResult object is returned after an answer operation is completed.
+toc_max_heading_level: 3
+---
+
+[call]: /docs/server-sdk/v2/php/reference/calling/call#answer
+[relay-event]: /docs/server-sdk/v2/php/reference/event
+
+This object returned from the [`answer`][call] method.
+
+## Methods
+
+### getEvent
+
+Returns the last Relay Event arrived for this operation.
+
+**Returns**
+
+[`Relay.Event`][relay-event] - Last Relay Event.
+
+**Examples**
+
+Answer a call and grab the result event.
+
+```php
+<?php
+
+$call->answer()->done(function($result) {
+  $event = $result->getEvent();
+  // Inspect $event->payload ..
+});
+```
+
+### isSuccessful
+
+Return `true` if the call was answered without errors, `false` otherwise.
+
+**Returns**
+
+`boolean` - Whether the call has been answered successfully.
+
+**Examples**
+
+Answer a call and check if it was successful.
+
+```php
+<?php
+
+$call->answer()->done(function($result) {
+  if ($result->isSuccessful()) {
+    // $call is now active...
+  }
+});
+```

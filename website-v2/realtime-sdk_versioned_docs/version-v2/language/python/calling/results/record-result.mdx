@@ -1,0 +1,23 @@
+---
+title: "Relay.Calling.RecordResult"
+slug: /python/reference/calling/results/record
+description: The result object that is returned when recording a call.
+toc_max_heading_level: 3
+---
+
+[record]: /docs/server-sdk/v2/python/reference/calling/call#record
+[relay-event]: /docs/server-sdk/v2/python/reference/event
+
+## Relay.Calling.RecordResult
+
+This object returned from [`record`][record] method that represents the final result of a recording.
+
+### Properties
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `successful` | boolean | Whether the recording has completed successfully. |
+| `event` | [`Relay.Event`][relay-event] | Last event that completed the operation. |
+| `url` | string | HTTPS URL to the recording file. |
+| `duration` | number | Duration of the recording in seconds. |
+| `size` | number | Size of the recording. |

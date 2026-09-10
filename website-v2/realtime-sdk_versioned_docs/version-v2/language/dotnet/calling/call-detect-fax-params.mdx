@@ -1,0 +1,47 @@
+---
+title: "CallDetect.FaxParams"
+slug: /dotnet/reference/calling/call-detect-fax-params
+toc_max_heading_level: 3
+---
+[call-detect-fax-params-fax-tone]: /docs/server-sdk/v2/dotnet/reference/calling/call-detect-fax-tone
+
+# SignalWire.Relay.Calling.CallDetect.FaxParams
+
+This object represents the parameters specific to fax detection.
+
+## Constructor
+
+The only constructor is the default constructor, properties should all be assigned by initializer or after construction.
+
+**Parameters**
+
+None
+
+**Examples**
+
+> Basic Example
+
+```csharp
+CallDetect detect = new CallDetect
+{
+    Type = CallDetect.DetectType.fax,
+    Parameters = new CallDetect.FaxParams
+    {
+        // No required parameters
+    }
+};
+```
+
+## Properties
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `Tone` | [`SignalWire.Relay.Calling.CallDetect.FaxParams.FaxTone`][call-detect-fax-params-fax-tone] | The tone to detect.<br />_Default: CED_ |
+
+## Methods
+
+None
+
+## Events
+
+None

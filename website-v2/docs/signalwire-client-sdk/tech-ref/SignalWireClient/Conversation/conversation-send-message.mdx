@@ -1,0 +1,55 @@
+---
+title: conversation.sendMessage
+slug: /signalwire-client/conversation-send-message
+---
+
+import APIField from '@site/src/components/APIField';
+
+Sends a message in a persistent conversation. Messages are stored permanently and remain accessible to all participants.
+
+## How it works
+
+The `conversation.sendMessage` method delivers a message to all participants in a persistent conversation. Unlike ephemeral chat messages, these messages are permanently stored.
+
+## Parameters
+
+<APIField name="params" type="SendConversationMessageParams" required>
+  Configuration for sending the message.
+</APIField>
+
+<APIField name="params.conversationId" type="string" required>
+  The unique identifier of the conversation.
+</APIField>
+
+<APIField name="params.content" type="string" required>
+  The message text to send.
+</APIField>
+
+<APIField name="params.metadata" type="object">
+  Optional metadata to attach to the message.
+</APIField>
+
+## Signature
+
+```typescript
+conversation.sendMessage(params: SendConversationMessageParams): Promise<SendConversationMessageResponse>
+```
+
+## Returns
+
+**Type:** `Promise<SendConversationMessageResponse>`
+
+Returns a Promise that resolves with the sent message details including message ID and timestamp.
+
+## Examples
+
+### Send a message
+
+```typescript
+const response = await client.conversation.sendMessage({
+  conversationId: 'conversation-id-here',
+  content: 'Hello everyone!'
+})
+
+console.log('Message sent:', response.messageId)
+```

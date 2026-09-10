@@ -1,0 +1,1252 @@
+---
+title: Relay.Calling.Call
+slug: /go/reference/calling/call
+toc_max_heading_level: 3
+---
+
+[link-1]: #detectmachine
+[link-2]: #detectdigit
+[link-3]: #detectfax
+[link-4]: #detect
+[link-5]: /docs/server-sdk/v2/go/reference/calling/actions/detect
+[newcall]: /docs/server-sdk/v2/go/reference/calling#newcall
+[relay-calling-answerresult]: /docs/server-sdk/v2/go/reference/calling/results/answer
+[relay-calling-detectaction]: /docs/server-sdk/v2/go/reference/calling/actions/detect
+[relay-calling-detectresult]: /docs/server-sdk/v2/go/reference/calling/results/detect
+[relay-calling-dialresult]: /docs/server-sdk/v2/go/reference/calling/results/dial
+[relay-calling-faxaction]: /docs/server-sdk/v2/go/reference/calling/actions/fax
+[relay-calling-faxresult]: /docs/server-sdk/v2/go/reference/calling/results/fax
+[relay-calling-hangupresult]: /docs/server-sdk/v2/go/reference/calling/results/hangup
+[relay-calling-playaction]: /docs/server-sdk/v2/go/reference/calling/actions/play
+[relay-calling-playresult]: /docs/server-sdk/v2/go/reference/calling/results/play
+[relay-calling-promptaction]: /docs/server-sdk/v2/go/reference/calling/actions/prompt
+[relay-calling-promptresult]: /docs/server-sdk/v2/go/reference/calling/results/prompt
+[relay-calling-recordaction]: /docs/server-sdk/v2/go/reference/calling/actions/record
+[relay-calling-recordresult]: /docs/server-sdk/v2/go/reference/calling/results/record
+[relay-calling-senddigitsaction]: /docs/server-sdk/v2/go/reference/calling/actions/send-digits
+[relay-calling-senddigitsresult]: /docs/server-sdk/v2/go/reference/calling/results/send-digits
+[relay-calling-tapaction]: /docs/server-sdk/v2/go/reference/calling/actions/tap
+[relay-calling-tapresult]: /docs/server-sdk/v2/go/reference/calling/results/tap
+
+## Relay.Calling.Call
+
+All calls in SignalWire have a common generic interface, `Call`. A `Call` is a connection between SignalWire and another device.
+
+## Properties
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `Id` | `string` | The unique identifier of the call. |
+| `Type` | `string` | The type of call. Only `phone` is currently supported. |
+| `From` | `string` | The phone number that the call is coming from. |
+| `To` | `string` | The phone number you are attempting to call. |
+| `Timeout` | `int` | The seconds the call rings before being transferred to voicemail. |
+| `State` | `string` | The current state of the call. |
+| `PrevState` | `string` | The previous state of the call. |
+| `Context` | `string` | The context the call belongs to. |
+| `Peer` | `*signalwire.CallObj` | The call your original call is connected to. |
+| `Active` | `bool` | Whether the call is active. |
+| `Ended` | `bool` | Whether the call has ended. |
+| `Answered` | `bool` | Whether the call has been answered. |
+| `Failed` | `bool` | Whether the call has failed. |
+| `Busy` | `bool` | Whether the call was busy. |
+
+## Methods
+
+### Answer
+
+Answer an inbound call.
+
+
+**Returns**
+
+[`*signalwire.AnswerResult`][relay-calling-answerresult] - The result of the answer operation.
+
+**Examples**
+
+Answer an inbound call and check if it was successful:
+
+```go
+resultAnswer := call.Answer()
+if !resultAnswer.Successful {
+    if err := consumer.Stop(); err != nil {
+        log.Errorf("Error occurred while trying to stop Consumer")
+        return
+    }
+}
+```
+
+### Detect
+
+Start a detector on the call and waits until it has finished or failed.
+
+The `Detect` method is a generic method for all types of detecting, see [`DetectAnsweringMachine`][link-1], [`DetectDigit`][link-2] or [`DetectFax`][link-3] for more specific usage.
+
+
+**Returns**
+
+[`*signalwire.DetectResult`][relay-calling-detectresult] - The result of the detect operation.
+
+### DetectMachineAsync, DetectFaxAsync, DetectDigitAsync
+
+Asynchronous version of [`detect`][link-4]. It does not wait the detector ends but returns a [`Relay.Calling.DetectAction`][link-5] you can interact with.
+
+
+**Parameters**
+
+See [`detect`][link-4] for the parameter list.
+
+**Returns**
+
+pointer to DetectAction, error
+
+**Examples**
+
+> Detect digits using default parameters. 
+
+```go
+var det signalwire.DetectDigitParams
+detectDigitAction, err := resultDial.Call.DetectDigitAsync(&det)
+```
+
+> Detect digits using filter. 
+
+```go
+var det signalwire.DetectDigitParams
+det.Digits = "789"
+detectDigitAction, err := resultDial.Call.DetectDigitAsync(&det)
+```
+
+### detectMachine
+
+Detect whether the call was answered by a human or an answering machine.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `params` | `*signalwire.DetectMachineParams` | **optional** | Detection parameters with the following properties: |
+
+#### DetectMachineParams Properties
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `InitialTimeout` | `float64` | **optional** | Number of seconds to wait for initial voice before giving up. _Defaults to 4.5._ |
+| `EndSilenceTimeout` | `float64` | **optional** | Number of seconds to wait for voice to finish. _Defaults to 1.0._ |
+| `MachineVoiceThreshold` | `float64` | **optional** | How many seconds of voice to decide is a _machine_. _Defaults to 1.25._ |
+| `MachineWordsThreshold` | `int` | **optional** | How many words to count to decide is a _machine_. _Defaults to 6._ |
+
+**Returns**
+
+[`*signalwire.DetectResult`][relay-calling-detectresult] - The result of the machine detection.
+
+**Examples**
+
+Perform an AMD and wait until the _machine_ is ready:
+
+```go
+// MyOnDetectUpdate ran on Detector update
+func MyOnDetectUpdate(det interface{}) {
+	signalwire.Log.Info("Detect update.\n")
+	   
+	detectAction, ok := det.(*signalwire.DetectMachineAction)
+	if ok {
+		signalwire.Log.Info("Machine Detect Action.\n")
+		if detectAction.GetDetectorEvent() == signalwire.DetectMachineReady {
+			signalwire.Log.Info("Machine READY.\n")
+			detectAction.Stop()
+		}
+	}
+}
+
+var det signalwire.DetectMachineParams
+detectMachineAction, err := resultDial.Call.DetectMachineAsync(&det)
+if err != nil {
+	signalwire.Log.Error("Error occurred while trying to start answering machine detector")
+}
+```
+
+### detectMachineAsync
+
+Asynchronous version of `detectMachine`. It does not wait for the detector to end but returns a [`DetectAction`][relay-calling-detectaction] you can interact with.
+
+**Parameters**
+
+See `detectMachine` for the parameter list.
+
+**Returns**
+
+[`*signalwire.DetectAction`][relay-calling-detectaction], `error` - The detect action and any error.
+
+**Examples**
+
+Perform an asynchronous AMD on the call. Then stop the action if not completed yet:
+
+```go
+detectMachineAction, err := resultDial.Call.DetectMachineAsync(&det)
+if err != nil {
+	signalwire.Log.Error("Error occurred while trying to start answering machine detector")
+}
+time.Sleep(10 * time.Second)
+if !detectMachineAction.GetCompleted() {
+	detectMachineAction.Stop()
+}
+```
+
+### detectDigit
+
+Detect DTMF digits on the call.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `params` | `*signalwire.DetectDigitParams` | **optional** | Detection parameters |
+
+#### DetectDigitParams Properties
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `Timeout` | `float64` | **optional** | Number of seconds to run the detector. _Defaults to 30.0._ |
+| `Digits` | `string` | **optional** | The digits to detect. _Defaults to "0123456789#*"._ |
+
+**Returns**
+
+[`*signalwire.DetectResult`][relay-calling-detectresult] - The result of the digit detection.
+
+**Examples**
+
+Detect digits and then write a log with the result:
+
+```go
+// MyOnDetectUpdate ran on Detector update
+func MyOnDetectUpdate(det interface{}) {
+	    
+	// type assertion to infer the type of detector that just called our callback.
+	detectAction, ok := det.(*signalwire.DetectDigitAction)
+	if ok {
+		signalwire.Log.Info("Detected DTMF: %s\n", detectAction.GetDetectorEvent().String())
+	}
+}
+
+func MyReady(consumer *signalwire.Consumer) {
+	[...]
+
+	resultDial.Call.OnDetectUpdate = MyOnDetectUpdate
+	var det signalwire.DetectDigitParams
+	detectDigitAction, err := resultDial.Call.DetectDigitAsync(&det)
+   
+	if err != nil {
+		signalwire.Log.Error("Error occurred while trying to start digit detector")
+	}
+}
+```
+
+### detectDigitAsync
+
+Asynchronous version of `detectDigit`.
+
+**Returns**
+
+[`*signalwire.DetectAction`][relay-calling-detectaction], `error` - The detect action and any error.
+
+**Examples**
+
+Detect only `1-3` digits asynchronously:
+
+```go
+resultDial.Call.OnDetectUpdate = MyOnDetectUpdate
+var det signalwire.DetectDigitParams
+det.Digits = "123"
+detectDigitAction, err := resultDial.Call.DetectDigitAsync(&det)
+if err != nil {
+	signalwire.Log.Error("Error occurred while trying to start digit detector")
+}
+```
+
+### detectFax
+
+Detect fax tones on the call.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `params` | `*signalwire.DetectFaxParams` | **optional** | Detection parameters |
+
+#### DetectFaxParams Properties
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `Timeout` | `float64` | **optional** | Number of seconds to run the detector. _Defaults to 30.0._ |
+| `Tone` | `string` | **optional** | The fax tone to detect: `CED` or `CNG`. _Defaults to "CED"._ |
+
+**Returns**
+
+[`*signalwire.DetectResult`][relay-calling-detectresult] - The result of the fax detection.
+
+**Examples**
+
+> Detect fax on the current call.
+
+```go
+var det signalwire.DetectFaxParams
+det.Tone = "CED"
+detectFaxAction, err := resultDial.Call.DetectFax(&det)
+    
+if err != nil {
+	signalwire.Log.Error("Error occurred while trying to start fax detector")
+}
+```
+
+### detectFaxAsync
+
+Asynchronous version of `detectFax`.
+
+**Returns**
+
+[`*signalwire.DetectAction`][relay-calling-detectaction], `error` - The detect action and any error.
+
+**Examples**
+
+> Detect fax on the current call. Stop the action immediately.
+
+```go
+var det signalwire.DetectFaxParams
+det.Tone = "CED"
+detectFaxAction, err := resultDial.Call.DetectFaxAsync(&det)
+    
+if err != nil {
+	signalwire.Log.Error("Error occurred while trying to start fax detector")
+}
+```
+
+### hangup
+
+Hangup the call.
+
+**Returns**
+
+[`*signalwire.HangupResult`][relay-calling-hangupresult] - The result of the hangup operation.
+
+**Examples**
+
+Hangup the current call:
+
+```go
+if err := resultDial.Call.Hangup(); err != nil {
+	signalwire.Log.Error("Error occurred while trying to hangup call. Err: %v\n", err)
+}
+```
+
+### playAudio
+
+Play an audio file on the call.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `url` | `string` | **required** | HTTP(S) URL to audio resource to play. |
+
+**Returns**
+
+[`*signalwire.PlayResult`][relay-calling-playresult], `error` - The result of the play operation and any error.
+
+**Examples**
+
+Play an MP3 file:
+
+```go
+PlayAction, err := resultDial.Call.PlayAudio("https://www.phatdrumloops.com/audio/wav/space_funk1.wav")
+if err != nil {
+	signalwire.Log.Error("Error occurred while trying to Play audio\n")
+}
+```
+
+### playAudioAsync
+
+Asynchronous version of `playAudio`.
+
+**Returns**
+
+[`*signalwire.PlayAction`][relay-calling-playaction], `error` - The play action and any error.
+
+**Examples**
+
+> Play an Mp3 file and stop it after 5 seconds.
+
+```go
+playAction, err := resultDial.Call.PlayAudioAsync("https://cdn.signalwire.com/default-music/welcome.mp3")
+if err != nil {
+	log.Errorf("Error occurred while trying to play audio")
+}
+time.Sleep(5 * time.Second)
+playAction.Stop()
+```
+
+### playTTS
+
+Play text-to-speech on the call.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `text` | `string` | **required** | Text to speak. |
+| `language` | `string` | **optional** | Language code. _Defaults to "en-US"._ |
+| `gender` | `string` | **optional** | Voice gender: `male` or `female`. _Defaults to "female"._ |
+
+**Returns**
+
+[`*signalwire.PlayResult`][relay-calling-playresult], `error` - The result of the play operation and any error.
+
+**Examples**
+
+Play TTS:
+
+```go
+_, err := resultDial.Call.PlayTTS("Welcome to Signalwire !", "en-US", "female")
+if err != nil {
+	signalwire.Log.Error("Error occurred while trying to Play audio\n")
+}
+```
+
+### playTTSAsync
+
+Asynchronous version of `playTTS`.
+
+**Returns**
+
+[`*signalwire.PlayAction`][relay-calling-playaction], `error` - The play action and any error.
+
+**Examples**
+
+> Play TTS and stop it after 1 second.
+
+```go
+playAction, err := resultDial.Call.PlayTTSAsync("Welcome to Signalwire !", "en-US", "female")
+if err != nil {
+	signalwire.Log.Error("Error occurred while trying to Play audio\n")
+}
+time.Sleep(1 * time.Second)
+
+playAction.Stop()
+
+```
+
+### record
+
+Start recording the call and wait until the recording ends or fails.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `params` | `*signalwire.RecordParams` | **optional** | Recording parameters |
+
+#### RecordParams Properties
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `Beep` | `bool` | **optional** | Play a beep before recording. _Defaults to false._ |
+| `Stereo` | `bool` | **optional** | Record in stereo. _Defaults to false._ |
+| `Format` | `string` | **optional** | Recording format: `mp3` or `wav`. _Defaults to "mp3"._ |
+| `Direction` | `string` | **optional** | Recording direction: `listen`, `speak`, or `both`. _Defaults to "speak"._ |
+| `InitialTimeout` | `float64` | **optional** | Seconds to wait until something is heard. _Defaults to 5.0._ |
+| `EndSilenceTimeout` | `float64` | **optional** | Seconds to wait until caller stops speaking. _Defaults to 1.0._ |
+| `Terminators` | `string` | **optional** | DTMF digits that end recording. _Defaults to "#*"._ |
+
+**Returns**
+
+[`*signalwire.RecordResult`][relay-calling-recordresult], `error` - The result of the record operation and any error.
+
+**Examples**
+
+Start recording audio in the call for both direction in stereo mode, if successful, grab `url`, `duration` and `size` from the RecordResult object:
+
+```go
+	var rec signalwire.RecordParams
+  
+	rec.Beep = true
+	rec.Format = "wav"
+	rec.Stereo = true
+	rec.Direction = signalwire.RecordDirectionBoth.String()
+	rec.InitialTimeout = 10
+	rec.EndSilenceTimeout = 3
+	rec.Terminators = "#*"
+	// blocking
+	recordResult, err := resultDial.Call.RecordAudio(&rec)
+	if err != nil {
+		signalwire.Log.Error("Error occurred while trying to record audio\n")
+	}
+
+	// recording stops on silence
+	signalwire.Log.Info("Recording is at: %s. Duration is:%d  Size is:%d \n", recordResult.URL, recordResult.Duration, recordResult.Size)
+```
+
+### recordAsync
+
+Asynchronous version of `record`.
+
+**Returns**
+
+[`*signalwire.RecordAction`][relay-calling-recordaction], `error` - The record action and any error.
+
+**Examples**
+
+Start recording audio in the call for both direction in stereo mode and then stop it using the RecordAction object:
+
+```go
+
+	var rec signalwire.RecordParams
+  
+	rec.Beep = true
+	rec.Format = "wav"
+	rec.Stereo = true
+	rec.Direction = signalwire.RecordDirectionBoth.String()
+	rec.InitialTimeout = 10
+	rec.EndSilenceTimeout = 3
+	rec.Terminators = "#*"
+		  
+	recordAction, err := resultDial.Call.RecordAudioAsync(&rec)
+	if err != nil {
+		signalwire.Log.Error("Error occurred while trying to record audio\n")
+	}
+
+	time.Sleep(3 * time.Second)
+	  
+	signalwire.Log.Info("Stopping  recording...\n")
+	recordAction.Stop()
+	 
+	for {
+		time.Sleep(1 * time.Second)
+		   
+		if recordAction.GetCompleted() {
+			break
+		}
+	}
+
+	// for Actions we use Getters, for Results that we know that are delivered when a blocking action ends 
+	// we can just read the needed vars directly from the Result struct.
+
+	signalwire.Log.Info("Recording is at: %s. Duration is:%d  Size is:%d \n", recordAction.GetURL(), recordAction.GetDuration(), recordAction.GetSize())
+```
+
+### sendFax
+
+Send a fax through the call.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `document` | `string` | **required** | HTTP(S) URL to the document to send (PDF format only). |
+| `identity` | `string` | **optional** | Identity to display on receiving fax. |
+| `header` | `string` | **optional** | Custom string to add to header of each fax page. |
+
+**Returns**
+
+[`*signalwire.FaxResult`][relay-calling-faxresult], `error` - The result of the fax operation and any error.
+
+**Examples**
+
+Sending a fax on the call:
+
+```go
+faxAction, err := resultDial.Call.SendFax("https://example.com/fax.pdf", "", "")
+if err != nil {
+	signalwire.Log.Error("Error occurred while trying to send fax\n")
+}
+```
+
+### sendFaxAsync
+
+Asynchronous version of `sendFax`.
+
+**Returns**
+
+[`*signalwire.FaxAction`][relay-calling-faxaction], `error` - The fax action and any error.
+
+**Examples**
+
+Trying to send a fax and then stop it:
+
+```go
+faxAction, err := resultDial.Call.SendFaxAsync("https://example.com/fax.pdf", "", "")
+if err != nil {
+	signalwire.Log.Error("Error occurred while trying to send fax\n")
+}
+	 
+// do something here, the for loop can be placed in a go routine
+	    
+for {
+	time.Sleep(200 * time.Millisecond)
+	   
+	if faxAction.GetCompleted() {
+		break
+	}
+}
+signalwire.Log.Info("Pages #%d\n", faxAction.GetPages())
+```
+
+### receiveFax
+
+Prepare the call to receive an inbound fax.
+
+**Returns**
+
+[`*signalwire.FaxResult`][relay-calling-faxresult], `error` - The result of the fax operation and any error.
+
+**Examples**
+
+Receiving a fax on the call and print logs for URL and number of received pages:
+
+```go
+faxResult, err := call.ReceiveFax()
+if err != nil {
+	log.Errorf("Error occurred while trying to receive fax")
+	return
+}
+log.Infof("Download Document from %s\n Pages #%d\n", faxResult.Document, faxResult.Pages
+```
+
+### receiveFaxAsync
+
+Asynchronous version of `receiveFax`.
+
+**Returns**
+
+[`*signalwire.FaxAction`][relay-calling-faxaction], `error` - The fax action and any error.
+
+**Examples**
+
+Trying to receive a fax and then stop it:
+
+```go
+faxAction, err := call.ReceiveFaxAsync()
+if err != nil {
+	signalwire.Log.Errorf("Error occurred while trying to receive fax")
+	return
+}
+```
+
+### dial
+
+This will start a call that was created with [`NewCall`][newcall] and waits until the Call has been answered or hung up.
+
+**Returns**
+
+[`*signalwire.DialResult`][relay-calling-dialresult] - The result of the dial operation.
+
+**Examples**
+
+```go
+newCall := consumer.Client.Calling.NewCall(fromNumber, toNumber)
+resultDial := consumer.Client.Calling.Dial(newCall)
+if !resultDial.Successful {
+    if err := consumer.Stop(); err != nil {
+        signalwire.Log.Error("Error occurred while trying to stop Consumer")
+    }
+    return
+}
+```
+
+### play
+
+Play one or multiple media in a call and wait until the playing has ended.
+
+The `Play` method is a generic method for all types of playing, see `playAudio`, `playSilence` or `playTTS` for more specific usage.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `media` | `[signalwire.MaxPlay]signalwire.PlayGenericParams` | **required** | Array of PlayGenericParams Struct. The type PlayGenericParams contains only a var interface{} and the SDK code expects types PlayAudio or PlayTTS or PlaySilence to be assigned to it. |
+
+* To play an audio file use the PlayAudio type to set the URL for the audio file:
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `URL` | `string` | **required** | Http(s) URL to `audio` resource to play. |
+
+* To play text to speech use the PlayTTS type to set the TTS params:
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `Text` | `string` | **required** | TTS to play. |
+| `Language` | `string` | **optional** | Default to `en-US`. |
+| `Gender` | `string` | **optional** | `male` or `female`. Default to `female`. |
+
+* To play silence use the PlaySilence type to set the Duration:
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `Duration` | `float64` | **required** | Seconds of silence to play. |
+
+**Returns**
+
+`[]*signalwire.PlayResult` - Array of PlayResult.
+
+**Examples**
+
+Play multiple media elements in the call:
+
+```go
+audio := new(signalwire.PlayAudio)
+audio.URL = "https://www.phatdrumloops.com/audio/wav/space_funk1.wav"
+
+tts := new(signalwire.PlayTTS)
+tts.Text = "Hello from SignalWire!"
+tts.Language = "en-US"
+tts.Gender = "male"
+    
+silence := new(signalwire.PlaySilence)
+silence.Duration = 3 /*seconds*/
+   
+var playGeneric [signalwire.MaxPlay]signalwire.PlayGenericParams
+playGeneric[0].SpecificParams = audio
+playGeneric[1].SpecificParams = silence
+playGeneric[2].SpecificParams = tts
+
+// will play all three in the order defined in the "playGeneric" array.
+// It will stop when all three Play commands end or upon error.
+if _, err := resultDial.Call.Play(playGeneric); err != nil {
+	signalwire.Log.Error("Error occurred while trying to play audio\n")
+}
+```
+
+### playAsync
+
+Asynchronous version of `play`. It does not wait the _playing_ to complete but returns a [`PlayAction`][relay-calling-playaction] you can interact with. This will run all Play actions in parallel.
+
+**Parameters**
+
+See `play` for the parameter list.
+
+**Returns**
+
+`[]*signalwire.PlayAction` - Array of pointers to PlayAction.
+
+**Examples**
+
+Play multiple media elements in the call and then stop it:
+
+```go
+audio := new(signalwire.PlayAudio)
+audio.URL = "https://www.phatdrumloops.com/audio/wav/space_funk1.wav"
+   
+tts := new(signalwire.PlayTTS)
+tts.Text = "Hello from SignalWire!"
+tts.Language = "en-US"
+tts.Gender = "female"
+    
+silence := new(signalwire.PlaySilence)
+silence.Duration = 3
+// MaxPlay is 10
+var playGeneric [signalwire.MaxPlay]signalwire.PlayGenericParams
+playGeneric[0].SpecificParams = audio
+playGeneric[1].SpecificParams = silence
+playGeneric[2].SpecificParams = tts
+
+if _, err := resultDial.Call.PlayAsync(playGeneric); err != nil {
+	signalwire.Log.Error("Error occurred while trying to play audio\n")
+}
+```
+
+### playSilence
+
+This is a helper function that refines the use of `play`. This simplifies playing silence.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `duration` | `float64` | **required** | Seconds of silence to play. |
+
+**Returns**
+
+[`*signalwire.PlayResult`][relay-calling-playresult], `error` - The result of the play operation and any error.
+
+**Examples**
+
+Play silence for 3 seconds:
+
+```go
+if _, err := resultDial.Call.PlaySilence(3); err != nil {
+	log.Errorf("Error occurred while trying to play silence. Err: %v\n", err)
+}
+```
+
+### playSilenceAsync
+
+Asynchronous version of `playSilence`. It does not wait the _playing_ to completes but returns a [`PlayAction`][relay-calling-playaction] you can interact with.
+
+**Parameters**
+
+See `playSilence` for the parameter list.
+
+**Returns**
+
+[`*signalwire.PlayAction`][relay-calling-playaction], `error` - The play action and any error.
+
+**Examples**
+
+Play silence for 3 seconds (async):
+
+```go
+if _, err := resultDial.Call.PlaySilenceAsync(3); err != nil {
+	log.Errorf("Error occurred while trying to play silence. Err: %v\n", err)
+}
+```
+
+### prompt
+
+Play one or more media while collecting user's input from the call at the same time, such as `digits` and `speech`. It waits until the collection succeed or timeout is reached. This is a general method for all types of playing, see `promptAudio` or `promptTTS` for more specific usage.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `media` | `*[]signalwire.PlayStruct` | **required** | List of media elements to play. See `play` for the array structure. |
+| `collect` | `*signalwire.CollectStruct` | **required** | The configuration for input collection. |
+| `volume` | `float64` | **optional** | Controls the volume, between -40dB and +40dB where 0 is unchanged. Default is `0`. |
+
+**Returns**
+
+[`*signalwire.PromptResult`][relay-calling-promptresult] - The result object to interact with.
+
+**Examples**
+
+Ask user to enter their PIN and collect the digits:
+
+```go
+resultDial.Call.OnPrompt = func(promptaction *signalwire.PromptAction) {
+	// we could do something here and this gets called when the Prompt Action finishes.
+}
+
+playAudioParams := signalwire.PlayAudioParams{
+	URL: "https://www.pacdv.com/sounds/voices/can-you-keep-a-secret.wav",
+}
+
+playTTSParams := signalwire.PlayTTSParams{
+	Text: "Hello from Signalwire!",
+}
+
+playRingtoneParams := signalwire.PlayRingtoneParams{
+	Duration: 5,
+	Name:     "us",
+}
+
+play := []signalwire.PlayStruct{{
+	Type:   "audio",
+	Params: playAudioParams,
+}, {
+	Type:   "tts",
+	Params: playTTSParams,
+}, {
+	Type:   "ringtone",
+	Params: playRingtoneParams,
+}}
+
+collectDigits := new(signalwire.CollectDigits)
+collectDigits.Max = 3
+
+collectSpeech := new(signalwire.CollectSpeech)
+collectSpeech.EndSilenceTimeout = 1
+collectSpeech.SpeechTimeout = 10
+collectSpeech.Hints = []string{"top", "well"}
+
+collect := signalwire.CollectStruct{
+	Speech: collectSpeech,
+	Digits: collectDigits,
+}
+
+promptAction, err := resultDial.Call.PromptAsync(&play, &collect)
+
+if err != nil {
+	signalwire.Log.Error("Error occurred while trying to start Prompt Action\n")
+
+	if err := consumer.Stop(); err != nil {
+		signalwire.Log.Error("Error occurred while trying to stop Consumer. Err: %v\n", err)
+	}
+
+	return
+}
+
+// do something here
+time.Sleep(15 * time.Second)
+
+if !promptAction.GetCompleted() {
+	promptAction.Stop()
+}
+
+for {
+	time.Sleep(1 * time.Second)
+
+	if promptAction.GetCompleted() {
+		break
+	}
+}
+
+myResult := promptAction.GetResultType()
+switch myResult {
+case signalwire.CollectResultSpeech:
+	signalwire.Log.Info("Speech text: \"%s\" Confidence: %f\n", promptAction.GetCollectResult(), promptAction.GetConfidence())
+case signalwire.CollectResultDigit:
+	signalwire.Log.Info("Digits: \"%s\" Terminator: %s\n", promptAction.GetCollectResult(), promptAction.GetTerminator())
+default:
+	signalwire.Log.Info("Result was: %s\n", myResult.String())
+}
+```
+
+### promptAsync
+
+Asynchronous version of `prompt`. It does not wait the _collection_ to completes but returns a [`PromptAction`][relay-calling-promptaction] you can interact with.
+
+**Parameters**
+
+See `prompt` for the parameter list.
+
+**Returns**
+
+[`*signalwire.PromptAction`][relay-calling-promptaction], `error` - The prompt action and any error.
+
+**Examples**
+
+> Ask user to enter their PIN and collect the digits.
+
+```go
+```
+
+### sendDigits
+
+This method sends DTMF digits to the other party on the call. Allowed digits are `1234567890*#ABCD` and `wW` for short and long waits. If any invalid characters are present, the entire operation is rejected.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `digits` | `string` | **required** | String of DTMF digits to send. |
+
+**Returns**
+
+[`*signalwire.SendDigitsResult`][relay-calling-senddigitsresult], `error` - The result of the send digits operation and any error.
+
+**Examples**
+
+Send some digits:
+
+```go
+_, err := resultDial.Call.SendDigits("777777890*#")
+if err != nil {
+	signalwire.Log.Error("Error occurred while trying send digits: %v\n", err)
+}
+```
+
+### sendDigitsAsync
+
+Asynchronous version of `sendDigits`. It does not wait for the sending event to complete, and immediately returns a [`SendDigitsAction`][relay-calling-senddigitsaction] object you can interact with.
+
+**Parameters**
+
+See `sendDigits` for the parameter list.
+
+**Returns**
+
+[`*signalwire.SendDigitsAction`][relay-calling-senddigitsaction], `error` - The send digits action and any error.
+
+**Examples**
+
+Send some digits and then check if the operation is completed using the _SendDigitsAction_ object:
+
+```go
+/* use an anonymous function as CB */
+resultDial.Call.OnSendDigitsFinished = func(a *signalwire.SendDigitsAction) {
+	signalwire.Log.Info("SendDigits finished with successful result: [%v]\n", a.GetSuccessful())
+}
+
+sendDigitsAction, err := resultDial.Call.SendDigitsAsync("1234567890*#")
+if err != nil {
+    signalwire.Log.Error("Error occurred while trying to send digits\n")
+}
+```
+
+### tap
+
+Intercept call media and stream it to the specify endpoint. It waits until the end of the call. SignalWire will send RTP or Websocket audio to the endpoint.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `audioDirection` | `string` | **required** | `listen` what the caller hears, `speak` what the caller says or `both`. |
+| `tap` | `*signalwire.TapDevice` | **required** | Struct with the following properties: |
+
+#### TapDevice Properties
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `Type` | `string` | **required** | Protocols to use: `RTP`, `WS`. Use signalwire.TapRTP.String() or signalwire.TapWS.String() |
+| `Ptime` | `int` | **optional** | Packetization time in ms. It will be the same as the tapped media if not set, typically 20 ms. |
+| `Codec` | `string` | **optional** | Codec to use. It will be the same as the tapped media if not set. Codecs can be `PCMU`, `PCMA` and `OPUS`. Defaults to `PCMU`. |
+
+* To `tap` through RTP:
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `Addr` | `string` | **required** | RTP IP v4 address. |
+| `Port` | `int` | **required** | RTP port. |
+
+* To `tap` through WS (Websocket audio - `ws` or `wss` URI):
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `URI` | `string` | **required** | `ws` or `wss` URI . To be set with Type signalwire.TapWS.String() |
+
+**Returns**
+
+[`*signalwire.TapResult`][relay-calling-tapresult], `error` - The result of the tap operation and any error.
+
+**Examples**
+
+> Tapping audio from the call, if successful, print both source and destination devices from the `TapResult` object.
+
+```go
+```
+
+### tapAsync
+
+Asynchronous version of `tap`. It does not wait the end of tapping but returns a [`TapAction`][relay-calling-tapaction] you can interact with.
+
+**Parameters**
+
+See `tap` for the parameter list.
+
+**Returns**
+
+[`*signalwire.TapAction`][relay-calling-tapaction], `error` - The tap action and any error.
+
+**Examples**
+
+Tapping audio from the call and then stop it using the `TapAction` object:
+
+```go
+var tapdevice signalwire.TapDevice
+if taptype == "rtp" {
+    tapdevice.Type = signalwire.TapRTP.String()
+    tapdevice.Params.Addr = "X.X.X.X"
+    tapdevice.Params.Port = 1234
+    tapdevice.Params.Codec = "PCMU"
+} else if taptype == "ws" {
+    tapdevice.Type = signalwire.TapWS.String()
+    tapdevice.Params.URI = "wss://X.X.X.X:1234"
+}
+tapAction, err := resultDial.Call.TapAudioAsync(signalwire.TapDirectionListen, &tapdevice)
+if err != nil {
+    signalwire.Log.Fatal("Error occurred while trying to tap audio: %v\n", err)
+}
+time.Sleep(10 * time.Second)
+tapAction.Stop()
+signalwire.Log.Info("SourceDevice: %v\n", tapAction.GetSourceDevice())           // comes from the SignalWire platform
+signalwire.Log.Info("DestinationDevice: %v\n", tapAction.GetDestinationDevice()) // the device passed above
+```
+
+### waitFor
+
+Wait for specific events on the Call or returns `false` if the Call ends without getting them.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `event` | `string` | **required** | One Call State Event |
+| `timeout` | `float64` | **optional** | Timeout in seconds |
+
+**Returns**
+
+`bool` - Whether the event was received before timeout.
+
+**Examples**
+
+Wait for _ending_ event:
+
+```go
+call.WaitFor("ending", 3) // wait 3 seconds
+```
+
+### waitForAnswered
+
+This is a helper function that refines the use of `waitFor`. This simplifies waiting for the _answered_ state.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `timeout` | `float64` | **optional** | Timeout in seconds |
+
+**Returns**
+
+`bool` - Whether the call was answered before timeout.
+
+**Examples**
+
+Wait for the _answered_ event:
+
+```go
+call.WaitForAnswered(20) // wait 20 seconds
+```
+
+### waitForEnded
+
+This is a helper function that refines the use of `waitFor`. This simplifies waiting for the _ended_ state.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `timeout` | `float64` | **optional** | Timeout in seconds |
+
+**Returns**
+
+`bool` - Whether the call ended before timeout.
+
+**Examples**
+
+Wait for the _ended_ event:
+
+```go
+call.WaitForEnded(3) // wait 3 seconds
+```
+
+### waitForEnding
+
+This is a helper function that refines the use of `waitFor`. This simplifies waiting for the _ending_ state.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `timeout` | `float64` | **optional** | Timeout in seconds |
+
+**Returns**
+
+`bool` - Whether the call started ending before timeout.
+
+**Examples**
+
+Wait for the _ending_ event:
+
+```go
+call.WaitForEnding(3) // wait 3 seconds
+```
+
+### waitForRinging
+
+This is a helper function that refines the use of `waitFor`. This simplifies waiting for the _ringing_ state.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `timeout` | `float64` | **optional** | Timeout in seconds |
+
+**Returns**
+
+`bool` - Whether the call started ringing before timeout.
+
+**Examples**
+
+Wait for the _ringing_ event:
+
+```go
+call.WaitForRinging(3) // wait 3 seconds
+```
+
+## Callbacks
+
+All these callbacks can be used to track the calls lifecycle and instruct SignalWire on what to do for each different state.
+
+### State Callbacks
+
+To track the state of a call.
+
+| Property | Description |
+| -------- | ----------- |
+| `OnStateChange` | Event dispatched when Call state changes. |
+| `OnCreated` | The call has been created in Relay. |
+| `OnRinging` | The call is ringing and has not yet been answered. |
+| `OnAnswered` | The call has been picked up. |
+| `OnEnding` | The call is hanging up. |
+| `OnEnded` | The call has ended. |
+
+### Play Callbacks
+
+To track a playback state.
+
+| Property | Description |
+| -------- | ----------- |
+| `OnPlayStateChange` | Event dispatched when the state of a `playing` changes. |
+| `OnPlayPlaying` | A playback is playing on the call. |
+| `OnPlayError` | A playback failed to start. |
+| `OnPlayFinished` | The playback has ended. |
+| `OnPlayPaused` | The playback is paused. |
+
+### Record Callbacks
+
+To track a recording state.
+
+| Property | Description |
+| -------- | ----------- |
+| `OnRecordStateChange` | Event dispatched when the state of a `recording` changes. |
+| `OnRecordRecording` | The call is being recorded. |
+| `OnRecordNoInput` | The recording failed due to _no input_. |
+| `OnRecordFinished` | The recording has finished. |
+
+### Fax Callbacks
+
+To track a fax state.
+
+| Property | Description |
+| -------- | ----------- |
+| `OnFaxError` | Faxing failed. |
+| `OnFaxFinished` | Faxing has finished. |
+| `OnFaxPage` | A fax page has been sent or received. |
+
+### Detect Callbacks
+
+To track a detector state.
+
+| Property | Description |
+| -------- | ----------- |
+| `OnDetectError` | The detector has failed. |
+| `OnDetectFinished` | The detector has finished. |
+| `OnDetectUpdate` | There is a notification from the detector (eg: a new DTMF tone). |
+
+
+### Send Digits Events
+
+To receive a message when the digits are finished sending.
+
+| Property | Description |
+| -------- | ----------- |
+| `OnSendDigitsStateChange` | The send digits state is changing, generalized event for the following events. |
+| `OnSendDigitsFinished` | The digits have finished sending. |
+
+### Tap Events
+
+To track an active tap.
+
+| Property | Description |
+| -------- | ----------- |
+| `OnTapStateChange` | The tap state is changing, generalized event for the following events. |
+| `OnTapTapping` | The call is being tapped. |
+| `OnTapFinished` | The tapping has finished. |
+
+### Prompt Events
+
+To track a prompt state.
+
+| Property | Description |
+| -------- | ----------- |
+| `OnPrompt` | The prompt action on the call has ended. |

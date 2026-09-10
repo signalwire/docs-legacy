@@ -1,0 +1,23 @@
+---
+title: "Relay.Calling.PromptResult"
+slug: /python/reference/calling/results/prompt
+description: The result object that is returned when prompting a call.
+toc_max_heading_level: 3
+---
+
+[relay-event]: /docs/server-sdk/v2/python/reference/event
+
+## Relay.Calling.PromptResult
+
+This object returned from one of the _synchronous_ prompt methods that represents the final result of a prompting attempt.
+
+### Properties
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `successful` | boolean | Whether the attempt has completed successfully. |
+| `event` | [`Relay.Event`][relay-event] | Last event that completed the operation. |
+| `type` | string | `digit` or `speech`. |
+| `result` | string | Result of `prompt` attempt. |
+| `terminator` | string | Digit that terminated the prompt. |
+| `confidence` | number | Confidence of the result on a `speech` prompt. |

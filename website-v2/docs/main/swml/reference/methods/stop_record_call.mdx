@@ -1,0 +1,89 @@
+---
+title: stop_record_call
+slug: /swml/reference/stop-record-call
+description: Stop an active background recording.
+toc_max_heading_level: 3
+---
+
+Stop an active background recording.
+
+<ParamField path="stop_record_call" type="object" required={true}>
+  An object that accepts the following properties.
+</ParamField>
+
+
+## **Properties**
+
+<ParamField path="stop_record_call.control_id" type="string" default="The last started recording will be stopped">
+  Identifier for the recording to stop
+</ParamField>
+
+
+## **Variables**
+
+Read by the method:
+
+- **record_control_id:** (in) control ID of last recording started.
+
+Set by the method:
+
+- **stop_record_call_result:** (out) `success` | `failed`
+
+## **Examples**
+
+### Stop last call recording
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - stop_record_call: {}
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "stop_record_call": {}
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+### Stop a specific call recording
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - stop_record_call:
+        control_id: my-recording-id
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "stop_record_call": {
+          "control_id": "my-recording-id"
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>

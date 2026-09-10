@@ -1,0 +1,266 @@
+---
+title: "Adding Skills"
+sidebar_label: "Adding Skills"
+slug: /python/guides/adding-skills
+toc_max_heading_level: 3
+---
+
+## Adding Skills
+
+Add skills to your agents with `add_skill()`. Pass configuration parameters to customize behavior.
+
+### Basic Usage
+
+Add a skill with no configuration:
+
+```python
+from signalwire_agents import AgentBase
+
+
+class MyAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="my-agent")
+        self.add_language("English", "en-US", "rime.spore")
+
+        # Add skill with default settings
+        self.add_skill("datetime")
+```
+
+### With Configuration
+
+Pass parameters as a dictionary:
+
+```python
+from signalwire_agents import AgentBase
+
+
+class MyAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="my-agent")
+        self.add_language("English", "en-US", "rime.spore")
+
+        # Add skill with configuration
+        self.add_skill("web_search", {
+            "api_key": "YOUR_API_KEY",
+            "search_engine_id": "YOUR_ENGINE_ID",
+            "num_results": 5
+        })
+```
+
+### Method Chaining
+
+`add_skill()` returns `self` for chaining:
+
+```python
+from signalwire_agents import AgentBase
+
+
+class MyAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="my-agent")
+        self.add_language("English", "en-US", "rime.spore")
+
+        # Chain multiple skills
+        (self
+            .add_skill("datetime")
+            .add_skill("math")
+            .add_skill("joke"))
+```
+
+### Multiple Skills
+
+Add as many skills as needed:
+
+```python
+from signalwire_agents import AgentBase
+
+
+class AssistantAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="assistant")
+        self.add_language("English", "en-US", "rime.spore")
+
+        # Add multiple capabilities
+        self.add_skill("datetime")
+        self.add_skill("math")
+        self.add_skill("wikipedia_search")
+
+        self.prompt_add_section(
+            "Role",
+            "You are a helpful assistant."
+        )
+
+        self.prompt_add_section(
+            "Capabilities",
+            body="You can help with:",
+            bullets=[
+                "Date and time information",
+                "Math calculations",
+                "Wikipedia lookups"
+            ]
+        )
+```
+
+### Checking Loaded Skills
+
+```python
+## Check if skill is loaded
+if agent.has_skill("datetime"):
+    print("Datetime skill is active")
+
+## List all loaded skills
+skills = agent.list_skills()
+print(f"Loaded skills: {skills}")
+```
+
+### Removing Skills
+
+```python
+## Remove a skill
+agent.remove_skill("datetime")
+```
+
+### Multi-Instance Skills
+
+Some skills support multiple instances:
+
+```python
+from signalwire_agents import AgentBase
+
+
+class MultiSearchAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="multi-search")
+        self.add_language("English", "en-US", "rime.spore")
+
+        # First search instance for news
+        self.add_skill("web_search", {
+            "tool_name": "search_news",
+            "api_key": "YOUR_API_KEY",
+            "search_engine_id": "NEWS_ENGINE_ID"
+        })
+
+        # Second search instance for documentation
+        self.add_skill("web_search", {
+            "tool_name": "search_docs",
+            "api_key": "YOUR_API_KEY",
+            "search_engine_id": "DOCS_ENGINE_ID"
+        })
+
+        self.prompt_add_section(
+            "Role",
+            "You can search news and documentation separately."
+        )
+```
+
+### SWAIG Fields
+
+Add extra SWAIG metadata to skill functions:
+
+```python
+self.add_skill("datetime", {
+    "swaig_fields": {
+        "fillers": {
+            "en-US": ["Let me check the time..."]
+        }
+    }
+})
+```
+
+### Error Handling
+
+Skills may fail to load:
+
+```python
+try:
+    agent.add_skill("web_search", {
+        "api_key": "invalid"
+    })
+except ValueError as e:
+    print(f"Skill failed to load: {e}")
+```
+
+Common errors:
+
+| Error | Cause | Solution |
+|-------|-------|----------|
+| Skill not found | Invalid skill name | Check spelling |
+| Missing parameters | Required config not provided | Add required params |
+| Package not installed | Missing Python dependency | Install with pip |
+| Env var missing | Required environment variable | Set the variable |
+
+### Skills with Environment Variables
+
+Some skills read from environment variables:
+
+```python
+import os
+
+## Set API key via environment
+os.environ["GOOGLE_SEARCH_API_KEY"] = "your-key"
+
+## Skill can read from env
+self.add_skill("web_search", {
+    "api_key": os.environ["GOOGLE_SEARCH_API_KEY"],
+    "search_engine_id": "your-engine-id"
+})
+```
+
+### Complete Example
+
+```python
+#!/usr/bin/env python3
+## full_featured_agent.py - Agent with multiple configured skills
+from signalwire_agents import AgentBase
+
+
+class FullFeaturedAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="full-featured")
+        self.add_language("English", "en-US", "rime.spore")
+
+        # Simple skills (no config needed)
+        self.add_skill("datetime")
+        self.add_skill("math")
+
+        self.prompt_add_section(
+            "Role",
+            "You are a versatile assistant named Alex."
+        )
+
+        self.prompt_add_section(
+            "Capabilities",
+            body="You can help with:",
+            bullets=[
+                "Current date and time",
+                "Math calculations"
+            ]
+        )
+
+
+if __name__ == "__main__":
+    agent = FullFeaturedAgent()
+    agent.run()
+```
+
+<Note>
+Skills like `web_search` and `joke` require additional configuration or API keys. See the [Built-in Skills](/docs/agents-sdk/python/guides/builtin-skills) section for details on each skill's requirements.
+</Note>
+
+### Best Practices
+
+**DO:**
+
+- Add skills in __init__ before prompt configuration
+- Use environment variables for API keys
+- Check skill availability with has_skill() if conditional
+- Update prompts to mention skill capabilities
+
+**DON'T:**
+
+- Hardcode API keys in source code
+- Add duplicate skills (unless multi-instance)
+- Assume skills are available without checking
+- Forget to handle skill loading errors
+
+

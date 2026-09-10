@@ -1,0 +1,46 @@
+---
+title: "CallMedia.SilenceParams"
+slug: /dotnet/reference/calling/call-media-silence-params
+toc_max_heading_level: 3
+---
+
+# SignalWire.Relay.Calling.CallMedia.SilenceParams
+
+This object represents the parameters specific to silence media.
+
+## Constructor
+
+The only constructor is the default constructor, properties should all be assigned by initializer or after construction.
+
+**Parameters**
+
+None
+
+**Examples**
+
+> Basic Example
+
+```csharp
+CallMedia media = new CallMedia
+{
+    Type = CallMedia.MediaType.silence,
+    Parameters = new CallMedia.SilenceParams
+    {
+        Duration = 1.0
+    }
+};
+```
+
+## Properties
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `Duration` | double | The duration in seconds the silence is played. |
+
+## Methods
+
+None
+
+## Events
+
+None

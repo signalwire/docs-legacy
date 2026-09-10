@@ -1,0 +1,921 @@
+---
+title: Error codes
+slug: /apis/error-codes
+---
+
+When using SignalWire REST APIs, some errors will include error codes. Below, you will find a list of our unique error codes and a short explanation of each to help with error handling and troubleshooting.
+
+<ParamField path="account_limit_exceeded" type="Error">
+
+- The account must be upgraded to perform this action.
+</ParamField>
+
+<ParamField path="allowed_address_limit_exceeded" type="Error">
+
+- The maximum number of allowed addresses has been exceeded.
+</ParamField>
+
+<ParamField path="already_assigned" type="Error">
+
+- This resource is already assigned.
+</ParamField>
+
+<ParamField path="already_verified" type="Error">
+
+- This number is already verified.
+</ParamField>
+
+<ParamField path="address_has_no_valid_channels" type="Error">
+
+- The address has no valid channels.
+</ParamField>
+
+<ParamField path="auto_top_up_deactivated" type="Error">
+
+- Auto top-up is not active on this account.
+</ParamField>
+
+<ParamField path="authblock_is_invalid" type="Error">
+
+- The authblock is invalid or doesn't reference an existing subscriber.
+</ParamField>
+
+<ParamField path="authblock_is_expired" type="Error">
+
+- The expires_at timestamp of the subscriber from the authblock has passed.
+</ParamField>
+
+<ParamField path="billing_route_not_found" type="Error">
+
+- Unable to locate a billing route.
+</ParamField>
+
+<ParamField path="brand_not_unique" type="Error">
+
+- The CSP Brand Reference must be unique within the Space
+</ParamField>
+
+<ParamField path="call_id_is_duplicated" type="Error">
+
+- The provided call ID is already associated with an existing call.
+</ParamField>
+
+<ParamField path="call_update_failed" type="Error">
+
+- The call update could not be completed at this time. Please try again, and contact support if issues persist.
+</ParamField>
+
+<ParamField path="campaign_inactive" type="Error">
+
+- Numbers cannot be assigned to an inactive campaign
+</ParamField>
+
+<ParamField path="campaign_limit_exceeded" type="Error">
+
+- The campaign limit has been exceeded.
+</ParamField>
+
+<ParamField path="campaign_not_active" type="Error">
+
+- Campaign must be active.
+</ParamField>
+
+<ParamField path="campaign_not_found" type="Error">
+
+- The campaign ID provided could not be found.
+</ParamField>
+
+<ParamField path="cannot_cancel_in_progress" type="Error">
+
+- Cannot cancel an in-progress call.
+</ParamField>
+
+<ParamField path="cannot_process" type="Error">
+
+- The request cannot be processed right now.
+</ParamField>
+
+<ParamField path="cannot_redirect_not_in_progress" type="Error">
+
+- Call is not in-progress. Cannot redirect.
+</ParamField>
+
+<ParamField path="cannot_remove_assignment_from_integration_test" type="Error">
+
+- You cannot remove the assignment from an integration test campaign.
+</ParamField>
+
+<ParamField path="cannot_update_completed" type="Error">
+
+- Completed calls cannot be updated.
+</ParamField>
+
+<ParamField path="channel_has_missing_properties" type="Error">
+
+- Channel must have read or write property.
+</ParamField>
+
+<ParamField path="channel_name_is_reserved" type="Error">
+
+- The channel name uses a reserved prefix.
+</ParamField>
+
+<ParamField path="channel_name_size_limit_exceeded" type="Error">
+
+- The channel name exceeds the maximum allowed length.
+</ParamField>
+
+<ParamField path="channel_size_limit_exceeded" type="Error">
+
+- The number of channels exceeds the allowed limit.
+</ParamField>
+
+<ParamField path="chat_token_invalid_for_session" type="Error">
+
+- The provided token is invalid for the provided room session.
+</ParamField>
+
+<ParamField path="chat_token_is_invalid" type="Error">
+
+- The provided token is not a valid chat token.
+</ParamField>
+
+<ParamField path="contains_external_entities" type="Error">
+
+- XML contains external entity definitions which are not allowed for security reasons.
+</ParamField>
+
+<ParamField path="conversation_flow_steps_are_invalid" type="Error">
+
+- This value must be an array. Example: ["Intro", ["Introduce yourself", "Ask caller's name"], "Summarize the conversation and thank the caller"]
+</ParamField>
+
+<ParamField path="could_not_purchase" type="Error">
+
+- The resource could not be purchased.
+</ParamField>
+
+<ParamField path="destination_number_not_supported" type="Error">
+
+- The destination phone number is not supported.
+</ParamField>
+
+<ParamField path="document_version_mismatch" type="Error">
+
+- The document_version does not match the current record's document_version.
+</ParamField>
+
+<ParamField path="does_not_exist" type="Error">
+
+- This entry does not exist.
+</ParamField>
+
+<ParamField path="domain_has_no_password" type="Error">
+
+- The domain has not been configured with a password.
+</ParamField>
+
+<ParamField path="duplicate_skill_type" type="Error">
+
+- Only one skill of this type can exist per AI Agent.
+</ParamField>
+
+<ParamField path="exceeds_history_logs_limit" type="Error">
+
+- This value exceeds the allowed date limit.
+</ParamField>
+
+<ParamField path="exceeds_platform_stream_limit" type="Error">
+
+- Adding an additional stream would exceed the allowed number of streams per room.
+</ParamField>
+
+<ParamField path="feature_not_available" type="Error">
+
+- This feature is not available to this account.
+</ParamField>
+
+<ParamField path="file_already_exists" type="Error">
+
+- An asset already exists with this project, path, and filename.
+</ParamField>
+
+<ParamField path="file_can_not_be_opened" type="Error">
+
+- An error occurred trying to open the provided file.
+</ParamField>
+
+<ParamField path="file_exceeds_size_limit" type="Error">
+
+- The file exceeds the maximum allowed size.
+</ParamField>
+
+<ParamField path="file_not_found" type="Error">
+
+- The requested file could not be found (404 Not Found). Please check the URL and try again.
+</ParamField>
+
+<ParamField path="from_fabric_address_id_does_not_match_subscriber" type="Error">
+
+- The provided from_fabric_address_id does not match an address for the provided subscriber.
+</ParamField>
+
+<ParamField path="incompatible_parameters" type="Error">
+
+- The parameters that were input cannot be specified together.
+</ParamField>
+
+<ParamField path="incorrect_keyword_format" type="Error">
+
+- Keywords must be comma separated values with no space.
+</ParamField>
+
+<ParamField path="incorrect_number_of_sub_use_cases_low_volume" type="Error">
+
+- Mixed use case campaigns require minimum 2 and maximum 5 sub use cases.
+</ParamField>
+
+<ParamField path="incorrect_number_of_sub_use_cases_mixed" type="Error">
+
+- Mixed use case campaigns require minimum 2 and maximum 5 sub use cases.
+</ParamField>
+
+<ParamField path="inline_swml_or_swml_webhook_required" type="Error">
+
+- You must pass instructions through inline SWML or a URL to a SWML document.
+</ParamField>
+
+<ParamField path="insufficient_balance" type="Error">
+
+- This account has an insufficient balance.
+</ParamField>
+
+<ParamField path="invalid_addresses_for_transfer_skill" type="Error">
+
+- Addresses must contain non-empty values for name and destination
+</ParamField>
+
+<ParamField path="invalid_auth_token_permissions" type="Error">
+
+- Permissions list contains invalid selections. Valid permissions are calling, chat, fax, management, messaging, numbers, pubsub, storage, tasking, and video.
+</ParamField>
+
+<ParamField path="invalid_call_handler_for_external_swml_handler" type="Error">
+
+- Handler must be calling or messaging.
+</ParamField>
+
+<ParamField path="invalid_call_handler_for_swml_application" type="Error">
+
+- Handler must be external_url or script.
+</ParamField>
+
+<ParamField path="invalid_call_id_passed" type="Error">
+
+- The call ID must not point to a cXML call.
+</ParamField>
+
+<ParamField path="invalid_campaign_id" type="Error">
+
+- The campaign ID provided is invalid.
+</ParamField>
+
+<ParamField path="invalid_campaign_status" type="Error">
+
+- The campaign status is invalid.
+</ParamField>
+
+<ParamField path="invalid_command_attempted" type="Error">
+
+- The specified command is invalid.
+</ParamField>
+
+<ParamField path="invalid_content_type" type="Error">
+
+- Invalid content type.
+</ParamField>
+
+<ParamField path="invalid_destination_number" type="Error">
+
+- The destination phone number is invalid.
+</ParamField>
+
+<ParamField path="invalid_for_type" type="Error">
+
+- This is not valid for the current type.
+</ParamField>
+
+<ParamField path="invalid_for_page_chunking" type="Error">
+
+- Chunking parameters are not allowed for page chunking.
+</ParamField>
+
+<ParamField path="invalid_for_paragraph_chunking" type="Error">
+
+- Chunking parameters are not allowed for paragraph chunking.
+</ParamField>
+
+<ParamField path="invalid_for_sentence_chunking" type="Error">
+
+- Provided chunking parameters are not valid for sentence chunking. Allowed parameters are max_sentences_per_chunk and split_newlines.
+</ParamField>
+
+<ParamField path="invalid_for_sliding_chunking" type="Error">
+
+- Provided chunking parameters are not valid for sliding chunking. Allowed parameters are chunk_size and overlap_size.
+</ParamField>
+
+<ParamField path="invalid_group_configuration" type="Error">
+
+- Fabric addresses must form a valid conversation group (a single room or two non-room subscribers) and group ID must start with 'sw_'.
+</ParamField>
+
+<ParamField path="invalid_handler_use" type="Error">
+
+- Handler must be calling or messaging.
+</ParamField>
+
+<ParamField path="invalid_http_method" type="Error">
+
+- This request method must be GET or POST.
+</ParamField>
+
+<ParamField path="invalid_join_until_date" type="Error">
+
+- Join Until date can't be in the past of Join From date.
+</ParamField>
+
+<ParamField path="invalid_list_items" type="Error">
+
+- The list items are invalid.
+</ParamField>
+
+<ParamField path="invalid_media_type" type="Error">
+
+- The media type provided is invalid.
+</ParamField>
+
+<ParamField path="invalid_media_url" type="Error">
+
+- The media URL provided is invalid.
+</ParamField>
+
+<ParamField path="invalid_message_body" type="Error">
+
+- The message body provided is invalid.
+</ParamField>
+
+<ParamField path="invalid_mustache_syntax" type="Error">
+
+- The mustache syntax is invalid..
+</ParamField>
+
+<ParamField path="invalid_number_format" type="Error">
+
+- The phone number is not in the correct format. Please use E.164 format, i.e., +15558675309.
+</ParamField>
+
+<ParamField path="invalid_object" type="Error">
+
+- This object is invalid. Refer to the error message for more details.
+</ParamField>
+
+<ParamField path="invalid_parameter" type="Error">
+
+- This list contains an invalid entry.
+</ParamField>
+
+<ParamField path="invalid_pstn_destination" type="Error">
+
+- The PSTN destination is either missing or not in E164 format.
+</ParamField>
+
+<ParamField path="invalid_relay_connector_parameters" type="Error">
+
+- Send relay_connector_id to link to an existing connector or relay_connector_name and relay_connector_token to create a new one.
+</ParamField>
+
+<ParamField path="invalid_resource_for_handler" type="Error">
+
+- This resource is not valid for the specified handler type.
+</ParamField>
+
+<ParamField path="invalid_resource_type" type="Error">
+
+- The passed resource type is not a valid resource type.
+</ParamField>
+
+<ParamField path="invalid_room_session" type="Error">
+
+- The room session ID does not point to a valid room session.
+</ParamField>
+
+<ParamField path="invalid_sip_configuration" type="Error">
+
+- The SIP configuration value is invalid.
+</ParamField>
+
+<ParamField path="invalid_sip_destination" type="Error">
+
+- The SIP destination is either missing or could not be parsed.
+</ParamField>
+
+<ParamField path="invalid_state" type="Error">
+
+- The object is not in the correct state for this action.
+</ParamField>
+
+<ParamField path="invalid_sub_use_cases" type="Error">
+
+- This sub use case is not valid.
+</ParamField>
+
+<ParamField path="invalid_subproject_id" type="Error">
+
+- The subproject ID passed could not be found or does not belong to the project being used to authenticate the request.
+</ParamField>
+
+<ParamField path="invalid_token_format" type="Error">
+
+- The format of the provided token is invalid.
+</ParamField>
+
+<ParamField path="invalid_zendesk_capability" type="Error">
+
+- The Zendesk Capability is invalid.
+</ParamField>
+
+<ParamField path="list_contains_invalid_entries" type="Error">
+
+- The list contains an invalid entry.
+</ParamField>
+
+<ParamField path="malformed_xml" type="Error">
+
+- The XML is not well formed
+</ParamField>
+
+<ParamField path="max_queued_calls_exceeded" type="Error">
+
+- The maximum number of queued calls has been exceeded.
+</ParamField>
+
+<ParamField path="max_queued_messages_exceeded" type="Error">
+
+- has exceeded the maximum number of queued messages/calls for this number
+</ParamField>
+
+<ParamField path="media_size_exceeds_limit" type="Error">
+
+- The media size exceeds the allowed limit.
+</ParamField>
+
+<ParamField path="media_url_required" type="Error">
+
+- A media URL is required.
+</ParamField>
+
+<ParamField path="message_body_required" type="Error">
+
+- The message body is required.
+</ParamField>
+
+<ParamField path="message_length_exceeds_limit" type="Error">
+
+- The message length exceeds the allowed limit.
+</ParamField>
+
+<ParamField path="messaging_provider_invalid" type="Error">
+
+- Messaging provider is invalid.
+</ParamField>
+
+<ParamField path="missing_required_parameter" type="Error">
+
+- The passed value is blank or empty, but it is required.
+</ParamField>
+
+<ParamField path="missing_sub_use_cases" type="Error">
+
+- Sub use cases are required for MIXED and LOW_VOLUME_MIXED campaigns.
+</ParamField>
+
+<ParamField path="missing_sip_configuration" type="Error">
+
+- The SIP configuration requires at least one selection.
+</ParamField>
+
+<ParamField path="must_belong_to_project" type="Error">
+
+- The requested resource must belong to the project being used to authenticate the request.
+</ParamField>
+
+<ParamField path="must_specify_related_parameter" type="Error">
+
+- This parameter must be used in combination with a related parameter.
+</ParamField>
+
+<ParamField path="no_channel_specified" type="Error">
+
+- You must specify a channel.
+</ParamField>
+
+<ParamField path="no_devices_or_registrations" type="Error">
+
+- The fabric address has no registered devices or current online registrations.
+</ParamField>
+
+<ParamField path="no_fabric_addresses" type="Error">
+
+- The resource has no fabric addresses.
+</ParamField>
+
+<ParamField path="no_installed_applications" type="Error">
+
+- Fabric Application must be installed in this project.
+</ParamField>
+
+<ParamField path="no_registered_devices" type="Error">
+
+- The fabric address has no registered devices.
+</ParamField>
+
+<ParamField path="no_steered_resource" type="Error">
+
+- The project has a steering tag set, but no steered resource is available for that tag.
+</ParamField>
+
+<ParamField path="no_valid_number_for_random_send_as_selection" type="Error">
+
+- There is no purchased or verified number in the project to select as the send_as.
+</ParamField>
+
+<ParamField path="not_a_boolean" type="Error">
+
+- Value must be true or false.
+</ParamField>
+
+<ParamField path="not_a_datetime" type="Error">
+
+- Value must be a datetime.
+</ParamField>
+
+<ParamField path="not_a_hash" type="Error">
+
+- Value must be a valid hash.
+</ParamField>
+
+<ParamField path="not_a_refresh_token" type="Error">
+
+- Invalid token type. You must use a Refresh token.
+</ParamField>
+
+<ParamField path="not_a_string" type="Error">
+
+- Value must be formatted as a string.
+</ParamField>
+
+<ParamField path="not_a_valid_json" type="Error">
+
+- This value must be valid JSON.
+</ParamField>
+
+<ParamField path="not_allowed_on_subscription_plan" type="Error">
+
+- This feature is not allowed on your current subscription plan.
+</ParamField>
+
+<ParamField path="not_alphanumeric" type="Error">
+
+- Value must be alphanumeric.
+</ParamField>
+
+<ParamField path="not_an_array_of_hashes" type="Error">
+
+- Value must be an array of hashes.
+</ParamField>
+
+<ParamField path="not_an_array_of_strings" type="Error">
+
+- Value must be an array of strings.
+</ParamField>
+
+<ParamField path="not_an_http_url" type="Error">
+
+- Value must be an HTTP or HTTPS URL.
+</ParamField>
+
+<ParamField path="not_available_for_assignment" type="Error">
+
+- This can not be assigned to the current target.
+</ParamField>
+
+<ParamField path="not_e164" type="Error">
+
+- The number must be in E.164 format.
+</ParamField>
+
+<ParamField path="not_json_or_yaml" type="Error">
+
+- Value must be a valid JSON or YAML document.
+</ParamField>
+
+<ParamField path="not_parsable" type="Error">
+
+- Value is not parsable.
+</ParamField>
+
+<ParamField path="not_parseable" type="Error">
+
+- Value is not parseable.
+</ParamField>
+
+<ParamField path="not_purchased_or_verified" type="Error">
+
+- The phone number must be purchased or verified.
+</ParamField>
+
+<ParamField path="not_registered" type="Error">
+
+- The endpoint is not registered.
+</ParamField>
+
+<ParamField path="not_routable" type="Error">
+
+- Unable to locate a route to the destination number. Please check geographic permissions and the destination number, and contact Support if issues persist.
+</ParamField>
+
+<ParamField path="not_valid_for_caller_id" type="Error">
+
+- The value is not valid (must be an E.164 number, caller ID string or SIP URI)
+</ParamField>
+
+<ParamField path="not_voice_capable" type="Error">
+
+- The number must be voice capable.
+</ParamField>
+
+<ParamField path="not_unique_within_project" type="Error">
+
+- Value must be unique within project.
+</ParamField>
+
+<ParamField path="not_unique_within_space" type="Error">
+
+- Value must be unique within space.
+</ParamField>
+
+<ParamField path="number_assignment_cannot_be_removed" type="Error">
+
+- Number assignments can only be removed if they are active, failed, or assigned to a pending campaign.
+</ParamField>
+
+<ParamField path="number_blacklisted" type="Error">
+
+- The phone number is blacklisted.
+</ParamField>
+
+<ParamField path="number_not_supported" type="Error">
+
+- The phone number is not supported.
+</ParamField>
+
+<ParamField path="number_not_verified" type="Error">
+
+- 'From' phone number not verified.
+</ParamField>
+
+<ParamField path="number_of_assignments_exceed_limit" type="Error">
+
+- The requested assignment would exceed the allowed number of assigned numbers for the selected campaign.
+</ParamField>
+
+<ParamField path="out_of_sync" type="Error">
+
+- The resource is out of sync.
+</ParamField>
+
+<ParamField path="page_token_is_invalid" type="Error">
+
+- The provided page token is not valid.
+</ParamField>
+
+<ParamField path="page_token_required" type="Error">
+
+- A page token is required if the page_number value is greater than 0.
+</ParamField>
+
+<ParamField path="page_token_required_for_next_page" type="Error">
+
+- The page token is required when the page number is passed and greater than 0.
+</ParamField>
+
+<ParamField path="provided_id_is_unrecognized" type="Error">
+
+- The provided ID is unrecognized. Verify that the ID points to a valid resource belonging to the current project.
+</ParamField>
+
+<ParamField path="purchased_too_recently" type="Error">
+
+- This number was purchased too recently to release. Please wait 14 days after purchase to release this number or 30 days if your account is in trial mode. Contact Support for further assistance.
+</ParamField>
+
+<ParamField path="query_processing_failed" type="Error">
+
+- The query cannot be processed at the moment. Please try again later.
+</ParamField>
+
+<ParamField path="rate_limit_exceeded" type="Error">
+
+- The rate limit has been exceeded.
+</ParamField>
+
+<ParamField path="resource_assigned_as_handler" type="Error">
+
+- You cannot delete a resource if it is currently assigned as a call or message handler
+</ParamField>
+
+<ParamField path="resource_in_different_project" type="Error">
+
+- The fabric resource is in a different project.
+</ParamField>
+
+<ParamField path="resource_not_allowed" type="Error">
+
+- Calls to this fabric resource are not allowed with this authorization.
+</ParamField>
+
+<ParamField path="resource_not_callable" type="Error">
+
+- The fabric resource is not callable.
+</ParamField>
+
+<ParamField path="resource_not_deletable" type="Error">
+
+- Resource cannot be deleted.
+</ParamField>
+
+<ParamField path="room_is_not_chat_enabled" type="Error">
+
+- The room for the provided room session does not have chat enabled.
+</ParamField>
+
+<ParamField path="room_token_invalid_for_session" type="Error">
+
+- The provided token is invalid for the provided room session.
+</ParamField>
+
+<ParamField path="room_token_is_invalid" type="Error">
+
+- The provided token is not a valid room token.
+</ParamField>
+
+<ParamField path="sat_must_have_application" type="Error">
+
+- SignalWire Access Token must be associated with a Fabric Application to perform this action.
+</ParamField>
+
+<ParamField path="send_as_is_invalid" type="Error">
+
+- The provided send_as number is missing or invalid.
+</ParamField>
+
+<ParamField path="sip_gateway_uri_must_be_external" type="Error">
+
+- Only external SIP entities are supported for the SIP Gateway. Do not provide a SignalWire-managed SIP entity.
+</ParamField>
+
+<ParamField path="sort_order_validations" type="Error">
+
+- Sort order cannot be specified without sort by.
+</ParamField>
+
+<ParamField path="state_size_limit_exceeded" type="Error">
+
+- The state size exceeds the maximum allowed limit.
+</ParamField>
+
+<ParamField path="sub_use_cases_present" type="Error">
+
+- Sub use cases are not permitted for non mixed campaign use case.
+</ParamField>
+
+<ParamField path="terms_and_conditions_required" type="Error">
+
+- You must agree to the terms and conditions to complete registration.
+</ParamField>
+
+<ParamField path="to_destination_unresolvable" type="Error">
+
+- The destination does not resolve to a valid destination.
+</ParamField>
+
+<ParamField path="token_expired" type="Error">
+
+- Token has expired.
+</ParamField>
+
+<ParamField path="token_has_invalid_prefix" type="Error">
+
+- The token includes an invalid format prefix.
+</ParamField>
+
+<ParamField path="token_invalid" type="Error">
+
+- The provided token is invalid.
+</ParamField>
+
+<ParamField path="token_invalid_or_unadoptable" type="Error">
+
+- The provided FreeSWITCH token is incorrect or not ready for adoption
+</ParamField>
+
+<ParamField path="token_not_associated_with_video_room" type="Error">
+
+- The provided token is not associated with a valid video room.
+</ParamField>
+
+<ParamField path="too_many_verification_attempts" type="Error">
+
+- Too many incorrect attempts to verify this number.
+</ParamField>
+
+<ParamField path="too_many_verification_requests" type="Error">
+
+- Too many call requests without verifying this number.
+</ParamField>
+
+<ParamField path="too_many_verification_requests_in_time_frame" type="Error">
+
+- This account has had too many Verified Caller ID requests within a short timeframe. As a precaution, we have disabled creating more for a short time. Please contact support if you need this restriction lifted sooner.
+</ParamField>
+
+<ParamField path="unknown_download_error" type="Error">
+
+- An unexpected error occurred while downloading the file. Please try again later or contact support if the issue persists.
+</ParamField>
+
+<ParamField path="unrecognized_fabric_addresses" type="Error">
+
+- One or more of the provided fabric addresses is unrecognized. Check that all IDs are valid and belong to the current project.
+</ParamField>
+
+<ParamField path="unsupported_file_extension" type="Error">
+
+- Unsupported file extension.
+</ParamField>
+
+<ParamField path="unsupported_mode" type="Error">
+
+- This mode is not supported on this number.
+</ParamField>
+
+<ParamField path="unsupported_option" type="Error">
+
+- The specified option is not supported.
+</ParamField>
+
+<ParamField path="unsupported_region" type="Error">
+
+- This number must be from an allowed region.
+</ParamField>
+
+<ParamField path="uri_does_not_resolve_to_address" type="Error">
+
+- The provided URI does not resolve to a recognized address.
+</ParamField>
+
+<ParamField path="uri_does_not_resolve_to_resource" type="Error">
+
+- The provided URI does not resolve to a valid resource.
+</ParamField>
+
+<ParamField path="uri_resolves_to_unsupported_resource" type="Error">
+
+- The provided URI resolves to a resource that is unsupported for dialing.
+</ParamField>
+
+<ParamField path="upload_error" type="Error">
+
+- There was an error while uploading the file. Please try again.
+</ParamField>
+
+<ParamField path="url_failed_to_parse" type="Error">
+
+- An unknown error occurred when parsing the provided URL.
+</ParamField>
+
+<ParamField path="url_is_unsafe" type="Error">
+
+- URL must not point to internal/private networks.
+</ParamField>
+
+<ParamField path="value_not_unique" type="Error">
+
+- This value **must** be unique.
+</ParamField>
+
+<ParamField path="verification_request_too_soon" type="Error">
+
+- This number has received a verification call too recently. Please wait a minute before requesting another call.
+</ParamField>

@@ -1,0 +1,87 @@
+---
+title: address.getAddresses
+slug: /signalwire-client/address-get-addresses
+description: Retrieve and filter addresses available in your SignalWire Space with pagination and sorting options.
+---
+
+import APIField from '@site/src/components/APIField';
+
+Retrieves addresses available to the current subscriber with filtering, sorting, and pagination.
+
+## Signature
+
+```typescript
+address.getAddresses(params?: GetAddressesParams): Promise<GetAddressesResult>
+```
+
+## Parameters
+
+<APIField name="params" type="GetAddressesParams">
+  Optional configuration for filtering and sorting addresses.
+</APIField>
+
+<APIField name="params.type" type="string">
+  Filter addresses by type (e.g., phone number, SIP endpoint).
+</APIField>
+
+<APIField name="params.displayName" type="string">
+  Filter addresses by their display name.
+</APIField>
+
+<APIField name="params.pageSize" type="number">
+  Number of results to return per page.
+</APIField>
+
+<APIField name="params.sortBy" type="'name' | 'created_at'">
+  Field to sort results by. Can be either `'name'` or `'created_at'`.
+</APIField>
+
+<APIField name="params.sortOrder" type="'asc' | 'desc'">
+  Sort order. Can be either `'asc'` (ascending) or `'desc'` (descending).
+</APIField>
+
+## Returns
+
+**Type:** `Promise<PaginatedResponse<GetAddressesResult>>`
+
+Returns a Promise that resolves with a paginated list of address details. 
+
+For full type information, see the [`GetAddressesResult`](../../Types/index.mdx#getaddressesresult) type.
+
+## Examples
+
+### Get all addresses
+
+```typescript
+const result = await client.address.getAddresses()
+
+console.log('Available addresses:', result.data)
+```
+
+### Filter and sort addresses
+
+```typescript
+const result = await client.address.getAddresses({
+  displayName: 'Support',
+  sortBy: 'created_at',
+  sortOrder: 'desc',
+  pageSize: 10
+})
+
+console.log('Recent support addresses:', result.data)
+```
+
+### Navigate paginated results
+
+```typescript
+const result = await client.address.getAddresses({
+  pageSize: 10
+})
+
+console.log('First page:', result.data)
+
+if (result.hasNext) {
+  const nextPage = await result.nextPage()
+  console.log('Second page:', nextPage.data)
+}
+```

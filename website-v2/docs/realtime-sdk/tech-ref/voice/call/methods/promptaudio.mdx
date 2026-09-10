@@ -1,0 +1,140 @@
+---
+title: "promptAudio"
+slug: /node/reference/voice/call/prompt-audio
+description: promptAudio method for the Call class.
+toc_max_heading_level: 3
+---
+
+[callprompt-onstarted]: /docs/server-sdk/node/reference/voice/call-prompt#onstarted
+[callprompt]: /docs/server-sdk/node/reference/voice/call-prompt
+[collectdigitsconfig]: /docs/server-sdk/node/reference/voice/types#collectdigitsconfig
+[collectspeechconfig]: /docs/server-sdk/node/reference/voice/types#collectspeechconfig
+
+### promptAudio
+
+- **promptAudio**(`params`): `Promise`\<[`CallPrompt`][callprompt]>
+
+Play an audio while collecting user input from the call, such as `digits` or `speech`.
+
+#### Parameters
+
+<ParamField path="params" type="object" required>
+  Object containing the parameters for prompting the user for input while playing audio.
+</ParamField>
+
+<Indent>
+<ParamField path="url" type="string" required>
+  HTTP(s) URL to an audio resource to play.
+</ParamField>
+
+<ParamField path="digits" type="CollectDigitsConfig">
+  Configuration for collecting digits. You must either set this, or `speech`. See [`CollectDigitsConfig`][collectdigitsconfig].
+</ParamField>
+
+<ParamField path="speech" type="CollectSpeechConfig">
+  Configuration for collecting speech. You must either set this, or `digits`. Pass an empty object to use the default configuration. See [`CollectSpeechConfig`][collectspeechconfig].
+</ParamField>
+
+<ParamField path="initialTimeout" type="number" default="4">
+  Initial timeout in seconds.
+</ParamField>
+
+<ParamField path="volume" type="number" default="0">
+  Volume value between -40dB and +40dB where 0 is unchanged.
+</ParamField>
+
+<ParamField path="listen" type="object">
+  Callback to listen for events. List of prompt events can be found [here][callprompt]. Example event: [`onStarted`][callprompt-onstarted].
+</ParamField>
+</Indent>
+
+#### Returns
+
+`Promise`\<[`CallPrompt`][callprompt]>
+
+A promise that resolves to a [`CallPrompt`][callprompt] object that you can use to
+view the current state and results of the `prompt` session.
+
+#### Examples
+
+**Digits Example**
+
+In this example, we dial a phone number and prompt for `digits` while playing audio in the background.
+After the digits are entered or a timeout occurs, the prompt session will end and return the digits results,
+and the call will hangup.
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+const voiceClient = client.voice;
+
+// Listen for incoming calls
+await voiceClient.listen({
+  topics: ["office"],
+  onCallReceived: async (call) => {
+    console.log("Call received");
+    // Answer the call
+    call.answer();
+    // Play audio on the call while prompting for digits. After the digits are entered or a timeout occurs, the prompt session will end and return the digits results, and the call will hangup.
+    await call.promptAudio({
+      url: "https://cdn.signalwire.com/default-music/welcome.mp3",
+      digits: {
+        max: 4,
+        digitTimeout: 10,
+        terminators: "#*"
+      },
+      listen: {
+        onStarted: () => console.log("Prompt started!"),
+        onFailed: () => console.log("Prompt failed!"),
+        onUpdated: (promptResult) => console.log("Prompt updated!", promptResult.result),
+        onEnded: (promptResult) => {
+          console.log("Prompt ended!", promptResult.result);
+          call.hangup();
+        }
+      }
+    }).onStarted();
+  }
+});
+```
+
+**Speech Example**
+
+In this example, we dial a phone number and prompt for `speech` while playing audio in the background.
+After the digits are entered or a timeout occurs, the prompt session will end and return the digits results,
+and the call will hangup.
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+const voiceClient = client.voice;
+
+// Listen for incoming calls
+await voiceClient.listen({
+  topics: ["office"],
+  onCallReceived: async (call) => {
+    console.log("Call received");
+    // Answer the call
+    call.answer();
+    // Play TTS on the call
+    await call.promptAudio({
+      url: "https://cdn.signalwire.com/default-music/welcome.mp3",
+      speech: {
+        model: "enhanced.phone_call",
+      },
+      listen: {
+        onStarted: () => console.log("Prompt started!"),
+        onFailed: () => console.log("Prompt failed!"),
+        onUpdated: (promptResult) => console.log("Prompt updated!", promptResult.result),
+        onEnded: (promptResult) => {
+          console.log("Prompt ended!", promptResult.result);
+          call.hangup();
+        }
+      }
+    }).onStarted();
+  }
+});
+```

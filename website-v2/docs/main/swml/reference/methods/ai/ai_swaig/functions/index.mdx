@@ -1,0 +1,299 @@
+---
+hide_title: false
+slug: /swml/reference/ai/swaig/functions
+title: functions
+description: Functions that can be executed during the interaction with the AI.
+toc_max_heading_level: 3
+---
+import WebHookUrlPartial from '@site/docs/_partials/swml/_web-hook-url.mdx';
+
+
+[reserved-functions]: #reserved-functions
+[post-prompt]: /docs/swml/reference/ai#post_prompt
+
+An array of JSON objects to define functions that can be executed during the interaction with the AI.
+
+## **Properties**
+
+<ParamField path="SWAIG.functions" type="object[]">
+  An array of JSON objects that accept the following properties.
+</ParamField>
+
+<Indent>
+
+<ParamField path="functions[].description" type="string" required={true}>
+  A description of the context and purpose of the function, to explain to the agent when to use it.
+</ParamField>
+
+
+<ParamField path="functions[].function" type="string" required={true}>
+  A unique name for the function. This can be any user-defined string or can reference a reserved function. Reserved functions are SignalWire functions that will be executed at certain points in the conversation. To learn more about reserved functions, see [Reserved Functions][reserved-functions].
+</ParamField>
+
+
+<ParamField path="functions[].active" type="boolean" default="true">
+  Whether the function is active.
+</ParamField>
+
+
+<ParamField path="functions[].data_map" type="object">
+  An object that processes function inputs and executes operations through expressions, webhooks, or direct output. Properties are evaluated in strict priority order: (1) expressions, (2) webhooks, (3) output. Evaluation stops at the first property that returns a valid output result, similar to a return statement in a function.
+
+  See [`data_map`](/docs/swml/reference/ai/swaig/functions/data-map) for additional details.
+</ParamField>
+
+
+<ParamField path="functions[].parameters" type="object">
+  A JSON object that defines the expected user input parameters and their validation rules for the function.
+
+  See [`parameters`](/docs/swml/reference/ai/swaig/functions/parameters) for additional details.
+</ParamField>
+
+
+#### fillers {#fillers}
+
+<ParamField path="functions[].fillers" type="object">
+  An object containing language-specific arrays of filler phrases that are played when calling a SWAIG function. These fillers help break silence between responses and are played asynchronously during the function call. Each key is a [language code](/docs/swml/reference/ai/swaig#filler-language-codes) and each value is an array of filler phrases selected from randomly.
+</ParamField>
+
+
+<ParamField path="functions[].skip_fillers" type="boolean" default="false">
+  Skips the top-level fillers specified in [`ai.languages`](/docs/swml/reference/ai/languages) (which includes `speech_fillers` and `function_fillers`). When set to `true`, only function-specific fillers defined directly on [`SWAIG.functions.fillers`](/docs/swml/reference/ai/swaig/functions) will play.
+</ParamField>
+
+
+<ParamField path="functions[].meta_data" type="object">
+  A powerful and flexible environmental variable which can accept arbitrary data that is set initially in the SWML script or from the SWML [`set_meta_data` action](/docs/swml/reference/ai/swaig/functions/data-map#actions). This data can be referenced **locally** to the function. All contained information can be accessed and expanded within the prompt - for example, by using a template string.
+</ParamField>
+
+
+<ParamField path="functions[].meta_data_token" type="string" default="Set by SignalWire">
+  Scoping token for `meta_data`. If not supplied, metadata will be scoped to function's `web_hook_url`.
+</ParamField>
+
+
+<ParamField path="functions[].wait_file" type="string">
+  A file to play while the function is running. `wait_file_loops` can specify the amount of times that files should continously play.
+</ParamField>
+
+
+<ParamField path="functions[].wait_file_loops" type="string | integer">
+  The amount of times that `wait_file` should continuously play/loop.
+</ParamField>
+
+
+<ParamField path="functions[].wait_for_fillers" type="boolean" default="false">
+  Whether to wait for fillers to finish playing before continuing with the function.
+</ParamField>
+
+
+<ParamField path="functions[].web_hook_url" type="string">
+  Function-specific URL to send status callbacks and reports to. Takes precedence over a default setting. Authentication can also be set in the url in the format of `username:password@url`.
+</ParamField>
+
+
+<ParamField path="functions[].purpose" type="string" deprecated={true}>
+  Deprecated. Use `description` instead.
+</ParamField>
+
+
+<ParamField path="functions[].argument" type="object" deprecated={true}>
+  Deprecated. Use `parameters` instead.
+</ParamField>
+
+
+<WebHookUrlPartial />
+
+</Indent>
+
+## **Reserved Functions**
+
+Reserved functions are special SignalWire functions that are automatically triggered at specific points during a conversation.
+You define them just like any other SWAIG function, but their names correspond to built-in logic on the SignalWire platform,
+allowing them to perform specific actions at the appropriate time.
+
+<Warning title="Function name conflicts">
+Do not use reserved function names for your own SWAIG functions unless you want to use the reserved function's built-in behavior.
+Otherwise, your function may not work as expected.
+</Warning>
+
+### List of Reserved Functions
+
+<ParamField path="start_hook" type="function">
+  Triggered when the call is answered. Sends the set properties of the function to the defined `web_hook_url`.
+</ParamField>
+
+
+<ParamField path="stop_hook" type="function">
+  Triggered when the call is ended. Sends the set properties of the function to the defined `web_hook_url`.
+</ParamField>
+
+
+<ParamField path="summarize_conversation" type="function">
+  Triggered when the call is ended. The [`post_prompt`][post-prompt] must be defined for this function to be triggered. Provides a summary of the conversation and any set properties to the defined `web_hook_url`.
+</ParamField>
+
+
+<Warning title="Where are my function properties?">
+If the AI is not returning the properties you set in your SWAIG function, it may be because a reserved function was triggered before
+those properties were available. To ensure your function receives all necessary information, make sure the AI has access to the
+required property values before the reserved function is called. Any property missing at the time the reserved function runs will
+not be included in the data sent back.
+</Warning>
+
+## Diagram examples
+
+```mermaid
+sequenceDiagram
+    participant SW System
+    participant User
+    participant AI
+    participant SWAIG
+
+    %% Call starts
+    SW System->>AI: Event: Call answered
+    AI->>SWAIG: Trigger reserved function start_hook
+    SWAIG->>AI: start_hook response
+
+    %% User asks a simple question (no function needed)
+    User->>AI: "Hello, who am I speaking with?"
+    Note right of AI: Intent does NOT match a function
+    AI->>User: "You are speaking with the SignalWire assistant."
+
+    %% User asks for weather (triggers function)
+    User->>AI: "What's the weather in Paris?"
+    Note right of AI: Intent matches get_weather function
+    AI->>SWAIG: Call get_weather with location=Paris
+    SWAIG->>AI: Response payload:<br>{ "location": "Paris", "temp": "75°F", "condition": "Sunny" }
+    AI->>User: "It's sunny and 75°F in Paris."
+
+    %% Call ends
+    SW System->>AI: Event: Call ended
+    AI->>SWAIG: Trigger reserved function stop_hook
+    SWAIG->>AI: stop_hook response
+
+    %% Conversation ends (post_prompt defined)
+    SW System->>AI: Event: Conversation ended
+    AI->>SWAIG: Trigger reserved function summarize_conversation
+```
+
+## SWML **Examples**
+
+### Using SWAIG Functions
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - ai:
+        post_prompt_url: "https://example.com/my-api"
+        prompt:
+          text: |
+            You are a helpful assistant that can provide information to users about a destination.
+            At the start of the conversation, always ask the user for their name.
+            You can use the appropriate function to get the phone number, address,
+            or weather information.
+        post_prompt:
+          text: "Summarize the conversation."
+        SWAIG:
+          includes:
+            - functions:
+                - get_phone_number
+                - get_address
+              url: https://example.com/functions
+              user: me
+              pass: secret
+          defaults:
+            web_hook_url: https://example.com/my-webhook
+            web_hook_auth_user: me
+            web_hook_auth_pass: secret
+          functions:
+            - function: get_weather
+              description: To determine what the current weather is in a provided location.
+              parameters:
+                properties:
+                  location:
+                    type: string
+                    description: The name of the city to find the weather from.
+                type: object
+            - function: summarize_conversation
+              description: Summarize the conversation.
+              parameters:
+                type: object
+                properties:
+                  name:
+                    type: string
+                    description: The name of the user.
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "ai": {
+          "post_prompt_url": "https://example.com/my-api",
+          "prompt": {
+            "text": "You are a helpful assistant that can provide information to users about a destination.\nAt the start of the conversation, always ask the user for their name.\nYou can use the appropriate function to get the phone number, address,\nor weather information.\n"
+          },
+          "post_prompt": {
+            "text": "Summarize the conversation."
+          },
+          "SWAIG": {
+            "includes": [
+              {
+                "functions": [
+                  "get_phone_number",
+                  "get_address"
+                ],
+                "url": "https://example.com/functions",
+                "user": "me",
+                "pass": "secret"
+              }
+            ],
+            "defaults": {
+              "web_hook_url": "https://example.com/my-webhook",
+              "web_hook_auth_user": "me",
+              "web_hook_auth_pass": "secret"
+            },
+            "functions": [
+              {
+                "function": "get_weather",
+                "description": "To determine what the current weather is in a provided location.",
+                "parameters": {
+                  "properties": {
+                    "location": {
+                      "type": "string",
+                      "description": "The name of the city to find the weather from."
+                    }
+                  },
+                  "type": "object"
+                }
+              },
+              {
+                "function": "summarize_conversation",
+                "description": "Summarize the conversation.",
+                "parameters": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "description": "The name of the user."
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>

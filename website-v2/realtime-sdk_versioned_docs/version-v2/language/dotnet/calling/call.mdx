@@ -1,0 +1,1893 @@
+---
+title: "SignalWire.Relay.Calling.Call"
+slug: /dotnet/reference/calling/call
+toc_max_heading_level: 3
+---
+
+[call-detect]: /docs/server-sdk/v2/dotnet/reference/calling/call-detect-fax-tone
+[call-media]: /docs/server-sdk/v2/dotnet/reference/calling/call-media-ringtone-params
+[connectaction]: /docs/server-sdk/v2/dotnet/reference/calling/actions/connect
+[link-10]: #playsilence
+[link-11]: #playtts
+[link-12]: #playringtone
+[link-13]: #play
+[link-14]: #promptaudio
+[link-15]: #prompttts
+[link-16]: #prompt
+[link-17]: #promptringtone
+[link-18]: #record
+[link-19]: #senddigits
+[link-1]: #detectansweringmachineasync
+[link-20]: #tap
+[link-21]: #waitforanswered
+[link-22]: #waitforended
+[link-23]: #waitforending
+[link-24]: #waitforringing
+[link-25]: #waitfor
+[link-2]: #connect
+[link-3]: #detectdigit
+[link-4]: #detectfax
+[link-5]: #detect
+[link-6]: #detecthuman
+[link-7]: #detectmachine
+[link-8]: #faxsend
+[link-9]: #playaudio
+[link]: #detectansweringmachine
+[newphonecall]: /docs/server-sdk/v2/dotnet/reference/calling
+[signalwire-relay-calling-answerresult]: /docs/server-sdk/v2/dotnet/reference/calling/results/answer
+[signalwire-relay-calling-call]: /docs/server-sdk/v2/dotnet/reference/calling/call
+[signalwire-relay-calling-callcollect-3]: /docs/server-sdk/v2/dotnet/reference/calling/call-collect
+[signalwire-relay-calling-calldetect]: /docs/server-sdk/v2/dotnet/reference/calling/call-detect
+[signalwire-relay-calling-calldevice]: /docs/server-sdk/v2/dotnet/reference/calling/call-device
+[signalwire-relay-calling-callmedia-2]: /docs/server-sdk/v2/dotnet/reference/calling/call-media
+[signalwire-relay-calling-callrecord]: /docs/server-sdk/v2/dotnet/reference/calling/call-record
+[signalwire-relay-calling-callstate-11]: /docs/server-sdk/v2/dotnet/reference/calling/call-state
+[signalwire-relay-calling-calltap]: /docs/server-sdk/v2/dotnet/reference/calling/call-tap
+[signalwire-relay-calling-calltapdevice]: /docs/server-sdk/v2/dotnet/reference/calling/call-tap-device
+[signalwire-relay-calling-connectaction]: /docs/server-sdk/v2/dotnet/reference/calling/actions/connect
+[signalwire-relay-calling-connectresult]: /docs/server-sdk/v2/dotnet/reference/calling/results/connect
+[signalwire-relay-calling-detectaction-11]: /docs/server-sdk/v2/dotnet/reference/calling/actions/detect
+[signalwire-relay-calling-detectresult-6]: /docs/server-sdk/v2/dotnet/reference/calling/results/detect
+[signalwire-relay-calling-dialresult]: /docs/server-sdk/v2/dotnet/reference/calling/results/dial
+[signalwire-relay-calling-disconnectreason]: /docs/server-sdk/v2/dotnet/reference/calling/disconnect-reason
+[signalwire-relay-calling-faxaction-3]: /docs/server-sdk/v2/dotnet/reference/calling/actions/fax
+[signalwire-relay-calling-faxresult-1]: /docs/server-sdk/v2/dotnet/reference/calling/results/fax
+[signalwire-relay-calling-hangupresult]: /docs/server-sdk/v2/dotnet/reference/calling/results/hangup
+[signalwire-relay-calling-playaction-9]: /docs/server-sdk/v2/dotnet/reference/calling/actions/play
+[signalwire-relay-calling-playresult-4]: /docs/server-sdk/v2/dotnet/reference/calling/results/play
+[signalwire-relay-calling-promptaction-7]: /docs/server-sdk/v2/dotnet/reference/calling/actions/prompt
+[signalwire-relay-calling-promptresult-3]: /docs/server-sdk/v2/dotnet/reference/calling/results/prompt
+[signalwire-relay-calling-recordaction-1]: /docs/server-sdk/v2/dotnet/reference/calling/actions/record
+[signalwire-relay-calling-recordresult-1]: /docs/server-sdk/v2/dotnet/reference/calling/results/record
+[signalwire-relay-calling-senddigitsaction-1]: /docs/server-sdk/v2/dotnet/reference/calling/actions/send-digits
+[signalwire-relay-calling-senddigitsresult]: /docs/server-sdk/v2/dotnet/reference/calling/results/send-digits
+[signalwire-relay-calling-tapaction]: /docs/server-sdk/v2/dotnet/reference/calling/actions/tap
+[signalwire-relay-calling-tapresult]: /docs/server-sdk/v2/dotnet/reference/calling/results/tap
+[tapaction]: /docs/server-sdk/v2/dotnet/reference/calling/actions/tap
+All calls in SignalWire have a common generic interface, `Call`. A `Call` is a connection between SignalWire and another device.
+
+## Properties
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `ID` | string | The unique identifier of the call. |
+| `Type` | string | The type of call. Only `phone` is currently supported. |
+| `State` | [`SignalWire.Relay.Calling.CallState`][signalwire-relay-calling-callstate-11] | The current state of the call. |
+| `PreviousState` | [`SignalWire.Relay.Calling.CallState`][signalwire-relay-calling-callstate-11] | The previous state of the call. |
+| `Context` | string | The context the call belongs to. |
+| `Peer` | [`SignalWire.Relay.Calling.Call`][signalwire-relay-calling-call] | The call your original call is connected to. |
+| `Active` | bool | Indicates the call is active. |
+| `Ended` | bool | Indicates the call has ended. |
+| `Answered` | bool | Indicates the call has been answered. |
+| `Busy` | bool | Indicates the call ended with a busy signal. |
+
+## Methods
+
+### AMD
+
+Alias for [`DetectAnsweringMachine`][link].
+
+### AMDAsync
+
+Alias for [`DetectAnsweringMachineAsync`][link-1].
+
+### Answer
+
+Answer an inbound call.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+[`SignalWire.Relay.Calling.AnswerResult`][signalwire-relay-calling-answerresult] - The result object to interact with.
+
+**Examples**
+
+> Answer an inbound call and check if it was successful.
+
+```csharp
+AnswerResult resultAnswer = call.Answer();
+if (resultAnswer.Successful) {
+    // The call has been answered
+}
+```
+
+### Connect
+
+Attempt to connect an existing call to a new outbound call and waits until one of the remote parties answers the call or the connect fails.<br/>This method involves complex nested parameters.
+You can connect to multiple devices in series, parallel, or any combination of both with creative use of the parameters. Series implies one device at a time, while parallel implies multiple devices at the same time.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `devices` | List&lt;List&lt;[`SignalWire.Relay.Calling.CallDevice`][signalwire-relay-calling-calldevice]&gt;&gt; | <span className="required-arg">required</span> | A nested list of devices. Outer list is dialed in series, while inner list is called in parallel to each other. |
+| `ringback` | List&lt;[`SignalWire.Relay.Calling.CallMedia`][signalwire-relay-calling-callmedia-2]&gt; | <span className="optional-arg">optional</span> | A list of ringback media to be played while waiting for the call to be answered. |
+
+**Returns**
+
+[`SignalWire.Relay.Calling.ConnectResult`][signalwire-relay-calling-connectresult] - The result object to interact with.
+
+**Examples**
+
+> Trying to connect a call by calling in series +18991114444 and +18991114445.
+
+```csharp
+ConnectResult resultConnect = call.Connect(new List<List<CallDevice>>
+{
+    new List<CallDevice>
+    {
+        new CallDevice
+        {
+            Type = CallDevice.DeviceType.phone,
+            Parameters = new CallDevice.PhoneParams
+            {
+                ToNumber = "+18991114444",
+                FromNumber = "+1YYYYYYYYYY",
+                Timeout = 30,
+            }
+        }
+    },
+    new List<CallDevice>
+    {
+        new CallDevice
+        {
+            Type = CallDevice.DeviceType.phone,
+            Parameters = new CallDevice.PhoneParams
+            {
+                ToNumber = "+18991114445",
+                FromNumber = "+1YYYYYYYYYY",
+                Timeout = 20,
+            }
+        }
+    }
+},
+ringback: new List<CallMedia>
+{
+    new CallMedia
+    {
+        Type = CallMedia.MediaType.ringtone,
+	Parameters = new CallMedia.RingtoneParams
+        {
+            Name = "us"
+        }
+    }
+});
+
+if (resultConnect.Successful) {
+    // The call was connected, and is available at resultConnect.Call
+}
+```
+
+> Combine serial and parallel calling. Call +18991114443 first and - if it doesn't answer - try calling in parallel +18991114444 and +18991114445. If none of the devices answer, continue the same process with +18991114446 and +18991114447.
+
+```csharp
+ConnectResult resultConnect = call.Connect(new List<List<CallDevice>>
+{
+    new List<CallDevice>
+    {
+        new CallDevice
+        {
+            Type = CallDevice.DeviceType.phone,
+            Parameters = new CallDevice.PhoneParams
+            {
+                ToNumber = "+18991114443",
+                FromNumber = "+1YYYYYYYYYY",
+                Timeout = 30,
+            }
+        }
+    },
+    new List<CallDevice>
+    {
+        new CallDevice
+        {
+            Type = CallDevice.DeviceType.phone,
+            Parameters = new CallDevice.PhoneParams
+            {
+                ToNumber = "+18991114444",
+                FromNumber = "+1YYYYYYYYYY",
+                Timeout = 30,
+            }
+        },
+        new CallDevice
+        {
+            Type = CallDevice.DeviceType.phone,
+            Parameters = new CallDevice.PhoneParams
+            {
+                ToNumber = "+18991114445",
+                FromNumber = "+1YYYYYYYYYY",
+                Timeout = 20,
+            }
+        }
+    },
+    new List<CallDevice>
+    {
+        new CallDevice
+        {
+            Type = CallDevice.DeviceType.phone,
+            Parameters = new CallDevice.PhoneParams
+            {
+                ToNumber = "+18991114446",
+                FromNumber = "+1YYYYYYYYYY",
+                Timeout = 30,
+            }
+        },
+        new CallDevice
+        {
+            Type = CallDevice.DeviceType.phone,
+            Parameters = new CallDevice.PhoneParams
+            {
+                ToNumber = "+18991114447",
+                FromNumber = "+1YYYYYYYYYY",
+                Timeout = 20,
+            }
+        }
+    }
+});
+
+if (resultConnect.Successful) {
+    // The call was connected, and is available at resultConnect.Call
+}
+```
+
+### ConnectAsync
+
+Asynchronous version of [`Connect`][link-2]. It does not wait the connect to complete or fail, but returns a [`ConnectAction`][connectaction] object you can interact with.
+
+**Parameters**
+
+See [`Connect`][link-2] for the parameter list.
+
+**Returns**
+
+[`SignalWire.Relay.Calling.ConnectAction`][signalwire-relay-calling-connectaction] - The action object to interact with.
+
+**Examples**
+
+> Trying to connect a call by calling in series +18991114444 and +18991114445.
+
+```csharp
+ConnectAction actionConnect = call.ConnectAsync(new List<List<CallDevice>>
+{
+    new List<CallDevice>
+    {
+        new CallDevice
+        {
+            Type = CallDevice.DeviceType.phone,
+            Parameters = new CallDevice.PhoneParams
+            {
+                ToNumber = "+18991114444",
+                FromNumber = "+1YYYYYYYYYY",
+                Timeout = 30,
+            }
+        }
+    },
+    new List<CallDevice>
+    {
+        new CallDevice
+        {
+            Type = CallDevice.DeviceType.phone,
+            Parameters = new CallDevice.PhoneParams
+            {
+                ToNumber = "+18991114445",
+                FromNumber = "+1YYYYYYYYYY",
+                Timeout = 20,
+            }
+        }
+    }
+});
+
+// Do other stuff while the call is being connected
+
+if (actionConnect.Completed && actionConnect.Result.Successful) {
+    // The call was connected, and is available at actionConnect.Result.Call
+}
+```
+
+### Detect
+
+Run a detector on the call and waits until the first detect update comes through. This is a general method for all types of detecting, see [`DetectAnsweringMachine`][link], [`DetectDigit`][link-3], or [`DetectFax`][link-4] for more specific usage.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `detect` | [`SignalWire.Relay.Calling.CallDetect`][signalwire-relay-calling-calldetect] | <span className="required-arg">required</span> | The configuration for detection. |
+
+**Returns**
+
+[`SignalWire.Relay.Calling.DetectResult`][signalwire-relay-calling-detectresult-6] - The result object to interact with.
+
+**Examples**
+
+> Start a detector and if successful, checks whether the `Type` is human from the [`SignalWire.Relay.Calling.DetectResult`][signalwire-relay-calling-detectresult-6] object.
+
+```csharp
+DetectResult resultDetect = call.Detect(
+    new CallDetect
+    {
+        Type = CallDetect.DetectType.machine,
+        Parameters = new CallDetect.MachineParams
+        {
+        }
+    });
+
+if (resultDetect.Successful)
+{
+    if (resultDetect.Type == DetectResultType.Human)
+    {
+        // ...
+    }
+}
+```
+
+### DetectAsync
+
+Asynchronous version of [`Detect`][link-5]. It does not wait for the detection update but returns a [`SignalWire.Relay.Calling.DetectAction`][signalwire-relay-calling-detectaction-11] object you can interact with. This is a general method for all types of detecting, see [`DetectAnsweringMachine`][link], [`DetectDigit`][link-3], or [`DetectFax`][link-4] for more specific usage.
+
+**Parameters**
+
+See [`Detect`][link-5] for the parameter list.
+
+**Returns**
+
+[`SignalWire.Relay.Calling.DetectAction`][signalwire-relay-calling-detectaction-11] - The action object to interact with.
+
+**Examples**
+
+> Start a detector and stop it after 5 seconds.
+
+```csharp
+DetectAction actionDetect = call.DetectAsync(
+    new CallDetect
+    {
+        Type = CallDetect.DetectType.machine,
+        Parameters = new CallDetect.MachineParams
+        {
+        }
+    });
+
+Thread.Sleep(5000);
+
+actionDetect.Stop();
+```
+
+### DetectAnsweringMachine
+
+This is a helper function that refines the use of [`Detect`][link-5]. This simplifies detecting machines.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `initialTimeout` | double | <span className="optional-arg">optional</span> | The length of time in seconds to wait for the initial voice before giving up. Default to `4.5`. |
+| `endSilenceTimeout` | double | <span className="optional-arg">optional</span> | The length of time in seconds to wait for the voice to finish. Default to `1.0`. |
+| `machineVoiceThreshold` | double | <span className="optional-arg">optional</span> | The length of time in seconds for the voice to trigger a machine detection. Default to `1.25`. |
+| `machineWordsThreshold` | int | <span className="optional-arg">optional</span> | The quantity of words to trigger a machine detection. Default to `6`. |
+| `waitForBeep` | bool? | <span className="optional-arg">optional</span> | Indicates whether the detector should return immediately upon detecting a machine or if it should wait for the machine's beep to return. Default to `false`. |
+
+**Returns**
+
+[`SignalWire.Relay.Calling.DetectResult`][signalwire-relay-calling-detectresult-6] - The result object to interact with.
+
+**Examples**
+
+> Detect machine.
+
+```csharp
+DetectResult resultDetect = call.DetectAnsweringMachine();
+```
+
+### DetectAnsweringMachineAsync
+
+Asynchronous version of [`DetectAnsweringMachine`][link]. It does not wait for the first detection update, but returns a [`SignalWire.Relay.Calling.DetectAction`][signalwire-relay-calling-detectaction-11] object you can interact with.
+
+**Parameters**
+
+See [`DetectAnsweringMachine`][link] for the parameter list.
+
+**Returns**
+
+[`SignalWire.Relay.Calling.DetectAction`][signalwire-relay-calling-detectaction-11] - The action object to interact with.
+
+**Examples**
+
+> Detect machine and stop after 5 seconds.
+
+```csharp
+// within an asynchronous function ..
+DetectAction actionDetect = call.DetectAnsweringMachineAsync();
+
+Thread.Sleep(5000);
+
+actionDetect.Stop();
+```
+
+### DetectDigit
+
+This is a helper function that refines the use of [`Detect`][link-5]. This simplifies detecting DTMF.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `digits` | string | <span className="optional-arg">optional</span> | The digits to detect. Default to `0123456789*#`. |
+
+**Returns**
+
+[`SignalWire.Relay.Calling.DetectResult`][signalwire-relay-calling-detectresult-6] - The result object to interact with.
+
+**Examples**
+
+> Detect DTMF digits.
+
+```csharp
+DetectResult resultDetect = call.DetectDigit();
+```
+
+### DetectDigitAsync
+
+Asynchronous version of [`DetectDigit`][link-3]. It does not wait for the first detection update, but returns a [`SignalWire.Relay.Calling.DetectAction`][signalwire-relay-calling-detectaction-11] object you can interact with.
+
+**Parameters**
+
+See [`DetectDigit`][link-3] for the parameter list.
+
+**Returns**
+
+[`SignalWire.Relay.Calling.DetectAction`][signalwire-relay-calling-detectaction-11] - The action object to interact with.
+
+**Examples**
+
+> Detect DTMF digits and stop after 5 seconds.
+
+```csharp
+// within an asynchronous function ..
+DetectAction actionDetect = call.DetectDigitAsync();
+
+Thread.Sleep(5000);
+
+actionDetect.Stop();
+```
+
+### DetectFax
+
+This is a helper function that refines the use of [`Detect`][link-5]. This simplifies detecting fax.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `tone` | [`SignalWire.Relay.Calling.CallDetect.FaxParams.FaxTone`][call-detect]? | <span className="optional-arg">optional</span> | The tone to detect. Default to `CED`. |
+
+**Returns**
+
+[`SignalWire.Relay.Calling.DetectResult`][signalwire-relay-calling-detectresult-6] - The result object to interact with.
+
+**Examples**
+
+> Detect fax.
+
+```csharp
+DetectResult resultDetect = call.DetectFax();
+```
+
+### DetectFaxAsync
+
+Asynchronous version of [`DetectFax`][link-4]. It does not wait for the first detection update, but returns a [`SignalWire.Relay.Calling.DetectAction`][signalwire-relay-calling-detectaction-11] object you can interact with.
+
+**Parameters**
+
+See [`DetectFax`][link-4] for the parameter list.
+
+**Returns**
+
+[`SignalWire.Relay.Calling.DetectAction`][signalwire-relay-calling-detectaction-11] - The action object to interact with.
+
+**Examples**
+
+> Detect fax and stop after 5 seconds.
+
+```csharp
+// within an asynchronous function ..
+DetectAction actionDetect = call.DetectFaxAsync();
+
+Thread.Sleep(5000);
+
+actionDetect.Stop();
+```
+
+### DetectHuman
+
+This is a helper function that refines the use of [`Detect`][link-5]. This simplifies detecting humans.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `initialTimeout` | double? | <span className="optional-arg">optional</span> | The length of time in seconds to wait for the initial voice before giving up. Default to `4.5`. |
+| `endSilenceTimeout` | double? | <span className="optional-arg">optional</span> | The length of time in seconds to wait for the voice to finish. Default to `1.0`. |
+| `machineVoiceThreshold` | double? | <span className="optional-arg">optional</span> | The length of time in seconds for the voice to trigger a machine detection. Default to `1.25`. |
+| `machineWordsThreshold` | int? | <span className="optional-arg">optional</span> | The quantity of words to trigger a machine detection. Default to `6`. |
+
+**Returns**
+
+[`SignalWire.Relay.Calling.DetectResult`][signalwire-relay-calling-detectresult-6] - The result object to interact with.
+
+**Examples**
+
+> Detect human.
+
+```csharp
+DetectResult resultDetect = call.DetectHuman();
+```
+
+### DetectHumanAsync
+
+Asynchronous version of [`DetectHuman`][link-6]. It does not wait for the first detection update, but returns a [`SignalWire.Relay.Calling.DetectAction`][signalwire-relay-calling-detectaction-11] object you can interact with.
+
+**Parameters**
+
+See [`DetectHuman`][link-6] for the parameter list.
+
+**Returns**
+
+[`SignalWire.Relay.Calling.DetectAction`][signalwire-relay-calling-detectaction-11] - The action object to interact with.
+
+**Examples**
+
+> Detect human and stop after 5 seconds.
+
+```csharp
+// within an asynchronous function ..
+DetectAction actionDetect = call.DetectHumanAsync();
+
+Thread.Sleep(5000);
+
+actionDetect.Stop();
+```
+
+### DetectMachine
+
+This is a helper function that refines the use of [`Detect`][link-5]. This simplifies detecting machines.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `initialTimeout` | double | <span className="optional-arg">optional</span> | The length of time in seconds to wait for the initial voice before giving up. Default to `4.5`. |
+| `endSilenceTimeout` | double | <span className="optional-arg">optional</span> | The length of time in seconds to wait for the voice to finish. Default to `1.0`. |
+| `machineVoiceThreshold` | double | <span className="optional-arg">optional</span> | The length of time in seconds for the voice to trigger a machine detection. Default to `1.25`. |
+| `machineWordsThreshold` | int | <span className="optional-arg">optional</span> | The quantity of words to trigger a machine detection. Default to `6`. |
+
+**Returns**
+
+[`SignalWire.Relay.Calling.DetectResult`][signalwire-relay-calling-detectresult-6] - The result object to interact with.
+
+**Examples**
+
+> Detect machine.
+
+```csharp
+DetectResult resultDetect = call.DetectMachine();
+```
+
+### DetectMachineAsync
+
+Asynchronous version of [`DetectMachine`][link-7]. It does not wait for the first detection update, but returns a [`SignalWire.Relay.Calling.DetectAction`][signalwire-relay-calling-detectaction-11] object you can interact with.
+
+**Parameters**
+
+See [`DetectMachine`][link-7] for the parameter list.
+
+**Returns**
+
+[`SignalWire.Relay.Calling.DetectAction`][signalwire-relay-calling-detectaction-11] - The action object to interact with.
+
+**Examples**
+
+> Detect machine and stop after 5 seconds.
+
+```csharp
+// within an asynchronous function ..
+DetectAction actionDetect = call.DetectMachineAsync();
+
+Thread.Sleep(5000);
+
+actionDetect.Stop();
+```
+
+### Dial
+
+This will start a call that was created with [`NewPhoneCall`][newphonecall] (or another call creation method) and waits until the call has been answered or hung up.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+[`SignalWire.Relay.Calling.DialResult`][signalwire-relay-calling-dialresult] - The result object to interact with.
+
+**Examples**
+
+```csharp
+PhoneCall call = client.Calling.NewPhoneCall("+1XXXXXXXXXX", "+1YYYYYYYYYY");
+DialResult resultDial = call.Dial();
+if (resultDial.Successful) {
+    // Call has been answered
+}
+```
+
+### FaxReceive
+
+Wait on a fax to come through the current call.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+[`SignalWire.Relay.Calling.FaxResult`][signalwire-relay-calling-faxresult-1] - The result object to interact with.
+
+**Examples**
+
+> Start receiving a fax and check whether it was successful.
+
+```csharp
+FaxResult resultFax = call.FaxReceive();
+
+if (resultFax.Successful)
+{
+    // ...
+}
+```
+
+### FaxReceiveAsync
+
+Asynchronous version of [`FaxReceive`](#faxreceive). It does not wait for a fax but returns a [`SignalWire.Relay.Calling.FaxAction`][signalwire-relay-calling-faxaction-3] object you can interact with.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+[`SignalWire.Relay.Calling.FaxAction`][signalwire-relay-calling-faxaction-3] - The action object to interact with.
+
+**Examples**
+
+> Start listening for faxes and stop it after 5 seconds.
+
+```csharp
+FaxAction actionFax = call.FaxReceiveAsync();
+
+Thread.Sleep(5000);
+
+actionFax.Stop();
+```
+
+### FaxSendAsync
+
+Asynchronous version of [`FaxSend`][link-8]. It does not wait for a fax but returns a [`SignalWire.Relay.Calling.FaxAction`][signalwire-relay-calling-faxaction-3] object you can interact with.
+
+**Parameters**
+
+See [`FaxSend`][link-8] for the parameter list.
+
+**Returns**
+
+[`SignalWire.Relay.Calling.FaxAction`][signalwire-relay-calling-faxaction-3] - The action object to interact with.
+
+**Examples**
+
+> Start listening for a fax and stop it after 5 seconds.
+
+```csharp
+FaxAction actionFax = call.FaxSendAsync();
+
+Thread.Sleep(5000);
+
+actionFax.Stop();
+```
+
+### FaxSend
+
+Wait on a fax to send to a destination.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `document` | string | <span className="required-arg">required</span> | Location of the document to send. PDF format only. |
+| `identity` | string | <span className="optional-arg">optional</span> | Identity to display on receiving fax. Default is `SignalWire DID`. |
+| `headerInfo` | string | <span className="optional-arg">optional</span> | Custom info to add to header of each fax page. The info, along with identity, date, and page number will be included in the header. Set to empty string to disable sending any header. Default is `SignalWire`. |
+
+**Returns**
+
+[`SignalWire.Relay.Calling.FaxResult`][signalwire-relay-calling-faxresult-1] - The result object to interact with.
+
+**Examples**
+
+> Send a fax and check whether it was successful.
+
+```csharp
+FaxResult resultFax = call.FaxSend("https://cdn.signalwire.com/fax/dummy.pdf");
+
+if (resultFax.Successful)
+{
+    // ...
+}
+```
+
+### FaxSendAsync
+
+Asynchronous version of [`FaxSend`][link-8]. It does not wait for a fax but returns a [`SignalWire.Relay.Calling.FaxAction`][signalwire-relay-calling-faxaction-3] object you can interact with.
+
+**Parameters**
+
+See [`FaxSend`][link-8] for the parameter list.
+
+**Returns**
+
+[`SignalWire.Relay.Calling.FaxAction`][signalwire-relay-calling-faxaction-3] - The action object to interact with.
+
+**Examples**
+
+> Start sending a fax and stop it after 5 seconds.
+
+```csharp
+FaxAction actionFax = call.FaxSendAsync("https://cdn.signalwire.com/fax/dummy.pdf");
+
+Thread.Sleep(5000);
+
+actionFax.Stop();
+```
+
+### Hangup
+
+Hangup the call.
+
+**Parameters**
+
+[`SignalWire.Relay.Calling.DisconnectReason`][signalwire-relay-calling-disconnectreason] - The reason for the disconnect, defaulted to `hangup`.
+
+**Returns**
+
+[`SignalWire.Relay.Calling.HangupResult`][signalwire-relay-calling-hangupresult] - The result object to interact with.
+
+**Examples**
+
+> Hangup a call and check if it was successful.
+
+```csharp
+HangupResult resultHangup = call.Hangup();
+if (resultHangup.Successful) {
+    // Call has been disconnected with the default hangup reason
+}
+```
+
+### Play
+
+Play one or more media to a Call and wait until the playing has ended. This is a general method for all types of playing, see [`PlayAudio`][link-9], [`PlaySilence`][link-10], [`PlayTTS`][link-11], or [`PlayRingtone`][link-12] for more specific usage.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `media` | List&lt;[`SignalWire.Relay.Calling.CallMedia`][signalwire-relay-calling-callmedia-2]&gt; | <span className="required-arg">required</span> | One or more objects describing media to be played in order. |
+| `volume` | double? | <span className="optional-arg">optional</span> | Controls the volume, between -40dB and +40dB where 0 is unchanged. Default is `0`. |
+
+**Returns**
+
+[`SignalWire.Relay.Calling.PlayResult`][signalwire-relay-calling-playresult-4] - The result object to interact with.
+
+**Examples**
+
+> Play multiple media elements in the call.
+
+```csharp
+PlayResult resultPlay = call.Play(
+    new List<CallMedia>
+    {
+        new CallMedia
+        {
+            Type = CallMedia.MediaType.tts,
+            Parameters = new CallMedia.TTSParams
+            {
+                Text = "Listen to this awesome file!"
+            }
+        },
+        new CallMedia
+        {
+            Type = CallMedia.MediaType.audio,
+            Parameters = new CallMedia.AudioParams
+            {
+                URL = "https://cdn.signalwire.com/default-music/welcome.mp3"
+            }
+        },
+        new CallMedia
+        {
+            Type = CallMedia.MediaType.silence,
+            Parameters = new CallMedia.SilenceParams
+            {
+                Duration = 5
+            }
+        },
+        new CallMedia
+        {
+            Type = CallMedia.MediaType.ringtone,
+            Parameters = new CallMedia.RingtoneParams
+            {
+                Name = "us"
+            }
+        },
+        new CallMedia
+        {
+            Type = CallMedia.MediaType.tts,
+            Parameters = new CallMedia.TTSParams
+            {
+                Text = "Did you like it?"
+            }
+        }
+    },
+    volume: 4.0
+);
+```
+
+### PlayAsync
+
+Asynchronous version of [`Play`][link-13]. It does not wait for the`playing to complete, but returns a [`SignalWire.Relay.Calling.PlayAction`][signalwire-relay-calling-playaction-9] object you can interact with.
+
+**Parameters**
+
+See [`Play`][link-13] for the parameter list.
+
+**Returns**
+
+[`SignalWire.Relay.Calling.PlayAction`][signalwire-relay-calling-playaction-9] - The action object to interact with.
+
+**Examples**
+
+> Play multiple media elements in the call and stop them after 5 seconds.
+
+```csharp
+PlayAction actionPlay = call.PlayAsync(
+    new List<CallMedia>
+    {
+        new CallMedia
+        {
+            Type = CallMedia.MediaType.tts,
+            Parameters = new CallMedia.TTSParams
+            {
+                Text = "Listen to this awesome file!"
+            }
+        },
+        new CallMedia
+        {
+            Type = CallMedia.MediaType.audio,
+            Parameters = new CallMedia.AudioParams
+            {
+                URL = "https://cdn.signalwire.com/default-music/welcome.mp3"
+            }
+        },
+        new CallMedia
+        {
+            Type = CallMedia.MediaType.silence,
+            Parameters = new CallMedia.SilenceParams
+            {
+                Duration = 5
+            }
+        },
+        new CallMedia
+        {
+            Type = CallMedia.MediaType.ringtone,
+            Parameters = new CallMedia.RingtoneParams
+            {
+                Name = "us"
+            }
+        },
+        new CallMedia
+        {
+            Type = CallMedia.MediaType.tts,
+            Parameters = new CallMedia.TTSParams
+            {
+                Text = "Did you like it?"
+            }
+        }
+    },
+    volume: 4.0
+);
+
+Thread.Sleep(5000);
+
+actionPlay.Stop();
+```
+
+### PlayAudio
+
+This is a helper function that refines the use of [`Play`][link-13]. This simplifies playing an audio file.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `url` | string | <span className="required-arg">required</span> | Http(s) URL to `audio` resource to play. |
+| `volume` | double? | <span className="optional-arg">optional</span> | Controls the volume, between -40dB and +40dB where 0 is unchanged. Default is `0`. |
+
+**Returns**
+
+[`SignalWire.Relay.Calling.PlayResult`][signalwire-relay-calling-playresult-4] - The result object to interact with.
+
+**Examples**
+
+> Play an MP3 file.
+
+```csharp
+PlayResult resultPlay = call.PlayAudio("https://cdn.signalwire.com/default-music/welcome.mp3", volume: 4.0);
+```
+
+### PlayAudioAsync
+
+Asynchronous version of [`PlayAudio`][link-9]. It does not wait for the playing to complete, but returns a [`SignalWire.Relay.Calling.PlayAction`][signalwire-relay-calling-playaction-9] object you can interact with.
+
+**Parameters**
+
+See [`PlayAudio`][link-9] for the parameter list.
+
+**Returns**
+
+[`SignalWire.Relay.Calling.PlayAction`][signalwire-relay-calling-playaction-9] - The action object to interact with.
+
+**Examples**
+
+> Play an MP3 file and stop it after 5 seconds.
+
+```csharp
+// within an asynchronous function ..
+PlayAction actionPlay = call.PlayAudioAsync("https://cdn.signalwire.com/default-music/welcome.mp3", volume: 4.0);
+
+Thread.Sleep(5000);
+
+actionPlay.Stop();
+```
+
+### PlayRingtone
+
+This is a helper function that refines the use of [`Play`][link-13]. This simplifies playing ringtones.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `name` | string | <span className="required-arg">required</span> | The name of the ringtone, see [`SignalWire.Relay.Calling.CallMedia.RingtoneParams`][call-media]. |
+| `duration` | double? | <span className="optional-arg">optional</span> | Default to `null`, 1 ringtone iteration. |
+| `volume` | double? | <span className="optional-arg">optional</span> | Controls the volume, between -40dB and +40dB where 0 is unchanged. Default is `0`. |
+
+**Returns**
+
+[`SignalWire.Relay.Calling.PlayResult`][signalwire-relay-calling-playresult-4] - The result object to interact with.
+
+**Examples**
+
+> Play a single US ringtone.
+
+```csharp
+PlayResult resultPlay = call.PlayRingtone("us");
+```
+
+### PlayRingtoneAsync
+
+Asynchronous version of [`PlayRingtone`][link-12]. It does not wait for the playing to complete, but returns a [`SignalWire.Relay.Calling.PlayAction`][signalwire-relay-calling-playaction-9] object you can interact with.
+
+**Parameters**
+
+See [`PlayRingtone`][link-12] for the parameter list.
+
+**Returns**
+
+[`SignalWire.Relay.Calling.PlayAction`][signalwire-relay-calling-playaction-9] - The action object to interact with.
+
+**Examples**
+
+> Play US ringtone for 60 seconds, if _Agent_ is available, stop the play.
+
+```csharp
+PlayAction actionPlay = call.PlayRingtoneAsync("us", duration: 60);
+
+if (agent.Available()) {
+    actionPlay.Stop();
+}
+```
+
+### PlaySilence
+
+This is a helper function that refines the use of [`Play`][link-13]. This simplifies playing silence.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `duration` | double | <span className="required-arg">required</span> | Seconds of silence to play. |
+
+**Returns**
+
+[`SignalWire.Relay.Calling.PlayResult`][signalwire-relay-calling-playresult-4] - The result object to interact with.
+
+**Examples**
+
+> Play silence for 10 seconds.
+
+```csharp
+PlayResult resultPlay = call.PlaySilence(10);
+```
+
+### PlaySilenceAsync
+
+Asynchronous version of [`PlaySilence`][link-10]. It does not wait for the playing to complete, but returns a [`SignalWire.Relay.Calling.PlayAction`][signalwire-relay-calling-playaction-9] object you can interact with.
+
+**Parameters**
+
+See [`PlaySilence`][link-10] for the parameter list.
+
+**Returns**
+
+[`SignalWire.Relay.Calling.PlayAction`][signalwire-relay-calling-playaction-9] - The action object to interact with.
+
+**Examples**
+
+> Play silence for 60 seconds, if _Agent_ is available, stop the play.
+
+```csharp
+PlayAction actionPlay = call.PlaySilenceAsync(60);
+
+if (agent.Available()) {
+    actionPlay.Stop();
+}
+```
+
+### PlayTTS
+
+This is a helper function that refines the use of [`Play`][link-13]. This simplifies playing TTS.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `text` | string | <span className="required-arg">required</span> | The text to speak. |
+| `gender` | string | <span className="optional-arg">optional</span> | `male` or `female`. Default to `female`. |
+| `language` | string | <span className="optional-arg">optional</span> | Default to `en-US`. |
+| `volume` | double? | <span className="optional-arg">optional</span> | Controls the volume, between -40dB and +40dB where 0 is unchanged. Default is `0`. |
+
+**Returns**
+
+[`SignalWire.Relay.Calling.PlayResult`][signalwire-relay-calling-playresult-4] - The result object to interact with.
+
+**Examples**
+
+> Play TTS.
+
+```csharp
+PlayResult resultPlay = call.PlayTTS("Welcome to SignalWire!", gender: "male", volume: 4.0 });
+```
+
+### PlayTTSAsync
+
+Asynchronous version of [`PlayTTS`][link-11]. It does not wait for the playing to complete, but returns a [`SignalWire.Relay.Calling.PlayAction`][signalwire-relay-calling-playaction-9] object you can interact with.
+
+**Parameters**
+
+See [`PlayTTS`][link-11] for the parameter list.
+
+**Returns**
+
+[`SignalWire.Relay.Calling.PlayAction`][signalwire-relay-calling-playaction-9] - The action object to interact with.
+
+**Examples**
+
+> Play TTS and stop it after 3 seconds.
+
+```csharp
+PlayAction actionPlay = call.PlayTTSAsync("Welcome to SignalWire! Making communications easy for everyone!", gender: "male", volume: 4.0 })
+
+Thread.Sleep(3000);
+
+actionPlay.Stop();
+```
+
+### Prompt
+
+Play one or more media while collecting user's input from the call at the same time, such as `digits` and `speech`.<br/>It waits until the collection succeed or timeout is reached. This is a general method for all types of playing, see [`PromptAudio`][link-14] or [`PromptTTS`][link-15] for more specific usage.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `media` | List&lt;[`SignalWire.Relay.Calling.CallMedia`][signalwire-relay-calling-callmedia-2]&gt; | <span className="required-arg">required</span> | One or more objects describing media to be played in order. |
+| `collect` | [`SignalWire.Relay.Calling.CallCollect`][signalwire-relay-calling-callcollect-3] | <span className="required-arg">required</span> | The configuration for input collection. |
+| `volume` | double? | <span className="optional-arg">optional</span> | Controls the volume, between -40dB and +40dB where 0 is unchanged. Default is `0`. |
+
+**Returns**
+
+[`SignalWire.Relay.Calling.PromptResult`][signalwire-relay-calling-promptresult-3] - The result object to interact with.
+
+**Examples**
+
+> Ask user to enter their PIN and collect the digits.
+
+```csharp
+PromptResult resultPrompt = call.Prompt(
+    new List<CallMedia>
+    {
+        new CallMedia
+        {
+            Type = CallMedia.MediaType.tts,
+            Parameters = new CallMedia.TTSParams
+            {
+                Text = "Welcome to SignalWire! Please enter your PIN",
+            }
+        }
+    },
+    new CallCollect
+    {
+        InitialTimeout = 10,
+        Digits = new CallCollect.DigitsParams
+        {
+            Max = 4,
+            DigitTimeout = 5,
+        }
+    },
+    volume: 4.0);
+
+if (resultPrompt.Successful)
+{
+    // The collected input is in resultPrompt.Result
+}
+```
+
+### PromptAsync
+
+Asynchronous version of [`Prompt`][link-16]. It does not wait for the collect to complete, but returns a [`SignalWire.Relay.Calling.PromptAction`][signalwire-relay-calling-promptaction-7] object you can interact with.
+
+**Parameters**
+
+See [`Prompt`][link-16] for the parameter list.
+
+**Returns**
+
+[`SignalWire.Relay.Calling.PromptAction`][signalwire-relay-calling-promptaction-7] - The action object to interact with.
+
+**Examples**
+
+> Ask user to enter their PIN and collect the digits.
+
+```csharp
+PromptAction actionPrompt = call.PromptAsync(
+    new List<CallMedia>
+    {
+        new CallMedia
+        {
+            Type = CallMedia.MediaType.tts,
+            Parameters = new CallMedia.TTSParams
+            {
+                Text = "Welcome to SignalWire! Please enter your PIN",
+            }
+        },
+        new CallMedia
+        {
+            Type = CallMedia.MediaType.audio,
+            Parameters = new CallMedia.AudioParams
+            {
+                URL = "https://cdn.signalwire.com/default-music/welcome.mp3",
+            }
+        }
+    },
+    new CallCollect
+    {
+        InitialTimeout = 10,
+        Digits = new CallCollect.DigitsParams
+        {
+            Max = 4,
+            DigitTimeout = 5,
+        }
+    },
+    volume: 4.0);
+
+// Do other stuff
+
+if (actionPrompt.Completed)
+{
+    if (actionPrompt.Result.Successful)
+    {
+        // The collected input is in actionPrompt.Result.Result
+    }
+}
+```
+
+### PromptAudio
+
+This is a helper function that refines the use of [`Prompt`][link-16].<br/>This function simplifies playing an audio file while collecting user input from the call, such as `digits` and `speech`.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `url` | string | <span className="required-arg">required</span> | Http(s) URL to `audio` resource to play. |
+| `collect` | [`SignalWire.Relay.Calling.CallCollect`][signalwire-relay-calling-callcollect-3] | <span className="required-arg">required</span> | The configuration for input collection. |
+| `volume` | double? | <span className="optional-arg">optional</span> | Controls the volume, between -40dB and +40dB where 0 is unchanged. Default is `0`. |
+
+**Returns**
+
+[`SignalWire.Relay.Calling.PromptResult`][signalwire-relay-calling-promptresult-3] - The result object to interact with.
+
+**Examples**
+
+> Collect user digits while playing an MP3 file.
+
+```csharp
+PromptResult resultPrompt = call.PromptAudio(
+    "https://cdn.signalwire.com/default-music/welcome.mp3",
+    new CallCollect
+    {
+        InitialTimeout = 10,
+        Digits = new CallCollect.DigitsParams
+        {
+            Max = 4,
+            DigitTimeout = 5,
+        }
+    },
+    volume: 4.0);
+
+if (resultPrompt.Successful)
+{
+    // The collected input is in resultPrompt.Result
+}
+```
+
+### PromptAudioAsync
+
+Asynchronous version of [`PromptAudio`][link-14]. It does not wait for the collection to complete, but returns a [`SignalWire.Relay.Calling.PromptAction`][signalwire-relay-calling-promptaction-7] object you can interact with.
+
+**Parameters**
+
+See [`PromptAudio`][link-14] for the parameter list.
+
+**Returns**
+
+[`SignalWire.Relay.Calling.PromptAction`][signalwire-relay-calling-promptaction-7] - The action object to interact with.
+
+**Examples**
+
+> Collect user digits while playing an MP3 file.
+
+```csharp
+PromptAction actionPrompt = call.PromptAudioAsync(
+    "https://cdn.signalwire.com/default-music/welcome.mp3",
+    new CallCollect
+    {
+        InitialTimeout = 10,
+        Digits = new CallCollect.DigitsParams
+        {
+            Max = 4,
+            DigitTimeout = 5,
+        }
+    },
+    volume: 4.0);
+
+if (actionPrompt.Completed)
+{
+    if (actionPrompt.Result.Successful)
+    {
+        // The collected input is in actionPrompt.Result.Result
+    }
+}
+```
+
+### PromptRingtone
+
+This is a helper function that refines the use of [`Prompt`][link-16].<br/>This function simplifies playing ringtones while collecting user input from the call, such as `digits` and `speech`.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `name` | string | <span className="required-arg">required</span> | The name of the ringtone, see [`SignalWire.Relay.Calling.CallMedia.RingtoneParams`][call-media]. |
+| `collect` | [`SignalWire.Relay.Calling.CallCollect`][signalwire-relay-calling-callcollect-3] | <span className="required-arg">required</span> | The configuration for input collection. |
+| `duration` | double? | <span className="optional-arg">optional</span> | Default to `null`, 1 ringtone iteration. |
+| `volume` | double? | <span className="optional-arg">optional</span> | Controls the volume, between -40dB and +40dB where 0 is unchanged. Default is `0`. |
+
+**Returns**
+
+[`SignalWire.Relay.Calling.PromptResult`][signalwire-relay-calling-promptresult-3] - The result object to interact with.
+
+**Examples**
+
+> Play a US ringtone once and collect digits.
+
+```csharp
+PromptResult resultPrompt = call.PromptRingtone(
+    "us",
+    new CallCollect
+    {
+        InitialTimeout = 10,
+        Digits = new CallCollect.DigitsParams
+        {
+            Max = 4,
+            DigitTimeout = 5,
+        }
+    },
+    volume: 4.0);
+
+if (resultPrompt.Successful)
+{
+    // The collected input is in resultPrompt.Result
+}
+```
+
+### PromptRingtoneAsync
+
+Asynchronous version of [`PromptRingtone`][link-17]. It does not wait for the collection to complete, but returns a [`SignalWire.Relay.Calling.PromptAction`][signalwire-relay-calling-promptaction-7] object you can interact with.
+
+**Parameters**
+
+See [`PromptRingtone`][link-17] for the parameter list.
+
+**Returns**
+
+[`SignalWire.Relay.Calling.PromptAction`][signalwire-relay-calling-promptaction-7] - The action object to interact with.
+
+**Examples**
+
+> Play a US ringtone once and collect digits.
+
+```csharp
+PromptAction actionPrompt = call.PromptRingtoneAsync(
+    "us",
+    new CallCollect
+    {
+        InitialTimeout = 10,
+        Digits = new CallCollect.DigitsParams
+        {
+            Max = 4,
+            DigitTimeout = 5,
+        }
+    },
+    volume: 4.0);
+
+if (actionPrompt.Completed)
+{
+    if (actionPrompt.Result.Successful)
+    {
+        // The collected input is in actionPrompt.Result.Result
+    }
+}
+```
+
+### PromptTTS
+
+This is a helper function that refines the use of [`Prompt`][link-16].<br/>This function simplifies playing TTS while collecting user input from the call, such as `digits` and `speech`.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `text` | string | <span className="required-arg">required</span> | The text to speak. |
+| `collect` | [`SignalWire.Relay.Calling.CallCollect`][signalwire-relay-calling-callcollect-3] | <span className="required-arg">required</span> | The configuration for input collection. |
+| `gender` | string | <span className="optional-arg">optional</span> | `male` or `female`. Default to `female`. |
+| `language` | string | <span className="optional-arg">optional</span> | Default to `en-US`. |
+| `volume` | double? | <span className="optional-arg">optional</span> | Controls the volume, between -40dB and +40dB where 0 is unchanged. Default is `0`. |
+
+**Returns**
+
+[`SignalWire.Relay.Calling.PromptResult`][signalwire-relay-calling-promptresult-3] - The result object to interact with.
+
+**Examples**
+
+> Ask user to enter their PIN and collect the digits.
+
+```csharp
+PromptResult resultPrompt = call.PromptTTS(
+    "Welcome to SignalWire! Please enter your PIN",
+    new CallCollect
+    {
+        InitialTimeout = 10,
+        Digits = new CallCollect.DigitsParams
+        {
+            Max = 4,
+            DigitTimeout = 5,
+        }
+    },
+    gender: "male",
+    volume: 4.0);
+
+if (resultPrompt.Successful)
+{
+    // The collected input is in resultPrompt.Result
+}
+```
+
+### PromptTTSAsync
+
+Asynchronous version of [`PromptTTS`][link-15]. It does not wait for the collection to complete, but returns a [`SignalWire.Relay.Calling.PromptAction`][signalwire-relay-calling-promptaction-7] object you can interact with.
+
+**Parameters**
+
+See [`PromptTTS`][link-15] for the parameter list.
+
+**Returns**
+
+[`SignalWire.Relay.Calling.PromptAction`][signalwire-relay-calling-promptaction-7] - The action object to interact with.
+
+**Examples**
+
+> Ask user to enter their PIN and collect the digits.
+
+```csharp
+PromptAction actionPrompt = call.PromptTTSAsync(
+    "Welcome to SignalWire! Please enter your PIN",
+    new CallCollect
+    {
+        InitialTimeout = 10,
+        Digits = new CallCollect.DigitsParams
+        {
+            Max = 4,
+            DigitTimeout = 5,
+        }
+    },
+    gender: "male",
+    volume: 4.0);
+
+if (actionPrompt.Completed)
+{
+    if (actionPrompt.Result.Successful)
+    {
+        // The collected input is in actionPrompt.Result.Result
+    }
+}
+```
+
+### Record
+
+Start recording the call and waits until the recording ends or fails.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `record` | [`SignalWire.Relay.Calling.CallRecord`][signalwire-relay-calling-callrecord] | <span className="required-arg">required</span> | The configuration for recording. |
+
+**Returns**
+
+[`SignalWire.Relay.Calling.RecordResult`][signalwire-relay-calling-recordresult-1] - The result object to interact with.
+
+**Examples**
+
+> Start recording audio in the call for both direction in stereo mode, if successful, grab `Url`, `Duration` and `Size` from the [`SignalWire.Relay.Calling.RecordResult`][signalwire-relay-calling-recordresult-1] object.
+
+```csharp
+RecordResult resultRecord = call.Record(
+    new CallRecord
+    {
+        Audio = new CallRecord.AudioParams
+        {
+            Stereo = true,
+            Direction = CallRecord.AudioParams.AudioDirection.both,
+        }
+    });
+
+if (resultRecord.Successful)
+{
+    // The URL for the recording is available in resultRecord.Url
+}
+```
+
+### RecordAsync
+
+Asynchronous version of [`Record`][link-18]. It does not wait for the end of the `recording` but returns a [`SignalWire.Relay.Calling.RecordAction`][signalwire-relay-calling-recordaction-1] object you can interact with.
+
+**Parameters**
+
+See [`Record`][link-18] for the parameter list.
+
+**Returns**
+
+[`SignalWire.Relay.Calling.RecordAction`][signalwire-relay-calling-recordaction-1] - The action object to interact with.
+
+**Examples**
+
+> Start recording audio in the call for both direction in stereo mode and stop it after 5 seconds.
+
+```csharp
+RecordAction actionRecord = call.RecordAsync(
+    new CallRecord
+    {
+        Audio = new CallRecord.AudioParams
+        {
+            Stereo = true,
+            Direction = CallRecord.AudioParams.AudioDirection.both,
+        }
+    });
+
+Thread.Sleep(5000);
+
+actionRecord.Stop();
+```
+
+### SendDigits
+
+Sends DTMF digits to the other party on the call.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `digits` | string | <span className="required-arg">required</span> | The digits to send. Allowed digits are `1234567890*#ABCD`. `w` and `W` may be used to indicate short and long waits respectively. If any invalid characters are present, the entire operation is rejected. |
+
+**Returns**
+
+[`SignalWire.Relay.Calling.SendDigitsResult`][signalwire-relay-calling-senddigitsresult] - The result object to interact with.
+
+**Examples**
+
+> Send digits and check whether sending was successful.
+
+```csharp
+SendDigitsResult result = call.SendDigits("123w456W789");
+
+if (result.Successful)
+{
+    // ...
+}
+```
+
+### SendDigitsAsync
+
+Asynchronous version of [`SendDigits`][link-19]. It does not wait for all digits to be sent but returns a [`SignalWire.Relay.Calling.SendDigitsAction`][signalwire-relay-calling-senddigitsaction-1] object you can interact with.
+
+**Parameters**
+
+See [`SendDigits`][link-19] for the parameter list.
+
+**Returns**
+
+[`SignalWire.Relay.Calling.SendDigitsAction`][signalwire-relay-calling-senddigitsaction-1] - The action object to interact with.
+
+**Examples**
+
+> Start sending digits.
+
+```csharp
+SendDigitsAction action = call.SendDigits("123w456W789");
+
+// Do other things
+```
+
+### Tap
+
+Start tapping the call and waits until the tap ends or fails.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `tap` | [`SignalWire.Relay.Calling.CallTap`][signalwire-relay-calling-calltap] | <span className="required-arg">required</span> | The configuration for tapping. |
+| `device` | [`SignalWire.Relay.Calling.CallTapDevice`][signalwire-relay-calling-calltapdevice] | <span className="required-arg">required</span> | The configuration for the target device. |
+
+**Returns**
+
+[`SignalWire.Relay.Calling.TapResult`][signalwire-relay-calling-tapresult] - The result object to interact with.
+
+**Examples**
+
+> Start tapping audio in the call for both directions.
+
+```csharp
+TapResult resultTap = call.Tap(
+    new CallTap
+    {
+        Audio = new CallTap.AudioParams
+        {
+            Direction = CallTap.AudioParams.AudioDirection.both,
+        }
+    },
+    new CallTapDevice
+    {
+        Type = CallTapDevice.DeviceType.rtp,
+        Parameters = new CallTapDevice.RTPParams
+        {
+            Address = "1.2.3.4",
+            Port = 12345,
+        }
+    });
+
+if (resultTap.Successful)
+{
+    // The RTP data is flowing to the device
+}
+```
+
+### TapAsync
+
+Asynchronous version of [`Tap`][link-20]. It does not wait for the end of the tapping but returns a [`TapAction`][tapaction] object you can interact with.
+
+**Parameters**
+
+See [`Tap`][link-20] for the parameter list.
+
+**Returns**
+
+[`SignalWire.Relay.Calling.TapAction`][signalwire-relay-calling-tapaction] - The action object to interact with.
+
+**Examples**
+
+> Start tapping audio in the call for both directions and stop it after 5 seconds.
+
+```csharp
+TapAction actionTap = call.TapAsync(
+    new CallTap
+    {
+        Audio = new CallTap.AudioParams
+        {
+            Direction = CallTap.AudioParams.AudioDirection.both,
+        }
+    },
+    new CallTapDevice
+    {
+        Type = CallTapDevice.DeviceType.rtp,
+        Parameters = new CallTapDevice.RTPParams
+        {
+            Address = "1.2.3.4",
+            Port = 12345,
+        }
+    });
+
+Thread.Sleep(5000);
+
+actionTap.Stop();
+```
+
+### WaitFor
+
+Block until the current state of the call is one of the specified [`SignalWire.Relay.Calling.CallState`][signalwire-relay-calling-callstate-11] values. This is a general method, see [`WaitForAnswered`][link-21], [`WaitForEnded`][link-22], [`WaitForEnding`][link-23], or [`WaitForRinging`][link-24] for more specific usage.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `timeout` | TimeSpan? | <span className="required-arg">required</span> | The maximum amount of time to wait. `null` is interpreted as an infinite wait. |
+| `states` | `params` [`SignalWire.Relay.Calling.CallState`][signalwire-relay-calling-callstate-11] | <span className="required-arg">required</span> | The states to wait for. |
+
+**Returns**
+
+`bool` - Will have the value `true` if the state is consistent with one of the provided states or `false` if a timeout occurred.
+
+**Examples**
+
+> Wait to see if a call is answered
+
+```csharp
+bool stateValid = call.WaitFor(null, CallState.answered);
+if (stateValid) {
+    // The call is answered
+}
+```
+
+### WaitForAnswered
+
+This is a helper function that refines the use of [`WaitFor`][link-25]. Block until the current state of the call is the answered [`SignalWire.Relay.Calling.CallState`][signalwire-relay-calling-callstate-11].
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `timeout` | TimeSpan? | <span className="optional-arg">optional</span> | The maximum amount of time to wait. `null` is interpreted as an infinite wait. Default to `null`. |
+
+**Returns**
+
+`bool` - Will have the value `true` if the state is consistent with the specified [`SignalWire.Relay.Calling.CallState`][signalwire-relay-calling-callstate-11] or `false` if a timeout occurred.
+
+**Examples**
+
+> Wait to see if a call is answered
+
+```csharp
+bool stateValid = call.WaitForAnswered();
+if (stateValid) {
+    // The call is answered
+}
+```
+
+### WaitForEnded
+
+This is a helper function that refines the use of [`WaitFor`][link-25]. Block until the current state of the call is the ended [`SignalWire.Relay.Calling.CallState`][signalwire-relay-calling-callstate-11].
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `timeout` | TimeSpan? | <span className="optional-arg">optional</span> | The maximum amount of time to wait. `null` is interpreted as an infinite wait. Default to `null`. |
+
+**Returns**
+
+`bool` - Will have the value `true` if the state is consistent with the specified [`SignalWire.Relay.Calling.CallState`][signalwire-relay-calling-callstate-11] or `false` if a timeout occurred.
+
+**Examples**
+
+> Wait to see if a call is ended
+
+```csharp
+bool stateValid = call.WaitForEnded();
+if (stateValid) {
+    // The call is ended
+}
+```
+
+### WaitForEnding
+
+This is a helper function that refines the use of [`WaitFor`][link-25]. Block until the current state of the call is the ending [`SignalWire.Relay.Calling.CallState`][signalwire-relay-calling-callstate-11].
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `timeout` | TimeSpan? | <span className="optional-arg">optional</span> | The maximum amount of time to wait. `null` is interpreted as an infinite wait. Default to `null`. |
+
+**Returns**
+
+`bool` - Will have the value `true` if the state is consistent with the specified [`SignalWire.Relay.Calling.CallState`][signalwire-relay-calling-callstate-11] or `false` if a timeout occurred.
+
+**Examples**
+
+> Wait to see if a call is ending
+
+```csharp
+bool stateValid = call.WaitForEnding();
+if (stateValid) {
+    // The call is ending
+}
+```
+
+### WaitForRinging
+
+This is a helper function that refines the use of [`WaitFor`][link-25]. Block until the current state of the call is the ringing [`SignalWire.Relay.Calling.CallState`][signalwire-relay-calling-callstate-11].
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `timeout` | TimeSpan? | <span className="optional-arg">optional</span> | The maximum amount of time to wait. `null` is interpreted as an infinite wait. Default to `null`. |
+
+**Returns**
+
+`bool` - Will have the value `true` if the state is consistent with the specified [`SignalWire.Relay.Calling.CallState`][signalwire-relay-calling-callstate-11] or `false` if a timeout occurred.
+
+**Examples**
+
+> Wait to see if a call is ringing
+
+```csharp
+bool stateValid = call.WaitForRinging();
+if (stateValid) {
+    // The call is ringing
+}
+```
+
+## Events
+
+All these events can be used to track the calls lifecycle and instruct SignalWire on what to do for each different state.
+
+### State Events
+
+To track the state of a call.
+
+| Name | Description |
+| --- | --- |
+| `OnStateChange` | The call is changing state, generalized event for the following events. |
+| `OnRinging` | The call is ringing and has not yet been answered. |
+| `OnAnswered` | The call has been picked up. |
+| `OnEnding` | The call is hanging up. |
+| `OnEnded` | The call has ended. |
+
+### Connect Events
+
+To track the connect state of a call.
+
+| Name | Description |
+| --- | --- |
+| `OnConnectStateChange` | The connect state is changing, generalized event for the following events. |
+| `OnConnectFailed` | The last call connection attempt failed. |
+| `OnConnectConnecting` | Currently calling the phone number(s) to connect. |
+| `OnConnectConnected` | The calls are being connected together. |
+| `OnConnectDisconnected` | The call was either never connected or the last call connection completed. |
+
+### Detect Events
+
+To track a detection.
+
+| Name | Description |
+| --- | --- |
+| `OnDetectError` | The detection failed. |
+| `OnDetectFinished` | The detection has finished. |
+| `OnDetectUpdate` | The detection state is changing, generalized event for the following events. |
+
+### Fax Events
+
+To track a fax operation.
+
+| Name | Description |
+| --- | --- |
+| `OnFaxError` | The fax operation failed. |
+| `OnFaxFinished` | The fax operation finished. |
+| `OnFaxPage` | The fax operation sent a page. |
+
+### Play Events
+
+To track a playback state.
+
+| Name | Description |
+| --- | --- |
+| `OnPlayStateChange` | The play state is changing, generalized event for the following events. |
+| `OnPlayPlaying` | One of the medias are being played to the call. |
+| `OnPlayError` | The play of media failed. |
+| `OnPlayFinished` | The playing of media has finished. |
+
+### Prompt Events
+
+To track a prompt state.
+
+| Name | Description |
+| --- | --- |
+| `OnPrompt` | The prompt action on the call has ended. |
+
+### Record Events
+
+To track a recording state.
+
+| Name | Description |
+| --- | --- |
+| `OnRecordStateChange` | The record state is changing, generalized event for the following events. |
+| `OnRecordRecording` | The call is being recorded. |
+| `OnRecordFinished` | The recording has finished. |
+| `OnRecordNoInput` | The recording failed due to no input detected. |
+
+### Send Digits Events
+
+To receive a message when the digits are finished sending.
+
+| Name | Description |
+| --- | --- |
+| `OnSendDigitsStateChange` | The send digits state is changing, generalized event for the following events. |
+| `OnSendDigitsFinished` | The digits have finished sending. |
+
+### Tap Events
+
+To track an active tap.
+
+| Name | Description |
+| :-------- | :----------- |
+| `OnTapStateChange` | The tap state is changing, generalized event for the following events. |
+| `OnTapTapping` | The call is being tapped. |
+| `OnTapFinished` | The tapping has finished. |

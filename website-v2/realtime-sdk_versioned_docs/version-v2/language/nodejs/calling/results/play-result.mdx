@@ -1,0 +1,16 @@
+---
+title: Relay.Calling.PlayResult
+slug: /node/reference/calling/results/play
+description: The result object that is returned when playing a call.
+toc_max_heading_level: 3
+---
+
+[relay-event]: /docs/server-sdk/v2/node/reference/event
+This object returned from one of the _synchronous_ play methods that represents the final result of a playing.
+
+## Properties
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `successful` | `boolean` | Whether the playing has completed successfully |
+| `event` | [`Relay.Event`][relay-event] | Last event that completed the operation |

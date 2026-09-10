@@ -1,0 +1,196 @@
+---
+title: Relay.Calling.FaxResult
+slug: /php/reference/calling/results/fax
+description: The FaxResult object is returned after a fax operation is completed.
+toc_max_heading_level: 3
+---
+
+[call-1]: /docs/server-sdk/v2/php/reference/calling/call#faxsend
+[call]: /docs/server-sdk/v2/php/reference/calling/call#faxreceive
+[relay-event]: /docs/server-sdk/v2/php/reference/event
+
+This object returned from [`faxReceive`][call] and [`faxSend`][call-1] methods that represents the final result of a sent or received Fax.
+
+## Methods
+
+### getDirection
+
+Returns the direction of the fax: `send` or `receive`.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`string` - *send* or *receive*.
+
+**Examples**
+
+Start faxing and then check the direction.
+
+```php
+<?php
+
+$call->faxSend('https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf')->done(function($result) {
+  if ($result->isSuccessful()) {
+    echo $result->getDirection(); // => "send"
+  }
+});
+```
+
+### getEvent
+
+Returns the last Relay Event arrived for this operation.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+[`Relay.Event`][relay-event] - Last Relay Event.
+
+**Examples**
+
+Send a document and then inspect the last received Relay event.
+
+```php
+<?php
+
+$call->faxSend('https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf')->done(function($result) {
+  if ($result->isSuccessful()) {
+    print_r($result->getEvent());
+  }
+});
+```
+
+### getDocument
+
+Returns the URL to the document send or received.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`string` - URL to the document.
+
+**Examples**
+
+Receiving fax and print the URL of the document.
+
+```php
+<?php
+
+$call->faxReceive()->done(function($result) {
+  if ($result->isSuccessful()) {
+    echo $result->getDocument();
+  }
+});
+```
+
+### getIdentity
+
+Returns the identity sending the fax.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`string` - Identity that sent the document.
+
+**Examples**
+
+Receiving fax and print the identity.
+
+```php
+<?php
+
+$call->faxReceive()->done(function($result) {
+  if ($result->isSuccessful()) {
+    echo $result->getIdentity();
+  }
+});
+```
+
+### getPages
+
+Returns the number of pages in the document.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`number` - Number of pages.
+
+**Examples**
+
+Receiving fax and print the number of received pages.
+
+```php
+<?php
+
+$call->faxReceive()->done(function($result) {
+  if ($result->isSuccessful()) {
+    echo $result->getPages();
+  }
+});
+```
+
+### getRemoteIdentity
+
+Returns the remote identity sent or receiving the Fax.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`string` - The remote identity.
+
+**Examples**
+
+Receiving fax and print the remote identity.
+
+```php
+<?php
+
+$call->faxReceive()->done(function($result) {
+  if ($result->isSuccessful()) {
+    echo $result->getRemoteIdentity();
+  }
+});
+```
+
+### isSuccessful
+
+Return `true` if faxing succeeded, `false` otherwise.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`boolean` - True/False accordingly to the state.
+
+**Examples**
+
+Start sending a document and then check if it has sent successfully.
+
+```php
+<?php
+
+$call->faxSend('https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf')->done(function($result) {
+  if ($result->isSuccessful()) {
+    // Fax sent successfully..
+  }
+});
+```

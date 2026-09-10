@@ -1,0 +1,46 @@
+---
+title: "CallTap.AudioParams"
+slug: /dotnet/reference/calling/call-tap-audio-params
+toc_max_heading_level: 3
+---
+[call-tap-audio-params-audio-direction]: /docs/server-sdk/v2/dotnet/reference/calling/call-tap-audio-direction
+
+# SignalWire.Relay.Calling.CallTap.AudioParams
+
+This object represents the parameters specific to audio tapping.
+
+## Constructor
+
+The only constructor is the default constructor, properties should all be assigned by initializer or after construction.
+
+**Parameters**
+
+None
+
+**Examples**
+
+> Basic Example
+
+```csharp
+CallTap tap = new CallTap
+{
+    Audio = new CallTap.AudioParams
+    {
+        // Use default audio tapping parameters
+    }
+};
+```
+
+## Properties
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `Direction` | [`SignalWire.Relay.Calling.CallTap.AudioParams.AudioDirection`][call-tap-audio-params-audio-direction] | The direction to include in the audio tapping, speak (what the caller says), listen (what the caller hears), or both.<br />_Default: speak_ |
+
+## Methods
+
+None
+
+## Events
+
+None

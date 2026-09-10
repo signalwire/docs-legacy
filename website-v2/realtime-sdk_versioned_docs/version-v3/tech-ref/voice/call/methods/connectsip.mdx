@@ -1,0 +1,62 @@
+---
+title: "connectSip"
+slug: /node/reference/voice/call/connect-sip
+description: connectSip method for the Call class.
+toc_max_heading_level: 3
+---
+
+[call-10]: /docs/server-sdk/v3/node/reference/voice/call
+[call-19]: /docs/server-sdk/v3/node/reference/voice/call
+[callstate-6]: /docs/server-sdk/v3/node/reference/voice/call-state
+[types]: /docs/server-sdk/v3/node/reference/voice/types#sipheader
+[voice-call-3]: /docs/server-sdk/v3/node/reference/voice/call/disconnected
+[voiceplaylist-4]: /docs/server-sdk/v3/node/reference/voice/playlist
+
+### connectSip
+
+- **connectSip**(`params`): `Promise<Call>` - See [Call][call-19] for more details.
+
+Attempt to connect an existing call to a new outbound SIP call. The two devices will hear each other. You can wait until the new peer is disconnected by calling [disconnected][voice-call-3].
+
+#### Parameters
+
+| Name                        | Type                                   | Description                                                                                                                                                                                                                                             |
+|:----------------------------|:---------------------------------------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `params`                    | `Object`                               | -                                                                                                                                                                                                                                                       |
+| `params.callStateEvents`    | `string[]`                             | An optional array of event names to be notified about. Allowed values are `created`, `ringing`, `answered`, and `ended`. Default is `ended`.                                                                                                            |
+| `params.callStateUrl`       | `string`                               | Optional webhook URL to which SignalWire will send call status change notifications. See the payload specifications under [`CallState`][callstate-6].                                                                                               |
+| `params.codecs?`            | `SipCodec`[]                           | Optional array of desired codecs in order of preference. Supported values are PCMU, PCMA, OPUS, G729, G722, VP8, H264. Default is parent leg codec(s).                                                                                                  |
+| `params.from`               | `string`                               | The party the call is coming from. Must be a SignalWire number or SIP endpoint that you own.                                                                                                                                                            |
+| `params.headers?`           | [`SipHeader`][types][] | Array of [`SipHeader`][types] objects. Must be X- headers only, see example below.                                                                                                                                                      |
+| `params.maxPricePerMinute?` | `number`                               | The maximum price in USD acceptable for the call to be created. If the rate for the call is greater than this value, the call will not be created. If not set, all calls will be created. Price can have a maximum of four decimal places, i.e. 0.0075. |
+| `params.ringback?`          | [`VoicePlaylist`][voiceplaylist-4] | Ringback audio to play to call leg. You can play audio, TTS, silence or ringtone.                                                                                                                                                                       |
+| `params.timeout?`           | `number`                               | The time, in seconds, the call will ring before it is considered unanswered.                                                                                                                                                                            |
+| `params.to`                 | `string`                               | The party you are attempting to call.                                                                                                                                                                                                                   |
+| `params.webrtcMedia?`       | `boolean`                              | If true, WebRTC media is negotiated. Default is parent leg setting.                                                                                                                                                                                     |
+| `params.sessionTimeout?`    | `number`                               | Non-negative value, in seconds, to use for the SIP `Session-Expires` header. If 0 or unset, SignalWire will pick the default (typically 600).                                                                                                           |
+
+#### Returns
+
+`Promise<Call>` - See [Call][call-19] for more details.
+
+A promise that resolves to a [`Call`][call-10] object that you can use to control the new peer. The promise resolves only after the new peer picks up the call.
+
+#### Example
+
+```js
+const peer = await call.connectSip({
+  from: "sip:user1@domain.com",
+  to: "sip:user2@domain.com",
+  timeout: 30,
+  headers: [
+    { name: "X-SomeKeyA", value: "SomeValueA" },
+    { name: "X-SomeKeyB", value: "SomeValueB" },
+  ],
+});
+
+await call.playTTS({ text: "You are peer 1" });
+await peer.playTTS({ text: "You are peer 2" });
+
+await call.disconnected();
+await call.playTTS({ text: "The peer disconnected" });
+```

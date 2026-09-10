@@ -1,0 +1,70 @@
+---
+title: SendResult
+slug: /go/reference/messaging/send-result
+toc_max_heading_level: 3
+---
+
+[link]: /docs/server-sdk/v2/go/reference/messaging#send
+
+## Relay.Messaging.SendResult
+
+This object returned from [`send`][link] method that represents the result of a send operation.
+
+### Properties
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `Successful` | `boolean` | Whether the send operation has successfully queued the message. |
+| `MessageId` | `string` | The ID of the message. |
+
+## Methods
+
+### GetMsgId
+
+Returns the ID of the queued message (MessageId).
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`string` - Message ID.
+
+**Examples**
+
+> Send a message and retrieve the ID.
+
+```go
+/* just send a message using Send() with params */
+  
+resultSend := consumer.Client.Messaging.Send(from, to, context, "Hello again from Signalwire !")
+if resultSend.GetSuccessful() {
+	signalwire.Log.Info("Msg Id: %s\n", resultSend.GetMsgId())
+}
+```
+
+### GetSuccessful
+
+Return `true` if the message was queued, `false` otherwise.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`boolean` - True/False accordingly to the state.
+
+**Examples**
+
+> Send a message and then check if there was an error.
+
+```go
+resultSend := consumer.Client.Messaging.Send(from, to, context, "Hello again from Signalwire !")
+if !resultSend.GetSuccessful() {
+	signalwire.Log.Info("error while trying to send message")
+}
+```

@@ -1,0 +1,97 @@
+---
+title: "collect"
+slug: /node/reference/voice/call/collect
+description: collect method for the Call class.
+toc_max_heading_level: 3
+---
+
+[callcollect-1]: /docs/server-sdk/v3/node/reference/voice/call-collect
+[callcollect]: /docs/server-sdk/v3/node/reference/voice/call-collect#startinputtimers
+[link-1]: /docs/server-sdk/v3/node/reference/voice/call/events#collectstartofinput
+[types-1]: /docs/server-sdk/v3/node/reference/voice/types#collectdigitsconfig
+[types-2]: /docs/server-sdk/v3/node/reference/voice/types#collectspeechconfig
+[voice-call-1]: /docs/server-sdk/v3/node/reference/voice/call/prompt-ringtone
+[voice-call-2]: /docs/server-sdk/v3/node/reference/voice/call/prompt-tts
+[voice-call]: /docs/server-sdk/v3/node/reference/voice/call/prompt-audio
+
+### collect
+
+**collect**(`params`): `Promise<CallCollect>` - See [CallCollect][callcollect-1] for more details.
+
+Collect user input. For methods that include a prompt to the user, please see [promptAudio][voice-call], [promptRingtone][voice-call-1], or [promptTTS][voice-call-2].
+
+#### Parameters
+
+| Name                       | Type                                                     | Description                                                                                                                                                                                                                                          |
+|:---------------------------|:---------------------------------------------------------|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `params`                   | `Object`                                                 | -                                                                                                                                                                                                                                                    |
+| `params.continuous?`       | `boolean`                                                | Detect utterances and digits until stopped. Defaults to false.                                                                                                                                                                                       |
+| `params.digits?`           | [`CollectDigitsConfig`][types-1] | Configuration for collecting digits. You must either set this, or `speech`.                                                                                                                                                                          |
+| `params.speech?`           | [`CollectSpeechConfig`][types-2] | Configuration for collecting speech. You must either set this, or `digits`.                                                                                                                                                                          |
+| `params.initialTimeout?`   | `number`                                                 | Number of seconds to wait for initial input before giving up. Default is 4 seconds. Will be used only when `startInputTimers` is true or when the timer is started manually via the [`startInputTimers`][callcollect] method. |
+| `params.partialResults?`   | `boolean`                                                | If true, partial result events are fired. Default is false.                                                                                                                                                                                          |
+| `params.sendStartOfInput?` | `boolean`                                                | If true, the [`startOfInput`][link-1] event is fired when input is detected. Default is false.                                                                                                                                         |
+| `params.startInputTimers?` | `boolean`                                                | If true, the `initialTimeout` timer is started. Default is false.                                                                                                                                                                                    |
+
+#### Returns
+
+`Promise<CallCollect>` - See [CallCollect][callcollect-1] for more details.
+
+#### Examples
+
+Collecting digits input:
+
+```js
+const collect = await call.collect({
+  digits: {
+    max: 5,
+    digitTimeout: 2,
+    terminators: "#*",
+  },
+});
+const { type, digits, terminator } = await collect.ended();
+```
+
+Collecting speech input:
+
+```js
+const collect = await call.collect({
+  speech: {
+    endSilenceTimeout: 2,
+    speechTimeout: 10,
+    language: "en-US",
+    hints: ["sales", "support", "representative"],
+  },
+});
+const { type, speech } = await collect.ended();
+```
+
+Collecting digits and listening for results using the events:
+
+```js
+call.on("collect.started", (collect) => {
+  console.log("collect.started", collect);
+});
+call.on("collect.startOfInput", (collect) => {
+  console.log("Input collection started.");
+});
+call.on("collect.updated", (collect) => {
+  console.log("collect.updated", collect.digits);
+});
+call.on("collect.ended", (collect) => {
+  console.log("collect.ended", collect.digits);
+});
+call.on("collect.failed", (collect) => {
+  console.log("collect.failed", collect.reason);
+});
+
+const collect = await call.collect({
+  digits: {
+    max: 4,
+    digitTimeout: 10,
+    terminators: "#",
+  },
+  partialResults: true,
+  sendStartOfInput: true,
+});
+```

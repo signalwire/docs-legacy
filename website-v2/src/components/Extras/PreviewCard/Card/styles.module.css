@@ -1,0 +1,133 @@
+/* Basic card styling */
+.previewCard {
+  background: var(--ifm-card-background-color);
+  border-radius: var(--ifm-card-border-radius, 0.75rem);
+  border: 1px solid var(--sw-card-border-color, var(--ifm-color-emphasis-300));
+  margin-bottom: 1.5rem;
+  cursor: zoom-in;
+  transition: transform 0.2s;
+  overflow: hidden; /* Prevent content from overflowing */
+  width: 100%; /* Ensure card takes full width of container */
+  display: flex; /* Use flexbox for content centering */
+  flex-direction: column; /* Stack content vertically */
+  height: 100%; /* Take full height of container */
+  max-width: 100%; /* Prevent standalone cards from expanding too wide */
+}
+
+/* Standalone card styles - make it behave like a card in a single column group */
+:not(:global(.previewCardGroup)) > .previewCard {
+  height: auto; /* Auto height for standalone cards */
+  max-height: none; /* Don't restrict max height */
+  margin-left: auto; /* Center the card */
+  margin-right: auto; /* Center the card */
+  max-width: 100%; /* Prevent expanding beyond container width */
+}
+
+/* Not expandable state */
+.notExpandable {
+  cursor: auto;
+}
+
+/* Card content container */
+.previewCardItemContent {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto; /* Grow and shrink as needed, starting from auto size */
+  height: 100%; /* Take full height */
+}
+
+/* Content area */
+.previewCardContent {
+  margin-bottom: 1rem;
+  overflow: hidden; /* Contain content overflow */
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Center horizontally */
+  justify-content: center; /* Center vertically */
+  word-wrap: break-word; /* Allow word wrapping */
+  word-break: break-word; /* Break words to prevent overflow */
+  text-align: center; /* Center text content */
+  flex: 1 1 auto; /* Grow and shrink as needed */
+  width: 100%; /* Take full width */
+}
+
+/* Content fitting - ensure proper containment */
+.previewCardContent img,
+.previewCardContent :global(.theme-code-block),
+.previewCardContent :global(.docusaurus-mermaid-container),
+.previewCardContent :global(pre) {
+  max-width: 100%;
+  overflow: auto; /* Add scrolling for code blocks if needed */
+  display: block; /* Fix layout issues */
+  margin: 0 auto; /* Center block elements */
+}
+
+/* Image specific styling */
+.previewCardContent img {
+  object-fit: contain;
+  max-height: 300px;
+}
+
+/* Code-specific containment */
+.previewCardContent :global(.theme-code-block) {
+  width: 100%;
+  max-height: 400px; /* Limit very tall code blocks */
+  text-align: left; /* Keep code left-aligned */
+}
+
+/* Code text wrapping */
+.previewCardContent :global(pre),
+.previewCardContent :global(code) {
+  white-space: pre-wrap; /* Allow code to wrap */
+  word-break: break-word;
+}
+
+/* Metadata section */
+.cardMetadata {
+  border-top: 1px solid var(--sw-card-border-color, var(--ifm-color-emphasis-300));
+  margin: 0 -1.5rem;
+  padding: 1rem 1.5rem 0;
+  margin-top: auto; /* Push to bottom */
+  text-align: left; /* Left-align metadata text */
+  flex-shrink: 0; /* Prevent footer from shrinking */
+}
+
+/* Title styling */
+.previewCardTitle {
+  margin: 0;
+  font-size: 1.1rem;
+  text-align: left; /* Ensure title is left-aligned */
+}
+
+/* Description styling */
+.previewCardDescription {
+  margin: 0.25rem 0 0 0;
+  color: var(--ifm-font-color-base);
+  text-align: left; /* Left-align description text */
+}
+
+/* Dark mode styles */
+[data-theme="dark"] .previewCard {
+  background: color-mix(in srgb, var(--ifm-card-background-color) 40%, transparent);
+}
+
+/* Hover effect */
+.previewCard:hover {
+  transform: translateY(-3px);
+  border-color: var(--sw-link-color, var(--ifm-color-primary));
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Dark mode hover override */
+[data-theme="dark"] .previewCard:hover {
+  border-color: transparent;
+  background-image: linear-gradient(
+      var(--ifm-card-background-color),
+      var(--ifm-card-background-color)
+    ),
+    var(--sw-horizontal-active-line-color);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+  transform: scale(1.01);
+}

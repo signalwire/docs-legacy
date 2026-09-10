@@ -1,0 +1,128 @@
+---
+title: Gather Input
+description: Call Flow Builder node to gather input from the caller.
+slug: /call-flow-builder/reference/gather-input
+---
+This node is used to gather input from the caller using DTMF or speech recognition.
+During the gather period, the call can use an audio file or text-to-speech to prompt the caller to enter the input.
+
+Multiple input options can be configured to gather multiple pieces of information from the caller using the `Add option` button.
+Additionally, actions can be taken based on the input received. 
+For every input option you can configure, an output node connection will be created to handle the input received.
+
+
+## **Output Node Connectors**
+
+<ParamField path="Input Option" type="string">
+  The output node connector for the first input option configured. This connector will be used when the input received matches the input option. Additional output node connectors will be created for each input option configured.
+</ParamField>
+
+<ParamField path="Unknown" type="string">
+  The output node connector for when the `input received does not match` any of the input options configured.
+</ParamField>
+
+<ParamField path="No Input" type="string">
+  The output node connector for when `no input` is received from the caller.
+</ParamField>
+
+## **Node Settings**
+
+<ParamField path="Text to Speech" type="object">
+  Configure the text-to-speech settings for the gather input node. See [Text to Speech Settings](#text-to-speech-settings).
+</ParamField>
+
+<ParamField path="Audio File" type="object">
+  Configure the audio file settings for the gather input node. See [Audio File Settings](#audio-file-settings).
+</ParamField>
+
+### Text to Speech Settings
+
+<ParamField path="Language" type="string">
+  The language to use for the text-to-speech.
+</ParamField>
+
+<ParamField path="Gender" type="string">
+  The gender of the voice to use for the text-to-speech.
+</ParamField>
+
+<ParamField path="Voice" type="string">
+  The voice to use for the text-to-speech.
+</ParamField>
+
+<ParamField path="Text" type="string">
+  The text to convert to speech.
+</ParamField>
+
+<ParamField path="Wait for Input" type="integer">
+  The amount of time to wait for the caller to enter input.<br /><br />**Possible Values:** A number between `1-99` is required.
+</ParamField>
+
+<ParamField path="Wait for Digits" type="integer">
+  The amount of time to wait for the caller to enter input.<br /><br />**Possible Values:** A number between `1-99` is required.
+</ParamField>
+
+<ParamField path="Input Options" type="array">
+  The input options to gather from the caller. Additional options can be added through the `Add option` button inside the node. See [Input Options](#input-options).
+</ParamField>
+
+### Audio File Settings
+
+<ParamField path="Audio File" type="string">
+  The URL of a audio file to play to the caller.
+</ParamField>
+
+<ParamField path="Input Options" type="array">
+  The input options to gather from the caller. Additional options can be added through the `Add option` button inside the node. See [Input Options](#input-options).
+</ParamField>
+
+### Input Options
+
+<ParamField path="Caller presses" type="string">
+  The DTMF key that the caller must press to select this input option.<br /><br />**Possible Values:** A value of `0-9`, `*`, or `#` is required.
+</ParamField>
+
+<ParamField path="Or says" type="string">
+  The speech recognition value that the caller must say to select this input option.
+</ParamField>
+
+## **Examples**
+
+### Simple Input
+
+You can choose to accept both Speech and DTMF tones with your IVR. 
+The caller in this example can either press 1 or say “sales” to connect with the sales line.
+
+<Frame caption="Gather input as speech or DTMF and send call to the selected channel.">
+
+![Gather Input node example that accepts both DTMF and speech input.](@image/call-flow/nodes/simple-input.webp)
+
+</Frame>
+
+### Input with infinite loop prevention
+
+If you plan to loop your “No Input” route, you probably want to disconnect a call if the Gather Input node attempts to loop the call more than 2 times. 
+You can do that with a combination of a [Set Variables](/docs/call-flow-builder/reference/set-variables) node 
+and a [Conditions](/docs/call-flow-builder/reference/conditions) node.
+If a caller dials your number and sits on the line in silence, your Flow will disconnect the call after a couple of loops.
+
+<Frame caption="Call Flow that prevents an infinite loop with a count and condition check." ogImage>
+
+![Call Flow that prevents an infinite loop with a count and condition check.](@image/call-flow/nodes/input-loop-protection.webp)
+
+</Frame>
+
+### Accept any speech option
+
+The “Unknown” route from the Gather Input node can be useful if you want to accept any and all speech recognition from your caller. 
+A word or phrase is required in your Option 1 “Or Says” field so that your Gather Input node knows it is collecting speech. 
+
+You can route that option to the same flow as the “Unknown” route so all speech options continue the same path. 
+The variable `%{prompt_value}` can then be used in any node and will contain all speech that was detected.
+
+<Frame caption="Call Flow that accepts any speech and repeats it back to the caller.">
+
+![Call Flow that accepts any speech and repeats it back to the caller.](@image/call-flow/nodes/unknown-speech-input.webp)
+
+</Frame>
+
+

@@ -1,0 +1,67 @@
+---
+title: "deleteMeta"
+slug: /node/reference/video/room-session/delete-meta
+description: deleteMeta method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+[roomsession-41]: /docs/server-sdk/node/reference/video/room-session
+
+### deleteMeta
+
+- **deleteMeta**(`keys`): `Promise<void>`
+
+Deletes the specified keys from the metadata for this RoomSession.
+
+#### Parameters
+
+<ParamField path="keys" type="string[]" required>
+  The keys to remove.
+</ParamField>
+
+#### Returns
+
+`Promise<void>`
+
+#### Example
+
+In this example, we set metadata for a room as soon as it starts.
+After 5 seconds, we remove the metadata for that room. Once the room's metadata is set or removed,
+we log the metadata for that room. This example assumes that there is a [`RoomSession`][roomsession-41]
+already active and that members are joining the room.
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+// Initialize the SignalWire client
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+// Access the video client from the main client
+const videoClient = client.video;
+
+// Setup listener for when a room starts
+await videoClient.listen({
+  onRoomStarted: async (roomSession) => {
+    console.log("Room started", roomSession.displayName);
+    await roomSession.setMeta({
+      "foo": "bar",
+      "roomName": roomSession.displayName
+    });
+    let roomMeta = await roomSession.getMeta()
+    console.log("Room meta", roomMeta);
+
+    // delete room meta after 5 seconds
+
+    setTimeout(async () => {
+      console.log("Deleting room meta");
+      await roomSession.deleteMeta(["foo"]);
+      roomMeta = await roomSession.getMeta()
+      console.log("Room meta", roomMeta);
+    }, 5000);
+
+  },
+  onRoomEnded: async (roomSession) => {
+    console.log("Room ended", roomSession.displayName);
+  }
+});
+```

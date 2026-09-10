@@ -1,0 +1,647 @@
+---
+title: "Defining Functions"
+sidebar_label: "Defining Functions"
+slug: /python/guides/defining-functions
+toc_max_heading_level: 3
+---
+
+# SWAIG Functions
+
+SWAIG (SignalWire AI Gateway) functions let your AI agent call custom code to look up data, make API calls, and take actions during conversations.
+
+## What You'll Learn
+
+This chapter covers everything about SWAIG functions:
+
+1. **Defining Functions** - Creating functions the AI can call
+2. **Parameters** - Accepting arguments from the AI
+3. **Results & Actions** - Returning data and triggering actions
+4. **DataMap** - Serverless API integration without webhooks
+5. **Native Functions** - Built-in SignalWire functions
+
+## How SWAIG Functions Work
+
+<Frame caption="SWAIG Function Flow">
+  <img className="diagram" src={require("@image/agents-sdk-manual/04_01_defining-functions_diagram1.webp").default} alt="SWAIG Function Flow." />
+</Frame>
+
+## Quick Start Example
+
+Here's a complete agent with a SWAIG function:
+
+```python
+from signalwire_agents import AgentBase, SwaigFunctionResult
+
+class OrderAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="order-agent")
+        self.add_language("English", "en-US", "rime.spore")
+
+        self.prompt_add_section(
+            "Role",
+            "You are an order status assistant. Help customers check their orders."
+        )
+
+        # Define a function the AI can call
+        self.define_tool(
+            name="check_order",
+            description="Look up order status by order number",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "order_number": {
+                        "type": "string",
+                        "description": "The order number to look up"
+                    }
+                },
+                "required": ["order_number"]
+            },
+            handler=self.check_order
+        )
+
+    def check_order(self, args, raw_data):
+        order_number = args.get("order_number")
+
+        # Your business logic here - database lookup, API call, etc.
+        orders = {
+            "12345": "Shipped Monday, arriving Thursday",
+            "67890": "Processing, ships tomorrow"
+        }
+
+        status = orders.get(order_number, "Order not found")
+        return SwaigFunctionResult(f"Order {order_number}: {status}")
+
+if __name__ == "__main__":
+    agent = OrderAgent()
+    agent.run()
+```
+
+## Function Types
+
+| Type | Description |
+|------|-------------|
+| **Handler Functions** | Defined with `define_tool()`. Python handler runs on your server with full control over logic, database access, and API calls. |
+| **DataMap Functions** | Serverless API integration that runs on SignalWire's servers. No webhook endpoint needed - direct REST API calls. |
+| **Native Functions** | Built into SignalWire. No custom code required - handles transfer, recording, etc. |
+
+## Chapter Contents
+
+| Section | Description |
+|---------|-------------|
+| [Defining Functions](/docs/agents-sdk/python/guides/defining-functions) | Creating SWAIG functions with define_tool() |
+| [Parameters](/docs/agents-sdk/python/guides/parameters) | Defining and validating function parameters |
+| [Results & Actions](/docs/agents-sdk/python/guides/result-actions) | Returning results and triggering actions |
+| [DataMap](/docs/agents-sdk/python/guides/data-map) | Serverless API integration |
+| [Native Functions](/docs/agents-sdk/python/guides/native-functions) | Built-in SignalWire functions |
+
+## When to Use SWAIG Functions
+
+| Use Case | Approach |
+|----------|----------|
+| Database lookups | Handler function |
+| Complex business logic | Handler function |
+| Simple REST API calls | DataMap |
+| Pattern-based responses | DataMap expressions |
+| Call transfers | Native function or SwaigFunctionResult.connect() |
+| SMS sending | SwaigFunctionResult.send_sms() |
+
+## Key Concepts
+
+**Handler Functions**: Python code that runs on your server when the AI decides to call a function. You have full access to databases, APIs, and any Python library.
+
+**SwaigFunctionResult**: The return type for all SWAIG functions. Contains the response text the AI will speak and optional actions to execute.
+
+**Parameters**: JSON Schema definitions that tell the AI what arguments your function accepts. The AI will extract these from the conversation.
+
+**Actions**: Side effects like call transfers, SMS sending, or context changes that execute after the function completes.
+
+**DataMap**: A way to define functions that call REST APIs without running any code on your server - the API calls happen directly on SignalWire's infrastructure.
+
+Let's start by learning how to define functions.
+
+## Basic Function Definition
+
+```python
+from signalwire_agents import AgentBase, SwaigFunctionResult
+
+
+class MyAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="my-agent")
+        self.add_language("English", "en-US", "rime.spore")
+
+        # Define a function
+        self.define_tool(
+            name="get_weather",
+            description="Get current weather for a city",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "city": {
+                        "type": "string",
+                        "description": "City name"
+                    }
+                },
+                "required": ["city"]
+            },
+            handler=self.get_weather
+        )
+
+    def get_weather(self, args, raw_data):
+        city = args.get("city")
+        # Your logic here
+        return SwaigFunctionResult(f"The weather in {city} is sunny, 72 degrees")
+```
+
+## The define_tool() Method
+
+**Required Parameters:**
+
+| Parameter | Description |
+|-----------|-------------|
+| `name` | Unique function name (lowercase, underscores) |
+| `description` | What the function does (helps AI decide when to use) |
+| `parameters` | JSON Schema defining accepted arguments |
+| `handler` | Python function to call |
+
+**Optional Parameters:**
+
+| Parameter | Description |
+|-----------|-------------|
+| `secure` | Require token validation (default: True) |
+| `fillers` | Language-specific filler phrases |
+| `webhook_url` | External webhook URL (overrides local handler) |
+| `required` | List of required parameter names |
+
+## Handler Function Signature
+
+All handlers receive two arguments:
+
+```python
+def my_handler(self, args, raw_data):
+    """
+    Args:
+        args: Dictionary of parsed function arguments
+              {"city": "New York", "units": "fahrenheit"}
+
+        raw_data: Full request data including:
+              - call_id: Unique call identifier
+              - caller_id_num: Caller's phone number
+              - caller_id_name: Caller's name
+              - called_id_num: Number that was called
+              - And more...
+
+    Returns:
+        SwaigFunctionResult with response text and optional actions
+    """
+    return SwaigFunctionResult("Response text")
+```
+
+## Accessing Call Data
+
+```python
+def check_account(self, args, raw_data):
+    # Get caller information
+    caller_number = raw_data.get("caller_id_num", "")
+    call_id = raw_data.get("call_id", "")
+
+    # Get function arguments
+    account_id = args.get("account_id")
+
+    # Use both for your logic
+    return SwaigFunctionResult(
+        f"Account {account_id} for caller {caller_number} is active"
+    )
+```
+
+## Multiple Functions
+
+Register as many functions as your agent needs:
+
+```python
+class CustomerServiceAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="customer-service")
+        self.add_language("English", "en-US", "rime.spore")
+
+        # Order lookup
+        self.define_tool(
+            name="check_order",
+            description="Look up order status by order number",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "order_number": {
+                        "type": "string",
+                        "description": "The order number"
+                    }
+                },
+                "required": ["order_number"]
+            },
+            handler=self.check_order
+        )
+
+        # Account balance
+        self.define_tool(
+            name="get_balance",
+            description="Get account balance for a customer",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "account_id": {
+                        "type": "string",
+                        "description": "Customer account ID"
+                    }
+                },
+                "required": ["account_id"]
+            },
+            handler=self.get_balance
+        )
+
+        # Store hours
+        self.define_tool(
+            name="get_store_hours",
+            description="Get store hours for a location",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "location": {
+                        "type": "string",
+                        "description": "Store location or city"
+                    }
+                },
+                "required": ["location"]
+            },
+            handler=self.get_store_hours
+        )
+
+    def check_order(self, args, raw_data):
+        order_number = args.get("order_number")
+        return SwaigFunctionResult(f"Order {order_number} is in transit")
+
+    def get_balance(self, args, raw_data):
+        account_id = args.get("account_id")
+        return SwaigFunctionResult(f"Account {account_id} balance: $150.00")
+
+    def get_store_hours(self, args, raw_data):
+        location = args.get("location")
+        return SwaigFunctionResult(f"{location} store: Mon-Fri 9AM-9PM, Sat-Sun 10AM-6PM")
+```
+
+## Function Fillers
+
+Add per-function filler phrases for when the function is executing:
+
+```python
+self.define_tool(
+    name="search_inventory",
+    description="Search product inventory",
+    parameters={
+        "type": "object",
+        "properties": {
+            "product": {"type": "string", "description": "Product to search"}
+        },
+        "required": ["product"]
+    },
+    handler=self.search_inventory,
+    fillers={
+        "en-US": [
+            "Let me check our inventory...",
+            "Searching our stock now...",
+            "One moment while I look that up..."
+        ],
+        "es-MX": [
+            "Dejame revisar nuestro inventario...",
+            "Buscando en nuestro stock..."
+        ]
+    }
+)
+```
+
+## The @tool Decorator
+
+Alternative syntax using decorators:
+
+```python
+from signalwire_agents import AgentBase, SwaigFunctionResult
+
+
+class MyAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="my-agent")
+        self.add_language("English", "en-US", "rime.spore")
+
+    @AgentBase.tool(
+        name="get_time",
+        description="Get the current time",
+        parameters={
+            "type": "object",
+            "properties": {
+                "timezone": {
+                    "type": "string",
+                    "description": "Timezone (e.g., 'EST', 'PST')"
+                }
+            }
+        }
+    )
+    def get_time(self, args, raw_data):
+        timezone = args.get("timezone", "UTC")
+        return SwaigFunctionResult(f"The current time in {timezone} is 3:45 PM")
+```
+
+## define_tool() vs @tool: Choosing an Approach
+
+Both methods register SWAIG functions with the same result. Choose based on your coding style and requirements.
+
+### Comparison
+
+| Aspect | define_tool() | @tool Decorator |
+|--------|---------------|-----------------|
+| **Where defined** | Inside `__init__` | At method definition |
+| **Dynamic registration** | Easy | Requires workarounds |
+| **Conditional functions** | Straightforward | More complex |
+| **Code organization** | Definition separate from handler | Self-documenting |
+| **Inheritance** | Easier to override | Works but less flexible |
+
+### When to Use define_tool()
+
+**Conditional function registration:**
+
+```python
+def __init__(self, enable_admin=False):
+    super().__init__(name="my-agent")
+
+    # Always available
+    self.define_tool(name="get_info", ...)
+
+    # Only for admin mode
+    if enable_admin:
+        self.define_tool(name="admin_reset", ...)
+```
+
+**Dynamic functions from configuration:**
+
+```python
+def __init__(self, functions_config):
+    super().__init__(name="my-agent")
+
+    for func in functions_config:
+        self.define_tool(
+            name=func["name"],
+            description=func["description"],
+            parameters=func["params"],
+            handler=getattr(self, func["handler_name"])
+        )
+```
+
+**Handlers defined outside the class:**
+
+```python
+def external_handler(agent, args, raw_data):
+    return SwaigFunctionResult("Handled externally")
+
+class MyAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="my-agent")
+        self.define_tool(
+            name="external_func",
+            description="Uses external handler",
+            parameters={...},
+            handler=lambda args, raw: external_handler(self, args, raw)
+        )
+```
+
+### When to Use @tool Decorator
+
+**Static, self-documenting functions:**
+
+```python
+class CustomerServiceAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="customer-service")
+        self.add_language("English", "en-US", "rime.spore")
+
+    @AgentBase.tool(
+        name="check_order",
+        description="Look up order status",
+        parameters={...}
+    )
+    def check_order(self, args, raw_data):
+        # Handler right here with its definition
+        return SwaigFunctionResult("...")
+
+    @AgentBase.tool(
+        name="get_balance",
+        description="Get account balance",
+        parameters={...}
+    )
+    def get_balance(self, args, raw_data):
+        return SwaigFunctionResult("...")
+```
+
+The decorator keeps the function metadata with the implementation, making it easier to see what a function does at a glance.
+
+### Mixing Both Approaches
+
+You can use both in the same agent:
+
+```python
+class HybridAgent(AgentBase):
+    def __init__(self, extra_functions=None):
+        super().__init__(name="hybrid")
+        self.add_language("English", "en-US", "rime.spore")
+
+        # Dynamic functions via define_tool
+        if extra_functions:
+            for func in extra_functions:
+                self.define_tool(**func)
+
+    # Static function via decorator
+    @AgentBase.tool(
+        name="get_help",
+        description="Get help information",
+        parameters={"type": "object", "properties": {}}
+    )
+    def get_help(self, args, raw_data):
+        return SwaigFunctionResult("How can I help you?")
+```
+
+## External Webhook Functions
+
+Route function calls to an external webhook:
+
+```python
+self.define_tool(
+    name="external_lookup",
+    description="Look up data from external service",
+    parameters={
+        "type": "object",
+        "properties": {
+            "query": {"type": "string", "description": "Search query"}
+        },
+        "required": ["query"]
+    },
+    handler=None,  # No local handler
+    webhook_url="https://external-service.com/api/lookup"
+)
+```
+
+## Function Security
+
+By default, functions require token validation. Disable for testing:
+
+```python
+# Secure function (default)
+self.define_tool(
+    name="secure_function",
+    description="Requires token validation",
+    parameters={"type": "object", "properties": {}},
+    handler=self.secure_handler,
+    secure=True  # Default
+)
+
+# Insecure function (testing only)
+self.define_tool(
+    name="test_function",
+    description="No token validation (testing only)",
+    parameters={"type": "object", "properties": {}},
+    handler=self.test_handler,
+    secure=False  # Disable for testing
+)
+```
+
+## Writing Good Descriptions
+
+The description helps the AI decide when to use your function:
+
+```python
+# Good - specific and clear
+description="Look up order status by order number. Returns shipping status and estimated delivery date."
+
+# Bad - too vague
+description="Get order info"
+
+# Good - mentions what triggers it
+description="Check if a product is in stock. Use when customer asks about availability."
+
+# Good - explains constraints
+description="Transfer call to human support. Only use if customer explicitly requests to speak with a person."
+```
+
+## Testing Functions
+
+Use swaig-test to test your functions:
+
+```bash
+# List all functions
+swaig-test my_agent.py --list-tools
+
+# Test a specific function
+swaig-test my_agent.py --exec check_order --order_number 12345
+
+# See the generated SWML
+swaig-test my_agent.py --dump-swml
+```
+
+## Complete Example
+
+```python
+#!/usr/bin/env python3
+# restaurant_agent.py - Restaurant order assistant
+from signalwire_agents import AgentBase, SwaigFunctionResult
+
+
+class RestaurantAgent(AgentBase):
+    MENU = {
+        "burger": {"price": 12.99, "description": "Angus beef burger with fries"},
+        "pizza": {"price": 14.99, "description": "12-inch cheese pizza"},
+        "salad": {"price": 9.99, "description": "Garden salad with dressing"}
+    }
+
+    def __init__(self):
+        super().__init__(name="restaurant-agent")
+        self.add_language("English", "en-US", "rime.spore")
+
+        self.prompt_add_section(
+            "Role",
+            "You are a friendly restaurant order assistant."
+        )
+
+        self.define_tool(
+            name="get_menu_item",
+            description="Get details about a menu item including price and description",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "item_name": {
+                        "type": "string",
+                        "description": "Name of the menu item"
+                    }
+                },
+                "required": ["item_name"]
+            },
+            handler=self.get_menu_item,
+            fillers={
+                "en-US": ["Let me check the menu..."]
+            }
+        )
+
+        self.define_tool(
+            name="place_order",
+            description="Place an order for menu items",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "items": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "List of menu items to order"
+                    },
+                    "special_requests": {
+                        "type": "string",
+                        "description": "Any special requests or modifications"
+                    }
+                },
+                "required": ["items"]
+            },
+            handler=self.place_order,
+            fillers={
+                "en-US": ["Placing your order now..."]
+            }
+        )
+
+    def get_menu_item(self, args, raw_data):
+        item_name = args.get("item_name", "").lower()
+        item = self.MENU.get(item_name)
+
+        if item:
+            return SwaigFunctionResult(
+                f"{item_name.title()}: {item['description']}. Price: ${item['price']}"
+            )
+        return SwaigFunctionResult(f"Sorry, {item_name} is not on our menu.")
+
+    def place_order(self, args, raw_data):
+        items = args.get("items", [])
+        special = args.get("special_requests", "")
+
+        total = sum(
+            self.MENU.get(item.lower(), {}).get("price", 0)
+            for item in items
+        )
+
+        if total > 0:
+            msg = f"Order placed: {', '.join(items)}. Total: ${total:.2f}"
+            if special:
+                msg += f" Special requests: {special}"
+            return SwaigFunctionResult(msg)
+
+        return SwaigFunctionResult("Could not place order. Please check item names.")
+
+
+if __name__ == "__main__":
+    agent = RestaurantAgent()
+    agent.run()
+```
+
+
+

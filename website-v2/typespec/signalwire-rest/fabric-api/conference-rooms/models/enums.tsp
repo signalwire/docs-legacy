@@ -1,0 +1,15 @@
+enum Layout {
+  Layout_Grid_Reponsive: "grid-responsive",
+  Layout_Grid_Responsive_Mobile: "grid-responsive-mobile",
+  Layout_Highlight_1_responsive: "highlight-1-responsive",
+  Layout_1_X_1: "1x1",
+  Layout_2_X_1: "2x1",
+  Layout_2_X_2: "2x2",
+  Layout_5_Up: "5up",
+  Layout_3_X_3: "3x3",
+  Layout_4_X_4: "4x4",
+  Layout_5_X_5: "5x5",
+  Layout_6_X_6: "6x6",
+  Layout_8_X_8: "8x8",
+  Layout_10_X_10: "10x10",
+}

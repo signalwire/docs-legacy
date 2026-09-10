@@ -1,0 +1,36 @@
+---
+title: WebRTC
+description: What WebRTC is and how SignalWire uses it for real-time communication.
+slug: /platform/voice/what-is-webrtc
+x-custom:
+  ported_from_readme: true
+  tags:
+    - product:voice
+    - product:video
+---
+
+WebRTC (Web Real-Time Communication) is a free, open-source project that adds real-time voice and video capabilities to web browsers and mobile applications. It lets web apps stream audio and video media directly between peers without plugins or third-party software.
+
+WebRTC combines a set of W3C APIs and IETF protocols that enable peer-to-peer data sharing, audio/video capture, and network traversal. SignalWire uses WebRTC as the transport layer for browser-based voice and video calling.
+
+### Key benefits
+
+- **No plugins required** — works natively in all major browsers.
+- **Cross-platform** — connects devices regardless of operating system.
+- **Encrypted by default** — all media is secured with SRTP (Secure Real-Time Transport Protocol).
+- **Adaptive quality** — adjusts bitrate and resolution based on network conditions.
+- **Interoperable** — works alongside [SIP](/docs/platform/voice/sip), PSTN, and other voice/video protocols.
+
+### Browser support
+
+All major browsers support WebRTC natively:
+
+- Google Chrome
+- Mozilla Firefox
+- Safari (macOS and iOS)
+- Microsoft Edge
+- Opera
+- Brave
+- Vivaldi
+
+No plugins or extensions are needed — users grant microphone/camera permissions and connect immediately.

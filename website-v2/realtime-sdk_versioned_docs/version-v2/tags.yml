@@ -1,0 +1,35 @@
+realtime-sdk:
+  label: Realtime SDK
+  permalink: /sdks/realtime-sdk
+  description: Realtime SDK related content.
+
+chat:
+  label: Chat
+  permalink: /chat
+  description: Chat related content.
+
+video:
+  label: Video
+  permalink: /video
+  description: Video related content.
+
+voice:
+  label: Voice
+  permalink: /voice
+  description: Voice related content.
+
+messaging:
+  label: Messaging
+  description: Messaging related content.
+
+pubsub:
+  label: PubSub
+  description: PubSub related content.
+
+task:
+  label: Task
+  description: Task related content.
+
+guides:
+  label: Guides
+  description: Guide related content.

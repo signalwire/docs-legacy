@@ -1,0 +1,67 @@
+---
+title: Messaging character limits
+sidebar_label: Character limits
+slug: /platform/messaging/character-limits
+x-custom:
+  ported_from_readme: true
+  hideInGuideShowcase: true
+description: An overview of how message segments are measured and priced.
+---
+
+
+What is a Message Segment?
+--------------------------
+
+A message segment is a part of an entire message that has been broken down into several pieces. If the body of the message is larger than 160 GSM-7 characters or 70 UCS-2 characters, it will automatically be broken up into smaller messages and annotated to attempt proper reconstruction on the recipient handset. Not all carriers and handsets support this. You can have a maximum of 1600 characters in an SMS body. 
+
+ SignalWire will recombine inbound messages into a single message. **Your project will be charged for each segment sent or received.**
+
+
+<Info>
+
+- All white spaces (space, tab, carriage return) count as a single character toward the total.
+- \\r = CR (Carriage Return) → Used as a new line character in Mac OS before X
+- \\n = LF (Line Feed) → Used as a new line character in Unix/Mac OS X
+- \\r\\n = CR + LF → Used as a new line character in Windows
+
+</Info>
+
+**Never copy and paste the message content that you are going to send!** Doing so is likely to result in segmenting and delivery issues. 
+
+View Message Encoding
+---------------------
+
+Check your SignalWire Space portal for the full breakdown to see how your messages are encoded and sent. Click an individual message record to see the encoding details, cost,  character count, number of segments, and number of media attachments. 
+
+<Frame>
+
+![A message record in a SignalWire Space portal titled 'Message Encoding Details' The message is split into three parts, labeled 'Segments 1 through 3'. Each character of the message is in a square box. The first three boxes of each segment are colored blue, and show the code 'UDH'. Emojis are shown in pink boxes.](@image/dashboard/messaging/encoding-details.webp)
+
+</Frame>
+
+GSM
+---
+
+When all characters in an SMS are part of the GSM 7-bit alphabet, the SMS is billed as GSM. This allows for up to 160 characters in a single message segment.
+
+See here for that 7-bit set [here](https://en.wikipedia.org/wiki/GSM_03.38).
+
+For larger messages beyond 160 characters, all segments (including the first) will be segmented at 153 characters per segment, using 7 characters for each segment's User Data Header. These are industry standards ensuring proper assembly/disassembly of SMS amongst various handsets. 
+
+See here for more info on UDH [here](https://en.wikipedia.org/wiki/User_Data_Header).
+
+Unicode
+-------
+
+A single Unicode character such as (♥) causes the entire message to be billed as Unicode. This allows for up to 70 characters in a single message segment. 
+
+ For larger messages beyond 70 characters, all segments (including the first) will be segmented at 67 characters per segment, using 3 characters per segment's User Defined Header.
+
+See here for more info on UDH [here](https://en.wikipedia.org/wiki/User_Data_Header).
+
+Final Note about Carriers
+-------------------------
+
+Some carriers may not utilize all 5 segments in an SMS and may limit to 5 or fewer. That decision is carrier-dependent and does not reflect SignalWire's ability to send up to 5 segments. 
+
+If a message is being truncated, you can always create a support ticket with a [Message SID](/docs/platform/what-is-a-sid) of the truncated message, and we can reach out to our carrier peer to see if there were any issues in delivery. However, they will often advise that the decision is based on the end user's carrier and therefore, that user would need to inquire with their carrier to find out more.

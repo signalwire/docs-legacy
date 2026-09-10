@@ -1,0 +1,27 @@
+---
+title: "getRecordings"
+slug: /node/reference/video/room-session/get-recordings
+description: getRecordings method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+[roomsessionrecording-5]: /docs/server-sdk/v3/node/reference/video/room-session-recording
+
+### getRecordings
+
+- **getRecordings**(): `Promise<{ recordings: RoomSessionRecording }>` - See [RoomSessionRecording][roomsessionrecording-5] for more details.
+
+Obtains a list of recordings for the current room session.
+
+#### Returns
+
+`Promise<{ recordings: RoomSessionRecording }>` - See [RoomSessionRecording][roomsessionrecording-5] for more details.
+
+#### Example
+
+```javascript
+const recs = await roomSession.getRecordings();
+if (recs.recordings.length > 0) {
+  console.log(recs.recordings[0].id, recs.recordings[0].duration);
+}
+```

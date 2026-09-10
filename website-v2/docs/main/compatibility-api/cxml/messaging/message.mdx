@@ -1,0 +1,453 @@
+---
+title: Message
+sidebar_label: Message
+excerpt: ''
+slug: /compatibility-api/cxml/reference/messaging/message
+sidebar_position: 1
+toc_max_heading_level: 3
+---
+
+The `<Message>` verb sends an SMS or MMS message to a phone number. To send a message in combination with [Voice XML](/docs/compatibility-api/cxml/reference/voice) verbs, use the [`<Sms>` Voice verb](/docs/compatibility-api/cxml/reference/voice/sms).
+
+An example message that responds to the sender:
+
+<CodeBlocks>
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Message>Hello from SignalWire!</Message>
+</Response>
+```
+
+```javascript title="Node.js"
+const { RestClient } = require("@signalwire/compatibility-api");
+const response = new RestClient.LaML.MessagingResponse();
+
+response.message("Hello from SignalWire!");
+console.log(response.toString());
+```
+
+```csharp
+using Twilio.TwiML;
+using System;
+
+
+class Example
+{
+    static void Main()
+    {
+        var response = new MessagingResponse();
+        response.Message("Hello from SignalWire!");
+
+        Console.WriteLine(response.ToString());;
+    }
+}
+```
+
+```python
+from signalwire.messaging_response import Message, MessagingResponse
+
+response = MessagingResponse()
+response.message('Hello from SignalWire!')
+
+print(response)
+```
+
+```ruby
+require 'signalwire/sdk'
+
+response = Signalwire::Sdk::MessagingResponse.new do |response|
+  response.message(body: 'Hello from SignalWire!')
+end
+
+puts response.to_s
+```
+</CodeBlocks>
+
+An example message with further instructions returned from the action request.
+
+<CodeBlocks>
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Message action="https://your-application.com/followup"
+             method="GET">
+        Hello from SignalWire!
+    </Message>
+</Response>
+```
+
+```javascript title="Node.js"
+const { RestClient } = require("@signalwire/compatibility-api");
+const response = new RestClient.LaML.MessagingResponse();
+
+response.message(
+  { action: "https://your-application.com/followup", method: "GET" },
+  "Hello from SignalWire!"
+);
+console.log(response.toString());
+```
+
+```csharp
+using Twilio.TwiML;
+using Twilio.Http;
+using System;
+
+
+class Example
+{
+    static void Main()
+    {
+        var response = new MessagingResponse();
+        response.Message("Hello from SignalWire",
+            action: new Uri("https://your-application.com/followup"), method: HttpMethod.Get);
+
+        Console.WriteLine(response.ToString());;
+    }
+}
+```
+
+```python
+from signalwire.messaging_response import Message, MessagingResponse
+
+response = MessagingResponse()
+response.message('Hello from SignalWire!', action='https://your-application.com/followup', method="GET")
+
+print(response)
+```
+
+```ruby
+require 'signalwire/sdk'
+
+response = Signalwire::Sdk::MessagingResponse.new do |response|
+  response.message(action: 'https://your-application.com/followup', method: 'GET', message: 'Hello from SignalWire!')
+end
+
+puts response.to_s
+```
+</CodeBlocks>
+
+## Verb attributes
+
+<ParamField path="action" type="string">
+  The `action` attribute takes a URL endpoint that is expected to return a cXML document to override control flow. The endpoint receives a callback with the [Standard Messaging Request Parameters](/docs/compatibility-api/cxml/reference/messaging#request-parameters) as well as `MessageStatus` and `ErrorCode` and expect a valid cXML document in return. The next instructions to be executed are the verbs returned in response to the `action` endpoint request. For example, any verbs following a `<Message>` verb with its `action` attribute set are unreachable, as flow control will be passed onto the response from the `action` request.
+</ParamField>
+
+<ParamField path="from" type="string">
+  The `from` attribute takes a valid phone number in E.164 format or short code. If no `from` is specified, it defaults to the number that received the message. You can only specify `from` phone numbers or short codes that you have purchased from SignalWire and which are capable of messaging.
+</ParamField>
+
+<ParamField path="method" type="string" default="POST">
+  The `method` attribute specifies whether the request to `action` is a `GET` or a `POST`. Valid values are `GET` or `POST`.
+</ParamField>
+
+<ParamField path="to" type="string">
+  The `to` attribute takes a valid phone number in E.164 format as an argument. The message is sent to this phone number. If no `to` is specified, the message is sent as a reply to the incoming message sender.
+</ParamField>
+
+## Message status
+
+The `MessageStatus` parameter is sent with requests to the `action` endpoint or to statusCallback URLs. It determines whether the message was successfully sent or if there were problem with delivery.
+
+Valid message statuses are: `queued`, `sending`, `sent`, `failed`, `delivered`
+
+## Nouns
+
+> An example Message verb using nested nouns
+
+<CodeBlocks>
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Message>
+        <Body>Hello from SignalWire!</Body>
+        <Media>https://link.to/your-media-file</Media>
+    </Message>
+</Response>
+```
+
+```javascript title="Node.js"
+const { RestClient } = require("@signalwire/compatibility-api");
+const response = new RestClient.LaML.MessagingResponse();
+
+message = response.message();
+message.body("Hello from SignalWire!");
+message.media("https://link.to/your-media-file");
+console.log(response.toString());
+```
+
+```csharp
+using Twilio.TwiML;
+using Twilio.TwiML.Messaging;
+using System;
+
+
+class Example
+{
+    static void Main()
+    {
+        var response = new MessagingResponse();
+        var message = new Message();
+        message.Body("Hello from SignalWire!");
+        message.Media(new Uri("https://link.to/your-media-file"));
+
+        response.Append(message);
+        Console.WriteLine(response.ToString());;
+    }
+}
+```
+
+```python
+from signalwire.messaging_response import Message, Media, Body, MessagingResponse
+
+response = MessagingResponse()
+message = Message()
+message.body('Hello from SignalWire!')
+message.media('https://link.to/your-media-file')
+response.append(message)
+
+print(response)
+```
+
+```ruby
+require 'signalwire/sdk'
+
+response = Signalwire::Sdk::MessagingResponse.new do |response|
+  response.message do |message|
+    message.body('Hello from SignalWire!')
+    message.media('https://link.to/your-media-file')
+  end
+end
+
+puts response.to_s
+```
+</CodeBlocks>
+
+The **noun** of a cXML verb is nested within the verb upon which the verb acts. `<Message>` has the following nouns:
+
+| Noun | Description |
+|:-----|:------------|
+| `plain text` | The text of the message you want to send. |
+| `<Body>` | The text of the message you want to send. If more than one `<Body>` noun is present, the text will be concatenated together into a single string. The maximum body size allowed is 1600 characters. |
+| `<Media>` | The URL of media to include in the message. If you wish to send multiple media in a single message, use multiple `<Media>` nouns. You can have a maximum of 10 media URLs per message. |
+
+## Nesting
+
+No other verbs can be nested within `<Message>` and you cannot nest `<Message>` within any other verbs.
+
+## Examples
+
+### Send a simple SMS
+
+<CodeBlocks>
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Message>Hello from SignalWire!</Message>
+</Response>
+```
+
+```javascript title="Node.js"
+const { RestClient } = require("@signalwire/compatibility-api");
+const response = new RestClient.LaML.MessagingResponse();
+
+response.message("Hello from SignalWire!");
+console.log(response.toString());
+```
+
+```csharp
+using Twilio.TwiML;
+using System;
+
+
+class Example
+{
+    static void Main()
+    {
+        var response = new MessagingResponse();
+        response.Message("Hello from SignalWire!");
+
+        Console.WriteLine(response.ToString());;
+    }
+}
+```
+
+```python
+from signalwire.messaging_response import Message, MessagingResponse
+
+response = MessagingResponse()
+response.message('Hello from SignalWire!')
+
+print(response)
+```
+
+```ruby
+require 'signalwire/sdk'
+
+response = Signalwire::Sdk::MessagingResponse.new do |response|
+  response.message(body: 'Hello from SignalWire!')
+end
+
+puts response.to_s
+```
+</CodeBlocks>
+
+The simplest case for `<Message>`: SignalWire responds to an inbound message with a "hello" message, from the number that received the message.
+
+### Send an image with your message (MMS)
+
+<CodeBlocks>
+
+```xml
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Message>
+        <Body>Hello from SignalWire!</Body>
+        <Media>https://link.to/your-media-file</Media>
+    </Message>
+</Response>
+```
+
+```javascript title="Node.js"
+const { RestClient } = require("@signalwire/compatibility-api");
+const response = new RestClient.LaML.MessagingResponse();
+
+message = response.message();
+message.body("Hello from SignalWire!");
+message.media("https://link.to/your-media-file");
+console.log(response.toString());
+```
+
+```csharp
+
+using Twilio.TwiML;
+using Twilio.TwiML.Messaging;
+using System;
+
+
+class Example
+{
+    static void Main()
+    {
+        var response = new MessagingResponse();
+        var message = new Message();
+        message.Body("Hello from SignalWire!");
+        message.Media(new Uri("https://link.to/your-media-file"));
+
+        response.Append(message);
+        Console.WriteLine(response.ToString());;
+    }
+}
+```
+
+```python 
+
+```python
+from signalwire.messaging_response import Message, Media, Body, MessagingResponse
+
+response = MessagingResponse()
+message = Message()
+message.body('Hello from SignalWire!')
+message.media('https://link.to/your-media-file')
+response.append(message)
+
+print(response)
+```
+
+```ruby
+require 'signalwire/sdk'
+
+response = Signalwire::Sdk::MessagingResponse.new do |response|
+  response.message do |message|
+    message.body('Hello from SignalWire!')
+    message.media('https://link.to/your-media-file')
+  end
+end
+
+puts response.to_s
+```
+
+</CodeBlocks>
+
+Add a picture to the message by specifying a URL with a nested `<Media>` noun. The `<Body>` noun is optional if you are sending media and you do not want to send text with your media in the message.
+
+### Send a message and respond based on status
+
+<CodeBlocks>
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Message action="https://your-application.com/followup"
+             method="GET">
+        Hello from SignalWire!
+    </Message>
+    <Message>I am unreachable!</Message>
+</Response>
+```
+
+```javascript title="Node.js"
+const { RestClient } = require("@signalwire/compatibility-api");
+const response = new RestClient.LaML.MessagingResponse();
+
+response.message(
+  { action: "https://your-application.com/followup", method: "GET" },
+  "Hello from SignalWire!"
+);
+response.message("I am unreachable!");
+console.log(response.toString());
+```
+
+```csharp
+using Twilio.TwiML;
+using Twilio.Http;
+using System;
+
+
+class Example
+{
+    static void Main()
+    {
+        var response = new MessagingResponse();
+        response.Message("Hello from SignalWire!",
+            action: new Uri("https://your-application.com/followup"), method: HttpMethod.Get);
+        response.Message("I am unreachable!");
+
+        Console.WriteLine(response.ToString());;
+    }
+}
+```
+
+```python
+from signalwire.messaging_response import Message, MessagingResponse
+
+response = MessagingResponse()
+response.message('Hello from SignalWire!', action='https://your-application.com/followup', method="GET")
+response.message('I am unreachable!')
+
+print(response)
+```
+
+```ruby
+require 'signalwire/sdk'
+
+response = Signalwire::Sdk::MessagingResponse.new do |response|
+  response.message(action: 'https://your-application.com/followup', method: 'GET', message: 'Hello from SignalWire!')
+  response.message(body: 'I am unreachable!')
+end
+
+puts response.to_s
+```
+</CodeBlocks>
+
+This example allows us to follow up with further actions based on whether the message is sent or not. The URL `https://your-application.com/followup` receives a `GET` request with the message's parameters and includes the `MessageStatus`, either `invalid`, `sending` or `failed`.
+
+The cXML document returned from your application determines what to do next.
+You could do nothing, or if the `MessageStatus` was failed, you could alert the user with a different `<Message>`.
+
+With the `action` attribute is present, the remaining verbs in the document are unreachable because control is passed off to the response rather than continuing on in the document.
+
+## See also
+
+Send messages without waiting for an inbound message by using our REST API to [create a message](/docs/compatibility-api/rest/create-message).

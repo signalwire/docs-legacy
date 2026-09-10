@@ -1,0 +1,52 @@
+---
+title: Recording calls
+slug: /swml/guides/record-calls
+description: Using SWML to record ongoing calls.
+---
+
+In [Making and receiving phone calls](/docs/swml/guides/make-and-receive-calls) we learned how to use SWML Scripts to define what should happen when a call is received by one of your
+SignalWire numbers. In that case, we just played some audio. In this article,
+instead, we will use the same technique to record the audio of the call.
+
+## Recording calls with SignalWire
+
+We are going to define the instructions for recording the call in a SWML script hosted on SignalWire.
+To create a new SWML script, navigate to the **Resources** section from your sidebar.
+From there, create a new script, and select the **SWML** option.
+
+Create a new script, and paste the following SWML in it:
+
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - record_call:
+        format: mp3
+        direction: "both"
+    - play:
+        url: 'say: Welcome to SignalWire. You should hear this in your call recording.'
+```
+
+We used the [`record_call`](/docs/swml/reference/record-call) method to start the recording in the background, then the [`play`](/docs/swml/reference/play) method to play a text-to-speech message.
+The recording will be available from your SignalWire Space in the **Storage** section, within **Recordings**.
+
+![Call Recording Example SWML.](@image/dashboard/sidebar/Call-Recording-Example-SWML.webp)
+
+The [`record_call`](/docs/swml/reference/record-call) method accepts parameters to configure the format, direction of the recording, terminators, and more.
+For additional information, see the `record_call` [technical documentation](/docs/swml/reference/record-call).
+
+## Assigning the script to a SignalWire phone number
+
+The final step is to configure one of your SignalWire phone numbers to answer calls using the SWML Script we just created. You can do that from the **Phone Numbers** section:
+
+![Assign Resource.](@image/dashboard/phone-numbers/assign-resource-voice.webp)
+
+Refer to [Making and receiving phone calls](/docs/swml/guides/make-and-receive-calls#receiving-incoming-calls) for more information about this step.
+
+## Conclusion
+
+You are now ready to test the call recording script.
+
+SWML scripts offer a quick and easy way to get started with common use cases. If you are an advanced developer, or you need more
+flexibility and real-time control on your calls, you may be interested in our
+guide about how to [make and receive calls in Node.js](/docs/server-sdk/node/guides/get-started-with-voice).

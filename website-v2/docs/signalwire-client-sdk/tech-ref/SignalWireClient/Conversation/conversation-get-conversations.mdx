@@ -1,0 +1,52 @@
+---
+title: conversation.getConversations
+slug: /signalwire-client/conversation-get-conversations
+---
+
+import APIField from '@site/src/components/APIField';
+
+Retrieves a list of conversations that the current subscriber has access to or is participating in.
+
+## How it works
+
+The `conversation.getConversations` method fetches all conversations associated with the authenticated subscriber. This includes active conversations, archived conversations, and group discussions.
+
+## Parameters
+
+<APIField name="params" type="GetConversationsParams">
+  Optional configuration for filtering conversations.
+</APIField>
+
+<APIField name="params.limit" type="number" default="50">
+  Maximum number of conversations to retrieve.
+</APIField>
+
+<APIField name="params.offset" type="number" default="0">
+  Number of conversations to skip (for pagination).
+</APIField>
+
+<APIField name="params.filter" type="string">
+  Optional filter criteria for conversations.
+</APIField>
+
+## Signature
+
+```typescript
+conversation.getConversations(params?: GetConversationsParams): Promise<GetConversationsResult>
+```
+
+## Returns
+
+**Type:** `Promise<GetConversationsResult>`
+
+Returns a Promise that resolves with an array of conversations and pagination information.
+
+## Examples
+
+### Get all conversations
+
+```typescript
+const result = await client.conversation.getConversations()
+
+console.log('Conversations:', result.conversations)
+```

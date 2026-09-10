@@ -1,0 +1,59 @@
+---
+title: "listen"
+slug: /node/reference/pubsub/client/listen
+description: listen method for the Client class.
+toc_max_heading_level: 3
+---
+
+[events]: /docs/server-sdk/node/reference/pubsub/client/events
+
+### listen
+
+- **listen**(`{ event: Callback }`): `Promise<PubSubEvents>`
+
+Listen for events on the specified channel.
+
+#### Parameters
+
+<ParamField path="params" type="object" required>
+  Object containing the parameters of the method.
+</ParamField>
+
+<Indent>
+<ParamField path="channels" type="string[]" required>
+  List of channels to listen to.
+</ParamField>
+
+<ParamField path="EVENT" type="Callback">
+  The event to listen to. List of events can be found [here][events]. Example event: `onMessageReceived`.
+</ParamField>
+</Indent>
+
+#### Returns
+
+`Promise<PubSubEvents>`
+
+A promise that resolves to a `PubSubEvents` object that you can use to view the current state or results of the event.
+
+#### Example
+
+```js
+import { SignalWire} from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+const pubSubClient = client.pubSub;
+
+await pubSubClient.listen({
+  channels: ["my-channel"],
+  onMessageReceived: (message) => {
+    console.log(message);
+  }
+});
+```
+
+In this example:
+ - Import the SignalWire module and initialize a new SignalWire client using your project ID and token.
+ - Access the PubSub client from the initialized SignalWire client. 
+ - Subscribe to the `my-channel` channel and set up a listener for incoming messages.
+ - Log received messages to the console.

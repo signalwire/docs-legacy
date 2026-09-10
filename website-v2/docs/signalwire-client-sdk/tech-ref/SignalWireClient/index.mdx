@@ -1,0 +1,126 @@
+---
+title: SignalWire Client
+slug: /signalwire-client
+---
+
+import APIField from '@site/src/components/APIField';
+
+The SignalWire Client ([`SignalWireContract`](types#signalwirecontract)) is the main entry point for the SignalWire SDK. It provides methods for managing calls, conversations, device registration, and real-time communication.
+
+## Core methods
+
+<APIField name="dial" type="[Dial](signalwire-client/dial)">
+  Initiates an outbound call to a destination. Returns a [CallSession](call-session) object for managing the call.
+</APIField>
+
+<APIField name="disconnect" type="void">
+  Disconnects from the SignalWire network and cleans up all active resources.
+</APIField>
+
+<APIField name="online" type="[OnlineParams](signalwire-client/online)">
+  Brings the client online to receive incoming calls and messages. Requires callback handlers for incoming calls.
+</APIField>
+
+<APIField name="offline" type="void">
+  Takes the client offline, preventing reception of new incoming calls and messages.
+</APIField>
+
+<APIField name="reattach" type="[ReattachParams](signalwire-client/reattach)">
+  Reattaches to an existing call session using a call ID. Useful for reconnecting after network interruptions.
+</APIField>
+
+## Device management
+
+<APIField name="registerDevice" type="[RegisterDeviceParams](signalwire-client/register-device)">
+  Registers a device for push notifications. Required for receiving calls when the app is in the background.
+</APIField>
+
+<APIField name="unregisterDevice" type="[UnregisterDeviceParams](signalwire-client/unregister-device)">
+  Unregisters a device from push notifications.
+</APIField>
+
+<APIField name="handlePushNotification" type="[HandlePushNotificationParams](signalwire-client/handle-push-notification)">
+  Processes incoming push notifications for call or message events.
+</APIField>
+
+## Token management
+
+<APIField name="getSubscriberInfo" type="void">
+  Retrieves information about the current subscriber, including capabilities and permissions.
+</APIField>
+
+<APIField name="updateToken" type="string">
+  Updates the authentication token for the client session. Useful for token refresh scenarios.
+</APIField>
+
+## Address namespace
+
+The `address` namespace provides methods for managing and retrieving address information.
+
+<APIField name="address.getAddresses" type="void">
+  Retrieves a list of all available addresses.
+</APIField>
+
+<APIField name="address.getAddress" type="string">
+  Retrieves information about a specific address by ID.
+</APIField>
+
+<APIField name="address.getMyAddresses" type="void">
+  Retrieves addresses associated with the current subscriber.
+</APIField>
+
+## Chat namespace
+
+The `chat` namespace provides methods for real-time chat functionality within calls.
+
+<APIField name="chat.getMessages" type="[GetConversationChatMessageParams](signalwire-client/chat-get-messages)">
+  Retrieves chat messages from a conversation.
+</APIField>
+
+<APIField name="chat.join" type="[JoinConversationParams](signalwire-client/chat-join)">
+  Joins a chat conversation.
+</APIField>
+
+<APIField name="chat.sendMessage" type="[SendConversationMessageParams](signalwire-client/chat-send-message)">
+  Sends a message in a chat conversation.
+</APIField>
+
+<APIField name="chat.subscribe" type="[ConversationChatMessagesSubscribeParams](signalwire-client/chat-subscribe)">
+  Subscribes to real-time chat message events.
+</APIField>
+
+## Conversation namespace
+
+The `conversation` namespace provides methods for managing persistent conversations and messaging.
+
+<APIField name="conversation.getConversationMessages" type="[GetConversationMessagesParams](signalwire-client/conversation-get-conversation-messages)">
+  Retrieves messages from a specific conversation.
+</APIField>
+
+<APIField name="conversation.getConversations" type="[GetConversationsParams](signalwire-client/conversation-get-conversations)">
+  Retrieves a list of conversations.
+</APIField>
+
+<APIField name="conversation.getMessages" type="[GetMessagesParams](signalwire-client/conversation-get-messages)">
+  Retrieves messages across conversations.
+</APIField>
+
+<APIField name="conversation.join" type="[JoinConversationParams](signalwire-client/conversation-join)">
+  Joins a conversation.
+</APIField>
+
+<APIField name="conversation.sendMessage" type="[SendConversationMessageParams](signalwire-client/conversation-send-message)">
+  Sends a message in a conversation.
+</APIField>
+
+<APIField name="conversation.subscribe" type="[ConversationSubscribeCallback](signalwire-client/conversation-subscribe)">
+  Subscribes to real-time conversation events.
+</APIField>
+
+## Methods
+
+<DocCardList />
+
+## See also
+
+- [Events](./events.mdx) - Available events for the SignalWire Client

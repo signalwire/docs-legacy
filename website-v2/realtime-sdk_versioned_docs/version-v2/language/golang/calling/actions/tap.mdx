@@ -1,0 +1,206 @@
+---
+title: Relay.Calling.TapAction
+slug: /go/reference/calling/actions/tap
+description: The Tap Action is used to stream call media to external endpoints.
+toc_max_heading_level: 3
+---
+
+[relay-calling-tapresult]: /docs/server-sdk/v2/go/reference/calling/results/tap
+[tapasync]: /docs/server-sdk/v2/go/reference/calling/call#tapasync
+
+## Relay.Calling.TapAction
+
+This object returned from [`tapAsync`][tapasync] method that represents the running media tapping active on a call. 
+Signalwire will send RTP or Websocket Audio (WS or WSS).
+
+### Methods-submenu
+
+
+#### GetResult
+
+Returns the final result of this `tapping` action.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+[`Relay.Calling.TapResult`][relay-calling-tapresult] - Final `tap` result.
+
+**Examples**
+
+> Start tapping audio and grab the result when it's completed (RTP).
+
+```go
+var tapdevice signalwire.TapDevice
+tapdevice.Type = signalwire.TapRTP.String()
+tapdevice.Params.Addr = "X.X.X.X"
+tapdevice.Params.Port = 1234
+tapdevice.Params.Codec = "PCMU"
+/* direction can be TapDirectionListen, TapDirectionSpeak or TapDirectionBoth */
+tapAction, err := resultDial.Call.TapAudioAsync(signalwire.TapDirectionListen, &tapdevice)
+if err != nil {
+	signalwire.Log.Fatal("Error occurred while trying to tap audio: %v\n", err)
+}
+// tap for 10 seconds
+time.Sleep(10 * time.Second)
+tapAction.Stop()
+signalwire.Log.Info("Tap: %v Result :%v\n", tapAction.GetTap(), tapAction.GetResult())
+signalwire.Log.Info("SourceDevice: %v\n", tapAction.GetSourceDevice())           // comes from the Signalwire platform
+signalwire.Log.Info("DestinationDevice: %v\n", tapAction.GetDestinationDevice()) // the device passed above
+```
+
+> Start tapping audio and grab the result when it's completed (WS or WSS).
+
+```go
+var tapdevice signalwire.TapDevice
+tapdevice.Type = signalwire.TapWS.String()
+tapdevice.Params.URI = "wss://X.X.X.X:1234" // ws or wss URI
+tapdevice.Params.Codec = "PCMU"
+/* direction can be TapDirectionListen, TapDirectionSpeak or TapDirectionBoth */
+tapAction, err := resultDial.Call.TapAudioAsync(signalwire.TapDirectionListen, &tapdevice)
+if err != nil {
+	signalwire.Log.Fatal("Error occurred while trying to tap audio: %v\n", err)
+}
+// tap for 10 seconds
+time.Sleep(10 * time.Second)
+tapAction.Stop()
+signalwire.Log.Info("Tap: %v Result :%v\n", tapAction.GetTap(), tapAction.GetResult())
+signalwire.Log.Info("SourceDevice: %v\n", tapAction.GetSourceDevice())           // comes from the Signalwire platform
+signalwire.Log.Info("DestinationDevice: %v\n", tapAction.GetDestinationDevice()) // the device passed above
+```
+
+
+#### GetState
+
+Return the current `tapping` state.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`string` - The current state.
+
+**Examples**
+
+> Start tapping audio and print the state.
+
+```go
+tapAction, err := resultDial.Call.TapAudioAsync(signalwire.TapDirectionListen, &tapdevice)
+if err != nil {
+	signalwire.Log.Fatal("Error occurred while trying to tap audio: %v\n", err)
+}
+if !tapAction.GetCompleted() {
+	// 'while' loop for Go
+	for ok := true; ok; ok = !(tapAction.GetState() == signalwire.TapFinished) {
+		signalwire.Log.Info("Completed: %v State: %s\n", tapAction.GetCompleted(), tapAction.GetCompleted().String())
+		time.Sleep(1 * time.Second)
+	}
+}
+```
+
+#### GetCompleted
+
+Return `true` if tapping has finished, `false` otherwise.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`Boolean` - True/False accordingly to the state.
+
+**Examples**
+
+> Start tapping audio and check if it has finished.
+
+```go
+tapAction, err := resultDial.Call.TapAudioAsync(signalwire.TapDirectionListen, &tapdevice)
+if err != nil {
+	signalwire.Log.Fatal("Error occurred while trying to tap audio: %v\n", err)
+}
+if !tapAction.GetCompleted() {
+	// 'while' loop for Go
+	for ok := true; ok; ok = !(tapAction.GetState() == signalwire.TapFinished) {
+		signalwire.Log.Info("Completed: %v State: %s\n", tapAction.GetCompleted(), tapAction.GetCompleted().String())
+		time.Sleep(1 * time.Second)
+	}
+}
+```
+
+#### GetSourceDevice
+
+Return the source device sending media.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`Object` - The source device.
+
+**Examples**
+
+> Start tapping audio and then inspect the source device.
+
+```go
+var tapdevice signalwire.TapDevice
+tapdevice.Type = signalwire.TapRTP.String()
+tapdevice.Params.Addr = "X.X.X.X"
+tapdevice.Params.Port = 1234
+tapdevice.Params.Codec = "PCMU"
+tapAction, err := resultDial.Call.TapAudioAsync(signalwire.TapDirectionListen, &tapdevice)
+if err != nil {
+	signalwire.Log.Fatal("Error occurred while trying to tap audio: %v\n", err)
+}
+// tap for 10 seconds
+time.Sleep(10 * time.Second)
+tapAction.Stop()
+signalwire.Log.Info("SourceDevice: %v\n", tapAction.GetSourceDevice())
+```
+
+#### Stop
+
+Stop the action immediately.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+error
+
+**Examples**
+
+> Start tapping audio and then stop the action.
+
+```go
+tapAction.Stop()
+signalwire.Log.Info("Tap: %v Result :%v\n", tapAction.GetTap(), tapAction.GetResult())
+signalwire.Log.Info("SourceDevice: %v\n", tapAction.GetSourceDevice())           // comes from the Signalwire platform
+signalwire.Log.Info("DestinationDevice: %v\n", tapAction.GetDestinationDevice()) // the device passed above
+```
+
+#### GetControlID
+
+Return the UUID to identify the action.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`string` - UUID to identify the action.

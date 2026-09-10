@@ -1,0 +1,111 @@
+---
+title: Installing FreeSWITCH or FreeSWITCH Enterprise
+description: Learn how to install FreeSWITCH or FreeSWITCH Enterprise on your system.
+slug: /platform/freeswitch/installing-freeswitch
+x-custom:
+  tags:
+  - product:freeswitch
+  - getting-started
+  ported_from_readme: true
+---
+
+## FreeSWITCH Terminology
+
+Before we begin, here is some general FreeSWITCH terminology that may be important for understanding this article!
+
+| Term                  | Meaning                                                                                                                                |
+| :-------------------- | :------------------------------------------------------------------------------------------------------------------------------------- |
+| FreeSWITCH            | The publicly released version of FreeSWITCH for the community at large.                                                                |
+| FreeSWITCH Enterprise | The privately release version of FreeSWITCH for subscribed customers.                                                                  |
+| FS                    | A generic term applicable to either FreeSWITCH or FreeSWITCH Enterprise                                                                |
+| Production Server     | A FreeSWITCH or FreeSWITCH Enterprise installation of packages from our stable repo.                                                   |
+| Staging Server        | A FreeSWITCH or FreeSWITCH Enterprise installation of packages from our unstable repo.                                                 |
+| Lab Server            | A FreeSWITCH or FreeSWITCH Enterprise installation by compilation of source code, build dependencies installed from the unstable repo. |
+
+## Getting an Access Token
+
+A SignalWire account is now required to download the pre-build FreeSWITCH binaries. First [create a SignalWire Space](/docs/platform/signing-up-for-a-space), then go to the `Personal Access Tokens`
+section located on the left side of the Dashboard. From there, create a Personal Access Token. [Click here to learn more](https://freeswitch.org/confluence/display/FREESWITCH/Debian).
+
+<Frame caption="The top-right menu">
+
+![The top right menu of the SignalWire Space](@image/dashboard/toolbar-right-open.webp)
+
+</Frame>
+
+<Frame caption="The top-right menu">
+
+![The personal access token page on the SignalWire space](@image/dashboard/credentials/personal-access-tokens.webp)
+
+</Frame>
+
+In case you missed the previous emails on the matter, here is the recap of this change:
+
+- This specifically (and only) affects the built copy of the FreeSWITCH software - the binaries that turn Linux into FreeSWITCH instantly.
+- It does not impact actively running instances or change the process for accessing the open-source code, which will continue to be freely available on GitHub.
+- It may affect how you obtain FreeSWITCH dependencies or FreeSWITCH packages from our package repositories such as our Debian repository.
+- The changes do not affect our FreeSWITCH Enterprise method of authenticating.
+
+## Choosing a repository
+
+Repositories are divided into publicly accessible repos for the community and privately accessible repos for FreeSWITCH Enterprise (FSE) subscribers. FSE repos receive code commits as soon as they are tested, while the public repo receives updates after further vetting for stability.
+
+Each repo has **release** and **unstable** branches. Release branches are ideal for production environments, while unstable branches are suited for lab/testing/QA environments.
+
+<Info>
+You will need a subscription and credentials to access the FreeSWITCH Enterprise repository.
+</Info>
+
+## Working with repos
+
+### Available to the community at large:
+
+Click [here](https://developer.signalwire.com/freeswitch/FreeSWITCH-Explained/Installation/Linux/Debian_67240088/) to see more about installing or compiling the public version of FreeSWITCH.
+
+```shell
+apt-get update && apt-get install -y gnupg2 wget lsb-release
+wget -O - https://files.freeswitch.org/repo/deb/debian-release/fsstretch-archive-keyring.asc | apt-key add -
+
+echo "deb http://files.freeswitch.org/repo/deb/debian-release/ `lsb_release -sc` main" > /etc/apt/sources.list.d/freeswitch.list
+echo "deb-src http://files.freeswitch.org/repo/deb/debian-release/ `lsb_release -sc` main" >> /etc/apt/sources.list.d/freeswitch.list
+
+# you may want to populate /etc/freeswitch at this point.
+# if /etc/freeswitch does not exist, the standard vanilla configuration is deployed
+apt-get update && apt-get install -y freeswitch-meta-all
+```
+
+FreeSWITCH™ is now installed and can be accessed with
+
+```shell FreeSwitch CLI
+fs_cli -rRS
+```
+
+### Must be a subscriber to access FreeSWITCH Enterprise:
+
+Click [here](https://developer.signalwire.com/freeswitch/FreeSWITCH-Explained/Installation/Linux/Deprecated-Installation-Instructions/27590677) to see more about installing or compiling the paid version of FreeSWITCH.
+
+```shell
+apt-get update && apt-get install -y gnupg2 wget lsb-release software-properties-common apt-transport-https
+USERNAME=FSAUSER
+PASSWORD=FSAPASS
+wget --http-user=$USERNAME --http-password=$PASSWORD -O - https://fsa.freeswitch.com/repo/deb/fsa/pubkey.gpg | apt-key add -
+echo "machine fsa.freeswitch.com login $USERNAME password $PASSWORD" > /etc/apt/auth.conf
+echo "deb https://fsa.freeswitch.com/repo/deb/fsa/ `lsb_release -sc` 1.8" > /etc/apt/sources.list.d/freeswitch.list
+echo "deb-src https://fsa.freeswitch.com/repo/deb/fsa/ `lsb_release -sc` 1.8" >> /etc/apt/sources.list.d/freeswitch.list
+
+# you may want to populate /etc/freeswitch at this point.
+# if /etc/freeswitch does not exist, the standard vanilla configuration is deployed
+apt-get update && apt-get install -y freeswitch-meta-all
+```
+
+FreeSWITCH™ is now installed and can be accessed with
+
+```shell FreeSwitch CLI
+fs_cli -rRS
+```
+
+<Info>
+
+If you need a compilation script, you can reach out to support@signalwire.com!
+
+</Info>

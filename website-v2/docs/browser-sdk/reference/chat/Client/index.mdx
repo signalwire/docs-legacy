@@ -1,0 +1,81 @@
+---
+title: Chat.Client
+sidebar_label: Client
+slug: /js/reference/chat/client
+toc_max_heading_level: 3
+---
+
+
+You can use the Client object to build a messaging system into the browser.
+
+Example usage:
+
+```js
+import { Chat } from "@signalwire/js";
+
+const chatClient = new Chat.Client({
+  token: "<your_chat_token>", // get this from the REST APIs
+});
+
+await chatClient.subscribe(["mychannel1", "mychannel2"]);
+
+chatClient.on("message", (message) => {
+  // prettier-ignore
+  console.log("Received", message.content,
+              "on", message.channel,
+              "at", message.publishedAt);
+});
+
+await chatClient.publish({
+  channel: "mychannel1",
+  content: "hello world",
+});
+```
+
+## Constructors
+
+### constructor
+
+- **new Client**(`chatOptions`)
+
+Creates a new Chat client.
+
+#### Parameters
+
+<ParamField path="chatOptions" type="object" required={true}>
+  Configuration options for the Chat client
+</ParamField>
+<Indent>
+  <ParamField path="chatOptions.token" type="string" required={true}>
+    SignalWire Chat token that can be obtained from the [REST APIs](/docs/apis/chat/create-chat-token).
+  </ParamField>
+</Indent>
+
+#### Example
+
+```js
+import { Chat } from "@signalwire/js";
+
+const chatClient = new Chat.Client({
+  token: "<your_chat_token>",
+});
+```
+
+---
+
+## Type Aliases
+
+### PaginationCursor
+
+This is a utility object that aids in pagination. It is specifically used in conjunction with the [getMessages](/docs/browser-sdk/js/reference/chat/client/get-messages) method.
+
+#### Properties
+
+<ParamField path="after" type="string">
+  This property signifies the cursor for the subsequent page.
+</ParamField>
+
+<ParamField path="before" type="string">
+  This property signifies the cursor for the preceding page.
+</ParamField>
+

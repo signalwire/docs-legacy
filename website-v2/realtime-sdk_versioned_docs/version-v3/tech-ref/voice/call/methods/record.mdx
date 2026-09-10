@@ -1,0 +1,26 @@
+---
+title: "record"
+slug: /node/reference/voice/call/record
+description: record method for the Call class.
+toc_max_heading_level: 3
+---
+
+[callrecording-3]: /docs/server-sdk/v3/node/reference/voice/call-recording
+[link-7]: /docs/server-sdk/v3/node/reference/voice/call/record-audio
+
+### record
+
+- **record**(`params`): `Promise<CallRecording>` - See [CallRecording][callrecording-3] for more details.
+
+Generic method to record a call. Please prefer using [recordAudio][link-7].
+
+#### Parameters
+
+| Name           | Type     | Description                                         |
+|:---------------|:---------|:----------------------------------------------------|
+| `params`       | `Object` | -                                                   |
+| `params.audio` | `Object` | See the parameters for [recordAudio][link-7]. |
+
+#### Returns
+
+`Promise<CallRecording>` - See [CallRecording][callrecording-3] for more details.

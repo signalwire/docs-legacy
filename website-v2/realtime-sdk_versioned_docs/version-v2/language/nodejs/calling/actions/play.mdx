@@ -1,0 +1,140 @@
+---
+title: Relay.Calling.PlayAction
+slug: /node/reference/calling/actions/play
+description: The Play Action is used to play audio files on a call.
+toc_max_heading_level: 3
+---
+
+[relay-calling-playpauseresult]: /docs/server-sdk/v2/node/reference/calling/results/play-pause
+[relay-calling-playresult]: /docs/server-sdk/v2/node/reference/calling/results/play
+[relay-calling-playresumeresult]: /docs/server-sdk/v2/node/reference/calling/results/play-resume
+[relay-calling-playvolumeresult]: /docs/server-sdk/v2/node/reference/calling/results/play-volume
+[relay-calling-stopresult]: /docs/server-sdk/v2/node/reference/calling/results/stop
+This object returned from one of _asynchronous_ play methods that represents a playing currently active on a call.
+
+## Properties
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `result` | [`Relay.Calling.PlayResult`][relay-calling-playresult] | Final result of playing |
+| `state` | `string` | Current state of playing |
+| `completed` | `boolean` | Whether the playing has finished |
+| `payload` | `object` | Payload sent to Relay to start playing |
+| `controlId` | `string` | UUID to identify the playing |
+
+## Methods
+
+### pause
+
+Pause the playback immediately.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`Promise<PlayPauseResult>` - Promise object that will be fulfilled with a [`Relay.Calling.PlayPauseResult`][relay-calling-playpauseresult] object.
+
+**Examples**
+
+> Start playing an audio file and pause it after 5 seconds.
+
+```javascript
+// Promise to wait some seconds..
+const sleep = (seconds) => new Promise(resolve => setTimeout(resolve, seconds*1000))
+
+async function main() {
+  const playAction = await call.playAudioAsync('https://cdn.signalwire.com/default-music/welcome.mp3')
+  await sleep(5)
+  const pauseResult = await playAction.pause()
+}
+
+main().catch(console.error)
+```
+
+### resume
+
+Resume the playback immediately.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`Promise<PlayResumeResult>` - Promise object that will be fulfilled with a [`Relay.Calling.PlayResumeResult`][relay-calling-playresumeresult] object.
+
+**Examples**
+
+> Start playing an audio file, stop it and then resume it after 5 seconds.
+
+```javascript
+// Promise to wait some seconds..
+const sleep = (seconds) => new Promise(resolve => setTimeout(resolve, seconds*1000))
+
+async function main() {
+  const playAction = await call.playAudioAsync('https://cdn.signalwire.com/default-music/welcome.mp3')
+  await sleep(5)
+  const pauseResult = await playAction.pause()
+  await sleep(5)
+  const resumeResult = await playAction.resume()
+}
+
+main().catch(console.error)
+```
+
+### stop
+
+Stop the action immediately.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`Promise<StopResult>` - Promise object that will be fulfilled with a [`Relay.Calling.StopResult`][relay-calling-stopresult] object.
+
+**Examples**
+
+> Start playing an audio file and stop it after 5 seconds.
+
+```javascript
+async function main() {
+  const playAction = await call.playAudioAsync('https://cdn.signalwire.com/default-music/welcome.mp3')
+
+  setTimeout(async () => {
+    const stopResult = await playAction.stop()
+  }, 5000)
+}
+
+main().catch(console.error)
+```
+
+### volume
+
+Control the volume of the playback.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `volume` | `number` | ✓ | Volume value between -40dB and +40dB where 0 is unchanged |
+
+**Returns**
+
+`Promise<PlayVolumeResult>` - Promise object that will be fulfilled with a [`Relay.Calling.PlayVolumeResult`][relay-calling-playvolumeresult] object.
+
+**Examples**
+
+> Start playing an audio file and increase the playback volume.
+
+```javascript
+async function main() {
+  const playAction = await call.playAudioAsync('https://cdn.signalwire.com/default-music/welcome.mp3')
+  const volumeResult = await playAction.volume(5.0)
+}
+
+main().catch(console.error)
+```

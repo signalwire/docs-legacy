@@ -1,0 +1,476 @@
+---
+title: "Troubleshooting"
+sidebar_label: "Troubleshooting"
+slug: /python/reference/troubleshooting
+toc_max_heading_level: 3
+---
+
+## Troubleshooting
+
+Common issues and solutions when developing SignalWire voice AI agents.
+
+### Quick Diagnostics
+
+| Command | Purpose |
+|---------|---------|
+| `swaig-test agent.py --dump-swml` | Verify SWML generation |
+| `swaig-test agent.py --list-tools` | List registered functions |
+| `swaig-test agent.py --exec func` | Test function execution |
+| `python agent.py` | Check for startup errors |
+| `curl -u "$SWML_BASIC_AUTH_USER:$SWML_BASIC_AUTH_PASSWORD" http://localhost:3000/` | Test agent endpoint |
+
+### Startup Issues
+
+#### Agent Won't Start
+
+**Symptom**: Python script exits immediately or with an error.
+
+**Common Causes**:
+
+1. **Missing dependencies**
+
+```bash
+## Check if signalwire-agents is installed
+pip show signalwire-agents
+
+## Install if missing
+pip install signalwire-agents
+```
+
+2. **Port already in use**
+
+```text
+Error: [Errno 48] Address already in use
+```
+
+**Solution**: Use a different port or stop the existing process.
+
+```python
+agent = AgentBase(name="myagent", route="/", port=3001)
+```
+
+3. **Invalid Python syntax**
+
+```bash
+## Check syntax
+python -m py_compile agent.py
+```
+
+#### Import Errors
+
+**Symptom**: `ModuleNotFoundError` or `ImportError`.
+
+```text
+ModuleNotFoundError: No module named 'signalwire_agents'
+```
+
+**Solutions**:
+
+```bash
+## Ensure virtual environment is activated
+source venv/bin/activate
+
+## Verify installation
+pip list | grep signalwire
+
+## Reinstall if needed
+pip install --upgrade signalwire-agents
+```
+
+### Function Issues
+
+#### Function Not Appearing
+
+**Symptom**: Function defined but not showing in `--list-tools`.
+
+**Check 1**: Decorator syntax
+
+```python
+## Correct
+@agent.tool(description="My function")
+def my_function(param: str) -> SwaigFunctionResult:
+    return SwaigFunctionResult("Done")
+
+## Wrong: Missing parentheses
+@agent.tool
+def my_function(param: str) -> SwaigFunctionResult:
+    pass
+
+## Wrong: Missing description
+@agent.tool()
+def my_function(param: str) -> SwaigFunctionResult:
+    pass
+```
+
+**Check 2**: Function defined before agent.run()
+
+```python
+from signalwire_agents import AgentBase
+from signalwire_agents.core.function_result import SwaigFunctionResult
+
+agent = AgentBase(name="test", route="/")
+
+## Functions must be defined before run()
+@agent.tool(description="Test function")
+def test_func() -> SwaigFunctionResult:
+    return SwaigFunctionResult("Test")
+
+## Then run
+if __name__ == "__main__":
+    agent.run()
+```
+
+#### Function Returns Wrong Response
+
+**Symptom**: AI receives unexpected or empty response.
+
+**Check 1**: Return SwaigFunctionResult
+
+```python
+## Correct
+@agent.tool(description="Get status")
+def get_status() -> SwaigFunctionResult:
+    return SwaigFunctionResult("Status is OK")
+
+## Wrong: Returns string instead of SwaigFunctionResult
+@agent.tool(description="Get status")
+def get_status() -> SwaigFunctionResult:
+    return "Status is OK"  # This won't work!
+```
+
+### Connection Issues
+
+#### Webhook Not Reached
+
+**Symptom**: Functions not being called, SignalWire can't reach agent.
+
+**Check 1**: Agent is accessible from internet
+
+```bash
+## Local testing with ngrok
+ngrok http 3000
+
+## Then use ngrok URL in SignalWire
+```
+
+**Check 2**: Firewall allows connections
+
+```bash
+## Check if port is open
+curl -I http://localhost:3000/
+```
+
+#### Authentication Failures
+
+**Symptom**: 401 Unauthorized errors.
+
+**Check credentials**:
+
+```bash
+## Test with credentials
+curl -u username:password http://localhost:3000/
+```
+
+**Set in agent**:
+
+```python
+agent = AgentBase(
+    name="secure",
+    route="/",
+    basic_auth=("username", "password")
+)
+```
+
+### Speech Recognition Issues
+
+#### Agent Not Hearing Caller
+
+**Symptom**: AI doesn't respond to speech.
+
+**Adjust confidence threshold**:
+
+```python
+agent.set_params({
+    "confidence": 0.5,       # Lower = more sensitive
+    "energy_level": 40       # Lower = quieter speech detected
+})
+```
+
+#### Frequent Interruptions
+
+**Symptom**: AI gets interrupted too easily.
+
+```python
+agent.set_params({
+    "barge_confidence": 0.8,  # Higher = harder to interrupt
+    "barge_min_words": 3      # Require 3+ words to barge
+})
+```
+
+#### Speech Cut Off Too Early
+
+**Symptom**: AI thinks caller finished speaking too soon.
+
+```python
+agent.set_params({
+    "end_of_speech_timeout": 1500  # Wait 1.5s of silence (default 700ms)
+})
+```
+
+### Timing Issues
+
+#### Caller Waits Too Long
+
+**Symptom**: Long delays before AI responds.
+
+**Solutions**:
+
+```python
+## Use fillers
+@agent.tool(
+    description="Long operation",
+    fillers=["One moment please..."]
+)
+def long_operation() -> SwaigFunctionResult:
+    pass
+```
+
+#### Call Disconnects Unexpectedly
+
+**Symptom**: Call ends without explicit hangup.
+
+**Check inactivity timeout**:
+
+```python
+agent.set_params({
+    "inactivity_timeout": 300000  # 5 minutes (default 10 minutes)
+})
+```
+
+### DataMap Issues
+
+#### Variable Not Substituting
+
+**Symptom**: `${args.param}` appears literally in output.
+
+**Check**: Parameter name matches
+
+```python
+data_map.add_parameter("city", "string", "City name", required=True)
+
+## URL must use same name
+data_map.add_webhook(
+    url="https://api.example.com?q=${enc:args.city}",  # "city" matches
+    ...
+)
+```
+
+### Variable Syntax Reference
+
+| Pattern | Usage |
+|---------|-------|
+| `${args.param}` | Function argument |
+| `${enc:args.param}` | URL-encoded argument (use in URLs) |
+| `${response.field}` | API response field |
+| `${global_data.key}` | Global session data |
+
+### Skill Issues
+
+#### Skill Not Loading
+
+**Symptom**: Skill added but functions not available.
+
+**Check 1**: Skill name is correct
+
+```python
+## List available skills
+print(agent.list_available_skills())
+
+## Add by exact name
+agent.add_skill("datetime")
+agent.add_skill("native_vector_search")
+```
+
+**Check 2**: Dependencies installed
+
+```bash
+## Some skills require additional packages
+pip install "signalwire-agents[search]"
+```
+
+### Serverless Issues
+
+#### Lambda Function Errors
+
+**Check 1**: Handler configuration
+
+```python
+## handler.py
+from my_agent import agent
+
+def handler(event, context):
+    return agent.serverless_handler(event, context)
+```
+
+**Check 2**: Lambda timeout
+
+Set Lambda timeout to at least 30 seconds for function processing.
+
+### Common Error Messages
+
+| Error | Solution |
+|-------|----------|
+| "Address already in use" | Change port or stop existing process |
+| "Module not found" | `pip install signalwire-agents` |
+| "401 Unauthorized" | Check basic_auth credentials |
+| "Connection refused" | Ensure agent is running |
+| "Function not found" | Check function name and decorator |
+| "Invalid SWML" | Use `swaig-test --dump-swml` to debug |
+| "Timeout" | Add fillers or optimize function |
+
+### Getting Help
+
+If issues persist:
+
+1. Check SignalWire documentation
+2. Review SDK examples in `/examples` directory
+3. Use `swaig-test` for diagnostics
+4. Check SignalWire community forums
+
+### Advanced Debugging
+
+#### Enable Debug Logging
+
+```python
+import logging
+logging.basicConfig(level=logging.DEBUG)
+
+# Or for specific components
+logging.getLogger("signalwire_agents").setLevel(logging.DEBUG)
+```
+
+#### Inspect Raw Request Data
+
+```python
+@agent.tool(description="Debug function")
+def debug_info(args=None, raw_data=None) -> SwaigFunctionResult:
+    import json
+    print("RAW DATA:", json.dumps(raw_data, indent=2))
+    return SwaigFunctionResult("Debug complete")
+```
+
+#### Test Webhook Connectivity
+
+```bash
+# Start agent
+python agent.py
+
+# In another terminal, simulate webhook call (use credentials from agent output or env vars)
+curl -X POST -u "$SWML_BASIC_AUTH_USER:$SWML_BASIC_AUTH_PASSWORD" http://localhost:3000/ \
+  -H "Content-Type: application/json" \
+  -d '{"function": "my_function", "argument": {"parsed": [{"name": "param", "value": "test"}]}}'
+```
+
+#### Verify SWML Generation
+
+```bash
+# Check for syntax issues
+swaig-test agent.py --dump-swml --raw | python -m json.tool
+
+# Extract specific sections
+swaig-test agent.py --dump-swml --raw | jq '.sections.main[1].ai.prompt'
+swaig-test agent.py --dump-swml --raw | jq '.sections.main[1].ai.SWAIG.functions[].function'
+```
+
+### Voice Quality Issues
+
+#### AI Speaks Too Fast
+
+```python
+# Reduce speech rate via prompt
+agent.prompt_add_section("Speech", "Speak at a moderate pace. Pause briefly between sentences.")
+```
+
+#### Caller Has Trouble Understanding
+
+```python
+# Add pronunciation rules
+agent.add_pronounce([
+    {"replace": "www", "with": "dub dub dub"},
+    {"replace": ".com", "with": "dot com"},
+    {"replace": "API", "with": "A P I"}
+])
+```
+
+#### Background Noise Issues
+
+```python
+agent.set_params({
+    "energy_level": 52.0,        # Higher = requires louder speech (default 52)
+    "input_sensitivity": 45.0    # Higher = less sensitive to background
+})
+```
+
+### Production Issues
+
+#### High Latency
+
+**Symptoms**: Long delays before AI responds.
+
+**Solutions**:
+
+1. Use fillers for long operations:
+
+```python
+@agent.tool(
+    description="Slow operation",
+    fillers=["One moment please...", "Let me check that..."]
+)
+def slow_operation() -> SwaigFunctionResult:
+    # Long running code
+    pass
+```
+
+2. Optimize database queries
+3. Use DataMap for simple API calls (executes on SignalWire servers)
+4. Consider caching frequently accessed data
+
+#### Memory/Resource Issues
+
+**Symptoms**: Agent crashes or becomes unresponsive.
+
+**Solutions**:
+
+1. Don't store large objects in global_data
+2. Clean up state between calls
+3. Use streaming for large responses
+4. Monitor memory usage in production
+
+#### Concurrent Call Issues
+
+**Symptoms**: State bleeds between calls.
+
+**Solutions**:
+
+1. Use `global_data` (per-call) instead of class attributes
+2. Don't use mutable default arguments
+3. Ensure thread safety for shared resources
+
+```python
+# BAD: Shared state across calls
+class Agent(AgentBase):
+    cart = []  # Shared between all calls!
+
+# GOOD: Per-call state
+agent.set_global_data({"cart": []})
+```
+
+### See Also
+
+| Topic | Reference |
+|-------|-----------|
+| swaig-test CLI | [swaig-test Reference](/docs/agents-sdk/python/reference/cli-swaig-test) |
+| AI parameters | [AI Parameters](/docs/agents-sdk/python/reference/ai-parameters-reference) |
+| Security best practices | [Security](/docs/agents-sdk/python/guides/security) |
+
+

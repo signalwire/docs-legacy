@@ -1,0 +1,34 @@
+---
+title: getAllowedChannels
+slug: /js/reference/chat/client/get-allowed-channels
+toc_max_heading_level: 3
+---
+
+- **getAllowedChannels**(): `Promise<Object>`
+
+Returns the channels that the current token allows you to subscribe to.
+
+## Returns
+
+`Promise<Object>`
+
+An object whose keys are the channel names, and whose values are the
+permissions. For example:
+
+```js
+{
+  "my-channel-1": { "read": true, "write": false },
+  "my-channel-2": { "read": true, "write": true },
+}
+```
+
+## Examples
+
+```js
+const chatClient = new Chat.Client({
+  token: "<your chat token>",
+});
+
+const channels = await chatClient.getAllowedChannels();
+console.log(channels);
+```

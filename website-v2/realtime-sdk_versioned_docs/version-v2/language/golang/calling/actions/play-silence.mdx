@@ -1,0 +1,48 @@
+---
+title: PlaySilenceAction
+slug: /go/reference/calling/actions/play-silence
+description: The Play Silence Action is used to play silence on a call.
+toc_max_heading_level: 3
+---
+
+[link]: /docs/server-sdk/v2/go/reference/calling/call
+
+## Relay.Calling.PlaySilenceAction
+
+This object represents a `silence action` that is currently active on a call.
+
+### Properties
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `call` | [`Relay.Calling.Call`][link] | This is the call the action is occurring on. |
+
+
+### Methods
+
+<div className="method-definitions"></div>
+
+#### Stop()
+
+Stop the action immediately.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+StopResult
+
+**Examples**
+
+> Play 10 seconds of silence and then stop.
+
+```go
+playSilence, err := resultDial.Call.PlaySilenceAsync(10); 
+if err != nil {
+	signalwire.Log.Error("Error occurred while trying to play silence. Err: %v\n", err)
+}
+playSilence.Stop()
+```

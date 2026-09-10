@@ -1,0 +1,224 @@
+---
+slug: /compatibility-api/sdks/reference/queue-members/update
+title: Update
+sidebar_label: Update
+toc_max_heading_level: 3
+---
+
+Use this endpoint for the Queue Members method to modify the properties of a queue member that is actively waiting in a call queue.
+
+<EndpointSchemaSnippet endpoint="POST /Accounts/{AccountSid}/Queues/{QueueSid}/Members/{CallSid}" />
+
+## Request examples
+
+<CodeBlocks>
+
+```javascript title="Node.js"
+const { RestClient } = require('@signalwire/compatibility-api')
+const client = RestClient('YourProjectID', 'YourAuthToken', { signalwireSpaceUrl: 'example.signalwire.com' })
+
+client.queues('QueueSid')
+      .members('CallSid')
+      .update()
+      .then(member => console.log(member.callSid))
+      .done();
+```
+
+```csharp
+using System;
+using System.Collections.Generic;
+using Twilio;
+using Twilio.Rest.Api.V2010.Account.Queue;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        TwilioClient.Init("YourProjectID", "YourAuthToken", new Dictionary<string, object> { ["signalwireSpaceUrl"] = "{SPACE}.signalwire.com" });
+
+        var member = MemberResource.Update(
+            pathQueueSid: "QueueSid",
+            pathCallSid: "CallSid"
+        );
+
+        Console.WriteLine(member.CallSid);
+    }
+}
+```
+
+```python
+from signalwire.rest import Client as signalwire_client
+
+client = signalwire_client("YourProjectID", "YourAuthToken", signalwire_space_url = 'example.signalwire.com')
+
+member = client.queues('QueueSid') \
+               .members('CallSid') \
+               .update()
+
+print(member.call_sid)
+```
+
+```ruby
+require 'signalwire/sdk'
+
+@client = Signalwire::REST::Client.new 'YourProjectID', 'YourAuthToken', signalwire_space_url: "example.signalwire.com"
+
+member = @client.queues('QueueSid')
+                .members('CallSid')
+                .update()
+
+puts member.call_sid
+```
+
+</CodeBlocks>
+
+---
+
+### Request: dequeue from front of queue
+
+Dequeue the member that is waiting at the front of the queue.
+
+<CodeBlocks>
+
+```javascript title="Node.js"
+const { RestClient } = require('@signalwire/compatibility-api')
+const client = RestClient('YourProjectID', 'YourAuthToken', { signalwireSpaceUrl: 'example.signalwire.com' })
+
+client.queues('QueueSid')
+      .members('Front')
+      .update({url: 'http://your-application.com/docs/voice.xml', method: 'POST'})
+      .then(member => console.log(member.callSid))
+      .done();
+```
+
+```csharp
+using System;
+using System.Collections.Generic;
+using Twilio;
+using Twilio.Rest.Api.V2010.Account.Queue;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        TwilioClient.Init("YourProjectID", "YourAuthToken", new Dictionary<string, object> { ["signalwireSpaceUrl"] = "{SPACE}.signalwire.com" });
+
+        var member = MemberResource.Update(
+            url: new Uri("http://your-application.com/docs/voice.xml"),
+            method: Twilio.Http.HttpMethod.Post,
+            pathQueueSid: "QueueSid",
+            pathCallSid: "Front"
+        );
+
+        Console.WriteLine(member.CallSid);
+    }
+}
+```
+
+```python
+from signalwire.rest import Client as signalwire_client
+
+client = signalwire_client("YourProjectID", "YourAuthToken", signalwire_space_url = 'example.signalwire.com')
+
+member = client.queues('QueueSid') \
+               .members('Front') \
+               .update(
+                    url='http://your-application.com/docs/voice.xml',
+                    method='POST'
+                )
+
+print(member.call_sid)
+```
+
+```ruby
+require 'signalwire/sdk'
+
+@client = Signalwire::REST::Client.new 'YourProjectID', 'YourAuthToken', signalwire_space_url: "example.signalwire.com"
+
+member = @client.queues('QueueSid')
+                .members('Front')
+                .update(
+                  url: 'http://your-application.com/docs/voice.xml',
+                  method: 'POST'
+                )
+
+puts member.call_sid
+```
+
+</CodeBlocks>
+
+---
+
+### Request: dequeue particular member
+
+Dequeue a particular member by specifying their `CallSid`. 
+Only the initial dequeue request will return a 200 response. 
+All other dequeue requests on the same `CallSid` will result in a 400 response.
+
+<CodeBlocks>
+```javascript title="Node.js"
+const { RestClient } = require('@signalwire/compatibility-api')
+const client = RestClient('YourProjectID', 'YourAuthToken', { signalwireSpaceUrl: 'example.signalwire.com' })
+
+client.queues('QueueSid')
+      .members('CallSid')
+      .update({url: 'http://your-application.com/docs/voice.xml', method: 'POST'})
+      .then(member => console.log(member.callSid))
+      .done();
+```
+
+```csharp
+using System;
+using System.Collections.Generic;
+using Twilio;
+using Twilio.Rest.Api.V2010.Account.Queue;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        TwilioClient.Init("YourProjectID", "YourAuthToken", new Dictionary<string, object> { ["signalwireSpaceUrl"] = "{SPACE}.signalwire.com" });
+
+        var member = MemberResource.Update(
+            url: new Uri("http://your-application.com/docs/voice.xml"),
+            method: Twilio.Http.HttpMethod.Post,
+            pathQueueSid: "QueueSid",
+            pathCallSid: "CallSid"
+        );
+
+        Console.WriteLine(member.CallSid);
+    }
+}
+```
+
+```python
+from signalwire.rest import Client as signalwire_client
+
+client = signalwire_client("YourProjectID", "YourAuthToken", signalwire_space_url = 'example.signalwire.com')
+
+member = client.queues('QueueSid') \
+               .members('CallSid') \
+               .update(
+                    url='http://your-application.com/docs/voice.xml',
+                    method='POST'
+                )
+
+print(member.call_sid)
+```
+
+```ruby
+require 'signalwire/sdk'
+
+@client = Signalwire::REST::Client.new 'YourProjectID', 'YourAuthToken', signalwire_space_url: "example.signalwire.com"
+
+member = @client.queues('QueueSid')
+                .members('CallSid')
+                .update(
+                  url: 'http://your-application.com/docs/voice.xml',
+                  method: 'POST'
+                )
+
+puts member.call_sid
+```
+
+</CodeBlocks>

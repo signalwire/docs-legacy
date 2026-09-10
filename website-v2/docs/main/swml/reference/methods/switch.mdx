@@ -1,0 +1,186 @@
+---
+title: switch
+slug: /swml/reference/switch
+description: Execute different instructions based on a variable's value.
+toc_max_heading_level: 3
+---
+
+Execute different instructions based on a variable's value
+
+## **Properties**
+
+<ParamField path="switch" type="object" required={true}>
+  An object that accepts the following properties.
+</ParamField>
+
+<Indent>
+
+<ParamField path="switch.variable" type="string" required={true}>
+  Name of the variable whose value needs to be compared.
+</ParamField>
+
+
+<ParamField path="switch.case" type="object" required={true}>
+  [`Case_params`](#case_params) object of key-mapped values to array of [SWML Methods](/docs/swml/reference) to execute.
+</ParamField>
+
+
+<ParamField path="switch.default" type="[]">
+  Array of [SWML Methods](/docs/swml/reference) to execute if no cases match.
+</ParamField>
+
+
+### case_params
+
+The `case_params` object serves as a dictionary where each key is a string identifier, and
+the associated value is an array of SWML Method objects.
+
+<Indent>
+
+<ParamField path="case.property_name" type="[]object" required={true}>
+  Name of the variable whose value needs to be compared.
+</ParamField>
+
+</Indent>
+</Indent>
+
+## **Examples**
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - switch:
+        variable: call.type
+        case:
+          sip:
+            - play:
+                url: "say: You're calling from SIP."
+          phone:
+            - play:
+                url: "say: You're calling from phone."
+        default:
+          - play:
+              url: 'say: Unexpected error'
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "switch": {
+          "variable": "call.type",
+          "case": {
+            "sip": [
+              {
+                "play": {
+                  "url": "say: You're calling from SIP."
+                }
+              }
+            ],
+            "phone": [
+              {
+                "play": {
+                  "url": "say: You're calling from phone."
+                }
+              }
+            ]
+          },
+          "default": [
+            {
+              "play": {
+                "url": "say: Unexpected error"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - set:
+        foo: 5
+    - execute:
+        dest: example_fn
+        params:
+          foo: '${foo}'
+  example_fn:
+    - switch:
+        variable: params.foo
+        default:
+          - play:
+              url: 'say: nothing matches'
+        case:
+          '5':
+            - play:
+                url: 'say: yup, math works!'
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "set": {
+          "foo": 5
+        }
+      },
+      {
+        "execute": {
+          "dest": "example_fn",
+          "params": {
+            "foo": "${foo}"
+          }
+        }
+      }
+    ],
+    "example_fn": [
+      {
+        "switch": {
+          "variable": "params.foo",
+          "default": [
+            {
+              "play": {
+                "url": "say: nothing matches"
+              }
+            }
+          ],
+          "case": {
+            "5": [
+              {
+                "play": {
+                  "url": "say: yup, math works!"
+                }
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+## **See Also**
+
+- **[Variables and Expressions](/docs/swml/reference/variables)**: Complete reference for SWML variables, scopes, and using variables in conditional logic
+- **[cond](/docs/swml/reference/cond)**: Alternative conditional logic method

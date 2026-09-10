@@ -1,0 +1,120 @@
+---
+title: Variables
+slug: /call-flow-builder/guides/variables
+---
+
+## Introduction
+
+Variables allow you to create a dynamic Call Flow that responds to user input and other outside information.
+
+While the [Set Variables](/docs/call-flow-builder/reference/set-variables) node allows you to manually create your own variables at any time,
+you can also use variables from [Request](/docs/call-flow-builder/reference/request) nodes or even get variables from the inbound call.
+All variables must be in the following format to signal to the Call Flow Builder that it should process a variable: `%{<variable>}`.
+
+### Inbound Call Variables
+
+The following variables exist for all inbound calls. At this time, the direction is always inbound,
+but the other values are very useful and can be referenced throughout the whole Flow.
+
+<ParamField path="%{call.from}" type="string">
+  The phone number of the caller.
+</ParamField>
+
+<ParamField path="%{call.to}" type="string">
+  The phone number the call was made to.
+</ParamField>
+
+<ParamField path="%{call.direction}" type="string">
+  The direction of the call.
+</ParamField>
+
+<ParamField path="%{call.call_id}" type="string">
+  The unique identifier for the call.
+</ParamField>
+
+<ParamField path="%{call.state}" type="string">
+  The state of the call.
+</ParamField>
+
+<ParamField path="%{call.type}" type="string">
+  The type of call.
+</ParamField>
+
+<br />
+
+#### Variable Example
+
+<Frame caption="Pass the caller phone number using a variable.">
+  ![Using a phone number as a variable in a Call Flow.](@image/call-flow/to-variable.webp)
+</Frame>
+
+---
+
+### Request Variables
+
+Variables that you get from a [Request](/docs/call-flow-builder/reference/request) node can be accessed using `%{request_response.<object_field>}`.
+For example, if we send a GET request to [timeapi.io](https://www.timeapi.io/swagger/index.html), the response we'll receive will look like this:
+
+```
+{
+  "year": 2023,
+  "month": 7,
+  "day": 27,
+  "hour": 16,
+  "minute": 9,
+  "seconds": 9,
+  "milliSeconds": 640,
+  "dateTime": "2023-07-27T16:09:09.640945",
+  "date": "07/27/2023",
+  "time": "16:09",
+  "timeZone": "America/Chicago",
+  "dayOfWeek": "Thursday",
+  "dstActive": true
+}
+```
+
+To reference the `hour`, `date`, and `dayOfWeek` from this response as variables in the Call Flow, we would format the variables like this:
+
+`%{request_response.hour}`
+`%{request_response.date}`
+`%{request_response.dayOfWeek}`
+
+Please note that response values that are strings will need special formatting to be used with conditional expressions or JavaScript operators.
+Use the format `%{vars.request_response.<object_field>'}` to use the value of the string.
+
+In the example above, the response parameter `dayOfWeek` has a string value of `Thursday`.
+The following condition will only be met when the day of the week is Thursday:
+
+`%{vars.request_response.dayOfWeek == 'Thursday'}`
+
+You can also use `slice()` to remove everything from the string after the third character to give you a shortened day of the week (Fri, Sat, Mon):
+
+Key: `short_day`
+Value: `%{vars.request_response.dayOfWeek.slice(0,3)}`
+
+
+### Variables with JavaScript Operators
+
+You can use variables along with [standard Javascript operators](https://www.w3schools.com/js/default.asp).
+This can be useful if you need to alter a variable or pass a condition that matches an expression.
+
+For example, you can use the [`slice()` method](https://www.w3schools.com/jsref/jsref_slice_string.asp) 
+to remove everything from the `%{call.from}` variable except for the area code of an inbound caller. 
+Within a [Set Variables](/docs/call-flow-builder/reference/set-variables) node, you can set the following:
+
+**Key:** `area_code`
+
+**Value:** `%{call.from.slice(2,5)}`
+
+You can even combine this with a [Conditions](/docs/call-flow-builder/reference/conditions) node as in the example below.
+Condition 1 uses the OR operator to check if the area code is 321 or 407.
+
+If either of those is true, the call is forwarded to +15552223333.
+A second condition in the same node checks for a 419 area code and forwards the call to +15553334444.
+
+Condition 1: `%{area_code}==321||%{area_code}==407`
+Condition 2: `%{area_code}==419`
+
+<Frame caption="Use the `slice()` method to alter a variable.">
+  ![Using slice to alter a variable.](@image/call-flow/slice-variable.webp)
+</Frame>

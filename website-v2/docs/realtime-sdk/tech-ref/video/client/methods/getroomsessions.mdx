@@ -1,0 +1,38 @@
+---
+title: "getRoomSessions"
+slug: /node/reference/video/client/get-room-sessions
+description: getRoomSessions method for the Video Client class.
+toc_max_heading_level: 3
+---
+
+[roomsession]: /docs/server-sdk/node/reference/video/room-session
+
+### getRoomSessions
+
+- **getRoomSessions**(): `Promise<{ roomSessions: RoomSession[] }>`
+
+Returns the currently active room sessions.
+
+#### Returns
+
+`Promise<{ roomSessions: RoomSession[] }>`
+
+A promise that resolves to an array of [`RoomSession[]`][roomsession] objects
+that can be used to access the room session's information and methods.
+
+#### Example
+
+In this example, we get the currently active room sessions and log their names.
+This example assumes that you have already active [`RoomSession`][roomsession].
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+const videoClient = client.video;
+
+const { roomSessions } = await videoClient.getRoomSessions();
+
+console.log(roomSessions.forEach(room => console.log(room.name)));
+```

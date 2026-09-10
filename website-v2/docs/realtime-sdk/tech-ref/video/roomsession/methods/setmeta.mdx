@@ -1,0 +1,64 @@
+---
+title: "setMeta"
+slug: /node/reference/video/room-session/set-meta
+description: setMeta method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+[roomsession-41]: /docs/server-sdk/node/reference/video/room-session
+
+### setMeta
+
+- **setMeta**(`meta`): `Promise<void>`
+
+Assigns custom metadata to the RoomSession. You can use this to store metadata whose meaning is entirely defined by your application.
+
+Note that calling this method overwrites any metadata that had been previously set on this RoomSession.
+
+#### Parameters
+
+<ParamField path="meta" type="Record<string, unknown>" required>
+  The metadata object to assign to the RoomSession.
+</ParamField>
+
+#### Returns
+
+`Promise<void>`
+
+#### Example
+
+In this example, we set metadata for a room as soon as it starts and then
+log the metadata for that room. This example assumes that there is a
+[`RoomSession`][roomsession-41] already active and
+that members are joining the room.
+
+```javascript
+import { SignalWire } from "@signalwire/realtime-api";
+
+// Initialize the SignalWire client
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+// Access the video client from the main client
+const videoClient = client.video;
+
+// Setup listener for when a room starts
+await videoClient.listen({
+  onRoomStarted: async (roomSession) => {
+    console.log("Room started", roomSession.displayName);
+
+    // Set the room meta
+    console.log("Setting room meta");
+    await roomSession.setMeta({
+      "foo": "bar",
+      "roomName": roomSession.displayName
+    });
+
+    // Get the room meta
+    let roomMeta = await roomSession.getMeta()
+    console.log("Room meta", roomMeta);
+  },
+  onRoomEnded: async (roomSession) => {
+    console.log("Room ended", roomSession.displayName);
+  }
+});
+```

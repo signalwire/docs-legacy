@@ -1,0 +1,89 @@
+---
+slug: /php/reference/calling/results/hangup
+description: The HangupResult object is returned after a hangup operation is completed.
+toc_max_heading_level: 3
+---
+
+[call]: /docs/server-sdk/v2/php/reference/calling/call#hangup
+[relay-event]: /docs/server-sdk/v2/php/reference/event
+
+# Relay.Calling.HangupResult
+
+This object returned from [`hangup`][call] method.
+
+## Methods
+
+### getEvent
+
+Returns the last Relay Event arrived for this operation.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+[`Relay.Event`][relay-event] - Last Relay Event.
+
+**Examples**
+
+> Hangup the call and inspect the retrieve the last Relay event.
+
+```php
+<?php
+
+$call->hangup()->done(function($result) {
+  $event = $result->getEvent();
+  // Inspect $event->payload ..
+});
+```
+
+### getReason
+
+Returns the reason why the call has ended.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`string` - Possible values: `hangup`, `cancel`, `busy`, `noAnswer`, `decline`, `error`
+
+**Examples**
+
+```php
+<?php
+
+$call->hangup()->done(function($result) {
+  $reason = $result->getReason();
+});
+```
+
+### isSuccessful
+
+Return `true` if the call was answered without errors, `false` otherwise.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`boolean` - Whether the call has been answered successfully.
+
+**Examples**
+
+> Hangup the call and check if the operation succeeded.
+
+```php
+<?php
+
+$call->hangup()->done(function($result) {
+  if ($result->isSuccessful()) {
+    // $call has been hung up successfully!
+  }
+});
+```

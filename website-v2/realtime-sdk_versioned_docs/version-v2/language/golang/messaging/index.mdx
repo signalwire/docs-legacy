@@ -1,0 +1,58 @@
+---
+title: Relay.Messaging
+slug: /go/reference/messaging
+toc_max_heading_level: 3
+---
+
+
+## Relay.Messaging
+
+This represents the API interface for the Messaging Relay Service. This object is used to make requests related to managing SMS and MMS messages.
+
+## Methods
+
+
+### Send
+
+Send a message to the destination number.
+
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `Context` | `string` | **required** | The context to receive inbound events. |
+| `From` | `string` | **required** | The phone number to place the message from. _Must be a SignalWire phone number or short code that you own._ |
+| `To` | `string` | **required** | The phone number to send to. |
+| `Body` | `string` | **required** | The content of the message. _Optional if `media` is present._ |
+| `Media` | `[]string` | **required** | Array of URLs to send in the message. _Optional if `body` is present._ |
+| `Tags` | `[]string` | **optional** | Array of strings to tag the message with for searching in the UI. |
+
+**Returns**
+
+SendResult
+
+**Examples**
+
+> Send a message in the context _office_.
+
+```go
+text := "Hello from Signalwire !"
+context := "office"
+from := "+1XXXXXXXXXX"
+to := "+15XXXXXXXXX"
+
+message := consumer.Client.Messaging.NewMessage(context, from, to, text)
+message.OnMessageQueued = func(_ *signalwire.SendResult) {
+	Signalwire.Log.Info("Message Queued.\n")
+}
+
+message.OnMessageDelivered = func(_ *signalwire.SendResult) {
+	signalwire.Log.Info("Message Delivered.\n")
+}
+
+resultSend := consumer.Client.Messaging.SendMsg(message)
+if !resultSend.GetSuccessful() {
+	signalwire.Log.Error("Could not send message\n")
+}
+```

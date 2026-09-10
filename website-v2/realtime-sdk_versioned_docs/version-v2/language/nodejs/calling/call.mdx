@@ -1,0 +1,2044 @@
+---
+title: Relay.Calling.Call
+slug: /node/reference/calling/call
+toc_max_heading_level: 3
+---
+
+[link-10]: #playringtone
+[link-11]: #ringtones
+[link-12]: #detectdigit
+[link-13]: #detectfax
+[link-14]: #detect
+[link-15]: #promptaudio
+[link-16]: #prompttts
+[link-17]: #promptringtone
+[link-18]: #prompt
+[link-19]: #detectmachine
+[link-1]: #detectansweringmachine
+[link-20]: #detecthuman
+[link-21]: #events
+[link-22]: #record
+[link-23]: #refer
+[link-24]: #senddigits
+[link-25]: #tap
+[link-26]: #waitfor
+[link-2]: #detectansweringmachineasync
+[link-3]: #play
+[link-4]: #connect
+[link-5]: #faxreceive
+[link-6]: #faxsend
+[link-7]: #playaudio
+[link-8]: #playsilence
+[link-9]: #playtts
+[link]: #state-events
+[newcall]: /docs/server-sdk/v2/node/reference/calling#newcall
+[relay-calling-answerresult]: /docs/server-sdk/v2/node/reference/calling/results/answer
+[relay-calling-call]: #
+[relay-calling-connectaction]: /docs/server-sdk/v2/node/reference/calling/actions/connect
+[relay-calling-connectresult]: /docs/server-sdk/v2/node/reference/calling/results/connect
+[relay-calling-detectaction]: /docs/server-sdk/v2/node/reference/calling/actions/detect
+[relay-calling-detectresult]: /docs/server-sdk/v2/node/reference/calling/results/detect
+[relay-calling-dialresult]: /docs/server-sdk/v2/node/reference/calling/results/dial
+[relay-calling-faxaction]: /docs/server-sdk/v2/node/reference/calling/actions/fax
+[relay-calling-faxresult]: /docs/server-sdk/v2/node/reference/calling/results/fax
+[relay-calling-hangupresult]: /docs/server-sdk/v2/node/reference/calling/results/hangup
+[relay-calling-passresult]: /docs/server-sdk/v2/node/reference/calling/results/pass
+[relay-calling-playaction]: /docs/server-sdk/v2/node/reference/calling/actions/play
+[relay-calling-playresult]: /docs/server-sdk/v2/node/reference/calling/results/play
+[relay-calling-promptaction]: /docs/server-sdk/v2/node/reference/calling/actions/prompt
+[relay-calling-promptresult]: /docs/server-sdk/v2/node/reference/calling/results/prompt
+[relay-calling-recordaction]: /docs/server-sdk/v2/node/reference/calling/actions/record
+[relay-calling-recordresult]: /docs/server-sdk/v2/node/reference/calling/results/record
+[relay-calling-referaction]: /docs/server-sdk/v2/node/reference/calling/actions/refer
+[relay-calling-referresult]: /docs/server-sdk/v2/node/reference/calling/results/refer
+[relay-calling-senddigitsaction]: /docs/server-sdk/v2/node/reference/calling/actions/send-digits
+[relay-calling-senddigitsresult]: /docs/server-sdk/v2/node/reference/calling/results/send-digits
+[relay-calling-tapaction]: /docs/server-sdk/v2/node/reference/calling/actions/tap
+[relay-calling-tapresult]: /docs/server-sdk/v2/node/reference/calling/results/tap
+All calls in SignalWire have a common generic interface, `Relay.Calling.Call`. A `Relay.Calling.Call` is a connection between SignalWire and another device.
+
+## Properties
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `id` | `string` | The unique identifier of the call |
+| `type` | `string` | The type of call. Only `phone` and `sip` are currently supported |
+| `from` | `string` | The phone number that the call is coming from |
+| `to` | `string` | The phone number you are attempting to call |
+| `timeout` | `number` | The seconds the call rings before being transferred to voicemail |
+| `state` | `string` | The current state of the call. See [State Events][link] for all the possible call states |
+| `prevState` | `string` | The previous state of the call |
+| `context` | `string` | The context the call belongs to |
+| `peer` | [`Relay.Calling.Call`][relay-calling-call] | The call your original call is connected to |
+| `active` | `boolean` | Whether the call is active |
+| `ended` | `boolean` | Whether the call has ended |
+| `answered` | `boolean` | Whether the call has been answered |
+| `failed` | `boolean` | Whether the call has failed |
+| `busy` | `boolean` | Whether the call was busy |
+
+## Methods
+
+### amd
+
+Alias for [`detectAnsweringMachine`][link-1].
+
+### amdAsync
+
+Alias for [`detectAnsweringMachineAsync`][link-2].
+
+### answer
+
+Answer an inbound call.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`Promise<Relay.Calling.AnswerResult>` - Promise object that will be fulfilled with a [`Relay.Calling.AnswerResult`][relay-calling-answerresult] object.
+
+**Examples**
+
+> Answer an inbound call and check if it was successful.
+
+```javascript
+// within an async function ..
+const answerResult = await call.answer()
+if (answerResult.successful) {
+
+}
+```
+
+### connect
+
+Attempt to connect an existing call to a new outbound call and waits until one of the remote party picks the call or the connect fails.
+
+This method involves complex nested parameters. You can connect to multiple devices in series, parallel, or any combination of both with creative use of the parameters. Series implies one device at a time, while parallel implies multiple devices at the same time.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `params` | `object` | ✓ | Object with the following properties: |
+| `devices` | `array` | ✓ | One or more objects with the structure below. _Nested depends on whether to dial in serial or parallel._ |
+| `ringback` | `object` | optional | Ringback audio to play to call leg. You can play _audio_, _tts_, _silence_ or _ringtone_. See [`play` media parameter][link-3] for details. |
+
+* Structure of a device:
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `type` | `string` | ✓ | The device type. Only `phone` and `sip` are currently supported |
+| `from` | `string` | optional | The party the call is coming from. _If not provided, the SDK will use the `from` of the originator call. Must be a SignalWire number or SIP endpoint that you own._ |
+| `to` | `string` | ✓ | The party you are attempting to connect with |
+| `timeout` | `number` | optional | The time, in seconds, the call will ring before going to voicemail |
+| `headers` | `{name: string, value: string}[]` | optional | SIP only. Array of headers. Must be X- headers only |
+| `codecs` | `string` | optional | SIP only. Optional array of desired codecs in order of preference. Supported values are PCMU, PCMA, OPUS, G729, G722, VP8, H264. Default is parent leg codec(s) |
+| `webrtc_media` | `boolean` | optional | SIP only. If true, WebRTC media is negotiated. Default is parent leg setting |
+
+**Returns**
+
+`Promise<Relay.Calling.ConnectResult>` - Promise object that will be fulfilled with a [`Relay.Calling.ConnectResult`][relay-calling-connectresult] object.
+
+**Examples**
+
+> Try connecting by calling `+18991114444` and `+18991114445` in series.
+
+```javascript
+const connectResult = await call.connect(
+  { type: 'phone', to: '+18991114444', timeout: 30 },
+  { type: 'phone', to: '+18991114445', timeout: 20 }
+)
+
+if (connectResult.successful) {
+  // connectResult.call is the remote leg connected with yours.
+}
+```
+
+> Combine serial and parallel calling. Call `+18991114443` first and - if it doesn't answer - try calling in parallel `+18991114444` and `+18991114445`. If none of the devices answer, continue the same process with `+18991114446` and `+18991114447`.
+
+```javascript
+const result = await call.connect(
+  { type: 'phone', to: '+18991114443', timeout: 30 },
+  [
+    { type: 'phone', to: '+18991114444', timeout: 30 },
+    { type: 'phone', to: '+18991114445', timeout: 20 }
+  ],
+  [
+    { type: 'phone', to: '+18991114446', timeout: 30 },
+    { type: 'phone', to: '+18991114447', timeout: 20 }
+  ]
+)
+
+if (connectResult.successful) {
+  // connectResult.call is the remote leg connected with yours.
+}
+```
+
+> Try connecting by calling `+18991114444` and `+18991114445` in series playing the US ringtone.
+
+```javascript
+const params = {
+  devices: [
+    { type: 'phone', to: '+18991114444' },
+    { type: 'phone', to: '+18991114445' }
+  ],
+  ringback: { type: 'ringtone', name: 'us' }
+}
+const connectResult = await call.connect(params)
+if (connectResult.successful) {
+  // connectResult.call is the remote leg connected with yours.
+}
+```
+
+### connectAsync
+
+Asynchronous version of [`connect`][link-4]. It does not wait the connect to completes or fails but returns a [`Relay.Calling.ConnectAction`][relay-calling-connectaction] you can interact with.
+
+**Parameters**
+
+See [`connect`][link-4] for the parameter list.
+
+**Returns**
+
+`Promise<Relay.Calling.ConnectAction>` - Promise object that will be fulfilled with a [`Relay.Calling.ConnectAction`][relay-calling-connectaction] object.
+
+**Examples**
+
+> Trying to connect a call by calling in series `+18991114444` and `+18991114445`.
+
+```javascript
+async function main() {
+  const connectAction = await call.connectAsync(
+    { type: 'phone', to: '+18991114444', timeout: 30 },
+    { type: 'phone', to: '+18991114445', timeout: 20 }
+  )
+  // .. do other important things while Relay try to connect your call..
+
+  // Check whether the action has completed
+  if (connectAction.completed) {
+
+  }
+}
+
+main().catch(console.error)
+```
+
+### faxReceive
+
+Prepare the call to receive an inbound fax. It waits until the fax has been received or failed.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`Promise<Relay.Calling.FaxResult>` - Promise object that will be fulfilled with a [`Relay.Calling.FaxResult`][relay-calling-faxresult] object.
+
+**Examples**
+
+> Receiving a fax on the call and print logs for URL and number of received pages.
+
+```javascript
+async function main() {
+  const faxResult = await call.faxReceive()
+  if (faxResult.successful) {
+    console.log('URL: ', faxResult.document)
+    console.log('Total pages: ', faxResult.pages)
+  }
+}
+
+main().catch(console.error)
+```
+
+### faxReceiveAsync
+
+Asynchronous version of [`faxReceive`][link-5]. It does not wait the fax to be received but returns a [`Relay.Calling.FaxAction`][relay-calling-faxaction] you can interact with.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`Promise<Relay.Calling.FaxAction>` - Promise object that will be fulfilled with a [`Relay.Calling.FaxAction`][relay-calling-faxaction] object.
+
+**Examples**
+
+> Trying to receive a fax. Stop the attempt after 5 seconds.
+
+```javascript
+async function main() {
+  const faxAction = await call.faxReceiveAsync()
+
+  setTimeout(async () => {
+    await faxAction.stop()
+  }, 5000)
+}
+
+main().catch(console.error)
+```
+
+### faxSend
+
+Send a `Fax` through the call. It waits until the fax has been sent or failed.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `document` | `string` | ✓ | Http(s) URL to the document to send. _PDF format only._ |
+| `identity` | `string` | optional | Identity to display on receiving fax. _Defaults to SignalWire DID._ |
+| `header` | `string` | optional | Custom string to add to header of each fax page. _Set to empty string to disable sending any header._ |
+
+**Returns**
+
+`Promise<Relay.Calling.FaxResult>` - Promise object that will be fulfilled with a [`Relay.Calling.FaxResult`][relay-calling-faxresult] object.
+
+**Examples**
+
+> Sending a fax on the call and print logs the number of sent pages.
+
+```javascript
+async function main() {
+  const faxResult = await call.faxSend('https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', null, 'Custom Header')
+  if (faxResult.successful) {
+    console.log('URL: ', faxResult.document)
+    console.log('Total pages: ', faxResult.pages)
+  }
+}
+
+main().catch(console.error)
+```
+
+### faxSendAsync
+
+Asynchronous version of [`faxSend`][link-6]. It does not wait the fax to be sent but returns a [`Relay.Calling.FaxAction`][relay-calling-faxaction] you can interact with.
+
+**Parameters**
+
+See [`faxSend`][link-6] for the parameter list.
+
+**Returns**
+
+`Promise<Relay.Calling.FaxAction>` - Promise object that will be fulfilled with a [`Relay.Calling.FaxAction`][relay-calling-faxaction] object.
+
+**Examples**
+
+> Trying to send a fax. Stop sending it after 5 seconds.
+
+```javascript
+async function main() {
+  const faxAction = await call.faxSendAsync('https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', null, 'Custom Header')
+
+  setTimeout(async () => {
+    await faxAction.stop()
+  }, 5000)
+}
+
+main().catch(console.error)
+```
+
+### dial
+
+This will start a call that was created with [`newCall`][newcall] and waits until the Call has been answered or hung up.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`Promise<Relay.Calling.DialResult>` - Promise object that will be fulfilled with a [`Relay.Calling.DialResult`][relay-calling-dialresult] object.
+
+**Examples**
+
+```javascript
+async function main() {
+  const call = client.calling.newCall({ type: 'phone', from: '+1XXXXXXXXXX', to: '+1YYYYYYYYYY' })
+
+  const dialResult = await call.dial()
+}
+
+main().catch(console.error)
+```
+
+### hangup
+
+Hangup the call.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`Promise<Relay.Calling.HangupResult>` - Promise object that will be fulfilled with a [`Relay.Calling.HangupResult`][relay-calling-hangupresult] object.
+
+**Examples**
+
+> Hangup a call and check if it was successful.
+
+```javascript
+// within an async function ..
+const hangupResult = await call.hangup()
+if (hangupResult.successful) {
+
+}
+```
+
+### play
+
+Play one or multiple media in a Call and waits until the playing has ended.
+
+The `play` method is a generic method for all types of playing, see [`playAudio`][link-7], [`playSilence`][link-8], [`playTTS`][link-9] or [`playRingtone`][link-10] for more specific usage.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `params` | `object` | ✓ | Object with the following properties: |
+| `volume` | `number` | optional | Volume value between -40dB and +40dB where 0 is unchanged. _Default is `0`._ |
+| `media` | `array` | ✓ | Array of media objects to play. See below for each type: |
+
+* To play an audio file:
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `type` | `string` | ✓ | `audio` |
+| `url` | `string` | ✓ | Http(s) URL to `audio` resource to play |
+
+* To play a text to speech string:
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `type` | `string` | ✓ | `tts` |
+| `text` | `string` | ✓ | TTS to play |
+| `language` | `string` | optional | Default to `en-US` |
+| `gender` | `string` | optional | `male` or `female`. Default to `female` |
+
+* To play silence:
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `type` | `string` | ✓ | `silence` |
+| `duration` | `number` | ✓ | Seconds of silence to play |
+
+* To play ringtone:
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `type` | `string` | ✓ | `ringtone` |
+| `name` | `string` | ✓ | The name of the ringtone. See [ringtones][link-11] for the supported values |
+| `duration` | `number` | optional | Duration of ringtone to play. _Default to 1 ringtone iteration._ |
+
+**Returns**
+
+`Promise<Relay.Calling.PlayResult>` - Promise object that will be fulfilled with a [`Relay.Calling.PlayResult`][relay-calling-playresult] object.
+
+**Examples**
+
+> Play multiple media in one request setting volume to 6dB.
+
+```javascript
+async function main() {
+  const params = {
+    media: [
+      { type: 'tts', text: 'Listen this awesome file!' },
+      { type: 'audio', url: 'https://cdn.signalwire.com/default-music/welcome.mp3' },
+      { type: 'silence', duration: 5 },
+      { type: 'tts', text: 'Did you like it?' }
+    ],
+    volume: 6
+  }
+  const playResult = await call.play(params)
+}
+
+main().catch(console.error)
+```
+
+### playAsync
+
+Asynchronous version of [`play`][link-3]. It does not wait the playing to completes but returns a [`Relay.Calling.PlayAction`][relay-calling-playaction] you can interact with.
+
+**Parameters**
+
+See [`play`][link-3] for the parameter list.
+
+**Returns**
+
+`Promise<Relay.Calling.PlayAction>` - Promise object that will be fulfilled with a [`Relay.Calling.PlayAction`][relay-calling-playaction] object.
+
+**Examples**
+
+> Play multiple media elements in the call and stop them after 5 seconds.
+
+```javascript
+async function main() {
+  const params = {
+    media: [
+      { type: 'tts', text: 'Listen this awesome file!' },
+      { type: 'audio', url: 'https://cdn.signalwire.com/default-music/welcome.mp3' },
+      { type: 'silence', duration: 5 },
+      { type: 'tts', text: 'Did you like it?' }
+    ],
+    volume: 6
+  }
+  const playAction = await call.playAsync(params)
+
+  setTimeout(async () => {
+    await playAction.stop()
+  }, 5000)
+}
+
+main().catch(console.error)
+```
+
+### playAudio
+
+This is a helper function that refines the use of [`play`][link-3]. This simplifies playing an audio file.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `params` | `object` | ✓ | Object with the following properties: |
+| `url` | `string` | ✓ | Http(s) URL to `audio` resource to play |
+| `volume` | `number` | optional | Volume value between -40dB and +40dB where 0 is unchanged. _Default is `0`._ |
+
+**Returns**
+
+`Promise<Relay.Calling.PlayResult>` - Promise object that will be fulfilled with a [`Relay.Calling.PlayResult`][relay-calling-playresult] object.
+
+**Examples**
+
+> Play an Mp3 file using the signature with a `string` as parameter.
+
+```javascript
+// within an async function ..
+const playResult = await call.playAudio('https://cdn.signalwire.com/default-music/welcome.mp3')
+```
+
+> Play an Mp3 file setting volume level to 4dB.
+
+```javascript
+// within an async function ..
+const params = {
+  url: 'https://cdn.signalwire.com/default-music/welcome.mp3',
+  volume: 4
+}
+const playResult = await call.playAudio(params)
+```
+
+### playAudioAsync
+
+Asynchronous version of [`playAudio`][link-7]. It does not wait the playing to completes but returns a [`Relay.Calling.PlayAction`][relay-calling-playaction] you can interact with.
+
+**Parameters**
+
+See [`playAudio`][link-7] for the parameter list.
+
+**Returns**
+
+`Promise<Relay.Calling.PlayAction>` - Promise object that will be fulfilled with a [`Relay.Calling.PlayAction`][relay-calling-playaction] object.
+
+**Examples**
+
+> Play an Mp3 file and stop it after 5 seconds.
+
+```javascript
+// within an async function ..
+const playAction = await call.playAudioAsync('https://cdn.signalwire.com/default-music/welcome.mp3')
+
+setTimeout(async () => {
+  await playAction.stop()
+}, 5000)
+```
+
+### playTTS
+
+This is a helper function that refines the use of [`play`][link-3]. This simplifies playing TTS.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `params` | `object` | ✓ | Object with the following properties: |
+| `text` | `string` | ✓ | TTS to play |
+| `language` | `string` | optional | Default to `en-US` |
+| `gender` | `string` | optional | `male` or `female`. Default to `female` |
+| `volume` | `number` | optional | Volume value between -40dB and +40dB where 0 is unchanged. _Default is `0`._ |
+
+**Returns**
+
+`Promise<Relay.Calling.PlayResult>` - Promise object that will be fulfilled with a [`Relay.Calling.PlayResult`][relay-calling-playresult] object.
+
+**Examples**
+
+> Play TTS.
+
+```javascript
+// within an async function ..
+const playResult = await call.playTTS({ text: 'Welcome to SignalWire!', gender: 'male' })
+```
+
+### playTTSAsync
+
+Asynchronous version of [`playTTS`][link-9]. It does not wait the playing to completes but returns a [`Relay.Calling.PlayAction`][relay-calling-playaction] you can interact with.
+
+**Parameters**
+
+See [`playTTS`][link-9] for the parameter list.
+
+**Returns**
+
+`Promise<Relay.Calling.PlayAction>` - Promise object that will be fulfilled with a [`Relay.Calling.PlayAction`][relay-calling-playaction] object.
+
+**Examples**
+
+> Play TTS and stop it after 5 seconds.
+
+```javascript
+// within an async function ..
+const playAction = await call.playTTSAsync({ text: 'Welcome to SignalWire!', gender: 'male' })
+
+setTimeout(async () => {
+  await playAction.stop()
+}, 5000)
+```
+
+### playSilence
+
+This is a helper function that refines the use of [`play`][link-3]. This simplifies playing silence.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `duration` | `number` | ✓ | Seconds of silence to play |
+
+**Returns**
+
+`Promise<Relay.Calling.PlayResult>` - Promise object that will be fulfilled with a [`Relay.Calling.PlayResult`][relay-calling-playresult] object.
+
+**Examples**
+
+> Play silence for 10 seconds.
+
+```javascript
+// within an async function ..
+const playResult = await call.playSilence(10)
+```
+
+### playSilenceAsync
+
+Asynchronous version of [`playSilence`][link-8]. It does not wait the playing to completes but returns a [`Relay.Calling.PlayAction`][relay-calling-playaction] you can interact with.
+
+**Parameters**
+
+See [`playSilence`][link-8] for the parameter list.
+
+**Returns**
+
+`Promise<Relay.Calling.PlayAction>` - Promise object that will be fulfilled with a [`Relay.Calling.PlayAction`][relay-calling-playaction] object.
+
+**Examples**
+
+> Play silence for 60 seconds, if _Agent_ is available, stop the play.
+
+```javascript
+// within an async function ..
+const playAction = await call.playSilenceAsync(60)
+
+if (Agent.available()) {
+  await playAction.stop()
+}
+```
+
+### playRingtone
+
+This is a helper function that refines the use of [`play`][link-3]. This simplifies playing ringtones.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `params` | `object` | ✓ | Object with the following properties: |
+| `name` | `string` | ✓ | The name of the ringtone. See [ringtones][link-11] for the supported values |
+| `duration` | `number` | optional | Duration of ringtone to play. _Default to 1 ringtone iteration._ |
+| `volume` | `number` | optional | Volume value between -40dB and +40dB where 0 is unchanged. _Default is `0`._ |
+
+**Returns**
+
+`Promise<Relay.Calling.PlayResult>` - Promise object that will be fulfilled with a [`Relay.Calling.PlayResult`][relay-calling-playresult] object.
+
+**Examples**
+
+> Play a single US ringtone.
+
+```javascript
+// within an async function ..
+const playResult = await call.playRingtone({ name: 'us' })
+```
+
+### playRingtoneAsync
+
+Asynchronous version of [`playRingtone`][link-10]. It does not wait the playing to completes but returns a [`Relay.Calling.PlayAction`][relay-calling-playaction] you can interact with.
+
+**Parameters**
+
+See [`playRingtone`][link-10] for the parameter list.
+
+**Returns**
+
+`Promise<Relay.Calling.PlayAction>` - Promise object that will be fulfilled with a [`Relay.Calling.PlayAction`][relay-calling-playaction] object.
+
+**Examples**
+
+> Play US ringtone for 30 seconds and stop it after 5 seconds.
+
+```javascript
+// within an async function ..
+const playAction = await call.playRingtoneAsync({ name: 'us', duration: 30 })
+
+setTimeout(async () => {
+  await playAction.stop()
+}, 5000)
+```
+
+### detect
+
+Start a detector on the call and waits until it has finished or failed.
+
+The `detect` method is a generic method for all types of detecting, see [`detectAnsweringMachine`][link-1], [`detectDigit`][link-12] or [`detectFax`][link-13] for more specific usage.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `params` | `object` | ✓ | Object to tune the detector with the following properties: |
+
+* To detect an answering machine:
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `type` | `string` | ✓ | `machine` |
+| `timeout` | `number` | optional | Number of seconds to run the detector. _Defaults to 30.0._ |
+| `wait_for_beep` | `boolean` | optional | Whether to wait until the AM is ready for voicemail delivery. _Defaults to false._ |
+| `initial_timeout` | `number` | optional | Number of seconds to wait for initial voice before giving up. _Defaults to 4.5._ |
+| `end_silence_timeout` | `number` | optional | Number of seconds to wait for voice to finish. _Defaults to 1.0._ |
+| `machine_voice_threshold` | `number` | optional | How many seconds of voice to decide is a _machine_. _Defaults to 1.25._ |
+| `machine_words_threshold` | `number` | optional | How many words to count to decide is a _machine_. _Defaults to 6._ |
+
+* To detect digits:
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `type` | `string` | ✓ | `digit` |
+| `timeout` | `number` | optional | Number of seconds to run the detector. _Defaults to 30.0._ |
+| `digits` | `string` | optional | The digits to detect. _Defaults to "0123456789#*"._ |
+
+* To detect a fax:
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `type` | `string` | ✓ | `fax` |
+| `timeout` | `number` | optional | Number of seconds to run the detector. _Defaults to 30.0._ |
+| `tone` | `string` | optional | The fax tone to detect: `CED` or `CNG`. _Defaults to "CED"._ |
+
+**Returns**
+
+`Promise<Relay.Calling.DetectResult>` - Promise object that will be fulfilled with a [`Relay.Calling.DetectResult`][relay-calling-detectresult] object.
+
+**Examples**
+
+> Detect a machine with custom parameters and timeout.
+
+```javascript
+// within an async function ..
+const detectResult = await call.detect({ type: 'machine', timeout: 45, initial_timeout: 3 })
+if (detectResult.successful) {
+
+}
+```
+
+> Detect a Fax setting timeout only.
+
+```javascript
+// within an async function ..
+const detectResult = await call.detect({ type: 'fax', timeout: 45 })
+if (detectResult.successful) {
+
+}
+```
+
+### detectAsync
+
+Asynchronous version of [`detect`][link-14]. It does not wait the detector ends but returns a [`Relay.Calling.DetectAction`][relay-calling-detectaction] you can interact with.
+
+**Parameters**
+
+See [`detect`][link-14] for the parameter list.
+
+**Returns**
+
+`Promise<Relay.Calling.DetectAction>` - Promise object that will be fulfilled with a [`Relay.Calling.DetectAction`][relay-calling-detectaction] object.
+
+**Examples**
+
+> Detect all the digits using default parameters. Stop the action after 5 seconds.
+
+```javascript
+async function main() {
+  call.on('detect.update', (call, params) => {
+    console.log('Detector event:', params)
+  })
+
+  const detectAction = await call.detectAsync('fax')
+  // Do other things while detector runs and then stop it..
+  setTimeout(async () => {
+    await detectAction.stop()
+  }, 5000)
+}
+
+main().catch(console.error)
+```
+
+### detectAnsweringMachine
+
+This is a helper function that refines the use of [`detect`][link-14]. The Promise will be resolved with a [`Relay.Calling.DetectResult`][relay-calling-detectresult] object as soon as the detector decided _who_ answered the call: `MACHINE`, `HUMAN` or `UNKNOWN`.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `params` | `object` | optional | Object to tune the detector with the following properties: |
+| `timeout` | `number` | optional | Number of seconds to run the detector. _Defaults to 30.0._ |
+| `wait_for_beep` | `boolean` | optional | Whether to wait until the AM is ready for voicemail delivery. _Defaults to false._ |
+| `initial_timeout` | `number` | optional | Number of seconds to wait for initial voice before giving up. _Defaults to 4.5._ |
+| `end_silence_timeout` | `number` | optional | Number of seconds to wait for voice to finish. _Defaults to 1.0._ |
+| `machine_voice_threshold` | `number` | optional | How many seconds of voice to decide is a _machine_. _Defaults to 1.25._ |
+| `machine_words_threshold` | `number` | optional | How many words to count to decide is a _machine_. _Defaults to 6._ |
+
+**Returns**
+
+`Promise<Relay.Calling.DetectResult>` - Promise object that will be fulfilled with a [`Relay.Calling.DetectResult`][relay-calling-detectresult] object.
+
+**Examples**
+
+> Perform an AMD and wait until the _machine_ is ready.
+
+```javascript
+// within an async function ..
+const { successful, result } = await call.detectAnsweringMachine({ wait_for_beep: true })
+if (successful) {
+  console.log('AMD result:', result) // MACHINE || HUMAN || UNKNOWN
+}
+```
+
+### detectAnsweringMachineAsync
+
+Asynchronous version of [`detectAnsweringMachine`][link-1]. It does not wait the detector ends but returns a [`Relay.Calling.DetectAction`][relay-calling-detectaction] you can interact with.
+
+**Parameters**
+
+See [`detectAnsweringMachine`][link-1] for the parameter list.
+
+**Returns**
+
+`Promise<Relay.Calling.DetectAction>` - Promise object that will be fulfilled with a [`Relay.Calling.DetectAction`][relay-calling-detectaction] object.
+
+**Examples**
+
+> Perform an asynchronous AMD on the call. Then stop the action if not completed yet.
+
+```javascript
+// within an async function ..
+call.on('detect.update', (call, params) => {
+  // Handle a detector event here..
+  console.log(params)
+})
+const detectAction = await call.detectAnsweringMachineAsync()
+// Do other things while detector runs and then stop it.
+if (detectAction.completed) {
+  detectAction.stop()
+}
+```
+
+### detectDigit
+
+This is a helper function that refines the use of [`detect`][link-14]. This simplifies detecting digits on a call.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `params` | `object` | optional | Object to tune the detector with the following properties: |
+| `timeout` | `number` | optional | Number of seconds to run the detector. _Defaults to 30.0._ |
+| `digits` | `string` | optional | The digits to detect. _Defaults to "0123456789#*"._ |
+
+**Returns**
+
+`Promise<Relay.Calling.DetectResult>` - Promise object that will be fulfilled with a [`Relay.Calling.DetectResult`][relay-calling-detectresult] object.
+
+**Examples**
+
+> Detect digits and then write a log with the result.
+
+```javascript
+// within an async function ..
+const detectResult = await call.detectDigit()
+if (detectResult.successful) {
+  console.log('Digits detected:', detectResult.result)
+}
+```
+
+### detectDigitAsync
+
+Asynchronous version of [`detectDigit`][link-12]. It does not wait the detector ends but returns a [`Relay.Calling.DetectAction`][relay-calling-detectaction] you can interact with.
+
+**Parameters**
+
+See [`detectDigit`][link-12] for the parameter list.
+
+**Returns**
+
+`Promise<Relay.Calling.DetectAction>` - Promise object that will be fulfilled with a [`Relay.Calling.DetectAction`][relay-calling-detectaction] object.
+
+**Examples**
+
+> Detect only `1-3` digits. Stop the action after 5 seconds.
+
+```javascript
+async function main() {
+  const detectAction = await call.detectDigitAsync({ digits: '123' })
+
+  setTimeout(async () => {
+    await detectAction.stop()
+  }, 5000)
+}
+
+main().catch(console.error)
+```
+
+### detectFax
+
+This is a helper function that refines the use of [`detect`][link-14]. This simplifies detecting a `fax`.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `params` | `object` | optional | Object to tune the detector with the following properties: |
+| `timeout` | `number` | optional | Number of seconds to run the detector. _Defaults to 30.0._ |
+| `tone` | `string` | optional | The fax tone to detect: `CED` or `CNG`. _Defaults to "CED"._ |
+
+**Returns**
+
+`Promise<Relay.Calling.DetectResult>` - Promise object that will be fulfilled with a [`Relay.Calling.DetectResult`][relay-calling-detectresult] object.
+
+**Examples**
+
+> Detect fax on the current call.
+
+```javascript
+// within an async function ..
+const detectResult = await call.detectFax()
+if (detectResult.successful) {
+  // A fax has been detected!
+}
+```
+
+### detectFaxAsync
+
+Asynchronous version of [`detectFax`][link-13]. It does not wait the detector ends but returns a [`Relay.Calling.DetectAction`][relay-calling-detectaction] you can interact with.
+
+**Parameters**
+
+See [`detectFax`][link-13] for the parameter list.
+
+**Returns**
+
+`Promise<Relay.Calling.DetectAction>` - Promise object that will be fulfilled with a [`Relay.Calling.DetectAction`][relay-calling-detectaction] object.
+
+**Examples**
+
+> Detect fax on the current call. Stop the action after 5 seconds.
+
+```javascript
+async function main() {
+  const detectAction = await call.detectFaxAsync()
+
+  setTimeout(async () => {
+    await detectAction.stop()
+  }, 5000)
+}
+
+main().catch(console.error)
+```
+
+### prompt
+
+Play one or multiple media while collecting user's input from the call at the same time, such as `digits` and `speech`. It waits until the collection succeed or timeout is reached.
+
+The `prompt` method is a generic method, see [`promptAudio`][link-15], [`promptTTS`][link-16] or [`promptRingtone`][link-17] for more specific usage.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `params` | `object` | ✓ | Object with the following properties: |
+| `type` | `string` | ✓ | `digits`, `speech` or `both` |
+| `media` | `array` | ✓ | List of media elements to play. See [`play`][link-3] parameters for the object structure |
+| `initial_timeout` | `number` | optional | Initial timeout in seconds. _Default to 4 seconds._ |
+| `volume` | `number` | optional | Volume value between -40dB and +40dB where 0 is unchanged. _Default is `0`._ |
+
+* To collect digits:
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `digits_max` | `number` | ✓ | Max digits to collect |
+| `digits_terminators` | `string` | optional | DTMF digits that will end the recording. _Default not set._ |
+| `digits_timeout` | `number` | optional | Timeout in seconds between each digit |
+
+* To collect speech:
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `end_silence_timeout` | `number` | optional | How much silence to wait for end of speech. _Default to 1 second._ |
+| `speech_timeout` | `number` | optional | Maximum time to collect speech. _Default to 60 seconds._ |
+| `speech_language` | `string` | optional | Language to detect. _Default to `en-US`._ |
+| `speech_hints` | `array` | optional | Array of expected phrases to detect |
+
+**Returns**
+
+`Promise<Relay.Calling.PromptResult>` - Promise object that will be fulfilled with a [`Relay.Calling.PromptResult`][relay-calling-promptresult] object.
+
+**Examples**
+
+> Ask user to enter their PIN and collect the digits.
+
+```javascript
+async function main() {
+  const params = {
+    type: 'digits',
+    digits_max: 4,
+    digits_terminators: '#',
+    media: [
+      { type: 'tts', text: 'Welcome at SignalWire. Please, enter your PIN and then # to proceed' }
+    ]
+  }
+  const promptResult = await call.prompt(params)
+
+  if (promptResult.successful) {
+    const type = promptResult.type // digit
+    const pin = promptResult.result // pin entered by the user
+  }
+}
+
+main().catch(console.error)
+```
+
+### promptAsync
+
+Asynchronous version of [`prompt`][link-18]. It does not wait the collection to completes but returns a [`Relay.Calling.PromptAction`][relay-calling-promptaction] you can interact with.
+
+**Parameters**
+
+See [`prompt`][link-18] for the parameter list.
+
+**Returns**
+
+`Promise<Relay.Calling.PromptAction>` - Promise object that will be fulfilled with a [`Relay.Calling.PromptAction`][relay-calling-promptaction] object.
+
+**Examples**
+
+> Ask user to enter their PIN and collect the digits.
+
+```javascript
+async function main() {
+  const params = {
+    type: 'digits',
+    digits_max: 4,
+    digits_terminators: '#',
+    media: [
+      { type: 'tts', text: 'Welcome at SignalWire. Please, enter your PIN and then # to proceed' },
+      { type: 'audio', url: 'https://cdn.signalwire.com/default-music/welcome.mp3' }
+    ]
+  }
+  const promptAction = await call.promptAsync(params)
+  // .. do other important things while collecting user digits..
+
+  if (promptAction.completed) {
+    const result = promptAction.result // => PromptResult object
+  }
+}
+
+main().catch(console.error)
+```
+
+### promptAudio
+
+This is a helper function that refines the use of [`prompt`][link-18]. This function simplifies playing an audio file while collecting user's input from the call, such as `digits` and `speech`.
+
+**Parameters**
+
+You can set all the properties that [`prompt`][link-18] accepts replacing `media` with:
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `url` | `string` | ✓ | Http(s) URL to `audio` resource to play |
+
+> The SDK will build the media for you.
+
+**Returns**
+
+`Promise<Relay.Calling.PromptResult>` - Promise object that will be fulfilled with a [`Relay.Calling.PromptResult`][relay-calling-promptresult] object.
+
+**Examples**
+
+> Collect user's digits while playing an Mp3 file.
+
+```javascript
+async function main() {
+  const params = {
+    type: 'digits',
+    digits_max: 4,
+    url: 'https://cdn.signalwire.com/default-music/welcome.mp3'
+  }
+  const promptResult = await call.promptAudio(params)
+
+  if (promptResult.successful) {
+    const type = promptResult.type // digit
+    const digits = promptResult.result // digits entered by the user
+  }
+}
+
+main().catch(console.error)
+```
+
+### promptAudioAsync
+
+Asynchronous version of [`promptAudio`][link-15]. It does not wait the collection to completes but returns a [`Relay.Calling.PromptAction`][relay-calling-promptaction] you can interact with.
+
+**Parameters**
+
+See [`promptAudio`][link-15] for the parameter list.
+
+**Returns**
+
+`Promise<Relay.Calling.PromptAction>` - Promise object that will be fulfilled with a [`Relay.Calling.PromptAction`][relay-calling-promptaction] object.
+
+**Examples**
+
+> Ask user to enter their PIN and collect the digits.
+
+```javascript
+async function main() {
+  const params = {
+    type: 'digits',
+    digits_max: 4,
+    url: 'https://cdn.signalwire.com/default-music/welcome.mp3'
+  }
+  const promptAction = await call.promptAudioAsync(params)
+  // .. do other important things while collecting user digits..
+
+  if (promptAction.completed) {
+    const result = promptAction.result // => PromptResult object
+  }
+}
+
+main().catch(console.error)
+```
+
+### promptTTS
+
+This is a helper function that refines the use of [`prompt`][link-18]. This function simplifies playing TTS while collecting user's input from the call, such as `digits` and `speech`.
+
+**Parameters**
+
+You can set all the properties that [`prompt`][link-18] accepts replacing `media` with:
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `text` | `string` | ✓ | Text-to-speech string to play |
+| `language` | `string` | optional | Default to `en-US` |
+| `gender` | `string` | optional | `male` or `female`. Default to `female` |
+
+> The SDK will build the media for you.
+
+**Returns**
+
+`Promise<Relay.Calling.PromptResult>` - Promise object that will be fulfilled with a [`Relay.Calling.PromptResult`][relay-calling-promptresult] object.
+
+**Examples**
+
+> Ask user to enter their PIN and collect the digits.
+
+```javascript
+async function main() {
+  const params = {
+    type: 'digits',
+    digits_max: 3,
+    text: 'Please, enter your 3 digit PIN',
+    gender: 'male'
+  }
+  const promptResult = await call.promptTTS(params)
+  if (promptResult.successful) {
+    const type = promptResult.type // digit
+    const pin = promptResult.result // pin entered by the user
+  }
+}
+
+main().catch(console.error)
+```
+
+### promptTTSAsync
+
+Asynchronous version of [`promptTTS`][link-16]. It does not wait the collection to completes but returns a [`Relay.Calling.PromptAction`][relay-calling-promptaction] you can interact with.
+
+**Parameters**
+
+See [`promptTTS`][link-16] for the parameter list.
+
+**Returns**
+
+`Promise<Relay.Calling.PromptAction>` - Promise object that will be fulfilled with a [`Relay.Calling.PromptAction`][relay-calling-promptaction] object.
+
+**Examples**
+
+> Ask user to enter their PIN and collect the digits.
+
+```javascript
+async function main() {
+  const params = {
+    type: 'digits',
+    digits_max: 3,
+    text: 'Please, enter your 3 digit PIN',
+    gender: 'male'
+  }
+  const promptAction = await call.promptTTSAsync(params)
+  // .. do other important things while collecting user digits..
+
+  if (promptAction.completed) {
+    const result = promptAction.result // => PromptResult object
+  }
+}
+
+main().catch(console.error)
+```
+
+### detectHuman
+
+This is a helper function that refines the use of [`detect`][link-14]. This simplifies detecting a _human_ on the call and is the inverse of [`detectMachine`][link-19].
+
+**Deprecated since**: v2.2 - Use [`detectAnsweringMachine`][link-1] instead.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `params` | object | required | Object to tune the detector with the following properties: |
+| `timeout` | number | optional | Number of seconds to run the detector. Defaults to 30.0. |
+| `wait_for_beep` | boolean | optional | Whether to wait until the AM is ready for voicemail delivery. Defaults to false. |
+| `initial_timeout` | number | optional | Number of seconds to wait for initial voice before giving up. Defaults to 4.5. |
+| `end_silence_timeout` | number | optional | Number of seconds to wait for voice to finish. Defaults to 1.0. |
+| `machine_voice_threshold` | number | optional | How many seconds of voice to decide is a _machine_. Defaults to 1.25. |
+| `machine_words_threshold` | number | optional | How many words to count to decide is a _machine_. Defaults to 6. |
+
+**Returns**
+
+`Promise<Relay.Calling.DetectResult>` - Promise object that will be fulfilled with a [`Relay.Calling.DetectResult`][relay-calling-detectresult] object.
+
+**Examples**
+
+> Detect a human on the current call.
+
+```javascript
+// within an async function ..
+const detectResult = await call.detectHuman()
+if (detectResult.successful) {
+  // Human has been detected!
+}
+```
+
+### detectHumanAsync
+
+Asynchronous version of [`detectHuman`][link-20]. It does not wait the detector ends but returns a [`Relay.Calling.DetectAction`][relay-calling-detectaction] you can interact with.
+
+**Deprecated since**: v2.2 - Use [`detectAnsweringMachineAsync`][link-2] instead.
+
+**Parameters**
+
+See [`detectHuman`][link-20] for the parameter list.
+
+**Returns**
+
+`Promise<Relay.Calling.DetectAction>` - Promise object that will be fulfilled with a [`Relay.Calling.DetectAction`][relay-calling-detectaction] object.
+
+**Examples**
+
+> Detect a human on the current call. Stop the action after 5 seconds.
+
+```javascript
+async function main() {
+  const detectAction = await call.detectHumanAsync()
+
+  setTimeout(async () => {
+    await detectAction.stop()
+  }, 5000)
+}
+
+main().catch(console.error)
+```
+
+### detectMachine
+
+This is a helper function that refines the use of [`detect`][link-14]. This simplifies detecting a _machine_ on the call and is the inverse of [`detectHuman`][link-20].
+
+**Deprecated since**: v2.2 - Use [`detectAnsweringMachine`][link-1] instead.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `params` | object | required | Object to tune the detector with the following properties: |
+| `timeout` | number | optional | Number of seconds to run the detector. Defaults to 30.0. |
+| `wait_for_beep` | boolean | optional | Whether to wait until the AM is ready for voicemail delivery. Defaults to false. |
+| `initial_timeout` | number | optional | Number of seconds to wait for initial voice before giving up. Defaults to 4.5. |
+| `end_silence_timeout` | number | optional | Number of seconds to wait for voice to finish. Defaults to 1.0. |
+| `machine_voice_threshold` | number | optional | How many seconds of voice to decide is a _machine_. Defaults to 1.25. |
+| `machine_words_threshold` | number | optional | How many words to count to decide is a _machine_. Defaults to 6. |
+
+**Returns**
+
+`Promise<Relay.Calling.DetectResult>` - Promise object that will be fulfilled with a [`Relay.Calling.DetectResult`][relay-calling-detectresult] object.
+
+**Examples**
+
+> Detect a machine on the current call.
+
+```javascript
+// within an async function ..
+const detectResult = await call.detectMachine()
+if (detectResult.successful) {
+  // A machine has been detected!
+}
+```
+
+### detectMachineAsync
+
+Asynchronous version of [`detectMachine`][link-19]. It does not wait the detector ends but returns a [`Relay.Calling.DetectAction`][relay-calling-detectaction] you can interact with.
+
+**Deprecated since**: v2.2 - Use [`detectAnsweringMachineAsync`][link-2] instead.
+
+**Parameters**
+
+See [`detectMachine`][link-19] for the parameter list.
+
+**Returns**
+
+`Promise<Relay.Calling.DetectAction>` - Promise object that will be fulfilled with a [`Relay.Calling.DetectAction`][relay-calling-detectaction] object.
+
+**Examples**
+
+> Detect a machine on the current call. Stop the action after 5 seconds.
+
+```javascript
+async function main() {
+  const detectAction = await call.detectMachineAsync()
+
+  setTimeout(async () => {
+    await detectAction.stop()
+  }, 5000)
+}
+
+main().catch(console.error)
+```
+
+### on
+
+Attach an event handler for the `event`.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `event` | string | required | Event name. See [Events][link-21] for the full list |
+| `handler` | function | required | Function to call when the event comes. |
+
+**Returns**
+
+[`Relay.Calling.Call`][relay-calling-call] - The call object itself.
+
+**Examples**
+
+> Subscribe to the `answered` and `ended` events for a given call.
+
+```javascript
+call.on('answered', (call) => {
+  // Call has been answered from the remote party!
+}).on('ended', (call) => {
+  // Call has ended.. cleanup something?
+})
+```
+
+### off
+
+Remove an event handler that were attached with `.on()`. If you don't pass a `handler`, all listeners for that `event` will be removed.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `event` | string | required | Event name. See [Events][link-21] for the full list |
+| `handler` | function | optional | Function to remove. Note: `handler` will be removed from the stack by reference so make sure to use the same reference in both `.on()` and `.off()` methods. |
+
+**Returns**
+
+[`Relay.Calling.Call`][relay-calling-call] - The call object itself.
+
+**Examples**
+
+> Subscribe to the call `ended` state change and then, remove the event handler.
+
+```javascript
+const callEndedHandler = (call) => {
+  // Call has ended.
+})
+
+call.on('ended', callEndedHandler)
+
+// .. later
+call.off('ended', callEndedHandler)
+```
+
+### pass
+
+This will allow a consumer to decline incoming calls without ending the call and redirect the call to another RELAY consumer.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`Promise<Relay.Calling.PassResult>` - Promise object that will be fulfilled with a [`Relay.Calling.PassResult`][relay-calling-passresult] object.
+
+**Examples**
+
+> Pass the inbound call.
+
+```javascript
+import { RelayConsumer } from '@signalwire/node'
+
+const consumer = new RelayConsumer({
+    project: process.env.PROJECT,
+    token: process.env.TOKEN,
+    contexts: ['home', 'office'],
+    onIncomingCall: async (call) => {
+        console.log('Inbound call', call.id, call.from, call.to)
+
+        // Pass call to another consumer 
+        const passResult = await call.pass()
+        if (!passResult.successful) {
+            console.error('Error passing the call')
+            return
+        }
+
+        console.log('Call passed to another consumer!')
+    }
+})
+
+consumer.run()
+```
+
+### record
+
+Start recording the call and waits until the recording ends or fails.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `params` | object | optional | Object with the following properties: |
+| `beep` | boolean | optional | Default to `false`. |
+| `stereo` | boolean | optional | Default to `false`. |
+| `format` | string | optional | `mp3` or `wav`. Default `mp3`. |
+| `direction` | string | optional | `listen`, `speak` or `both`. Default to `speak`. |
+| `initial_timeout` | number | optional | How long to wait in seconds until something is heard in the recording. Disable with `0`. Default `5.0`. |
+| `end_silence_timeout` | number | optional | How long to wait in seconds until caller has stopped speaking. Disable with `0`. Default `1.0`. |
+| `terminators` | string | optional | DTMF digits that will end the recording. Default `#*`. |
+
+**Returns**
+
+`Promise<Relay.Calling.RecordResult>` - Promise object that will be fulfilled with a [`Relay.Calling.RecordResult`][relay-calling-recordresult] object.
+
+**Examples**
+
+> Start recording audio in the call for both direction in stereo mode, if successful, grab `url`, `duration` and `size` from the RecordResult object.
+
+```javascript
+async function main() {
+  const params = {
+    stereo: true,
+    direction: 'both'
+  }
+  const recordResult = await call.record(params)
+
+  if (recordResult.successful) {
+    const { url, duration, size } = recordResult
+  }
+}
+
+main().catch(console.error)
+```
+
+### recordAsync
+
+Asynchronous version of [`record`][link-22]. It does not wait the end of recording but returns a [`Relay.Calling.RecordAction`][relay-calling-recordaction] you can interact with.
+
+**Parameters**
+
+See [`record`][link-22] for the parameter list.
+
+**Returns**
+
+`Promise<Relay.Calling.RecordAction>` - Promise object that will be fulfilled with a [`Relay.Calling.RecordAction`][relay-calling-recordaction] object.
+
+**Examples**
+
+> Start recording audio in the call for both direction in stereo mode and stop it after 5 seconds.
+
+```javascript
+async function main() {
+  const params = {
+    stereo: true,
+    direction: 'both'
+  }
+  const recordAction = await call.recordAsync(params)
+
+  setTimeout(async () => {
+    await recordAction.stop()
+  }, 5000)
+}
+
+main().catch(console.error)
+```
+
+### refer
+
+Transfer a `SIP` call to an external `SIP` endpoint.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `params` | object | required | Object with the following properties: |
+| `to` | string | required | SIP URI to transfer the call to. |
+| `headers` | `{name: string, value: string}[]` | optional | Array of headers. Must be X-headers only. |
+
+**Returns**
+
+`Promise<Relay.Calling.ReferResult>` - Promise object that will be fulfilled with a [`Relay.Calling.ReferResult`][relay-calling-referresult] object.
+
+**Examples**
+
+> Transfer the `call` to another SIP endpoint.
+
+```javascript
+async function main() {
+  const params = {
+    to: 'sip:user@sip.example.com',
+  }
+  const referResult = await call.refer(params)
+
+  if (referResult.successful) {
+    const { referTo, referNotifyCode, referResponseCode } = referResult
+  }
+}
+
+main().catch(console.error)
+```
+
+### referAsync
+
+Asynchronous version of [`refer`][link-23]. It does not wait the end of the REFER but returns a [`Relay.Calling.ReferAction`][relay-calling-referaction] you can interact with.
+
+**Parameters**
+
+See [`refer`][link-23] for the parameter list.
+
+**Returns**
+
+`Promise<Relay.Calling.ReferAction>` - Promise object that will be fulfilled with a [`Relay.Calling.ReferAction`][relay-calling-referaction] object.
+
+**Examples**
+
+> Async transfer the `call` to another SIP endpoint.
+
+```javascript
+async function main() {
+  const params = {
+    to: 'sip:user@sip.example.com',
+  }
+
+  call.on('refer.success', (params) => {
+    // listen for the success event
+    console.log('Refer success', params)
+  })
+
+  const referAction = await call.referAsync(params)
+}
+
+main().catch(console.error)
+```
+
+### sendDigits
+
+This method sends DTMF digits to the other party on the call.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `digits` | string | required | String of DTMF digits to send. Allowed digits are `1234567890*#ABCD` and `wW` for short and long waits. If any invalid characters are present, the entire operation is rejected. |
+
+**Returns**
+
+`Promise<Relay.Calling.SendDigitsResult>` - Promise object that will be fulfilled with a [`Relay.Calling.SendDigitsResult`][relay-calling-senddigitsresult] object.
+
+**Examples**
+
+> Send some digits.
+
+```javascript
+async function main() {
+  const result = await call.sendDigits('123')
+}
+
+main().catch(console.error)
+```
+
+### sendDigitsAsync
+
+Asynchronous version of [`sendDigits`][link-24]. It does not wait for the sending event to complete, and immediately returns a [`Relay.Calling.SendDigitsAction`][relay-calling-senddigitsaction] object you can interact with.
+
+**Parameters**
+
+See [`sendDigits`][link-24] for the parameter list.
+
+**Returns**
+
+`Promise<Relay.Calling.SendDigitsAction>` - Promise object that will be fulfilled with a [`Relay.Calling.SendDigitsAction`][relay-calling-senddigitsaction] object.
+
+**Examples**
+
+> Send some digits and then check if the operation is completed using the _SendDigitsAction_ object.
+
+```javascript
+async function main() {
+  const action = await call.sendDigitsAsync('123')
+
+  setTimeout(() => {
+    if (action.completed) {
+      // ...
+    }
+  }, 1000)
+}
+
+main().catch(console.error)
+```
+
+### tap
+
+Intercept call media and stream it to the specify endpoint. It waits until the end of the call.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `params` | object | required | Object with the following properties: |
+| `audio_direction` | string | required | `listen` what the caller hears, `speak` what the caller says or `both`. |
+| `target_type` | string | required | Protocol to use: `rtp` or `ws`, defaults to `rtp`. |
+| `target_ptime` | number | optional | Packetization time in ms. It will be the same as the tapped media if not set. |
+| `codec` | string | optional | Codec to use. It will be the same as the tapped media if not set. |
+
+* To `tap` through RTP:
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `target_addr` | string | required | RTP IP v4 address. |
+| `target_port` | number | required | RTP port. |
+
+**Returns**
+
+`Promise<Relay.Calling.TapResult>` - Promise object that will be fulfilled with a [`Relay.Calling.TapResult`][relay-calling-tapresult] object.
+
+**Examples**
+
+> Tapping audio from the call, if successful, print both source and destination devices from the `TapResult` object.
+
+```javascript
+// within an async function ..
+const params = {
+  audio_direction: 'both',
+  target_type: 'rtp',
+  target_addr: '192.168.1.1',
+  target_port: 1234
+}
+const tapResult = await call.tap(params)
+if (tapResult.successful) {
+  const { sourceDevice, destinationDevice } = tapResult
+  console.log(sourceDevice)
+  console.log(destinationDevice)
+}
+```
+
+### tapAsync
+
+Asynchronous version of [`tap`][link-25]. It does not wait the end of tapping but returns a [`Relay.Calling.TapAction`][relay-calling-tapaction] you can interact with.
+
+**Parameters**
+
+See [`tap`][link-25] for the parameter list.
+
+**Returns**
+
+`Promise<Relay.Calling.TapAction>` - Promise object that will be fulfilled with a [`Relay.Calling.TapAction`][relay-calling-tapaction] object.
+
+**Examples**
+
+> Tapping audio from the call and then stop it using the `TapAction` object.
+
+```javascript
+// within an async function ..
+const params = {
+  audio_direction: 'both',
+  target_type: 'rtp',
+  target_addr: '192.168.1.1',
+  target_port: 1234
+}
+const tapAction = await call.tapAsync(params)
+// Do other things while tapping the media and then stop it..
+setTimeout(async () => {
+  await tapAction.stop()
+}, 5000)
+```
+
+### promptRingtone
+
+This is a helper function that refines the use of [`prompt`][link-18]. This function simplifies playing ringtones while collecting user's input from the call, such as `digits` and `speech`.
+
+**Parameters**
+
+You can set all the properties that [`prompt`][link-18] accepts replacing `media` with:
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `name` | string | required | The name of the ringtone. See [Ringtones][link-11] for the supported values. |
+| `duration` | number | optional | Duration of ringtone to play. Default to 1 ringtone iteration. |
+
+> The SDK will build the media for you.
+
+**Returns**
+
+`Promise<Relay.Calling.PromptResult>` - Promise object that will be fulfilled with a [`Relay.Calling.PromptResult`][relay-calling-promptresult] object.
+
+**Examples**
+
+> Play US ringtone for 30 seconds while collect digits.
+
+```javascript
+async function main() {
+  const params = {
+    type: 'digits',
+    digits_max: 3,
+    name: 'us',
+    duration: 30
+  }
+  const promptResult = await call.promptRingtone(params)
+  if (promptResult.successful) {
+    const type = promptResult.type // digit
+    const pin = promptResult.result // pin entered by the user
+  }
+}
+
+main().catch(console.error)
+```
+
+### promptRingtoneAsync
+
+Asynchronous version of [`promptRingtone`][link-17]. It does not wait the collection to completes but returns a [`Relay.Calling.PromptAction`][relay-calling-promptaction] you can interact with.
+
+**Parameters**
+
+See [`promptRingtone`][link-17] for the parameter list.
+
+**Returns**
+
+`Promise<Relay.Calling.PromptAction>` - Promise object that will be fulfilled with a [`Relay.Calling.PromptAction`][relay-calling-promptaction] object.
+
+**Examples**
+
+> Play US ringtone for 30 seconds while collect digits in asynchronous.
+
+```javascript
+async function main() {
+  const params = {
+    type: 'digits',
+    digits_max: 3,
+    name: 'us',
+    duration: 30
+  }
+  const promptAction = await call.promptRingtoneAsync(params)
+  // .. do other important things while collecting user digits..
+
+  if (promptAction.completed) {
+    const result = promptAction.result // => PromptResult object
+  }
+}
+
+main().catch(console.error)
+```
+
+### waitFor
+
+Wait for specific events on the Call or returns `false` if the Call ends without getting them.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `event1, event2, ..eventN` | string or string[] | required | One or more Call state events. See [Events][link-21] for the full list |
+
+**Returns**
+
+`Promise<boolean>` - Promise resolved with `true` or `false`.
+
+**Examples**
+
+> Wait for `ending` or `ended` events.
+
+```javascript
+// within an async function ..
+const success = await call.waitFor('ending', 'ended')
+if (success) {
+  // ...
+}
+```
+
+### waitForAnswered
+
+This is a helper function that refines the use of [`waitFor`][link-26]. This simplifies waiting for the _answered_ state.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`Promise<boolean>` - Promise resolved with `true` or `false`.
+
+**Examples**
+
+> Wait for the `answered` event.
+
+```javascript
+// within an async function ..
+const success = await call.waitForAnswered()
+if (success) {
+  // ...
+}
+```
+
+### waitForEnded
+
+This is a helper function that refines the use of [`waitFor`][link-26]. This simplifies waiting for the _ended_ state.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`Promise<boolean>` - Promise resolved with `true` or `false`.
+
+**Examples**
+
+> Wait for the `ended` event.
+
+```javascript
+// within an async function ..
+const success = await call.waitForEnded()
+if (success) {
+  // ...
+}
+```
+
+### waitForEnding
+
+This is a helper function that refines the use of [`waitFor`][link-26]. This simplifies waiting for the _ending_ state.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`Promise<boolean>` - Promise resolved with `true` or `false`.
+
+**Examples**
+
+> Wait for the `ending` event.
+
+```javascript
+// within an async function ..
+const success = await call.waitForEnding()
+if (success) {
+  // ...
+}
+```
+
+### waitForRinging
+
+This is a helper function that refines the use of [`waitFor`][link-26]. This simplifies waiting for the _ringing_ state.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`Promise<boolean>` - Promise resolved with `true` or `false`.
+
+**Examples**
+
+> Wait for the `ringing` event.
+
+```javascript
+// within an async function ..
+const success = await call.waitForRinging()
+if (success) {
+  // ...
+}
+```
+
+## Events
+
+All these events can be used to track the calls lifecycle and instruct SignalWire on what to do for each different state.
+
+### State Events
+
+To track the state of a call.
+
+| Event | Description |
+|-------|-------------|
+| `stateChange` | Event dispatched when Call state changes. |
+| `created` | The call has been created in Relay. |
+| `ringing` | The call is ringing and has not yet been answered. |
+| `answered` | The call has been picked up. |
+| `ending` | The call is hanging up. |
+| `ended` | The call has ended. |
+
+### Connect Events
+
+To track the connect state of a call.
+
+| Event | Description |
+|-------|-------------|
+| `connect.stateChange` | Event dispatched when the Call `connect` state changes. |
+| `connect.connecting` | Currently calling the phone number(s) to connect. |
+| `connect.connected` | The calls are being connected together. |
+| `connect.failed` | The last call connection attempt failed. |
+| `connect.disconnected` | The call was either never connected or the last call connection completed. |
+
+### Play Events
+
+To track a playback state.
+
+| Event | Description |
+|-------|-------------|
+| `play.stateChange` | Event dispatched when the state of a `playing` changes. |
+| `play.playing` | A playback in playing on the call. |
+| `play.error` | A playback failed to start. |
+| `play.finished` | The playback has ended. |
+
+### Record Events
+
+To track a recording state.
+
+| Event | Description |
+|-------|-------------|
+| `record.stateChange` | Event dispatched when the state of a `recording` changes. |
+| `record.recording` | The call is being recorded. |
+| `record.no_input` | The recording failed due to _no input_. |
+| `record.finished` | The recording has ended. |
+
+### Refer Events
+
+To track a REFER state.
+
+| Event | Description |
+|-------|-------------|
+| `refer.stateChange` | Event dispatched when the state of a `refer` process changes. |
+| `refer.inProgress` | The transfer is in progress. |
+| `refer.cancel` | The transfer has been cancelled. |
+| `refer.busy` | The SIP endpoint is busy. |
+| `refer.noAnswer` | The SIP endpoint did not answer. |
+| `refer.error` | The `refer` attempt failed. |
+| `refer.success` | The `refer` attempt succeeded. |
+
+### Prompt Events
+
+To track a prompt state.
+
+| Event | Description |
+|-------|-------------|
+| `prompt` | The prompt action on the call has ended. |
+
+### Fax Events
+
+To track a fax state.
+
+| Event | Description |
+|-------|-------------|
+| `fax.error` | Faxing failed. |
+| `fax.finished` | Faxing has finished. |
+| `fax.page` | A fax page has been sent or received. |
+
+### Detect Events
+
+To track a detector state.
+
+| Event | Description |
+|-------|-------------|
+| `detect.error` | The detector has failed. |
+| `detect.finished` | The detector has finished. |
+| `detect.update` | There is a notification from the detector (eg: a new DTMF). |
+
+### Tap Events
+
+To track a tapping state.
+
+| Event | Description |
+|-------|-------------|
+| `tap.tapping` | The tap action has started on the call. |
+| `tap.finished` | Tap has finished. |
+
+### Digits Events
+
+To track a _send digits_ action state.
+
+| Event | Description |
+|-------|-------------|
+| `sendDigits.finished` | Digits have been sent. |
+
+## Ringtones
+
+Here you can find all the accepted values for the ringtone to play, based on short country codes:
+
+| Property | Country Code |
+|-------------|-------------|
+| `name` | at, au, bg, br, be, ch, cl, cn, cz, de, dk, ee, es, fi, fr, gr, hu, il, in, it, lt, jp, mx, my, nl, no, nz, ph, pl, pt, ru, se, sg, th, uk, us, tw, ve, za |

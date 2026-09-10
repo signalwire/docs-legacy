@@ -1,0 +1,177 @@
+---
+title: Making and receiving phone calls
+slug: /swml/guides/make-and-receive-calls
+description: Overview of the many ways you can make and receive calls using SignalWire products.
+---
+import UiAccordionPartial from '@site/docs/_partials/common/dashboard/_ui-accordion.mdx';
+import CreateSwmlScriptPartial from '@site/docs/_partials/common/dashboard/_create-swml-script.mdx';
+
+
+{/* Links */}
+[swml]: /docs/swml "SignalWire Markup Language"
+[sw-api]: /docs/apis "SignalWire API"
+
+Follow this guide to make and receive your first phone calls using
+[SignalWire Markup Language (SWML)][swml] and
+the [SignalWire API][sw-api].
+
+## Prerequisites
+
+To be able to make calls, you will need:
+
+- a SignalWire phone number
+- your API credentials (Space URL, Project ID, and API token)
+
+Also, note that if your account is in trial mode,
+you'll need to upgrade it in order to call numbers other than your own verified numbers.
+
+To acquire a phone number,
+[log in](https://signalwire.com/signin) to your SignalWire Space.
+From the [Phone Numbers section](https://my.signalwire.com/?phone_numbers),
+[buy a new phone number](/docs/platform/phone-numbers).
+You will need at least one number to make and receive calls.
+
+Find your API tokens in the API section of your Space, as shown below.
+You may need to create a new token if you never used one.
+Make sure that your token has at least the "Voice" scope enabled.
+
+<Frame caption="You can find your Project ID and Token from the API tab in your SignalWire Space. Make sure your token has the 'Voice' scope enabled.">
+
+![The API page.](@image/dashboard/credentials/api-credentials.webp)
+
+</Frame>
+
+<UiAccordionPartial />
+
+## SWML
+
+### Receiving incoming calls
+
+To handle incoming calls we need to configure the phone number in our
+[SignalWire Space](https://signalwire.com/signin) to answer calls using a SWML Script.
+
+<CreateSwmlScriptPartial />
+
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - play: say:Hello from SignalWire!
+```
+
+Take note of the Request URL for the SWML Script that we created. You can even create a new script if you want to define a different behavior for incoming calls.
+
+To configure your number to handle incoming calls with an SWML Script, click the [Phone Numbers](https://my.signalwire.com/?phone_numbers) section within your SignalWire Space, and edit the settings of the specific number you would like to use to answer calls.
+Set **Handle calls using** to **a SWML Script**, then select your SWML Script from the dropdown
+
+That's it! Inbound calls to this SignalWire number will execute the specified SWML Script.
+
+### Making your first call
+
+Outbound calls can be made via the SignalWire REST API's [Create a Call endpoint](/docs/apis/calling/call-commands).
+This is accomplished by sending a POST request using SWML in the request body to handle the call.
+The SWML can be served via URL or passed inline directly as an escaped JSON string.
+
+<Tabs>
+<TabItem value="url" label="URL">
+
+```bash
+curl -L -g 'https://Your_Space_Name.signalwire.com/api/calling/calls' \
+-H 'Content-Type: application/json' \
+-H 'Accept: application/json' \
+-H "Authorization: Basic $(echo -n "${YOUR-PROJECT-ID}:${YOUR-API-TOKEN}" | base64)" \
+--data-raw '{
+  "command": "dial",
+  "params": {
+    "from": "sip:from-sip@example-112233445566.sip.signalwire.com",
+    "to": "+1xxxxxxxxxx",
+    "caller_id": "+1234567890",
+    "fallback_url": "https://example.com/fallback",
+    "status_url": "https://example.com/status_callback",
+    "status_events": [
+      "answered",
+      "ended"
+    ],
+    "url": "https://example.com/swml"
+  }
+}'
+```
+
+</TabItem>
+<TabItem value="swml-object" label="SWML object">
+
+```bash
+curl -L -g 'https://Your_Space_Name.signalwire.com/api/calling/calls' \
+-H 'Content-Type: application/json' \
+-H 'Accept: application/json' \
+-H "Authorization: Basic $(echo -n "${YOUR-PROJECT-ID}:${YOUR-API-TOKEN}" | base64)" \
+--data-raw '{
+  "command": "dial",
+  "params": {
+    "from": "sip:from-sip@example-112233445566.sip.signalwire.com",
+    "to": "+1xxxxxxxxxx",
+    "caller_id": "+1234567890",
+    "fallback_url": "https://example.com/fallback",
+    "status_url": "https://example.com/status_callback",
+    "status_events": [
+      "answered",
+      "ended"
+    ]
+  },
+  "swml": {
+    "version": "1.0.0",
+    "sections": {
+      "main": [
+        {
+          "play": "say:Hello from SignalWire!"
+        }
+      ]
+    }
+  }
+}'
+```
+
+</TabItem>
+<TabItem value="inline-swml" label="Inline SWML">
+
+<Info>
+
+To pass SWML as an inline string, quotes must be escaped, as shown in the example below.
+
+</Info>
+
+```bash
+curl -L -g 'https://Your_Space_Name.signalwire.com/api/calling/calls' \
+-H 'Content-Type: application/json' \
+-H 'Accept: application/json' \
+-H "Authorization: Basic $(echo -n "${YOUR-PROJECT-ID}:${YOUR-API-TOKEN}" | base64)" \
+--data-raw '{
+  "command": "dial",
+  "params": {
+    "from": "sip:from-sip@example-112233445566.sip.signalwire.com",
+    "to": "+1xxxxxxxxxx",
+    "caller_id": "+1234567890",
+    "fallback_url": "https://example.com/fallback",
+    "status_url": "https://example.com/status_callback",
+    "status_events": [
+      "answered",
+      "ended"
+    ],
+	"swml": "{\"version\":\"1.0.0\",\"sections\":{\"main\":[{\"play\":\"say:Hello from SignalWire!\"}]}}"
+  }
+}'
+```
+
+</TabItem>
+</Tabs>
+
+---
+
+## Next steps
+
+SWML scripts allow you to handle incoming phone calls,
+and REST APIs make it easy to trigger outbound calls.
+
+If you need more flexibility and real-time control on your calls,
+you may be interested in our guide about how to
+[make and receive calls in Node.js](/docs/server-sdk/node/guides/get-started-with-voice).

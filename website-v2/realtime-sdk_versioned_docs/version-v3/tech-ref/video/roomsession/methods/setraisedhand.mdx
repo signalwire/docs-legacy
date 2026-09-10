@@ -1,0 +1,42 @@
+---
+title: "setRaisedHand"
+slug: /node/reference/video/room-session/set-raised-hand
+description: setRaisedHand method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+[creating-the-video-room-token-1]: /docs/apis/video/create-room-token
+
+### setRaisedHand
+
+- **setRaisedHand**(`params`): `Promise<void>`
+
+Sets the raised hand status for the current member.
+
+#### Parameters
+
+| Name              | Type      | Description                                                                                                                        |
+|:------------------|:----------|:-----------------------------------------------------------------------------------------------------------------------------------|
+| `params`          | `Object`  | -                                                                                                                                  |
+| `params.memberId` | `string`  | Id of the member to affect.                                                                                                        |
+| `params.raised?`  | `boolean` | Whether to raise or lower the hand. Default: `true`. If omitted, the hand status is toggled to the opposite of the current status. |
+
+#### Returns
+
+`Promise<void>`
+
+#### Permissions
+
+- `video.member.raisehand`: to raise a hand
+- `video.member.lowerhand`: to lower a hand
+
+You need to specify the permissions when [creating the Video Room Token][creating-the-video-room-token-1] on the server side.
+
+#### Example
+
+```javascript
+await room.setRaisedHand({
+  memberId: "de550c0c-3fac-4efd-b06f-b5b86...",
+  raised: false
+});
+```

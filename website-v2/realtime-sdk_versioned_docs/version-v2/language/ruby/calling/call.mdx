@@ -1,0 +1,1753 @@
+---
+title: Call
+slug: /ruby/reference/calling/call
+toc_max_heading_level: 3
+---
+
+[connectaction]: /docs/server-sdk/v2/ruby/reference/calling/actions/connect
+[detectaction-5]: /docs/server-sdk/v2/ruby/reference/calling/actions/detect
+[faxaction-1]: /docs/server-sdk/v2/ruby/reference/calling/actions/fax
+[index]: /docs/server-sdk/v2/ruby/reference/calling#new_call
+[link-10]: #fax_send
+[link-11]: #events
+[link-12]: #play_audio
+[link-13]: #play_silence
+[link-14]: #play_tts
+[link-15]: #play_ringtone
+[link-16]: #ringtones
+[link-17]: #prompt_audio
+[link-18]: #prompt_tts
+[link-19]: #prompt
+[link-1]: #play
+[link-20]: #prompt_silence
+[link-21]: #prompt_ringtone
+[link-22]: #record
+[link-23]: #send_digits
+[link-24]: #tap_media
+[link-25]: #wait_for
+[link-2]: #connect
+[link-3]: #detect_digit
+[link-4]: #detect_fax
+[link-5]: #detect_human
+[link-6]: #detect_machine
+[link-7]: #detect
+[link-8]: #detect_answering_machine
+[link-9]: #fax_receive
+[link]: #state-events
+[play]: /docs/server-sdk/v2/ruby/reference/calling/actions/play#volume
+[playaction-3]: /docs/server-sdk/v2/ruby/reference/calling/actions/play
+[promptaction-3]: /docs/server-sdk/v2/ruby/reference/calling/actions/prompt
+[recordaction]: /docs/server-sdk/v2/ruby/reference/calling/actions/record
+[relay-calling-answerresult]: /docs/server-sdk/v2/ruby/reference/calling/results/answer
+[relay-calling-call]: #
+[relay-calling-connectaction]: /docs/server-sdk/v2/ruby/reference/calling/actions/connect
+[relay-calling-connectresult]: /docs/server-sdk/v2/ruby/reference/calling/results/connect
+[relay-calling-detectaction-6]: /docs/server-sdk/v2/ruby/reference/calling/actions/detect
+[relay-calling-detectresult-6]: /docs/server-sdk/v2/ruby/reference/calling/results/detect
+[relay-calling-dialresult]: /docs/server-sdk/v2/ruby/reference/calling/results/dial
+[relay-calling-faxaction-1]: /docs/server-sdk/v2/ruby/reference/calling/actions/fax
+[relay-calling-faxaction]: /docs/server-sdk/v2/ruby/reference/calling/actions/fax
+[relay-calling-faxresult-1]: /docs/server-sdk/v2/ruby/reference/calling/results/fax
+[relay-calling-hangupresult]: /docs/server-sdk/v2/ruby/reference/calling/results/hangup
+[relay-calling-playaction-5]: /docs/server-sdk/v2/ruby/reference/calling/actions/play
+[relay-calling-playresult-4]: /docs/server-sdk/v2/ruby/reference/calling/results/play
+[relay-calling-promptaction-5]: /docs/server-sdk/v2/ruby/reference/calling/actions/prompt
+[relay-calling-promptresult-4]: /docs/server-sdk/v2/ruby/reference/calling/results/prompt
+[relay-calling-recordaction]: /docs/server-sdk/v2/ruby/reference/calling/actions/record
+[relay-calling-recordresult]: /docs/server-sdk/v2/ruby/reference/calling/results/record
+[relay-calling-senddigitsaction]: /docs/server-sdk/v2/ruby/reference/calling/actions/send-digits
+[relay-calling-senddigitsresult]: /docs/server-sdk/v2/ruby/reference/calling/results/send-digits
+[relay-calling-tapaction]: /docs/server-sdk/v2/ruby/reference/calling/actions/tap
+[relay-calling-tapresult]: /docs/server-sdk/v2/ruby/reference/calling/results/tap
+[senddigitsaction]: /docs/server-sdk/v2/ruby/reference/calling/actions/send-digits
+[tapaction]: /docs/server-sdk/v2/ruby/reference/calling/actions/tap
+[tapresult-1]: /docs/server-sdk/v2/ruby/reference/calling/results/tap
+
+All calls in SignalWire have a common generic interface, `Call`. A call is a connection between SignalWire and another device.
+
+## Properties
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `id` | String | The unique identifier of the call. |
+| `type` | String | The type of call. Only `phone` is currently supported. |
+| `from` | String | The phone number that the call is coming from. |
+| `to` | String | The phone number you are attempting to call. |
+| `timeout` | Numeric | The seconds the call rings before being transferred to voicemail. |
+| `state` | String | The current state of the call. See [Call State Events][link] for all the possible call states. |
+| `prevState` | String | The previous state of the call. |
+| `context` | String | The context the call belongs to. |
+| `peer` | Call | The call your original call is connected to. |
+| `active` | Boolean | Whether the call is active. |
+| `ended` | Boolean | Whether the call has ended. |
+| `answered` | Boolean | Whether the call has been answered. |
+| `failed` | Boolean | Whether the call has failed. |
+| `busy` | Boolean | Whether the call is busy. |
+
+## Methods
+
+### answer
+
+Answer an inbound call.
+
+
+**Parameters**
+
+None
+
+**Returns**
+
+[`Relay::Calling::AnswerResult`][relay-calling-answerresult] - The result object to interact with.
+
+**Examples**
+
+Answer an inbound call and check if it was successful.
+
+```ruby
+result = call.answer
+
+if result.successful
+  #call was answered
+end
+```
+
+### connect
+
+Attempts to connect an existing call to a new outbound call and waits until one of the remote party picks the call or the connect fails.
+
+You can connect to multiple devices in series, parallel, or any combination of both. Series means one device is dialed at a time, while parallel implies multiple devices ring at the same time.
+
+
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `device1, device2, ..deviceN` | Array | Yes | An array of devices, passed in as hashes with the following properties. Nesting depends on whether the dialing is in serial or parallel. Only `phone` devices are currently supported. |
+| `ringback` | Hash | No | Ringback audio to play to call leg. You can play _audio_, _tts_, _silence_ or _ringtone_. See [`play` media parameter][link-1] for details. |
+
+To dial a phone number:
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `type` | String | Yes | `phone` |
+| `params` | Hash | Yes | Parameters that specify the call parties: |
+| `params.from_number` | String | No | The party the call is coming from. If not provided, the SDK will use the `from` property of the originating call. Must be a SignalWire number or SIP endpoint that you own. |
+| `params.to_number` | String | Yes | The party you are attempting to connect with. |
+| `timeout` | Numeric | No | The time, in seconds, the call will ring before being canceled. Defaults to 30 |
+
+**Returns**
+
+[`Relay::Calling::ConnectResult`][relay-calling-connectresult] - The result object to interact with.
+
+**Examples**
+
+Trying to connect a call by calling `+18991114444` and `+18991115555` in series.
+
+```ruby
+connected = call.connect [
+  [{ type: 'phone', params: { to_number: '+18991114444', from_number: "+1YYYYYYYYYY", timeout: 30 } }],
+  [{ type: 'phone', params: { to_number: '+18991115555', from_number: "+1YYYYYYYYYY", timeout: 30 } }]
+]
+
+if connected.successful
+  # connected.call is the remote leg connected with yours.
+  connected.call.wait_for_ended
+end
+
+call.hangup
+```
+
+Trying to connect a call by calling `+18991114444` and `+18991115555` in series, playing the US ringtone.
+
+```ruby
+connected = call.connect(devices: [
+    [{ type: 'phone', params: { to_number: '+18991114444', from_number: "+1YYYYYYYYYY", timeout: 30 } }],
+    [{ type: 'phone', params: { to_number: '+18991115555', from_number: "+1YYYYYYYYYY", timeout: 30 } }]
+  ],
+  ringback: { type: 'ringtone', name: 'us' }
+)
+
+if connected.successful
+  # connected.call is the remote leg connected with yours.
+  connected.call.wait_for_ended
+end
+
+call.hangup
+```
+
+Combine serial and parallel calling. Call `+18991114443` first and - if it doesn't answer - try calling in parallel `+18991114444` and `+18991114445`. If none of the devices answer, continue the same process with `+18991114446` and `+18991114447`.
+
+```ruby
+ connected = call.connect [
+    [{ type: 'phone', params: { to_number: '+18991114443', from_number: "+1YYYYYYYYYY", timeout: 30 } }],
+    [
+      { type: 'phone', params: { to_number: '+18991114444', from_number: "+1YYYYYYYYYY", timeout: 30 } },
+      { type: 'phone', params: { to_number: '+18991114445', from_number: "+1YYYYYYYYYY", timeout: 30 } },
+    ],
+    [
+      { type: 'phone', params: { to_number: '+18991114446', from_number: "+1YYYYYYYYYY", timeout: 30 } },
+      { type: 'phone', params: { to_number: '+18991114447', from_number: "+1YYYYYYYYYY", timeout: 30 } },
+    ]
+  ]
+
+  if connected.successful
+    # connected.call is the remote leg connected with yours.
+    connected.call.wait_for_ended
+  end
+
+  call.hangup
+```
+
+### connect!
+
+Asynchronous version of [`connect`][link-2]. It does not wait for the connect to complete or fail, and it immediately returns a [`ConnectAction`][connectaction] object you can interact with.
+
+
+
+**Parameters**
+
+See [`connect`][link-2] for the parameter list.
+
+**Returns**
+
+[`Relay::Calling::ConnectAction`][relay-calling-connectaction] - The action object to interact with.
+
+**Examples**
+
+Trying to connect a call by calling in series `+18991114444` and `+18991114445`.
+
+```ruby
+connected = call.connect! [
+  [{ type: 'phone', params: { to_number: '+18991114444', from_number: "+1YYYYYYYYYY", timeout: 30 } }],
+  [{ type: 'phone', params: { to_number: '+18991114445', from_number: "+1YYYYYYYYYY", timeout: 30 } }]
+]
+
+# asynchronous code that executes in parallel with the dial
+
+if connected.completed
+  #the call is now connected
+end
+```
+
+### detect
+
+Starts a detector on the call and waits until it has finished or failed.
+
+The `detect` method is a generic method for all types of detecting, see [`detect_digit`][link-3], [`detect_fax`][link-4], [`detect_human`][link-5] or [`detect_machine`][link-6] for more specific usage.
+
+
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `type` | String | No | Type of detector to start: `machine`, `fax` or `digit`. Defaults to `machine`. |
+| `timeout` | Numeric | No | Number of seconds to run the detector. Defaults to 30.0s. |
+
+When type is `machine`:
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `initial_timeout` | Numeric | No | Number of seconds to wait for initial voice before giving up. Valid when type is `machine`. Defaults to 4.5. |
+| `end_silence_timeout` | Numeric | No | Number of seconds to wait for voice to finish. Valid when type is `machine`. Defaults to 1.0. |
+| `machine_voice_threshold` | Numeric | No | How many seconds of speech to return `MACHINE`. Valid when type is `machine`. Defaults to 1.25. |
+| `machine_words_threshold` | Numeric | No | How many words to count to return `MACHINE`. Valid when type is `machine`. Defaults to 6. |
+
+When type is `fax`:
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `tone` | String | No | The tone to detect: `CED` or `CNG`. Valid when type is `fax`. Defaults to "CED". |
+
+When type is `digits`:
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `digits` | String | No | The digits to detect. Valid when type is `digit`. Defaults to "0123456789#*". |
+
+**Returns**
+
+[`Relay::Calling::DetectResult`][relay-calling-detectresult-6] - The result object to interact with.
+
+**Examples**
+
+Detect with custom parameters and timeout.
+
+```ruby
+result = call.detect(type: :digit, digits: "345" timeout: 10)
+logger.debug "User pressed #{result.result}"
+```
+
+Detect a Fax setting timeout only.
+
+```ruby
+result = call.detect(type: :fax, detect: detect)
+puts "fax detected" if result.successful
+```
+
+### detect!
+
+Asynchronous version of [`detect`][link-7]. It does not wait for the detector to stop, and returns a [`DetectAction`][detectaction-5] object you can interact with.
+
+
+
+**Parameters**
+
+See [`detect`][link-7] for the parameter list.
+
+**Returns**
+
+[`Relay::Calling::DetectAction`][relay-calling-detectaction-6] - The action object to interact with.
+
+**Examples**
+
+Detect all the digits using default parameters. Stop the action after 5 seconds.
+
+```ruby
+action = call.detect!(type: :digit, digits: "345" timeout: 10)
+sleep 5
+action.stop
+```
+
+### detect_answering_machine
+
+This is a helper function that refines the use of [`detect`][link-7]. It is used to detect a machine, and is intended to replace the deprecated methods.
+
+
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `initial_timeout` | Numeric | No | Number of seconds to wait for initial voice before giving up. Defaults to 4.5. |
+| `end_silence_timeout` | Numeric | No | Number of seconds to wait for voice to finish. Defaults to 1.0. |
+| `machine_voice_threshold` | Numeric | No | How many seconds of speech to return `MACHINE`. Defaults to 1.25. |
+| `machine_words_threshold` | Numeric | No | How many words to count to return `MACHINE`. Defaults to 6. |
+| `timeout` | Numeric | No | Number of seconds to run the detector. Defaults to 30.0s. |
+
+**Returns**
+
+[`Relay::Calling::DetectResult`][relay-calling-detectresult-6] - The result object to interact with.
+
+**Examples**
+
+Detect a machine and log the result.
+
+```ruby
+result = call.detect_answering_machine(initial_timeout: 10, timeout: 10)
+logger.debug "Detect result was #{result.result}"
+```
+
+### detect_answering_machine!
+
+Asynchronous version of [`detect_answering_machine`][link-8]. It does not wait the detector ends but returns a [`DetectAction`][detectaction-5] object you can interact with.
+
+
+
+**Parameters**
+
+See [`detect_answering_machine`][link-8] for the parameter list.
+
+**Returns**
+
+[`Relay::Calling::DetectAction`][relay-calling-detectaction-6] - The action object to interact with.
+
+**Examples**
+
+Detect a machine. Stop the action after 5 seconds.
+
+```ruby
+action = call.detect_answering_machine!(initial_timeout: 10, timeout: 10)
+sleep 5
+action.stop
+```
+
+### amd
+
+Alias of [`detect_answering_machine`][link-8].
+
+
+
+**Parameters**
+
+See [`detect_answering_machine`][link-8] for the parameter list.
+
+**Returns**
+
+[`Relay::Calling::DetectResult`][relay-calling-detectresult-6] - The result object to interact with.
+
+### amd!
+
+Alias of the asynchronous [`detect_answering_machine!`][link-8] method.
+
+
+
+**Parameters**
+
+See [`detect_answering_machine`][link-8] for the parameter list.
+
+**Returns**
+
+[`Relay::Calling::DetectAction`][relay-calling-detectaction-6] - The action object to interact with.
+
+### detect_digit
+
+This is a helper function that refines the use of [`detect`][link-7]. This simplifies detecting digits on a call.
+
+
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `digits` | String | No | The digits to detect. Defaults to "0123456789#*". |
+| `timeout` | Numeric | No | Number of seconds to run the detector. Defaults to 30.0s. |
+
+**Returns**
+
+[`Relay::Calling::DetectResult`][relay-calling-detectresult-6] - The result object to interact with.
+
+**Examples**
+
+Detect digits and then write a log with the result.
+
+```ruby
+result = call.detect_digit(digits: "345", timeout: 10)
+logger.debug "User pressed #{result.result}"
+```
+
+### detect_digit!
+
+Asynchronous version of [`detect_digit`][link-3]. It does not wait the detector ends but returns a [`DetectAction`][detectaction-5] object you can interact with.
+
+
+
+**Parameters**
+
+See [`detect_digit`][link-3] for the parameter list.
+
+**Returns**
+
+[`Relay::Calling::DetectAction`][relay-calling-detectaction-6] - The action object to interact with.
+
+**Examples**
+
+Detect `1-3` digits. Stop the action after 5 seconds.
+
+```ruby
+action = call.detect_digit!(digits: "345", timeout: 10)
+sleep 5
+action.stop
+```
+
+### detect_fax
+
+This is a helper function that refines the use of [`detect`][link-7]. This simplifies detecting a fax.
+
+
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `tone` | String | No | The tone to detect: `CED` or `CNG`. Defaults to "CED". |
+| `timeout` | Numeric | No | Number of seconds to run the detector. Defaults to 30.0s. |
+
+**Returns**
+
+[`Relay::Calling::DetectResult`][relay-calling-detectresult-6] - The result object to interact with.
+
+**Examples**
+
+Detect fax on the current call.
+
+```ruby
+result = call.detect_fax
+puts "fax detected" if result.successful
+```
+
+### detect_fax!
+
+Asynchronous version of [detect_fax][link-4]. It does not wait for the detector to end, and returns a [`DetectAction`][detectaction-5] object you can interact with.
+
+
+
+**Parameters**
+
+See [`detect_fax`][link-4] for the parameter list.
+
+**Returns**
+
+[`Relay::Calling::DetectAction`][relay-calling-detectaction-6] - The action object to interact with.
+
+**Examples**
+
+Detect fax on the current call. Stop the action after 5 seconds.
+
+```ruby
+action = call.detect_fax!
+sleep 5
+action.stop
+```
+
+### detect_human
+
+This is a helper function that refines the use of [`detect`][link-7]. This simplifies detecting a human on the call and is the inverse of [`detect_machine`][link-6].
+
+*This method is DEPRECATED and will be removed in version 3.0*
+
+
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `params` | Hash | No | Parameters to tune the detector. See [detect parameters][link-7] for the properties of `params`. |
+| `timeout` | Numeric | No | Number of seconds to run the detector. Defaults to 30.0s. |
+
+**Returns**
+
+[`Relay::Calling::DetectResult`][relay-calling-detectresult-6] - The result object to interact with.
+
+**Examples**
+
+Detect a human on the current call.
+
+```ruby
+result = call.detect_human
+puts "human detected" if result.successful
+```
+
+### detect_human!
+
+Asynchronous version of [`detect_human`][link-5]. It does not wait for the detector to end, and returns a [`DetectAction`][detectaction-5] object you can interact with.
+
+*This method is DEPRECATED and will be removed in version 3.0*
+
+
+
+**Parameters**
+
+See [detect_human][link-5] for the parameter list.
+
+**Returns**
+
+[`Relay::Calling::DetectAction`][relay-calling-detectaction-6] - The action object to interact with.
+
+**Examples**
+
+Detect a human on the current call. Stop the action after 5 seconds.
+
+```ruby
+action = call.detect_human!
+sleep 5
+action.stop
+```
+
+### detect_machine
+
+This is a helper function that refines the use of [`detect`][link-7]. This simplifies detecting a machine on the call and is the inverse of [detect_human][link-5].
+
+*This method is DEPRECATED and will be removed in version 3.0*
+
+
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `params` | Hash | No | Parameters to tune the detector. See [detect parameters][link-7] for the properties of `params`. |
+| `timeout` | Numeric | No | Number of seconds to run the detector. Defaults to 30.0s. |
+
+**Returns**
+
+[`Relay::Calling::DetectResult`][relay-calling-detectresult-6] - The result object to interact with.
+
+**Examples**
+
+Detect a machine on the current call.
+
+```ruby
+result = call.detect_machine
+puts "machine detected" if result.successful
+```
+
+### detect_machine!
+
+Asynchronous version of [`detect_machine`][link-6]. It does not wait for the detector, and returns a [`DetectAction`][detectaction-5] object you can interact with.
+
+*This method is DEPRECATED and will be removed in version 3.0*
+
+
+
+**Parameters**
+
+See [`detect_machine`][link-6] for the parameter list.
+
+**Returns**
+
+[`Relay::Calling::DetectAction`][relay-calling-detectaction-6] - The action object to interact with.
+
+**Examples**
+
+Detect a machine on the current call. Stop the action after 5 seconds.
+
+```ruby
+action = call.detect_machine!
+sleep 5
+action.stop
+```
+
+### dial
+
+This will start a call that was created with [`new_call`][index] and wait until the call has been answered or hung up.
+
+
+
+**Parameters**
+
+None
+
+**Returns**
+
+[`Relay::Calling::DialResult`][relay-calling-dialresult] - The result object to interact with.
+
+**Examples**
+
+```ruby
+call = client.calling.new_call(from: "+1XXXXXXXXXX", to: "+1YYYYYYYYYY")
+call.dial
+```
+
+### fax_receive
+
+Prepare the call to receive an inbound `Fax`. It waits until the fax has been received or failed.
+
+
+
+**Parameters**
+
+None
+
+**Returns**
+
+[`Relay::Calling::FaxResult`][relay-calling-faxresult-1] - The `result` object to interact with.
+
+**Examples**
+
+Receiving a fax on the call and print logs for URL and number of received pages.
+
+```ruby
+fax_result = call.fax_receive
+logger.debug "Received a fax: #{fax_result.document} that is #{fax_result.pages} pages long."
+```
+
+### fax_receive!
+
+Asynchronous version of [`fax_receive`][link-9]. It does not block until the fax is received, it immediately returns a [`FaxAction`][faxaction-1] object you can interact with.
+
+
+
+**Parameters**
+
+None
+
+**Returns**
+
+[`Relay::Calling::FaxAction`][relay-calling-faxaction] - The `action` object to interact with.
+
+**Examples**
+
+Trying to receive a fax. Stop the attempt after 5 seconds.
+
+```ruby
+fax_action = call.fax_receive!
+sleep 5
+fax_action.stop
+```
+
+### fax_send
+
+Send a `Fax` through the call. It waits until the fax has been sent or failed.
+
+
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `document` | String | Yes | Http(s) URL to the document to send. PDF format only. |
+| `identity` | String | No | Identity to display on receiving fax. Defaults to SignalWire DID. |
+| `header` | String | No | Custom string to add to header of each fax page. Set to empty string to disable sending any header. |
+
+**Returns**
+
+[`Relay::Calling::FaxResult`][relay-calling-faxresult-1] - The `result` object to interact with.
+
+**Examples**
+
+Sending a fax on the call and print logs the number of sent pages.
+
+```ruby
+fax_result = call.fax_send(document: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf")
+logger.debug "Sent a fax: #{fax_result.document} that is #{fax_result.pages} pages long."
+```
+
+### fax_send!
+
+Asynchronous version of [`fax_send`][link-10]. It does not block until the fax is finished sending, it immediately returns a [`FaxAction`][faxaction-1] object you can interact with.
+
+
+
+**Parameters**
+
+See [fax_send][link-10] for the parameter list.
+
+**Returns**
+
+[`Relay.Calling.FaxAction`][relay-calling-faxaction-1] - The `action` object to interact with.
+
+**Examples**
+
+Trying to send a fax. Stop sending it after 5 seconds.
+
+```ruby
+fax_action = call.fax_send(document: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf")
+sleep 5
+fax_action.stop
+```
+
+### hangup
+
+Hangup the call.
+
+
+
+**Parameters**
+
+None
+
+**Returns**
+
+[`Relay::Calling::HangupResult`][relay-calling-hangupresult] - The result object to interact with.
+
+**Examples**
+
+Hangup a call and check if it was successful.
+
+```ruby
+hangup_result = call.hangup
+if hangup_result.successful
+  # call was hung up correctly
+end
+```
+
+### on
+
+Attach an event handler for various events.
+
+
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `event` | Symbol | Yes | Event name. Full list of events [Call Events][link-11] |
+| `handler` | Proc | Yes | Function to call when the event comes. |
+
+**Returns**
+
+[`Relay::Calling::Call`][relay-calling-call] - The call object itself.
+
+**Examples**
+
+Subscribe to the `answered` and `ended` events for a given call.
+
+```ruby
+call.on :answered do |event|
+   # call was answered by event
+end
+
+call.on :ended do |event|
+   # call ended on event
+end
+```
+
+### play
+
+Play one or multiple media in a call and waits until the playing has ended.
+
+The `play` method is a generic method for all types of playing, see [`play_audio`][link-12], [`play_silence`][link-13], [`play_tts`][link-14] or [`play_ringtone`][link-15] for more specific usage.
+
+
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `media1, media2, ..mediaN` | Array | Yes | One or more objects with the following structure: |
+| `volume` | Numeric | No | Volume setting. See [`PlayAction::volume`][play] for details |
+
+To play an audio file:
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `type` | String | Yes | `audio` |
+| `params` | Hash | Yes | Parameters to specify the played audio: |
+| `params.url` | String | Yes | Http(s) URL to `audio` resource to play. |
+
+To play a text to speech string:
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `type` | String | Yes | `tts` |
+| `params` | Hash | Yes | Parameters for the TTS playback: |
+| `params.text` | String | Yes | Text to speech string to play. |
+| `params.language` | String | No | Default to `en-US`. |
+| `params.gender` | String | No | `male` or `female`. Default to `female`. |
+
+To play silence:
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `type` | String | Yes | `silence` |
+| `params` | Hash | Yes | Parameters for silence: |
+| `params.duration` | Numeric | Yes | Seconds of silence to play. |
+
+To play a ringtone:
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `type` | String | Yes | `ringtone` |
+| `name` | String | Yes | The name of the ringtone. See [ringtones][link-16] for the supported values. |
+| `duration` | Numeric | No | Duration of ringtone to play. Defaults to 1 ringtone iteration. |
+
+**Returns**
+
+[`Relay::Calling::PlayResult`][relay-calling-playresult-4] - The result object to interact with.
+
+**Examples**
+
+Play multiple media elements in the call.
+
+```ruby
+media = [
+  { type: 'tts', params: { text: 'Listen this awesome file!' } },
+  { type: 'audio', params: { url: 'https://cdn.signalwire.com/default-music/welcome.mp3' } },
+  { type: 'silence', params: { duration: 5 } },
+  { type: 'tts', params: { text: 'Did you like it?' } }
+]
+
+play_result = call.play media
+```
+
+### play!
+
+Asynchronous version of [`play`][link-1]. It does not wait for the playing event to complete, it immediately returns a [`PlayAction`][playaction-3] object you can interact with.
+
+
+
+**Parameters**
+
+See [`play`][link-1] for the parameter list.
+
+**Returns**
+
+[`Relay::Calling::PlayAction`][relay-calling-playaction-5] - The action object to interact with.
+
+**Examples**
+
+Play multiple media elements in the call and stop them after 2 seconds.
+
+```ruby
+media = [
+  { type: 'tts', params: { text: 'Listen this awesome file!' } },
+  { type: 'audio', params: { url: 'https://cdn.signalwire.com/default-music/welcome.mp3' } },
+  { type: 'silence', params: { duration: 5 } },
+  { type: 'tts', params: { text: 'Did you like it?' } }
+]
+
+play_action = call.play media
+
+sleep 2
+play_action.stop # audio will stop after 2 seconds
+```
+
+### play_audio
+
+This is a helper function that refines the use of [`play`][link-1]. This simplifies playing an audio file.
+
+
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `url` | String | Yes | Http(s) URL to `audio` resource to play. |
+| `volume` | Numeric | No | Volume setting. See [`PlayAction::volume`][play] for details |
+
+**Returns**
+
+[`Relay::Calling::PlayResult`][relay-calling-playresult-4] - The result object to interact with.
+
+**Examples**
+
+Play an MP3 file.
+
+```ruby
+call.play_audio('https://cdn.signalwire.com/default-music/welcome.mp3')
+```
+
+### play_audio!
+
+Asynchronous version of [`play_audio`][link-12]. It does not wait for the playing event to complete, and immediately returns a [`PlayAction`][playaction-3] object you can interact with.
+
+
+
+**Parameters**
+
+See [`play_audio`][link-12] for the parameter list.
+
+**Returns**
+
+[`Relay::Calling::PlayAction`][relay-calling-playaction-5] - The action object to interact with.
+
+**Examples**
+
+Play an MP3 file and stop it after 2 seconds.
+
+```ruby
+play_action = call.play_audio!('https://cdn.signalwire.com/default-music/welcome.mp3')
+sleep 2
+play_action.stop # audio will stop after 2 seconds
+```
+
+### play_ringtone
+
+This is a helper function that refines the use of [`play`][link-1]. This simplifies playing a ringtone.
+
+
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `name` | String | Yes | The name of the ringtone. See [ringtones][link-16] for the supported values. |
+| `duration` | Numeric | No | Duration of ringtone to play. Default to 1 ringtone iteration. |
+
+**Returns**
+
+[`Relay::Calling::PlayResult`][relay-calling-playresult-4] - The result object to interact with.
+
+**Examples**
+
+Play a single US ringtone.
+
+```ruby
+result = call.play_ringtone(name: 'US')
+```
+
+### play_ringtone!
+
+Asynchronous version of [`play_ringtone`][link-15]. It does not wait the playing to completes but returns a [`Relay::Calling::PlayAction`][relay-calling-playaction-5] you can interact with.
+
+
+
+**Parameters**
+
+See [`play_ringtone`][link-15] for the parameter list.
+
+**Returns**
+
+[`Relay::Calling::PlayAction`][relay-calling-playaction-5] - The action object to interact with.
+
+**Examples**
+
+Play US ringtone for 30 seconds and stop it after 5 seconds.
+
+```ruby
+result = call.play_ringtone!(name: 'US', duration: 30)
+sleep(5)
+result.stop
+```
+
+### play_silence
+
+This is a helper function that refines the use of [`play`][link-1]. This simplifies playing silence.
+
+
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `duration` | Numeric | Yes | Seconds of silence to play. |
+
+**Returns**
+
+[`Relay::Calling::PlayResult`][relay-calling-playresult-4] - The result object to interact with.
+
+**Examples**
+
+Play silence for 10 seconds.
+
+```ruby
+result = call.play_silence(10)
+```
+
+### play_silence!
+
+Asynchronous version of [`play_silence`][link-13]. It does not wait for the playing event to complete, it immediately returns a [`PlayAction`][playaction-3] object you can interact with.
+
+
+
+**Parameters**
+
+See [`play_silence`][link-13] for the parameter list.
+
+**Returns**
+
+[`Relay::Calling::PlayAction`][relay-calling-playaction-5] - The action object to interact with.
+
+**Examples**
+
+Play silence for 60 seconds, if _Agent_ becomes available, stop the play.
+
+```ruby
+action = call.play_silence(60)
+action.stop if Agent.available
+```
+
+### play_tts
+
+This is a helper function that refines the use of [`play`][link-1]. This simplifies playing text to speech strings.
+
+
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `sentence` | String | Yes | TTS to play. |
+| `language` | String | No | Default to `en-US`. |
+| `gender` | String | No | `male` or `female`. Default to `female`. |
+| `volume` | Numeric | No | Volume setting. See [`PlayAction::volume`][play] for details |
+
+**Returns**
+
+[`Relay::Calling::PlayResult`][relay-calling-playresult-4] - The result object to interact with.
+
+**Examples**
+
+Play text to string.
+
+```ruby
+result = call.play_tts text: "the quick brown fox jumps over the lazy dog", language: "en-US", gender: "male"
+```
+
+### play_tts!
+
+Asynchronous version of [`play_tts`][link-14]. It does not wait for the playing event to complete, it immediately returns a [`PlayAction`][playaction-3] object you can interact with.
+
+
+
+**Parameters**
+
+See [`play_tts`][link-14] for the parameter list.
+
+**Returns**
+
+[`Relay::Calling::PlayAction`][relay-calling-playaction-5] - The action object to interact with.
+
+**Examples**
+
+Play TTS and stop it after 2 seconds.
+
+```ruby
+action = call.play_tts! text: "the quick brown fox jumps over the lazy dog", language: "en-US", gender: "male"
+sleep 2
+action.stop
+```
+
+### prompt
+
+Play one or multiple media while collecting user's input from the call at the same time, such as `digits` and `speech`.
+
+It waits until the collection succeeds or a timeout is reached.
+
+The `prompt` method is a generic method, see [`prompt_audio`][link-17] or [`prompt_tts`][link-18] for more specific usage.
+
+Passing any of the `digits_` or `speech_` arguments will activate the respective detector.
+
+
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `initial_timeout` | Numeric | No | Timeout in seconds. |
+| `partial_results` | Boolean | No | Whether to return partial results during detection. Defaults to `false`. |
+| `digits_max` | Numeric | No | Max digits to collect. |
+| `digits_timeout` | Numeric | No | Timeout in seconds between each digit. |
+| `digits_terminators` | String | No | DTMF digits that will end the recording. Default not set. |
+| `speech_timeout` | Numeric | No | How much silence to wait for end of speech. Default 1 second. |
+| `speech_language` | String | No | Language to detect. Default to `en-US`. |
+| `speech_hints` | array | No | Array of expected phrases to detect. |
+| `play ... playN` | Hash | Yes | One or more Media objects with the same structure used in [play][link-1] |
+| `volume` | Numeric | No | Volume setting. See [`PlayAction::volume`][play] for details |
+
+**Returns**
+
+[`Relay::Calling::PromptResult`][relay-calling-promptresult-4] - The result object to interact with.
+
+**Examples**
+
+Ask user to enter their PIN and collect the digits.
+
+```ruby
+tts = [{ type: 'tts', params: { text: 'Please, enter your 3 digit PIN.' } }]
+result = call.prompt(initial_timeout: 10, digits_max: 3, digits_timeout: 5, play: tts)
+
+if result.successful)
+  type = result.type # digit
+  pin = result.result # pin entered by the user
+end
+```
+
+### prompt!
+
+Asynchronous version of [`prompt`][link-19]. It does not wait for the collect action to complete, it immediately returns a [`PromptAction`][promptaction-3] object you can interact with.
+
+
+
+**Parameters**
+
+See [`prompt`][link-19] for the parameter list.
+
+**Returns**
+
+[`Relay::Calling::PromptAction`][relay-calling-promptaction-5] - The action object to interact with.
+
+**Examples**
+
+Ask user to enter their PIN and collect the digits.
+
+```ruby
+tts = [{ type: 'tts', params: { text: 'Please, enter your 3 digit PIN.' } }]
+action = call.prompt!(initial_timeout: 10, digits_max: 3, digits_timeout: 5, play: tts)
+
+# .. do other important things while collecting user digits..
+
+if action.completed)
+  result = action.result # => PromptResult object
+end
+```
+
+### prompt_audio
+
+This is a helper function that refines the use of [`prompt`][link-19]. This function simplifies playing an audio file while collecting user's input from the call, such as digits and speech.
+
+
+
+**Parameters**
+
+See [`prompt`][link-19] for the parameter list, plus:
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `url` | String | Yes | Http(s) URL to audio resource to play. |
+| `volume` | Numeric | No | Volume setting. See [`PlayAction::volume`][play] for details |
+
+**Returns**
+
+[`Relay::Calling::PromptResult`][relay-calling-promptresult-4] - The result object to interact with.
+
+**Examples**
+
+Collect user's digits while playing an MP3 file, setting its volume to 20.
+
+```ruby
+result = call.prompt_audio(initial_timeout: 10, digits_max: 3, digits_timeout: 5, url: 'https://cdn.signalwire.com/default-music/welcome.mp3', volume: 20)
+
+if result.successful
+  type = promptResult.type # digit
+  digits = promptResult.result # digits entered by the user
+end
+```
+
+### prompt_audio!
+
+Asynchronous version of [`prompt_audio`][link-17]. It does not wait for the collect action to complete, it immediately returns a [`PromptAction`][promptaction-3] object you can interact with.
+
+
+
+**Parameters**
+
+See [`prompt_audio`][link-17] for the parameter list.
+
+**Returns**
+
+[`Relay::Calling::PromptAction`][relay-calling-promptaction-5] - The action object to interact with.
+
+**Examples**
+
+Ask user to enter their PIN and collect the digits.
+
+```ruby
+action = call.prompt_audio!(initial_timeout: 10, digits_max: 3, digits_timeout: 5, url: 'https://cdn.signalwire.com/default-music/welcome.mp3')
+
+# .. do other important things while collecting user digits..
+
+if action.completed
+    result = action.result # => PromptResult object
+end
+```
+
+### prompt_silence
+
+This is a helper function that refines the use of [`prompt`][link-19]. This function simplifies collecting user's input from the call, such as digits and speech, while not playing any audio.
+
+
+
+**Parameters**
+
+See [`prompt`][link-19] for the parameter list, plus:
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `duration` | Numeric | Yes | Seconds of silence to play. |
+
+**Returns**
+
+[`Relay::Calling::PromptResult`][relay-calling-promptresult-4] - The result object to interact with.
+
+**Examples**
+
+Collect user's digits while playing 5 seconds of silence.
+
+```ruby
+result = call.prompt_silence(initial_timeout: 10, digits_max: 3, digits_timeout: 5, duration: 5)
+
+if result.successful
+  type = promptResult.type # digit
+  digits = promptResult.result # digits entered by the user
+end
+```
+
+### prompt_silence!
+
+Asynchronous version of [`prompt_silence`][link-20]. It does not wait for the collect action to complete, it immediately returns a [`PromptAction`][promptaction-3] object you can interact with.
+
+
+
+**Parameters**
+
+See [`prompt_silence`][link-20] for the parameter list.
+
+**Returns**
+
+[`Relay::Calling::PromptAction`][relay-calling-promptaction-5] - The action object to interact with.
+
+**Examples**
+
+Collect user's digits while playing 5 seconds of silence.
+
+```ruby
+action = call.prompt_silence!(initial_timeout: 10, digits_max: 3, digits_timeout: 5, duration: 5)
+
+# .. do other important things while collecting user digits..
+
+if action.completed
+    result = action.result # => PromptResult object
+end
+```
+
+### prompt_ringtone
+
+This is a helper function that refines the use of [`prompt`][link-19]. This function simplifies playing TTS while collecting user's input from the call, such as `digits` and `speech`.
+
+
+
+**Parameters**
+
+See [`prompt`][link-19] for the parameter list, plus:
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `name` | String | Yes | The name of the ringtone. See [ringtones][link-16] for the supported values. |
+| `duration` | Numeric | No | Duration of ringtone to play. Default to 1 ringtone iteration. |
+
+**Returns**
+
+[`Relay::Calling::PromptResult`][relay-calling-promptresult-4] - The result object to interact with.
+
+**Examples**
+
+Play US ringtone for 30 seconds while collecting digits.
+
+```ruby
+result = call.prompt_ringtone(name: 'us', duration: 30, digits_max: 3)
+
+if result.successful
+  type = promptResult.type # digit
+  digits = promptResult.result # digits entered by the user
+end
+```
+
+### prompt_ringtone!
+
+Asynchronous version of [`prompt_ringtone`][link-21]. It does not wait the collection to completes but returns a [`Relay::Calling::PromptAction`][relay-calling-promptaction-5] you can interact with.
+
+
+
+**Parameters**
+
+See [`prompt_ringtone`][link-21] for the parameter list.
+
+**Returns**
+
+[`Relay::Calling::PromptAction`][relay-calling-promptaction-5] - The action object to interact with.
+
+**Examples**
+
+Play US ringtone for 30 seconds while collecting digits in asynchronous mode.
+
+```ruby
+result = call.prompt_ringtone!(name: 'us', duration: 30, digits_max: 3)
+
+# code is executing here...
+
+if result.successful
+  type = promptResult.type # digit
+  digits = promptResult.result # digits entered by the user
+end
+```
+
+### prompt_tts
+
+This is a helper function that refines the use of [`prompt`][link-19]. This function simplifies playing TTS while collecting user's input from the call, such as digits and speech.
+
+
+
+**Parameters**
+
+See [`prompt`][link-19] for the parameter list, plus:
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `text` | String | Yes | TTS to play. |
+| `language` | String | No | Default to `en-US`. |
+| `gender` | String | No | `male` or `female`. Default to `female`. |
+| `volume` | Numeric | No | Volume setting. See [`PlayAction::volume`][play] for details |
+
+**Returns**
+
+[`Relay::Calling::PromptResult`][relay-calling-promptresult-4] - The result object to interact with.
+
+**Examples**
+
+Ask user to enter their PIN and collect the digits.
+
+```ruby
+result = call.prompt_tts initial_timeout: 10, digits_max: 3, digits_timeout: 5, text: 'Please, enter your 3 digit PIN.', gender: 'male'
+
+if result.successful
+  type = promptResult.type # digit
+  digits = promptResult.result # digits entered by the user
+end
+```
+
+### prompt_tts!
+
+Asynchronous version of [`prompt_tts`][link-18]. It does not wait for the `collection` event to complete, it immediately returns a [`PromptAction`][promptaction-3] object you can interact with.
+
+
+
+**Parameters**
+
+See [`prompt_tts`][link-18] for the parameter list.
+
+**Returns**
+
+[`Relay::Calling::PromptAction`][relay-calling-promptaction-5] - The action object to interact with.
+
+**Examples**
+
+Ask user to enter their PIN and collect the digits.
+
+```ruby
+action = call.prompt_tts! initial_timeout: 10, digits_max: 3, digits_timeout: 5, text: 'Please, enter your 3 digit PIN.', gender: 'male'
+
+# .. do other important things while collecting user digits..
+
+if action.completed
+    result = action.result # => PromptResult object
+end
+```
+
+### record
+
+Start recording the call and waits until the recording ends or fails.
+
+
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `beep` | Boolean | No | Default to `false`. |
+| `stereo` | Boolean | No | Default to `false`. |
+| `format` | String | No | `mp3` or `wav`. Default `mp3`. |
+| `direction` | String | No | `listen` / `speak` / `both`. Default to `speak`. |
+| `initial_timeout` | Numeric | No | How long to wait in seconds until something is heard in the recording. Disable with `0`. Default `5.0`. |
+| `end_silence_timeout` | Numeric | No | How long to wait in seconds until caller has stopped speaking. Disable with `0`. Default `1.0`. |
+| `terminators` | String | No | DTMF digits that will end the recording. Default `#*`. |
+
+**Returns**
+
+[`Relay::Calling::RecordResult`][relay-calling-recordresult] - The result object to interact with.
+
+**Examples**
+
+Start recording audio in the call for both direction in stereo mode, if successful, print the `url` from the RecordResult object.
+
+```ruby
+result = call.record(stereo: true, direction: 'both')
+
+if result.successful
+  puts result.url # the HTTP URL of the recording
+end
+```
+
+### record!
+
+Asynchronous version of [`record`][link-22]. It does not wait for the end of the recording, it immediately returns a [`RecordAction`][recordaction] object you can interact with.
+
+
+
+**Parameters**
+
+See [`record`][link-22] for the parameter list.
+
+**Returns**
+
+[`Relay::Calling::RecordAction`][relay-calling-recordaction] - The action object to interact with.
+
+**Examples**
+
+Start recording audio in the call for both direction in stereo mode and stop it after 2 seconds.
+
+```ruby
+action = call.record!(stereo: true, direction: 'both')
+sleep 2
+action.stop
+```
+
+### send_digits
+
+This method sends DTMF digits to the other party on the call.
+
+
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `digits` | String | Yes | String of DTMF digits to send. Allowed digits are `1234567890*#ABCD` or `wW` for short and long waits. If any invalid characters are present, the entire operation is rejected. |
+
+**Returns**
+
+[`Relay::Calling::SendDigitsResult`][relay-calling-senddigitsresult] - The result object to interact with.
+
+**Examples**
+
+Send some digits.
+
+```ruby
+call.send_digits('123')
+```
+
+### send_digits!
+
+Asynchronous version of [`send_digits`][link-23]. It does not wait for the sending event to complete, and immediately returns a [`SendDigitsAction`][senddigitsaction] object you can interact with.
+
+
+
+**Parameters**
+
+See [`send_digits`][link-23] for the parameter list.
+
+**Returns**
+
+[`Relay::Calling::SendDigitsAction`][relay-calling-senddigitsaction] - The action object to interact with.
+
+**Examples**
+
+Send some digits.
+
+```ruby
+action = call.send_digits!('123123123123123')
+# Do something while digits are sending...
+```
+
+### tap_media
+
+Intercept call media and stream it to the specified endpoint. It waits until the end of the call.
+
+This method is named `tap_media` instead of `tap` in the Ruby SDK because of a reserved method.
+
+
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `audio_direction` | String | No | `listen` to _tap_ what the caller hears, `speak` for what the caller says or `both`. Default `speak`. |
+| `codec` | String | No | Optional codec, `[OPUS|PCMA|PCMU...]`. It will be the same as the tapped audio if not set. |
+| `target_type` | String | No | Target type. `rtp` or `ws`, defaults to `rtp`, defaults to `rtp`. |
+| `target_addr` | String | Yes | RTP IP v4 address. (used with `rtp`) |
+| `target_port` | Numeric | Yes | RTP port. (used with `rtp`) |
+| `target_ptime` | Numeric | No | Optional packetization time in ms. It will be the same as the tapped audio if not set. (used with `rtp`) |
+| `target_uri` | String | Yes | WSS URI. (used with `target_type=ws`) |
+
+**Returns**
+
+[`Relay::Calling::TapResult`][relay-calling-tapresult] - The result object to interact with.
+
+**Examples**
+
+Tapping audio from the call, if successful, print both source and destination devices from the [`TapResult`][tapresult-1] object.
+
+```ruby
+result = call.tap_media(audio_direction: "listen", target_addr: "127.0.0.1", target_port: 1234)
+
+if result.successful)
+  puts result.source_device
+  puts result.destination_device
+end
+```
+
+Tapping audio into a WSS endpoint, if successful, print both source and destination devices from the [`TapResult`][tapresult-1] object.
+
+```ruby
+result = call.tap_media(audio_direction: "listen", target_type: 'ws', target_uri: 'wss://somewss.com')
+
+if result.successful)
+  puts result.source_device
+  puts result.destination_device
+end
+```
+
+### tap_media!
+
+Asynchronous version of [`tap_media`][link-24]. It does not wait the end of tapping but returns a [`TapAction`][tapaction] object you can interact with.
+
+
+
+**Parameters**
+
+See [`tap_media`][link-24] for the parameter list.
+
+**Returns**
+
+[`Relay::Calling::TapAction`][relay-calling-tapaction] - The action object to interact with.
+
+**Examples**
+
+Tapping audio from the call and then stop it using the `TapAction` object.
+
+```ruby
+action = call.tap_media!(audio_direction: "listen", target_addr: "127.0.0.1", target_port: 1234)
+sleep 5
+action.stop
+```
+
+### wait_for
+
+Wait for specific events on the Call or returns `false` if the Call ends without getting one.
+
+
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `event1, event2, ..eventN` | string or string[] | Yes | One or more [Call events][link-11] |
+
+**Returns**
+
+`Boolean` - `true`/`false`.
+
+**Examples**
+
+Wait for `ending` or `ended` events.
+
+```ruby
+if call.wait_for('ending', 'ended')
+  # ending or ended was received
+end
+```
+
+### wait_for_answered
+
+This is a helper function that refines the use of [`wait_for`][link-25]. This simplifies waiting for the `answered` state.
+
+
+
+**Parameters**
+
+None
+
+**Returns**
+
+`Boolean` - `true`/`false`.
+
+**Examples**
+
+Wait for the `answered` event.
+
+```ruby
+if call.wait_for_answered
+  # answered was received
+end
+```
+
+### wait_for_ended
+
+This is a helper function that refines the use of [`wait_for`][link-25]. This simplifies waiting for the `ended` state.
+
+
+
+**Parameters**
+
+None
+
+**Returns**
+
+`Boolean` - `true`/`false`.
+
+**Examples**
+
+Wait for the `ended` event.
+
+```ruby
+if call.wait_for_ended
+  # ended was received
+end
+```
+
+### wait_for_ending
+
+This is a helper function that refines the use of [`wait_for`][link-25]. This simplifies waiting for the `ending` state.
+
+
+
+**Parameters**
+
+None
+
+**Returns**
+
+`Boolean` - `true`/`false`.
+
+**Examples**
+
+Wait for the `ending` event.
+
+```ruby
+if call.wait_for_ending
+  # ending was received
+end
+```
+
+### wait_for_ringing
+
+This is a helper function that refines the use of [`wait_for`][link-25]. This simplifies waiting for the `ringing` state.
+
+
+
+**Parameters**
+
+None
+
+**Returns**
+
+`Boolean` - `true`/`false`.
+
+**Examples**
+
+Wait for the `ringing` event.
+
+```ruby
+if call.wait_for_ringing
+  # ringing was received
+end
+```
+
+## Events
+
+All these events can be used to track the calls lifecycle and instruct SignalWire on what to do for each different state.
+
+### State Events
+
+To track the state of a call.
+
+| Event | Description |
+| ----- | ----------- |
+| `state_change` | Event dispatched when Call state changes. |
+| `created` | The call has been created in Relay. |
+| `ringing` | The call is ringing and has not yet been answered. |
+| `answered` | The call has been picked up. |
+| `ending` | The call is hanging up. |
+| `ended` | The call has ended. |
+
+### Connect Events
+
+To track the connect state of a call.
+
+| Event | Description |
+| ----- | ----------- |
+| `connect_state_hange` | Event dispatched when the Call `connect` state changes. |
+| `connect_connecting` | Currently calling the phone number(s) to connect. |
+| `connect_connected` | The calls are being connected together. |
+| `connect_failed` | The last call connection attempt failed. |
+| `connect_disconnected` | The call was either never connected or the last call connection completed. |
+
+### Play Events
+
+To track a playback state.
+
+| Event | Description |
+| ----- | ----------- |
+| `play_stateChange` | Event dispatched when the state of a `playing` changes. |
+| `play_playing` | A playback in playing on the call. |
+| `play_error` | A playback failed to start. |
+| `play_finished` | The playback has ended. |
+
+### Record Events
+
+To track a recording state.
+
+| Event | Description |
+| ----- | ----------- |
+| `record_stateChange` | Event dispatched when the state of a `recording` changes. |
+| `record_recording` | The call is being recorded. |
+| `record_no_input` | The recording failed due to _no input_. |
+| `record_finished` | The recording has ended. |
+
+### Prompt Events
+
+To track a prompt state.
+
+| Event | Description |
+| ----- | ----------- |
+| `prompt` | The prompt action on the call has ended. |
+
+## Ringtones
+
+Here you can find all the accepted values for playing a ringtone, based on short country codes:
+
+| Name | Description |
+| ---- | ----------- |
+| `name` | _at, au, bg, br, be, ch, cl, cn, cz, de, dk, ee, es, fi, fr, gr, hu, il, in, it, lt, jp, mx, my, nl, no, nz, ph, pl, pt, ru, se, sg, th, uk, us, tw, ve, za_ |

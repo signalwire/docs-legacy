@@ -1,0 +1,39 @@
+---
+title: "Relay::Messaging::Message"
+slug: /ruby/reference/messaging/message
+toc_max_heading_level: 3
+---
+
+[link]: #state-events
+An object representing an SMS or MMS message. It is the parameter of both `on_incoming_message` and `on_message_state_change` Consumer handlers.
+
+## Properties
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `id` | String | The unique identifier of the message. |
+| `context` | String | The context of the message. |
+| `from` | String | The phone number the message comes from. |
+| `to` | String | The destination number of the message. |
+| `direction` | String | The direction of the message: `inbound` or `outbound`. |
+| `state` | String | The current state of the message. See [Message State Events][link] for all the possible states. |
+| `body` | String | The content of the message. |
+| `media` | Array | Array of URL media strings. |
+| `tags` | Array | Array of strings with message tags. |
+| `segments` | Numeric | Number of segments of the message. |
+| `reason` | String | Reason why the message was not sent.<br/> _Present only in case of failure._ |
+
+## Events
+
+### State Events
+
+To track the state of a message.
+
+| State | Description |
+| ----- | ----------- |
+| `queued` | The message has been queued in Relay. |
+| `initiated` | Relay has initiated the process to send the message. |
+| `sent` | Relay has sent the message. |
+| `delivered` | The message has been successfully delivered. Due to the nature of SMS and MMS, receiving a `delivered` event is not guaranteed, even if the message is delivered successfully. |
+| `undelivered` | The message has not been delivered. Due to the nature of SMS and MMS, receiving a `undelivered` event is not guaranteed, even if the message fails to be delivered. |
+| `failed` | The message delivery has failed. |

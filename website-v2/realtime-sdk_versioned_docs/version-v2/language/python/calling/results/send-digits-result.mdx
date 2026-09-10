@@ -1,0 +1,20 @@
+---
+title: "Relay.Calling.SendDigitsResult"
+slug: /python/reference/calling/results/send-digits
+description: The result object that is returned when sending digits to a call.
+toc_max_heading_level: 3
+---
+
+[relay-event]: /docs/server-sdk/v2/python/reference/event
+[send-digits]: /docs/server-sdk/v2/python/reference/calling/call#send_digits
+
+## Relay.Calling.SendDigitsResult
+
+This object is returned by the [`send_digits`][send-digits] method and represents the final result of the action.
+
+### Properties
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `successful` | boolean | Whether the action has completed successfully. |
+| `event` | [`Relay.Event`][relay-event] | Last event that completed the operation. |

@@ -1,0 +1,69 @@
+---
+slug: /compatibility-api/sdks/reference/accounts/list
+title: List
+sidebar_label: List
+toc_max_heading_level: 3
+---
+
+Use this endpoint for the Accounts method to list all accounts.
+Optionally, you can use the `FriendlyName` parameter to filter by that exact `FriendlyName`.
+
+This route is present to be API compatible with other providers.
+Note that, since authentication on SignalWire is specific to a Project, this endpoint will return a list that contains only the Project you are connecting as.
+
+<EndpointSchemaSnippet endpoint="GET /Accounts" />
+
+<EndpointResponseSnippet endpoint="GET /Accounts" />
+
+## Request examples
+
+<CodeBlocks>
+```javascript title="Node.js"
+const { RestClient } = require('@signalwire/compatibility-api')
+const client = RestClient('YourProjectID', 'YourAuthToken', { signalwireSpaceUrl: 'example.signalwire.com' })
+
+client.api.accounts.each(accounts => console.log(accounts.sid));
+```
+```csharp
+using System;
+using System.Collections.Generic;
+using Twilio;
+using Twilio.Rest.Api.V2010;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        TwilioClient.Init("YourProjectID", "YourAuthToken", new Dictionary<string, object> { ["signalwireSpaceUrl"] = "{SPACE}.signalwire.com" });
+
+        var accounts = AccountResource.Read();
+
+        foreach(var record in accounts)
+        {
+           Console.WriteLine(record.Sid);
+        }
+    }
+}
+```
+```python
+from signalwire.rest import Client as signalwire_client
+
+client = signalwire_client("YourProjectID", "YourAuthToken", signalwire_space_url = 'example.signalwire.com')
+
+accounts = client.api.accounts.list()
+
+for record in accounts:
+    print(record.sid)
+```
+```ruby
+require 'signalwire/sdk'
+
+@client = Signalwire::REST::Client.new 'YourProjectID', 'YourAuthToken', signalwire_space_url: "example.signalwire.com"
+
+accounts = @client.api.accounts.list
+
+accounts.each do |record|
+  puts record.sid
+end
+```
+</CodeBlocks>

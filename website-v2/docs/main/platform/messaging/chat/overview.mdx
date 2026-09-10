@@ -1,0 +1,93 @@
+---
+title: Chat
+slug: /platform/chat
+sidebar_label: Overview
+sidebar_position: 0
+description: Programmable, integrated, low-latency Chat APIs and SDKs
+
+---
+
+The SignalWire Chat API is a flexible IP Message Bus that you can use to send and receive messages.
+
+## PubSub
+
+The most basic chat functionality is provided in a **PubSub** environment, which has two main components: **Channels** and **Messages**. Messages are published to a channel and the new message event is available to any subscribers. This means the publishers and subscribers are isolated and do not need to know where the messages are coming from or being read. If this sounds like the messaging model that meets your needs, check out our PubSub service.
+
+<CardGroup cols={3}>
+  <Card
+    title="REST API"
+    href="/docs/apis/pubsub/create-token"
+    icon="solid code"
+  >
+    Create PubSub Tokens
+  </Card>
+  <Card
+    title="Browser SDK"
+    href="/docs/browser-sdk/js/reference/pubsub"
+    icon="solid globe"
+  >
+    Integrate PubSub into your web app
+  </Card>
+  <Card
+    title="Realtime Server SDK"
+    href="/docs/server-sdk/node/reference/pubsub"
+    icon="solid cloud"
+  >
+    Manage subscriptions and event listeners
+  </Card>
+</CardGroup>
+
+## Chat
+
+**Chat** service extends PubSub with a third main component: **Members**.
+
+You can create channels, members can subscribe to those channels, and they can send attributed messages that every other subscriber will be able to see. Members can even carry state. If this model better suits your needs, Chat is for you!
+
+<CardGroup cols={3}>
+  <Card
+    title="REST API"
+    href="/docs/apis/chat/create-chat-token"
+    icon="solid code"
+  >
+    Create Chat Tokens
+  </Card>
+  <Card
+    title="Browser SDK"
+    href="/docs/browser-sdk/js/reference/chat"
+    icon="solid globe"
+  >
+    Integrate Chat features into any web app
+  </Card>
+  <Card
+    title="Realtime Server SDK"
+    href="/docs/server-sdk/node/reference/chat"
+    icon="solid cloud"
+  >
+    Manage members, subscriptions and event listeners, and send messages to a particular channel.
+  </Card>
+</CardGroup>
+
+## Frequently asked questions
+
+<AccordionGroup>
+  <Accordion title="Can Chat only send and receive text messages?">
+    Chat can be used to send and receive any JSON-serializable object.
+  </Accordion>
+
+  <Accordion title="Does Chat support group chats?">
+    Yes! Channels are essentially group chats that members can join and exchange messages in. If you intend to create group chats that use SMS as well, please read the next frequently asked question.
+  </Accordion>
+
+  <Accordion title="Does Chat support sending/receiving via SMS?">
+    While Chat does not support sending/receiving via SMS by default, using RELAY Realtime SDK along with our [Messaging API](/docs/platform/messaging) you can add SMS support (or any other format of communication) to it!
+  </Accordion>
+
+  <Accordion title="Can we use Chat to build a chatbot?">
+    Yes! You can use Chat along with [Dialogflow](https://cloud.google.com/dialogflow#chatbots-for-b2c-conversations) to create chatbots according to your needs.
+  </Accordion>
+
+  <Accordion title="Can Chat messages be logged?">
+    Using [RELAY Realtime Server SDK](/docs/server-sdk/node/reference/chat) you can listen for the "message" event and log each message accordingly.
+  </Accordion>
+</AccordionGroup>
+

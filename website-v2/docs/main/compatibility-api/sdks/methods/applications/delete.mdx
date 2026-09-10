@@ -1,0 +1,57 @@
+---
+slug: /compatibility-api/sdks/reference/applications/delete
+title: Delete
+sidebar_label: Delete
+toc_max_heading_level: 3
+---
+
+Use this endpoint for the Applications method to delete an Application.
+
+<EndpointSchemaSnippet endpoint="DELETE /Accounts/{AccountSid}/Applications/{Sid}" selector="request" />
+
+## Request examples
+
+<CodeBlocks>
+```javascript title="Node.js"
+const { RestClient } = require('@signalwire/compatibility-api')
+const client = RestClient('YourProjectID', 'YourAuthToken', { signalwireSpaceUrl: 'example.signalwire.com' })
+
+client.applications('Sid')
+      .remove()
+      .then(application => console.log(application.sid))
+      .done();
+```
+```csharp
+using System;
+using Twilio;
+using Twilio.Rest.Api.V2010.Account;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        TwilioClient.Init("YourProjectID", "YourAuthToken", new Dictionary<string, object> { ["signalwireSpaceUrl"] = "{SPACE}.signalwire.com" });
+
+        ApplicationResource.Delete(pathSid: "YourProjectID");
+    }
+}
+```
+```python
+from signalwire.rest import Client as signalwire_client
+
+client = signalwire_client("YourProjectID", "YourAuthToken", signalwire_space_url = 'example.signalwire.com')
+
+client.applications('Sid').delete()
+```
+```ruby
+require 'signalwire/sdk'
+
+@client = Signalwire::REST::Client.new 'YourProjectID', 'YourAuthToken', signalwire_space_url: "example.signalwire.com"
+
+@client.applications('Sid').delete
+```
+</CodeBlocks>
+
+## Response
+
+A successful request returns a 204 status code with no body.

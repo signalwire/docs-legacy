@@ -1,0 +1,21 @@
+---
+title: "Relay.Calling.DetectResult"
+slug: /python/reference/calling/results/detect
+description: The result object that is returned when detecting a call.
+toc_max_heading_level: 3
+---
+
+[relay-event]: /docs/server-sdk/v2/python/reference/event
+
+## Relay.Calling.DetectResult
+
+This object returned from one of the _synchronous_ detect methods that represents the final result of a detector.
+
+### Properties
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `successful` | boolean | Whether the detector has finished successfully. |
+| `event` | [`Relay.Event`][relay-event] | Last event that completed the operation. |
+| `type` | string | The detector type: `fax`, `machine` or `digit`. |
+| `result` | string | The final detector result. |

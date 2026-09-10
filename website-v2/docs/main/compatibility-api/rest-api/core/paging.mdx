@@ -1,0 +1,57 @@
+---
+title: Paging
+slug: /compatibility-api/rest/paging
+---
+
+For resources that return many instances, the API will return partial "pages" of results. These results will contain meta information about the entire list of results you can use to see more of the list.
+
+| Attribute           | Type    | Description                                                                      |
+| ------------------- | ------- | -------------------------------------------------------------------------------- |
+| `uri`               | string  | The current page's URI.                                                          |
+| `first_page_uri`    | string  | The first page in the result set's URI.                                          |
+| `next_page_uri`     | string  | The next page in the result set's URI.                                           |
+| `previous_page_uri` | string  | The previous page in the result set's URI.                                       |
+| `page`              | integer | The current page number, using zero-based number (so the first page would be 0). |
+| `page_size`         | string  | The number of results per page. The last page may have fewer items.              |
+
+Here is an example of a paged result of messages with one message per page.
+
+```json
+{
+  "uri": "/api/laml/2010-04-01/Accounts/446e9986-0848-4d46-a617-48793c5f5e07/Messages?Page=0&PageSize=1",
+  "first_page_uri": "/api/laml/2010-04-01/Accounts/446e9986-0848-4d46-a617-48793c5f5e07/Messages?Page=0&PageSize=1",
+  "next_page_uri": "/api/laml/2010-04-01/Accounts/446e9986-0848-4d46-a617-48793c5f5e07/Messages?Page=1&PageSize=1&PageToken=PA95f7fba1-aeb7-4750-9092-47525b7a7cad",
+  "previous_page_uri": null,
+  "page": 0,
+  "page_size": 1,
+  "messages": [
+    {
+      "account_sid": "446e9986-0848-4d46-a617-48793c5f5e07",
+      "api_version": "2010-04-01",
+      "body": "Hello World!",
+      "num_segments": 1,
+      "num_media": 0,
+      "date_created": "Tue, 14 Aug 2018 19:37:39 +0000",
+      "date_sent": "Tue, 14 Aug 2018 19:37:41 +0000",
+      "date_updated": "Tue, 14 Aug 2018 19:37:44 +0000",
+      "direction": "outbound-api",
+      "error_code": null,
+      "error_message": null,
+      "from": "+15551234567",
+      "price": 0.005,
+      "price_unit": "USD",
+      "sid": "8a8e5ec4-071a-408e-948c-2429da869cc9",
+      "status": "delivered",
+      "to": "+15557654321",
+      "uri": "/api/laml/2010-04-01/Accounts/446e9986-0848-4d46-a617-48793c5f5e07/Messages/8a8e5ec4-071a-408e-948c-2429da869cc9",
+      "subresource_uris": {
+        "media": "/api/laml/2010-04-01/Accounts/446e9986-0848-4d46-a617-48793c5f5e07/Messages/8a8e5ec4-071a-408e-948c-2429da869cc9/Media"
+      }
+    }
+  ]
+}
+```
+
+<Info title="Always use the latest next and previous page URIs">
+You should always use the returned `next_page_uri` or `previous_page_uri` when traversing to the next or previous page in the result set. This will ensure you properly page through all of resources and your result set is not affected by new resources being created, or paging scheme changing.
+</Info>

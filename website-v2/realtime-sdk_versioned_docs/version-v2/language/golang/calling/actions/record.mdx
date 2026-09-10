@@ -1,0 +1,180 @@
+---
+title: Relay.Calling.RecordAction
+slug: /go/reference/calling/actions/record
+description: The Record Action is used to record a call.
+toc_max_heading_level: 3
+---
+
+[link-1]: /docs/server-sdk/v2/go/reference/calling/results/record
+[link]: /docs/server-sdk/v2/go/reference/calling/call#recordasync
+
+## Relay.Calling.RecordAction
+
+This object returned from [`recordAsync`][link] method that represents a recording that is currently active on a call.
+
+### Methods-submenu
+
+
+#### GetResult
+
+Returns the final result of the recording.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+[`Relay.Calling.RecordResult`][link-1] - Final result of the recording.
+
+**Examples**
+
+> Start recording in stereo mode and grab the result when it's completed.
+
+```go
+
+var rec signalwire.RecordParams
+rec.Beep = true
+rec.Format = "wav"
+rec.Stereo = true
+rec.Direction = signalwire.RecordDirectionBoth.String()
+rec.InitialTimeout = 10
+rec.EndSilenceTimeout = 3
+rec.Terminators = "#*"
+
+// use anonymous function as callback
+resultDial.Call.OnRecordFinished = func(recordAction *signalwire.RecordAction) {
+	signalwire.Log.Info("Recording is at: %s\n", recordAction.Result.URL)
+	signalwire.Log.Info("Recording Duration: %d\n", recordAction.Result.Duration)
+	signalwire.Log.Info("Recording File Size: %d\n", recordAction.Result.Size)
+}
+
+recordAction, err := resultDial.Call.RecordAudioAsync(&rec)
+if err != nil {
+	signalwire.Log.Error("Error occurred while trying to record audio\n")
+}
+
+// the recording can stop by itself when detected silence or it can be stopped via command
+
+[do something here]
+
+recordAction.Stop()
+
+```
+
+#### GetState
+
+Return the current state of recording.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`string` - Current state of recording.
+
+#### GetCompleted
+
+Return `true` if the recording has finished, `false` otherwise.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`Boolean` - True/False accordingly to the state.
+
+**Examples**
+
+> Start recording in stereo mode and check if it has finished.
+
+```go
+var rec signalwire.RecordParams
+  
+rec.Beep = true
+rec.Format = "wav"
+rec.Stereo = true
+rec.Direction = signalwire.RecordDirectionBoth.String()
+rec.InitialTimeout = 10
+rec.EndSilenceTimeout = 3
+rec.Terminators = "#*"
+
+recordAction, err := resultDial.Call.RecordAudioAsync(&rec)
+if err != nil {
+	signalwire.Log.Error("Error occurred while trying to record audio\n")
+}
+
+// we sleep but you can do something else in the main thread
+time.Sleep(3 * time.Second)
+
+signalwire.Log.Info("Stopping recording...\n")
+recordAction.Stop()
+
+// this can be run in a go routine
+for {
+	time.Sleep(1 * time.Second)
+	   
+	if recordAction.GetCompleted() {
+		break
+	}
+}
+```
+
+#### GetControlID
+
+Return the UUID to identify the action.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`string` - UUID to identify the action.
+
+**Examples**
+
+> Start recording and print the controlId.
+
+```go
+recordAction, err := resultDial.Call.RecordAudioAsync(&rec)
+if err != nil {
+	signalwire.Log.Error("Error occurred while trying to record audio\n")
+}
+Signalwire.Log.Info("Recording ControlID: %s\n",  recordAction.GetControlID())
+```
+
+#### Stop
+
+Stop the action immediately.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+
+**Examples**
+
+> Start recording with default params and stop it upon condition
+
+```go
+var rec signalwire.RecordParams
+recordAction, err := resultDial.Call.RecordAudioAsync(&rec)
+if err != nil {
+	signalwire.Log.Error("Error occurred while trying to record audio\n")
+}
+
+[do something here]
+if (cond) {
+	recordAction.Stop()
+}
+```

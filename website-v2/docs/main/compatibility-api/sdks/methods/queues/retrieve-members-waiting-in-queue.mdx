@@ -1,0 +1,69 @@
+---
+slug: /compatibility-api/sdks/reference/queues/retrieve-members-waiting
+title: Retrieve Members Waiting in a Queue
+sidebar_label: Retrieve Members Waiting in a Queue
+toc_max_heading_level: 3
+---
+
+Use this endpoint for the Queues method to read the list of members that are currently waiting in a call queue.
+
+## Parameters
+
+This endpoint takes no parameters.
+
+## Request examples
+
+<CodeBlocks>
+```javascript title="Node.js"
+const { RestClient } = require('@signalwire/compatibility-api')
+const client = RestClient('YourProjectID', 'YourAuthToken', { signalwireSpaceUrl: 'example.signalwire.com' })
+
+client.queues('QueueSid')
+      .members
+      .each(members => console.log(members.callSid));
+```
+```csharp
+using System;
+using System.Collections.Generic;
+using Twilio;
+using Twilio.Rest.Api.V2010.Account.Queue;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        TwilioClient.Init("YourProjectID", "YourAuthToken", new Dictionary<string, object> { ["signalwireSpaceUrl"] = "{SPACE}.signalwire.com" });
+
+        var members = MemberResource.Read(
+            pathSid: "b3877c40-da60-4998-90ad-b792e98472qu"
+        );
+
+        foreach(var record in members)
+        {
+           Console.WriteLine(record.CallSid);
+        }
+    }
+}
+```
+```python
+from signalwire.rest import Client as signalwire_client
+
+client = signalwire_client("YourProjectID", "YourAuthToken", signalwire_space_url = 'example.signalwire.com')
+
+members = client.queues('b3877c40-da60-4998-90ad-b792e98472qu').members.list()
+
+for record in members:
+    print(record.call_sid)
+```
+```ruby
+require 'signalwire/sdk'
+
+@client = Signalwire::REST::Client.new 'YourProjectID', 'YourAuthToken', signalwire_space_url: "example.signalwire.com"
+
+members = @client.queues('b3877c40-da60-4998-90ad-b792e98472qu').members.list
+
+members.each do |record|
+  puts record.call_sid
+end
+```
+</CodeBlocks>

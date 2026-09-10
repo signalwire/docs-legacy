@@ -1,0 +1,97 @@
+---
+title: audioMute
+slug: /call-session/audiomute
+---
+
+import APIField from '@site/src/components/APIField';
+
+Mutes the microphone for yourself or another participant in the call.
+
+## Signature
+
+```typescript
+audioMute(params?: MemberCommandParams): Promise<void>
+```
+
+## Parameters
+
+<APIField name="params" type="MemberCommandParams">
+  Options for the mute operation.
+</APIField>
+
+<APIField name="params.memberId" type="string" default="Your own member">
+  ID of the member to mute. If omitted, mutes your own microphone.
+</APIField>
+
+## Returns
+
+**Type:** `Promise<void>`
+
+A Promise that resolves when the mute operation completes successfully.
+
+## Permissions
+
+- **Muting yourself:** Requires `call.capabilities.self.muteAudio.on`
+- **Muting another member:** Requires `call.capabilities.member.muteAudio.on`
+
+## Events
+
+- `member.updated` - General member update event
+- `member.updated.audioMuted` - Specific audio mute state change
+
+## Examples
+
+### Mute your own microphone
+
+```typescript
+await call.audioMute()
+```
+
+### Mute another participant
+
+```typescript
+const { members } = await call.getMembers()
+const member = members.find(m => m.name === 'John Doe')
+
+if (member) {
+  await call.audioMute({ memberId: member.id })
+}
+```
+
+### Check capabilities before muting
+
+```typescript
+if (call.capabilities?.self.muteAudio.on) {
+  await call.audioMute()
+}
+```
+
+### Listen for mute events
+
+```typescript
+call.on('member.updated.audioMuted', (event) => {
+  console.log(`Member ${event.member.id} is now ${event.member.audio_muted ? 'muted' : 'unmuted'}`)
+})
+
+await call.audioMute()
+```
+
+### Toggle mute with state tracking
+
+```typescript
+let isMuted = false
+
+call.on('member.updated.audioMuted', (event) => {
+  if (event.member.id === call.memberId) {
+    isMuted = event.member.audio_muted
+  }
+})
+
+async function toggleMute() {
+  if (isMuted) {
+    await call.audioUnmute()
+  } else {
+    await call.audioMute()
+  }
+}
+```

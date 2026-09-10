@@ -1,0 +1,67 @@
+---
+slug: /php/reference/calling/results/send-digits
+hide_title: true
+toc_max_heading_level: 3
+---
+
+[call]: /docs/server-sdk/v2/php/reference/calling/call#senddigits
+[relay-event]: /docs/server-sdk/v2/php/reference/event
+
+# Relay.Calling.SendDigitsResult
+
+This object is returned by [`sendDigits`][call] method and represents the final result of a _send digits_ action.
+
+## Methods
+
+### getEvent
+
+Returns the last Relay Event arrived for this operation.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+[`Relay.Event`][relay-event] - Last Relay Event.
+
+**Examples**
+
+> Send some digits and then grab the last event occurred.
+
+```php
+<?php
+
+$call->sendDigits('1234')->done(function($result) {
+  $event = $result->getEvent();
+  // Inspect $event->payload ..
+});
+```
+
+### isSuccessful
+
+Return `true` if the operation has succeeded, `false` otherwise.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`boolean` - Whether the operation has completed successfully.
+
+**Examples**
+
+> Send some digits and then check if it has ended successfully.
+
+```php
+<?php
+
+$call->sendDigits('1234')->done(function($result) {
+  if ($result->isSuccessful()) {
+    // Do other things...
+  }
+});
+```

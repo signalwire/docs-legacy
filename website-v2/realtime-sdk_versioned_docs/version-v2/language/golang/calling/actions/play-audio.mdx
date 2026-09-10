@@ -1,0 +1,45 @@
+---
+title: PlayAudioAction
+slug: /go/reference/calling/actions/play-audio
+description: The Play Audio Action is used to play audio on a call.
+toc_max_heading_level: 3
+---
+
+[link]: /docs/server-sdk/v2/go/reference/calling/call
+
+## Relay.Calling.PlayAudioAction
+
+This object represents an `audio action` that is currently active on a call.
+
+### Properties
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `call` | [`Relay.Calling.Call`][link] | This is the call the action is occurring on. |
+
+
+### Methods
+
+<div className="method-definitions"></div>
+
+#### Stop()
+
+Stop the action immediately.
+
+
+
+**Examples**
+
+> Play an audio file and stop it upon condition.
+
+```
+playAction, err := resultDial.Call.PlayAudioAsync("https://cdn.signalwire.com/default-music/welcome.mp3")
+if err != nil {
+	log.Errorf("Error occurred while trying to play audio")
+}
+
+if condition {
+	playAction.Stop()
+}
+
+```

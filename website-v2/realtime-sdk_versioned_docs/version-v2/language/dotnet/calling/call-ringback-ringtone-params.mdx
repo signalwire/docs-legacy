@@ -1,0 +1,48 @@
+---
+title: "CallRingback.RingtoneParams"
+slug: /dotnet/reference/calling/call-ringback-ringtone-params
+toc_max_heading_level: 3
+---
+
+# SignalWire.Relay.Calling.CallRingback.RingtoneParams
+
+This object represents the parameters specific to ringtone ringback.
+
+## Constructor
+
+The only constructor is the default constructor, properties should all be assigned by initializer or after construction.
+
+**Parameters**
+
+None
+
+**Examples**
+
+> Basic Example
+
+```csharp
+CallRingback ringback = new CallRingback
+{
+    Type = CallRingback.RingbackType.ringtone,
+    Parameters = new CallRingback.RingtoneParams
+    {
+        Name = "us",
+        Duration = 30
+    }
+};
+```
+
+## Properties
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `Name` | string | The country code for desired ringtone. |
+| `Duration` | integer | The max duration in seconds for the ringtone. |
+
+## Methods
+
+None
+
+## Events
+
+None

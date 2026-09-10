@@ -1,0 +1,29 @@
+---
+title: "setSpeakerVolume"
+slug: /node/reference/video/room-session/set-speaker-volume
+description: setSpeakerVolume method for the RoomSession class.
+availability: deprecated
+toc_max_heading_level: 3
+---
+
+[video-roomsession-6]: /docs/server-sdk/v3/node/reference/video/room-session/set-output-volume
+
+### setSpeakerVolume
+
+- **setSpeakerVolume**(`params`): `Promise<void>`
+
+> ⚠️ Deprecated.
+> Use [setOutputVolume][video-roomsession-6] instead.
+> `setSpeakerVolume` will be removed in v4.0.0
+
+#### Parameters
+
+| Name              | Type     |
+|:------------------|:---------|
+| `params`          | `Object` |
+| `params.memberId` | `string` |
+| `params.volume`   | `number` |
+
+#### Returns
+
+`Promise<void>`

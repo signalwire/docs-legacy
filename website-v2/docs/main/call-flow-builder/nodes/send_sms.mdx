@@ -1,0 +1,44 @@
+---
+title: Send SMS
+description: Call Flow Builder node to send an SMS
+slug: /call-flow-builder/reference/send-sms
+---
+The Send SMS node is used to send an SMS to a phone number.
+
+
+## **Node Settings**
+
+<ParamField path="To Phone Number" type="string">
+  The phone number to which the SMS will be sent.
+</ParamField>
+
+<ParamField path="From Phone Number" type="string">
+  The phone number from which the SMS will be sent.
+</ParamField>
+
+<ParamField path="SMS Text" type="string">
+  The text of the SMS that will be sent.
+</ParamField>
+
+
+## **Example**
+
+### Send SMS with variable
+
+The example below is connected with a Request node that sends a request to a joke API. 
+Knowing the parameters of the API response, the node can pull the request’s response with `%{request_response.joke}`. 
+This example also includes messaging opt-out verbiage since this is important to avoid SMS spam blocks.
+
+<Frame caption="Sending an SMS with a variable in Call Flow Builder">
+![Sending an SMS with a variable in Call Flow Builder.](@image/call-flow/nodes/send-sms.webp)
+</Frame>
+
+---
+
+### Send SMS notification as Call Whisper
+
+You might be using Call Flow Builder to forward calls to a personal cell phone. The example below will send an SMS to the specified phone number just before forwarding a call to that same number. This way you’ll receive a text letting you know this is a forwarded call from SignalWire and which original SignalWire number your caller dialed.
+
+<Frame caption="Sending an SMS notification as a Call Whisper." ogImage>
+    ![Sending an SMS notification as a Call Whisper.](@image/call-flow/nodes/sms-whisper.webp)
+</Frame>

@@ -1,0 +1,77 @@
+---
+slug: /compatibility-api/sdks/reference/messaging/create
+title: Create
+sidebar_label: Create
+toc_max_heading_level: 3
+---
+
+Use this endpoint for the Media method to send an outbound message from one of your SignalWire phone numbers.
+
+<EndpointSchemaSnippet endpoint="POST /Accounts/{AccountSid}/Messages" />
+
+## Request examples
+
+<CodeBlocks>
+
+```javascript title="Node.js"
+const { RestClient } = require('@signalwire/compatibility-api')
+const client = RestClient('YourProjectID', 'YourAuthToken', { signalwireSpaceUrl: 'example.signalwire.com' })
+
+client.messages
+      .create({from: '+15551234567', body: 'Hello World!', to: '+15557654321'})
+      .then(message => console.log(message.sid))
+      .done();
+```
+
+```csharp
+using System;
+using System.Collections.Generic;
+using Twilio;
+using Twilio.Rest.Api.V2010.Account;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        TwilioClient.Init("YourProjectID", "YourAuthToken", new Dictionary<string, object> { ["signalwireSpaceUrl"] = "{SPACE}.signalwire.com" });
+
+        var message = MessageResource.Create(
+            from: new Twilio.Types.PhoneNumber("+15551234567"),
+            body: "Hello World!",
+            to: new Twilio.Types.PhoneNumber("+15557654321")
+        );
+
+        Console.WriteLine(message.Sid);
+    }
+}
+```
+
+```python
+from signalwire.rest import Client as signalwire_client
+
+client = signalwire_client("YourProjectID", "YourAuthToken", signalwire_space_url = 'example.signalwire.com')
+
+message = client.messages.create(
+                              from_='+15551234567',
+                              body='Hello World!',
+                              to='+15557654321'
+                          )
+
+print(message.sid)
+```
+
+```ruby
+require 'signalwire/sdk'
+
+@client = Signalwire::REST::Client.new 'YourProjectID', 'YourAuthToken', signalwire_space_url: "example.signalwire.com"
+
+message = @client.messages.create(
+                             from: '+15551234567',
+                             body: 'Hello World!',
+                             to: '+15557654321'
+                           )
+
+puts message.sid
+```
+
+</CodeBlocks>

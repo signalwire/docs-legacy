@@ -1,0 +1,66 @@
+---
+title: Relay.Calling
+slug: /python/reference/calling
+toc_max_heading_level: 3
+---
+
+[relay-calling-call]: /docs/server-sdk/v2/python/reference/calling/call
+[relay-calling-dialresult]: /docs/server-sdk/v2/python/reference/calling/results/dial
+
+## Relay.Calling
+
+This represents the API interface for the Calling Relay Service. This object is used to make requests related to managing end to end calls.
+
+## Methods
+
+### dial
+
+Make an outbound Call and waits until it has been answered or hung up.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `call_type` | `string` | **optional** | The type of call.<br/>_Default to `phone` as it is the only supported for now._ |
+| `from_number` | `string` | **required** | The party the call is coming from. <br /> _Must be a SignalWire number or SIP endpoint that you own._ |
+| `to_number` | `string` | **required** | The party you are attempting to call. |
+| `timeout` | `number` | **optional** | The time, in seconds, the call will ring before going to voicemail. |
+
+**Returns**
+
+`coroutine` - Coroutine object that will be fulfilled with a [`Relay.Calling.DialResult`][relay-calling-dialresult] object.
+
+**Examples**
+
+Make an outbound Call and print the call object if it was answered:
+
+```python
+async def ready(client):
+  result = await client.calling.dial(from_number='+1XXXXXXXXXX', to_number='+1YYYYYYYYYY')
+  if result.successful:
+    # Call has been answered and is now active. Use 'result.call' to access the Call object.
+    print(result.call)
+  else:
+    print('Call failed or not answered.')
+```
+
+### newCall
+
+Create a new `Call` object. The call has not started yet allowing you to attach event listeners on it.
+
+**Parameters**
+
+See `Relay.Calling.Dial` for the parameter list.
+
+**Returns**
+
+`Call` - A new [`Relay.Calling.Call`][relay-calling-call] object.
+
+**Examples**
+
+Create a new Call object:
+
+```python
+call = client.calling.new_call(from_number='+1XXXXXXXXXX', to_number='+1YYYYYYYYYY', timeout=30)
+# Use the call object..
+```

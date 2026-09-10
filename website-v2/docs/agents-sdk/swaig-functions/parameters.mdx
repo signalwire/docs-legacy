@@ -1,0 +1,387 @@
+---
+title: "Parameters"
+sidebar_label: "Parameters"
+slug: /python/guides/parameters
+toc_max_heading_level: 3
+---
+
+## Parameters
+
+Define function parameters using JSON Schema to specify what arguments your functions accept. The AI extracts these from the conversation.
+
+### Parameter Structure
+
+Parameters use JSON Schema format:
+
+```python
+parameters={
+    "type": "object",
+    "properties": {
+        "param_name": {
+            "type": "string",           # Data type
+            "description": "Description" # Help AI understand the parameter
+        }
+    },
+    "required": ["param_name"]          # Required parameters
+}
+```
+
+### Parameter Types
+
+| Type | Description | Example Values |
+|------|-------------|----------------|
+| `string` | Text values | `"hello"`, `"12345"`, `"New York"` |
+| `number` | Numeric values | `42`, `3.14`, `-10` |
+| `integer` | Whole numbers only | `1`, `42`, `-5` |
+| `boolean` | True/false | `true`, `false` |
+| `array` | List of values | `["a", "b", "c"]` |
+| `object` | Nested structure | `{"key": "value"}` |
+
+### String Parameters
+
+Basic string parameters:
+
+```python
+parameters={
+    "type": "object",
+    "properties": {
+        "name": {
+            "type": "string",
+            "description": "Customer name"
+        },
+        "email": {
+            "type": "string",
+            "description": "Email address"
+        },
+        "phone": {
+            "type": "string",
+            "description": "Phone number in any format"
+        }
+    },
+    "required": ["name"]
+}
+```
+
+### Enum Parameters
+
+Restrict to specific values:
+
+```python
+parameters={
+    "type": "object",
+    "properties": {
+        "department": {
+            "type": "string",
+            "description": "Department to transfer to",
+            "enum": ["sales", "support", "billing", "returns"]
+        },
+        "priority": {
+            "type": "string",
+            "description": "Issue priority level",
+            "enum": ["low", "medium", "high", "urgent"]
+        }
+    },
+    "required": ["department"]
+}
+```
+
+### Number Parameters
+
+```python
+parameters={
+    "type": "object",
+    "properties": {
+        "quantity": {
+            "type": "integer",
+            "description": "Number of items to order"
+        },
+        "amount": {
+            "type": "number",
+            "description": "Dollar amount"
+        },
+        "rating": {
+            "type": "integer",
+            "description": "Rating from 1 to 5",
+            "minimum": 1,
+            "maximum": 5
+        }
+    },
+    "required": ["quantity"]
+}
+```
+
+### Boolean Parameters
+
+```python
+parameters={
+    "type": "object",
+    "properties": {
+        "gift_wrap": {
+            "type": "boolean",
+            "description": "Whether to gift wrap the order"
+        },
+        "express_shipping": {
+            "type": "boolean",
+            "description": "Use express shipping"
+        }
+    }
+}
+```
+
+### Array Parameters
+
+```python
+parameters={
+    "type": "object",
+    "properties": {
+        "items": {
+            "type": "array",
+            "description": "List of menu items to order",
+            "items": {
+                "type": "string"
+            }
+        },
+        "tags": {
+            "type": "array",
+            "description": "Tags to apply",
+            "items": {
+                "type": "string",
+                "enum": ["urgent", "vip", "callback"]
+            }
+        }
+    },
+    "required": ["items"]
+}
+```
+
+### Object Parameters
+
+```python
+parameters={
+    "type": "object",
+    "properties": {
+        "address": {
+            "type": "object",
+            "description": "Delivery address",
+            "properties": {
+                "street": {"type": "string"},
+                "city": {"type": "string"},
+                "zip": {"type": "string"}
+            },
+            "required": ["street", "city", "zip"]
+        }
+    },
+    "required": ["address"]
+}
+```
+
+### Optional vs Required Parameters
+
+```python
+parameters={
+    "type": "object",
+    "properties": {
+        # Required - AI must extract this
+        "order_number": {
+            "type": "string",
+            "description": "Order number (required)"
+        },
+        # Optional - AI will include if mentioned
+        "include_tracking": {
+            "type": "boolean",
+            "description": "Include tracking details"
+        },
+        # Optional with default handling
+        "format": {
+            "type": "string",
+            "description": "Output format",
+            "enum": ["brief", "detailed"],
+            "default": "brief"
+        }
+    },
+    "required": ["order_number"]  # Only order_number is required
+}
+```
+
+### Default Values
+
+Handle missing optional parameters in your handler:
+
+```python
+def search_products(self, args, raw_data):
+    # Get required parameter
+    query = args.get("query")
+
+    # Get optional parameters with defaults
+    category = args.get("category", "all")
+    max_results = args.get("max_results", 5)
+    sort_by = args.get("sort_by", "relevance")
+
+    # Use parameters
+    results = self.db.search(
+        query=query,
+        category=category,
+        limit=max_results,
+        sort=sort_by
+    )
+
+    return SwaigFunctionResult(f"Found {len(results)} products")
+```
+
+### Parameter Descriptions
+
+Good descriptions help the AI extract parameters correctly:
+
+```python
+parameters={
+    "type": "object",
+    "properties": {
+        # Good - specific format guidance
+        "order_number": {
+            "type": "string",
+            "description": "Order number, usually starts with ORD- followed by digits"
+        },
+
+        # Good - examples help
+        "date": {
+            "type": "string",
+            "description": "Date in MM/DD/YYYY format, e.g., 12/25/2024"
+        },
+
+        # Good - clarifies ambiguity
+        "amount": {
+            "type": "number",
+            "description": "Dollar amount without currency symbol, e.g., 29.99"
+        },
+
+        # Bad - too vague
+        "info": {
+            "type": "string",
+            "description": "Information"  # Don't do this
+        }
+    }
+}
+```
+
+### Complex Example
+
+```python
+from signalwire_agents import AgentBase, SwaigFunctionResult
+
+
+class TravelAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="travel-agent")
+        self.add_language("English", "en-US", "rime.spore")
+
+        self.define_tool(
+            name="search_flights",
+            description="Search for available flights between cities",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "from_city": {
+                        "type": "string",
+                        "description": "Departure city or airport code"
+                    },
+                    "to_city": {
+                        "type": "string",
+                        "description": "Destination city or airport code"
+                    },
+                    "departure_date": {
+                        "type": "string",
+                        "description": "Departure date in YYYY-MM-DD format"
+                    },
+                    "return_date": {
+                        "type": "string",
+                        "description": "Return date in YYYY-MM-DD format (optional for one-way)"
+                    },
+                    "passengers": {
+                        "type": "integer",
+                        "description": "Number of passengers",
+                        "minimum": 1,
+                        "maximum": 9
+                    },
+                    "cabin_class": {
+                        "type": "string",
+                        "description": "Preferred cabin class",
+                        "enum": ["economy", "premium_economy", "business", "first"]
+                    },
+                    "preferences": {
+                        "type": "object",
+                        "description": "Travel preferences",
+                        "properties": {
+                            "nonstop_only": {
+                                "type": "boolean",
+                                "description": "Only show nonstop flights"
+                            },
+                            "flexible_dates": {
+                                "type": "boolean",
+                                "description": "Search nearby dates for better prices"
+                            }
+                        }
+                    }
+                },
+                "required": ["from_city", "to_city", "departure_date"]
+            },
+            handler=self.search_flights
+        )
+
+    def search_flights(self, args, raw_data):
+        from_city = args.get("from_city")
+        to_city = args.get("to_city")
+        date = args.get("departure_date")
+        passengers = args.get("passengers", 1)
+        cabin = args.get("cabin_class", "economy")
+        prefs = args.get("preferences", {})
+
+        nonstop = prefs.get("nonstop_only", False)
+
+        # Your flight search logic here
+        return SwaigFunctionResult(
+            f"Found 3 flights from {from_city} to {to_city} on {date}. "
+            f"Cheapest: $299 {cabin} class"
+        )
+```
+
+### Validating Parameters
+
+Add validation in your handler:
+
+```python
+def process_payment(self, args, raw_data):
+    amount = args.get("amount")
+    card_last_four = args.get("card_last_four")
+
+    # Validate amount
+    if amount is None or amount <= 0:
+        return SwaigFunctionResult(
+            "Invalid amount. Please specify a positive dollar amount."
+        )
+
+    # Validate card
+    if not card_last_four or len(card_last_four) != 4:
+        return SwaigFunctionResult(
+            "Please provide the last 4 digits of your card."
+        )
+
+    # Process payment
+    return SwaigFunctionResult(f"Processing ${amount:.2f} on card ending {card_last_four}")
+```
+
+### Parameter Best Practices
+
+**DO:**
+- Use clear, descriptive names (order_number not num)
+- Provide detailed descriptions with examples
+- Use enum for fixed choices
+- Mark truly required parameters as required
+- Handle missing optional parameters with defaults
+
+**DON'T:**
+- Require parameters the caller might not know
+- Use ambiguous descriptions
+- Expect perfect formatting (be flexible in handlers)
+- Create too many required parameters
+
+

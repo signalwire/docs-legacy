@@ -1,0 +1,119 @@
+---
+title: setRaisedHand
+slug: /call-session/setraisedhand
+---
+
+import APIField from '@site/src/components/APIField';
+
+Raises or lowers the hand for yourself or another member in the call.
+
+## Parameters
+
+<APIField name="params" type="SetRaisedHandRoomParams">
+  Configuration for raising/lowering hand.
+</APIField>
+
+<APIField name="params.raised" type="boolean" default="true">
+  `true` to raise hand, `false` to lower hand.
+</APIField>
+
+<APIField name="params.memberId" type="string" default="Your member ID">
+  Member to control. Omit to control yourself, provide specific ID to control another member.
+</APIField>
+
+## Signature
+
+```typescript
+setRaisedHand(params?: SetRaisedHandRoomParams): Promise<void>
+```
+
+## Returns
+
+**Type:** `Promise<void>`
+
+## Permissions
+
+- **Raise your own hand:** Requires `call.capabilities.self.raisehand.on`
+- **Lower your own hand:** Requires `call.capabilities.self.raisehand.off`
+- **Control other members:** Requires `call.capabilities.member.raisehand.on` (to raise) or `call.capabilities.member.raisehand.off` (to lower)
+
+## Events
+
+- `member.updated` - General member update event
+- `member.updated.handraised` - Specific event for hand state changes
+
+## Examples
+
+### Raise your own hand
+
+```typescript
+// Raise your hand (default behavior)
+await call.setRaisedHand()
+
+// Explicitly raise your hand
+await call.setRaisedHand({ raised: true })
+```
+
+### Lower your own hand
+
+```typescript
+await call.setRaisedHand({ raised: false })
+```
+
+### Control another member's hand
+
+```typescript
+// Raise another member's hand (requires permission)
+await call.setRaisedHand({
+  raised: true,
+  memberId: 'member-123'
+})
+
+// Lower another member's hand (requires permission)
+await call.setRaisedHand({
+  raised: false,
+  memberId: 'member-123'
+})
+```
+
+### With capability check
+
+```typescript
+if (call.capabilities?.self.raisehand.on) {
+  await call.setRaisedHand({ raised: true })
+} else {
+  console.log('You do not have permission to raise your hand')
+}
+```
+
+### Track members with raised hands
+
+```typescript
+const membersWithRaisedHands: string[] = []
+
+call.on('member.updated.handraised', (event) => {
+  if (event.member.handraised) {
+    membersWithRaisedHands.push(event.member.id)
+  } else {
+    const index = membersWithRaisedHands.indexOf(event.member.id)
+    if (index > -1) {
+      membersWithRaisedHands.splice(index, 1)
+    }
+  }
+
+  console.log(`${membersWithRaisedHands.length} members have raised hands`)
+})
+```
+
+### Virtual classroom
+
+```typescript
+// Student raises hand to ask a question
+await call.setRaisedHand({ raised: true })
+
+// Teacher acknowledges and lowers student's hand
+await call.setRaisedHand({
+  raised: false,
+  memberId: studentMemberId
+})
+```

@@ -1,0 +1,293 @@
+---
+title: "Lifecycle"
+sidebar_label: "Lifecycle"
+sidebar_position: 4
+slug: /python/guides/lifecycle
+toc_max_heading_level: 3
+---
+
+## Request Lifecycle
+
+Trace the complete journey of a call through the SignalWire Agents SDK, from incoming call to conversation end.
+
+### The Complete Call Flow
+
+Understanding the request lifecycle helps you debug issues and optimize your agents. Here's the complete flow:
+
+<Frame caption="Complete Call Lifecycle">
+  <img className="diagram" src={require("@image/agents-sdk-manual/02_04_lifecycle_diagram1.webp").default} alt="Complete Call Lifecycle." />
+</Frame>
+
+### Phase 1: Call Setup
+
+When a call arrives at SignalWire:
+
+<Frame caption="Call Setup">
+  <img className="diagram" src={require("@image/agents-sdk-manual/02_04_lifecycle_diagram2.webp").default} alt="Call Setup." />
+</Frame>
+
+**Key points:**
+- SignalWire knows which agent to contact based on phone number configuration
+- The request includes Basic Auth credentials
+- POST is the default; GET requests are also supported for SWML retrieval
+
+### Phase 2: SWML Generation
+
+Your agent builds and returns the SWML document:
+
+```python
+## Inside AgentBase._render_swml()
+
+def _render_swml(self, request_body=None):
+    """Generate SWML document for this agent."""
+
+    # 1. Build the prompt (POM or text)
+    prompt = self._build_prompt()
+
+    # 2. Collect all SWAIG functions
+    functions = self._tool_registry.get_functions()
+
+    # 3. Generate webhook URLs with security tokens
+    webhook_url = self._build_webhook_url("/swaig")
+
+    # 4. Assemble AI configuration
+    ai_config = {
+        "prompt": prompt,
+        "post_prompt": self._post_prompt,
+        "post_prompt_url": self._build_webhook_url("/post_prompt"),
+        "SWAIG": {
+            "defaults": {"web_hook_url": webhook_url},
+            "functions": functions
+        },
+        "hints": self._hints,
+        "languages": self._languages,
+        "params": self._params
+    }
+
+    # 5. Build complete SWML document
+    swml = {
+        "version": "1.0.0",
+        "sections": {
+            "main": [
+                {"answer": {}},
+                {"ai": ai_config}
+            ]
+        }
+    }
+
+    return swml
+```
+
+### Phase 3: AI Conversation
+
+Once SignalWire has the SWML, it executes the instructions:
+
+<Frame caption="AI Conversation Loop">
+  <img className="diagram" src={require("@image/agents-sdk-manual/02_04_lifecycle_diagram3.webp").default} alt="AI Conversation Loop." />
+</Frame>
+
+**AI Parameters that control this loop:**
+
+| Parameter | Default | Purpose |
+|-----------|---------|---------|
+| `end_of_speech_timeout` | 500ms | Wait time after user stops speaking |
+| `attention_timeout` | 15000ms | Max silence before AI prompts |
+| `inactivity_timeout` | 30000ms | Max silence before ending call |
+| `barge_match_string` | - | Words that immediately interrupt AI |
+
+### Phase 4: Function Calls
+
+When the AI needs to call a function:
+
+<Frame caption="SWAIG Function Call">
+  <img className="diagram" src={require("@image/agents-sdk-manual/02_04_lifecycle_diagram4.webp").default} alt="SWAIG Function Call." />
+</Frame>
+
+### Phase 5: Call End
+
+When the call ends, the post-prompt summary is sent:
+
+<Frame caption="Call Ending">
+  <img className="diagram" src={require("@image/agents-sdk-manual/02_04_lifecycle_diagram5.webp").default} alt="Call Ending." />
+</Frame>
+
+### Handling Post-Prompt
+
+Configure post-prompt handling in your agent:
+
+```python
+from signalwire_agents import AgentBase
+
+
+class MyAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="my-agent")
+
+        # Set the post-prompt instruction
+        self.set_post_prompt(
+            "Summarize this call including: "
+            "1) The caller's main question or issue "
+            "2) How it was resolved "
+            "3) Any follow-up actions needed"
+        )
+
+        # Or use structured post-prompt with JSON output
+        self.set_post_prompt_json({
+            "issue": "string - the caller's main issue",
+            "resolution": "string - how the issue was resolved",
+            "follow_up": "boolean - whether follow-up is needed",
+            "sentiment": "string - caller sentiment (positive/neutral/negative)"
+        })
+
+    def on_post_prompt(self, data):
+        """Handle the call summary."""
+        summary = data.get("post_prompt_data", {})
+        call_id = data.get("call_id")
+
+        # Log to your system
+        self.log_call_summary(call_id, summary)
+
+        # Update CRM
+        self.update_crm(data)
+```
+
+### Request/Response Headers
+
+#### SWML Request (GET or POST /)
+
+```http
+GET / HTTP/1.1
+Host: your-agent.com
+Authorization: Basic c2lnbmFsd2lyZTpwYXNzd29yZA==
+Accept: application/json
+X-Forwarded-For: signalwire-ip
+X-Forwarded-Proto: https
+```
+
+#### SWML Response
+
+```http
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{"version": "1.0.0", "sections": {...}}
+```
+
+#### SWAIG Request (POST /swaig)
+
+```http
+POST /swaig HTTP/1.1
+Host: your-agent.com
+Authorization: Basic c2lnbmFsd2lyZTpwYXNzd29yZA==
+Content-Type: application/json
+
+{"action": "swaig_action", "function": "...", ...}
+```
+
+#### SWAIG Response
+
+```http
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{"response": "...", "action": [...]}
+```
+
+### Debugging the Lifecycle
+
+#### View SWML Output
+
+```bash
+## See what your agent returns
+curl -u signalwire:password http://localhost:3000/ | jq '.'
+
+## Using swaig-test
+swaig-test my_agent.py --dump-swml
+```
+
+#### Test Function Calls
+
+```bash
+## Call a function directly
+swaig-test my_agent.py --exec get_balance --account_id 12345
+
+## With verbose output
+swaig-test my_agent.py --exec get_balance --account_id 12345 --verbose
+```
+
+#### Monitor Live Traffic
+
+```python
+from signalwire_agents import AgentBase
+
+
+class DebugAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="debug-agent")
+
+    def on_swml_request(self, request_data=None, callback_path=None, request=None):
+        """Called when SWML is requested."""
+        if request:
+            print(f"SWML requested from: {request.client.host}")
+            print(f"Headers: {dict(request.headers)}")
+
+    def on_swaig_request(self, function_name, args, raw_data):
+        """Called before each SWAIG function."""
+        print(f"Function called: {function_name}")
+        print(f"Arguments: {args}")
+        print(f"Call ID: {raw_data.get('call_id')}")
+```
+
+### Error Handling
+
+#### SWML Errors
+
+If your agent can't generate SWML:
+
+```python
+def _render_swml(self):
+    try:
+        return self._build_swml()
+    except Exception as e:
+        # Return minimal valid SWML
+        return {
+            "version": "1.0.0",
+            "sections": {
+                "main": [
+                    {"answer": {}},
+                    {"play": {"url": "https://example.com/error.mp3"}},
+                    {"hangup": {}}
+                ]
+            }
+        }
+```
+
+#### SWAIG Errors
+
+If a function fails:
+
+```python
+def get_balance(self, args, raw_data):
+    try:
+        balance = self.lookup_balance(args.get("account_id"))
+        return SwaigFunctionResult(f"Your balance is ${balance}")
+    except DatabaseError:
+        return SwaigFunctionResult(
+            "I'm having trouble accessing account information right now. "
+            "Please try again in a moment."
+        )
+    except Exception as e:
+        # Log the error but return user-friendly message
+        self.logger.error(f"Function error: {e}")
+        return SwaigFunctionResult(
+            "I encountered an unexpected error. "
+            "Let me transfer you to a representative."
+        )
+```
+
+### Next Steps
+
+Now that you understand the complete lifecycle, let's look at how security works throughout this flow.
+
+
+

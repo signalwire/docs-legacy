@@ -1,0 +1,142 @@
+.container {
+  /* Container styles if needed */
+  margin-bottom: 1rem;
+}
+
+.hintWrapper {
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.hintIcon {
+  flex: none;
+  width: 1rem;
+  height: 1rem;
+  fill: #94a3b8;
+}
+
+[data-theme="dark"] .hintIcon {
+  fill: #cbd5e1;
+}
+
+.hintText {
+  color: #334155;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+[data-theme="dark"] .hintText {
+  color: #e2e8f0;
+}
+
+.frame {
+  position: relative;
+  background-color: #f8fafc;
+  overflow: hidden;
+}
+
+[data-theme="dark"] .frame {
+  background-color: rgba(30, 41, 59, 0.25);
+}
+
+.gridOverlay {
+  position: absolute;
+  inset: 0;
+  background-position: 10px 10px;
+  background-image: linear-gradient(0deg, #fff, rgba(255, 255, 255, 0.6));
+  mask-image: linear-gradient(0deg, #fff, rgba(255, 255, 255, 0.6));
+}
+
+[data-theme="dark"] .gridOverlay {
+  background-position: 0;
+  background-image: linear-gradient(
+    0deg,
+    rgba(255, 255, 255, 0.1),
+    rgba(255, 255, 255, 0.5)
+  );
+  mask-image: linear-gradient(0deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.5));
+}
+
+.imageWrapper {
+  max-height: 500px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.imageWrapper img {
+  max-height: 500px;
+  width: auto;
+  object-fit: contain;
+}
+
+.content {
+  position: relative;
+  overflow: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
+.contentMultiple {
+  position: relative;
+  overflow: auto;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  
+}
+
+.content, .contentMultiple {
+  padding: 0.7rem;
+  border-radius: 0.5rem;
+}
+
+.content img {
+  max-height: 500px;
+  width: auto;
+  object-fit: contain;
+}
+
+.content img,
+.contentMultiple img {
+  border-radius: 0.5rem;
+}
+
+.caption {
+  position: relative;
+  border-radius: 0.75rem;
+  overflow: auto;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 10px;
+  font-size: 0.875rem;
+  color: #334155;
+}
+.caption p {
+  margin: 0;
+  padding: 0 20px;
+}
+
+[data-theme="dark"] .caption {
+  color: #94a3b8;
+}
+
+.border, .frame {
+  border-radius: 1.2rem;
+}
+
+.border {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="dark"] .border {
+  border-color: rgba(255, 255, 255, 0.05);
+}

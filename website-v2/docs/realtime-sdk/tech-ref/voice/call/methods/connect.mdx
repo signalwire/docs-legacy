@@ -1,0 +1,104 @@
+---
+title: "connect"
+slug: /node/reference/voice/call/connect
+description: connect method for the Call class.
+toc_max_heading_level: 3
+---
+
+[call]: /docs/server-sdk/node/reference/voice/call
+[connectphone]: /docs/server-sdk/node/reference/voice/call/connect-phone
+[connectsip]: /docs/server-sdk/node/reference/voice/call/connect-sip
+[devicebuilder]: /docs/server-sdk/node/reference/voice/device-builder
+[disconnected]: /docs/server-sdk/node/reference/voice/call/disconnected
+[voicedevicebuilder]: /docs/server-sdk/node/reference/voice/device-builder
+[voiceplaylist]: /docs/server-sdk/node/reference/voice/playlist
+
+### connect
+
+- **connect**(`params`): `Promise`\<[`Call`][call]>
+
+Attempt to connect an existing call to a new outbound call. The two devices will hear each other. You can wait until the new peer is disconnected by calling [disconnected][disconnected].
+
+This is a generic method that allows you to connect to multiple devices in series, parallel, or combinations of both with the use of a [DeviceBuilder][devicebuilder]. 
+
+<Tip>
+For simpler use cases, we recommend using [connectPhone][connectphone] or [connectSip][connectsip].
+</Tip>
+
+#### Parameters
+
+<ParamField path="params" type="object" required>
+  Object containing the parameters for connecting the call.
+</ParamField>
+
+<Indent>
+<ParamField path="devices" type="VoiceDeviceBuilder" required>
+  A device builder specifying the devices to call. See [`VoiceDeviceBuilder`][voicedevicebuilder].
+</ParamField>
+
+<ParamField path="ringback" type="VoicePlaylist">
+  Ringback audio to play to the first call leg. You can play audio, TTS, silence or ringtone. See [`VoicePlaylist`][voiceplaylist].
+</ParamField>
+
+<ParamField path="maxPricePerMinute" type="number">
+  The maximum price in USD acceptable for the call to be created. If the rate for the call is greater than this value, the call will not be created. If not set, all calls will be created. Price can have a maximum of four decimal places, i.e. `0.0075`.
+</ParamField>
+</Indent>
+
+#### Returns
+
+`Promise`\<[`Call`][call]>
+
+A promise that resolves to a [`Call`][call] object that you can use to control the new peer.
+The promise resolves only after the new peer picks up the call.
+
+#### Examples
+
+Connecting to a new SIP call, while playing ringback audio to the first leg of the call.
+
+```js
+import { SignalWire, Voice} from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+const voiceClient = client.voice;
+
+const ringback = new Voice.Playlist().add(
+  Voice.Playlist.Ringtone({
+    name: "it"
+  })
+);
+
+await voiceClient.listen({
+  topics: ["office"],
+  onCallReceived: async (call) => {
+
+    let plan = new Voice.DeviceBuilder().add(
+      Voice.DeviceBuilder.Sip({
+        // Replace the to and from with valid SIP endpoint domains
+        from: `sip:${call.from}@example.sip.signalwire.com`,
+        to: "sip:example@example.sip.signalwire.com",
+        timeout: 30
+      })
+    );
+    // Answer the call
+    call.answer();
+    // Connect the call to the device builder plan
+    const peer = await call.connect({
+      devices: plan,
+      ringback: ringback
+    });
+    // Listen to peer state changes
+    await peer.listen({
+      onStateChanged: (state) => {
+        console.log("Peer state changed:", state.state);
+      }
+    })
+    // wait for peer to hangup
+    await peer.disconnected();
+    console.log("The peer hungup");
+    // hangup the call
+    call.hangup();
+  }
+});
+```

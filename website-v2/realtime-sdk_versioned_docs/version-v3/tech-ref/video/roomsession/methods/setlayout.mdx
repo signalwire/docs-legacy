@@ -1,0 +1,34 @@
+---
+title: "setLayout"
+slug: /node/reference/video/room-session/set-layout
+description: setLayout method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+[video-roomsession-4]: /docs/server-sdk/v3/node/reference/video/room-session/get-layouts
+
+### setLayout
+
+- **setLayout**(`params`): `Promise<void>`
+
+Sets a layout for the room. You can obtain a list of available layouts with [getLayouts][video-roomsession-4].
+
+#### Parameters
+
+| Name                | Type             | Description                                           |
+|:--------------------|:-----------------|:------------------------------------------------------|
+| `params`            | `Object`         | -                                                     |
+| `params.name`       | `string`         | Name of the layout.                                   |
+| `params.positions?` | `VideoPositions` | Positions to assign as soon as the new layout is set. |
+
+#### Returns
+
+`Promise<void>`
+
+#### Example
+
+Set the 6x6 layout:
+
+```typescript
+await roomSession.setLayout({ name: "6x6" });
+```

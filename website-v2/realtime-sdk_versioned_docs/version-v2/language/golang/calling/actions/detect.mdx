@@ -1,0 +1,141 @@
+---
+title: DetectAction
+slug: /go/reference/calling/actions/detect
+description: The Detect Action is used to detect DTMF, fax tones, or answering machines.
+toc_max_heading_level: 3
+---
+
+[relay-calling-detectresult]: /docs/server-sdk/v2/go/reference/calling/results/detect
+
+## Relay.Calling.DetectAction
+
+This object returned from one of _asynchronous_ detect methods that represents a running detector on the call.
+
+### Methods-submenu
+
+<div className="method-definitions"></div>
+
+#### GetResult
+
+Returns the final detector result.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+DetectResult
+
+[`Relay.Calling.DetectResult`][relay-calling-detectresult] - Final detector result.
+
+**Examples**
+
+> Trying detecting DTMF and grab the result when it's completed.
+
+```go
+var det signalwire.DetectMachineParams
+
+detectMachineAction, err := resultDial.Call.DetectMachineAsync(&det)
+if err != nil {
+	signalwire.Log.Error("Error occurred while trying to start answering machine detector")
+}
+
+time.Sleep(15 * time.Second)
+
+if !detectMachineAction.GetCompleted() {
+	detectMachineAction.Stop()
+}
+
+for {
+	time.Sleep(1 * time.Second)
+
+	if detectMachineAction.GetCompleted() {
+		signalwire.Log.Info("Machine Detection Successful(%v)\n", detectMachineAction.GetSuccessful())
+		break
+	}
+
+	signalwire.Log.Info("Last Machine event: %s Result: %v\n", detectMachineAction.GetDetectorEvent().String(), detectMachineAction.GetResult())
+}
+```
+
+#### GetCompleted
+
+Return `true` if detector has finished, `false` otherwise.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`Boolean` - True/False accordingly to the state.
+
+**Examples**
+
+> Trying detecting DTMF and check if it has finished.
+
+```go
+var det signalwire.DetectMachineParams
+detectMachineAction, err := resultDial.Call.DetectMachineAsync(&det)
+if err != nil {
+		signalwire.Log.Error("Error occurred while trying to start answering machine detector")
+}
+if !detectMachineAction.GetCompleted() {
+	detectMachineAction.Stop()
+}
+```
+
+#### Stop
+
+Stop the action immediately.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+StopResult
+
+**Examples**
+
+> Trying detecting a machine and then stop the action.
+
+```go
+var det signalwire.DetectMachineParams
+detectMachineAction, err := resultDial.Call.DetectMachineAsync(&det)
+if err != nil {
+		signalwire.Log.Error("Error occurred while trying to start answering machine detector")
+}
+detectMachineAction.Stop()
+```
+
+#### GetControlID
+
+Return the UUID to identify the action.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`string` - UUID to identify the action.
+
+**Examples**
+
+> Start a detector and print the controlId.
+
+```go
+var det signalwire.DetectMachineParams
+detectMachineAction, err := resultDial.Call.DetectMachineAsync(&det)
+if err != nil {
+		signalwire.Log.Error("Error occurred while trying to start answering machine detector")
+}
+Signalwire.Log.Info("Detector ControlID: %s\n",  detectMachineAction.GetControlID())
+```

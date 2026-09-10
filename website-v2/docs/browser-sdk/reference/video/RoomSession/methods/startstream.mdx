@@ -1,0 +1,46 @@
+---
+title: "startStream"
+slug: /js/reference/video/room-session/start-stream
+description: startStream method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+### startStream
+
+- **startStream**(): `Promise<RoomSessionStream>` - See [RoomSessionStream documentation](/docs/browser-sdk/js/reference/video/room-session-stream) for more details.
+
+Starts streaming the audio/video of this room to an external service. You can
+use the returned [RoomSessionStream](/docs/browser-sdk/js/reference/video/room-session-stream) object to
+interact with the stream.
+
+#### Parameters
+
+<ParamField path="params" type="object">
+  Object containing the parameters of the method.
+</ParamField>
+
+<Indent>
+<ParamField path="url" type="string">
+  RTMP or RTMPS url. This must be the address of a server accepting incoming RTMP/RTMPS streams.
+</ParamField>
+</Indent>
+
+#### Returns
+
+`Promise<RoomSessionStream>` - See [RoomSessionStream documentation](/docs/browser-sdk/js/reference/video/room-session-stream) for more details.
+
+#### Permissions
+
+- `room.stream` (or the more specific `room.stream.start`)
+
+You need to specify the permissions when [creating the Video Room Token](/docs/apis/video/create-room-token) on the server side.
+
+#### Example
+
+```javascript
+const stream = await roomSession.startStream({ url: "rtmp://example.com" });
+
+// Stop the stream after 60 seconds
+setTimeout(() => stream.stop(), 60000);
+```
+

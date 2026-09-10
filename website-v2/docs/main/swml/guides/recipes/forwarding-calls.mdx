@@ -1,0 +1,61 @@
+---
+title: Forwarding calls
+slug: /swml/guides/forward-calls
+description: Use SWML to forward calls
+---
+
+In [Making and receiving phone calls](/docs/swml/guides/make-and-receive-calls) we learned how to use SWML
+to define what should happen when a call is received by one of your
+SignalWire numbers. In that case, we just played some audio. In this article,
+instead, we will use the same technique to forward the call to a different
+number.
+
+## SWML for call forwarding
+
+We are going to define the forwarding instructions in a SWML Script hosted on SignalWire.
+To create a new SWML Script, navigate to the **Resources** section from your sidebar.
+There, create a new Script, and select the **SWML Script** option.
+
+### Creating your call forwarding Script
+
+Once you are in the menu for creating a SWML Script, copy and paste the following Script:
+
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - connect:
+        from: "%{call.from}"
+        to: "+15551234567"
+```
+
+This Script will handle the call by making an outbound dial, setting the `from` address to be the address which created the initial call,
+and then forwarding that call to the number specified in the `to` field.
+
+<Info>
+You should replace `+15551234567` with a real phone number, for example your personal one.
+</Info>
+
+We used the [`connect`](/docs/swml/reference/connect) method to call the number you would like the call to be forwarded to.
+Notice how we used its `from` parameter to ensure that the number of the original caller
+(stored in the [`call.from` variable](/docs/swml/reference/variables#field-from))
+is maintained as caller ID for the forwarded call.
+
+### Assigning the Script to a SignalWire phone number
+
+The final step is to configure one of your SignalWire phone numbers to answer calls using the SWML Script we just created.
+You can do that from the **Phone Numbers** section:
+
+![Assign Resource.](@image/dashboard/phone-numbers/assign-resource-voice.webp)
+
+After clicking on the **Phone Numbers** section, click on the phone number that you'd like to assign, then click **edit settings**.
+From there, click **Assign Resource** and assign the newly created SWML Script.
+Now any calls that are routed to that number will be forwarded, with the caller ID being the original number that called in.
+
+## Conclusion
+
+You are now ready to test call forwarding.
+
+SWML Scripts offer a quick and easy way to get started with common use cases. If you are an advanced developer, or you need more
+flexibility and real-time control on your calls, you may be interested in our
+guide about how to [make and receive calls in Node.js](/docs/server-sdk/node/guides/get-started-with-voice).

@@ -1,0 +1,25 @@
+.previewCardGroup {
+  display: grid;
+  width: 100%;
+  gap: 1rem;
+  margin: 2rem 0;
+}
+
+
+@media (min-width: 640px) {
+  .cols1 {
+    grid-template-columns: 1fr;
+  }
+
+  .cols2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .cols3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .cols4 {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}

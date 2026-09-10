@@ -1,0 +1,53 @@
+---
+title: "dialSip"
+slug: /node/reference/voice/client/dial-sip
+description: dialSip method for the Client class.
+toc_max_heading_level: 3
+---
+
+[call-5]: /docs/server-sdk/v3/node/reference/voice/call
+[types]: /docs/server-sdk/v3/node/reference/voice/types#sipheader
+
+### dialSip
+
+- **dialSip**(`params`): `Promise<Call>` - See [Call][call-5] for more details.
+
+Makes an outbound call to a SIP endpoint.
+
+#### Parameters
+
+| Name                        | Type                                   | Description                                                                                                                                                                                                                                             |
+| :-------------------------- | :------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `params`                    | `Object`                               | -                                                                                                                                                                                                                                                       |
+| `params.codecs?`            | `SipCodec[]`                           | Optional array of desired codecs in order of preference. Supported values are PCMU, PCMA, OPUS, G729, G722, VP8, H264. Default is parent leg codec(s).                                                                                                  |
+| `params.from`               | `string`                               | The party the call is coming from. Must be a SignalWire number or SIP endpoint that you own.                                                                                                                                                            |
+| `params.headers?`           | [`SipHeader`][types][] | Array of [`SipHeader`][types] objects. Must be X- headers only, see example below.                                                                                                                                                      |
+| `params.maxPricePerMinute?` | `number`                               | The maximum price in USD acceptable for the call to be created. If the rate for the call is greater than this value, the call will not be created. If not set, all calls will be created. Price can have a maximum of four decimal places, i.e. 0.0075. |
+| `params.timeout?`           | `number`                               | The time, in seconds, the call will ring before it is considered unanswered.                                                                                                                                                                            |
+| `params.to`                 | `string`                               | The party you are attempting to call.                                                                                                                                                                                                                   |
+| `params.webrtcMedia?`       | `boolean`                              | If true, WebRTC media is negotiated. Default is parent leg setting.                                                                                                                                                                                     |
+| `params.sessionTimeout?`    | `number`                               | Non-negative value, in seconds, to use for the SIP `Session-Expires` header. If 0 or unset, SignalWire will pick the default (typically 600).                                                                                                           |
+
+#### Returns
+
+`Promise<Call>` - See [Call][call-5] for more details.
+
+A call object.
+
+#### Example
+
+```js
+try {
+  const call = await client.dialSip({
+    from: "sip:xxx@yyy.zz",
+    to: "sip:ppp@qqq.rr",
+    timeout: 30,
+    headers: [
+      { name: "X-SomeKeyA", value: "SomeValueA" },
+      { name: "X-SomeKeyB", value: "SomeValueB" },
+    ],
+  });
+} catch (e) {
+  console.log("Call not answered.");
+}
+```

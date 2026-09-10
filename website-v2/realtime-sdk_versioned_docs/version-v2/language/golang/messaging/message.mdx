@@ -1,0 +1,44 @@
+---
+title: Relay.Messaging.Message
+slug: /go/reference/messaging/message
+toc_max_heading_level: 3
+---
+
+[link-1]: /docs/server-sdk/v2/go/reference/consumer#onmessagestatechange
+[link-2]: #state-events
+[link]: /docs/server-sdk/v2/go/reference/consumer#onincomingmessage
+
+## Relay.Messaging.Message
+
+An object representing an SMS or MMS message. It is the parameter of both [`onIncomingMessage`][link] and [`onMessageStateChange`][link-1] Consumer handlers.
+
+### Properties
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `Id` | `string` | The unique identifier of the message. |
+| `Context` | `string` | The context of the message. |
+| `From` | `string` | The phone number the message comes from. |
+| `To` | `string` | The destination number of the message. |
+| `Direction` | `string` | The direction of the message: `inbound` or `outbound`. |
+| `State` | `string` | The current state of the message. See [`Relay.Messaging.Message` State Events][link-2] for all the possible states. |
+| `Body` | `string` | The content of the message. |
+| `Media` | `string[]` | Array of URLs media. |
+| `Tags` | `string[]` | Array of strings with message tags. |
+| `Segments` | `number` | Number of segments of the message. |
+| `Reason` | `string` | Reason why the message was not sent.<br/> _Present only in case of failure._ |
+
+### Events
+
+#### State Events
+
+To track the state of a message.
+
+| Event | Description |
+| ----- | ----------- |
+| `MsgQueued` | The message has been queued in Relay. |
+| `MsgInitiated` | Relay has initiate the process to send the message. |
+| `MsgSent` | Relay has sent the message. |
+| `MsgDelivered` | The message has been successfully delivered.  Due to the nature of SMS and MMS, receiving a `delivered` event is not guaranteed, even if the message is delivered successfully. |
+| `MsgUndelivered` | The message has not been delivered.  Due to the nature of SMS and MMS, receiving a `undelivered` event is not guaranteed, even if the message fails to be delivered. |
+| `MsgFailed` | The call has failed. |

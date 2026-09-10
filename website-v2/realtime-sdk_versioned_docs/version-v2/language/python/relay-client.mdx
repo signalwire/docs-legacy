@@ -1,0 +1,164 @@
+---
+title: Relay.Client
+slug: /python/reference/relay-client
+toc_max_heading_level: 3
+---
+
+[coroutine]: https://docs.python.org/3/library/asyncio-task.html#coroutines
+[link]: #events
+[relay-calling]: /docs/server-sdk/v2/python/reference/calling/
+[relay-client]: /docs/server-sdk/v2/python/reference/relay-client
+[relay-messaging]: /docs/server-sdk/v2/python/reference/messaging/
+[relay-tasking]: /docs/server-sdk/v2/python/reference/task
+
+## Relay.Client
+
+[`Relay.Client`][relay-client] is the basic connection to RELAY, allowing you send commands to RELAY and setup handlers for inbound events.
+
+
+### Constructor
+
+Constructs a client object to interact with RELAY.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `project` | `string` | **required** | Project ID from your SignalWire Space |
+| `token` | `string` | **required** | Token from your SignalWire Space |
+
+**Examples**
+
+Create a Client to interact with the RELAY API:
+
+```python
+from signalwire.relay.client import Client
+
+client = Client(project='<project-id>', token='<project-token>')
+```
+
+## Properties
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `connected` | `boolean` | Returns _true_ if the client is connected to RELAY. |
+| `calling` | [`Relay.Calling`][relay-calling] | Returns a [`Relay.Calling`][relay-calling] instance associated with the client. |
+| `tasking` | [`Relay.Tasking`][relay-tasking] | Returns a [`Relay.Tasking`][relay-tasking] instance associated with the client. |
+| `messaging` | [`Relay.Messaging`][relay-messaging] | Returns a [`Relay.Messaging`][relay-messaging] instance associated with the client. |
+
+## Methods
+
+### connect
+
+Activates the connection to the RELAY API. The connection to RELAY does not happen automatically so that you can setup handlers to events that might occur before the connection is successfully established.
+
+**Returns**
+
+`None`
+
+**Examples**
+
+```python
+# Make sure you have attached the listeners you need before connecting the client, or you might miss some events.
+client.connect()
+```
+
+### disconnect
+
+Coroutine that close the RELAY connection, cancel the pending tasks and stop the event loop.
+
+**Returns**
+
+`awaitable` - A coroutine object.
+
+**Examples**
+
+Within an `async` function:
+
+```python
+import asyncio
+
+# with a 'client' variable already created..
+async def sleep_and_disconnect():
+  await asyncio.sleep(5)
+  await client.disconnect()
+  print('Client disconnected!')
+
+asyncio.run(sleep_and_disconnect())
+```
+
+Scheduling a new _asyncio task_:
+
+```python
+import asyncio
+
+# schedule a task to disconnect the client..
+asyncio.create_task(client.disconnect())
+```
+
+### on
+
+Attach an event handler for a specific type of event. The handler could be a [coroutine][coroutine] or a normal function.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `event` | `string` | **required** | Event name. Full list of events [Relay.Client Events][link] |
+| `handler` | `function` | **required** | Function to call when the event comes. |
+
+**Returns**
+
+[`Relay.Client`][relay-client] - The client object itself.
+
+**Examples**
+
+Subscribe to the `ready` event:
+
+```python
+def do_something(client):
+  pass
+
+client.on('ready', do_something)
+```
+
+### off
+
+Remove an event handler that were attached with `.on()`. If no `handler` parameter is passed, all listeners for that `event` will be removed.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `event` | `string` | **required** | Event name. Full list of events [Relay.Client Events][link] |
+| `handler` | `function` | **optional** | Function to remove. <br /> _Note: `handler` will be removed from the stack by reference so make sure to use the same reference in both `.on()` and `.off()` methods._ |
+
+**Returns**
+
+[`Relay.Client`][relay-client] - The client object itself.
+
+**Examples**
+
+Subscribe to the `ready` event and then, remove the handler:
+
+```python
+def do_something(client):
+  pass
+
+client.on('ready', do_something)
+
+# .. later
+client.off('ready', do_something)
+```
+
+## Events
+
+All available events you can attach a listener on.
+
+| Property | Description |
+| -------- | ----------- |
+| `ready` | The session has been established and all other methods can now be used. |
+| `signalwire.socket.open` | The websocket is open. However, you have not yet been authenticated. |
+| `signalwire.socket.error` | The websocket gave an error. |
+| `signalwire.socket.message` | The client has received a message from the websocket. |
+| `signalwire.socket.close` | The websocket is closing. |

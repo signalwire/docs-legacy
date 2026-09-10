@@ -1,0 +1,66 @@
+---
+title: SignalWire.Relay.MessagingAPI
+slug: /dotnet/reference/messaging
+toc_max_heading_level: 3
+---
+
+[sendresult]: /docs/server-sdk/v2/dotnet/reference/messaging/send-result
+[sendsource]: /docs/server-sdk/v2/dotnet/reference/messaging/send-source
+This represents the API interface for the Messaging Relay Service. This object is used to make requests related to managing SMS and MMS messages.
+
+## Methods
+
+### Send
+
+Send an outbound SMS or MMS message.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `context` | string | <span className="required-arg">required</span> | The context to receive inbound events. |
+| `to` | string | <span className="required-arg">required</span> | The phone number to send to. |
+| `from` | string | <span className="required-arg">required</span> | The phone number to place the message from. _Must be a SignalWire phone number or short code that you own._ |
+| `source` | [`SignalWire.Relay.Messaging.SendSource`][sendsource] | <span className="required-arg">required</span> | The message. May be populated by a body string or a list of media URLs. |
+| `tags` | List&lt;string&gt; | <span className="optional-arg">optional</span> | Tags to tag the message with for searching in the UI. <br />_Default: Empty_ |
+
+**Returns**
+
+[`SignalWire.Relay.Messaging.SendResult`][sendresult] - The result object to interact with.
+
+**Examples**
+
+> Send a message.
+
+```csharp
+SendResult resultSend = client.Messaging.Send(validContext, "+1XXXXXXXXXX", "+1YYYYYYYYYY");
+
+if (resultSend.Successful)
+{
+    // Message has been queued, you can subscribe to MessagingAPI.OnMessageStateChange to receive further updates
+}
+```
+
+## Events
+
+All these events can be used to track the message lifecycle and instruct SignalWire on what to do for each different state.
+
+## State Events
+
+To track the state of a sent message.
+
+| Property | Description |
+| :-------- | :----------- |
+| `OnMessageStateChange` | The message is changing state, generalized event for the following events. |
+| `OnMessageDelivered` | The message has been delivered. Due to the nature of SMS and MMS, receiving a `delivered` event is not guaranteed, even if the message is delivered successfully.
+| `OnMessageFailed` | The message delivery failed. |
+| `OnMessageInitiated` | The message delivery has been started. |
+| `OnMessageQueued` | The message has been put into the queue for delivery. |
+| `OnMessageSent` | The message has been sent for delivery. |
+| `OnMessageUndelivered` | The message has not been delivered. Due to the nature of SMS and MMS, receiving an `undelivered` event is not guaranteed, even if the message fails to be delivered. |
+
+## Receive Events
+
+| Property | Description |
+| :-------- | :----------- |
+| `OnMessageReceived` | A message has been received. |

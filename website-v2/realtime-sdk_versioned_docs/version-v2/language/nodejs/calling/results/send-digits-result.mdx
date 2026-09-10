@@ -1,0 +1,17 @@
+---
+title: Relay.Calling.SendDigitsResult
+slug: /node/reference/calling/results/send-digits
+description: The result object that is returned when sending digits to a call.
+toc_max_heading_level: 3
+---
+
+[relay-event]: /docs/server-sdk/v2/node/reference/event
+[senddigits]: /docs/server-sdk/v2/node/reference/calling/call#senddigits
+This object is returned by the [`sendDigits`][senddigits] method and represents the final result of the action.
+
+## Properties
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `successful` | `boolean` | Whether the action has completed successfully |
+| `event` | [`Relay.Event`][relay-event] | Last event that completed the operation |

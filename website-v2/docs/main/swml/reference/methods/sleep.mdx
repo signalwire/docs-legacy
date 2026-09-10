@@ -1,0 +1,78 @@
+---
+title: sleep
+slug: /swml/reference/sleep
+description: Set the amount of time for the current application to sleep for in milliseconds before continuing to the next action.
+toc_max_heading_level: 3
+---
+
+Set the amount of time for the current application to sleep for in milliseconds before
+continuing to the next action.
+
+<ParamField path="sleep" type="object | integer" required={true}>
+  An object that accepts the following properties, or an integer value directly.
+</ParamField>
+
+
+## **Properties**
+
+<ParamField path="sleep.duration" type="integer" required={true}>
+  The amount of time to sleep in milliseconds. Must be a positive number. Can also be set to a `-1` integer for the sleep to never end.
+</ParamField>
+
+**Possible Values:** `-1` or any positive number
+
+## **Examples**
+
+### Timed Sleep Example
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - sleep: 5000
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "sleep": 5000
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+### Forever Sleep Example
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - sleep: -1
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "sleep": -1
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>

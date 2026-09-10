@@ -1,0 +1,68 @@
+---
+slug: /compatibility-api/sdks/reference/faxes/delete
+title: Delete
+sidebar_label: Delete
+toc_max_heading_level: 3
+---
+
+Use this endpoint for the Fax method to delete a fax. 
+If the delete is successful, a 204 response, with no body, will be returned. 
+
+<Warning title="This action cannot be undone.">
+Please be sure you want to go through with this action, as it cannot be undone.
+</Warning>
+
+<EndpointSchemaSnippet endpoint="DELETE /Accounts/{AccountSid}/Faxes/{Sid}" selector="request" />
+
+## Request examples
+
+<CodeBlocks>
+
+```javascript title="Node.js"
+const { RestClient } = require('@signalwire/compatibility-api')
+const client = RestClient('YourProjectID', 'YourAuthToken', { signalwireSpaceUrl: 'example.signalwire.com' })
+
+client.fax.faxes('FaxSid')
+      .remove()
+      .then(fax => console.log(fax.sid))
+      .done();
+```
+
+```csharp
+using System;
+using System.Collections.Generic;
+using Twilio;
+using Twilio.Rest.Fax.V1;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        TwilioClient.Init("YourProjectID", "YourAuthToken", new Dictionary<string, object> { ["signalwireSpaceUrl"] = "{SPACE}.signalwire.com" });
+
+        FaxResource.Delete(pathSid: "FaxSid");
+    }
+}
+```
+
+```python
+from signalwire.rest import Client as signalwire_client
+
+client = signalwire_client("YourProjectID", "YourAuthToken", signalwire_space_url = 'example.signalwire.com')
+
+client.fax.faxes('FaxSid').delete()
+```
+
+```ruby
+require 'signalwire/sdk'
+
+@client = Signalwire::REST::Client.new 'YourProjectID', 'YourAuthToken', signalwire_space_url: "example.signalwire.com"
+
+@client.faxes('FaxSid').delete
+```
+
+</CodeBlocks>
+
+## Response
+
+A successful request returns a 204 status code with no body.

@@ -1,0 +1,131 @@
+---
+title: off
+slug: /call-session/off
+---
+
+import APIField from '@site/src/components/APIField';
+
+Removes an event listener that was previously registered with `on()` or `once()`.
+
+## Signature
+
+```typescript
+call.off<T extends EventNames>(
+  event: T,
+  handler?: EventListener<T>
+): CallSession
+```
+
+## Parameters
+
+<APIField name="event" type="string" required>
+  The event name to remove listeners from.
+</APIField>
+
+<APIField name="handler" type="function">
+  The specific handler function to remove. If not provided, all listeners for this event are removed.
+</APIField>
+
+## Returns
+
+**Type:** `CallSession`
+
+Returns the CallSession instance for method chaining.
+
+## Important Notes
+
+**Handler Reference Required:** To remove a specific handler, you must pass the exact same function reference that was used with `on()`:
+
+```typescript
+// ❌ This won't work - different function instances
+call.on('member.joined', (params) => console.log(params))
+call.off('member.joined', (params) => console.log(params)) // Different function!
+
+// ✅ This works - same function reference
+const handler = (params) => console.log(params)
+call.on('member.joined', handler)
+call.off('member.joined', handler)
+```
+
+**Remove All Listeners:** Calling `off()` without a handler removes ALL listeners for that event:
+
+```typescript
+call.off('member.joined') // Removes ALL member.joined listeners
+```
+
+**No Error on Missing Handler:** Calling `off()` with a handler that was never registered (or already removed) does nothing and throws no error.
+
+**Automatic Cleanup:** When a CallSession is destroyed, all event listeners are automatically cleaned up. You don't need to manually call `off()` before calling `hangup()`.
+
+## Examples
+
+### Remove Specific Handler
+
+```typescript
+const memberJoinedHandler = (params) => {
+  console.log('Member joined:', params.member.name)
+}
+
+// Register the handler
+call.on('member.joined', memberJoinedHandler)
+
+// Later, remove the specific handler
+call.off('member.joined', memberJoinedHandler)
+```
+
+### Remove All Handlers for an Event
+
+```typescript
+// Register multiple handlers
+call.on('member.joined', handler1)
+call.on('member.joined', handler2)
+call.on('member.joined', handler3)
+
+// Remove ALL member.joined handlers
+call.off('member.joined')
+```
+
+### Cleanup Pattern
+
+```typescript
+function setupCallHandlers(call) {
+  const handlers = {
+    onMemberJoined: (params) => {
+      console.log('Member joined:', params.member.name)
+    },
+    onMemberLeft: (params) => {
+      console.log('Member left:', params.member.name)
+    },
+    onLayoutChanged: (params) => {
+      console.log('Layout changed:', params.layout.name)
+    }
+  }
+
+  // Register handlers
+  call.on('member.joined', handlers.onMemberJoined)
+  call.on('member.left', handlers.onMemberLeft)
+  call.on('layout.changed', handlers.onLayoutChanged)
+
+  // Return cleanup function
+  return () => {
+    call.off('member.joined', handlers.onMemberJoined)
+    call.off('member.left', handlers.onMemberLeft)
+    call.off('layout.changed', handlers.onLayoutChanged)
+  }
+}
+
+// Usage
+const cleanup = setupCallHandlers(call)
+
+// Later, when done
+cleanup()
+```
+
+### Method Chaining
+
+```typescript
+call
+  .off('member.joined', handler1)
+  .off('member.left', handler2)
+  .off('layout.changed', handler3)
+```

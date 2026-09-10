@@ -1,0 +1,135 @@
+---
+title: Forward to Phone
+description: Call Flow Builder node to forward the call to a phone number.
+slug: /call-flow-builder/reference/forward-to-phone
+---
+
+[variables]: /docs/call-flow-builder/guides/variables
+
+This node will allow you to forward the incoming call to another phone or SIP endpoint.
+
+
+## **Output Node Connectors**
+
+<ParamField path="Success" type="string">
+  Call is forwarded successfully. The connector will be triggered when the call is successfully forwarded to the phone number.
+</ParamField>
+
+<ParamField path="No Answer" type="string">
+  Call is not answered. The connector will be triggered when the call is not answered by the phone number.
+</ParamField>
+
+<ParamField path="Busy" type="string">
+  Call is busy. The connector will be triggered when the call is busy.
+</ParamField>
+
+<ParamField path="Decline" type="string">
+  Call is declined. The connector will be triggered when the call is declined.
+</ParamField>
+
+<ParamField path="Error" type="string">
+  An error occurred. The connector will be triggered when an error occurs while forwarding the call.
+</ParamField>
+
+
+
+## **Node Settings**
+
+<ParamField path="Default From" type="string">
+  The default phone number to use as the caller ID when forwarding the call.
+</ParamField>
+
+<ParamField path="Default Timeout" type="integer">
+  The time in seconds to wait for the call to be answered before timing-out and either disconnecting the call or attempting a new number.<br /><br />**Default Value:** 45 seconds.
+</ParamField>
+
+<ParamField path="Call State URL" type="string">
+  A webhook URL that will receive a POST request containing call details each time a Call State Event is triggered. You will need to choose which events you want listen for in the next field. If no events are chosen, the URL will receive no requests.
+</ParamField>
+
+<ParamField path="Call State Events" type="string">
+  The events that will trigger a POST request to the Call State URL.<br /><br />**Possible Values:** `created`, `ringing`, `answered`, `ended`
+</ParamField>
+
+<ParamField path="Call Numbers" type="string">
+  _Only shows when multiple numbers are added_.<br /><br /> A toggle option to change the behavior of the forwarding of the call. If set to `Sequential`, the call will be forwarded to the next number in the list if the previous number is busy, declined, or not answered. If set to `Simultaneously`, the call will be forwarded to all numbers in the list at the same time.<br /><br />**Possible Values:** `Sequential`, `Simultaneously`
+</ParamField>
+
+
+### Phone Number Configuration
+
+One or more phone numbers can be added to the node.
+Additional phone numbers can be added by clicking the `Add Phone Number` button.
+Depending on the `Call Numbers` property, the call will be forwarded to the next number in the list (`Sequential`) 
+or to all numbers in the list at the same time (`Simultaneously`).
+
+<ParamField path="To" type="string">
+  The phone number or SIP endpoint to forward the call to.
+</ParamField>
+
+<ParamField path="From" type="string">
+  The phone number to use as the caller ID when forwarding the call. If not set, `Default From` will be used.
+</ParamField>
+
+<ParamField path="Timeout" type="integer">
+  The time in seconds to wait for the call to be answered before timing out and either disconnecting the call or attempting a new number. If not set, `Default Timeout` will be used.
+</ParamField>
+
+<ParamField path="Enable Whisper" type="boolean">
+  This executes [SWML](/docs/swml) when the call is answered. The SWML will be executed before connecting the call.<br /><br />**Handle Via:** `External URL` that is hosted off the SignalWire platform, or a [`SWML`](/docs/swml) script [resource](/docs/platform/resources).
+</ParamField>
+
+
+
+## **Examples**
+
+
+### Preserve Original Caller ID When Forwarding
+
+This example shows how to forward calls while preserving the original caller's phone number as the caller ID. 
+This is useful when you want the person receiving the forwarded call to see who originally called, rather than your SignalWire number.
+
+In this flow, the **Handle Call** node receives the incoming call and passes it to the **Forward to Phone** node,
+which forwards the call to the destination number. The key configuration is setting the **From** field to `%{call.from}` - this [variable][variables] contains the original caller's
+phone number, ensuring that the person receiving the forwarded call will see the original caller's number on their caller ID rather than your SignalWire number. 
+
+If the forward is successful, the call connects directly. If the call fails for any reason (no answer, busy, declined, or error), the flow routes to **Hang Up Call**.
+This approach is particularly useful for business scenarios where you want to maintain transparency about who is calling.
+
+<Frame caption="Forward call while preserving original caller ID" ogImage>
+
+![A Call Flow that uses the Forward to Phone node to forward the call while preserving the original caller ID.](@image/call-flow/nodes/forward-from-original-example.webp)
+
+</Frame>
+
+
+### Forward to SIP
+
+In order to dial a SIP endpoint, format the **To** field with with “sip:” followed by the endpoint’s address. 
+For example:
+
+**To:** `sip:alice@example.com`
+
+If the endpoint is unavailable, the flow will follow one of the four failed routes depending on the SIP signaling that is received. 
+You can give individual actions for each signal, or route them all back into the same node.
+
+<Frame caption="Forward to SIP" ogImage>
+
+![A Call Flow that uses the Forward to Phone node to forward the call to a sip endpoint.](@image/call-flow/nodes/forward-sip.webp)
+
+</Frame>
+
+
+---
+
+### Forward to multiple SIP endpoints and phone
+
+You can combine SIP dialing and Phone number dialing in the same node. 
+The example below is set to `Sequential` dialing, so the sales endpoint will first ring for 20 seconds.
+After that, the call will ring the support endpoint for 20 more seconds before finally dialing out to +15552223333.
+
+<Frame caption="Forward to multiple SIP endpoints and phone numbers sequentially using the Forward to Phone node.">
+
+![Forward to multiple SIP endpoints and phone numbers sequentially using the Forward to Phone node.](@image/call-flow/nodes/forward-mix.webp)
+
+</Frame>

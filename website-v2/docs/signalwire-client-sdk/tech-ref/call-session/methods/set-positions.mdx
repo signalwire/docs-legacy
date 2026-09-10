@@ -1,0 +1,148 @@
+---
+title: setPositions
+slug: /call-session/setpositions
+---
+
+import APIField from '@site/src/components/APIField';
+
+Repositions multiple members within the current video layout without changing the layout itself.
+
+## Signature
+
+```typescript
+setPositions(params: SetPositionsParams): Promise<void>
+```
+
+## Parameters
+
+<APIField name="params" type="SetPositionsParams" required>
+  Positioning configuration object.
+</APIField>
+
+<APIField name="params.positions" type="Record<string, [VideoPosition](../types#videoposition)>" required>
+  Map of member IDs to their desired positions in the layout.
+</APIField>
+
+## Returns
+
+**Type:** `Promise<void>`
+
+## Important Notes
+
+**setPositions() vs setLayout():**
+
+| Method | Purpose | Layout Change |
+|--------|---------|---------------|
+| `setLayout()` | Change layout **and** optionally position members | ✅ Changes layout |
+| `setPositions()` | Reposition members **within** current layout | ❌ Keeps current layout |
+
+**When to use each:**
+
+```typescript
+// Change from 2x2 to 6x6 layout AND position members
+await call.setLayout({
+  name: '6x6',
+  positions: {
+    'member-1': 'reserved-1'
+  }
+})
+
+// Keep current layout (6x6), just move members around
+await call.setPositions({
+  positions: {
+    'member-1': 'reserved-2',
+    'member-2': 'reserved-1'
+  }
+})
+```
+
+**Position Types:**
+
+**Reserved Positions** (`reserved-1`, `reserved-2`, etc.)
+- Pin important participants to specific spots
+- Remain fixed even as other members join/leave
+
+**Standard Positions** (`standard-1`, `standard-2`, etc.)
+- Dynamic positioning for regular participants
+
+**Special Positions:**
+- `auto` - SDK automatically positions the member
+- `off-canvas` - Member is in the call but not visible
+- `full-screen` - Member takes up the entire screen
+- `playback` - For media playback positioning
+
+**Using "self" Keyword:**
+- Use `"self"` as a key when you don't know your own member ID yet
+- Useful when joining a call and positioning yourself immediately
+- Can be mixed with explicit member IDs
+
+**Persistence:**
+- Position settings persist until explicitly changed
+- New members joining will not automatically take reserved positions
+- Positions remain even if members temporarily leave and rejoin
+
+## Examples
+
+### Reposition multiple members
+
+```typescript
+await call.setPositions({
+  positions: {
+    'member-id-1': 'reserved-1',
+    'member-id-2': 'reserved-2',
+    'member-id-3': 'auto'
+  }
+})
+```
+
+### Use "self" keyword
+
+```typescript
+// Position yourself without knowing your member ID
+await call.setPositions({
+  positions: {
+    'self': 'reserved-1'
+  }
+})
+
+// Mix self and other member IDs
+await call.setPositions({
+  positions: {
+    'self': 'reserved-1',
+    'member-id-2': 'reserved-2'
+  }
+})
+```
+
+### Hide multiple members
+
+```typescript
+await call.setPositions({
+  positions: {
+    'member-id-1': 'off-canvas',
+    'member-id-2': 'off-canvas'
+  }
+})
+```
+
+### Promote/demote members
+
+```typescript
+// Promote a member to a reserved position
+async function promoteMember(memberId: string) {
+  await call.setPositions({
+    positions: {
+      [memberId]: 'reserved-1'
+    }
+  })
+}
+
+// Demote a member back to auto positioning
+async function demoteMember(memberId: string) {
+  await call.setPositions({
+    positions: {
+      [memberId]: 'auto'
+    }
+  })
+}
+```

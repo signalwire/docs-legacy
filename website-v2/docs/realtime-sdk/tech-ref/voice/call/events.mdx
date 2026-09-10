@@ -1,0 +1,316 @@
+---
+title: "Events"
+slug: /node/reference/voice/call/events
+description: Events available on the Call class.
+toc_max_heading_level: 3
+---
+
+[call]: #
+[callcollect]: /docs/server-sdk/node/reference/voice/call-collect
+[calldetect]: /docs/server-sdk/node/reference/voice/call-detect
+[callplayback]: /docs/server-sdk/node/reference/voice/call-playback
+[callprompt]: /docs/server-sdk/node/reference/voice/call-prompt
+[callrecording]: /docs/server-sdk/node/reference/voice/call-recording
+[callstate]: /docs/server-sdk/node/reference/voice/call-state
+[calltap]: /docs/server-sdk/node/reference/voice/call-tap
+
+## Events
+
+### onStateChanged
+
+- **Call.listen**(`{ onStateChanged: Callback }`)
+
+Emitted when the state of the call changes. Your event handler
+will be called with an instance of the [`CallState`][callstate] object.
+
+#### Parameters
+
+<ParamField path="call" type="CallState" required>
+  A [`Call`][call] object containing the call state. See [`CallState`][callstate].
+</ParamField>
+
+### onCollectEnded
+
+- **Call.listen**(`{ onCollectEnded: Callback }`)
+
+Emitted when a collect session has ended. Your event handler
+will be called with an instance of the [`CallCollect`][callcollect] object.
+
+#### Parameters
+
+<ParamField path="collect" type="CallCollect" required>
+  A [`CallCollect`][callcollect] object.
+</ParamField>
+
+### onCollectFailed
+
+- **Call.listen**(`{ onCollectFailed: Callback }`)
+
+Emitted when a collect session has failed. Your event handler
+will be called with an instance of the [`CallCollect`][callcollect] object.
+
+#### Parameters
+
+<ParamField path="collect" type="CallCollect" required>
+  A [`CallCollect`][callcollect] object.
+</ParamField>
+
+### onCollectInputStarted {#voice_call_oncollectinputstarted}
+
+- **Call.listen**(`{ onCollectInputStarted: Callback }`)
+
+Emitted when a collect session has started. Your event handler
+will be called with an instance of the [`CallCollect`][callcollect] object.
+
+#### Parameters
+
+<ParamField path="collect" type="CallCollect" required>
+  A [`CallCollect`][callcollect] object.
+</ParamField>
+
+### onCollectStarted
+
+- **Call.listen**(`{ onCollectStarted: Callback }`)
+
+Emitted when a collect session has started. Your event handler
+will be called with an instance of the [`CallCollect`][callcollect] object.
+
+#### Parameters
+
+<ParamField path="collect" type="CallCollect" required>
+  A [`CallCollect`][callcollect] object.
+</ParamField>
+
+### onCollectUpdated
+
+- **Call.listen**(`{ onCollectUpdated: Callback }`)
+
+Emitted when the state of a collect session has changed. Your event handler
+will be called with an instance of the [`CallCollect`][callcollect] object.
+
+#### Parameters
+
+<ParamField path="collect" type="CallCollect" required>
+  A [`CallCollect`][callcollect] object.
+</ParamField>
+
+### onDetectEnded
+
+- **Call.listen**(`{ onDetectEnded: Callback }`)
+
+Emitted when a call detection session has ended. Your event handler
+will be called with an instance of the [`CallDetect`][calldetect] object.
+
+#### Parameters
+
+<ParamField path="detect" type="CallDetect" required>
+  A [`CallDetect`][calldetect] object.
+</ParamField>
+
+### onDetectStarted
+
+- **Call.listen**(`{ onDetectStarted: Callback }`)
+
+Emitted when a call detection session has started. Your event handler
+will be called with an instance of the [`CallDetect`][calldetect] object.
+
+#### Parameters
+
+<ParamField path="detect" type="CallDetect" required>
+  A [`CallDetect`][calldetect] object.
+</ParamField>
+
+### onDetectUpdated
+
+- **Call.listen**(`{ onDetectUpdated: Callback }`)
+
+Emitted when the state of a call detection session has changed. Your event handler
+will be called with an instance of the [`CallDetect`][calldetect] object.
+
+#### Parameters
+
+<ParamField path="detect" type="CallDetect" required>
+  A [`CallDetect`][calldetect] object.
+</ParamField>
+
+### onPlaybackEnded
+
+- **Call.listen**(`{ onPlaybackEnded: Callback }`)
+
+Emitted when a playback has ended. Your event handler
+will be called with an instance of the [`CallPlayback`][callplayback] object.
+
+#### Parameters
+
+<ParamField path="playback" type="CallPlayback" required>
+  A [`CallPlayback`][callplayback] object.
+</ParamField>
+
+### onPlaybackFailed
+
+• **Call.listen**(`{ onPlaybackFailed: Callback }`)
+
+Emitted when a playback has failed. Your event handler
+will be called with an instance of the [`CallPlayback`][callplayback] object.
+
+#### Parameters
+
+<ParamField path="playback" type="CallPlayback" required>
+  A [`CallPlayback`][callplayback] object.
+</ParamField>
+
+### onPlaybackStarted
+
+- **Call.listen**(`{ onPlaybackStarted: Callback }`)
+
+Emitted when a playback has started. Your event handler
+will be called with an instance of the [`CallPlayback`][callplayback] object.
+
+#### Parameters
+
+<ParamField path="playback" type="CallPlayback" required>
+  A [`CallPlayback`][callplayback] object.
+</ParamField>
+
+### onPlaybackUpdated
+
+- **Call.listen**(`{ onPlaybackUpdated: Callback }`)
+
+Emitted when the state of a playback has changed. Your event handler
+will be called with an instance of the [`CallPlayback`][callplayback] object.
+
+#### Parameters
+
+<ParamField path="playback" type="CallPlayback" required>
+  A [`CallPlayback`][callplayback] object.
+</ParamField>
+
+### onPromptEnded
+
+- **Call.listen**(`{ onPromptEnded: Callback }`)
+
+Emitted when a prompt has ended. Your event handler
+will be called with an instance of the [`CallPrompt`][callprompt] object.
+
+#### Parameters
+
+<ParamField path="prompt" type="CallPrompt" required>
+  A [`CallPrompt`][callprompt] object.
+</ParamField>
+
+### onPromptFailed
+
+- **Call.listen**(`{ onPromptFailed: Callback }`)
+
+Emitted when a prompt has failed. Your event handler
+will be called with an instance of the [`CallPrompt`][callprompt] object.
+
+#### Parameters
+
+<ParamField path="prompt" type="CallPrompt" required>
+  A [`CallPrompt`][callprompt] object.
+</ParamField>
+
+### onPromptStarted
+
+- **Call.listen**(`{ onPromptStarted: Callback }`)
+
+Emitted when a prompt has started. Your event handler
+will be called with an instance of the [`CallPrompt`][callprompt] object.
+
+#### Parameters
+
+<ParamField path="prompt" type="CallPrompt" required>
+  A [`CallPrompt`][callprompt] object.
+</ParamField>
+
+### onPromptUpdated
+
+- **Call.listen**(`{ onPromptUpdated: Callback }`)
+
+Emitted when the state of a prompt has changed. Your event handler
+will be called with an instance of the [`CallPrompt`][callprompt] object.
+
+#### Parameters
+
+<ParamField path="prompt" type="CallPrompt" required>
+  A [`CallPrompt`][callprompt] object.
+</ParamField>
+
+### onRecordingEnded
+
+- **Call.listen**(`{ onRecordingEnded: Callback }`)
+
+Emitted when a recording has ended. Your event handler
+will be called with an instance of the [`CallRecording`][callrecording] object.
+
+#### Parameters
+
+<ParamField path="recording" type="CallRecording" required>
+  A [`CallRecording`][callrecording] object.
+</ParamField>
+
+### onRecordingFailed
+
+- **Call.listen**( `{ onRecordingFailed: Callback }`)
+
+Emitted when a recording has failed. Your event handler
+will be called with an instance of the [`CallRecording`][callrecording] object.
+
+#### Parameters
+
+<ParamField path="recording" type="CallRecording" required>
+  A [`CallRecording`][callrecording] object.
+</ParamField>
+
+### onRecordingStarted
+
+- **Call.listen**(`{ onRecordingStarted: Callback }`)
+
+Emitted when a recording has started. Your event handler
+will be called with an instance of the [`CallRecording`][callrecording] object.
+
+#### Parameters
+
+<ParamField path="recording" type="CallRecording" required>
+  A [`CallRecording`][callrecording] object.
+</ParamField>
+
+### onRecordingUpdated
+
+- **Call.listen**(`{ onRecordingUpdated: Callback }`)
+
+Emitted when the state of a recording has changed. Your event handler
+will be called with an instance of the [`CallRecording`][callrecording] object.
+
+#### Parameters
+
+<ParamField path="recording" type="CallRecording" required>
+  A [`CallRecording`][callrecording] object.
+</ParamField>
+
+### onTapEnded
+
+- **Call.listen**(`{ onTapEnded: Callback }`)
+
+Emitted when a tap has ended. Your event handler
+will be called with an instance of the [`CallTap`][calltap] object.
+
+#### Parameters
+
+<ParamField path="tap" type="CallTap" required>
+  A [`CallTap`][calltap] object.
+</ParamField>
+
+### onTapStarted
+
+- **Call.listen**(`{ onTapStarted: Callback }`)
+
+Emitted when a tap has started. Your event handler
+will be called with an instance of the [`CallTap`][calltap] object.
+
+#### Parameters
+
+<ParamField path="tap" type="CallTap" required>
+  A [`CallTap`][calltap] object.
+</ParamField>

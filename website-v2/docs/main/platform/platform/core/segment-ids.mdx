@@ -1,0 +1,32 @@
+---
+title: Segment IDs
+description: Learn about Segment IDs and how to retrieve them from your SignalWire Dashboard
+slug: /platform/what-is-a-sid
+x-custom:
+  tags:
+    - product:signalwire_space
+---
+
+A Segment ID (SID) is a [UUID](https://en.wikipedia.org/wiki/Universally_unique_identifier "Universally Unique Identifier") (Universally Unique Identifier) that uniquely identifies all communication aspects on SignalWire. This includes calls, SMS, and faxes. The SID is used to log, track and identify events. 
+
+For example, a voice call will have the same Segment ID throughout the lifecycle of the call. So you can use the SID to track that call in your system or database.
+
+## How to locate your SIDs
+
+SIDs can be found in the logs section of your [SignalWire Dashboard](https://my.signalwire.com/logs/voices).
+You will see sections related to Voice, Conferencing, Messaging, and Fax. 
+
+Open the detail view of any individual log you'd like to investigate or find the SID of.
+
+<Frame caption="SignalWire Dashboard logs section showing various log entries.">
+    ![Logs section in the SignalWire Dashboard displaying log entries with their associated SIDs.](@image/dashboard/logs.webp)
+</Frame>
+
+The SID will be displayed in the log under the "Voice Segment ID", "Message Segment ID", or "Fax Segment ID" section, depending on the type of communication.
+
+In REST APIs related to calls, messages, and faxes, the SID is returned in the response as `id`.
+
+## Providing SIDs for support
+
+When filing a ticket with SignalWire Support, always include the SID from the log where the incident occurred.
+For failing messages or calls, this SID allows for the support team to quickly isolate and investigate the issue.

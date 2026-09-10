@@ -1,0 +1,58 @@
+---
+title: "PubSub Client"
+sidebar_label: Client
+slug: /node/reference/pubsub/client
+description: PubSub Client reference for publishing and subscribing to messages.
+sidebar_position: 1
+toc_max_heading_level: 3
+---
+
+[events]: /docs/server-sdk/v3/node/reference/pubsub/client/events
+
+The PubSub Client enables real-time publish/subscribe messaging. It connects to SignalWire and allows you to subscribe to channels and publish messages to them.
+
+```javascript
+import { PubSub } from "@signalwire/realtime-api";
+
+const pubSubClient = new PubSub.Client({
+  project: "<project-id>",
+  token: "<api-token>",
+});
+```
+
+After instantiating, call `subscribe()` to join channels, then use `publish()` to send messages and listen for the `message` event to receive them. See [Events][events] for all available events.
+
+## Constructor
+
+▸ **new PubSub.Client**(`opts`): `PubSub.Client`
+
+Creates a new PubSub Client instance.
+
+#### Parameters
+
+| Name | Type | Description |
+|:-----|:-----|:------------|
+| `opts.project` | `string` | **Required.** SignalWire project ID. |
+| `opts.token` | `string` | **Required.** SignalWire API token. |
+| `opts.debug.logWsTraffic?` | `boolean` | Log WebSocket traffic for debugging. Default: `false`. |
+
+## Examples
+
+### Subscribing to channels
+
+```javascript
+await pubSubClient.subscribe(["notifications"]);
+
+pubSubClient.on("message", (message) => {
+  console.log("Received:", message.content);
+});
+```
+
+### Publishing messages
+
+```javascript
+await pubSubClient.publish({
+  channel: "notifications",
+  content: { type: "alert", text: "New update available" },
+});
+```

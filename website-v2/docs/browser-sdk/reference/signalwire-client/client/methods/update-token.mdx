@@ -1,0 +1,41 @@
+---
+title: "updateToken"
+slug: /js/reference/signalwire/client/update-token
+description: updateToken method for the SignalWire Client.
+toc_max_heading_level: 3
+---
+
+### updateToken
+
+- **updateToken**(`token`: `string`): `Promise<void>`
+
+Update the auth token being used by the client. Use this when the old token is about to expire and you have refreshed it through OAuth2.
+
+#### Parameters
+
+<ParamField path="token" type="string" required={true}>
+  The new token that the client should start to use.
+</ParamField>
+
+#### Returns
+
+`Promise<void>`
+
+Returns empty object when successful. Throws an error with the server's error message when unsuccessful.
+
+#### Example
+
+```javascript
+import { SignalWire } from "@signalwire/js";
+
+async function main() {
+  const client = await SignalWire({
+    token: "<TOKEN>",
+    onRefreshToken: () => {
+      let newToken = refreshToken(); // this function should refresh token as per OAuth2 protocol
+      client.updateToken(newToken);
+    },
+  });
+}
+```
+

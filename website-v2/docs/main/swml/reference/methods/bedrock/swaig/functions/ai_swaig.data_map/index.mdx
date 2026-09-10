@@ -1,0 +1,488 @@
+---
+slug: /swml/reference/amazon-bedrock/swaig/functions/data-map
+title: data_map
+description: Defines how a SWAIG function should process and respond to the user's input data.
+toc_max_heading_level: 3
+---
+import ActionsPartial from '@site/docs/_partials/swml/_actions.mdx';
+
+
+`functions[].data_map` defines how a [`SWAIG function`](/docs/swml/reference/amazon-bedrock/swaig/functions) should process and respond to the user's input data.
+
+<ParamField path="functions[].data_map" type="object">
+  An object that processes function inputs and executes operations through expressions, webhooks, or direct output.
+</ParamField>
+
+<Warning title="Processing order">
+The components are processed in the following sequence:
+
+1. `expressions` - Processes data using pattern matching (includes its own `output`)
+2. `webhooks` - Makes external API calls (includes its own `output` and `expressions`)
+3. `output` - Returns a direct response and actions to perform
+</Warning>
+
+Similar to a `return` statement in conventional programming languages,
+when a valid [`output`](#output) is encountered within any component,
+it immediately terminates function execution.
+The `output` provides:
+1. A `response` object: Contains static text for the AI agent's context
+2. An optional `action` object: Defines executable actions to be triggered
+
+If no component produces a valid `output`, the system continues processing in sequence:
+- First attempts `expressions`
+- If unsuccessful, tries `webhooks`
+- If still unsuccessful, attempts top-level `output`
+- If all fail, returns a generic fallback error message
+
+
+## **Properties**
+
+<ParamField path="data_map.expressions" type="object[]">
+  An array of objects that define plain string or regex patterns to match against the user's input. When a match is found, the `output` object is returned.
+</ParamField>
+
+<Indent>
+
+<ParamField path="expressions[].string" type="string" required={true}>
+  The actual input or value from the user or system.
+</ParamField>
+
+<ParamField path="expressions[].pattern" type="string" required={true}>
+  A regular expression pattern to validate or match the string.
+</ParamField>
+
+<ParamField path="expressions[].output" type="object" required={true}>
+  Defines the response or action to be taken when the pattern matches.
+  See [`output`](#output) for details.
+</ParamField>
+
+</Indent>
+
+
+### webhooks {#webhooks}
+
+<ParamField path="data_map.webhooks" type="object[]">
+  An array of objects that define external API calls. If a webhook defines `foreach`, `expressions`, and `output`, they are evaluated in that order.
+</ParamField>
+
+<Indent>
+
+<ParamField path="webhooks[].url" type="string" required={true}>
+  The endpoint for the external service or API. Authentication can also be set in the url in the format of `username:password@url`. See [webhook runtime request](#webhook-runtime-request) for details on template variable substitution and request behavior.
+</ParamField>
+
+<ParamField path="webhooks[].method" type="string" required={true}>
+  The HTTP method (GET, POST, etc.) for the API call.
+</ParamField>
+
+<ParamField path="webhooks[].headers" type="object">
+  Any necessary headers for the API call.
+</ParamField>
+
+<ParamField path="webhooks[].params" type="object">
+  An object of any necessary parameters for the API call. The key is the parameter name and the value is the parameter value.
+</ParamField>
+
+<ParamField path="webhooks[].input_args_as_params" type="boolean" default="false">
+  A boolean to determine if the input [parameters](/docs/swml/reference/amazon-bedrock/swaig/functions/parameters) should be passed as parameters.
+</ParamField>
+
+<ParamField path="webhooks[].required_args" type="string | string[]">
+  A string or array of strings that represent the [parameters](/docs/swml/reference/amazon-bedrock/swaig/functions/parameters) that are required to make the webhook request.
+</ParamField>
+
+<ParamField path="webhooks[].error_keys" type="string | string[]">
+  A string or array of strings that represent the keys to be used for error handling.
+</ParamField>
+
+<ParamField path="webhooks[].expressions" type="object">
+  A list of expressions to be evaluated upon matching.
+  See [`expressions`](#expressions) for details.
+</ParamField>
+
+<ParamField path="webhooks[].foreach" type="object">
+  Iterates over an array of objects and processes an output based on each element in the array. Works similarly to JavaScript's [forEach](https://www.w3schools.com/jsref/jsref_foreach.asp) method.
+</ParamField>
+
+<Indent>
+
+<ParamField path="foreach.input_key" type="string" required={true}>
+  The key to be used to access the current element in the array.
+</ParamField>
+
+<ParamField path="foreach.output_key" type="string" required={true}>
+  The key that can be referenced in the output of the `foreach` iteration. The values that are stored from `append` will be stored in this key.
+</ParamField>
+
+<ParamField path="foreach.append" type="string" required={true}>
+  The values to append to the `output_key`.
+  Properties from the object can be referenced and added to the `output_key` by using the following syntax: `${this.property_name}`.
+  The `this` keyword is used to reference the current object in the array.
+</ParamField>
+
+<ParamField path="foreach.max" type="number">
+  The max amount of elements that are iterated over in the array. This will start at the beginning of the array.
+</ParamField>
+
+</Indent>
+
+<ParamField path="webhooks[].output" type="object" required={true}>
+  Defines the response or action to be taken when the webhook is successfully triggered.
+  See [`output`](#output) for details.
+</ParamField>
+
+</Indent>
+
+
+### output {#output}
+
+<ParamField path="data_map.output" type="object">
+  Similar to a `return` statement in conventional programming languages, the `data_map.output` object immediately
+  terminates function execution and returns control to the caller.
+</ParamField>
+
+<Indent>
+
+<ParamField path="output.response" type="string" required={true}>
+  Static text that will be added to the AI agent's context.
+</ParamField>
+
+<ParamField path="output.action" type="object[]">
+  A list of SWML-compatible objects that are executed upon the execution of a SWAIG function.
+  See [list of valid actions](#actions) for details.
+</ParamField>
+
+</Indent>
+
+### List of valid actions {#actions}
+
+<ActionsPartial />
+
+
+## **Webhook runtime request**
+
+When the AI triggers a function that uses `data_map.webhooks`, SignalWire sends a request to each configured `url`.
+
+### Template variables
+
+The `url` and `params` fields support `%{variable}` substitution.
+Nested properties use dot notation — for example,
+`https://api.example.com/weather?city=%{args.location}` substitutes the value the AI extracted for `location`.
+For more on [variables](/docs/swml/reference/variables) and scopes, see the [Variables reference](/docs/swml/reference/variables).
+
+<ParamField path="args" type="object">
+  Function argument values extracted by the AI, keyed by argument name.
+</ParamField>
+
+<Indent>
+
+<ParamField path="args.*" type="any">
+  Individual argument value. The key matches an argument name from the function's [`parameters`](/docs/swml/reference/amazon-bedrock/swaig/functions/parameters) schema.
+</ParamField>
+
+</Indent>
+
+<ParamField path="call_id" type="string">
+  Unique identifier for the current call.
+</ParamField>
+
+<ParamField path="ai_session_id" type="string">
+  AI session identifier.
+</ParamField>
+
+<ParamField path="conversation_id" type="string">
+  Conversation identifier.
+</ParamField>
+
+<ParamField path="function" type="string">
+  Name of the function being executed.
+</ParamField>
+
+<ParamField path="caller_id_name" type="string">
+  Caller's display name.
+</ParamField>
+
+<ParamField path="caller_id_num" type="string">
+  Caller's phone number.
+</ParamField>
+
+<ParamField path="project_id" type="string">
+  SignalWire project ID.
+</ParamField>
+
+<ParamField path="space_id" type="string">
+  SignalWire space ID.
+</ParamField>
+
+<ParamField path="app_name" type="string">
+  AI application name.
+</ParamField>
+
+<ParamField path="global_data" type="object">
+  The application's global data.
+</ParamField>
+
+<Indent>
+
+<ParamField path="global_data.*" type="any">
+  User-defined property.
+</ParamField>
+
+</Indent>
+
+<ParamField path="meta_data" type="object">
+  Function metadata (when `meta_data_token` is set).
+</ParamField>
+
+<Indent>
+
+<ParamField path="meta_data.*" type="any">
+  User-defined property.
+</ParamField>
+
+</Indent>
+
+### Request body
+
+When `params` is defined (or `method` is `POST`), SignalWire sends the `params` object as the JSON request body.
+Template variables in `params` values are expanded before sending.
+
+If no `params` are defined and `method` is not `POST`, the request is sent without a body.
+
+If [`input_args_as_params`](#properties) is `true`, the function arguments extracted by the AI
+are merged into `params`. If no `params` are defined, the arguments become the entire request body.
+
+### Response processing
+
+The JSON response from the webhook is processed through the [`output`](#output) template.
+Fields from the response can be referenced using `%{key}` syntax in the output's `response` string.
+For example, if the webhook returns `{"temp": 72, "conditions": "sunny"}`, an output of
+`"The weather is %{temp}°F with %{conditions}"` will produce `"The weather is 72°F with sunny"`.
+
+
+## **Examples**
+
+### expressions
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+data_map:
+  expressions:
+    - string: "starwars"
+      pattern: "(?i)star\\s*wars"
+      output:
+        response: "May the Force be with you!"
+    - string: "startrek"
+      pattern: "(?i)star\\s*trek"
+      output:
+        response: "Live long and prosper!"
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "data_map": {
+    "expressions": [
+      {
+        "string": "starwars",
+        "pattern": "(?i)star\\s*wars",
+        "output": {
+          "response": "May the Force be with you!"
+        }
+      },
+      {
+        "string": "startrek",
+        "pattern": "(?i)star\\s*trek",
+        "output": {
+          "response": "Live long and prosper!"
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+### webhooks with explicit params
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+data_map:
+  webhooks:
+    - url: https://api.example.com/weather
+      method: POST
+      params:
+        call_id: "%{call_id}"
+        city: "%{args.location}"
+      output:
+        response: "The weather in %{city} is %{temp}°F and %{conditions}."
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "data_map": {
+    "webhooks": [
+      {
+        "url": "https://api.example.com/weather",
+        "method": "POST",
+        "params": {
+          "call_id": "%{call_id}",
+          "city": "%{args.location}"
+        },
+        "output": {
+          "response": "The weather in %{city} is %{temp}°F and %{conditions}."
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+Sends the following request body to `https://api.example.com/weather`:
+
+```json
+{
+  "call_id": "xxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+  "city": "New York"
+}
+```
+
+### webhooks with input_args_as_params
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+data_map:
+  webhooks:
+    - url: https://api.example.com/weather
+      method: POST
+      input_args_as_params: true
+      output:
+        response: "The weather is %{temp}°F and %{conditions}."
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "data_map": {
+    "webhooks": [
+      {
+        "url": "https://api.example.com/weather",
+        "method": "POST",
+        "input_args_as_params": true,
+        "output": {
+          "response": "The weather is %{temp}°F and %{conditions}."
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+Sends the AI-extracted arguments directly as the request body:
+
+```json
+{
+  "location": "New York"
+}
+```
+
+### output with action
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+sections:
+  main:
+    - amazon_bedrock:
+        prompt:
+          text: You are a helpful SignalWire assistant.
+        SWAIG:
+          functions:
+            - function: test_function
+              description: This is a test function.
+              parameters:
+                type: object
+                properties:
+                  name:
+                    type: string
+                    description: The name of the person.
+                required:
+                  - name
+              data_map:
+                output:
+                  response: We are testing the function.
+                  action:
+                    - SWML:
+                        sections:
+                          main:
+                            - play:
+                                url: 'say:We are testing the function.'
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "sections": {
+    "main": [
+      {
+        "amazon_bedrock": {
+          "prompt": {
+            "text": "You are a helpful SignalWire assistant."
+          },
+          "SWAIG": {
+            "functions": [
+              {
+                "function": "test_function",
+                "description": "This is a test function.",
+                "parameters": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "description": "The name of the person."
+                    }
+                  },
+                  "required": [
+                    "name"
+                  ]
+                },
+                "data_map": {
+                  "output": {
+                    "response": "We are testing the function.",
+                    "action": [
+                      {
+                        "SWML": {
+                          "sections": {
+                            "main": [
+                              {
+                                "play": {
+                                  "url": "say:We are testing the function."
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>

@@ -1,0 +1,74 @@
+---
+title: "setOutputVolume"
+slug: /node/reference/video/room-session/set-output-volume
+description: setOutputVolume method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+[roomsession-41]: /docs/server-sdk/node/reference/video/room-session
+
+### setOutputVolume
+
+- **setOutputVolume**(`params`): `Promise<void>`
+
+Sets the output volume for the member (e.g., the speaker output level).
+
+#### Parameters
+
+<ParamField path="params" type="object" required>
+  Object containing the parameters of the method.
+</ParamField>
+
+<Indent>
+<ParamField path="memberId" type="string">
+  ID of the member to affect.
+</ParamField>
+
+<ParamField path="volume" type="number" required default="0">
+  Desired volume. Values range from -50 to 50.
+</ParamField>
+</Indent>
+
+#### Returns
+
+`Promise<void>`
+
+#### Example
+
+In this example, we wait for a room to start and then wait for a member to join the room.
+When a member joins the room, we set the output volume for that member to -50.
+This example assumes that there is a [`RoomSession`][roomsession-41]
+already active and that members are joining the room.
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+// Initialize the SignalWire client
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" });
+
+// Access video client from the main client
+const videoClient = client.video;
+
+// Setup listener for when a room starts
+await videoClient.listen({
+  onRoomStarted: async (roomsession) => {
+
+    console.log("Room started", roomsession.displayName);
+
+    roomsession.listen({
+      onMemberJoined: async (member) => {
+        console.log("Member joined", member.displayName);
+         // set output volume to -50dB
+         console.log("Setting output volume to -50dB for", member.name);
+        await roomsession.setOutputVolume({
+          volume: -50,
+          memberId: member.id
+        });
+      },
+      onMemberUpdated: async (member) => {
+        console.log(`${member.name} output volume is now ${member.outputVolume}`);
+      },
+    })
+  }
+});
+```

@@ -1,0 +1,41 @@
+---
+title: PlayMediaAction
+slug: /go/reference/calling/actions/play-media
+description: The Play Media Action is used to play media on a call.
+toc_max_heading_level: 3
+---
+
+[link]: /docs/server-sdk/v2/go/reference/calling/call
+
+## Relay.Calling.PlayMediaAction
+
+This object represents a `media action` that is currently active on a call.
+
+### Properties
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `call` | [`Relay.Calling.Call`][link] | This is the call the action is occurring on. |
+
+
+### Methods
+
+<div className="method-definitions"></div>
+
+#### stop()
+
+Stop the action immediately.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+**Examples**
+
+> Play an audio file and stop it if `Agent` is not available.
+
+```go
+```

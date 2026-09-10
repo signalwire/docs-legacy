@@ -1,0 +1,150 @@
+---
+title: RELAY SDK for .NET
+slug: /dotnet/reference
+toc_max_heading_level: 3
+---
+import V2IntroPartial from '@site/realtime-sdk_versioned_docs/version-v2/snippets/v2-intro.mdx';
+
+
+[net-core-2-1]: https://docs.microsoft.com/en-us/dotnet/core/
+[net-framework-4-6-1]: https://docs.microsoft.com/en-us/dotnet/framework/get-started/system-requirements
+[relay-client]: /docs/server-sdk/v2/dotnet/reference/relay-client
+[relay-consumer]: /docs/server-sdk/v2/dotnet/reference/consumer
+[task]: /docs/server-sdk/v2/dotnet/reference/task
+
+<V2IntroPartial />
+
+
+## Getting Started
+
+The RELAY SDK for .NET enables .NET developers to connect and use SignalWire's RELAY APIs within their own .NET code.
+
+## Installation
+
+Install the package for a .NET Core project using NUGET:
+
+```shell
+dotnet add package signalwire-dotnet
+```
+
+Or you can install the package through Visual Studio's NUGET package manager, simply install the `signalwire-dotnet` package to your project.
+
+## Minimum Requirements
+
+The .NET SDK may be used with [.NET Framework 4.6.1][net-framework-4-6-1] or greater or [.NET Core 2.1][net-core-2-1] or greater.
+
+## Using the SDK
+
+To use the SDK, you need your **project** and **token** from your SignalWire dashboard.
+
+### RELAY Consumer
+
+A [`SignalWire.Relay.Consumer`][relay-consumer] creates a long running process, allowing you to respond to incoming requests and events in realtime. RELAY Consumers abstract all the setup of connecting to RELAY and automatically dispatches workers to handle requests; so you can concentrate on writing your code without having to worry about multi-threading or blocking, everything just works. Think of RELAY Consumers like a background worker system for all your calling and messaging needs.
+
+RELAY Consumers can scale easily, simply by running multiple instances of your `SignalWire.Relay.Consumer` process. Each event will only be delivered to a single consumer, so as your volume increases, just scale up! This process works well whether you are using Docker Swarm, a Procfile on Heroku, your own webserver, and most other environments.
+
+> Setting up a new consumer is the easiest way to get up and running.
+
+```csharp
+using SignalWire.Relay;
+using SignalWire.Relay.Calling;
+using System;
+using System.Collections.Generic;
+
+namespace Example
+{
+    class ExampleConsumer : Consumer
+    {
+        protected override void Setup()
+        {
+            Project = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX";
+            Token = "PTXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
+            Contexts = new List<string> { "test" };
+        }
+
+        protected override void OnIncomingCall(Call call)
+        {
+            AnswerResult resultAnswer = call.Answer();
+            if (!resultAnswer.Successful) return;
+
+            call.PlayTTS("Welcome to SignalWire!");
+
+            call.Hangup();
+        }
+    }
+
+    class Program
+    {
+        public static void Main()
+        {
+            new ExampleConsumer().Run();
+        }
+    }
+}
+```
+
+[Learn more about RELAY Consumers][relay-consumer]
+
+### RELAY Task
+
+A [`SignalWire.Relay.RelayTask`][task] is simple way to send jobs to your [`SignalWire.Relay.Consumer`][relay-consumer] from a short lived process, like a web framework. RELAY Tasks allow you to pass commands down to your Consumers without blocking your short lived request. Think of a RELAY Task as a way to queue a job for your background workers to processes asynchronously.
+
+For example, if you wanted to make an outbound call and play a message when your user clicks a button on your web application, since RELAY is a realtime protocol and relies on you to tell it what to do in realtime, if you did this within your web application, your web server would block until the call was finished... this may take a long time! Instead, simply create a new RELAY Task. This task will be handled by a running RELAY Consumer process and your web application can respond back to your user immediately.
+
+```csharp
+RelayTask.Deliver(validHost, validProjectID, validToken, validContext, new JObject {
+    ["number_to_call"] = "+1555XXXXXXX",
+    ["message_to_play"] = "We have a message for you",
+});
+```
+
+[Learn more about RELAY Tasks][task]
+
+### RELAY Client
+
+[`SignalWire.Relay.Client`][relay-client] is a lower level object, giving you a basic connection to RELAY but that is all. It is best used when you are creating a script only concerned with sending outbound requests or you want complete control over the RELAY connection yourself.
+
+> Setting up a new client and make an outbound call.
+
+```csharp
+using SignalWire.Relay;
+using SignalWire.Relay.Calling;
+using System;
+using System.Threading.Tasks;
+
+namespace Example
+{
+    internal class Program
+    {
+        public static void Main()
+        {
+            using (Client client = new Client("XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX", "PTXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"))
+            {
+                // Assign callbacks
+                client.OnReady += c =>
+                {
+                    // This callback cannot block, so create a threaded task
+                    Task.Run(() =>
+                    {
+                        DialResult resultDial = client.Calling.DialPhone("+1XXXXXXXXXX", "+1YYYYYYYYYY");
+
+                        if (resultDial.Successful)
+                        {
+                            // Your call has been answered, use resultDial.Call to access it
+                        }
+                    });
+                };
+
+                // Connect the client
+                client.Connect();
+
+                // Prevent exit until a key is pressed
+                Console.Write("Press any key to exit...");
+                Console.ReadKey(true);
+            }
+        }
+    }
+}
+```
+
+[Learn more about RELAY Clients][relay-client]

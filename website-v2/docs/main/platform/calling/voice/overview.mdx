@@ -1,0 +1,181 @@
+---
+title: Voice
+slug: /platform/voice
+sidebar_label: Overview
+sidebar_position: 0
+description: Build next-generation calling applications with integrated AI, plug-and-play compatibility with other providers, and infinite scalability
+---
+
+Whether building a UCaaS solution, modernizing a legacy IVR, augmenting CX with AI, or migrating from another provider's APIs, our comprehensive technical references and guides have you covered.
+
+## Get started
+
+<CardGroup cols={3}>
+  <Card title="Buy a phone number" icon="solid credit-card" href="/docs/platform/phone-numbers">
+    SignalWire phone numbers in the Dashboard
+  </Card>
+  <Card title="Quickstart with AI" icon="solid bolt" href="/docs/platform/ai/no-code-agents">
+    Deploy a serverless voice AI Agent and call it over the PSTN in under 5 minutes with SWML
+  </Card>
+  <Card title="Make your first phone calls" icon="solid phone" href="/docs/swml/guides/make-and-receive-calls">
+    The fundamentals of your first calling app
+  </Card>
+  <Card title="Migrate a Twilio application" icon="solid rocket" href="/docs/compatibility-api">
+    Get started with our Compatibility API
+  </Card>
+  <Card title="No-code apps with Call Flow Builder" icon="solid grid-2" href="/docs/call-flow-builder">
+    Create a drag-and-drop calling application
+  </Card>
+</CardGroup>
+
+## Choose an API
+
+SignalWire's advanced APIs and elastic cloud infrastructure make it a breeze to build modern and powerful voice applications using both PSTN and SIP endpoints. 
+
+- **SignalWire REST API:** A robust, modern and flexible API for building integrated, advanced communications applications.
+- **Compatibility API:** Ideal for porting code from other providers. It can run serverless, but it also supports Python, PHP, Node.js, and other languages.
+- **Realtime API:** This API is ideal if you are an advanced developer and you want flexible, modern and realtime SDKs for Node.js.
+
+<CardGroup cols={2}>
+  <Card title="SignalWire API" icon="solid code" href="/docs/apis">
+    High-quality, scalable, and secure voice API
+  </Card>
+  <Card title="Compatibility API & cXML" icon="solid arrows-left-right" href="/docs/compatibility-api">
+    Easily migrate from Twilio and other providers
+  </Card>
+  <Card title="RELAY Realtime Server SDK" icon="solid server" href="/docs/server-sdk/node/reference/voice">
+    Next-gen server telephony applications powered by our RELAY WebSocket API
+  </Card>
+  <Card title="RELAY Browser SDK" icon="solid mobile-screen" href="/docs/browser-sdk/js">
+    Bring telephone capabilities to the browser with our Node.js SDK
+  </Card>
+</CardGroup>
+
+## Low-code and no-code solutions
+
+<CardGroup cols={2}>
+  <Card title="Call Flow Builder" icon="solid grip-vertical" href="/docs/call-flow-builder">
+    Drag-and-drop, no-code call application builder
+  </Card>
+  <Card title="SWML" icon="solid file-code" href="/docs/swml">
+    Write realtime, AI-integrated calling applications using simple JSON or YAML scripts
+  </Card>
+</CardGroup>
+
+## Popular guides
+
+<CardGroup cols={2}>
+  <Card title="SIP trunking" icon="solid phone-volume" href="/docs/platform/voice/sip/trunking">
+    Route SIP traffic through the SignalWire platform to your PBX system.
+  </Card>
+  <Card title="Getting started with SIP" icon="solid comments" href="/docs/platform/voice">
+    Guides that focus on the basic setup for SIP calling.
+  </Card>
+</CardGroup>
+
+{/* Core links */}
+
+## Frequently asked questions
+
+<AccordionGroup>
+<Accordion title="How many calls per second can I send?">
+You can send up to `1 CPS` (Call Per Second) across your SignalWire Space.
+
+Consult our [Guide to Rate Limits](/docs/platform/rate-limits) for more information. Customers can also request additional [increases to their Space limits](/docs/platform/rate-limits).
+</Accordion>
+
+<Accordion title="Are calls queued as they go out?">
+Every Space has a [default call backlog](/docs/platform/rate-limits#queue-and-backlog-system) of 10k. SignalWire will send calls out at 1 call per second per phone number. If your backlog fills up past 10k, you will not be able to queue any more calls until it decreases. You can request an increase to this backlog [here](/docs/platform/rate-limits).
+</Accordion>
+
+<Accordion title="How do I enable higher throughput calling?">
+We do have offerings available for high throughput toll-free calling and high throughput SIP calling.
+Please reach out to [Support@signalwire.com](mailto:Support@signalwire.com) to get this process started.
+</Accordion>
+
+<Accordion title="Can you build an IVR (Interactive Voice Response) with SignalWire?">
+Yes, SignalWire has all the components to build a very powerful IVR! You could use [SWML](/docs/swml), the [RELAY SDK](/docs/compatibility-api/sdks), or even build a video/voice solution using our [Javascript SDKs](/docs/browser-sdk/js).
+</Accordion>
+
+<Accordion title="Does SignalWire offer phone numbers to purchase?">
+Yes! You can purchase local long code, toll-free, and shortcode numbers from our carrier partners through the SignalWire platform. You can read about how to purchase numbers [here](/docs/platform/phone-numbers).
+</Accordion>
+
+<Accordion title="What do I do if I can't find the specific area code or phone number that I need?">
+SignalWire is a communications platform, not a carrier. To make our customers' lives easier, we integrate with our carrier peers so that you can buy numbers directly through us from them. That being said, the availability of numbers is totally reliant on our carrier.
+If you cannot find the area code you need, please create a Support ticket via the help link in your SignalWire Space and our team will do their best to get you the numbers you need. You can also [port any number into SignalWire](/docs/platform/porting-into-signalwire) from another provider!
+</Accordion>
+
+<Accordion title="What is PSTN?">
+Public Switched Telephone Network (PSTN) is the network that carries your voice call when you call from a landline, cell phone, or DID (such as those SignalWire owns). This uses regular telephone infrastructure rather than SIP or other protocols.
+</Accordion>
+
+<Accordion title="What is SIP?">
+SIP (Session Initiation Protocol) refers to the process through which phone calls can take place over the internet (i.e. VOIP) instead of physical regular phone lines. This allows for greater worldwide reach, less physical requirements, and is more affordable/scalable for businesses.
+</Accordion>
+
+<Accordion title="How is SIP on SignalWire different from traditional SIP trunking?">
+A SIP trunk is just a container that holds multiple SIP lines. In a sense, it's just an abstract version of traditional trunks—bundles of wire connecting switches.
+</Accordion>
+
+<Accordion title="What is BYOC (Bring Your Own Carrier)?">
+BYOC allows you to use SignalWire's APIs, services, and programmability all while keeping your current SIP providers for outbound/inbound calling. If you are interested in BYOC, see our [full guide](/docs/platform/voice/sip/bring-your-own-carrier) to get started.
+</Accordion>
+
+<Accordion title="How many SIP channels can you have for each phone number?">
+You have unlimited inbound and 1CPS per phone number outbound.
+If you would like to send more than 1 SIP call per second per phone number, you can reach out to
+[Support@signalwire.com](mailto:Support@signalwire.com)
+to talk about raising your max throughput.
+</Accordion>
+
+<Accordion title="How many legs are in a SIP call?">
+The number of call legs is dependent on the call flow. A call is made up of multiple call legs where a call leg represents a relationship between two user agents. If you directly forward a call to a SIP endpoint, that is only two legs (inbound and outbound). If a call comes into SignalWire and is then forwarded to 4 SIP endpoints, that would be 5 legs.
+</Accordion>
+
+<Accordion title="Do you have Answering Machine Detection?">
+Yes, SignalWire will allow you to easily implement Answering Machine Detection (AMD) on your calls! AMD listens to the call to determine if the party that picked up is a real person or a voicemail machine. You can use this information to determine whether to leave a voicemail message or begin interacting with a real person. You can use AMD through [`detect_machine`](/docs/swml/reference/detect-machine) in SWML or `detect_answering_machine` using the [Realtime SDK](/docs/server-sdk/node/reference/voice/call/detect-answering-machine).
+</Accordion>
+
+<Accordion title="Do you have call recording capabilities?">
+Yes, call recording is possible through the [Realtime SDK](/docs/server-sdk/node/reference/voice/call/record-audio) or [SWML](/docs/swml/reference/record-call). Check out our guide on [Recording Calls](/docs/swml/guides/record-calls).
+</Accordion>
+
+<Accordion title="Do you have transcription capabilities?">
+Yes - transcription is possible using the [Realtime SDK](/docs/server-sdk/node/reference/voice) or through SWML's [AI agent](/docs/swml/reference/ai) capabilities. You can also set a callback in order to do something with your transcriptions when they're received.
+</Accordion>
+
+<Accordion title="Do you have text-to-speech capabilities?">
+Yes - text to speech is simple with either the [RELAY Realtime SDK](/docs/server-sdk/v3/node/reference/voice/call/play-tts) or [SWML's play method](/docs/swml/reference/play).
+</Accordion>
+
+<Accordion title="What about speech-to-text capabilities?">
+Speech to text is available through [SWML's prompt method](/docs/swml/reference/prompt) or you can collect speech and transcribe with Node.js using the [RELAY Realtime SDK](/docs/server-sdk/v3/node/reference/voice/call/collect).
+</Accordion>
+
+<Accordion title="Do you have call whisper?">
+Call Whisper involves playing a short message before the callee accepts the call and connects to the caller. At this time, the caller will still hear ringing. This allows for the callee to screen the call and choose to accept/reject or gather additional information before connecting with the caller. Check out our [Call Whisper guide](/docs/swml/guides/call-whisper) for a SWML example.
+</Accordion>
+
+<Accordion title="How do I set Caller ID/CNAM?">
+The Caller Name (CNAM) is a feature that displays your Name or Company Name on the Caller ID display of the party you are calling. When it is set up, your Caller ID Name will display as text along with your Caller ID Number.
+The Caller ID is the actual phone number calling in, whereas the accompanying text that provides the identifying name for that number is called CNAM (a.k.a. "Caller Name").
+Follow the steps [here](/docs/platform/voice/how-to-set-caller-id-or-cnam) to get CNAM or caller ID set up.
+</Accordion>
+
+<Accordion title="Do you support ringless voicemail?">
+While it is possible to create ringless voicemail using SignalWire APIs, we do not provide support in creating this feature. Ringless voicemail is most commonly associated with spam to the carriers and therefore may not be able to be corrected if you run into problems.
+</Accordion>
+
+<Accordion title="Where are your nearest data hubs/centers?">
+We have an elastic swarm of servers all across the world and across different providers to ensure minimum latency and maximum uptime. If you are looking for more details or would like to request a node in a specific location, please reach out to [sales@signalwire.com](mailto:sales@signalwire.com).
+</Accordion>
+
+<Accordion title="Is SignalWire PCI compliant?">
+Yes, SignalWire is PCI compliant. All applications built using SignalWire will also have to be built to maintain this compliance, for example: pausing/terminating any recording or transcription before accepting sensitive information.
+</Accordion>
+
+<Accordion title="Are there prohibited Voice use cases?">
+Yes, phishing and scam calls or calls to numbers that have been listed on a "Do Not Call" registry will be flagged as fraudulent. See the [SignalWire Cloud Agreement](https://signalwire.com/legal/signalwire-cloud-agreement) for more details.
+</Accordion>
+</AccordionGroup>

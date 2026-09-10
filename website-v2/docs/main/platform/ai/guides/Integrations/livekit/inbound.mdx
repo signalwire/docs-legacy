@@ -1,0 +1,146 @@
+---
+title: Route inbound calls to LiveKit
+description: Send inbound PSTN calls to LiveKit with SWML `connect`
+
+slug: /platform/ai/livekit/inbound
+---
+import CreateSwmlScriptPartial from '@site/docs/_partials/common/dashboard/_create-swml-script.mdx';
+
+
+
+In this guide, we will deploy a 
+[SWML](/docs/swml) 
+script that routes inbound calls from SignalWire to the LiveKit platform.
+The script uses the SWML [`connect`](/docs/swml/reference/connect) method
+to dial a LiveKit SIP address.
+
+## Prerequisites
+
+Before getting started, you'll need the following:
+
+  - a [SignalWire Space][signup]
+  - a [LiveKit account][livekit]
+  - a [SignalWire phone number][buy-phone] 
+
+## Setup
+
+<Steps>
+
+### Create a SWML Script
+
+<CreateSwmlScriptPartial />
+
+  - Log in to your SignalWire Dashboard and navigate to the [**Resources**](https://my.signalwire.com/?page=resources) tab on the left-hand sidebar.
+  - Click **Add**, select **Script**, and then choose **SWML Script**.
+  - Paste the following SWML code snippet into the editor:
+
+```yaml
+version: 1.0.0
+sections:
+   main:
+      - connect:
+           to: sip:%{call.to}@your-unique-SIP-domain-from-Livekit.com;transport=tcp
+```
+
+	Be sure to replace `your-unique-SIP-domain-from-Livekit.com` with the SIP domain from your LiveKit settings
+	(for example, `241ozqza.sip.livekit.cloud`).
+	Find this domain under **LiveKit Settings** labeled as **SIP URI**.
+
+  - Save the SWML script once the modifications are complete.
+
+### Assign a phone number
+
+When your SignalWire phone number receives an inbound call, it needs to know how to handle it.
+In this step, we will assign the intended SignalWire phone number to the
+new SWML script Resource as an Address.
+
+<Tip>
+On the SignalWire platform, 
+[Resources](/docs/platform/resources),
+including SWML scripts,
+are powerful building blocks that can orchestrate any kind of communications application.
+Each Resource can have multiple
+[Addresses](/docs/platform/addresses),
+such as phone numbers, SIP addresses, and aliases.
+</Tip>
+
+  - Open the [**Phone Numbers**](https://my.signalwire.com/?page=phone_numbers) tab of your SignalWire Dashboard.
+  - Select the **Edit Settings** option for the phone number you want to use for inbound calls.
+  - Click **Assign Resource** and choose the SWML script you just created.
+
+This ensures that incoming calls to the designated SignalWire phone number follow the routing path defined in the SWML script.
+
+### Configure LiveKit
+
+Next, we will configure a SIP trunk in LiveKit to handle calls routed from SignalWire. 
+Follow the official LiveKit 
+[SIP trunk inbound guide](https://docs.livekit.io/sip/trunk-inbound/) 
+for further information.
+
+### Add a LiveKit SIP Trunk
+
+  - Create a new SIP trunk using the following configuration:
+
+    ```json
+    {
+      "trunk": {
+        "name": "My trunk",
+        "numbers": ["+1XXXXXXXXXX"]
+      }
+    }
+    ```
+
+Be sure to replace `+1XXXXXXXXXX` with the SignalWire phone number you assigned previously. 
+Ensure the number is formatted in E.164 format.
+
+  - Submit your configuration.
+
+</Steps>
+
+After completing this setup, you can use LiveKit's dispatch rules to determine how incoming calls should be handled.
+Consult LiveKit's 
+[Dispatch Rules Guide](https://docs.livekit.io/sip/dispatch-rule/)
+for guidance on managing call routing.
+
+You're all set to start handling inbound calls with LiveKit and SignalWire. 
+If you need further assistance, consult the 
+[LiveKit documentation](https://docs.livekit.io) 
+or reach out to SignalWire support.
+
+## Next steps
+
+### Troubleshooting
+
+- If calls are not reaching LiveKit:
+    - Verify that the **SIP domain** in your SWML script matches your LiveKit settings.
+    - Ensure your phone number is correctly formatted in the trunk configuration.
+
+### Record calls
+
+To record inbound calls, add the `record_call` method to your existing inbound SWML script:
+```yaml
+version: 1.0.0
+sections:
+  main:
+  - record_call:
+      format: mp3
+  - connect:
+      to: sip:%{call.to}@your-unique-SIP-domain-from-Livekit-goes-here.com
+```
+
+These recordings can be accessed in the Dashboard in **Storage > Recordings**,
+or using the 
+[Recordings List API endpoint](/docs/apis/relay-rest/list-recordings).
+
+### View logs
+
+Access call logs in the 
+[Logs](https://my.signalwire.com/?page=logs)
+tab of your SignalWire Dashboard.
+
+
+{/* Links */}
+
+[signup]: https://signalwire.com/signup "Sign up for a SignalWire Space."
+[livekit]: https://cloud.livekit.io/login "Sign up for a LiveKit account."
+[buy-phone]: /docs/platform/phone-numbers "Buy a phone number in the SignalWire dashboard."

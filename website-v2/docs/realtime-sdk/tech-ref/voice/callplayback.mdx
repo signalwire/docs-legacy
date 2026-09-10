@@ -1,0 +1,250 @@
+---
+title: "CallPlayback"
+keywords:
+  - SignalWire
+  - Realtime SDK
+  - Node.js
+  - audio playback
+  - TTS
+  - text-to-speech
+  - play audio
+slug: /node/reference/voice/call-playback
+sidebar_label: CallPlayback
+description: CallPlayback object reference for playing audio, TTS, ringtones, and silence during voice calls. Control playback with pause, resume, and volume methods.
+toc_max_heading_level: 3
+---
+
+[callplayback]: #
+[play]: /docs/server-sdk/node/reference/voice/call/play
+[playAudio]: /docs/server-sdk/node/reference/voice/call/play-audio
+[playRingtone]: /docs/server-sdk/node/reference/voice/call/play-ringtone
+[playSilence]: /docs/server-sdk/node/reference/voice/call/play-silence
+[playTTS]: /docs/server-sdk/node/reference/voice/call/play-tts
+
+Represents a current or past playback in a call. 
+
+Obtain instances of this class by starting a Playback with one of the following methods:
+
+- [`Call.play`][play]
+- [`Call.playAudio`][playAudio]
+- [`Call.playRingtone`][playRingtone]
+- [`Call.playSilence`][playSilence]
+- [`Call.playTTS`][playTTS]
+
+### Example
+
+Playing a text-to-speech message and waiting for it to end before proceeding to
+the next instructions.
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project, token });
+
+const call = await client.voice.dialPhone({
+  from: "+YYYYYYYYYY",
+  to: "+XXXXXXXXXX",
+});
+
+// Start a TTS playback
+await call.playTTS({
+  text: "Welcome to SignalWire!",
+  listen: {
+    onStarted: () => console.log("Playback started"),
+    onUpdated: (playback) => console.log("Playback updated", playback.state),
+    onEnded: async (playback) => {
+      console.log("Playback ended", playback.state);
+      // Hangup the call
+      call.hangup();
+    },
+    onFailed: () => console.log("Playback failed")
+  }
+}).onStarted();
+```
+
+## **Properties**
+
+<ParamField path="id" type="string">
+  The unique ID for this playback.
+</ParamField>
+
+<ParamField path="state" type='"playing" | "paused" | "finished" | "error"'>
+  The current state of the playback.
+</ParamField>
+
+<ParamField path="hasEnded" type="boolean">
+  Whether the playback has ended. Returns `true` if the state is `"finished"` or `"error"`.
+</ParamField>
+
+## **Methods**
+
+### pause
+
+- **pause**(): `Promise`\<[`CallPlayback`][callplayback]>
+
+Pauses the playback.
+
+#### Returns
+
+`Promise`\<[`CallPlayback`][callplayback]>
+
+A promise that is resolved only after the playback is paused.
+
+#### Example
+
+```js
+const playback = await call.playAudio({
+  url: "https://cdn.signalwire.com/default-music/welcome.mp3",
+}).onStarted();
+await playback.pause();
+```
+
+---
+
+### ended
+
+- **ended**(): `Promise`\<[`CallPlayback`][callplayback]>
+
+Waits for the playback to end.
+
+#### Returns
+
+`Promise`\<[`CallPlayback`][callplayback]>
+
+A promise that is resolved to [`CallPlayback`][callplayback] when the playback ends.
+
+#### Example
+
+```js
+const playback = await call.playAudio({
+  url: "https://cdn.signalwire.com/default-music/welcome.mp3",
+}).onStarted();
+await playback.ended();
+```
+
+---
+
+### resume
+
+- **resume**(): `Promise`\<[`CallPlayback`][callplayback]>
+
+Resumes the playback if it was paused.
+
+#### Returns
+
+`Promise`\<[`CallPlayback`][callplayback]>
+
+A promise that is resolved to [`CallPlayback`][callplayback] when the playback is resumed.
+
+#### Example
+
+```js
+const playback = await call.playAudio({
+  url: "https://cdn.signalwire.com/default-music/welcome.mp3",
+}).onStarted();
+await playback.resume();
+```
+
+---
+
+### setVolume
+
+- **setVolume**(`volume`): `Promise`\<[`CallPlayback`][callplayback]>
+
+Changes the volume of the playback.
+
+#### Parameters
+
+<ParamField path="volume" type="number" required>
+  Volume value between -40dB and +40dB.
+</ParamField>
+
+#### Returns
+
+`Promise`\<[`CallPlayback`][callplayback]>
+
+A promise that is resolved to [`CallPlayback`][callplayback] when the volume is changed.
+
+#### Example
+
+```js
+const playback = await call.playAudio({
+  url: "https://cdn.signalwire.com/default-music/welcome.mp3",
+}).onStarted();
+await playback.setVolume(-20);
+```
+
+---
+
+### stop
+
+- **stop**(): `Promise`\<[`CallPlayback`][callplayback]>
+
+Stops the playback.
+
+#### Returns
+
+`Promise`\<[`CallPlayback`][callplayback]>
+
+A promise that is resolved to [`CallPlayback`][callplayback] when the playback is stopped.
+
+#### Example
+
+```js
+const playback = await call.playAudio({
+  url: "https://cdn.signalwire.com/default-music/welcome.mp3",
+}).onStarted();
+await playback.stop();
+```
+
+---
+
+## **Events**
+
+### onStarted
+
+- **CallPlayback.listen**(`{ onStarted: Callback }}`)
+
+Emitted when the playback starts playing. Your event handler will receive an instance of [`CallPlayback`][callplayback].
+
+#### Parameters
+
+<ParamField path="playback" type="CallPlayback" required>
+  The playback instance. See [`CallPlayback`][callplayback].
+</ParamField>
+
+### onUpdated
+
+- **CallPlayback.listen**(`{ onUpdated: Callback }}`)
+
+Emitted when the playback is updated. Your event handler will receive an instance of [`CallPlayback`][callplayback].
+
+#### Parameters
+
+<ParamField path="playback" type="CallPlayback" required>
+  The playback instance. See [`CallPlayback`][callplayback].
+</ParamField>
+
+### onFailed
+
+- **CallPlayback.listen**(`{ onFailed: Callback }}`)
+
+Emitted when the playback fails to start. Your event handler will receive an instance of [`CallPlayback`][callplayback].
+
+#### Parameters
+
+<ParamField path="playback" type="CallPlayback" required>
+  The playback instance. See [`CallPlayback`][callplayback].
+</ParamField>
+
+### onEnded
+
+- **CallPlayback.listen**(`{ onEnded: Callback }}`)
+
+Emitted when the playback finishes playing. Your event handler will receive an instance of [`CallPlayback`][callplayback].
+
+#### Parameters
+
+<ParamField path="playback" type="CallPlayback" required>
+  The playback instance. See [`CallPlayback`][callplayback].
+</ParamField>

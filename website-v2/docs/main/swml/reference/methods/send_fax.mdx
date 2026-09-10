@@ -1,0 +1,250 @@
+---
+slug: /swml/reference/send-fax
+title: send_fax
+description: Send a fax.
+toc_max_heading_level: 3
+---
+
+[statuscallbacks]: #statuscallbacks
+
+Send a fax.
+
+## **Properties**
+
+<ParamField path="send_fax" type="object" required={true}>
+  An object that accepts the following properties.
+</ParamField>
+
+<Indent>
+
+<ParamField path="send_fax.document" type="string" required={true}>
+  URL to the PDF document to fax
+</ParamField>
+
+
+<ParamField path="send_fax.header_info" type="string">
+  Text to add to the fax header
+</ParamField>
+
+
+<ParamField path="send_fax.identity" type="string" default="Calling party's caller ID number">
+  Station identity to report
+</ParamField>
+
+
+<ParamField path="send_fax.status_url" type="string">
+  HTTP or HTTPS URL to deliver send fax status events. Learn more about [status callbacks][statuscallbacks].
+</ParamField>
+
+</Indent>
+
+
+## **Variables**
+
+Set by the method:
+
+- **send_fax_document:** (out) URL of sent document.
+- **send_fax_identity:** (out) identity of this fax station.
+- **send_fax_remote_identity:** (out) identity of the receiving fax station.
+- **send_fax_pages:** (out) number of pages sent.
+- **send_fax_result_code:** (out) fax status code.
+- **send_fax_result_text:** (out) description of fax status code.
+- **send_fax_result:** (out) `success` | `failed`.
+
+## **StatusCallbacks**
+
+A POST request will be sent to `status_url` with a JSON payload like the following:
+
+<ParamField path="event_type" type="string">
+  The type of event. Always `calling.call.fax` for this method.
+</ParamField>
+
+
+<ParamField path="event_channel" type="string">
+  The channel for the event, includes the SWML session ID.
+</ParamField>
+
+
+<ParamField path="timestamp" type="number">
+  Unix timestamp (float) when the event was generated.
+</ParamField>
+
+
+<ParamField path="project_id" type="string">
+  The project ID associated with the call.
+</ParamField>
+
+
+<ParamField path="space_id" type="string">
+  The Space ID associated with the call.
+</ParamField>
+
+
+<ParamField path="params" type="object">
+  An object containing fax-specific parameters.
+</ParamField>
+
+<Indent>
+
+<ParamField path="params.call_id" type="string">
+  The call ID.
+</ParamField>
+
+
+<ParamField path="params.node_id" type="string">
+  The node handling the call.
+</ParamField>
+
+
+<ParamField path="params.control_id" type="string">
+  The control ID for this fax operation.
+</ParamField>
+
+
+<ParamField path="params.fax" type="object">
+  Fax result details.
+</ParamField>
+
+<Indent>
+
+<ParamField path="fax.type" type="string">
+  The type of fax operation. Always `finished`.
+</ParamField>
+
+
+<ParamField path="fax.params.direction" type="string">
+  The direction of the fax (`send`).
+</ParamField>
+
+
+<ParamField path="fax.params.identity" type="string">
+  The identity of this fax station.
+</ParamField>
+
+
+<ParamField path="fax.params.remote_identity" type="string">
+  The identity of the receiving fax station.
+</ParamField>
+
+
+<ParamField path="fax.params.document" type="string">
+  URL of the sent fax document.
+</ParamField>
+
+
+<ParamField path="fax.params.pages" type="number">
+  Number of pages sent.
+</ParamField>
+
+
+<ParamField path="fax.params.success" type="boolean">
+  Whether the fax was sent successfully.
+</ParamField>
+
+
+<ParamField path="fax.params.result" type="number">
+  The numeric result code of the fax operation (e.g., `0` for success).
+</ParamField>
+
+
+<ParamField path="fax.params.result_text" type="string">
+  A description of the fax result (e.g., `OK`).
+</ParamField>
+
+
+<ParamField path="fax.params.format" type="string">
+  The format of the fax document. Always `"pdf"`.
+</ParamField>
+
+</Indent>
+
+</Indent>
+
+#### Page progress events
+
+A separate callback is sent for each page as the fax progresses:
+
+<ParamField path="fax.type" type="string">
+  Always `"page"` for page progress events.
+</ParamField>
+
+<ParamField path="fax.params.direction" type="string">
+  The direction of the fax.
+</ParamField>
+
+<ParamField path="fax.params.number" type="number">
+  The page number that was just processed.
+</ParamField>
+
+
+### Raw JSON example
+
+```json
+{
+  "event_type": "calling.call.fax",
+  "event_channel": "swml:xxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+  "timestamp": 1640000000.123,
+  "project_id": "xxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+  "space_id": "xxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+  "params": {
+    "call_id": "xxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "node_id": "xxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "control_id": "xxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "fax": {
+      "type": "finished",
+      "params": {
+        "direction": "send",
+        "identity": "+15551231234",
+        "remote_identity": "+15553214321",
+        "document": "https://example.com/fax_to_send.pdf",
+        "pages": 3,
+        "success": true,
+        "result": 0,
+        "result_text": "OK",
+        "format": "pdf"
+      }
+    }
+  }
+}
+```
+
+---
+
+## **Examples**
+
+### Send a fax and post a result to a webhook
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - send_fax:
+        document: https://example.com/fax_to_send.pdf
+    - execute:
+        dest: 'https://example.com/handle_outgoing_fax_result'
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "send_fax": {
+          "document": "https://example.com/fax_to_send.pdf"
+        }
+      },
+      {
+        "execute": {
+          "dest": "https://example.com/handle_outgoing_fax_result"
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>

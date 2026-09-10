@@ -1,0 +1,119 @@
+---
+title: Add mustache template parameters to cXML responses
+slug: /compatibility-api/guides/mustache-templates
+description: An introduction to saving parameters as mustache variables through XML webhooks.
+---
+
+Certain incoming message information can be extracted and added to a cXML application response by using parameters. Mustache templates are parameters in curly braces, like `{{Name}}`, which output the given value of a parameter.
+
+Mustache template variables are used to make your cXML application dynamic. Variables can be parameters of the HTTP payload for the request, or a query string variable you set in your webhook (`https://yourspace.signalwire.com/laml-bins/your-xml-bin-id?YOURVARIABLE=123`). Either method of Mustache variable declaration will work well in translating values into your cXML application.
+
+## Which parameters work as mustache templates?
+
+| Type of Parameter   | Default Parameter Names                                                                                   |
+| :------------------ | :-------------------------------------------------------------------------------------------------------- |
+| General Parameters  | `{{From}}`, `{{To}}`, `{{AccountSid}}` (equivalent to Project ID), `{{APIVersion}}`                       |
+| Messaging Specific  | `{{SmsSid}}`, `{{Body}}`, `{{NumSegments}}` (number of segments), `{{NumMedia}}` (number of media files)  |
+| Voice Specific      | `{{CallSid}}`, `{{CallStatus}}`, `{{Direction}}`, `{{ParentCallSid}}`                                     |
+| Inbound Domain Apps | `{{SipUser}}`                                                                                             |
+
+## Messaging examples
+
+In looking at how to forward an incoming message to another number, the mustache parameters `{{From}}` and `{{Body}}` can be retrieved and stored as variables to then be utilized in forwarding the message.
+
+Please follow this knowledge base article for more information on [forwarding an incoming message](/docs/compatibility-api/guides/send-sms) to another number.
+
+Following a similar format to the above article to show all the available message parameters, a cXML application/webhook can use the below XML:
+
+```xml
+<Response>
+   <Message to='+1XXXXXXXXXX' from='+1XXXXXXXXXX'> Message received with the following details:
+MessageSid:{{MessageSid}}
+SmsSid:{{SmsSid}}
+AccountSid:{{AccountSid}}
+From:{{From}}
+To:{{To}}
+Body:{{Body}}
+Number of Media:{{NumMedia}}
+Media:{{Media}}
+Number of Segments: {{NumSegments}}
+
+</Message>
+</Response>
+```
+
+## Voice examples
+
+The following XML will result in all calls being forwarded to the specified number.
+
+Notice what is declared in the third line — the `{{From}}` parameter is being assigned as the value of the callerId property.
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+  <Dial callerId="{{From}}">
+    <Number>+19074864171</Number>
+  </Dial>
+</Response>
+```
+
+In this case, we are using the `{{From}}` value so that the caller ID for the forwarded call echoes the original calling number. In this way, your calls will have the correct caller identification.
+
+## Using custom mustache templates
+
+A custom mustache template can be created by adding the mustache variable within a cXML application/webhook URL or a SIP address.
+
+### With cXML applications or webhooks
+
+Using the below XML in an XML Bin/Webhook, the Say verb will state the value of `{{YOURVARIABLE}}`. We will set this value in our webhook by amending the end of the URL. We can do this by following the syntax of `?YOURVARIABLE=YOURVALUE`. Assuming we want to make the value of the variable equal to `Something`, our XML Bin URL or Webhook URL will look similar to: `https://YOURSPACE.signalwire.com/laml-bins/xxxx-xxxx-xxxx-xxxx-xxxx?YOURVARIABLE=Something`
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Say>{{YOURVARIABLE}}</Say>
+</Response>
+```
+
+<Info title="Mustache variable">
+Remember that after copying and pasting the XML bin URL into the phone setting options, manually add the mustache variable to the end of the URL to create and declare your custom variable.
+
+For example, to set the variable to 123, we would enter it as `?YOURVARIABLE=123` at the end of your URL.
+</Info>
+
+### With domain applications
+
+When calling a Domain Application that handles incoming calls with a LaML Webhook, you can still pass the custom mustache variable in the SIP URL, much like you would with Webhooks, by adding `?YOURVARIABLE=YOURVALUE` at the end: `sip:123456789@YOURSPACE-EXAMPLE.dapp.signalwire.com?YOURVARIABLE=Something`.
+
+Assuming the Domain App calls the same XML Bin/Webhook as the one we outlined above, we just need to prefix the variable name with `SipHeader_X-`, making the end result `SipHeader_X-YOURVARIABLE`.
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Say>{{SipHeader_X-YOURVARIABLE}}</Say>
+</Response>
+```
+
+This is particularly useful in BYOC setups where you wish to send calls to SignalWire and adjust the FROM number on the fly using a custom variable:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Dial callerId="{{SipHeader_X-FROM_NUMBER}}">
+        <Number>{{SipUser}}</Number>
+    </Dial>
+</Response>
+```
+
+If you wished to call `+1111111111` from `+123456789`, your SIP URL would look like this:
+
+`sip:+1111111111@YOURSPACE-EXAMPLE.dapp.signalwire.com?FROM_NUMBER=%2B123456789`
+
+<Info title="URL encoding">
+Notice the encoded `+` in the `FROM_NUMBER`, as `%2B`? Since it is a reserved character, we need to encode it when passing it in the URL. To learn more about URL Encoding, please read [this page](https://www.w3schools.com/tags/ref_urlencode.ASP).
+</Info>
+
+## Further references
+
+For more information about SignalWire cXML and Mustache templates, please review the [cXML overview](/docs/compatibility-api/cxml).
+
+For further information about the functions of mustache templates, please read the [Mustache manual](https://mustache.github.io/mustache.5.html).

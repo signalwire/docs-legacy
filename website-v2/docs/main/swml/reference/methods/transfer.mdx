@@ -1,0 +1,349 @@
+---
+title: transfer
+slug: /swml/reference/transfer
+description: Transfer the execution of the script to a different `SWML section`, `URL`, or `RELAY application`.
+toc_max_heading_level: 3
+---
+
+Transfer the execution of the script to a different `SWML section`, `URL`, or `RELAY application`. Once
+the transfer is complete, the script will continue executing SWML from the new location.
+
+## **Properties**
+
+<ParamField path="transfer" type="object" required={true}>
+  An object that accepts the following properties.
+</ParamField>
+
+<Indent>
+
+<ParamField path="transfer.dest" type="string" required={true}>
+  Specifies where to transfer to. The value can be one of:
+  - `"<section_name>"` - section in the SWML document to jump to
+  - A URL (http or https) - URL to fetch next document from. Sends HTTP POST. Authentication can also be set in the url in the format of `username:password@url`.
+  - An inline SWML document (as a JSON string) - SWML document provided directly as a JSON string
+</ParamField>
+
+
+<ParamField path="transfer.params" type="object">
+  Named parameters to send to a section, URL, or application.
+</ParamField>
+
+
+<ParamField path="transfer.meta" type="object">
+  User data, ignored by SignalWire. Accepts an object mapping variable names to values.
+</ParamField>
+
+</Indent>
+
+## **Valid Destination Values**
+
+The destination string can be one of:
+
+- `"section_name"` - section in the current document to execute.
+(For example: `execute: main`)
+- `"relay:<relay application>"` - relay application to notify (currently not implemented)
+- `"https://example.com/sub-swml.yaml"` - URL pointing to the document to execute.
+An HTTP POST request will be sent to the URL. Authentication can also be set in the url in the format of `username:password@url`.
+The `params` object is passed, along with the variables and the [`Call`](/docs/swml/reference/variables#variables-list) object.
+
+---
+
+## **Examples**
+
+### Basic transfer to a URL
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - transfer:
+        dest: "https://example.com/next"
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "transfer": {
+          "dest": "https://example.com/next"
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+### Basic transfer to a section
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - play:
+        url: 'say:Transferring you to another section'
+    - transfer:
+        dest: subsection
+    - play:
+        url: 'say:Back!'
+  subsection:
+    - play:
+        url: 'say:inside a subsection'
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "play": {
+          "url": "say:Transferring you to another section"
+        }
+      },
+      {
+        "transfer": {
+          "dest": "subsection"
+        }
+      },
+      {
+        "play": {
+          "url": "say:Back!"
+        }
+      }
+    ],
+    "subsection": [
+      {
+        "play": {
+          "url": "say:inside a subsection"
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+### Named parameter with sub-parameters
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - transfer:
+        - dest: "https://example.com/next"
+        - params:
+            - foo: "bar"
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "transfer": [
+          {
+            "dest": "https://example.com/next"
+          },
+          {
+            "params": [
+              {
+                "foo": "bar"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+### Transfer to a SWML script hosted on a server
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - prompt:
+        play: >-
+          say: Press 1 to be transfered to the Sales department, 2 for marketing
+          department or anything else to listen to some music.
+    - switch:
+        variable: prompt_value
+        case:
+          '1':
+            - transfer:
+                dest: 'https://<YOUR_NGROK_UUID>.ngrok-free.app'
+                params:
+                  where: sales
+          '2':
+            - transfer:
+                dest: 'https://<YOUR_NGROK_UUID>.ngrok-free.app'
+                params:
+                  where: marketing
+    - play:
+        url: 'https://cdn.signalwire.com/swml/April_Kisses.mp3'
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "prompt": {
+          "play": "say: Press 1 to be transfered to the Sales department, 2 for marketing department or anything else to listen to some music."
+        }
+      },
+      {
+        "switch": {
+          "variable": "prompt_value",
+          "case": {
+            "1": [
+              {
+                "transfer": {
+                  "dest": "https://<YOUR_NGROK_UUID>.ngrok-free.app",
+                  "params": {
+                    "where": "sales"
+                  }
+                }
+              }
+            ],
+            "2": [
+              {
+                "transfer": {
+                  "dest": "https://<YOUR_NGROK_UUID>.ngrok-free.app",
+                  "params": {
+                    "where": "marketing"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      },
+      {
+        "play": {
+          "url": "https://cdn.signalwire.com/swml/April_Kisses.mp3"
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+A minimal server for this SWML script can be written as follows:
+
+<Tabs>
+  <TabItem value="python/flask" label="Python/Flask">
+
+```python
+from flask import Flask, request
+from waitress import serve
+
+app = Flask(__name__)
+
+@app.route("/", methods=['POST'])
+def swml():
+    content = request.get_json(silent=True)
+    print(content)
+    return '''
+version: 1.0.0
+sections:
+  main:
+    - answer: {}
+    - play:
+        url: 'say: Welcome to the {} department.'
+'''.format(content['params']['where'])
+
+if __name__ == "__main__":
+    serve(app, host='0.0.0.0', port=6000)
+```
+
+  </TabItem>
+  <TabItem value="javascript/express" label="JavaScript/Express">
+
+```javascript
+const express = require("express");
+const app = express();
+
+app.use(express.json());
+
+// note the POST method
+app.post("/", (req, res) => {
+  const data = req.body;
+  console.log(data);
+  res.send(`
+version: 1.0.0
+sections:
+  main:
+    - answer: {}
+    - play:
+        url: 'say: Welcome to the {} department.'
+  `);
+});
+
+const port = 6000;
+app.listen(port);
+```
+
+  </TabItem>
+</Tabs>
+
+This server (running on `localhost`) can be made accessible to the wider web (and thus this SWML script) using forwarding tools like `ngrok`.
+Visit [ngrok.com](https://ngrok.com) to learn how.
+
+The server will be sent the payload in the following format:
+
+```json
+{
+  "call": {
+    "call_id": "<call_id>",
+    "node_id": "<node_id>",
+    "segment_id": "<segment_id>",
+    "call_state": "answered",
+    "direction": "inbound",
+    "type": "phone",
+    "from": "<address>",
+    "to": "<address>",
+    "from_number": "<address>",
+    "to_number": "<address>",
+    "headers": [],
+    "project_id": "<your Project UUID>",
+    "space_id": "<your Space UUID>"
+  },
+  "vars": {
+    "answer_result": "success",
+    "prompt_result": "match_digits",
+    "prompt_value_raw": "2",
+    "prompt_value": "2"
+  },
+  "params": { "where": "marketing" }
+}
+```
+
+The `call` object is described in detail in the [introduction](/docs/swml/reference/transfer).
+All variables created within the SWML document are passed inside `vars`,
+and the `params` object contains the parameters defined in the `params` parameter of `transfer`.

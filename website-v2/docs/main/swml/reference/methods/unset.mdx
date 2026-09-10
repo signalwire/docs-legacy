@@ -1,0 +1,143 @@
+---
+slug: /swml/reference/unset
+title: unset
+description: Unset specified variables.
+toc_max_heading_level: 3
+---
+
+Unset specified variables. The variables have been set either using the [`set`](/docs/swml/reference/set) command
+or as a byproduct of some other statements or methods (like [`record`](/docs/swml/reference/record))
+
+<ParamField path="unset" type="string | string[]" required={true}>
+  The name of the variable to unset (as a string) or an array of variable names to unset.
+</ParamField>
+
+
+## **Variable**
+
+Any variable can be unset by this method.
+
+## **Examples**
+
+### Unset a single variable
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - set:
+        num_var: 1
+    - play:
+        url: 'say: The value of num_var is: ${num_var}.'
+    - unset: num_var
+    - play:
+        url: 'say: The value of num_var is ${num_var}.'
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "set": {
+          "num_var": 1
+        }
+      },
+      {
+        "play": {
+          "url": "say: The value of num_var is: ${num_var}."
+        }
+      },
+      {
+        "unset": "num_var"
+      },
+      {
+        "play": {
+          "url": "say: The value of num_var is ${num_var}."
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+### Unset multiple variables
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - set:
+        systems:
+          hr:
+            - tracy
+            - luke
+          engineering:
+            john: absent
+        name: john
+    - play:
+        url: 'say: ${systems.hr}'
+    - unset:
+        - systems
+        - name
+    # this play statement emits an error because `systems` is undefined
+    # at this point so there's nothing for `play` to say.
+    - play:
+        url: 'say: ${systems}'
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "set": {
+          "systems": {
+            "hr": [
+              "tracy",
+              "luke"
+            ],
+            "engineering": {
+              "john": "absent"
+            }
+          },
+          "name": "john"
+        }
+      },
+      {
+        "play": {
+          "url": "say: ${systems.hr}"
+        }
+      },
+      {
+        "unset": [
+          "systems",
+          "name"
+        ]
+      },
+      {
+        "play": {
+          "url": "say: ${systems}"
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+## **See Also**
+
+- **[Variables and Expressions](/docs/swml/reference/variables)**: Complete reference for SWML variables, scopes, and syntax
+- **[set](/docs/swml/reference/set)**: Set variables in the script

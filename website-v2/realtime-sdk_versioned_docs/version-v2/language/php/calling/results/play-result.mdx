@@ -1,0 +1,66 @@
+---
+slug: /php/reference/calling/results/play
+description: The PlayResult object is returned after a play operation is completed.
+toc_max_heading_level: 3
+---
+
+[relay-event]: /docs/server-sdk/v2/php/reference/event
+
+# Relay.Calling.PlayResult
+
+This object returned from one of _synchronous_ play methods that represents the final result of a playing action.
+
+## Methods
+
+### getEvent
+
+Returns the last Relay Event arrived for this operation.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+[`Relay.Event`][relay-event] - Last Relay Event.
+
+**Examples**
+
+> Start playing an audio file and then grab the last event occurred.
+
+```php
+<?php
+
+$call->playAudio('https://cdn.signalwire.com/default-music/welcome.mp3')->done(function($result) {
+  $event = $result->getEvent();
+  // Inspect $event->payload ..
+});
+```
+
+### isSuccessful
+
+Return `true` if the playing has succeeded, `false` otherwise.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`boolean` - Whether the playing has finished successfully.
+
+**Examples**
+
+> Start the recording and then check if it has ended successfully.
+
+```php
+<?php
+
+$call->playAudio('https://cdn.signalwire.com/default-music/welcome.mp3')->done(function($result) {
+  if ($result->isSuccessful()) {
+    // Do other things...
+  }
+});
+```

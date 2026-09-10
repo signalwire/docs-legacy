@@ -1,0 +1,46 @@
+---
+title: "CallMedia.AudioParams"
+slug: /dotnet/reference/calling/call-media-audio-params
+toc_max_heading_level: 3
+---
+
+# SignalWire.Relay.Calling.CallMedia.AudioParams
+
+This object represents the parameters specific to audio media.
+
+## Constructor
+
+The only constructor is the default constructor, properties should all be assigned by initializer or after construction.
+
+**Parameters**
+
+None
+
+**Examples**
+
+> Basic Example
+
+```csharp
+CallMedia media = new CallMedia
+{
+    Type = CallMedia.MediaType.audio,
+    Parameters = new CallMedia.AudioParams
+    {
+        URL = "http://example.somewhere.com/test.wav"
+    }
+};
+```
+
+## Properties
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `URL` | string | The URL of the audio file to play. |
+
+## Methods
+
+None
+
+## Events
+
+None

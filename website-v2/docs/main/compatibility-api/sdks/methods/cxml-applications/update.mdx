@@ -1,0 +1,16 @@
+---
+slug: /compatibility-api/sdks/reference/cxml-applications/update
+title: Update
+sidebar_label: Update
+toc_max_heading_level: 3
+---
+
+To update a cXML Application, make a `POST` request to the cXML Application resource.
+Use the unique ID that was returned from your previous request to identify the specific instance.
+Only parameters passed in will be updated, others will be ignored.
+
+<EndpointSchemaSnippet endpoint="POST /Accounts/{AccountSid}/LamlBins/{Sid}" />
+
+## Example
+
+<EndpointRequestSnippet endpoint="POST /Accounts/{AccountSid}/LamlBins/{Sid}" />

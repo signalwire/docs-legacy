@@ -1,0 +1,102 @@
+---
+title: "play"
+slug: /node/reference/video/room-session/play
+description: play method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+[roomsession-41]: /docs/server-sdk/node/reference/video/room-session
+[roomsessionplayback-12]: /docs/server-sdk/node/reference/video/room-session-playback
+[roomsessionplayback-4]: /docs/server-sdk/node/reference/video/room-session-playback
+[video-roomsessionplayback]: /docs/server-sdk/node/reference/video/room-session-playback#events
+
+### play
+
+- **play**(`params`): `Promise`\<[`RoomSessionPlayback`][roomsessionplayback-12]>
+
+Start a playback in the room. You can use the returned [RoomSessionPlayback][roomsessionplayback-4]
+object to control the playback (e.g., pause, resume, setVolume and stop).
+
+#### Parameters
+
+<ParamField path="params" type="object" required>
+  Object containing the parameters of the method.
+</ParamField>
+
+<Indent>
+<ParamField path="url" type="string" required>
+  The url (http, https, rtmp, rtmps) of the stream to reproduce.
+</ParamField>
+
+<ParamField path="seekPosition" type="number" default="0">
+  The starting timecode in milliseconds for playback.
+</ParamField>
+
+<ParamField path="volume" type="number" default="0">
+  The playback volume from -50 to 50.
+</ParamField>
+
+<ParamField path="positions" type="VideoPositions">
+  Positions to assign as soon as the playback starts. You can use the special keyword `self` to refer to the id of the playback.
+</ParamField>
+
+<ParamField path="layout" type="string">
+  Layout to change to when the playback starts.
+</ParamField>
+
+<ParamField path="listen" type="object">
+  Object of event listeners. See [RoomSessionPlayback Events][video-roomsessionplayback] for a list of valid events. Example event: `onStarted`.
+</ParamField>
+</Indent>
+
+#### Returns
+
+`Promise`\<[`RoomSessionPlayback`][roomsessionplayback-12]>
+
+A promise that resolves to a [`RoomSessionPlayback`][roomsessionplayback-12] object.
+
+#### Example
+
+In this example, we wait for a room to start and then play a video in that room.
+When a second member joins the roomSession, we stop the playback.
+This example assumes that there is a [`RoomSession`][roomsession-41]
+already active and that members are joining the room.
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+// Initialize the SignalWire client
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+// Access the video client from the main client
+const videoClient = client.video;
+
+// Setup listener for when a room starts
+await videoClient.listen({
+  onRoomStarted: async (roomSession) => {
+    console.log("Room started", roomSession.displayName);
+
+    // play wait music
+    let roomPlayback = roomSession.play({
+      url: "https://cdn.signalwire.com/default-music/welcome.mp3",
+      listen: {
+        onStarted: () => console.log("Playback started"),
+        onUpdated: (playback) => console.log("Playback updated", playback.state),
+        onEnded: () => console.log("Playback ended")
+      }
+    });
+    await roomSession.listen({
+      onMemberJoined: (member) => {
+        console.log("Member joined", member.name);
+        roomPlayback.stop();
+      },
+      onMemberLeft: (member) => {
+        console.log("Member left", member.name);
+      },
+    });
+  },
+  onRoomEnded: async (roomSession) => {
+    console.log("Room ended", roomSession.displayName);
+  }
+});
+```

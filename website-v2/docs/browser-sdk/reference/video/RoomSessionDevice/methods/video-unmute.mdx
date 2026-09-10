@@ -1,0 +1,29 @@
+---
+title: "videoUnmute"
+slug: /js/reference/video/room-session-device/video-unmute
+description: videoUnmute method for the RoomSessionDevice class.
+toc_max_heading_level: 3
+---
+
+### videoUnmute
+
+▸ **videoUnmute**(): `Promise<void>`
+
+Unmutes the video if it had been previously muted. Participants will start seeing the video stream again.
+
+#### Returns
+
+`Promise<void>`
+
+#### Permissions
+
+- `room.self.video_unmute`
+
+You need to specify the permissions when [creating the Video Room Token](/docs/apis/video/create-room-token) on the server side.
+
+#### Example
+
+```javascript
+await roomdevice.videoUnmute();
+```
+

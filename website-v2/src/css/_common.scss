@@ -1,0 +1,119 @@
+/**
+ * Any CSS included here will be global. The classic template
+ * bundles Infima by default. Infima is a CSS framework designed to
+ * work well for content-centric websites.
+ */
+
+// To generate these colors, please use the tool Docusaurus provides at
+// https://docusaurus.io/docs/styling-layout#styling-your-site-with-infima
+
+:root {
+  // Primary Brand Palette
+  --sw-pink-color: #f72a72;
+  --sw-blue-color: #044ef4;
+  --sw-mist-color: #f1f8ff;
+  --sw-breeze-color: #b7d9ff;
+  --sw-deep-sea-color: #0336ab;
+  --sw-navy-color: #070c2d;
+
+  // Neutrals
+  --sw-charcoal-color: #050910;
+  --sw-grey-2-color: #55606a;
+  --sw-grey-4-color: #8d959e;
+  --sw-grey-6-color: #bec3c9;
+  --sw-grey-8-color: #f5f7fa;
+  --sw-white-color: #ffffff;
+
+  // Secondary Colors (for code, accents, and highlights)
+  --sw-turquoise-color: #40e0d0;
+  --sw-gold-color: #ffd700;
+  --sw-purple-color: #6432e6;
+
+  // Link colors - using theme primary colors
+  --sw-link-color: var(--ifm-color-primary);
+  --sw-link-color-hover: var(--ifm-color-primary-darker);
+  --sw-link-decoration-color: var(--ifm-color-primary-lighter);
+
+  // Gradient variables
+  --sw-horizontal-active-line-color: linear-gradient(
+    to left,
+    var(--sw-pink-color),
+    var(--sw-blue-color)
+  );
+  --sw-vertical-active-line-color: linear-gradient(
+    to bottom,
+    var(--sw-blue-color),
+    var(--sw-pink-color)
+  );
+  --sw-gradient-border: var(--sw-horizontal-active-line-color);
+  --sw-card-border-color: var(--ifm-color-gray-300);
+
+  --ifm-font-family-base: "Inter", sans-serif;
+  --ifm-heading-font-family: "Neue Einstellung", sans-serif;
+
+  --ifm-color-primary: var(--sw-blue-color);
+  --ifm-color-primary-dark: #0446dc;
+  --ifm-color-primary-darker: #0342cf;
+  --ifm-color-primary-darkest: #0337ab;
+  --ifm-color-primary-light: #165cfb;
+  --ifm-color-primary-lighter: #2265fb;
+  --ifm-color-primary-lightest: #2c6cfc;
+
+  --sw-category-menu-color: var(--ifm-color-gray-800);
+  --sw-category-menu-color-active: var(--sw-link-color);
+}
+
+:root[data-theme="dark"] {
+  --dark-mode-bg-pattern: url("/img/stardust.png");
+  --dark-mode-gradient-overlay: linear-gradient(
+    to bottom,
+    rgba(40, 0, 0, 0.4),
+    transparent
+  );
+
+  --sw-horizontal-active-line-color: linear-gradient(
+    to right,
+    var(--sw-pink-color),
+    var(--sw-blue-color)
+  );
+  --sw-vertical-active-line-color: linear-gradient(
+    to bottom,
+    var(--sw-blue-color),
+    var(--sw-pink-color)
+  );
+  --sw-gradient-border: var(--sw-horizontal-active-line-color);
+  --sw-card-border-color: var(--ifm-color-gray-800);
+
+  --ifm-background-color: var(--sw-navy-color);
+  --ifm-background-surface-color: #0c1339;
+
+  background-image: var(--dark-mode-gradient-overlay), var(--dark-mode-bg-pattern);
+  background-repeat: no-repeat, repeat;
+  background-size:
+    100% 100%,
+    300px 300px;
+  background-position: center;
+
+  --ifm-color-primary: var(--sw-pink-color);
+  --ifm-color-primary-dark: #f71f6b;
+  --ifm-color-primary-darker: #f61463;
+  --ifm-color-primary-darkest: #f2095b;
+  --ifm-color-primary-light: #f84684;
+  --ifm-color-primary-lighter: #f9548e;
+  --ifm-color-primary-lightest: #fa7ea9;
+
+  --ifm-hr-background-color: var(--ifm-color-emphasis-200);
+
+  --sw-link-color: white;
+  --sw-link-color-hover: var(--ifm-color-primary-lighter);
+  --sw-link-decoration-color: var(--ifm-color-primary);
+
+  --sw-category-menu-color: inherit;
+  --sw-category-menu-color-active: var(--sw-link-color);
+  --docsearch-searchbox-focus-background: rgba(0, 0, 0, 0.3);
+}
+
+// Disable smooth scrolling to prevent conflicts with secondary navbar transition
+html {
+  scroll-behavior: unset !important;
+}

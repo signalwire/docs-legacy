@@ -1,0 +1,73 @@
+---
+title: "setInputSensitivity"
+slug: /node/reference/video/room-session/set-input-sensitivity
+description: setInputSensitivity method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+[roomsession-41]: /docs/server-sdk/node/reference/video/room-session
+
+### setInputSensitivity
+
+- **setInputSensitivity**(`params`): `Promise<void>`
+
+Sets the input level at which the participant is identified as currently speaking.
+
+#### Parameters
+
+<ParamField path="params" type="object" required>
+  Object containing the parameters of the method.
+</ParamField>
+
+<Indent>
+<ParamField path="memberId" type="string">
+  ID of the member to affect.
+</ParamField>
+
+<ParamField path="value" type="number" required default="30">
+  Desired sensitivity from 0 (lowest sensitivity, essentially muted) to 100 (highest sensitivity).
+</ParamField>
+</Indent>
+
+#### Returns
+
+`Promise<void>`
+
+#### Example
+
+In this example, we wait for a room to start and then set the input sensitivity for a member to 0.
+This example assumes that there is a [`RoomSession`][roomsession-41]
+already active and that members are joining the room.
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+// Initialize the SignalWire client
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+// Access the video client from the main client
+const videoClient = client.video;
+
+// Setup listener for when a room starts
+await videoClient.listen({
+  onRoomStarted: async (roomsession) => {
+    console.log("Room started", roomsession.displayName);
+
+    // Setup listener for when a room is updated
+    roomsession.listen({
+      onMemberJoined: async (member) => {
+        console.log("Member joined", member.name);
+
+        // Update the input sensitivity for the member
+        await roomsession.setInputSensitivity({
+          value: 0,
+          memberId: member.id,
+        });
+      },
+      onMemberUpdated: async (member) => {
+        console.log(`Updated input sensitivity for ${member.name, member.inputSensitivity}`);
+      },
+    })
+  }
+});
+```

@@ -1,0 +1,68 @@
+---
+title: "videoMute"
+slug: /node/reference/video/room-session/video-mute
+description: videoMute method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+[roomsession-41]: /docs/server-sdk/node/reference/video/room-session
+
+### videoMute
+
+- **videoMute**(`params`): `Promise<void>`
+
+Puts the video of a given member on mute. Participants will see a mute image instead of the video stream.
+
+#### Parameters
+
+<ParamField path="params" type="object">
+  Object containing the parameters of the method.
+</ParamField>
+
+<Indent>
+<ParamField path="memberId" type="string">
+  ID of the member to mute.
+</ParamField>
+</Indent>
+
+#### Returns
+
+`Promise<void>`
+
+#### Example
+
+In this example, we wait for a room to start and then wait for a second member to join the room.
+When a second member joins the room, we mute the video of that member.
+This example assumes that there is a [`RoomSession`][roomsession-41]
+already active and that members are joining the room.
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+// Initialize the SignalWire client
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" });
+
+// Access video client from the main client
+const videoClient = client.video;
+
+// Setup listener for when a room starts
+await videoClient.listen({
+  onRoomStarted: async (roomSession) => {
+    console.log("Room started", roomSession.displayName);
+
+    await roomSession.listen({
+      onMemberJoined: (member) => {
+        console.log("Member joined", member.name);
+
+        // Video mute the member
+        roomSession.videoMute({
+          memberId: member.id,
+        })
+      },
+      onMemberUpdated: (member) => {
+        console.log("Member mute status updated", member.name, member.videoMuted);
+      },
+    });
+  }
+});
+```

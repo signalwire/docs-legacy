@@ -1,0 +1,57 @@
+---
+title: "deleteMemberMeta"
+slug: /js/reference/video/room-session/delete-member-meta
+description: deleteMemberMeta method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+### deleteMemberMeta
+
+- **deleteMemberMeta**(`params`): `Promise<void>`
+
+Deletes the specified keys from the metadata for the specified member.
+
+#### Parameters
+
+<ParamField path="params" type="object">
+  Object containing the parameters of the method.
+</ParamField>
+
+<Indent>
+<ParamField path="memberId" type="string" required={false}>
+  Id of the member to affect. If omitted, affects the current member.
+</ParamField>
+
+<ParamField path="keys" type="string[]">
+  The keys to remove.
+</ParamField>
+</Indent>
+
+#### Returns
+
+`Promise<void>`
+
+#### Permissions
+
+- `room.set_meta`
+
+You need to specify the permissions when [creating the Video Room Token](/docs/apis/video/create-room-token) on the server side.
+
+#### Example
+
+```js
+roomSession.on("member.updated", (e) => {
+  // We can set an event listener to log changes to the metadata.
+  console.log(e.member.meta);
+});
+
+await roomSession.setMemberMeta({
+  memberId: "...",
+  meta: { foo: "bar", baz: true },
+});
+// The logger will now print `{ foo: "bar", baz: true }`
+
+await roomSession.deleteMemberMeta({ memberId: "...", keys: ["foo"] });
+// The logger will now print `{ baz: true }`
+```
+

@@ -1,0 +1,51 @@
+---
+title: "videoMute"
+slug: /js/reference/video/room-session/video-mute
+description: videoMute method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+### videoMute
+
+- **videoMute**(`params?`): `Promise<void>`
+
+Puts the video on mute. Participants will see a mute image instead of the video stream. You can use this method to mute either yourself or another participant in the room.
+
+#### Parameters
+
+<ParamField path="params" type="object" required={false}>
+  Object containing the parameters of the method.
+</ParamField>
+
+<Indent>
+<ParamField path="memberId" type="string" required={false}>
+  Id of the member to mute. If omitted, mutes the default device in the local client.
+</ParamField>
+</Indent>
+
+#### Returns
+
+`Promise<void>`
+
+#### Permissions
+
+- `room.self.video_mute`: to unmute a local device.
+- `room.member.video_mute`: to unmute a remote member.
+
+You need to specify the permissions when [creating the Video Room Token](/docs/apis/video/create-room-token) on the server side.
+
+#### Examples
+
+Muting your own video:
+
+```javascript
+await roomSession.videoMute();
+```
+
+Muting the video of another participant:
+
+```javascript
+const id = "de550c0c-3fac-4efd-b06f-b5b8614b8966"; // you can get this from getMembers()
+await roomSession.videoMute({ memberId: id });
+```
+

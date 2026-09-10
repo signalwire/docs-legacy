@@ -1,0 +1,145 @@
+---
+title: Events
+slug: /signalwire-client/events
+---
+
+import APIField from '@site/src/components/APIField';
+
+The SignalWire Client emits various events that you can listen to for real-time updates about AI interactions and custom user events.
+
+## How it works
+
+The client uses an event-driven architecture where you can register listeners for specific event types. When events occur, your callback functions are invoked with relevant event data.
+
+## Event registration
+
+Use the standard `on()` method to register event listeners:
+
+```typescript
+client.on('event_name', (params) => {
+})
+```
+
+## AI events
+
+The client emits several AI-related events for tracking AI agent interactions and responses.
+
+### ai.partial_result
+
+Emitted when the AI agent provides a partial result, similar to a typing indicator. This shows the AI is processing and generating a response.
+
+<APIField name="params.text" type="string">
+  The partial text result from the AI.
+</APIField>
+
+<APIField name="params.barged" type="boolean">
+  Whether the response was interrupted (barged) by user input.
+</APIField>
+
+```typescript
+client.on("ai.partial_result", (params) => {
+  console.log('AI is generating:', params.text)
+  console.log('Was barged:', params.barged)
+})
+```
+
+### ai.speech_detect
+
+Emitted when the AI detects speech from the user. This event indicates that the user is speaking.
+
+<APIField name="params.text" type="string">
+  The detected speech text with confidence information.
+</APIField>
+
+<APIField name="params.type" type="string">
+  The type of speech detection (e.g., 'normal', 'barged').
+</APIField>
+
+```typescript
+client.on("ai.speech_detect", (params) => {
+  const cleanText = params.text.replace(/\{confidence=[\d.]+\}/, "")
+  console.log('User said:', cleanText)
+  console.log('Detection type:', params.type)
+})
+```
+
+### ai.completion
+
+Emitted when the AI agent completes a response. This is the final response from the AI.
+
+<APIField name="params.text" type="string">
+  The complete response text from the AI.
+</APIField>
+
+<APIField name="params.type" type="string">
+  Whether the response was completed normally or was 'barged' (interrupted).
+</APIField>
+
+```typescript
+client.on("ai.completion", (params) => {
+  console.log('AI completed:', params.text)
+  console.log('Was interrupted:', params.type === 'barged')
+})
+```
+
+### ai.response_utterance
+
+Emitted when the AI agent provides a spoken response utterance. This represents what the AI is actually saying.
+
+<APIField name="params.utterance" type="string">
+  The text of the AI's spoken response.
+</APIField>
+
+```typescript
+client.on("ai.response_utterance", (params) => {
+  console.log('AI is saying:', params.utterance)
+})
+```
+
+## Custom user events
+
+### user_event
+
+You can write SWML scripts to send custom events to your application. That way, when you
+use the `client.dial()` method to dial to a SWML script, you can listen for those events.
+
+<APIField name="params" type="object">
+  Custom event data sent by the SWML script.
+</APIField>
+
+```typescript
+client.on("user_event", (params) => {
+  console.log('User event received:', params)
+})
+```
+
+This can be useful for triggering actions and UI updates on the client side. The AI can 
+also send these custom events, making it very powerful.
+
+Consider this simple SWML script:
+
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - user_event:
+        event:
+          myCustomEvent: 'Hello, world!'
+    - play:
+        url: 'say: Custom event sent.'
+```
+
+This will send a custom event to the dialing client with the name `myCustomEvent` and the value `Hello, world!`.
+
+You can listen to this event like so:
+
+```typescript
+const client = await SignalWire({token:"<TOKEN>"})
+const callSession = await client.dial({to:"/private/swml-script"})
+
+client.on("user_event", (params) => {
+  console.log('User event received:', params)
+})
+```
+
+For more details on writing SWML scripts to send custom events, see the [user_event](/swml/methods/user_event) SWML method.

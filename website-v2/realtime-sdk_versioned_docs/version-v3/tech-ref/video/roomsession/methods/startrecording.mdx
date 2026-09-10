@@ -1,0 +1,25 @@
+---
+title: "startRecording"
+slug: /node/reference/video/room-session/start-recording
+description: startRecording method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+[roomsessionrecording-5]: /docs/server-sdk/v3/node/reference/video/room-session-recording
+
+### startRecording
+
+- **startRecording**(): `Promise<RoomSessionRecording>` - See [RoomSessionRecording][roomsessionrecording-5] for more details.
+
+Starts the recording of the room. You can use the returned [RoomSessionRecording][roomsessionrecording-5] object to control the recording (e.g., pause, resume, stop).
+
+#### Returns
+
+`Promise<RoomSessionRecording>` - See [RoomSessionRecording][roomsessionrecording-5] for more details.
+
+#### Example
+
+```javascript
+const rec = await roomSession.startRecording();
+await rec.stop();
+```

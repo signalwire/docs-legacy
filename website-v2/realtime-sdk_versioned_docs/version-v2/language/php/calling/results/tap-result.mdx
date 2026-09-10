@@ -1,0 +1,172 @@
+---
+slug: /php/reference/calling/results/tap
+hide_title: true
+toc_max_heading_level: 3
+---
+
+[call]: /docs/server-sdk/v2/php/reference/calling/call#tap
+[relay-event]: /docs/server-sdk/v2/php/reference/event
+
+# Relay.Calling.TapResult
+
+This object returned from [`tap`][call] method that represents the final result of a tapping.
+
+## Methods
+
+### getDestinationDevice
+
+Returns the `destination` device receiving media.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`Object` - The destination device.
+
+**Examples**
+
+> Tapping audio from the call and then inspect the destination device.
+
+```php
+<?php
+
+$tap = [
+  'target_type' => 'rtp',
+  'target_addr' => '192.168.1.1',
+  'target_port' => 1234
+];
+$call->tap($tap)->done(function($result) {
+  if ($result->isSuccessful()) {
+    $destination = $result->getDestinationDevice();
+  }
+});
+```
+
+### getEvent
+
+Returns the last Relay Event arrived for this operation.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+[`Relay.Event`][relay-event] - Last Relay Event.
+
+**Examples**
+
+> Tapping audio from the call and grab the result when it's completed.
+
+```php
+<?php
+
+$tap = [
+  'target_type' => 'rtp',
+  'target_addr' => '192.168.1.1',
+  'target_port' => 1234
+];
+$call->tap($tap)->done(function($result) {
+  $event = $result->getEvent();
+  // Inspect $event->payload ..
+});
+```
+
+### getSourceDevice
+
+Returns the `source` device sending media.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`Object` - The source device.
+
+**Examples**
+
+> Tapping audio from the call and then inspect the source device.
+
+```php
+<?php
+
+$tap = [
+  'target_type' => 'rtp',
+  'target_addr' => '192.168.1.1',
+  'target_port' => 1234
+];
+$call->tap($tap)->done(function($result) {
+  if ($result->isSuccessful()) {
+    $source = $result->getSourceDevice();
+  }
+});
+```
+
+### getTap
+
+Returns the payload for this `tap` action.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`Object` - Payload used to start tapping.
+
+**Examples**
+
+> Tapping audio from the call and then inspect the `tap` payload.
+
+```php
+<?php
+
+$tap = [
+  'target_type' => 'rtp',
+  'target_addr' => '192.168.1.1',
+  'target_port' => 1234
+];
+$call->tap($tap)->done(function($result) {
+  if ($result->isSuccessful()) {
+    $tap = $result->getTap();
+  }
+});
+```
+
+### isSuccessful
+
+Return `true` if the tapping succeeded, `false` otherwise.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`Boolean` - True/False accordingly to the state.
+
+**Examples**
+
+> Tapping audio from the call and then check if it has ended successfully.
+
+```php
+<?php
+
+$tap = [
+  'target_type' => 'rtp',
+  'target_addr' => '192.168.1.1',
+  'target_port' => 1234
+];
+$call->tap($tap)->done(function($result) {
+  if ($result->isSuccessful()) {
+
+  }
+});
+```

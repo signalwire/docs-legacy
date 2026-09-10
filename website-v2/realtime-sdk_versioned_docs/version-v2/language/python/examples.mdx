@@ -1,0 +1,96 @@
+---
+title: Examples
+slug: /python/reference/examples
+toc_max_heading_level: 3
+---
+Follow the examples to see how's easy to use the Relay SDK to interact with inbound or outbound calls.
+
+### Outbound Calls
+
+> Using a Relay Consumer to make an outbound call and say "Welcome to SignalWire!", then hangup.
+
+```python
+import logging
+from signalwire.relay.consumer import Consumer
+
+class CustomConsumer(Consumer):
+  def setup(self):
+    self.project = 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX'
+    self.token = 'PTXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
+    self.contexts = ['office']
+
+  async def ready(self):
+    logging.info('CustomConsumer is ready!')
+    # Replace numbers with yours!
+    dial_result = await self.client.calling.dial(to_number='+18991114443', from_number='+18991114444')
+    if dial_result.successful is False:
+      logging.info('Outbound call not answered or failed')
+      return
+    # Take the Call object from "dial_result"
+    call = dial_result.call
+    await call.play_tts(text='Welcome to SignalWire!')
+    logging.info('Hanging up..')
+    await call.hangup()
+
+consumer = CustomConsumer()
+consumer.run()
+```
+
+### Connect inbound calls with a series of devices
+
+> Using a Relay Consumer to manage inbound calls from the `office` context. Answer the call, try to connect it with 3 devices and wait until the remote call will be hanged up.
+
+```python
+from signalwire.relay.consumer import Consumer
+
+class CustomConsumer(Consumer):
+  def setup(self):
+    self.project = 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX'
+    self.token = 'PTXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
+    self.contexts = ['office']
+    self.devices = [
+      { 'to_number': '+18991114443' },
+      { 'to_number': '+18991114444' },
+      { 'to_number': '+18991114445' }
+    ]
+
+  async def on_incoming_call(self, call):
+    result = await call.answer()
+    if result.successful is False:
+      print('Error answering the call')
+      return
+    result = await call.connect(device_list=self.devices)
+    if result.successful:
+      remote_call = result.call
+      # Wait until the remote leg is ended..
+      await remote_call.wait_for_ended()
+    await call.hangup()
+
+consumer = CustomConsumer()
+consumer.run()
+```
+
+### Send an SMS
+
+> Using a Relay Consumer to send SMS.
+
+```python
+import logging
+from signalwire.relay.consumer import Consumer
+
+class CustomConsumer(Consumer):
+  def setup(self):
+    self.project = 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX'
+    self.token = 'PTXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
+    self.contexts = ['office']
+
+  async def ready(self):
+    logging.info('CustomConsumer is ready!')
+    # Replace numbers with yours!
+    result = await self.client.messaging.send(context='office', to_number='+18991114443', from_number='+18991114444', body='Welcome to SignalWire!')
+    if result.successful:
+      logging.info(f'Message sent. ID: {result.message_id}')
+
+consumer = CustomConsumer()
+consumer.run()
+```

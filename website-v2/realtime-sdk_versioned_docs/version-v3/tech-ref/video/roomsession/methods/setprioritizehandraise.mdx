@@ -1,0 +1,37 @@
+---
+title: "setPrioritizeHandraise"
+slug: /node/reference/video/room-session/set-prioritize-hand-raise
+description: setPrioritizeHandraise method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+[creating-the-video-room-token-1]: /docs/apis/video/create-room-token
+
+### setPrioritizeHandraise
+
+- **setPrioritizeHandraise**(`params`): `Promise<boolean>`
+
+Set whether to prioritize hand-raise or not.
+Users with raised hands will be shown in the main video area over other participants who don't have their hand raised.
+
+#### Parameters
+
+| Name    | Type      | Description                                                                                                                                                             |
+|:--------|:----------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `param` | `boolean` | Whether to prioritize participants on the canvas with their hand-raised. Default: `true`. If omitted, the hand status is toggled to the opposite of the current status. |
+
+#### Permissions
+
+- `video.prioritize_handraise`
+
+You need to specify the permissions when [creating the Video Room Token][creating-the-video-room-token-1] on the server side.
+
+#### Returns
+
+`Promise<boolean>`
+
+#### Example
+
+```javascript
+await room.setPrioritizeHandraise(false)
+```

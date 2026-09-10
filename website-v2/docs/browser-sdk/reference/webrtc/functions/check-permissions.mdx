@@ -1,0 +1,30 @@
+---
+title: "checkPermissions"
+slug: /js/reference/webrtc/check-permissions
+description: checkPermissions function in the WebRTC namespace.
+toc_max_heading_level: 3
+---
+
+### checkPermissions
+
+- `Const` **checkPermissions**(`name?`): `Promise<null | boolean>`
+
+Asynchronously returns whether we have permissions to access the specified resource. Some common parameter values for `name` are `"camera"`, `"microphone"`, and `"speaker"`. In those cases, prefer the dedicated functions [checkCameraPermissions](/docs/browser-sdk/js/reference/webrtc/check-camera-permissions), [checkMicrophonePermissions](/docs/browser-sdk/js/reference/webrtc/check-microphone-permissions), and [checkSpeakerPermissions](/docs/browser-sdk/js/reference/webrtc/check-speaker-permissions).
+
+#### Parameters
+
+<ParamField path="name" type="DevicePermissionName">
+  Name of the resource.
+</ParamField>
+
+#### Returns
+
+`Promise<null | boolean>`
+
+#### Example
+
+```javascript
+await SignalWire.WebRTC.checkPermissions("camera");
+// true: we have permission for using the camera
+```
+

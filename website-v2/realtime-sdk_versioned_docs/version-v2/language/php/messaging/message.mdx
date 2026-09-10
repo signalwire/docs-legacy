@@ -1,0 +1,45 @@
+---
+slug: /php/reference/messaging/message
+hide_title: true
+toc_max_heading_level: 3
+---
+
+[consumer-1]: /docs/server-sdk/v2/php/reference/consumer#onmessagestatechange
+[consumer]: /docs/server-sdk/v2/php/reference/consumer#onincomingmessage
+[link]: #state-events
+
+## Relay.Messaging.Message
+
+An object representing an SMS or MMS message. It is the parameter of both [`onIncomingMessage`][consumer] and [`onMessageStateChange`][consumer-1] Consumer handlers.
+
+### Properties
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `id` | `string` | The unique identifier of the message. |
+| `context` | `string` | The context of the message. |
+| `from` | `string` | The phone number the message comes from. |
+| `to` | `string` | The destination number of the message. |
+| `direction` | `string` | The direction of the message: `inbound` or `outbound`. |
+| `state` | `string` | The current state of the message. See [`Relay.Messaging.Message` State Events][link] for all the possible states. |
+| `body` | `string` | The content of the message. |
+| `media` | `string[]` | Array of URLs media. |
+| `tags` | `string[]` | Array of strings with message tags. |
+| `segments` | `number` | Number of segments of the message. |
+| `reason` | `string` | Reason why the message was not sent.<br/> _Present only in case of failure._ |
+
+### Events
+
+#### State Events
+
+To track the state of a message.
+
+| Name | Description |
+| --- | --- |
+| `queued` | The message has been queued in Relay. |
+| `initiated` | Relay has initiate the process to send the message. |
+| `sent` | Relay has sent the message. |
+| `delivered` | The message has been successfully delivered.  Due to the nature of SMS and MMS, receiving a `delivered` event is not guaranteed, even if the message is delivered successfully. |
+| `undelivered` | The message has not been delivered.  Due to the nature of SMS and MMS, receiving a `undelivered` event is not guaranteed, even if the message fails to be delivered. |
+| `failed` | The call has failed. |
+

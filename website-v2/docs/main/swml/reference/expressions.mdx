@@ -1,0 +1,498 @@
+---
+slug: /swml/reference/expressions
+title: Expressions
+description: Complete technical reference for JavaScript expressions in SMWL
+
+---
+
+Expressions allow you to use JavaScript within SWML variables to transform data, perform calculations, and implement logic. Instead of static values, you can dynamically construct values based on call data, user input, and calculations.
+
+For information about variable scopes and basic access patterns, see the [Variables Reference](/docs/swml/reference/variables).
+For template transformation functions, see the [Template Functions Reference](/docs/swml/reference/template-functions).
+
+## What are expressions?
+
+Expressions use the `${...}` syntax and support JavaScript for dynamic value construction. Any JavaScript that evaluates to a value can be used inside these delimiters. Both syntaxes work identically.
+
+SWML uses the Google V8 JavaScript engine (version 6 and later) to evaluate expressions. For detailed JavaScript feature support, refer to the [V8 documentation](https://v8.dev/docs).
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - prompt:
+        play: 'say: Please enter your order quantity'
+        speech_hints:
+          - one
+          - two
+          - three
+    - set:
+        # Set the prompt value
+        quantity: '${prompt_value}'
+        # Set the unit price
+        unit_price: 5
+        # Extract area code from caller
+        area_code: '${call.from.substring(0, 3)}'
+        # Calculate total with tax
+        subtotal: '${vars.unit_price * parseInt(vars.quantity)}'
+        tax: '${subtotal * 0.08}'
+        total: '${subtotal + tax}'
+        # Determine shipping message
+        shipping_msg: '${total > 50 ? "with free shipping" : "plus shipping"}'
+    - play:
+        url: 'say: Your total is ${total.toFixed(2)} dollars ${shipping_msg}'
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "prompt": {
+          "play": "say: Please enter your order quantity",
+          "speech_hints": [
+            "one",
+            "two",
+            "three"
+          ]
+        }
+      },
+      {
+        "set": {
+          "quantity": "${prompt_value}",
+          "unit_price": 5,
+          "area_code": "${call.from.substring(0, 3)}",
+          "subtotal": "${vars.unit_price * parseInt(vars.quantity)}",
+          "tax": "${subtotal * 0.08}",
+          "total": "${subtotal + tax}",
+          "shipping_msg": "${total > 50 ? \"with free shipping\" : \"plus shipping\"}"
+        }
+      },
+      {
+        "play": {
+          "url": "say: Your total is ${total.toFixed(2)} dollars ${shipping_msg}"
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+Expressions are evaluated at runtime and replaced with their computed values.
+
+### Variable access in expressions
+
+All SWML variables are accessible within JavaScript expressions. 
+You can reference them with or without scope prefixes:
+
+```yaml
+- set:
+    # With prefix (explicit)
+    caller: '${call.from}'
+    value: '${vars.my_variable}'
+    setting: '${envs.api_key}'
+    # Without prefix (automatic)
+    formatted: '${my_variable.toUpperCase()}'
+```
+
+When you access a variable without a prefix, the expression engine checks scopes in this order: `vars`, then `envs`, then `call`. 
+Using explicit prefixes like `vars.` or `call.` is recommended for clarity, especially when variable names might exist in multiple scopes.
+
+## When to use expressions vs. server-side logic
+
+Expressions are evaluated at runtime within SWML and work well for simple transformations like formatting phone numbers or calculating totals.
+The question of when to use expressions versus server-side logic depends largely on your deployment model.
+
+### Serverless (dashboard-hosted) SWML
+
+When hosting SWML directly in the SignalWire Dashboard, expressions become your primary tool for dynamic behavior.
+You can use them to transform call data like extracting area codes with `${call.from.substring(0, 3)}`, perform calculations such as `${vars.unit_price * parseInt(vars.quantity)}`, or make simple decisions with ternary operators.
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - prompt:
+        play: 'say: Please enter your order quantity'
+        speech_hints:
+          - one
+          - two
+          - three
+    - set:
+        # Set the prompt value
+        quantity: '${prompt_value}'
+        # Set the unit price
+        unit_price: 5
+        # Extract area code from caller
+        area_code: '${call.from.substring(0, 3)}'
+        # Calculate total with tax
+        subtotal: '${vars.unit_price * parseInt(vars.quantity)}'
+        tax: '${subtotal * 0.08}'
+        total: '${subtotal + tax}'
+        # Determine shipping message
+        shipping_msg: '${total > 50 ? "with free shipping" : "plus shipping"}'
+    - play:
+        url: 'say: Your total is ${total.toFixed(2)} dollars ${shipping_msg}'
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "prompt": {
+          "play": "say: Please enter your order quantity",
+          "speech_hints": [
+            "one",
+            "two",
+            "three"
+          ]
+        }
+      },
+      {
+        "set": {
+          "quantity": "${prompt_value}",
+          "unit_price": 5,
+          "area_code": "${call.from.substring(0, 3)}",
+          "subtotal": "${vars.unit_price * parseInt(vars.quantity)}",
+          "tax": "${subtotal * 0.08}",
+          "total": "${subtotal + tax}",
+          "shipping_msg": "${total > 50 ? \"with free shipping\" : \"plus shipping\"}"
+        }
+      },
+      {
+        "play": {
+          "url": "say: Your total is ${total.toFixed(2)} dollars ${shipping_msg}"
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+If you need complex logic in serverless mode, use the [`request`](/docs/swml/reference/request) method to fetch data from a server during call execution.
+The response data becomes available as variables that you can then manipulate with expressions.
+
+### Server-based (external URL) SWML
+
+Serving SWML from your own web server opens up more architectural options. This is where you should handle database queries, external API calls to your business systems, and any complex business logic that requires authentication or heavy data processing.
+
+The general pattern is to do the heavy lifting server-side before generating the SWML response, then use expressions for runtime transformations. For example, you might query your database to fetch customer information, call your internal billing service to get their account status, and insert that data directly into the SWML. Then expressions handle runtime concerns like formatting that data or calculating values based on user input collected during the call.
+
+```javascript
+app.post('/swml-handler', async (req, res) => {
+  const { call, params } = req.body;
+
+  // Server-side: Query database
+  const customer = await db.query(
+    'SELECT * FROM customers WHERE phone = ?',
+    [call.from]
+  );
+
+  // Server-side: Call internal billing API
+  const billing = await fetch(`https://billing.yourcompany.com/api/account/${customer.id}`);
+  const accountData = await billing.json();
+
+  // Return SWML with data inserted
+  const swml = {
+    version: '1.0.0',
+    sections: {
+      main: [
+        {
+          play: {
+            // Expression: Simple transformation at runtime
+            url: `say: Hello ${customer.name}, your account status is ${accountData.status}`
+          }
+        },
+        {
+          set: {
+            // Expression: Calculate with fetched data
+            discount: '${params.base_price * 0.1}'
+          }
+        }
+      ]
+    }
+  };
+
+  res.json(swml);
+});
+```
+
+The key principle is to use server-side logic to prepare and fetch data, then use expressions for transformations and dynamic behavior that happen during the call itself.
+
+## Common expression patterns
+
+### String operations
+
+Transform and manipulate text using JavaScript string methods:
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - set:
+        first_name: 'John'
+        last_name: 'Doe'
+        # Extract part of a string
+        area_code: '${call.from.substring(0, 3)}'
+        # Change case
+        uppercase: '${call.type.toUpperCase()}'
+        # Combine strings
+        full_name: '${vars.first_name + " " + vars.last_name}'
+    - play:
+        url: 'say: Hello ${full_name}. Your area code is ${area_code}. Call type: ${uppercase}'
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "set": {
+          "first_name": "John",
+          "last_name": "Doe",
+          "area_code": "${call.from.substring(0, 3)}",
+          "uppercase": "${call.type.toUpperCase()}",
+          "full_name": "${vars.first_name + \" \" + vars.last_name}"
+        }
+      },
+      {
+        "play": {
+          "url": "say: Hello ${full_name}. Your area code is ${area_code}. Call type: ${uppercase}"
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+Common methods: `substring()`, `toUpperCase()`, `toLowerCase()`, `trim()`, `replace()`, `split()`, `join()`
+
+### Arithmetic and math
+
+Perform calculations using standard JavaScript operators and Math functions:
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - set:
+        # Calculate total
+        total: '${params.price * params.quantity}'
+        # Format currency (2 decimal places)
+        formatted: '${total.toFixed(2)}'
+        # Round to nearest integer
+        rounded: '${Math.round(params.rating)}'
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "set": {
+          "total": "${params.price * params.quantity}",
+          "formatted": "${total.toFixed(2)}",
+          "rounded": "${Math.round(params.rating)}"
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+Use operators: `+`, `-`, `*`, `/`, `%` and Math functions: `Math.round()`, `Math.ceil()`, `Math.floor()`, `Math.max()`, `Math.min()`
+
+### Conditional logic
+
+Use ternary operators and comparisons to make decisions:
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - set:
+        # Conditional greeting based on call direction
+        greeting: '${call.direction == "inbound" ? "Welcome" : "Calling"}'
+        # Fallback to "unknown" if call.type is null
+        call_label: '${call.type != null ? call.type : "unknown"}'
+        # Compound condition checking both type and direction
+        status: '${call.type == "phone" && call.direction == "inbound" ? "valid" : "invalid"}'
+    - play:
+        url: 'say: ${greeting}! Your call type is ${call_label} and status is ${status}'
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "set": {
+          "greeting": "${call.direction == \"inbound\" ? \"Welcome\" : \"Calling\"}",
+          "call_label": "${call.type != null ? call.type : \"unknown\"}",
+          "status": "${call.type == \"phone\" && call.direction == \"inbound\" ? \"valid\" : \"invalid\"}"
+        }
+      },
+      {
+        "play": {
+          "url": "say: ${greeting}! Your call type is ${call_label} and status is ${status}"
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+Use comparisons: `==`, `!=`, `>`, `<`, `>=`, `<=` and logical operators: `&&`, `||`
+
+### Array operations
+
+Work with arrays using JavaScript array methods:
+
+```yaml
+version: 1.0.0
+  sections:
+    main:
+      - set:
+          # Define the array first
+          items:
+            - apple
+            - banana
+      - set:
+          # Get array length
+          count: '${(items.length)}'
+          # Join array into string
+          list: '${vars.items.join(", ")}'
+          # Check if array contains item
+          has_item: '${vars.items.includes("apple")}'
+          # Get last item
+          last: '${vars.items[vars.items.length - 1]}'
+      - play:
+          url: 'say: You have ${count} items: ${list}. Last item is ${last}.'
+```
+
+Common methods: `.length`, `.join()`, `.includes()`, bracket notation for access
+
+### Type conversions
+
+Convert between strings, numbers, and booleans:
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+  - set:
+      quantity: ${parseInt("42")}
+      count: 100
+      text: "${count.toString()}"
+      is_active: "${Boolean(1)}"
+  - play:
+      url: 'say: The quantity is ${quantity}. The count variable is ${text}. Active is set to ${is_active}'
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "set": {
+          "quantity": "${parseInt(\"42\")}",
+          "count": 100,
+          "text": "${count.toString()}",
+          "is_active": "${Boolean(1)}"
+        }
+      },
+      {
+        "play": {
+          "url": "say: The quantity is ${quantity}. The count variable is ${text}. Active is set to ${is_active}"
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+Use: `parseInt()`, `parseFloat()`, `.toString()`, `Boolean()`
+
+## Expression limitations
+
+Expressions are designed for quick data transformations during calls. They work great for formatting strings, performing calculations, and making simple decisions, but they're intentionally constrained to keep your calls running smoothly.
+
+You can't create custom functions with the `function` keyword or arrow syntax. Instead, rely on JavaScript's built-in methods like string operations, Math functions, and array methods:
+
+```yaml
+- set:
+    calculator: '${function(x) { return x * 2; }}'
+
+# Do this instead
+- set:
+    doubled: '${value * 2}'
+```
+
+Loops like `for` and `while` aren't available, but you can use array methods for most transformation needs. Methods like `.map()`, `.filter()`, and `.reduce()` handle common iteration patterns:
+
+```yaml
+# Loops aren't supported
+- set:
+    result: '${for(let i=0; i<10; i++) { sum += i; }}'
+
+# Array methods work well
+- set:
+    sum: '${[1,2,3,4,5].reduce((a,b) => a+b, 0)}'
+```
+
+Simple property access like `.length`, `.name`, `.value`, etc. on arrays or strings require parentheses to evaluate correctly.
+Without them, the expression is treated as a variable lookup rather than JavaScript.
+Method Calls with parentheses work directly:
+
+```yaml
+  # Property access needs parentheses
+  - set:
+      count: '${(items.length)}'
+      name_length: '${(user.name.length)}'
+
+  # Method calls work without extra syntax
+  - set:
+      list: '${items.join(", ")}'
+      upper: '${name.toUpperCase()}'
+```
+
+Expressions execute synchronously, so you can't use `async`, `await`, or make API calls directly. For operations that need external data, use the [`request`](/docs/swml/reference/request) method to fetch data first, then transform the results with expressions.
+
+Keep expressions under 1,024 characters and expect them to complete within 150ms. If you're hitting these limits, it's usually a sign that the logic belongs in your server code rather than inline in SWML.

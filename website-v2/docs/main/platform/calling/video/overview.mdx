@@ -1,0 +1,119 @@
+---
+title: Video
+slug: /platform/video
+sidebar_label: Overview
+sidebar_position: 0
+description: Programmable, lightweight, scalable video conferencing
+---
+
+SignalWire Video is a powerful WebRTC video conferencing tool built on an 
+[MCU (Multipoint Control Unit)][mcu] that handles all the muxing in the cloud.
+A single unified stream is sent to each participant, resulting in low latency, high quality, and the same video stream for all users.
+
+<CardGroup cols={2}>
+  <Card
+    title="REST APIs"
+    icon="solid rotate-right"
+    href="/docs/apis"
+  >
+    Use classic HTTP calls to create and maintain tokens, rooms, sessions, and recordings.
+  </Card>
+  <Card
+    title="Realtime Server SDK"
+    icon="solid server"
+    href="/docs/server-sdk/node/reference/video"
+  >
+    Build a video solution using your own server with web socket technology.
+  </Card>
+  <Card
+    title="Browser SDKs (v2 and v3)"
+    icon="solid globe"
+    href="/docs/browser-sdk/js"
+  >
+    Make audio/video calls to phone numbers, SIP endpoints, and other browsers.
+  </Card>
+</CardGroup>
+
+
+## Frequently asked questions
+
+<AccordionGroup>
+
+<Accordion title="Can I programmatically create rooms and control attendee permissions?">
+Yes. Please check out our API reference to see how to create a [room with a prebuilt
+UI](/docs/apis/video/create-video-conference) (a Programmable Video Conference) with
+a [room without a prebuilt UI](/docs/apis/video/create-room).
+</Accordion>
+
+<Accordion title="How long can room names be?">
+Room names can be up to 100 characters, with a display name of up to 200 characters. Be sure to avoid using "/" in room names.
+</Accordion>
+
+<Accordion title="How can I define user permissions?">
+You define a user's permissions for a room when you generate their access token. See the [room_tokens](/docs/apis/video/create-room-token) API endpoint. Access tokens for Programmable Video Conferences are generated when the conference is created. The response object includes tokens for moderators and guests. Guest tokens will only have permissions to modify their own settings while moderators can effect their own settings, room settings, and settings for other participants.
+</Accordion>
+
+<Accordion title="Do video tokens expire?">
+No, by default all tokens will last indefinitely. You can alter the lifetime of your tokens using a variety of parameters, more detail [here](/docs/apis/video/create-room-token).
+</Accordion>
+
+<Accordion title="Are the video tokens signed or encrypted?">
+The video tokens are signed and are secure. Encryption cannot be implemented on the user-end without causing problems as SignalWire would then need to decrypt them.
+</Accordion>
+
+<Accordion title="Can users be blocked by IP address?">
+Not at the SignalWire/Token level. You would have to block them from your website/application.
+</Accordion>
+
+<Accordion title="Is the Video API encrypted?">
+Yes, it is encrypted through HTTPS and SRTP. WebRTC products are required to be encrypted!
+</Accordion>
+
+<Accordion title="Is SignalWire video HIPAA compliant?">
+Yes! You control access to video conferences via JWT tokens, recording is disabled by default and must be enabled manually, and recordings can be deleted from SignalWire.
+</Accordion>
+
+<Accordion title="Can I incorporate chat?">
+Yes! When building your website you will have to generate a unique token for the video room and the chat room, but both can exist on the same page.
+</Accordion>
+
+<Accordion title="Can I use video filters?">
+There is no native support for this at the moment, but you can implement it yourself using video overlays.
+</Accordion>
+
+<Accordion title="Why do users' cameras briefly activate when joining while muted?">
+SignalWire enumerates over all devices and 'checks' the devices where permissions allow. No video/audio data is transmitted during this test.
+</Accordion>
+
+<Accordion title="Does SignalWire support RTMP?">
+The Video API supports inbound RTMP via the [`play`](/docs/browser-sdk/js/reference/video/room-session/play) method, and outbound RTMP via the [`startStream`](/docs/browser-sdk/js/reference/video/room-session/start-stream) method.
+</Accordion>
+
+<Accordion title="Where are recordings stored?">
+Video Room recordings can be found in your [SignalWire Dashboard](https://signalwire.com/signin). Click on _Video_ in the left sidebar, then find a list of recordings under the _Recordings_ tab.
+</Accordion>
+
+<Accordion title="How can recordings be downloaded/deleted?">
+Video room recordings can be deleted or downloaded via your [SignalWire Dashboard](https://signalwire.com/signin) in the video recordings section or via the [API](/docs/apis/video/list-room-session-recordings).
+</Accordion>
+
+<Accordion title="What is considered a participant?">
+Any new member in the room - this could be a person who joined or a screen being shared.
+</Accordion>
+
+<Accordion title="Are Programmable Video Conferences customizable?">
+Yes! With Programmable Video Conferences, you can now change the background color, foreground color, primary color, success color, negative color, and switch from light mode to dark mode. See a demonstration in our [Programmable Video Conferences article](/docs/platform/video).
+</Accordion>
+
+<Accordion title="Can you record and screen share in a Programmable Video Conference?">
+Yes! Our [Programmable Video Conferences](/docs/platform/video) allow for recording, screen sharing, moderator/guest access, room previews, and more, all with **no code required**. If you need further customizations, you can write custom code on top of the pre-built room with ease.
+</Accordion>
+
+<Accordion title="Do Programmable Video Conferences have automatic recording?">
+Yes, you can choose to start recording as soon as the room starts in the settings for [Programmable Video Conferences](/docs/platform/video). Even if you do not select this, moderators will still have the ability to manually start and stop recording at their own discretion. Guests will not have this ability.
+</Accordion>
+
+</AccordionGroup>
+
+{/* Links */}
+[mcu]: https://signalwire.com/blogs/industry/p2p-sfu-mcu-find-out-which-webrtc-architecture-is-right-for-you

@@ -1,0 +1,215 @@
+---
+title: FusionPBX
+slug: /platform/fusionpbx
+x-custom:
+  ported_from_readme: true
+  hideInGuideShowcase: true
+---
+
+
+[FusionPBX](https://www.fusionpbx.com/) is a FreeSWITCH-based multi-tenant PBX that provides a robust set of features for business phone systems. Using SignalWire services with FusionPBX allows you to leverage our high call quality and low rates.
+
+Creating a SIP Endpoint
+-----------------------
+
+If you don't have a SIP endpoint set up already, the first step is to [create a SIP Endpoint](/docs/platform/voice) and connect it to a phone number.
+
+FusionPBX GUI Set Up
+--------------------
+
+From your FusionPBX installation's web GUI go to **Accounts** > **Gateways**. 
+
+<Frame caption="The Gateways item under Accounts.">
+
+![The Gateways item under Accounts.](@image/external/fusionpbx/01_gateways.webp)
+
+</Frame>
+
+This is where you will use the credentials you created in the first step. Once you are in the **Gateways** section, click the **ADD** button in the top right corner. 
+
+<Frame caption="Selecting the Add button in the Gateways section.">
+
+![Selecting the Add button in the Gateways section.](@image/external/fusionpbx/02_add_gateways.webp)
+
+</Frame>
+
+Enter the following information in the **Gateway** form:
+
+Gateway: This is a label. In this example we will define this as signalwire  
+Username: Your username as created in the SIP endpoint on SignalWire  
+Password: The password you set above  
+Proxy: YOURSPACE-SIPDOMAIN.sip.signalwire.com (Replace with your proxy address)  
+Register: True
+
+
+<Info>
+
+The Proxy address and other SIP credentials can be found in the SignalWire Dashboard by going to the **SIP** > **SIP Settings** tab as shown below.
+
+</Info>
+
+<Frame caption="Selecting the SIP Settings pane of the SIP tab.">
+
+![Selecting the SIP Settings pane of the SIP tab.](@image/external/fusionpbx/03_signalwire_sip_address.webp)
+
+</Frame>
+
+Click the **Advanced** button to expand additional settings
+
+<ol>
+<li>Register Transport: TLS (This can also be TCP but is better to be secure with TLS)</li>
+<li>Ping: 90</li>
+<li>Profile: internal</li>
+<li>Enabled: True Click save at the top right corner.</li>
+</ol>
+Your form should look similar to the following.
+
+
+<Info>
+
+In order to use TLS on your FusionPBX installation, you **must** have SSL certificates like Let's Encrypt or others configured. You can find this detailed further in the FusionPBX member documentation.
+
+</Info>
+
+<Frame caption="A screenshot of the Gateway form. The Gateway name is set to signalwire. Username, password, and proxy are filled in with appropriate values. Expire seconds is set to 800. Register is set to True. Retry Seconds is set to 30. Under Advanced, the Context is set to Public and the Profile is set to Internal.">
+
+![A screenshot of the Gateway form. The Gateway name is set to signalwire. Username, password, and proxy are filled in with appropriate values. Expire seconds is set to 800. Register is set to True. Retry Seconds is set to 30. Under Advanced, the Context is set to Public and the Profile is set to Internal.](@image/external/fusionpbx/04_gateway_form.webp)
+
+</Frame>
+
+You should now have a gateway registered(REGED) as shown in the image below! If you don't see it yet, try clicking **Start**.
+
+<Frame caption="A screenshot of a table with gateways. The example gateway reads 'REGED' in the State column.">
+
+![A screenshot of a table with gateways. The example gateway reads 'REGED' in the State column.](@image/external/fusionpbx/05_gateway_reged.webp)
+
+</Frame>
+
+Making Outbound Calls over SignalWire
+-------------------------------------
+
+After the gateway is configured in your FusionPBX installation and registered, we can now configure an outbound route! Go to **Dialplan** > **Outbound Routes** and click the **ADD** button at the top right.
+
+<Frame caption="A screenshot of the Dialplan menu, with Outbound Routes selected.">
+
+![A screenshot of the Dialplan menu, with Outbound Routes selected.](@image/external/fusionpbx/06_outbound_routes.webp)
+
+</Frame>
+
+<Frame caption="Selecting the Add button.">
+
+![Selecting the Add button.](@image/external/fusionpbx/07_outbound_routes_add.webp)
+
+</Frame>
+
+Fill in the form with a few simple settings:
+
+<ol>
+<li>Gateway: Select signalwire from the drop down list</li>
+<li>Dialplan Expression: Choose North America (This can be typed in manually or you can pick other areas also)</li>
+</ol>
+
+Check your form is similar to the following, and click **Save**.
+
+<Frame caption="Settings in the Outbound Routes form.">
+
+![Settings in the Outbound Routes form.](@image/external/fusionpbx/08_outbound_routes_form.webp)
+
+</Frame>
+
+Recieving Inbound Calls over SignalWire
+---------------------------------------
+
+Go to **Accounts** > **Extensions**. Here you can create an extension. This is needed to point your registered peer to so you can receive calls.
+
+<Frame caption="Selecting the Extensions item in the Accounts menu.">
+
+![Selecting the Extensions item in the Accounts menu.](@image/external/fusionpbx/09_extensions.webp)
+
+</Frame>
+
+Create an extension by clicking the **Add** button at the top right. In this example, we will create extension **900** and click **Save** at the top right.
+
+Go to **Dialplan** > **Destinations** from your FusionPBX installation. We will now create an inbound route to connect the SignalWire peer and the extension you just created.
+
+<Frame caption="Selecting the Destinations item in the Dialplan menu.">
+
+![Selecting the Destinations item in the Dialplan menu.](@image/external/fusionpbx/10_destinations.webp)
+
+</Frame>
+
+Create a destination by clicking the **+ADD** button at the top right.
+
+<Frame caption="Selecting the Add button.">
+
+![Selecting the Add button.](@image/external/fusionpbx/11_destinations_add.webp)
+
+</Frame>
+
+Fill in the form with the necessary information
+
+<ol>
+<li>Destination: Your SignalWire phone number, with the +1 (eg. +15556677888)</li>
+<li>Caller ID Name: This is optional (also see the documentation for Caller ID settings on SignalWire)</li>
+<li>Caller ID Number: This is optional</li>
+<li>Actions: 900 (This is where the call will go to). The actions can be an extension, IVR, Time condition, etc.</li>
+</ol>
+
+Click the **Save** button at the top right, after checking your form looks similar to the following.
+
+<Frame caption="Form settings.">
+
+![Form settings.](@image/external/fusionpbx/image.webp)
+
+</Frame>
+
+This next step is **VERY** important. This must be set in order to receive calls to your FusionPBX installation. In the menu, look for **Advanced** > **Default Settings** and click the **Add** button on the top right.
+
+<Frame caption="Selecting the Add button under Default Settings.">
+
+![Selecting the Add button under Default Settings.](@image/external/fusionpbx/13_sip_default_setting.webp)
+
+</Frame>
+
+In the form, enter the following information:
+
+1. Category: dialplan
+2. Subcategory: destination
+3. Type: text
+4. Value: `${sip_to_user}`
+5. Enabled: True
+6. Description: optional
+
+Check the form looks similar to the following, then click **Save**. After saving, click the top right **Reload** button.
+
+<Frame caption="Selecting the Save button.">
+
+![Selecting the Save button.](@image/external/fusionpbx/14_sip_user_setting.webp)
+
+</Frame>
+
+Access Control
+--------------
+
+The IPs are needed to make/receive calls, but they can change frequently.  You can find the IPs by querying sip.signalwire.com. CIDR is used so IPs must be added with a  x.x.x.x/32.
+
+**Windows**  
+`nslookup sip.signalwire.com`
+
+**Mac/linux**  
+`dig sip.signalwire.com`
+
+You can add these in **Advanced** --> **Access Controls** --> **Domains**. 
+
+<Frame caption="A screenshot of the Access Control page, with a list of nodes.">
+
+![A screenshot of the Access Control page, with a list of nodes.](@image/external/fusionpbx/signalwire_allow_ips.webp)
+
+</Frame>
+
+fail2ban
+--------
+
+If you are using [fail2ban](https://docs.fusionpbx.com/en/latest/firewall/fail2ban.html) to protect FreeSWITCH, you can add SignalWire IPs directly to iptables via the linux command line!
+
+ Check out our article on [how to allow SignalWire IPs through your firewall](/docs/platform/allow-signalwire-ips-through-your-firewall)  to learn more.

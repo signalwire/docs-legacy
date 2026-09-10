@@ -1,0 +1,62 @@
+---
+slug: /compatibility-api/sdks/reference/accounts/retrieve
+title: Retrieve
+sidebar_label: Retrieve
+toc_max_heading_level: 3
+---
+
+Use this endpoint for the Accounts method to retrieve a single account.
+
+<EndpointSchemaSnippet endpoint="GET /Accounts/{Sid}" />
+
+<EndpointResponseSnippet endpoint="GET /Accounts/{Sid}" />
+
+## Request examples
+
+<CodeBlocks>
+```javascript title="Node.js"
+const { RestClient } = require('@signalwire/compatibility-api')
+const client = RestClient('YourProjectID', 'YourAuthToken', { signalwireSpaceUrl: 'example.signalwire.com' })
+
+client.api.accounts('YourProjectID')
+          .fetch()
+          .then(account => console.log(account.friendlyName))
+          .done();
+```
+```csharp
+using System;
+using System.Collections.Generic;
+using Twilio;
+using Twilio.Rest.Api.V2010;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        TwilioClient.Init("YourProjectID", "YourAuthToken", new Dictionary<string, object> { ["signalwireSpaceUrl"] = "{SPACE}.signalwire.com" });
+
+        var account = AccountResource.Fetch(pathSid: "YourProjectID");
+
+        Console.WriteLine(account.FriendlyName);
+    }
+}
+```
+```python
+from signalwire.rest import Client as signalwire_client
+
+client = signalwire_client("YourProjectID", "YourAuthToken", signalwire_space_url = 'example.signalwire.com')
+
+account = client.api.accounts('YourProjectID').fetch()
+
+print(account.friendly_name)
+```
+```ruby
+require 'signalwire/sdk'
+
+@client = Signalwire::REST::Client.new 'YourProjectID', 'YourAuthToken', signalwire_space_url: "example.signalwire.com"
+
+account = @client.api.accounts('YourProjectID').fetch
+
+puts account.friendly_name
+```
+</CodeBlocks>

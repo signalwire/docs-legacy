@@ -1,0 +1,40 @@
+---
+title: "updateMeta"
+slug: /node/reference/video/room-session/update-meta
+description: updateMeta method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+[link-4]: /docs/server-sdk/v3/node/reference/video/room-session/set-meta
+
+### updateMeta
+
+- **updateMeta**(`meta`): `Promise<void>`
+
+Updates the RoomSession metadata by only setting the specified fields. This is
+different from [setMeta][link-4], which replaces the whole metadata object.
+
+#### Parameters
+
+| Name   | Type                                       | Description                 |
+|:-------|:-------------------------------------------|:----------------------------|
+| `meta` | `Record``<string, unknown>` | The update to the metadata. |
+
+#### Returns
+
+`Promise<void>`
+
+#### Example
+
+```js
+roomSession.on("room.updated", (e) => {
+  // We can set an event listener to log changes to the metadata.
+  console.log(e.room.meta);
+});
+
+await roomSession.setMeta({ foo: "bar", baz: true });
+// The logger will now print `{ foo: "bar", baz: true }`
+
+await roomSession.updateMeta({ baz: false, t: 10 });
+// The logger will now print `{ foo: "bar", baz: false, t: 10 }`
+```

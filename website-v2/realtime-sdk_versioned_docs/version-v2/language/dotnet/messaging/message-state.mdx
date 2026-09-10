@@ -1,0 +1,20 @@
+---
+title: "MessageState"
+slug: /dotnet/reference/messaging/message-state
+toc_max_heading_level: 3
+---
+
+# SignalWire.Relay.Messaging.MessageState
+
+This is an enumeration that represents the different possible message states.
+
+### Values
+
+| Value | Description |
+| ----- | ----------- |
+| `delivered` | The message has been delivered. Due to the nature of SMS and MMS, receiving a `delivered` event is not guaranteed, even if the message is delivered successfully. |
+| `failed` | The message delivery failed. |
+| `initiated` | The message delivery has been started. |
+| `queued` | The message has been put into the queue for delivery. |
+| `sent` | The message has been sent for delivery. |
+| `undelivered` | The message has not been delivered. Due to the nature of SMS and MMS, receiving an `undelivered` event is not guaranteed, even if the message fails to be delivered. |

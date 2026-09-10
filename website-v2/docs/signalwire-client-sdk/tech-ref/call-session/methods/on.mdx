@@ -1,0 +1,125 @@
+---
+title: on
+slug: /call-session/on
+---
+
+import APIField from '@site/src/components/APIField';
+
+Registers an event listener for the specified event. The listener will be called every time the event is emitted.
+
+## Signature
+
+```typescript
+call.on<T extends EventNames>(
+  event: T,
+  handler: EventListener<T>
+): CallSession
+```
+
+## Parameters
+
+<APIField name="event" type="string" required>
+  The event name to listen for.
+</APIField>
+
+<APIField name="handler" type="function" required>
+  Callback function to execute when the event fires.
+</APIField>
+
+## Returns
+
+**Type:** `CallSession`
+
+Returns the CallSession instance for method chaining.
+
+## Important Notes
+
+**Multiple Listeners:** You can register multiple listeners for the same event. They will all be called in the order they were registered.
+
+```typescript
+call.on('member.joined', (params) => {
+  console.log('First handler')
+})
+
+call.on('member.joined', (params) => {
+  console.log('Second handler')
+})
+// Both handlers will be called when member.joined fires
+```
+
+**Removing Listeners:** To remove a specific listener, you must keep a reference to the handler function and use `off()`:
+
+```typescript
+const handler = (params) => {
+  console.log('Member joined:', params.member.name)
+}
+
+call.on('member.joined', handler)
+
+// Later, remove the listener
+call.off('member.joined', handler)
+```
+
+**Listener Lifecycle:** Event listeners remain active until either:
+- You explicitly remove them with `off()`
+- The CallSession is destroyed
+
+**One-Time Listeners:** If you need a listener that only fires once, use `once()` instead.
+
+## Examples
+
+### Basic Event Listener
+
+```typescript
+call.on('call.joined', (params) => {
+  console.log('Call joined:', params.call_id)
+  console.log('Member ID:', params.member_id)
+})
+```
+
+### Member Events
+
+```typescript
+call.on('member.joined', (params) => {
+  console.log('Member joined:', params.member.name)
+})
+
+call.on('member.left', (params) => {
+  console.log('Member left:', params.member.name)
+})
+```
+
+### Connection State Events
+
+```typescript
+call.on('connected', (callSession) => {
+  console.log('Call connected')
+})
+
+call.on('disconnected', (callSession) => {
+  console.log('Call disconnected')
+})
+```
+
+### Layout Events
+
+```typescript
+call.on('layout.changed', (params) => {
+  console.log('Layout changed to:', params.layout.name)
+})
+```
+
+### Method Chaining
+
+```typescript
+call
+  .on('call.joined', (params) => {
+    console.log('Joined call:', params.call_id)
+  })
+  .on('member.joined', (params) => {
+    console.log('Member joined:', params.member.name)
+  })
+  .on('layout.changed', (params) => {
+    console.log('Layout changed:', params.layout.name)
+  })
+```

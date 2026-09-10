@@ -1,0 +1,31 @@
+---
+title: "getSupportedConstraints"
+slug: /js/reference/webrtc/get-supported-constraints
+description: getSupportedConstraints function in the WebRTC namespace.
+toc_max_heading_level: 3
+---
+
+### getSupportedConstraints
+
+- `Const` **getSupportedConstraints**(): `MediaTrackSupportedConstraints`
+
+Returns a dictionary whose fields specify the constrainable properties the user agent understands.
+
+#### Returns
+
+`MediaTrackSupportedConstraints`
+
+#### Example
+
+```javascript
+SignalWire.WebRTC.getSupportedConstraints();
+// {
+//   "aspectRatio": true,
+//   "autoGainControl": true,
+//   "brightness": true,
+//   "channelCount": true,
+//   "colorTemperature": true,
+//   ...
+// }
+```
+

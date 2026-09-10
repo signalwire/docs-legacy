@@ -1,0 +1,91 @@
+---
+title: audioUnmute
+slug: /call-session/audiounmute
+---
+
+import APIField from '@site/src/components/APIField';
+
+Unmutes the microphone for yourself or another participant in the call.
+
+## Signature
+
+```typescript
+audioUnmute(params?: MemberCommandParams): Promise<void>
+```
+
+## Parameters
+
+<APIField name="params" type="MemberCommandParams">
+  Options for the unmute operation.
+</APIField>
+
+<APIField name="params.memberId" type="string" default="Your own member">
+  ID of the member to unmute. If omitted, unmutes your own microphone.
+</APIField>
+
+## Permissions
+
+- **Unmuting yourself:** Requires `call.capabilities.self.muteAudio.off`
+- **Unmuting another member:** Requires `call.capabilities.member.muteAudio.off`
+
+## Events
+
+- `member.updated` - General member update event
+- `member.updated.audioMuted` - Specific audio mute state change
+
+## Examples
+
+### Unmute your own microphone
+
+```typescript
+await call.audioUnmute()
+```
+
+### Unmute another participant
+
+```typescript
+const { members } = await call.getMembers()
+const member = members.find(m => m.name === 'John Doe')
+
+if (member) {
+  await call.audioUnmute({ memberId: member.id })
+}
+```
+
+### Check capabilities before unmuting
+
+```typescript
+if (call.capabilities?.self.muteAudio.off) {
+  await call.audioUnmute()
+}
+```
+
+### Listen for unmute events
+
+```typescript
+call.on('member.updated.audioMuted', (event) => {
+  console.log(`Member ${event.member.id} is now ${event.member.audio_muted ? 'muted' : 'unmuted'}`)
+})
+
+await call.audioUnmute()
+```
+
+### Toggle mute with state tracking
+
+```typescript
+let isMuted = false
+
+call.on('member.updated.audioMuted', (event) => {
+  if (event.member.id === call.memberId) {
+    isMuted = event.member.audio_muted
+  }
+})
+
+async function toggleMute() {
+  if (isMuted) {
+    await call.audioUnmute()
+  } else {
+    await call.audioMute()
+  }
+}
+```

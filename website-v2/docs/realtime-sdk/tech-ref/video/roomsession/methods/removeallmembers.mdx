@@ -1,0 +1,47 @@
+---
+title: "removeAllMembers"
+slug: /node/reference/video/room-session/remove-all-members
+description: removeAllMembers method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+[roomsession-41]: /docs/server-sdk/node/reference/video/room-session
+
+### removeAllMembers
+
+- **removeAllMembers**(): `Promise<void>`
+
+Removes all the members from this room session. The room session will end.
+
+#### Returns
+
+`Promise<void>`
+
+#### Example
+
+In this example, we wait for a room to start and then remove all the members from that room
+after 5 seconds. This example assumes that there is a [`RoomSession`][roomsession-41]
+already active and that members are joining the room.
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+// Initialize the SignalWire client
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+// Access the video client from the main client
+const videoClient = client.video;
+
+// Setup listener for when a room starts
+await videoClient.listen({
+  onRoomStarted: async (roomsession) => {
+    console.log("Room started", roomsession.displayName);
+
+    // Remove all members from the room after 5 seconds
+    setTimeout(async () => {
+      console.log("Removing all members from room");
+      await roomsession.removeAllMembers();
+    }, 5000);
+  }
+})
+```

@@ -1,0 +1,31 @@
+---
+title: "audioUnmute"
+slug: /node/reference/video/room-session/audio-unmute
+description: audioUnmute method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+
+### audioUnmute
+
+- **audioUnmute**(`params`): `Promise<void>`
+
+Unmutes the microphone of a given member if it had been previously muted.
+
+#### Parameters
+
+| Name              | Type     | Description                 |
+|:------------------|:---------|:----------------------------|
+| `params`          | `Object` | -                           |
+| `params.memberId` | `string` | Id of the member to unmute. |
+
+#### Returns
+
+`Promise<void>`
+
+#### Example
+
+```typescript
+const id = "de550c0c-3fac-4efd-b06f-b5b8614b8966"; // you can get this from getMembers()
+await roomSession.audioUnmute({ memberId: id });
+```

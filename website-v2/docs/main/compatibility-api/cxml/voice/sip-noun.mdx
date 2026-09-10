@@ -1,0 +1,476 @@
+---
+title: Sip
+sidebar_label: Sip
+slug: /compatibility-api/cxml/reference/voice/sip
+sidebar_position: 1
+toc_max_heading_level: 3
+---
+
+[`<Dial>`](/docs/compatibility-api/cxml/reference/voice/dial) verb's `<Sip>` noun permits the set up of VoIP sessions using SIP (Session Initiation Protocol). You can send a call to any SIP endpoint.
+
+When dialing an SIP endpoint, the transport defaults to TLS. If the SIP destination does not support TLS, you can set the transport to UDP or TCP by setting the transport manually. For example: `sip:alice@example.com;transport=udp`.
+
+The `<Sip>` noun supports all of the [`<Dial>` verb's attributes](/docs/compatibility-api/cxml/reference/voice/dial#verb-attributes) with one exception: `callerId` is supported but not limited to a valid E.164 number. When using the `<Sip>` noun, the `callerId` attribute can be any alphanumeric string and include the following characters: `+-_.,` but no whitespace.
+
+For example, one can dial to a SIP destination with:
+
+<CodeBlocks>
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Dial>
+        <Sip>sip:alice@example.com</Sip>
+    </Dial>
+</Response>
+```
+
+```javascript title="Node.js"
+const { RestClient } = require("@signalwire/compatibility-api");
+const response = new RestClient.LaML.VoiceResponse();
+
+dial = response.dial();
+dial.sip("sip:alice@example.com");
+console.log(response.toString());
+```
+
+```csharp
+using System;
+using Twilio.TwiML;
+using Twilio.TwiML.Voice;
+
+class Example
+{
+    static void Main()
+    {
+        var response = new VoiceResponse();
+        var dial = new Dial();
+        dial.Sip(new Uri("sip:alice@example.com"));
+        response.Append(dial);
+
+        Console.WriteLine(response.ToString());
+    }
+}
+```
+
+```python
+from signalwire.voice_response import VoiceResponse, Dial, Sip
+
+response = VoiceResponse()
+dial = Dial()
+dial.sip('sip:alice@example.com')
+response.append(dial)
+
+print(response)
+```
+
+```ruby
+require 'signalwire/sdk'
+
+response = Signalwire::Sdk::VoiceResponse.new do |response|
+  response.dial do |dial|
+    dial.sip('sip:alice@example.com')
+  end
+end
+
+puts response.to_s
+```
+
+</CodeBlocks>
+
+## Noun attributes
+
+<ParamField path="codecs" type="string" default="PCMU,PCMA">
+  A comma separated list of codecs to offer to the SIP user agent. Select from `PCMU`, `PCMA`, `G722`, `G729`, and `OPUS`. Codecs are offered in the order specified.
+</ParamField>
+
+<ParamField path="method" type="string" default="POST">
+  The `method` attribute specifies whether the request to action is a `GET` or a `POST`. Valid values are `GET` or `POST`.
+</ParamField>
+
+<ParamField path="password" type="string">
+  Password for SIP authentication.
+</ParamField>
+
+<ParamField path="sessionTimeout" type="integer">
+  Non-negative value, in seconds, to use for the SIP `Session-Expires` header. If 0 or unset, SignalWire will pick the default (typically 600).
+</ParamField>
+
+<ParamField path="statusCallback" type="string">
+  The URL to make requests to for each `statusCallbackEvent` event. See [below](#sip_statusCallback) for request parameters.
+</ParamField>
+
+<ParamField path="statusCallbackEvent" type="string">
+  The current status of the call. The call moves from `initiated` to `ringing` when the phone starts ringing. It moves from `ringing` to `answered` when the phone call is answered. Finally, it moves from `answered` to `completed` when the call is terminated. The status will be set to `completed` through the following reasons: **busy**, **canceled**, **completed**, **failed**, or **no-answer**. To specify multiple events, separate each one with a space. See [below](#sip_statusCallbackEvent) for the different call statuses.
+</ParamField>
+
+<ParamField path="statusCallbackMethod" type="string" default="POST">
+  The type of HTTP request to use when requesting a `statusCallback`.
+</ParamField>
+
+<ParamField path="url" type="string">
+  A specified URL for a document that runs on the callee's end after the dialed number answers but before the call is connected. This allows the caller to provide information to the dialed number, giving them the opportunity to decline the call, before they answer the call. See [below](#sip_url) for request parameters.
+</ParamField>
+
+<ParamField path="username" type="string">
+  Username for SIP authentication.
+</ParamField>
+
+
+
+After a Dial attempt is made, SignalWire can make a request to the `<Dial>` verb's `action` attribute. In addition to the [Standard Request Parameters](/docs/compatibility-api/cxml/reference/voice#request-parameters), the following are parameters passed back to your application when SignalWire makes the request.
+
+<ParamField path="DialSipCallId" type="string">
+  The SIP call ID header of the request made to the remote SIP infrastructure.
+</ParamField>
+
+<ParamField path="DialSipHeader_" type="string">
+  The name or value of any X-headers returned in the 200 response to the SIP INVITE request.
+</ParamField>
+
+<ParamField path="DialSipResponseCode" type="string">
+  The SIP response code to the INVITE attempt.
+</ParamField>
+
+
+
+
+#### Request parameters for `sip_url` {#sip_url}
+
+In addition to the [Standard Request Parameters](/docs/compatibility-api/cxml/reference/voice#request-parameters), the following are parameters passed back to your application when SignalWire makes a request to the `<Sip>` noun's `url` attribute.
+
+<ParamField path="SipCallId" type="string">
+  The SIP call ID header of the request made to the remote SIP infrastructure.
+</ParamField>
+
+<ParamField path="SipHeader" type="string">
+  The name or value of any X-headers returned in the 200 response to the SIP INVITE request.
+</ParamField>
+
+
+
+
+#### Status values for `statusCallbackEvent` {#sip_statusCallbackEvent}
+
+The `statusCallbackEvent` attribute has the following call status values:
+
+| Value | Description |
+|:------|:------------|
+| `initiated` | Dialing of a call has begun. |
+| `ringing` | The call has begun ringing. |
+| `answered` | The call has been answered. |
+| `completed` | The call has been terminated. The status will be set to `completed` through the following reasons: **busy**, **canceled**, **completed**, **failed**, or **no-answer**. |
+
+
+
+
+#### Request parameters for the `statusCallback` URL {#sip_statusCallback}
+
+<WebhookPayloadSnippet webhook="voiceStatusCallback" />
+
+
+## Examples
+
+### Dialing to a SIP endpoint
+
+
+<CodeBlocks>
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Dial>
+        <Sip>sip:alice@example.com</Sip>
+    </Dial>
+</Response>
+```
+
+```javascript title="Node.js"
+const { RestClient } = require("@signalwire/compatibility-api");
+const response = new RestClient.LaML.VoiceResponse();
+
+dial = response.dial();
+dial.sip("sip:alice@example.com");
+console.log(response.toString());
+```
+
+```csharp
+using System;
+using Twilio.TwiML;
+using Twilio.TwiML.Voice;
+
+class Example
+{
+    static void Main()
+    {
+        var response = new VoiceResponse();
+        var dial = new Dial();
+        dial.Sip(new Uri("sip:alice@example.com"));
+        response.Append(dial);
+
+        Console.WriteLine(response.ToString());
+    }
+}
+```
+
+```python
+from signalwire.voice_response import VoiceResponse, Dial, Sip
+
+response = VoiceResponse()
+dial = Dial()
+dial.sip('sip:alice@example.com')
+response.append(dial)
+
+print(response)
+```
+
+```ruby
+require 'signalwire/sdk'
+
+response = Signalwire::Sdk::VoiceResponse.new do |response|
+  response.dial do |dial|
+    dial.sip('sip:alice@example.com')
+  end
+end
+
+puts response.to_s
+```
+
+</CodeBlocks>
+
+In this example, in order to connect to 'alice@example.com' we have to nest a `<Sip>` within a `<Dial>`.
+
+### Dialing to a SIP endpoint with authentication
+
+<CodeBlocks>
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Dial>
+        <Sip username="admin" password="1234">sip:bob@example.com</Sip>
+    </Dial>
+</Response>
+```
+
+```javascript title="Node.js"
+const { RestClient } = require("@signalwire/compatibility-api");
+const response = new RestClient.LaML.VoiceResponse();
+
+dial = response.dial();
+dial.sip({ username: "admin", password: "1234" }, "sip:bob@example.com");
+console.log(response.toString());
+```
+
+```csharp
+using System;
+using Twilio.TwiML;
+using Twilio.TwiML.Voice;
+
+class Example
+{
+    static void Main()
+    {
+        var response = new VoiceResponse();
+        var dial = new Dial();
+        dial.Sip(new Uri("sip:bob@example.com"), username: "admin",
+            password: "1234");
+        response.Append(dial);
+
+        Console.WriteLine(response.ToString());
+    }
+}
+```
+
+```python
+from signalwire.voice_response import VoiceResponse, Dial, Sip
+
+response = VoiceResponse()
+dial = Dial()
+dial.sip('sip:bob@example.com', username='admin', password='1234')
+response.append(dial)
+
+print(response)
+```
+
+```ruby
+require 'signalwire/sdk'
+
+response = Signalwire::Sdk::VoiceResponse.new do |response|
+  response.dial do |dial|
+    dial.sip('sip:bob@example.com', username:'admin', password:'1234')
+  end
+end
+
+puts response.to_s
+```
+
+</CodeBlocks>
+
+Now, in order to connect to 'bob@example.com', you have to have the proper authentication credentials.
+
+### Passing custom headers
+
+Pass custom headers to the SIP endpoint.
+
+<CodeBlocks>
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Dial>
+        <Sip>sip:charlie@example.com?customheader=foo&amp;othercustomheader=bar</Sip>
+    </Dial>
+</Response>
+```
+
+```javascript title="Node.js"
+const { RestClient } = require("@signalwire/compatibility-api");
+const response = new RestClient.LaML.VoiceResponse();
+
+dial = response.dial();
+dial.sip("sip:charlie@example.com?customheader=foo&amp;othercustomheader=bar");
+console.log(response.toString());
+```
+
+```csharp
+using System;
+using Twilio.TwiML;
+using Twilio.TwiML.Voice;
+
+class Example
+{
+    static void Main()
+    {
+        var response = new VoiceResponse();
+        var dial = new Dial();
+        dial
+            .Sip(new Uri("sip:charlie@example.com?customheader=foo&amp;othercustomheader=bar"));
+        response.Append(dial);
+
+        Console.WriteLine(response.ToString());
+    }
+}
+```
+
+```python
+from signalwire.voice_response import VoiceResponse, Dial, Sip
+
+response = VoiceResponse()
+dial = Dial()
+dial.sip('sip:charlie@example.com?customheader=foo&amp;othercustomheader=bar')
+response.append(dial)
+
+print(response)
+```
+
+```ruby
+require 'signalwire/sdk'
+
+response = Signalwire::Sdk::VoiceResponse.new do |response|
+  response.dial do |dial|
+    dial.sip('sip:charlie@example.com?customheader=foo&amp;othercustomheader=bar')
+  end
+end
+
+puts response.to_s
+```
+
+</CodeBlocks>
+
+### Dialing a SIP endpoint with Dial attributes
+
+The Sip Noun supports of `<Dial>` attributes and can be used together.
+
+
+<CodeBlocks>
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Dial
+     record="record-from-answer"
+     callerId="alice"
+     method="GET"
+     action="https://www.example.com/after_dial">
+        <Sip
+          url="https://www.example.com/whisper_audio"
+          statusCallbackEvent='ringing answered'
+          statusCallback='https://www.example.com/dial_events'>
+            sip:dan@example.com?customheader=foo
+        </Sip>
+    </Dial>
+</Response>
+```
+
+```javascript title="Node.js"
+const { RestClient } = require("@signalwire/compatibility-api");
+const response = new RestClient.LaML.VoiceResponse();
+
+dial = response.dial({
+  record: "record-from-answer",
+  callerId: "alice",
+  method: "GET",
+  action: "https://www.example.com/after_dial",
+});
+dial.sip(
+  {
+    url: "https://www.example.com/whisper_audio",
+    statusCallbackEvent: "ringing answered",
+    statusCallback: "https://www.example.com/dial_events",
+  },
+  "sip:dan@example.com?customheader=foo"
+);
+console.log(response.toString());
+```
+
+```csharp
+using System;
+using Twilio.TwiML;
+using Twilio.TwiML.Voice;
+
+
+class Example
+{
+    static void Main()
+    {
+        var response = new VoiceResponse();
+        var dial = new Dial(record: Dial.RecordEnum.RecordFromAnswer,
+            callerId: "alice", method: Twilio
+            .Http.HttpMethod.Get, action: new Uri("https://www.example.com/after_dial"));
+        dial.Sip(new Uri("sip:dan@example.com?customheader=foo"),
+            statusCallbackEvent: new []{Sip.EventEnum.Ringing, Sip.EventEnum.Answered}.ToList(),
+            statusCallback: new Uri("https://www.example.com/dial_events"),
+            url: new Uri("https://www.example.com/whisper_audio"));
+        response.Append(dial);
+
+        Console.WriteLine(response.ToString());
+    }
+}
+```
+
+```python
+from signalwire.voice_response import VoiceResponse, Dial, Sip
+
+response = VoiceResponse()
+dial = Dial(record='record-from-answer', caller_id='alice', method='GET', action='https://www.example.com/after_dial')
+dial.sip('sip:dan@example.com?customheader=foo', url='https://www.example.com/whisper_audio', status_callback_event='ringing answered', status_callback='https://www.example.com/dial_events')
+response.append(dial)
+
+print(response)
+```
+
+```ruby
+require 'signalwire/sdk'
+
+response = Signalwire::Sdk::VoiceResponse.new do |response|
+  response.dial(record:'record-from-answer', caller_id:'alice', method:'GET', action:'https://www.example.com/after_dial') do |dial|
+    dial.sip('sip:dan@example.com?customheader=foo', url:'https://www.example.com/whisper_audio', status_callback_event:'ringing answered', status_callback:'https://www.example.com/dial_events')
+  end
+end
+
+puts response.to_s
+```
+
+</CodeBlocks>
+
+## Notes on usage
+
+- SIP INVITE message includes CallSid, AccountSid, and the API version; can also pass custom SIP headers in the INVITE message.
+- You can have up to 10 `<Sip>`s within a `<Dial>`.
+- You cannot add other nouns in a `<Dial>` that contains a `<Sip>`.

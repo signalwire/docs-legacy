@@ -1,0 +1,327 @@
+---
+slug: /swml/reference/execute
+title: execute
+description: Execute a specified section or URL as a subroutine, and upon completion, return to the current document.
+toc_max_heading_level: 3
+---
+
+Execute a specified section or URL as a subroutine, and upon completion, return to the current document.
+Use the [return](/docs/swml/reference/return) statement to pass any return values or objects back to the current document.
+
+## **Properties**
+
+<ParamField path="execute" type="object" required={true}>
+  An object that accepts the following properties.
+</ParamField>
+
+<Indent>
+
+<ParamField path="execute.dest" type="string" required={true}>
+  Accepts any [`valid destination`](#valid-destinations)
+</ParamField>
+
+
+<ParamField path="execute.params" type="object">
+  Named parameters to send to section or URL
+</ParamField>
+
+
+<ParamField path="execute.meta" type="object">
+  User-defined metadata. This data is ignored by SignalWire and can be used for your own tracking purposes.
+</ParamField>
+
+
+<ParamField path="execute.on_return" type="object[]">
+  Array of SWML methods to execute when the executed section or URL returns.
+</ParamField>
+
+
+<ParamField path="execute.result" type="object | object[]">
+  Action to take based on the result of the call. This will run once the peer leg of the call has ended.
+</ParamField>
+
+Will use the [`switch`](/docs/swml/reference/switch) method when the `return_value` is a object, and will use the [`cond`](/docs/swml/reference/cond) method when the `return_value` is an array.
+
+### Valid Destinations
+
+The destination string can be one of:
+
+- `"section_name"` - section in the current document to execute. (For example: `main`)
+- A URL (http or https) - URL pointing to the document to execute. An HTTP POST request will be sent to the URL. The `params` object is passed, along with the variables and the [`Call`](/docs/swml/reference/variables#variables-list) object. Authentication can also be set in the url in the format of `username:password@url`.
+- An inline SWML document (as a JSON string) - SWML document provided directly as a JSON string.
+
+</Indent>
+
+## **Examples**
+
+### Executing a subroutine
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - execute:
+        dest: subroutine
+        params:
+          to_play: 'https://cdn.signalwire.com/swml/April_Kisses.mp3'
+  subroutine:
+    - answer: {}
+    - play:
+        url: '${params.to_play}'
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "execute": {
+          "dest": "subroutine",
+          "params": {
+            "to_play": "https://cdn.signalwire.com/swml/April_Kisses.mp3"
+          }
+        }
+      }
+    ],
+    "subroutine": [
+      {
+        "answer": {}
+      },
+      {
+        "play": {
+          "url": "${params.to_play}"
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+### Executing a subroutine and branching on return
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - answer: {}
+    - execute:
+        dest: my_arithmetic
+        params:
+          a: 2
+          b: 3
+        on_return:
+          - switch:
+              variable: return_value
+              case:
+                '5':
+                  - play:
+                      url: 'say: Math works!'
+                '23':
+                  - play:
+                      url: 'say: Wrong'
+              default:
+                - play:
+                    url: 'say: Bad robot! ${return_value}'
+  my_arithmetic:
+    - return: '${parseInt(params.a) + parseInt(params.b)}'
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "answer": {}
+      },
+      {
+        "execute": {
+          "dest": "my_arithmetic",
+          "params": {
+            "a": 2,
+            "b": 3
+          },
+          "on_return": [
+            {
+              "switch": {
+                "variable": "return_value",
+                "case": {
+                  "5": [
+                    {
+                      "play": {
+                        "url": "say: Math works!"
+                      }
+                    }
+                  ],
+                  "23": [
+                    {
+                      "play": {
+                        "url": "say: Wrong"
+                      }
+                    }
+                  ]
+                },
+                "default": [
+                  {
+                    "play": {
+                      "url": "say: Bad robot! ${return_value}"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "my_arithmetic": [
+      {
+        "return": "${parseInt(params.a) + parseInt(params.b)}"
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+### Execute a SWML script hosted on a server
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - answer: {}
+    - execute:
+        dest: 'https://<YOUR_NGROK_UUID>.ngrok-free.app'
+        params:
+          some_info: 12345
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "answer": {}
+      },
+      {
+        "execute": {
+          "dest": "https://<YOUR_NGROK_UUID>.ngrok-free.app",
+          "params": {
+            "some_info": 12345
+          }
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+A minimal server for this SWML script can be written as follows:
+
+<Tabs>
+  <TabItem value="python/flask" label="Python/Flask">
+
+```python
+from flask import Flask, request
+from waitress import serve
+
+app = Flask(__name__)
+
+@app.route("/", methods=['POST'])
+def swml():
+    content = request.get_json(silent=True)
+    print(content)
+    return '''
+version: 1.0.0
+sections:
+  main:
+    - answer: {}
+    - play:
+        url: "say: The call type is {}"
+'''.format(content['call']['type'])
+
+if __name__ == "__main__":
+    serve(app, host='0.0.0.0', port=6000)
+```
+
+  </TabItem>
+  <TabItem value="javascript/express" label="JavaScript/Express">
+
+```javascript
+const express = require("express");
+const app = express();
+
+app.use(express.json());
+
+// note the POST method
+app.post("/", (req, res) => {
+  const data = req.body;
+  console.log(data);
+  res.send(`
+version: 1.0.0
+sections:
+  main:
+    - answer: {}
+    - play:
+        url: "say: Welcome to the ${data.params.where} department"
+  `);
+});
+
+const port = 6000;
+app.listen(port);
+```
+
+  </TabItem>
+</Tabs>
+
+This server (running on `localhost`) can be made accessible to the wider web (and thus this SWML script) using forwarding tools like `ngrok`.
+Visit [ngrok.com](https://ngrok.com) to learn how.
+
+The server will be sent the following payload:
+
+```json
+{
+  "call": {
+    "call_id": "<call_id>",
+    "node_id": "<node_id>",
+    "segment_id": "<segment_id>",
+    "call_state": "answered",
+    "direction": "inbound",
+    "type": "phone",
+    "from": "<address>",
+    "to": "<address>",
+    "from_number": "<address>",
+    "to_number": "<address>",
+    "headers": [],
+    "project_id": "<your Project UUID>",
+    "space_id": "<your Space UUID>"
+  },
+  "vars": {
+    "answer_result": "success"
+  },
+  "params": {
+    "some_info": "12345"
+  }
+}
+```
+
+The `call` object is described in detail in the [introduction](/docs/swml/reference/variables#variables-list). All variables created
+within the SWML document are passed inside `vars`, and the `params` object contains the parameters defined in the `params`
+parameter of `execute`.

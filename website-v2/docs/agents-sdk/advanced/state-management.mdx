@@ -1,0 +1,468 @@
+---
+title: "State Management"
+sidebar_label: "State Management"
+slug: /python/guides/state-management
+toc_max_heading_level: 3
+---
+
+## State Management
+
+Manage data throughout call sessions using global_data for persistent state, metadata for function-scoped data, and post_prompt for call summaries.
+
+State management is essential for building agents that remember information throughout a conversation. Without state, every function call would be independent—your agent wouldn't know the customer's name, what items they've ordered, or what step of a workflow they're on.
+
+The SDK provides several state mechanisms, each designed for different use cases. Understanding when to use each one is key to building effective agents.
+
+### How State Persists
+
+State in the AI Agents SDK is **session-scoped**—it exists only for the duration of a single call. When the call ends, all state is cleared. This is by design: each call is independent, and there's no built-in mechanism for persisting state between calls.
+
+If you need data to persist across calls (like customer profiles or order history), store it in your own database and retrieve it when needed using SWAIG functions.
+
+**Within a call, state flows like this:**
+
+1. Agent initialization sets initial `global_data`
+2. AI uses state in prompts via `${global_data.key}` substitution
+3. SWAIG functions can read state from `raw_data` and update it via `SwaigFunctionResult`
+4. Updated state becomes available to subsequent prompts and function calls
+5. When the call ends, `post_prompt` runs to extract structured data
+6. All in-memory state is cleared
+
+### State Types Overview
+
+| State Type | Scope | Key Features |
+|------------|-------|--------------|
+| **global_data** | Entire session | Persists entire session, available to all functions, accessible in prompts, set at init or runtime |
+| **metadata** | Function-scoped | Scoped to function's token, private to specific function, isolated per `meta_data_token`, set via function results |
+| **post_prompt** | After call | Executes after call ends, generates summaries, extracts structured data, webhook delivery |
+| **call_info** | Read-only | Read-only call metadata, caller ID, call ID, available in `raw_data`, SignalWire-provided |
+
+### Global Data
+
+Global data persists throughout the entire call session and is available to all functions and prompts.
+
+#### Setting Initial Global Data
+
+```python
+from signalwire_agents import AgentBase
+
+
+class CustomerAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="customer-agent")
+        self.add_language("English", "en-US", "rime.spore")
+
+        # Set initial global data at agent creation
+        self.set_global_data({
+            "business_name": "Acme Corp",
+            "support_hours": "9 AM - 5 PM EST",
+            "current_promo": "20% off first order"
+        })
+
+        self.prompt_add_section(
+            "Role",
+            "You are a customer service agent for ${global_data.business_name}."
+        )
+
+
+if __name__ == "__main__":
+    agent = CustomerAgent()
+    agent.run()
+```
+
+#### Updating Global Data at Runtime
+
+```python
+self.update_global_data({
+    "customer_tier": "premium",
+    "account_balance": 150.00
+})
+```
+
+#### Updating Global Data from Functions
+
+```python
+from signalwire_agents import AgentBase
+from signalwire_agents.core.function_result import SwaigFunctionResult
+
+
+class StateAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="state-agent")
+        self.add_language("English", "en-US", "rime.spore")
+
+        self.define_tool(
+            name="set_customer_name",
+            description="Store the customer's name",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "name": {"type": "string", "description": "Customer name"}
+                },
+                "required": ["name"]
+            },
+            handler=self.set_customer_name
+        )
+
+    def set_customer_name(self, args, raw_data):
+        name = args.get("name", "")
+
+        return (
+            SwaigFunctionResult(f"Stored name: {name}")
+            .update_global_data({"customer_name": name})
+        )
+
+
+if __name__ == "__main__":
+    agent = StateAgent()
+    agent.run()
+```
+
+#### Accessing Global Data in Prompts
+
+Use `${global_data.key}` syntax in prompts:
+
+```python
+self.prompt_add_section(
+    "Customer Info",
+    """
+    Customer Name: ${global_data.customer_name}
+    Account Tier: ${global_data.customer_tier}
+    Current Balance: ${global_data.account_balance}
+    """
+)
+```
+
+### Metadata
+
+Metadata is scoped to a specific function's `meta_data_token`, providing isolated storage per function.
+
+#### Setting Metadata
+
+```python
+def process_order(self, args, raw_data):
+    order_id = create_order()
+
+    return (
+        SwaigFunctionResult(f"Created order {order_id}")
+        .set_metadata({"order_id": order_id, "status": "pending"})
+    )
+```
+
+#### Removing Metadata
+
+```python
+def cancel_order(self, args, raw_data):
+    return (
+        SwaigFunctionResult("Order cancelled")
+        .remove_metadata(["order_id", "status"])
+    )
+```
+
+### Post-Prompt Data
+
+The post-prompt runs after the call ends and generates structured data from the conversation.
+
+#### Setting Post-Prompt
+
+```python
+from signalwire_agents import AgentBase
+
+
+class SurveyAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="survey-agent")
+        self.add_language("English", "en-US", "rime.spore")
+
+        self.prompt_add_section(
+            "Role",
+            "Conduct a customer satisfaction survey."
+        )
+
+        # Post-prompt extracts structured data after call
+        self.set_post_prompt("""
+            Summarize the survey results as JSON:
+            {
+                "satisfaction_score": <1-10>,
+                "main_feedback": "<summary>",
+                "would_recommend": <true/false>,
+                "issues_mentioned": ["<issue1>", "<issue2>"]
+            }
+        """)
+
+        # Optionally set where to send the data
+        self.set_post_prompt_url("https://example.com/survey-results")
+
+
+if __name__ == "__main__":
+    agent = SurveyAgent()
+    agent.run()
+```
+
+#### Post-Prompt LLM Parameters
+
+Configure a different model for post-prompt processing:
+
+```python
+self.set_post_prompt_llm_params(
+    model="gpt-4o-mini",
+    temperature=0.3  # Lower for consistent extraction
+)
+```
+
+### Accessing Call Information
+
+The `raw_data` parameter contains call metadata:
+
+```python
+def my_handler(self, args, raw_data):
+    # Available call information
+    call_id = raw_data.get("call_id")
+    caller_id_number = raw_data.get("caller_id_number")
+    caller_id_name = raw_data.get("caller_id_name")
+    call_direction = raw_data.get("call_direction")  # "inbound" or "outbound"
+
+    # Current AI interaction state
+    ai_session_id = raw_data.get("ai_session_id")
+
+    self.log.info(f"Call from {caller_id_number}")
+
+    return SwaigFunctionResult("Processing...")
+```
+
+### State Flow Diagram
+
+<Frame caption="State Flow">
+  <img className="diagram" src={require("@image/agents-sdk-manual/06_02_state-management_diagram1.webp").default} alt="State Flow." />
+</Frame>
+
+### Complete Example
+
+```python
+#!/usr/bin/env python3
+## order_agent.py - Order management with state
+from signalwire_agents import AgentBase
+from signalwire_agents.core.function_result import SwaigFunctionResult
+
+
+class OrderAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="order-agent")
+        self.add_language("English", "en-US", "rime.spore")
+
+        # Initial global state
+        self.set_global_data({
+            "store_name": "Pizza Palace",
+            "order_items": [],
+            "order_total": 0.0
+        })
+
+        self.prompt_add_section(
+            "Role",
+            "You are an order assistant for ${global_data.store_name}. "
+            "Help customers place their order."
+        )
+
+        self.prompt_add_section(
+            "Current Order",
+            "Items: ${global_data.order_items}\n"
+            "Total: $${global_data.order_total}"
+        )
+
+        # Post-prompt for order summary
+        self.set_post_prompt("""
+            Extract the final order as JSON:
+            {
+                "items": [{"name": "", "quantity": 0, "price": 0.00}],
+                "total": 0.00,
+                "customer_name": "",
+                "special_instructions": ""
+            }
+        """)
+
+        self._register_functions()
+
+    def _register_functions(self):
+        self.define_tool(
+            name="add_item",
+            description="Add an item to the order",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "item": {"type": "string", "description": "Item name"},
+                    "price": {"type": "number", "description": "Item price"}
+                },
+                "required": ["item", "price"]
+            },
+            handler=self.add_item
+        )
+
+    def add_item(self, args, raw_data):
+        item = args.get("item")
+        price = args.get("price", 0.0)
+
+        # Note: In real implementation, maintain state server-side
+        # This example shows the pattern
+        return (
+            SwaigFunctionResult(f"Added {item} (${price}) to your order")
+            .update_global_data({
+                "last_item_added": item,
+                "last_item_price": price
+            })
+        )
+
+
+if __name__ == "__main__":
+    agent = OrderAgent()
+    agent.run()
+```
+
+### DataMap Variable Access
+
+In DataMap functions, use variable substitution:
+
+```python
+from signalwire_agents.core.data_map import DataMap
+from signalwire_agents.core.function_result import SwaigFunctionResult
+
+lookup_dm = (
+    DataMap("lookup_customer")
+    .description("Look up customer by ID")
+    .parameter("customer_id", "string", "Customer ID", required=True)
+    .webhook(
+        "GET",
+        "https://api.example.com/customers/${enc:args.customer_id}"
+        "?store=${enc:global_data.store_id}"
+    )
+    .output(SwaigFunctionResult(
+        "Customer: ${response.name}, Tier: ${response.tier}"
+    ))
+)
+```
+
+### State Methods Summary
+
+| Method | Scope | Purpose |
+|--------|-------|---------|
+| `set_global_data()` | Agent | Set initial global state |
+| `update_global_data()` | Agent | Update global state at runtime |
+| `SwaigFunctionResult.update_global_data()` | Function | Update state from function |
+| `SwaigFunctionResult.set_metadata()` | Function | Set function-scoped data |
+| `SwaigFunctionResult.remove_metadata()` | Function | Remove function-scoped data |
+| `set_post_prompt()` | Agent | Set post-call data extraction |
+| `set_post_prompt_url()` | Agent | Set webhook for post-prompt data |
+| `set_post_prompt_llm_params()` | Agent | Configure post-prompt model |
+
+### Timeout and Disconnection Behavior
+
+Understanding what happens when calls end unexpectedly is important for robust state management.
+
+**Normal call end:** When the caller hangs up or the agent ends the call normally, the post-prompt executes and any configured webhooks fire. State is then cleared.
+
+**Timeout:** If the caller is silent for too long, the call may timeout. The post-prompt still executes, but the conversation may be incomplete. Design your post-prompt to handle partial data gracefully.
+
+**Network disconnection:** If the connection drops unexpectedly, the post-prompt may not execute. Don't rely solely on post-prompt for critical data—consider saving important state via SWAIG function webhooks as the conversation progresses.
+
+**Function timeout:** Individual SWAIG function calls have timeout limits. If a function takes too long, it returns an error. State updates from that function call won't be applied.
+
+### Memory and Size Limits
+
+While the SDK doesn't impose strict limits on state size, keep these practical considerations in mind:
+
+**Global data:** Keep global_data reasonably small (under a few KB). Large state objects increase latency and memory usage. Don't store base64-encoded files or large datasets.
+
+**Metadata:** Same guidance—use metadata for small pieces of function-specific data, not large payloads.
+
+**Prompt substitution:** When state is substituted into prompts, the entire value is included. Very large state values can consume your context window quickly.
+
+**Best practice:** If you need to work with large datasets, keep them server-side and retrieve specific pieces as needed rather than loading everything into state.
+
+### Structuring State Effectively
+
+Well-structured state makes your agent easier to debug and maintain.
+
+**Flat structures work well:**
+```python
+self.set_global_data({
+    "customer_name": "",
+    "customer_email": "",
+    "order_total": 0.0,
+    "current_step": "greeting"
+})
+```
+
+**Avoid deeply nested structures:**
+```python
+# Harder to access and update
+self.set_global_data({
+    "customer": {
+        "profile": {
+            "personal": {
+                "name": ""  # ${global_data.customer.profile.personal.name} is cumbersome
+            }
+        }
+    }
+})
+```
+
+**Use consistent naming conventions:**
+```python
+# Good: Clear, consistent naming
+self.set_global_data({
+    "order_id": "",
+    "order_items": [],
+    "order_total": 0.0,
+    "customer_name": "",
+    "customer_phone": ""
+})
+
+# Avoid: Inconsistent naming
+self.set_global_data({
+    "orderId": "",
+    "items": [],
+    "total": 0.0,
+    "customerName": "",
+    "phone": ""
+})
+```
+
+### Debugging State Issues
+
+When state isn't working as expected:
+
+1. **Log state in handlers:**
+```python
+def my_handler(self, args, raw_data):
+    self.log.info(f"Current global_data: {raw_data.get('global_data', {})}")
+    # ... rest of handler
+```
+
+2. **Check variable substitution:** Ensure your `${global_data.key}` references match the actual keys in state.
+
+3. **Verify update timing:** State updates from a function result aren't available until the *next* prompt or function call. You can't update state and use the new value in the same function's return message.
+
+4. **Use swaig-test:** The testing tool shows the SWML configuration including initial global_data.
+
+### Best Practices
+
+**DO:**
+
+- Use global_data for data needed across functions
+- Use metadata for function-specific isolated data
+- Set initial state in __init__ for predictable behavior
+- Use post_prompt to extract structured call summaries
+- Log state changes for debugging
+- Keep state structures flat and simple
+- Use consistent naming conventions
+- Save critical data server-side, not just in session state
+
+**DON'T:**
+
+- Store sensitive data (passwords, API keys) in global_data where it might be logged
+- Rely on global_data for complex state machines (use server-side)
+- Assume metadata persists across function boundaries
+- Forget that state resets between calls
+- Store large objects or arrays in state
+- Use deeply nested state structures
+
+

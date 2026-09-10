@@ -1,0 +1,40 @@
+---
+title: "setInputVolume"
+slug: /js/reference/video/room-session-screen-share/set-input-volume
+description: setInputVolume method for the RoomSessionScreenShare class.
+toc_max_heading_level: 3
+---
+
+### setInputVolume
+
+▸ **setInputVolume**(`params`): `Promise<void>`
+
+Sets the input volume level (e.g. for the microphone).
+
+#### Parameters
+
+<ParamField path="params" type="object" required={true}>
+  Configuration object for input volume
+</ParamField>
+<Indent>
+  <ParamField path="params.volume" type="number" required={true}>
+    Desired volume. Values range from -50 to 50, with a default of 0.
+  </ParamField>
+</Indent>
+
+#### Returns
+
+`Promise<void>`
+
+#### Permissions
+
+- `room.self.set_input_volume`
+
+You need to specify the permissions when [creating the Video Room Token](/docs/apis/video/create-room-token) on the server side.
+
+#### Example
+
+```javascript
+await roomdevice.setMicrophoneVolume({ volume: -10 });
+```
+

@@ -1,0 +1,140 @@
+---
+title: Redirect
+sidebar_label: Redirect
+slug: /compatibility-api/cxml/reference/voice/redirect
+sidebar_position: 1
+toc_max_heading_level: 3
+---
+
+An example that redirects the next XML instruction to another call:
+
+<CodeBlocks>
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Redirect>https://www.your-application.com/next-instructions</Redirect>
+</Response>
+```
+```javascript title="Node.js"
+const { RestClient } = require("@signalwire/compatibility-api");
+const response = new RestClient.LaML.VoiceResponse();
+
+response.redirect("https://www.your-application.com/next-instructions");
+console.log(response.toString());
+```
+```csharp
+using Twilio.TwiML;
+using Twilio.Http;
+using System;
+
+
+class Example
+{
+    static void Main()
+    {
+        var response = new VoiceResponse();
+        response.Redirect(new Uri("https://www.your-application.com/next-instructions"));
+
+        Console.WriteLine(response.ToString());;
+    }
+}
+```
+```python
+from signalwire.voice_response import VoiceResponse, Redirect
+
+response = VoiceResponse()
+response.redirect('https://www.your-application.com/next-instructions')
+
+print(response)
+```
+```ruby
+require 'signalwire/sdk'
+
+response = Signalwire::Sdk::VoiceResponse.new do |response|
+  response.redirect('https://www.your-application.com/next-instructions')
+end
+
+puts response.to_s
+```
+</CodeBlocks>
+
+The `<Redirect>` verb transfers control from the current call to another. It is effectively an exit statement from the current call, as there is no way to return to any instructions listed after the `<Redirect>` verb.
+
+## Verb attributes
+
+The following attribute is available for the verb `<Redirect>`:
+
+<ParamField path="method" type="string" default="POST">
+  Specifies whether the redirect is a `GET` or a `POST`.
+</ParamField>
+
+## Nouns
+
+The following item is accepted as a noun for the `<Redirect>` verb:
+
+| Noun | Description |
+|:-----|:------------|
+| `plain text` | The URL, in plain text, of the call to execute. |
+
+## Nesting
+
+No other verbs can be nested within `<Redirect>` and you cannot nest `<Redirect>` within any other verbs.
+
+## Examples
+
+### Redirect to absolute URL
+
+<CodeBlocks>
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Dial>310-123-0000</Dial>
+    <Redirect>http://www.your-application.com/next-instructions</Redirect>
+</Response>
+```
+```javascript title="Node.js"
+const { RestClient } = require("@signalwire/compatibility-api");
+const response = new RestClient.LaML.VoiceResponse();
+
+response.dial("310-123-0000");
+response.redirect("http://www.your-application.com/next-instructions");
+console.log(response.toString());
+```
+```csharp
+using Twilio.TwiML;
+using System;
+
+class Example
+{
+    static void Main()
+    {
+        var response = new VoiceResponse();
+        response.Dial("310-123-0000");
+        response.Redirect(new Uri("http://www.your-application.com/next-instructions"));
+
+        Console.WriteLine(response.ToString());;
+    }
+}
+```
+```python
+from signalwire.voice_response import VoiceResponse, Dial, Redirect
+
+response = VoiceResponse()
+response.dial('310-123-0000')
+response.redirect('http://www.your-application.com/next-instructions')
+
+print(response)
+```
+```ruby
+require 'signalwire/sdk'
+
+response = Signalwire::Sdk::VoiceResponse.new do |response|
+  response.dial(number: '310-123-0000')
+  response.redirect('https://www.your-application.com/next-instructions')
+end
+
+puts response.to_s
+```
+</CodeBlocks>
+
+SignalWire makes a request after the number has been dialed and transfers the call to the XML received through the request.

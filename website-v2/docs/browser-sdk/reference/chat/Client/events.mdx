@@ -1,0 +1,59 @@
+---
+title: Events
+slug: /js/reference/chat/client/events
+toc_max_heading_level: 3
+---
+
+## member.joined
+
+- **member.joined**(`member`)
+
+A new member joined the chat.
+
+#### Parameters
+
+<ParamField path="member" type="ChatMember" required={true}>
+  The member who joined. See [`ChatMember`](/docs/browser-sdk/js/reference/chat/chat-member) for more details.
+</ParamField>
+
+## member.left
+
+- **member.left**(`member`)
+
+A member left the chat.
+
+#### Parameters
+
+<ParamField path="member" type="ChatMember" required={true}>
+  The member who left. See [`ChatMember`](/docs/browser-sdk/js/reference/chat/chat-member) for more details.
+</ParamField>
+
+## member.updated
+
+- **member.updated**(`member`)
+
+A member updated its state.
+
+#### Parameters
+
+<ParamField path="member" type="ChatMember" required={true}>
+  The member who updated. See [`ChatMember`](/docs/browser-sdk/js/reference/chat/chat-member) for more details.
+</ParamField>
+
+## message
+
+- **message**(`message`)
+
+A new message has been received.
+
+#### Parameters
+
+<ParamField path="message" type="ChatMessage" required={true}>
+  The received message. See [`ChatMessage`](/docs/browser-sdk/js/reference/chat/chat-message) for more details.
+</ParamField>
+
+## session.expiring
+
+- **session.expiring**()
+
+The session is going to expire. Use the `updateToken` method to refresh your token.

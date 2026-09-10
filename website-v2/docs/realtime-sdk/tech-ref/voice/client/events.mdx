@@ -1,0 +1,22 @@
+---
+title: "Events"
+slug: /node/reference/voice/client/events
+description: Events available on the Client class.
+toc_max_heading_level: 3
+---
+
+[call]: /docs/server-sdk/node/reference/voice/call
+
+## Events
+
+### onCallReceived {#oncallreceived}
+
+- **client.voice.listen**(`{ onCallReceived: Callback }`)
+
+Emitted when a call is received. Your event handler will be called with a [`Call`][call] object.
+
+#### Parameters
+
+<ParamField path="call" type="Call" required>
+  The incoming [`Call`][call] object.
+</ParamField>

@@ -1,0 +1,137 @@
+---
+title: "playTTS"
+slug: /node/reference/voice/call/play-tts
+description: playTTS method for the Call class.
+toc_max_heading_level: 3
+---
+
+[callplayback-events]: /docs/server-sdk/node/reference/voice/call-playback#events
+[callplayback-onstarted]: /docs/server-sdk/node/reference/voice/call-playback#onstarted
+[callplayback]: /docs/server-sdk/node/reference/voice/call-playback
+[ssml]: https://cloud.google.com/text-to-speech/docs/ssml
+[supported-voices-languages]: /docs/platform/voice/tts
+
+### playTTS
+
+- **playTTS**(`params`): `Promise`\<[`CallPlayback`][callplayback]>
+
+Plays text-to-speech.
+
+#### Parameters
+
+<ParamField path="params" type="object" required>
+  Object containing the parameters for playing text-to-speech.
+</ParamField>
+
+<Indent>
+<ParamField path="text" type="string" required>
+  Text to play. SSML may be entered as a string wrapped in `<speak>` tags. See our [supported voices and languages][supported-voices-languages] documentation for usage and supported tags.
+</ParamField>
+
+<ParamField path="language" type="string" default="en-US">
+  Language of the text in ISO 639-1 (language name) + ISO 3166 (country code). Supported languages can be found [here][supported-voices-languages].
+</ParamField>
+
+<ParamField path="gender" type='"male" | "female"' default="female">
+  Gender of the voice.
+</ParamField>
+
+<ParamField path="voice" type="string">
+  Voice to use (takes precedence over `gender`). Supported voices can be found [here][supported-voices-languages].
+</ParamField>
+
+<ParamField path="volume" type="number" default="0">
+  Volume value between -40dB and +40dB where 0 is unchanged.
+</ParamField>
+
+<ParamField path="listen" type="object">
+  Callback to listen for events. List of playback events can be found [here][callplayback-events]. Example event: [`onStarted`][callplayback-onstarted].
+</ParamField>
+</Indent>
+
+#### Returns
+
+`Promise`\<[`CallPlayback`][callplayback]>
+
+A promise that resolves to a [`CallPlayback`][callplayback] object that you can use to
+view the current state and results of the `play` session.
+
+#### Examples
+
+In this example, we dial a phone number and play a TTS message. Once the TTS message is finished playing, we hangup the call.
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+const voiceClient = client.voice;
+
+// Listen for incoming calls
+await voiceClient.listen({
+  topics: ["office"],
+  onCallReceived: async (call) => {
+    console.log("Call received");
+    // Answer the call
+    call.answer();
+    // Play TTS on the call
+    await call.playTTS({
+      text: "Hello, this is a test call from SignalWire",
+      listen: {
+        onStarted: () => console.log("TTS started"),
+        onFailed: () => console.log("TTS failed"),
+        onUpdated: (tts) => console.log("TTS state:", tts.state),
+        onEnded: () => {
+          console.log("TTS ended");
+          // Hangup the call
+          call.hangup();
+        }
+      }
+    }).onStarted();
+  }
+});
+```
+
+In this example, we are using [SSML][ssml] to play a TTS message. Once the TTS message is finished playing, we hangup the call.
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+const voiceClient = client.voice;
+
+// Listen for incoming calls
+await voiceClient.listen({
+  topics: ["office"],
+  onCallReceived: async (call) => {
+    console.log("Call received");
+    // Answer the call
+    call.answer();
+    // Play TTS on the call using SSML. Listens for playback events. Ends the call after the TTS is finished playing.
+    await call.playTTS({
+      text: `<speak>
+      Here are <say-as interpret-as="characters">SSML</say-as> samples.
+      I can pause <break time="3s"/>.
+      I can speak in cardinals. Your number is <say-as interpret-as="cardinal">10</say-as>.
+      Or I can speak in ordinals. You are <say-as interpret-as="ordinal">10</say-as> in line.
+      Or I can even speak in digits. The digits for ten are <say-as interpret-as="characters">10</say-as>.
+      I can also substitute phrases, like the <sub alias="World Wide Web Consortium">W3C</sub>.
+      Finally, I can speak a paragraph with two sentences.
+      <p><s>This is sentence one.</s><s>This is sentence two.</s></p>
+    </speak>
+    `,
+      voice: "polly.Joey",
+      listen: {
+        onStarted: () => console.log("TTS started"),
+        onFailed: () => console.log("TTS failed"),
+        onUpdated: (tts) => console.log("TTS state:", tts.state),
+        onEnded: () => {
+          console.log("TTS ended");
+          call.hangup();
+        }
+      }
+    }).onStarted();
+  }
+});
+```

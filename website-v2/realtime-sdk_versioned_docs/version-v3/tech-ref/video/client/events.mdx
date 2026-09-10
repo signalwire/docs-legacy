@@ -1,0 +1,48 @@
+---
+title: "Events"
+slug: /node/reference/video/client/events
+description: Events available on the Video Client class.
+toc_max_heading_level: 3
+---
+
+[roomsession]: /docs/server-sdk/v3/node/reference/video/room-session
+
+## Events
+
+### room.ended
+
+- **room.ended**(`roomSession`)
+
+Emitted when a room session ends. Your event handler receives an object which is an instance of [Video.RoomSession][roomsession].
+
+```javascript
+const video = new Video.Client(...)
+video.on('room.ended', async (roomSession) => {
+    console.log(roomSession.name)
+})
+```
+
+#### Parameters
+
+| Name          | Type                           |
+|:--------------|:-------------------------------|
+| `roomSession` | [`RoomSession`][roomsession]   |
+
+### room.started
+
+- **room.started**(`roomSession`)
+
+Emitted when a room session is started. Your event handler receives an object which is an instance of [Video.RoomSession][roomsession]. Example:
+
+```javascript
+const video = new Video.Client(...)
+video.on('room.started', async (roomSession) => {
+    console.log(roomSession.name)
+})
+```
+
+#### Parameters
+
+| Name          | Type                           |
+|:--------------|:-------------------------------|
+| `roomSession` | [`RoomSession`][roomsession]   |

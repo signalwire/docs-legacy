@@ -1,0 +1,65 @@
+---
+title: Relay.Calling.SendDigitsResult
+slug: /go/reference/calling/results/send-digits
+description: The result object that is returned when sending digits to a call.
+toc_max_heading_level: 3
+---
+
+[relay-event]: /docs/server-sdk/v2/go/reference/event
+[senddigits]: /docs/server-sdk/v2/go/reference/calling/call#senddigits
+
+## Relay.Calling.SendDigitsResult
+
+This object is returned by [`sendDigits`][senddigits] method and represents the final result of a _send digits_ action.
+
+## Methods-submenu
+
+### GetEvent
+
+Returns the last Relay Event arrived for this operation.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+[`*signalwire.Event`][relay-event] - Last Relay Event.
+
+
+### GetSuccessful
+
+Return `true` if the operation has succeeded, `false` otherwise.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`bool` - Whether the operation has completed successfully.
+
+**Examples**
+
+> Send some digits and then check if it has ended successfully.
+
+```go
+/* use an anonymous function as CB */
+resultDial.Call.OnSendDigitsFinished = func(a *signalwire.SendDigitsAction) {
+    signalwire.Log.Info("SendDigits finished with successful result: [%v]\n", a.GetSuccessful())
+}
+
+sendDigitsAction, err := resultDial.Call.SendDigitsAsync("1234567890*#")
+if err != nil {
+    signalwire.Log.Error("Error occurred while trying to play audio\n")
+}
+
+// do something more here
+time.Sleep(2 * time.Second)
+
+if sendDigitsAction.GetCompleted() {
+    // just print this again
+    signalwire.Log.Info("SendDigits finished with successful result: [%v]\n", sendDigitsAction.GetSuccessful())
+}
+```

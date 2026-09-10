@@ -1,0 +1,126 @@
+---
+title: "connectSip"
+slug: /node/reference/voice/call/connect-sip
+description: connectSip method for the Call class.
+toc_max_heading_level: 3
+---
+
+[call]: /docs/server-sdk/node/reference/voice/call
+[callstate]: /docs/server-sdk/node/reference/voice/call-state
+[disconnected]: /docs/server-sdk/node/reference/voice/call/disconnected
+[sipcodec]: /docs/server-sdk/node/reference/voice/types#sipcodec
+[sipheader]: /docs/server-sdk/node/reference/voice/types#sipheader
+[voiceplaylist]: /docs/server-sdk/node/reference/voice/playlist
+
+### connectSip
+
+- **connectSip**(`params`): `Promise`\<[`Call`][call]>
+
+Attempt to connect an existing call to a new outbound SIP call. The two devices will hear each other.
+You can wait until the new peer is disconnected by calling [disconnected][disconnected].
+
+#### Parameters
+
+<ParamField path="params" type="object" required>
+  Object containing the parameters for connecting the call to a SIP endpoint.
+</ParamField>
+
+<Indent>
+<ParamField path="from" type="string" required>
+  The party the call is coming from. Must be a SignalWire number or SIP endpoint that you own.
+</ParamField>
+
+<ParamField path="to" type="string" required>
+  The party you are attempting to call.
+</ParamField>
+
+<ParamField path="timeout" type="number">
+  The time, in seconds, the call will ring before it is considered unanswered.
+</ParamField>
+
+<ParamField path="headers" type="SipHeader[]">
+  Array of [`SipHeader`][sipheader] objects. Must be X- headers only, see example below.
+</ParamField>
+
+<ParamField path="codecs" type="SipCodec[]">
+  Array of desired codecs in order of preference. Supported values are `PCMU`, `PCMA`, `OPUS`, `G729`, `G722`, `VP8`, `H264`. Default is parent leg codec(s). See [`SipCodec`][sipcodec].
+</ParamField>
+
+<ParamField path="webrtcMedia" type="boolean">
+  If `true`, WebRTC media is negotiated. Default is parent leg setting.
+</ParamField>
+
+<ParamField path="sessionTimeout" type="number">
+  Non-negative value, in seconds, to use for the SIP `Session-Expires` header. If `0` or unset, SignalWire will pick the default (typically `600`).
+</ParamField>
+
+<ParamField path="maxPricePerMinute" type="number">
+  The maximum price in USD acceptable for the call to be created. If the rate for the call is greater than this value, the call will not be created. If not set, all calls will be created. Price can have a maximum of four decimal places, i.e. `0.0075`.
+</ParamField>
+
+<ParamField path="ringback" type="VoicePlaylist">
+  Ringback audio to play to the call leg. You can play audio, TTS, silence or ringtone. See [`VoicePlaylist`][voiceplaylist].
+</ParamField>
+
+<ParamField path="callStateUrl" type="string">
+  Webhook URL to which SignalWire will send call status change notifications. See the payload specifications under [`CallState`][callstate].
+</ParamField>
+
+<ParamField path="callStateEvents" type="string[]" default='["ended"]'>
+  An array of event names to be notified about. Allowed values are `created`, `ringing`, `answered`, and `ended`.
+</ParamField>
+</Indent>
+
+#### Returns
+
+`Promise`\<[`Call`][call]>
+
+A promise that resolves to a [`Call`][call] object that you can use to control the new peer.
+The promise resolves only after the new peer picks up the call.
+
+#### Example
+
+In this example, we connect a inbound call to a internal SIP endpoint. We play a ringback tone to the inbound call leg
+while waiting for the SIP endpoint to answer. Once the SIP endpoint answers, we wait for the peer to hangup and then hangup the inbound call.
+
+```js
+import { SignalWire, Voice} from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+const voiceClient = client.voice;
+// Ringback tone
+const ringback = new Voice.Playlist().add(
+  Voice.Playlist.Ringtone({
+    name: "it"
+  })
+);
+
+await voiceClient.listen({
+  topics: ["office"],
+  onCallReceived: async (call) => {
+
+    // Answer the call
+    call.answer();
+    // Connect the call to the device builder plan
+    let peer = await call.connectSip({
+      // Replace the to and from with valid SIP endpoint domains
+      to: "sip:example@example.sip.signalwire.com",
+      from: `sip:${call.from}@example.sip.signalwire.com`,
+      ringback: ringback
+    });
+
+    // Listen to peer state changes
+    await peer.listen({
+      onStateChanged: (state) => {
+        console.log("Peer state changed:", state.state);
+      }
+    })
+    // wait for peer to hangup
+    await peer.disconnected();
+    console.log("The peer hungup");
+    // hangup the call
+    call.hangup();
+  }
+});
+```

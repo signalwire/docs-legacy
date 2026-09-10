@@ -1,0 +1,33 @@
+---
+title: "pass"
+slug: /node/reference/voice/call/pass
+description: pass method for the Call class.
+toc_max_heading_level: 3
+---
+
+[call-19]: /docs/server-sdk/v3/node/reference/voice/call
+[voice-client-1]: /docs/server-sdk/v3/node/reference/voice/client
+[voice-client-1]: /docs/server-sdk/v3/node/reference/voice/client/dial-phone
+[voice-client-3]: /docs/server-sdk/v3/node/reference/voice/client/events#callreceived
+
+### pass
+
+- **pass**(`params`): `Promise<Call>` - See [Call][call-19] for more details.
+
+This will allow a client to decline incoming calls without ending the call and redirect the call to another [Voice client][voice-client-1]
+
+Will trigger on the [`call.received`][voice-client-3] event.
+
+#### Returns
+
+`Promise<Call>` - See [Call][call-19] for more details.
+
+#### Example
+
+```js
+client.on("call.received", async (call) => {
+  await call.pass();
+
+  // Every method on the "call" object will fail after calling "pass".
+});
+```

@@ -1,0 +1,43 @@
+---
+title: "disconnected"
+slug: /node/reference/voice/call/disconnected
+description: disconnected method for the Call class.
+toc_max_heading_level: 3
+---
+
+[call-19]: /docs/server-sdk/v3/node/reference/voice/call
+[link-6]: /docs/server-sdk/v3/node/reference/voice/call/connect
+[voice-call-4]: /docs/server-sdk/v3/node/reference/voice/call/connect-phone
+[voice-call-5]: /docs/server-sdk/v3/node/reference/voice/call/connect-sip
+
+### disconnected
+
+- **disconnected**(): `Promise<Call>` - See [Call][call-19] for more details.
+
+Call this method after connecting a peer (e.g., using [connect][link-6],
+[connectPhone][voice-call-4], or [connectSip][voice-call-5]) to wait until the
+peer disconnects.
+
+This is equivalent to calling `peer.waitFor("ended")` on the connected peer.
+
+#### Returns
+
+`Promise<Call>` - See [Call][call-19] for more details.
+
+#### Example
+
+```js
+const plan = new Voice.DeviceBuilder().add(
+  Voice.DeviceBuilder.Sip({
+    from: "sip:user1@domain.com",
+    to: "sip:user2@domain.com",
+    timeout: 30,
+  })
+);
+
+const peer = await call.connect(plan);
+
+await call.disconnected(); // same as `peer.waitFor("ended")`
+
+await call.playTTS({ text: "The peer disconnected" });
+```

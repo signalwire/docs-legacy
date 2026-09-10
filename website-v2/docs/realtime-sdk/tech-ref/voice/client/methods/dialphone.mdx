@@ -1,0 +1,70 @@
+---
+title: "dialPhone"
+slug: /node/reference/voice/client/dial-phone
+description: dialPhone method for the Client class.
+toc_max_heading_level: 3
+---
+
+[call-events]: /docs/server-sdk/node/reference/voice/call/events
+[call]: /docs/server-sdk/node/reference/voice/call
+
+### dialPhone
+
+- **dialPhone**(`params`): `Promise`\<[`Call`][call]>
+
+Makes an outbound call to a PSTN number.
+
+#### Parameters
+
+<ParamField path="params" type="object" required>
+  Object containing the parameters for dialing a phone number.
+</ParamField>
+
+<Indent>
+<ParamField path="to" type="string" required>
+  The party you are attempting to call.
+</ParamField>
+
+<ParamField path="from" type="string">
+  The party the call is coming from. Must be a SignalWire number or SIP endpoint that you own.
+</ParamField>
+
+<ParamField path="timeout" type="number">
+  The time, in seconds, the call will ring before it is considered unanswered.
+</ParamField>
+
+<ParamField path="maxPricePerMinute" type="number">
+  The maximum price in USD acceptable for the call to be created. If the rate for the call is greater than this value, the call will not be created. If not set, all calls will be created. Price can have a maximum of four decimal places, i.e. `0.0075`.
+</ParamField>
+
+<ParamField path="listen" type="object">
+  Object that contains callbacks to listen for events. List of Call events can be found [here][call-events].
+</ParamField>
+</Indent>
+
+#### Returns
+
+`Promise`\<[`Call`][call]>
+
+A call object.
+
+#### Example
+
+```js
+import { SignalWire, Voice } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+const voiceClient = client.voice
+
+try {
+  const call = await voiceClient.dialPhone({
+    from: "+YYYYYYYYYY",
+    to: "+XXXXXXXXXX",
+    timeout: 30
+  });
+  console.log("Call answered.", call);
+} catch (e) {
+  console.log("Call not answered.", e);
+}
+```

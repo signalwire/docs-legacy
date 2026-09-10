@@ -1,0 +1,59 @@
+---
+title: "tap"
+slug: /node/reference/voice/call/tap
+description: tap method for the Call class.
+toc_max_heading_level: 3
+---
+
+[calltap-3]: /docs/server-sdk/v3/node/reference/voice/call-tap
+[types-4]: /docs/server-sdk/v3/node/reference/voice/types#tapdevice
+[voice-call-10]: /docs/server-sdk/v3/node/reference/voice/call/tap-audio
+
+### tap
+
+- **tap**(`params`): `Promise<CallTap>` - See [CallTap][calltap-3] for more details.
+
+Intercept call media and stream it to the specified WebSocket endpoint. Prefer using [tapAudio][voice-call-10] if you only need to tap audio.
+
+<Note>
+
+This is an experimental method. The destination must be a hosted WebSocket/RTP server, with an address that SignalWire can reach.
+
+A current limitation of this method is that the destination device does not receive any metadata regarding the origin of the stream.
+
+</Note>
+
+#### Parameters
+
+| Name            | Type                                 | Description                                                                       |
+|:----------------|:-------------------------------------|:----------------------------------------------------------------------------------|
+| `params`        | `Object`                             | -                                                                                 |
+| `params.device` | [`TapDevice`][types-4] | Destination device. Can be either WebSocket or RTP.                               |
+| `params.audio`  | `Object`                             | An object with the configuration for audio tapping. See "audio parameters" below. |
+
+**Audio parameters**
+
+| Name              | Type                                | Description                                                                                                 |
+|:------------------|:------------------------------------|:------------------------------------------------------------------------------------------------------------|
+| `audio`           | `Object`                            | -                                                                                                           |
+| `audio.direction` | `"listen"` \| `"speak"` \| `"both"` | Direction to tap. Can be `"listen"` (what the caller hears), `"speak"` (what the caller says), or `"both"`. |
+
+#### Returns
+
+`Promise<CallTap>` - See [CallTap][calltap-3] for more details.
+
+#### Example
+
+```js
+const tap = await call.tapAudio({
+  device: {
+    type: "ws",
+    uri: "wss://example.domain.com/endpoint",
+  },
+  audio: {
+    direction: "both",
+  },
+});
+
+await tap.stop();
+```

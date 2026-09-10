@@ -1,0 +1,53 @@
+---
+title: "listen"
+slug: /node/reference/messaging/client/listen
+description: listen method for the Client class.
+toc_max_heading_level: 3
+---
+
+[events]: /docs/server-sdk/node/reference/messaging/client/events
+
+### listen
+
+- **listen**(`{ event: Callback }`): `Promise<MessageEvents>`
+
+Listens for message events.
+
+#### Parameters
+
+<ParamField path="params" type="object" required>
+  Object containing the parameters of the method.
+</ParamField>
+
+<Indent>
+<ParamField path="topics" type="string[]" required>
+  List of topics to listen to. Previously known as `contexts`.
+</ParamField>
+
+<ParamField path="EVENT" type="Callback">
+  The event to listen to. List of events can be found [here][events]. Example event: `onMessageReceived`.
+</ParamField>
+</Indent>
+
+#### Returns
+
+`Promise<MessageEvents>`
+
+A promise that resolves to a `MessageEvents` object that you can use to view the current state or results of the event.
+
+#### Example
+
+In this example, we listen for inbound messages on the topic `"office"` and log any received messages.
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here"})
+
+await client.messaging.listen({
+  topics: ["office"],
+  async onMessageReceived(message) {
+    console.log("message.received", message);
+  }
+})
+```

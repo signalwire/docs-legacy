@@ -1,0 +1,119 @@
+---
+slug: /swml/reference
+description: Overview of SWML methods.
+title: Methods overview
+sidebar_label: Overview
+sidebar_position: 0
+toc_max_heading_level: 3
+---
+
+Methods in SWML control the program flow and execute functions.
+This includes setting and unsetting variables, conditional statements,
+making calls, and sending faxes etc.
+
+## The `ai` method
+
+The [`ai`](/docs/swml/reference/ai) method is an incredibly powerful tool to instantiate an AI agent
+that holds a natural conversation with the caller, and perform actions based on their input.
+
+## Control-flow methods
+
+### `execute` and `return`
+
+The [`execute`](/docs/swml/reference/execute) method is similar to a function call in most languages. It can be sent parameters,
+and it can return values using the [`return`](/docs/swml/reference/return) object. The SWML function to be executed can
+exist as a subsection in the same SWML document, but it can also be a separate SWML document hosted on
+an internet-accessible web-server.
+
+### `transfer`
+
+The [`transfer`](/docs/swml/reference/transfer) statement transfers the execution to a different section or
+a different SWML document. Unlike the `execute` statement, the `transfer` statement doesn't return
+back to the calling section.
+
+### `goto` and `label`
+
+The [`goto`](/docs/swml/reference/goto) statement can jump to a specified [`label`](/docs/swml/reference/label) either depending on a
+given condition or unconditionally, and repeatedly for a specified number of repetitions.
+
+### `cond` and `switch`
+
+The [`cond`](/docs/swml/reference/cond) statement is a general purpose conditional branching statement that
+executes SWML code based on the evaluation of a JavaScript expression.
+
+The [`switch`](/docs/swml/reference/switch) statement allows switch-case like conditional execution depending on whether a certain variable is
+a certain value.
+
+## Call related methods
+
+### `answer` and `hangup`
+
+Use these methods to decide when to [`answer`](/docs/swml/reference/answer) the call
+and when to [`hangup`](/docs/swml/reference/hangup). Some other methods (like [`play`](/docs/swml/reference/play))
+will automatically answer calls, but you can use these methods to be more
+specific about when it happens.
+
+### `denoise` and `stop_denoise`
+
+The [`denoise`](/docs/swml/reference/denoise) method starts the noise reduction filter and the
+[`stop_denoise`](/docs/swml/reference/stop-denoise) method stops it.
+
+### `live_transcribe`
+
+The [`live_transcribe`](/docs/swml/reference/live-transcribe) method starts a live transcription of the call.
+
+### `live_translate`
+
+The [`live_translate`](/docs/swml/reference/live-translate) method starts a live translation of the call.
+
+### `play` and `prompt`
+
+The [`play`](/docs/swml/reference/play) method can be used to send TTS speech, play audio files, send different rings etc.
+The [`prompt`](/docs/swml/reference/prompt) method also plays TTS or URLs like `play` but it can receive
+keypad or speech input in response.
+
+### `connect`
+
+Use the [`connect`](/docs/swml/reference/connect) method to connect the caller to other phone or SIP calls.
+You can set it up to dial multiple numbers in series, parallel or a combination of the two.
+
+### `enter_queue`
+
+The [`enter_queue`](/docs/swml/reference/enter-queue) method places the call in a queue where it will wait
+until an agent or resource becomes available. You can configure wait music, timeout settings, and
+status callbacks to manage the queue experience.
+
+### `join_room`
+
+The [`join_room`](/docs/swml/reference/join-room) method seamlessly connects your call to a
+[video room](/docs/platform/video), enabling participants to
+join from various sources, including mobile apps, web browsers, or phone calls.
+
+### `receive_fax`
+
+The [`receive_fax`](/docs/swml/reference/receive-fax) method will interpret the call as a fax and process it.
+
+### `record`, `record_call` and `stop_record_call`
+
+The [`record`](/docs/swml/reference/record) and the [`record_call`](/docs/swml/reference/record-call) methods will record
+the call. The `record` method, however, waits for the recording to terminate before continuing
+execution. The [`record_call`](/docs/swml/reference/record-call) method starts a call recording in the
+background, and it stops recording when you call [`stop_record_call`](/docs/swml/reference/stop-record-call).
+
+### `tap` and `stop_tap`
+
+The [`tap`](/docs/swml/reference/tap) method starts streaming the call to an RTP or a web socket sink.
+The [`stop_tap`](/docs/swml/reference/stop-tap) method stops it.
+
+### `sip_refer`
+
+The [`sip_refer`](/docs/swml/reference/sip-refer) method transfer a SIP call by sending a SIP REFER
+message.
+
+### `send_sms`
+
+Use [`send_sms`](/docs/swml/reference/send-sms) to send an SMS to a phone number.
+
+### `send_digits`
+
+Use [`send_digits`](/docs/swml/reference/send-digits) to send digits as DTMF tones.

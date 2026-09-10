@@ -1,0 +1,67 @@
+---
+title: "listen"
+slug: /node/reference/voice/call/listen
+description: listen method for the Call class.
+toc_max_heading_level: 3
+---
+
+[call-events]: /docs/server-sdk/node/reference/voice/call/events
+[onstatechanged]: /docs/server-sdk/node/reference/voice/call/events#onstatechanged
+
+### listen
+
+- **listen**(`{ event: Callback }`): `Promise`\<[`Call Events`][call-events]>
+
+Listen for events on the call.
+
+#### Parameters
+
+<ParamField path="listeners" type="object" required>
+  Object containing event listener callbacks.
+</ParamField>
+
+<Indent>
+<ParamField path="EVENT" type="Callback">
+  The event to listen for. List of events can be found [here][call-events]. Example event: [`onStateChanged`][onstatechanged].
+</ParamField>
+</Indent>
+
+#### Returns
+
+`Promise`\<[`Call Events`][call-events]>
+
+A promise that resolves to an unsubscribe function that you can call to stop listening for events.
+
+#### Example
+
+In this example, we listen for an incoming call and listen for the `onStateChanged` event.
+After 3 seconds, we hangup the call.
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+// Initialize the SignalWire client
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+// Access video client from the main client
+const voiceClient = client.voice;
+
+// Listen for incoming calls
+await voiceClient.listen({
+  topics: ["office"],
+  onCallReceived: async (call) => {
+    // Answer the call
+    call.answer();
+   // Listen for a status change event on the call
+   await call.listen({
+      onStateChanged: (call) => {
+        console.log("Call state changed:", call.state);
+      }
+   })
+    // wait 3 seconds and then hangup
+    setTimeout(async () => {
+      await call.hangup();
+    }, 3000);
+  }
+});
+```

@@ -1,0 +1,55 @@
+---
+title: "ChatMember"
+keywords:
+  - SignalWire
+  - Realtime SDK
+  - Node.js
+  - chat member
+  - chat user
+slug: /node/reference/chat/chat-member
+sidebar_label: ChatMember
+description: ChatMember object representing a participant in a chat channel. Access member ID, channel, and state through join/update/leave events.
+toc_max_heading_level: 3
+---
+
+This class represents a member in a chat. A `ChatMember` object is received in the `onMemberJoined`, `onMemberUpdated`, and `onMemberLeft` event handlers when listening to chat events.
+
+## **Properties**
+
+<ParamField path="id" type="string" required>
+  The id of this member.
+</ParamField>
+
+<ParamField path="channel" type="string" required>
+  The channel of this member.
+</ParamField>
+
+<ParamField path="state" type="Record<any, any>" required>
+  The state of this member.
+</ParamField>
+
+## **Example**
+
+Listening for member events and accessing `ChatMember` properties:
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "your-project-id", token: "your-api-token" });
+
+await client.chat.listen({
+  channels: ["my-channel"],
+  onMemberJoined: (member) => {
+    console.log("Member joined:", member.id);
+    console.log("Channel:", member.channel);
+    console.log("State:", member.state);
+  },
+  onMemberUpdated: (member) => {
+    console.log("Member updated:", member.id);
+    console.log("New state:", member.state);
+  },
+  onMemberLeft: (member) => {
+    console.log("Member left:", member.id);
+  }
+});
+```

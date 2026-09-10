@@ -1,0 +1,137 @@
+.installHero {
+  background: var(--ifm-card-background-color);
+  padding: 2rem 0;
+  margin: 2rem 0;
+  border-radius: var(--ifm-card-border-radius);
+  border: 1px solid var(--ifm-color-emphasis-200);
+}
+
+.content {
+  max-width: var(--ifm-container-width);
+  margin: 0 auto;
+  padding: 0 var(--ifm-spacing-horizontal);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.title {
+  margin: 0;
+  font-size: var(--ifm-h1-font-size);
+  font-weight: var(--ifm-h1-font-weight);
+  line-height: var(--ifm-h1-line-height);
+  color: var(--ifm-heading-color);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.titleIcon {
+  display: inline-flex;
+  align-items: center;
+  font-size: 1.25em;
+}
+
+.description {
+  margin-bottom: 2rem;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.installSection {
+  margin: 2rem 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.codeBlockWrapper {
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* Center text within the installation code block only */
+.codeBlockWrapper :global(.theme-code-block) code {
+  text-align: center;
+}
+
+.links {
+  display: flex;
+  gap: 2rem;
+  margin-top: 2rem;
+  justify-content: center;
+  align-items: center;
+}
+
+.packageGroup {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--ifm-color-primary);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.link:hover {
+  color: var(--ifm-color-primary-darker);
+  text-decoration: none;
+}
+
+.linkShield {
+  height: 20px;
+  margin-left: 0.5rem;
+}
+
+/* Responsive styles */
+@media (max-width: 996px) {
+  .title {
+    font-size: 2rem;
+  }
+
+  .links {
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .installHero {
+    padding: 1.5rem 0;
+  }
+
+  .title {
+    font-size: 1.75rem;
+  }
+
+  .header {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .links {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .packageGroup {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .codeBlockWrapper {
+    max-width: 100% !important;
+  }
+} 

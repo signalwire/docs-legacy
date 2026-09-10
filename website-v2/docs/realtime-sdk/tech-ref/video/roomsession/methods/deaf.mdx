@@ -1,0 +1,64 @@
+---
+title: "deaf"
+slug: /node/reference/video/room-session/deaf
+description: deaf method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+[video-roomsession-1]: /docs/server-sdk/node/reference/video/room-session/audio-unmute
+
+### deaf
+
+- **deaf**(`params`): `Promise<void>`
+
+Mutes the incoming audio for a given member. The affected participant will not hear audio from the other participants anymore.
+
+Note that in addition to making a participant deaf, this will also automatically mute the microphone of the target participant. If you want, you can then manually unmute it by calling [audioUnmute][video-roomsession-1].
+
+#### Parameters
+
+<ParamField path="params" type="object" required>
+  Object containing the parameters of the method.
+</ParamField>
+
+<Indent>
+<ParamField path="memberId" type="string">
+  ID of the member to affect.
+</ParamField>
+</Indent>
+
+#### Returns
+
+`Promise<void>`
+
+#### Example
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+// Initialize the SignalWire client
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+// Access the video client from the main client
+const videoClient = client.video;
+
+// Setup listener for when a room starts
+await videoClient.listen({
+
+  onRoomStarted: async (roomSession) => {
+    console.log("Room started", roomSession.displayName);
+    await roomSession.listen({
+      // Listen for when a member joins the room
+      onMemberJoined: async (member) => {
+        console.log("Member joined", member.name);
+        // Deafen the member
+        console.log("Deafing member", member.name);
+        await roomSession.deaf({ memberId: member.id });
+      }
+    });
+  },
+  onRoomEnded: async (roomSession) => {
+    console.log("Room ended", roomSession.displayName);
+  }
+});
+```

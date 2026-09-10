@@ -1,0 +1,181 @@
+---
+title: return
+slug: /swml/reference/return
+description: Return from a `execute` method or exit script.
+toc_max_heading_level: 3
+---
+
+Return from [`execute`](/docs/swml/reference/execute) or exit script.
+
+<ParamField path="return" type="any" required={true}>
+  The return value.
+</ParamField>
+
+
+## **Properties**
+
+No specific parameters. The value can be set to `any` type.
+
+## **Variables**
+
+Set by the method:
+
+- **return_value:**(out) Optional return value.
+
+## **Examples**
+
+### Return with optional value
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - return: 1
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "return": 1
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+### Return with multiple values
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - execute:
+        dest: fn_that_returns
+    - play:
+        url: 'say: returned ${return_value[0].a}'
+  fn_that_returns:
+    - return:
+        - a: 1
+        - b: 2
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "execute": {
+          "dest": "fn_that_returns"
+        }
+      },
+      {
+        "play": {
+          "url": "say: returned ${return_value[0].a}"
+        }
+      }
+    ],
+    "fn_that_returns": [
+      {
+        "return": [
+          {
+            "a": 1
+          },
+          {
+            "b": 2
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+### using the `on_return` parameter
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - execute:
+        dest: fn_that_returns
+        on_return:
+          - play:
+              url: 'say: returned ${return_value}'
+  fn_that_returns:
+    - return: hello
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "execute": {
+          "dest": "fn_that_returns",
+          "on_return": [
+            {
+              "play": {
+                "url": "say: returned ${return_value}"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "fn_that_returns": [
+      {
+        "return": "hello"
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+### Return with no value
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - return: {}
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "return": {}
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+Additional examples are available in the [introduction](/docs/swml/guides/deployment#from-a-web-server).

@@ -1,0 +1,222 @@
+---
+title: "AI Parameters"
+sidebar_label: "AI Parameters"
+sidebar_position: 5
+slug: /python/guides/ai-parameters
+toc_max_heading_level: 3
+---
+
+## AI Parameters
+
+Tune conversation behavior with parameters for speech detection, timeouts, barge control, and AI model settings. For a complete parameter reference, see [AI Parameters Reference](/docs/agents-sdk/python/reference/ai-parameters-reference).
+
+### Parameter Categories
+
+| Category | Key Parameters | Purpose |
+|----------|----------------|---------|
+| **Speech Detection** | `end_of_speech_timeout`, `energy_level` | Control when speech ends |
+| **Timeouts** | `attention_timeout`, `inactivity_timeout` | Handle silence and idle callers |
+| **Barge Control** | `barge_match_string`, `transparent_barge` | Manage interruptions |
+| **AI Model** | `temperature`, `top_p`, `max_tokens` | Tune response generation |
+
+### Setting Parameters
+
+```python
+from signalwire_agents import AgentBase
+
+
+class MyAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="my-agent")
+        self.add_language("English", "en-US", "rime.spore")
+
+        # Set multiple parameters at once
+        self.set_params({
+            "end_of_speech_timeout": 600,
+            "attention_timeout": 15000,
+            "inactivity_timeout": 45000,
+            "temperature": 0.5
+        })
+```
+
+### Essential Parameters
+
+#### Speech Detection
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `end_of_speech_timeout` | int | 700 | Milliseconds of silence before speech is complete |
+| `energy_level` | int | 52 | Minimum audio level in dB (0-100) |
+
+```python
+## Fast response - shorter silence detection
+self.set_params({"end_of_speech_timeout": 400})
+
+## Patient agent - longer silence tolerance
+self.set_params({"end_of_speech_timeout": 1000})
+```
+
+#### Timeouts
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `attention_timeout` | int | 5000 | Milliseconds before prompting idle caller |
+| `inactivity_timeout` | int | 600000 | Milliseconds before ending call (10 min default) |
+
+```python
+## Quick service - prompt quickly if silent
+self.set_params({
+    "attention_timeout": 5000,    # "Are you there?" after 5 seconds
+    "inactivity_timeout": 30000   # End call after 30 seconds
+})
+
+## Patient service - give caller time to think
+self.set_params({
+    "attention_timeout": 20000,   # Wait 20 seconds before prompting
+    "inactivity_timeout": 60000   # Wait full minute before ending
+})
+```
+
+#### Barge Control
+
+Barge-in allows callers to interrupt the AI while it's speaking.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `barge_match_string` | str | - | Phrase required to trigger barge |
+| `transparent_barge` | bool | true | Enable transparent barge mode |
+
+```python
+## Require specific phrase to interrupt
+self.set_params({
+    "barge_match_string": "excuse me"
+})
+```
+
+#### AI Model
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `temperature` | float | 0.3 | Randomness (0-2, higher = more creative) |
+| `top_p` | float | 1.0 | Nucleus sampling threshold |
+| `max_tokens` | int | 256 | Maximum response length |
+| `frequency_penalty` | float | 0.1 | Reduce repetitive phrases |
+
+```python
+## Consistent responses (FAQ bot)
+self.set_params({"temperature": 0.2})
+
+## Creative responses (entertainment)
+self.set_params({"temperature": 0.9})
+
+## Balanced for customer service
+self.set_params({
+    "temperature": 0.5,
+    "frequency_penalty": 0.3
+})
+```
+
+### Use Case Presets
+
+#### Customer Service
+
+```python
+self.set_params({
+    "end_of_speech_timeout": 600,
+    "attention_timeout": 12000,
+    "inactivity_timeout": 45000,
+    "temperature": 0.5
+})
+```
+
+#### Technical Support
+
+```python
+self.set_params({
+    "end_of_speech_timeout": 800,    # Patient for complex explanations
+    "attention_timeout": 20000,
+    "inactivity_timeout": 60000,
+    "temperature": 0.3               # Precise responses
+})
+```
+
+#### IVR Menu
+
+```python
+self.set_params({
+    "end_of_speech_timeout": 400,    # Quick response
+    "attention_timeout": 8000,
+    "inactivity_timeout": 20000,
+    "temperature": 0.2               # Very consistent
+})
+```
+
+### Tuning Guide
+
+#### If callers are...
+
+| Problem | Solution |
+|---------|----------|
+| Being cut off mid-sentence | Increase `end_of_speech_timeout` |
+| Waiting too long for response | Decrease `end_of_speech_timeout` |
+| Not hearing "Are you there?" | Decrease `attention_timeout` |
+| Getting hung up on too fast | Increase `inactivity_timeout` |
+
+#### If responses are...
+
+| Problem | Solution |
+|---------|----------|
+| Too repetitive | Increase `frequency_penalty` |
+| Too random/inconsistent | Decrease `temperature` |
+| Too predictable | Increase `temperature` |
+| Too long | Decrease `max_tokens` |
+
+### Complete Example
+
+```python
+#!/usr/bin/env python3
+## configured_agent.py - Agent with AI parameters configured
+from signalwire_agents import AgentBase
+
+
+class ConfiguredAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="configured-agent")
+        self.add_language("English", "en-US", "rime.spore")
+
+        self.set_params({
+            # Speech detection
+            "end_of_speech_timeout": 600,
+
+            # Timeouts
+            "attention_timeout": 15000,
+            "inactivity_timeout": 45000,
+
+            # AI model
+            "temperature": 0.5,
+            "frequency_penalty": 0.2
+        })
+
+        self.prompt_add_section(
+            "Role",
+            "You are a helpful customer service agent."
+        )
+
+
+if __name__ == "__main__":
+    agent = ConfiguredAgent()
+    agent.run()
+```
+
+### More Parameters
+
+For the complete list of all available parameters including:
+
+- ASR configuration (diarization, smart formatting)
+- Audio settings (volume, background music, hold music)
+- Video parameters
+- Advanced behavior controls
+- SWAIG control parameters
+
+See the **[AI Parameters Reference](/docs/agents-sdk/python/reference/ai-parameters-reference)** in the Appendix.
+

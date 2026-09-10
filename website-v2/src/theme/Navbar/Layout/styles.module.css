@@ -1,0 +1,26 @@
+/* CSS Variables for navbar heights */
+:root {
+  --ifm-primary-navbar-height: 3.75rem;  /* Always fixed for main navbar content */
+}
+
+/* Apply height to navbar element */
+:global(.navbar) {
+  /* Height - override Docusaurus default */
+  height: var(--ifm-primary-navbar-height);
+
+  /* Layout - ensure flex centering works properly */
+  display: flex;
+  align-items: center;
+
+  /* Width */
+  width: 100%;
+}
+
+/* Navbar hide/show animation styles */
+.navbarHideable {
+  transition: transform var(--ifm-transition-fast) ease;
+}
+
+.navbarHidden {
+  transform: translate3d(0, calc(-100% - 2px), 0);
+}

@@ -1,0 +1,43 @@
+---
+title: "pass"
+slug: /node/reference/voice/call/pass
+description: pass method for the Call class.
+toc_max_heading_level: 3
+---
+
+[call]: /docs/server-sdk/node/reference/voice/call
+[voice-client-oncallreceived]: /docs/server-sdk/node/reference/voice/client/events#oncallreceived
+
+### pass
+
+- **pass**(`params`): `Promise`\<[`Call`][call]>
+
+This will allow a client to decline incoming calls without ending the call and redirect the call to another [Voice client][voice-client-oncallreceived].
+
+Will trigger on the [`onCallReceived`][voice-client-oncallreceived] event.
+
+#### Returns
+
+`Promise`\<[`Call`][call]>
+
+A promise that resolves to the [`Call`][call] object that you can use to control the call.
+
+#### Example
+
+In this example, we listen for an incoming call and then pass the call to a different topic.
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+const voiceClient = client.voice;
+
+await voiceClient.listen({
+  topics: ["office"],
+  onCallReceived: (call) => {
+    // pass the call to a different client
+    call.pass();
+    }
+});
+```

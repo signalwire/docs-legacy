@@ -1,0 +1,49 @@
+---
+title: Relay.Calling.DetectAction
+slug: /python/reference/calling/actions/detect
+description: The Detect Action is used to detect DTMF, fax tones, or answering machines.
+toc_max_heading_level: 3
+---
+
+[relay-calling-detectresult]: /docs/server-sdk/v2/python/reference/calling/results/detect
+[relay-calling-stopresult]: /docs/server-sdk/v2/python/reference/calling/results/stop
+
+## Relay.Calling.DetectAction
+
+This object returned from one of the _asynchronous_ detect methods that represents a running detector on the call.
+
+### Properties
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `result` | [`Relay.Calling.DetectResult`][relay-calling-detectresult] | Final detector result. |
+| `completed` | `boolean` | Whether the action has finished. |
+| `payload` | `dict` | Payload sent to Relay to start this detector. |
+| `control_id` | `string` | UUID to identify the detector. |
+
+### Methods
+
+#### stop
+
+Stop the action immediately.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`coroutine` - Coroutine that will return a [`Relay.Calling.StopResult`][relay-calling-stopresult] object.
+
+**Examples**
+
+Trying to detect a machine and stop the action after 5 seconds:
+
+```python
+import asyncio # to use sleep
+
+action = await call.detect_answering_machine_async()
+# For demonstration purposes only..
+await asyncio.sleep(5)
+await action.stop()
+```

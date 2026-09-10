@@ -1,0 +1,81 @@
+---
+title: FreePBX
+slug: /platform/freepbx
+x-custom:
+  ported_from_readme: true
+  hideInGuideShowcase: true
+---
+
+
+Using FreePBX and taking advantage of SignalWire’s disruptive pricing on DIDs and voice minutes is almost too easy.
+
+Creating a SIP Endpoint
+-----------------------
+
+If you don't have a SIP endpoint set up already, the first step is to [create a SIP Endpoint](/docs/platform/voice) and connect it to a phone number.
+
+Editing the Signalwire SIP Endpoint for FreePBX
+-----------------------------------------------
+
+There are a couple of settings we need to change on the SIP Endpoint we have created in SignalWire to get good interworking with FreePBX:
+
+<ol>
+<li>Set Encryption to ‘Required’</li>
+<li>Disable the Encryption option for AEAD_AES_256_GCM_8 as Asterisk is not currently supported and will cause a warning on the Asterisk Command Line (though calls would still work).</li>
+</ol>
+
+For more information on these steps, please follow our [getting started with SIP](/docs/platform/voice) guide.
+
+
+Configuring Asterisk
+--------------------
+
+Add a SIP (PJSIP) trunk, and on the **General** tab enter the following:
+
+Trunk Name: SignalWire (Can be anything you want)  
+Outbound CallerID: 1-469-FREEPBX (the DID you purchased)
+
+![Tab of an Edit Trunk page in the Asterisk interface. Hide CallerID is set to No. Outbound CallerID is set to the purchased DID, in this case 14693733729. CID options is set to Allow Any CID. Maximum Channels is blank. Asterisk Trunk Dial Options is set to System. Continue if Busy, Disable Trunk, and Monitor Trunk Failures are all set to No](@image/external/freepbx/edit-trunk-general.webp)
+
+Then, on the **PJSIP Settings** tab and the **General** sub-tab, enter the following:
+
+Username: freepbx (the name you gave the SIP endpoint)  
+Secret: (the password you gave the SIP endpoint)  
+SIP Server: YOURSPACE-123456abc.sip.signalwire.com (your Space URI)  
+SIP Server Port: 5060 (standard SIP port)  
+Context: from-signalwire (default is ‘from-pstn’, but you must change it)
+
+![the PJSIP Settings tab of the Edit Trunk page in Asterisk. User name is set to freepbx. Authentication is set to Outbound. Registration is set to Send. Language Code is set to Default. The SIP Server is set to the desired Space URI. SIP Server Port is set to 5060. Context is set to 'from-signalwire'. Transport is set to '0.0.0.0-udp'](@image/external/freepbx/edit-trunk-pjsip.webp)
+
+As the last step on this screen, on the **PJSIP Settings** tab and the **Advanced** sub-tab, the following three settings:
+
+From Domain: YOURSPACE-123456abc.sip.signalwire.com (your Space URI)  
+From User: freepbx (the name you gave the SIP endpoint)  
+Media Encryption: SRTP via in-SDP (select from drop-down)
+
+<Frame>
+![The Advanced tab of the Edit Trunk page in Asterisk. From Domain is set to the desired Space URI. From User is set to freepbx, or the name selected for the SIP endpoint. Media Encryption is set to SRTP via in-SDP.](@image/external/freepbx/pjsip-full-settings.webp)
+</Frame>
+
+Now your trunk is all set up!
+
+Setting up the Dial Plan
+------------------------
+
+There is a small amount of dialplan script to add (which we will place in a context called "from-signalwire" - remember, we set this in the above steps), in order to extract the dialed number from the SIP Header, before passing the call to FreePBX for normal processing.
+
+We do this by entering the following lines in a file called **extensions_custom.conf** (which may be empty) using the inbuilt config editor in the Admin menu:
+
+```text extensions_custom.conf
+[from-signalwire]
+exten => s,1,Set(numb=${CUT(CUT(PJSIP_HEADER(read,To),@,1),:,2)})
+same => n,Goto(from-pstn,${numb:1},1)
+```
+
+The editor is at Admin > Config Edit > extensions_custom.conf:
+
+![The Configuration File Editor. The file 'extensions_custom.conf' is selected, and the provided code has been entered in the conf file.](@image/external/freepbx/extension.webp)
+
+Now just set up your inbound routing (the DID will be in the format 12223334444) and your outbound routing as normal.
+
+That's all there is to it! You should now be able to make outbound calls over your SignalWire SIP trunk and accept incoming calls to the number you purchased.

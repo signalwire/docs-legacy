@@ -1,0 +1,27 @@
+.carousel {
+  padding: 20px 40px;
+  background: var(--ifm-background-surface-color);
+  border-radius: 10px;
+  margin-bottom: 1rem;
+}
+
+.carouselMobile {
+  padding: 20px 0px;
+}
+
+.carouselMobile code {
+}
+
+.carousel h3 {
+  margin-top: 2px;
+}
+
+.container {
+  padding: 0px 10px;
+  code {
+    /* font-size: small; */
+  }
+  pre {
+    height: 310px;
+  }
+}

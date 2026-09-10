@@ -1,0 +1,73 @@
+---
+title: Relay Calling
+slug: /ruby/reference/calling
+toc_max_heading_level: 3
+---
+
+[call]: /docs/server-sdk/v2/ruby/reference/calling/call
+[link]: #dial
+[relay-calling-call]: /docs/server-sdk/v2/ruby/reference/calling/call
+[relay-calling-dialresult]: /docs/server-sdk/v2/ruby/reference/calling/results/dial
+
+This namespace represents the API interface for the Calling Relay Service. It is used to make requests related to managing end to end calls.
+
+## Methods
+
+### dial
+
+Make an outbound Call and waits until it has been answered or hung up.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `from` | String | Yes | The party the call is coming from. Must be a SignalWire number or SIP endpoint that you own. |
+| `to` | String | Yes | The party you are attempting to call. |
+| `type` | String | No | The type of call. Only `phone` is currently supported. |
+| `timeout` | Numeric | No | The time, in seconds, the call will ring before going to voicemail. |
+
+**Returns**
+
+[`Relay::Calling::DialResult`][relay-calling-dialresult] - returned upon answer or failure of the dialed call.
+
+**Examples**
+
+Make an outbound Call and grab the call object is it was answered.
+
+```ruby
+call_result = client.dial(from: "+1XXXXXXXXXX", to: "+1YYYYYYYYYY")
+
+if call_result.successful
+  call = call_result.call
+end
+```
+
+### new_call
+
+Create a new [`Call`][call] object. The call is not dialed yet allowing you to attach event listeners on it.
+
+**Parameters**
+
+See [`Relay::Calling::Dial`][link] for the parameter list.
+
+**Returns**
+
+[`Relay::Calling::Call`][relay-calling-call] - A new call object.
+
+**Examples**
+
+Create a new Call object then dial.
+
+```ruby
+call = client.calling.new_call(
+  type: 'phone',
+  from: '+1XXXXXXXXXX',
+  to: '+1YYYYYYYYYY',
+  timeout: 30
+)
+
+# Do some pre-dialing setup.
+
+# Start dialing the destination.
+call.dial
+```

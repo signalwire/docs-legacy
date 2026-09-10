@@ -1,0 +1,42 @@
+---
+title: "Relay::Messaging"
+slug: /ruby/reference/messaging
+toc_max_heading_level: 3
+---
+This namespace represents the API interface for the Messaging Relay Service. It is used to send and receive text messages.
+
+## Methods
+
+### send
+
+Send an outbound SMS or MMS message.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `to` | String | required | The number you are attempting to send the message to. |
+| `from` | String | required | The phone number to place the message from. _Must be a SignalWire phone number or short code that you own._ |
+| `context` | String | required | The SignalWire context on which you will receive updates about the message state. |
+| `body` | String | optional | The text body to send. Either `body` or `media` _must_ be specified. |
+| `media` | Array | optional | An array of media URLs to send with an MMS. Either `body` or `media` _must_ be specified. |
+| `tags` | Array | optional | An array of tags to tag the message with. For searching in the UI and identifying messages. |
+
+**Returns**
+
+`Signalwire::Relay::Messaging::SendResult` - the result of the `send` command.
+
+**Examples**
+
+Send a message in the _office_ context.
+
+```ruby
+result = client.messaging.send(
+  from: '+1XXXXXXXXXX',
+  to: '+1YYYYYYYYYY',
+  context: 'office',
+  body: 'SignalWire says hello!'
+)
+
+puts "Message #{result.message_id} was successfully sent" if result.successful
+```

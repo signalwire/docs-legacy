@@ -1,0 +1,122 @@
+---
+title: Calling
+slug: /node/reference/calling
+toc_max_heading_level: 3
+---
+
+[link]: #dial
+[relay-calling-call]: /docs/server-sdk/v2/node/reference/calling/call
+[relay-calling-dialresult]: /docs/server-sdk/v2/node/reference/calling/results/dial
+
+# Relay.Calling
+
+This represents the API interface for the Calling Relay Service. This object is used to make requests related to managing end to end calls.
+
+## Methods
+
+### dial
+
+Make an outbound Call and waits until it has been answered or hung up.
+
+#### Parameters
+
+| Parameter | Type | Default | Description |
+| --------- | ---- | ------- | ----------- |
+| `type` | `string` | **required** | The type of call. Only `phone` and `sip` are currently supported |
+| `from` | `string` | **required** | The party the call is coming from. Must be a SignalWire number or SIP endpoint that you own |
+| `to` | `string` | **required** | The party you are attempting to call |
+| `timeout` | `number` | optional | The time, in seconds, the call will ring before going to voicemail |
+| `from_name` | `string` | optional | SIP only. The caller ID name to display |
+| `headers` | `Header[]` | optional | SIP only. Array of `Header` objects like: `{ name: string, value: string }`. Must be X- headers only, see example below |
+| `codecs` | `string` | optional | SIP only. Optional array of desired codecs in order of preference. Supported values are PCMU, PCMA, OPUS, G729, G722, VP8, H264. Default is parent leg codec(s) |
+| `webrtc_media` | `boolean` | optional | SIP only. If true, WebRTC media is negotiated. Default is parent leg setting |
+
+#### Returns
+
+`Promise<Relay.Calling.DialResult>` - Promise that will be fulfilled with a [`Relay.Calling.DialResult`][relay-calling-dialresult] object.
+
+#### Examples
+
+Make an outbound Call and grab the call object if it was answered.
+
+```javascript
+async function main() {
+  const dialResult = await client.calling.dial({
+    type: 'phone',
+    from: '+1XXXXXXXXXX',
+    to: '+1YYYYYYYYYY',
+    timeout: 30
+  })
+
+  if (dialResult.successful) {
+    const { call } = dialResult
+  }
+}
+
+main().catch(console.error)
+```
+
+Make an outbound Call to a SIP endpoint.
+
+```javascript
+async function main() {
+  const dialResult = await client.calling.dial({
+    type: 'sip',
+    from: 'sip:XXXX@XXXXX.XXX',
+    to: 'sip:YYYY@YYYYY.YYY',
+    timeout: 30
+  })
+
+  if (dialResult.successful) {
+    const { call } = dialResult
+  }
+}
+
+main().catch(console.error)
+```
+
+Dial a SIP endpoint with custom headers.
+
+```javascript
+client.calling.dial({
+  type: 'sip',
+  from: 'sip:XXXX@XXXXX.XXX',
+  to: 'sip:YYYY@YYYYY.YYY',
+  timeout: 30,
+  headers: [{
+    "name": "X-Relay-Call-ID",
+    "value": "697a4e98-f452-416f-b11e-63c19112f542"
+  }, {
+    "name": "X-CID",
+    "value": "124077399_129412436@206.117.11.72"
+  }, {
+    "name": "X-Target-Type",
+    "value": "classic"
+  }]
+})
+```
+
+### newCall
+
+Create a new `Call` object. The call has not started yet allowing you to attach event listeners on it.
+
+#### Parameters
+
+See [`dial`][link] for the parameter list.
+
+#### Returns
+
+`Call` - A new [`Relay.Calling.Call`][relay-calling-call] object.
+
+#### Example
+
+```javascript
+const call = client.calling.newCall({
+  type: 'phone',
+  from: '+1XXXXXXXXXX',
+  to: '+1YYYYYYYYYY',
+  timeout: 30
+})
+
+// Use the call object...
+```

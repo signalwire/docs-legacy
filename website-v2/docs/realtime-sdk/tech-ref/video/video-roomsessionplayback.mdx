@@ -1,0 +1,492 @@
+---
+title: "RoomSessionPlayback"
+keywords:
+  - SignalWire
+  - Realtime SDK
+  - Node.js
+  - video playback
+  - play video
+slug: /node/reference/video/room-session-playback
+sidebar_label: RoomSessionPlayback
+description: RoomSessionPlayback reference for controlling media playback in video rooms. Pause, resume, seek, and stop playback of videos and audio in room sessions.
+toc_max_heading_level: 3
+---
+
+[link-1]: #forward
+[link-2]: #rewind
+[link]: #seek
+[video-roomsession-1]: /docs/server-sdk/node/reference/video/room-session/play
+[video-roomsession]: /docs/server-sdk/node/reference/video/room-session
+[video-roomsessionplayback]: /docs/server-sdk/node/reference/video/room-session-playback
+
+Instances of this class allow you to control (e.g., pause, resume, stop) the playback inside a room session. You can obtain instances of this class by starting a playback from the desired [RoomSession][video-roomsession] (see [RoomSession.play][video-roomsession-1])
+
+## **Properties**
+
+<ParamField path="id" type="string" required>
+  Unique id for this playback.
+</ParamField>
+
+<ParamField path="roomId" type="string" required>
+  Id of the room associated to this playback.
+</ParamField>
+
+<ParamField path="roomSessionId" type="string" required>
+  Id of the room session associated to this playback.
+</ParamField>
+
+<ParamField path="url" type="string" required>
+  Url of the file reproduced by this playback.
+</ParamField>
+
+<ParamField path="state" type='"paused" | "completed" | "playing"' required>
+  Current state of the playback.
+</ParamField>
+
+<ParamField path="position" type="number" required>
+  Current playback position, in milliseconds.
+</ParamField>
+
+<ParamField path="seekable" type="boolean" required>
+  Whether the seek functions ([seek][link], [forward][link-1], [rewind][link-2]) can be used for this playback.
+</ParamField>
+
+<ParamField path="volume" type="number" required default="0">
+  Audio volume at which the playback file is reproduced.
+</ParamField>
+
+<ParamField path="startedAt" type="Date">
+  Start time, if available.
+</ParamField>
+
+<ParamField path="endedAt" type="Date">
+  End time, if available.
+</ParamField>
+
+<ParamField path="hasEnded" type="boolean" required>
+  Whether the playback has ended. Returns `true` if the state is `"completed"`.
+</ParamField>
+
+## **Methods**
+
+### forward
+
+▸ **forward**(`offset`): `Promise<void>`
+
+Seeks the current playback forward by the specified `offset`.
+
+#### Parameters
+
+<ParamField path="offset" type="number" default="5000">
+  Relative number of milliseconds to seek forward from the current position.
+</ParamField>
+
+#### Returns
+
+`Promise<void>`
+
+#### Example
+
+In this example, we wait for the [`RoomSession`][video-roomsession] to start,
+then we start a playback and forward it by 10 seconds after 5 seconds.
+This example assumes that a [`RoomSession`][video-roomsession] is active and
+members are joining the room.
+
+```javascript
+import { SignalWire } from "@signalwire/realtime-api"
+
+// Initialize the SignalWire client
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+// Access the video client from the SignalWire client
+const videoClient = client.video
+
+// Setup a listener for when a room starts
+await videoClient.listen({
+    onRoomStarted: async (roomSession) => {
+        // Start a playback
+        const playback = await roomSession.play({ url: "https://cdn.signalwire.com/default-music/welcome.mp3" })
+      
+      setTimeout(async () => {
+        // Forward the playback by 5 seconds
+        await playback.forward(10000)
+      }, 5000)
+    }
+})
+```
+
+---
+
+### pause
+
+▸ **pause**(): `Promise<void>`
+
+Pauses the playback.
+
+#### Returns
+
+`Promise<void>`
+
+#### Example
+
+In this example, we wait for the [`RoomSession`][video-roomsession] to start,
+then we start a playback.
+After 5 seconds, we pause the playback.
+This example assumes that a [`RoomSession`][video-roomsession] is active and
+members are joining the room.
+
+```javascript
+import { SignalWire } from "@signalwire/realtime-api"
+
+// Initialize the SignalWire client
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+// Access the video client from the SignalWire client
+const videoClient = client.video
+
+// Setup a listener for when a room starts
+await videoClient.listen({
+    onRoomStarted: async (roomSession) => {
+      // Start a playback
+      const playback = await roomSession.play({ url: "https://cdn.signalwire.com/default-music/welcome.mp3" })
+      
+      // Resume the playback after 5 seconds
+      setTimeout(async () => {
+        // Pause the playback
+        await playback.pause()
+      }, 5000)
+    }
+})
+```
+
+---
+
+### resume
+
+▸ **resume**(): `Promise<void>`
+
+Resumes the playback.
+
+#### Returns
+
+`Promise<void>`
+
+#### Example
+
+In this example, we wait for the [`RoomSession`][video-roomsession] to start,
+then we start a playback and pause it.
+After 5 seconds, we resume the playback.
+This example assumes that a [`RoomSession`][video-roomsession] is active and
+members are joining the room.
+
+```javascript
+import { SignalWire } from "@signalwire/realtime-api"
+
+// Initialize the SignalWire client
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+// Access the video client from the SignalWire client
+const videoClient = client.video
+
+// Setup a listener for when a room starts
+await videoClient.listen({
+    onRoomStarted: async (roomSession) => {
+      // Start a playback
+      const playback = await roomSession.play({ url: "https://cdn.signalwire.com/default-music/welcome.mp3" })
+      // Pause the playback
+      await playback.pause()
+      
+      // Resume the playback after 5 seconds
+      setTimeout(async () => {
+        // Pause the playback
+        await playback.resume()
+      }, 5000)
+    }
+})
+```
+
+---
+
+### rewind
+
+▸ **rewind**(`offset`): `Promise<void>`
+
+Seeks the current playback backwards by the specified offset.
+
+#### Parameters
+
+<ParamField path="offset" type="number" default="5000">
+  Relative number of milliseconds to seek backwards from the current position.
+</ParamField>
+
+#### Returns
+
+`Promise<void>`
+
+#### Example
+
+In this example, we wait for the [`RoomSession`][video-roomsession] to start,
+then we start a playback. After 10 seconds, we rewind the playback by 5 seconds.
+This example assumes that a [`RoomSession`][video-roomsession] is active and
+members are joining the room.
+
+```javascript
+import { SignalWire } from "@signalwire/realtime-api"
+
+// Initialize the SignalWire client
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+// Access the video client from the SignalWire client
+const videoClient = client.video
+
+// Setup a listener for when a room starts
+await videoClient.listen({
+  onRoomStarted: async (roomSession) => {
+    // Start a playback
+    const playback = await roomSession.play({ url: "https://cdn.signalwire.com/default-music/welcome.mp3" })
+    
+    setTimeout(async () => {
+      // Rewind the playback by 5 seconds after 10 seconds
+      await playback.rewind(5000)
+    }, 10000)
+  }
+})
+```
+
+---
+
+### seek
+
+▸ **seek**(`timecode`): `Promise<void>`
+
+Seeks the current playback to the specified absolute position.
+
+#### Parameters
+
+<ParamField path="timecode" type="number" required>
+  The absolute position in milliseconds to seek to in the playback.
+</ParamField>
+
+#### Returns
+
+`Promise<void>`
+
+#### Example
+
+In this example, we wait for the [`RoomSession`][video-roomsession] to start,
+then we start a playback. We then seek the playback to the 30th second.
+This example assumes that a [`RoomSession`][video-roomsession] is active and
+members are joining the room.
+
+```javascript
+import { SignalWire } from "@signalwire/realtime-api";
+
+// Initialize the SignalWire client
+const client = await SignalWire({ project: "Project ID Here", token: "API Token Here" })
+
+// Access the video client from the main client
+const videoClient = client.video;
+
+// Setup listener for when a room starts
+await videoClient.listen({
+  onRoomStarted: async (roomSession) => {
+    console.log("Room started", roomSession.displayName);
+
+    // play wait music
+    await roomSession.play({
+      url: "https://cdn.signalwire.com/default-music/welcome.mp3",
+      listen: {
+        onStarted: (playback) => {
+          console.log("Playback started");
+          // Seek to 30 seconds
+          console.log("Skipping to 30 seconds");
+          playback.seek(30000)
+        },
+        onUpdated: (playback) => console.log("Playback updated", playback.state),
+        onEnded: (playback) => console.log("Playback ended", playback.state),
+      }
+    })
+  }
+})
+```
+
+---
+
+### setVolume
+
+▸ **setVolume**(`volume`): `Promise<void>`
+
+Sets the audio volume for the playback.
+
+#### Parameters
+
+<ParamField path="volume" type="number" required default="0">
+  The desired volume. Values range from -50 to 50.
+</ParamField>
+
+#### Returns
+
+`Promise<void>`
+
+#### Example
+
+In this example, we wait for the [`RoomSession`][video-roomsession] to start,
+then we start a playback. After 5 seconds, we set the volume to -50dB.
+This example assumes that a [`RoomSession`][video-roomsession] is active and
+members are joining the room.
+
+```javascript
+import { SignalWire } from "@signalwire/realtime-api";
+
+// Initialize the SignalWire client
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" });
+
+// Access video client from the main client
+const videoClient = client.video;
+
+// Setup listener for when a room starts
+await videoClient.listen({
+  onRoomStarted: async (roomSession) => {
+    console.log("Room started", roomSession.displayName);
+
+    // play wait music
+    let roomPlayback = roomSession.play({
+      url: "https://cdn.signalwire.com/default-music/welcome.mp3",
+      listen: {
+        onStarted: () => {
+          console.log("Playback started");
+          setTimeout(() => {
+             roomPlayback.setVolume(-50);
+          }, 5000);
+        }
+      }
+    });
+    await roomSession.listen({
+      onMemberJoined: (member) => {
+        console.log("Member joined", member.name);
+      },
+      onMemberLeft: (member) => {
+        console.log("Member left", member.name);
+      },
+    });
+  },
+  onRoomEnded: async (roomSession) => {
+    console.log("Room ended", roomSession.displayName);
+  }
+})
+```
+
+---
+
+### stop
+
+▸ **stop**(): `Promise<void>`
+
+Stops the playback.
+
+#### Returns
+
+`Promise<void>`
+
+#### Example
+
+In this example, we wait for the [`RoomSession`][video-roomsession] to start,
+then we start a playback. After 5 seconds, we stop the playback.
+This example assumes that a [`RoomSession`][video-roomsession] is active and
+members are joining the room.
+
+```javascript
+import { SignalWire } from "@signalwire/realtime-api";
+
+// Initialize the SignalWire client
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" });
+
+// Access video client from the main client
+const videoClient = client.video;
+
+// Setup listener for when a room starts
+await videoClient.listen({
+  onRoomStarted: async (roomsession) => {
+
+    console.log("Room started", roomsession.displayName);
+
+    // Setup listener for when a room starts
+    await videoClient.listen({
+      onRoomStarted: async (roomSession) => {
+        console.log("Room started", roomSession.displayName);
+
+        // play wait music
+        let roomPlayback = roomSession.play({
+          url: "https://cdn.signalwire.com/default-music/welcome.mp3",
+          listen: {
+            onStarted: () => {
+              console.log("Playback started");
+            },
+            onEnded: () => {
+              console.log("Playback ended");
+            },
+            onUpdated: (playback) => {
+              console.log("Playback updated", playback);
+            },
+          }
+        });
+
+        // wait for 5 seconds then stop the playback
+        setTimeout(() => {
+          roomPlayback.stop();
+        }, 5000);
+
+        await roomSession.listen({
+          onMemberJoined: (member) => {
+            console.log("Member joined", member.name);
+          },
+          onMemberLeft: (member) => {
+            console.log("Member left", member.name);
+          },
+        });
+      },
+      onRoomEnded: async (roomSession) => {
+        console.log("Room ended", roomSession.displayName);
+      }
+    });
+  }
+});
+```
+
+## **Events**
+
+### onStarted
+
+▸ **RoomSessionPlayback**(`listen: {onStarted: Callback }`)
+
+Emitted when the playback starts.
+
+#### Parameters
+
+<ParamField path="playback" type="RoomSessionPlayback" required>
+  The playback that started. See [`RoomSessionPlayback`][video-roomsessionplayback].
+</ParamField>
+
+### onUpdated
+
+▸ **RoomSessionPlayback**(`listen: {onUpdated: Callback }`)
+
+Emitted when the playback is updated.
+
+#### Parameters
+
+<ParamField path="playback" type="RoomSessionPlayback" required>
+  The playback that updated. See [`RoomSessionPlayback`][video-roomsessionplayback].
+</ParamField>
+
+### onEnded
+
+▸ **RoomSessionPlayback**(`listen: {onEnded: Callback }`)
+
+Emitted when the playback ends.
+
+#### Parameters
+
+<ParamField path="playback" type="RoomSessionPlayback" required>
+  The playback that ended. See [`RoomSessionPlayback`][video-roomsessionplayback].
+</ParamField>

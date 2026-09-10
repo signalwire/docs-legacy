@@ -1,0 +1,443 @@
+---
+title: "Events"
+slug: /node/reference/video/room-session/events
+description: Events available on the RoomSession class.
+toc_max_heading_level: 3
+---
+
+[roomsession-41]: /docs/server-sdk/node/reference/video/room-session
+[roomsessionmember-28]: /docs/server-sdk/node/reference/video/room-session-member
+[roomsessionplayback-12]: /docs/server-sdk/node/reference/video/room-session-playback
+[roomsessionrecording-12]: /docs/server-sdk/node/reference/video/room-session-recording
+[roomsessionstream-8]: /docs/server-sdk/node/reference/video/room-session-stream
+[videoposition]: /docs/platform/video
+
+## Events
+
+### onRoomSubscribed
+
+- **RoomSession.listen**(`{ onRoomSubscribed: Callback }`)
+
+Emitted when the room session is subscribed too. Your event handler
+will be called with an instance of the [`RoomSession`][roomsession-41] object.
+
+#### Parameters
+
+<ParamField path="roomSession" type="RoomSession" required>
+  The room session object. See [`RoomSession`][roomsession-41].
+</ParamField>
+
+### onRoomStarted
+
+- **RoomSession.listen**(`{ onRoomStarted: Callback }`)
+
+<Tip>
+This event is emitted when the first participant joins the room.
+</Tip>
+
+Emitted when the room session is started.
+Your event handler will be called with an instance of the [`RoomSession`][roomsession-41] object.
+
+#### Parameters
+
+<ParamField path="roomSession" type="RoomSession" required>
+  The room session object. See [`RoomSession`][roomsession-41].
+</ParamField>
+
+### onRoomUpdated
+
+- **RoomSession.listen**(`{ onRoomUpdated: Callback }`)
+
+Emitted when the room session is updated. Your event handler
+will be called with an instance of the [`RoomSession`][roomsession-41] object.
+
+#### Parameters
+
+<ParamField path="roomSession" type="RoomSession" required>
+  The room session object. See [`RoomSession`][roomsession-41].
+</ParamField>
+
+### onRoomEnded
+
+- **RoomSession.listen**(`{ onRoomEnded: Callback }`)
+
+Emitted when the room session is ended. Your event handler
+will be called with an instance of the [`RoomSession`][roomsession-41] object.
+
+#### Parameters
+
+<ParamField path="roomSession" type="RoomSession" required>
+  The room session object. See [`RoomSession`][roomsession-41].
+</ParamField>
+
+### onRoomAudienceCount
+
+- **RoomSession.listen**(`{ onRoomAudienceCount: Callback }`)
+
+Emitted periodically, and when the audience count of the room changes. Your event handler
+will be called with an instance of the `VideoRoomAudienceCount` object.
+
+#### Parameters
+
+<ParamField path="params" type="object" required>
+  Object containing the event parameters.
+</ParamField>
+
+<Indent>
+<ParamField path="room_session_id" type="string" required>
+  ID of the room session.
+</ParamField>
+
+<ParamField path="room_id" type="string" required>
+  ID of the room.
+</ParamField>
+
+<ParamField path="total" type="number" required>
+  Total number of audience members.
+</ParamField>
+</Indent>
+
+### onLayoutChanged
+
+- **RoomSession.listen**(`{ onLayoutChanged: Callback }`)
+
+Emitted when the layout of the room changes. Your event handler
+will be called with an instance of the `VideoLayOutChanged` object.
+
+#### Parameters
+
+<ParamField path="params" type="object" required>
+  Object containing the event parameters.
+</ParamField>
+
+<Indent>
+<ParamField path="room_session_id" type="string" required>
+  ID of the room session.
+</ParamField>
+
+<ParamField path="room_id" type="string" required>
+  ID of the room.
+</ParamField>
+
+<ParamField path="layout" type="string" required>
+  Name of the new layout.
+</ParamField>
+</Indent>
+
+### onMemberJoined
+
+- **RoomSession.listen**(`{ onMemberJoined: Callback }`)
+
+<Tip>
+This event is only emitted when the room session has already been started.
+This means the first participant to join the room will not trigger this event.
+</Tip>
+
+Emitted when a member joins the room. Your event handler
+will be called with an instance of the [`RoomSessionMember`][roomsessionmember-28] object.
+
+#### Parameters
+
+<ParamField path="member" type="RoomSessionMember" required>
+  The member that joined. See [`RoomSessionMember`][roomsessionmember-28].
+</ParamField>
+
+### onMemberUpdated
+
+- **RoomSession.listen**(`{ onMemberUpdated: Callback }`)
+
+Emitted when a member in the room is updated. Your event handler
+will be called with an instance of the [`RoomSessionMember`][roomsessionmember-28] object.
+
+#### Parameters
+
+<ParamField path="member" type="RoomSessionMember" required>
+  The member that was updated. See [`RoomSessionMember`][roomsessionmember-28].
+</ParamField>
+
+### onMemberListUpdated
+
+- **RoomSession.listen**(`{ onMemberListUpdated: Callback }`)
+
+Emitted when the list of members in the room is updated. Your event handler
+will be called with an instance of the [`RoomSessionMember`][roomsessionmember-28] object.
+
+#### Parameters
+
+<ParamField path="member" type="RoomSessionMember" required>
+  The member list update. See [`RoomSessionMember`][roomsessionmember-28].
+</ParamField>
+
+### onMemberLeft
+
+- **RoomSession.listen**(`{ onMemberLeft: Callback }`)
+
+Emitted when a member leaves the room. Your event handler
+will be called with an instance of the [`RoomSessionMember`][roomsessionmember-28] object.
+
+#### Parameters
+
+<ParamField path="member" type="RoomSessionMember" required>
+  The member that left. See [`RoomSessionMember`][roomsessionmember-28].
+</ParamField>
+
+### onMemberDeaf
+
+- **RoomSession.listen**(`{ onMemberDeaf: Callback }`)
+
+Emitted when a member in the room deafens status changes. Your event handler
+will be called with an instance of the [`RoomSessionMember`][roomsessionmember-28] object.
+
+#### Parameters
+
+<ParamField path="member" type="RoomSessionMember" required>
+  The member whose deaf status changed. See [`RoomSessionMember`][roomsessionmember-28].
+</ParamField>
+
+### onMemberVisible
+
+- **RoomSession.listen**(`{ onMemberVisible: Callback }`)
+
+Emitted when a member in the room visibility changes. Your event handler
+will be called with an instance of the [`RoomSessionMember`][roomsessionmember-28] object.
+
+#### Parameters
+
+<ParamField path="member" type="RoomSessionMember" required>
+  The member whose visibility changed. See [`RoomSessionMember`][roomsessionmember-28].
+</ParamField>
+
+### onMemberAudioMuted
+
+- **RoomSession.listen**(`{ onMemberAudioMuted: Callback }`)
+
+Emitted when a member in the room audio state changes. Your event handler
+will be called with an instance of the [`RoomSessionMember`][roomsessionmember-28] object.
+
+#### Parameters
+
+<ParamField path="member" type="RoomSessionMember" required>
+  The member whose audio mute state changed. See [`RoomSessionMember`][roomsessionmember-28].
+</ParamField>
+
+### onMemberVideoMuted
+
+- **RoomSession.listen**(`{ onMemberVideoMuted: Callback }`)
+
+Emitted when a member in the room video state changes. Your event handler
+will be called with an instance of the [`RoomSessionMember`][roomsessionmember-28] object.
+
+#### Parameters
+
+<ParamField path="member" type="RoomSessionMember" required>
+  The member whose video mute state changed. See [`RoomSessionMember`][roomsessionmember-28].
+</ParamField>
+
+### onMemberInputVolume
+
+- **RoomSession.listen**(`{ onMemberInputVolume: Callback }`)
+
+Emitted when a member in the room input volume changes. Your event handler
+will be called with an instance of the [`RoomSessionMember`][roomsessionmember-28] object.
+
+#### Parameters
+
+<ParamField path="member" type="RoomSessionMember" required>
+  The member whose input volume changed. See [`RoomSessionMember`][roomsessionmember-28].
+</ParamField>
+
+### onMemberOutputVolume
+
+- **RoomSession.listen**(`{ onMemberOutputVolume: Callback }`)
+
+Emitted when a member in the room output volume changes. Your event handler
+will be called with an instance of the [`RoomSessionMember`][roomsessionmember-28] object.
+
+#### Parameters
+
+<ParamField path="member" type="RoomSessionMember" required>
+  The member whose output volume changed. See [`RoomSessionMember`][roomsessionmember-28].
+</ParamField>
+
+### onMemberInputSensitivity
+
+- **RoomSession.listen**(`{ onMemberInputSensitivity: Callback }`)
+
+Emitted when a member in the room input sensitivity changes. Your event handler
+will be called with an instance of the [`RoomSessionMember`][roomsessionmember-28] object.
+
+#### Parameters
+
+<ParamField path="member" type="RoomSessionMember" required>
+  The member whose input sensitivity changed. See [`RoomSessionMember`][roomsessionmember-28].
+</ParamField>
+
+### onMemberTalking
+
+- **RoomSession.listen**(`{ onMemberTalking: Callback }`)
+
+Emitted when a member in the room talking status changes. Your event handler
+will be called with an instance of the [`RoomSessionMember`][roomsessionmember-28] object.
+
+#### Parameters
+
+<ParamField path="member" type="RoomSessionMember" required>
+  The member whose talking status changed. See [`RoomSessionMember`][roomsessionmember-28].
+</ParamField>
+
+### onMemberTalkingStarted
+
+- **RoomSession.listen**(`{ onMemberTalkingStarted: Callback }`)
+
+Emitted when a member in the room starts talking. Your event handler
+will be called with an instance of the [`RoomSessionMember`][roomsessionmember-28] object.
+
+#### Parameters
+
+<ParamField path="member" type="RoomSessionMember" required>
+  The member who started talking. See [`RoomSessionMember`][roomsessionmember-28].
+</ParamField>
+
+### onMemberTalkingEnded
+
+• **RoomSession.listen**(`{ onMemberTalkingEnded: Callback }`)
+
+Emitted when a member in the room stops talking. Your event handler
+will be called with an instance of the [`RoomSessionMember`][roomsessionmember-28] object.
+
+#### Parameters
+
+<ParamField path="member" type="RoomSessionMember" required>
+  The member who stopped talking. See [`RoomSessionMember`][roomsessionmember-28].
+</ParamField>
+
+### onPlaybackStarted
+
+• **RoomSession.listen**(`{ onPlaybackStarted: Callback }`)
+
+Emitted when a playback starts in the room. Your event handler
+will be called with an instance of the [`RoomSessionPlayback`][roomsessionplayback-12] object.
+
+#### Parameters
+
+<ParamField path="playback" type="RoomSessionPlayback" required>
+  The playback that started. See [`RoomSessionPlayback`][roomsessionplayback-12].
+</ParamField>
+
+### onPlaybackUpdated
+
+- **RoomSession.listen**(`{ onPlaybackUpdated: Callback }`)
+
+Emitted when a playback in the room is updated. Your event handler
+will be called with an instance of the [`RoomSessionPlayback`][roomsessionplayback-12] object.
+
+#### Parameters
+
+<ParamField path="playback" type="RoomSessionPlayback" required>
+  The playback that was updated. See [`RoomSessionPlayback`][roomsessionplayback-12].
+</ParamField>
+
+### onPlaybackEnded
+
+- **RoomSession.listen**(`{ onPlaybackEnded: Callback }`)
+
+Emitted when a playback in the room ends. Your event handler
+will be called with an instance of the [`RoomSessionPlayback`][roomsessionplayback-12] object.
+
+#### Parameters
+
+<ParamField path="playback" type="RoomSessionPlayback" required>
+  The playback that ended. See [`RoomSessionPlayback`][roomsessionplayback-12].
+</ParamField>
+
+### onRecordingStarted
+
+- **RoomSession.listen**(`{ onRecordingStarted: Callback }`)
+
+Emitted when a recording starts in the room. Your event handler
+will be called with an instance of the [`RoomSessionRecording`][roomsessionrecording-12] object.
+
+#### Parameters
+
+<ParamField path="recording" type="RoomSessionRecording" required>
+  The recording that started. See [`RoomSessionRecording`][roomsessionrecording-12].
+</ParamField>
+
+### onRecordingUpdated
+
+- **RoomSession.listen**(`{ onRecordingUpdated: Callback }`)
+
+Emitted when a recording in the room is updated. Your event handler
+will be called with an instance of the [`RoomSessionRecording`][roomsessionrecording-12] object.
+
+#### Parameters
+
+<ParamField path="recording" type="RoomSessionRecording" required>
+  The recording that was updated. See [`RoomSessionRecording`][roomsessionrecording-12].
+</ParamField>
+
+### onRecordingEnded
+
+- **RoomSession.listen**(`{ onRecordingEnded: Callback }`)
+
+Emitted when a recording in the room ends. Your event handler
+will be called with an instance of the [`RoomSessionRecording`][roomsessionrecording-12] object.
+
+#### Parameters
+
+<ParamField path="recording" type="RoomSessionRecording" required>
+  The recording that ended. See [`RoomSessionRecording`][roomsessionrecording-12].
+</ParamField>
+
+### onStreamEnded
+
+- **RoomSession.listen**(`{ onStreamEnded: Callback }`)
+
+Emitted when a stream in the room ends. Your event handler
+will be called with an instance of the [`RoomSessionStream`][roomsessionstream-8] object.
+
+#### Parameters
+
+<ParamField path="stream" type="RoomSessionStream" required>
+  The stream that ended. See [`RoomSessionStream`][roomsessionstream-8].
+</ParamField>
+
+### onStreamStarted
+
+- **RoomSession.listen**(`{ onStreamStarted: Callback }`)
+
+Emitted when a stream starts in the room. Your event handler
+will be called with an instance of the [`RoomSessionStream`][roomsessionstream-8] object.
+
+#### Parameters
+
+<ParamField path="stream" type="RoomSessionStream" required>
+  The stream that started. See [`RoomSessionStream`][roomsessionstream-8].
+</ParamField>
+
+## **Alias Types**
+
+### VideoPositions
+
+▪ **VideoPositions**:  \[ **key**: `string`\]: [`VideoPosition`][videoposition]
+
+An object whose keys represent member IDs, and values the layout position to assign.
+Instead of a member ID, in some contexts you can use
+the special keyword `self` if you don't know yet the ID of the member which
+is going to be created.
+
+<ParamField path="auto" type="string">
+  The position of the member in the layout is determined automatically.
+</ParamField>
+
+<ParamField path="reserved-positionNumber" type="string">
+  The reserved position in the layout (e.g. `reserved-3`).
+</ParamField>
+
+<ParamField path="standard-positionNumber" type="string">
+  The standard position in the layout (e.g. `standard-3`).
+</ParamField>
+
+<ParamField path="off-canvas" type="string">
+  Assign the member off-canvas, outside the layout.
+</ParamField>

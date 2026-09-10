@@ -1,0 +1,4 @@
+# SWML configuration - generates JSON Schema
+extends: ../tspconfig.yaml
+emit:
+  - "@typespec/json-schema"

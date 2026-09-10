@@ -1,0 +1,22 @@
+---
+title: DialResult
+slug: /ruby/reference/calling/results/dial
+description: The DialResult object is returned when a call is dialed.
+toc_max_heading_level: 3
+---
+
+[call]: /docs/server-sdk/v2/ruby/reference/calling/call#dial
+[relay-calling-call]: /docs/server-sdk/v2/ruby/reference/calling
+[relay-event]: /docs/server-sdk/v2/ruby/reference/event
+
+# Relay::Calling::DialResult
+
+This object is returned by the [`dial`][call] method.
+
+## Properties
+
+| Property | Type | Description |
+| :------- | :--- | :---------- |
+| `successful` | Boolean | Whether the remote party has picked up your call. |
+| `event` | [Relay::Event][relay-event] | Last event that completed the operation. |
+| `call` | [Relay::Calling::Call][relay-calling-call] | Reference to the Call. |

@@ -1,0 +1,72 @@
+---
+slug: /compatibility-api/sdks/reference/faxes/update
+title: Update
+sidebar_label: Update
+toc_max_heading_level: 3
+---
+
+Use this endpoint for the Fax method to update the Status of a Fax.
+
+<EndpointSchemaSnippet endpoint="POST /Accounts/{AccountSid}/Faxes/{Sid}" />
+
+## Request examples
+
+In this example request, we update the Status of a Fax to `Canceled`.
+
+<CodeBlocks>
+
+```javascript title="Node.js"
+const { RestClient } = require('@signalwire/compatibility-api')
+const client = RestClient('YourProjectID', 'YourAuthToken', { signalwireSpaceUrl: 'example.signalwire.com' })
+
+client.fax.faxes('FaxSid')
+          .update({status: 'canceled'})
+          .then(fax => console.log(fax.to))
+          .done();
+```
+
+```csharp
+using System;
+using System.Collections.Generic;
+using Twilio;
+using Twilio.Rest.Fax.V1;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        TwilioClient.Init("YourProjectID", "YourAuthToken", new Dictionary<string, object> { ["signalwireSpaceUrl"] = "{SPACE}.signalwire.com" });
+
+        var fax = FaxResource.Update(
+            status: FaxResource.UpdateStatusEnum.Canceled,
+            pathSid: "FaxSid"
+        );
+
+        Console.WriteLine(fax.To);
+    }
+}
+```
+
+```python
+from signalwire.rest import Client as signalwire_client
+
+client = signalwire_client("YourProjectID", "YourAuthToken", signalwire_space_url = 'example.signalwire.com')
+
+fax = client.fax.faxes('FaxSid') \
+                .update(status='canceled')
+
+print(fax.to)
+```
+
+```ruby
+require 'signalwire/sdk'
+
+@client = Signalwire::REST::Client.new 'YourProjectID', 'YourAuthToken', signalwire_space_url: "example.signalwire.com"
+
+fax = @client.fax.faxes('FaxSid')
+                 .update(status: 'canceled')
+
+puts fax.to
+```
+
+</CodeBlocks>

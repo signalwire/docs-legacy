@@ -1,0 +1,608 @@
+---
+slug: /swml/reference/variables
+title: Variables
+description: Complete technical reference for SWML variable scopes and variable management.
+
+---
+
+SWML provides a powerful variable system that allows you to access call information, store data, and pass parameters between sections.
+This page is the authoritative technical reference for global variable scopes (`call`, `params`, `vars`, `envs`) and variable management in SWML.
+
+For information about using JavaScript expressions with variables, see the [Expressions Reference](/docs/swml/reference/expressions).
+For template transformation functions, see the [Template Functions Reference](/docs/swml/reference/template-functions).
+
+## Syntax
+
+SWML uses the `${variable}` syntax for variable substitution:
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - play:
+        url: 'say: This call is from the number ${call.from}'
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "play": {
+          "url": "say: This call is from the number ${call.from}"
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+## Reference {#variables-list}
+
+SWML provides several variable scopes that are available throughout your scripts. These scopes give you access to call information, script parameters, and stored data.
+
+<ParamField path="call" type="object">
+  Information about the current call. Contains the following properties. 
+  
+  **Scope:** Call-specific and read-only. Each call leg (A-leg, B-leg) has its own unique `call` object with different `call_id`, `from`, `to`, etc.
+   When connecting to a new leg, the `call` object is re-initialized with the new leg's data.
+</ParamField>
+
+  <Indent>
+
+    <ParamField path="call.call_id" type="string">
+      A unique identifier for the call.
+    </ParamField>
+
+    <ParamField path="call.call_state" type="string">
+      The current state of the call.
+    </ParamField>
+
+    <ParamField path="call.direction" type="string">
+      The direction of this call. Possible values: `inbound`, `outbound`
+    </ParamField>
+
+    <ParamField path="call.from" type="string">
+      The number/URI that initiated this call.
+    </ParamField>
+
+    <ParamField path="call.headers" type="object[]">
+      The headers associated with this call.
+    </ParamField>
+
+      <Indent>
+
+        <ParamField path="call.headers[].name" type="string">
+          The name of the header.
+        </ParamField>
+
+        <ParamField path="call.headers[].value" type="string">
+          The value of the header.
+        </ParamField>
+
+      </Indent>
+
+    <ParamField path="call.node_id" type="string">
+      A unique identifier for the node handling the call.
+    </ParamField>
+
+    <ParamField path="call.project_id" type="string">
+      The Project ID this call belongs to.
+    </ParamField>
+
+    <ParamField path="call.segment_id" type="string">
+      A unique identifier for the current call segment.
+    </ParamField>
+
+    <ParamField path="call.sip_data" type="object">
+      SIP-specific data for SIP calls. Only present when `call.type` is `sip`. Contains detailed SIP header information.
+    </ParamField>
+
+    <ParamField path="call.space_id" type="string">
+      The Space ID this call belongs to.
+    </ParamField>
+
+    <ParamField path="call.to" type="string">
+      The number/URI of the destination of this call.
+    </ParamField>
+
+    <ParamField path="call.type" type="string">
+      The type of call. Possible values: `sip`, `phone`, `webrtc`
+    </ParamField>
+
+  </Indent>
+
+<ParamField path="sip_data.sip_contact_host" type="string">
+  The host portion of the SIP Contact header.
+</ParamField>
+
+<ParamField path="sip_data.sip_contact_params" type="object">
+  Additional parameters from the SIP Contact header.
+</ParamField>
+
+<ParamField path="sip_data.sip_contact_port" type="string">
+  The port from the SIP Contact header.
+</ParamField>
+
+<ParamField path="sip_data.sip_contact_uri" type="string">
+  The full URI from the SIP Contact header.
+</ParamField>
+
+<ParamField path="sip_data.sip_contact_user" type="string">
+  The user portion of the SIP Contact header.
+</ParamField>
+
+<ParamField path="sip_data.sip_from_host" type="string">
+  The host portion of the SIP From header.
+</ParamField>
+
+<ParamField path="sip_data.sip_from_uri" type="string">
+  The full URI from the SIP From header.
+</ParamField>
+
+<ParamField path="sip_data.sip_from_user" type="string">
+  The user portion of the SIP From header.
+</ParamField>
+
+<ParamField path="sip_data.sip_req_host" type="string">
+  The host portion of the SIP request URI.
+</ParamField>
+
+<ParamField path="sip_data.sip_req_uri" type="string">
+  The full SIP request URI.
+</ParamField>
+
+<ParamField path="sip_data.sip_req_user" type="string">
+  The user portion of the SIP request URI.
+</ParamField>
+
+<ParamField path="sip_data.sip_to_host" type="string">
+  The host portion of the SIP To header.
+</ParamField>
+
+<ParamField path="sip_data.sip_to_uri" type="string">
+  The full URI from the SIP To header.
+</ParamField>
+
+<ParamField path="sip_data.sip_to_user" type="string">
+  The user portion of the SIP To header.
+</ParamField>
+
+<ParamField path="envs" type="object">
+  Environment variables configured at the account or project level in your SignalWire configuration. These provide access to account-wide settings and configuration values.
+  
+  <Warning>
+Coming soon!
+The `envs` object is included in POST request bodies to external servers, but the ability to set environment variables in the SignalWire Dashboard is not yet available in production. This feature is coming soon.
+</Warning>
+</ParamField>
+
+  **Scope:** Account/project-level and read-only. Set in your SignalWire account configuration, not within SWML scripts.
+
+  **Fallback behavior:** When you reference a variable without a scope prefix (e.g., `${my_variable}`), SWML first checks `vars`. If not found in `vars`, it automatically falls back to `envs`.
+
+  **Example keys:** `envs.api_key`, `envs.webhook_url`, `envs.account_setting`
+
+<ParamField path="params" type="object">
+  Parameters that are user-defined and set by the calling the [`execute`](/docs/swml/reference/execute) or [`transfer`](/docs/swml/reference/transfer) method.
+</ParamField>
+
+  **Scope:** Section-scoped and read-only. Each section has its own independent `params` that must be explicitly passed via `execute` or `transfer`. Params do not persist after a section completes.
+  When an `execute` call returns, the calling section's original params are restored.
+
+  **Example keys:** `params.audio_file`, `params.volume`, `params.department`
+
+<ParamField path="vars" type="object">
+  Script variables that can be set, modified, and accessed throughout your SWML script.
+</ParamField>
+
+  **Created by:**
+  - [`set`](/docs/swml/reference/set) method - Create or update user-defined variables
+  - Method outputs - Many methods automatically create variables (e.g., `prompt_value`, `record_url`, `return_value`)
+
+  **Managed with:**
+  - [`unset`](/docs/swml/reference/unset) method - Remove variables
+
+  **Example keys:** `vars.user_choice`, `vars.counter`, `vars.prompt_value`, `vars.record_url`
+
+  **Scope:** Global within a single call session. Variables persist across all sections and through `execute` calls.
+  However, connecting to a new leg of a call will reset the `vars` object to an empty state.
+
+  **Variable access:** Variables can be accessed with or without the `vars.` prefix.
+  When you reference a variable without a scope prefix (e.g., `${my_variable}`), SWML first checks `vars`. If not found in `vars`, it automatically falls back to `envs`.
+
+### Example: Variables in JSON format
+
+When SWML communicates with your SWML server, the following request body format is used to represent variables:
+
+```json
+{
+  "call": {
+    "call_id": "<CALL_UUID>",
+    "node_id": "<NODE_ID>",
+    "segment_id": "<SEGMENT_ID>",
+    "call_state": "created",
+    "direction": "inbound",
+    "type": "sip",
+    "from": "sip:user@example.com",
+    "to": "sip:destination@yourdomain.com",
+    "headers": [],
+    "sip_data": {
+      "sip_req_user": "destination",
+      "sip_req_uri": "destination@yourdomain.com",
+      "sip_req_host": "yourdomain.com",
+      "sip_from_user": "user",
+      "sip_from_uri": "user@example.com",
+      "sip_from_host": "example.com",
+      "sip_to_user": "destination",
+      "sip_to_uri": "destination@yourdomain.com",
+      "sip_to_host": "yourdomain.com",
+      "sip_contact_user": "user",
+      "sip_contact_port": "5060",
+      "sip_contact_uri": "user@192.168.1.100:5060",
+      "sip_contact_host": "192.168.1.100",
+      "sip_contact_params": {}
+    },
+    "project_id": "<YOUR PROJECT ID>",
+    "space_id": "<YOUR SPACE ID>"
+  },
+  "vars": {
+    "user_selection": "1"
+  },
+  "envs": {
+    "api_key": "<YOUR_API_KEY>",
+    "webhook_url": "https://example.com/webhook"
+  },
+  "params": {
+    "department": "sales"
+  }
+}
+```
+
+## Variables in serverless and server-based SWML
+
+All SWML variables (`call`, `params`, `vars`, `envs`) are available in both serverless (Dashboard-hosted) and server-based (external URL) deployments.
+
+### Serverless (dashboard-hosted) scripts
+
+When SWML is executed directly from the SignalWire Dashboard, access variables using the `${}` syntax:
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - set:
+        department: sales
+    - play:
+        url: 'say: You are calling from ${call.from}'
+    - play:
+        url: 'say: Department is ${vars.department}'
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "set": {
+          "department": "sales"
+        }
+      },
+      {
+        "play": {
+          "url": "say: You are calling from ${call.from}"
+        }
+      },
+      {
+        "play": {
+          "url": "say: Department is ${vars.department}"
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+### Server-based (external URL) scripts
+
+When SWML is served from your web server, SignalWire sends the current variable state as JSON in the POST request body (see the [JSON format example](#example-variables-in-json-format) above).
+
+You have two options for working with these variables in your SWML response:
+
+#### Option 1: Use variable expansion syntax
+
+Use `${}` syntax in your returned SWML, and SignalWire will substitute the values at runtime:
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - play:
+        url: 'say: Welcome to ${params.department}'
+    - play:
+        url: 'say: Calling from ${call.from}'
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "play": {
+          "url": "say: Welcome to ${params.department}"
+        }
+      },
+      {
+        "play": {
+          "url": "say: Calling from ${call.from}"
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+#### Option 2: Extract and insert values server-side
+
+Extract variables from the request body in your server code and insert them directly into the SWML response:
+
+```javascript
+// Example: Node.js/Express server
+app.post('/swml-handler', (req, res) => {
+  const { call, vars, envs, params } = req.body;
+
+  // Extract values from the request
+  const department = params.department || 'support';
+  const callerNumber = call.from;
+  const apiKey = envs.api_key;
+
+  // Build SWML with values inserted directly
+  const swml = {
+    version: '1.0.0',
+    sections: {
+      main: [
+        {
+          play: {
+            url: `say: Welcome to ${department}`
+          }
+        },
+        {
+          play: {
+            url: `say: Calling from ${callerNumber}`
+          }
+        }
+      ]
+    }
+  };
+
+  res.json(swml);
+});
+```
+
+Both approaches produce the same result. Use variable expansion (`${}`) for simpler cases, or extract values server-side when you need to perform logic or transformations on the data.
+
+See the [Deployment Guide](/docs/swml/guides/deployment) for complete server setup instructions.
+
+## Accessing variable data
+
+Variables can contain different types of data - simple values, nested objects, or arrays. Use dot notation (`.`) for object properties, bracket notation (`[]`) for array elements, or combine both for complex data structures.
+
+### Simple values
+
+Access variables directly by name:
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - set:
+        name: Alice
+        age: 30
+    - play:
+        url: 'say: Hello ${name}, you are ${age} years old'
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "set": {
+          "name": "Alice",
+          "age": 30
+        }
+      },
+      {
+        "play": {
+          "url": "say: Hello ${name}, you are ${age} years old"
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+### Nested objects
+
+Access nested properties using dot notation:
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - set:
+        user:
+          name: Alice
+          address:
+            city: Seattle
+            state: WA
+    - play:
+        url: 'say: ${user.name} lives in ${user.address.city}, ${user.address.state}'
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "set": {
+          "user": {
+            "name": "Alice",
+            "address": {
+              "city": "Seattle",
+              "state": "WA"
+            }
+          }
+        }
+      },
+      {
+        "play": {
+          "url": "say: ${user.name} lives in ${user.address.city}, ${user.address.state}"
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+### Arrays
+
+Access array elements using bracket notation with zero-based indexing:
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - set:
+        departments:
+          - Sales
+          - Support
+          - Engineering
+    - play:
+        url: 'say: First department is ${departments[0]}'
+    - play:
+        url: 'say: Second department is ${departments[1]}'
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "set": {
+          "departments": [
+            "Sales",
+            "Support",
+            "Engineering"
+          ]
+        }
+      },
+      {
+        "play": {
+          "url": "say: First department is ${departments[0]}"
+        }
+      },
+      {
+        "play": {
+          "url": "say: Second department is ${departments[1]}"
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+### Arrays of objects
+
+Combine bracket and dot notation to access properties in array elements:
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - set:
+        employees:
+          - name: Alice
+            role: Engineer
+          - name: Bob
+            role: Manager
+    - play:
+        url: 'say: ${employees[0].name} is an ${employees[0].role}'
+    - play:
+        url: 'say: ${employees[1].name} is a ${employees[1].role}'
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "set": {
+          "employees": [
+            {
+              "name": "Alice",
+              "role": "Engineer"
+            },
+            {
+              "name": "Bob",
+              "role": "Manager"
+            }
+          ]
+        }
+      },
+      {
+        "play": {
+          "url": "say: ${employees[0].name} is an ${employees[0].role}"
+        }
+      },
+      {
+        "play": {
+          "url": "say: ${employees[1].name} is a ${employees[1].role}"
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>

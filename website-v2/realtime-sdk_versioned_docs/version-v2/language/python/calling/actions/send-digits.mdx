@@ -1,0 +1,23 @@
+---
+title: Relay.Calling.SendDigitsAction
+slug: /python/reference/calling/actions/send-digits
+description: The Send Digits Action is used to send digits to a call.
+toc_max_heading_level: 3
+---
+
+[relay-calling-senddigitsresult]: /docs/server-sdk/v2/python/reference/calling/call#send_digits_async
+[send-digits-async]: /docs/server-sdk/v2/python/reference/calling/call#send_digits_async
+
+## Relay.Calling.SendDigitsAction
+
+This object is returned by the [`send_digits_async`][send-digits-async] method and represents a _send digits_ action currently active on a call.
+
+### Properties
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `result` | [`Relay.Calling.SendDigitsResult`][relay-calling-senddigitsresult] | Final result of the action. |
+| `state` | string | Current state of the action. |
+| `completed` | boolean | Whether the action has finished. |
+| `payload` | dict | Payload sent to Relay to start the action. |
+| `control_id` | string | UUID to identify the action. |

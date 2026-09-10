@@ -1,0 +1,29 @@
+---
+slug: /compatibility-api/sdks/reference/media
+title: Media
+sidebar_label: Media
+toc_max_heading_level: 3
+---
+
+The **Media** object represents a single attachment or media file that is associated with a [Message](/docs/platform/messaging).
+
+To simplify sharing of the media files with external applications, the URLs to the files themselves are made publicly accessible. These URLs are random, long and hard to guess, so the contents of the media should stay private unless you choose to distribute the URL. This means that these URLS can be included in any web application to access the files without needing your credentials.
+
+A media object is created when an incoming message is received, or an outgoing message is created, that contain one or more attachments.
+
+## Properties
+
+<Schema type="MessageMedia" />
+
+## Example object
+
+<SchemaSnippet type="MessageMedia" title="The Media Object" />
+
+## Media size restrictions
+
+All messages, both incoming and outgoing, are limited to 5 MB of associated media files.
+
+Incoming messages with more than 5 MB of media are not accepted.
+
+Outgoing messages are allowed a maximum of 10 Media files. 
+If the total size of all Media is greater than 5 MB, the message will return an error code.

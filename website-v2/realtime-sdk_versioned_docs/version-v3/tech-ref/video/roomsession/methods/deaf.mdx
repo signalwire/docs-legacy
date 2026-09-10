@@ -1,0 +1,34 @@
+---
+title: "deaf"
+slug: /node/reference/video/room-session/deaf
+description: deaf method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+[video-roomsession-1]: /docs/server-sdk/v3/node/reference/video/room-session/audio-unmute
+
+### deaf
+
+- **deaf**(`params`): `Promise<void>`
+
+Mutes the incoming audio for a given member. The affected participant will not hear audio from the other participants anymore.
+
+Note that in addition to making a participant deaf, this will also automatically mute the microphone of the target participant. If you want, you can then manually unmute it by calling [audioUnmute][video-roomsession-1].
+
+#### Parameters
+
+| Name              | Type     | Description                 |
+|:------------------|:---------|:----------------------------|
+| `params`          | `Object` | -                           |
+| `params.memberId` | `string` | Id of the member to affect. |
+
+#### Returns
+
+`Promise<void>`
+
+#### Example
+
+```typescript
+const id = "de550c0c-3fac-4efd-b06f-b5b8614b8966"; // you can get this from getMembers()
+await roomSession.deaf({ memberId: id });
+```

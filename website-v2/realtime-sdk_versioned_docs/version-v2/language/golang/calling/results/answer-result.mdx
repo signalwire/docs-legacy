@@ -1,0 +1,32 @@
+---
+title: Relay.Calling.AnswerResult
+slug: /go/reference/calling/results/answer
+description: The result object that is returned when answering a call.
+toc_max_heading_level: 3
+---
+
+[link]: /docs/server-sdk/v2/go/reference/calling/call#answer
+
+## Relay.Calling.AnswerResult
+
+This object returned from the [`answer`][link] method.
+
+## Methods-submenu
+
+### GetSuccessful
+
+Return `true` if the answer has succeeded, `false` otherwise.
+
+**Parameters**
+
+_None_
+
+```go
+ resultAnswer := call.Answer()
+  if !resultAnswer.Successful {
+   if err := consumer.Stop(); err != nil {
+     log.Errorf("Error occurred while trying to stop Consumer")
+   }
+  return
+ }
+```

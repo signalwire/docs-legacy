@@ -1,0 +1,94 @@
+---
+title: "Task"
+sidebar_label: Overview
+sidebar_position: 0
+slug: /node/reference/task
+description: Access the Task API for inter-application communication. Send and receive tasks between different applications using topics for routing.
+toc_max_heading_level: 3
+---
+
+[task-client-2]: /docs/server-sdk/v3/node/reference/task/client
+[task-client]: /docs/server-sdk/v3/node/reference/task/client/events
+
+Access the Task API. You can instantiate a [Task.Client][task-client-2] to receive tasks from a different application. Please check [Task Events][task-client] for the full list of events that a [Task.Client][task-client-2] can subscribe to.
+
+#### Example
+
+The following example listens for incoming tasks.
+
+```javascript
+import { Task } from "@signalwire/realtime-api";
+
+const client = new Task.Client({
+  project: "<project-id>",
+  token: "<api-token>",
+  topics: ["office"],
+});
+
+client.on("task.received", (payload) => {
+  console.log("Task Received", payload);
+  // Do something with the payload...
+});
+```
+
+From a different process, even on a different machine, you can then send tasks:
+
+```js
+import { Task } from "@signalwire/realtime-api";
+
+await Task.send({
+  project: "<project-id>",
+  token: "<api-token>",
+  topic: "office",
+  message: { hello: ["world", true] }
+});
+```
+
+## Classes
+
+<CardGroup cols={2}>
+  <Card title="Client" icon="fa-solid fa-server" href="/docs/server-sdk/v3/node/reference/task/client">
+    The main Task client for sending and receiving tasks between applications using topic-based routing.
+  </Card>
+</CardGroup>
+
+## Functions
+
+### send
+
+- `Const` **send**(`params`): `Promise<void>`
+
+Send a job to your Task Client in a specific topic.
+
+#### Parameters
+
+| Name             | Type                      | Description                                                         |
+|:-----------------|:--------------------------|:--------------------------------------------------------------------|
+| `params`         | `Object`                  | -                                                                   |
+| `params.topic`   | `string`                  | Topic to send the task to. Previously known as `"context"`.         |
+| `params.message` | `Record<string, unknown>` | Message to send.                                                    |
+| `params.project` | `string`                  | SignalWire project id, e.g. `a10d8a9f-2166-4e82-56ff-118bc3a4840f`. |
+| `params.token`   | `string`                  | SignalWire project token, e.g. `PT9e5660c101...a360079c9`.          |
+
+#### Returns
+
+`Promise<void>`
+
+#### Example
+
+Sending a task with a message to then make an outbound Call. Please note that the call is _not_ performed automatically: your [Task.Client][task-client-2] gives you back your payload, which you should interpret by your own custom logic.
+
+```js
+const message = {
+  'action': 'call',
+  'from': '+18881112222',
+  'to': '+18881113333'
+}
+
+await Task.send({
+  project: "<project-id>",
+  token: "<api-token>",
+  topic: 'office',
+  message: message
+})
+```

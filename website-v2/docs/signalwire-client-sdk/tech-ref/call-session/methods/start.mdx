@@ -1,0 +1,127 @@
+---
+title: start
+slug: /call-session/start
+---
+
+Initiates the WebRTC connection and joins the call session.
+
+## Signature
+
+```typescript
+start(): Promise<void>
+```
+
+## Parameters
+
+None
+
+## Returns
+
+**Type:** `Promise<void>`
+
+**Resolves:** When the call has successfully joined (after `room.subscribed` event fires)
+
+**Rejects:** If the call fails to start or is destroyed before joining
+
+## Important Notes
+
+**Automatic Invocation:**
+
+In most use cases, you don't need to call `start()` manually. The SDK automatically calls it when:
+- You provide `listen` parameter to `client.dial()`
+- You provide `listen` parameter to `client.reattach()`
+
+**What it does:**
+1. Initiates the WebRTC connection
+2. Sends the appropriate signaling message (invite for outbound, answer for inbound)
+3. Waits for the `room.subscribed` event confirming you've joined
+4. Resolves when the call is successfully established
+
+**Lifecycle Events:**
+
+`start()` waits for specific events to complete:
+- **Success:** Resolves when `room.subscribed` event fires
+- **Failure:** Rejects if `destroy` event fires before joining
+
+**Call Only Once:**
+
+Do not call `start()` multiple times on the same `CallSession` object. It should only be invoked once per call session.
+
+## Events
+
+During the `start()` process, the following events may be emitted:
+
+- `room.subscribed` - Fires when successfully joined (causes `start()` to resolve)
+- `destroy` - Fires if the call fails to start (causes `start()` to reject)
+- Connection state events: `connecting`, `connected`, etc.
+
+## Examples
+
+### Automatic usage (recommended)
+
+When you provide event listeners to `dial()`, the SDK automatically calls `start()`:
+
+```typescript
+// The SDK calls start() automatically when you provide listeners
+const call = await client.dial({
+  to: 'user@example.com',
+  listen: {
+    onCallJoined: () => console.log('Call joined!')
+  }
+})
+
+// Call is already started and joined at this point
+console.log('Call is active:', call.memberId)
+```
+
+### Manual usage (advanced)
+
+In advanced scenarios where you need explicit control:
+
+```typescript
+// Get the call session without starting it
+const callSession = buildOutboundCall({ to: 'user@example.com' })
+
+// Set up event listeners first
+callSession.on('room.subscribed', () => {
+  console.log('Successfully joined the call')
+})
+
+callSession.on('destroy', () => {
+  console.log('Call failed to start')
+})
+
+// Now manually start the call
+try {
+  await callSession.start()
+  console.log('Call started successfully')
+} catch (error) {
+  console.error('Failed to start call:', error)
+}
+```
+
+### With error handling
+
+```typescript
+try {
+  await call.start()
+  console.log('Call connected successfully')
+} catch (error) {
+  console.error('Call failed to start:', error.message)
+  // Handle failure - call may have been destroyed
+}
+```
+
+### Listening for lifecycle events
+
+```typescript
+call.on('room.subscribed', (params) => {
+  console.log('Joined call:', params.call_id)
+})
+
+call.on('destroy', () => {
+  console.log('Call was destroyed before joining')
+})
+
+await call.start()
+```

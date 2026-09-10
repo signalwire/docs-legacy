@@ -1,0 +1,71 @@
+---
+slug: /compatibility-api/sdks/reference/media/delete
+title: Delete
+sidebar_label: Delete
+toc_max_heading_level: 3
+---
+
+Use this endpoint for the Media method to delete a media instance from your Project so it no longer appears in the Dashboard or on the API.
+
+<EndpointSchemaSnippet endpoint="DELETE /Accounts/{AccountSid}/Messages/{MessageSid}/Media/{Sid}" selector="request" />
+
+## Request examples
+
+<CodeBlocks>
+
+```javascript title="Node.js"
+const { RestClient } = require('@signalwire/compatibility-api')
+const client = RestClient('YourProjectID', 'YourAuthToken', { signalwireSpaceUrl: 'example.signalwire.com' })
+
+client.messages('MessageSid')
+      .media('MediaSid')
+      .remove()
+      .then(media => console.log(media.sid))
+      .done();
+```
+
+```csharp
+using System;
+using System.Collections.Generic;
+using Twilio;
+using Twilio.Rest.Api.V2010.Account.Message;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        TwilioClient.Init("YourProjectID", "YourAuthToken", new Dictionary<string, object> { ["signalwireSpaceUrl"] = "{SPACE}.signalwire.com" });
+
+        MediaResource.Delete(
+            pathMessageSid: "MessageSid",
+            pathSid: "MediaSid"
+        );
+    }
+}
+```
+
+```python
+from signalwire.rest import Client as signalwire_client
+
+client = signalwire_client("YourProjectID", "YourAuthToken", signalwire_space_url = 'example.signalwire.com')
+
+client.messages('MessageSid') \
+      .media('MediaSid') \
+      .delete()
+```
+
+```ruby
+require 'signalwire/sdk'
+
+@client = Signalwire::REST::Client.new 'YourProjectID', 'YourAuthToken', signalwire_space_url: "example.signalwire.com"
+
+@client.messages('MessageSid')
+       .media('MediaSid')
+       .delete
+```
+
+</CodeBlocks>
+
+## Response
+
+A successful request returns a 204 status code with no body.

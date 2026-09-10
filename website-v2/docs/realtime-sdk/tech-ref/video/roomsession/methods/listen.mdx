@@ -1,0 +1,60 @@
+---
+title: "listen"
+slug: /node/reference/video/room-session/listen
+description: listen method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+[link-2]: /docs/server-sdk/node/reference/video/room-session/events
+[roomsession-41]: /docs/server-sdk/node/reference/video/room-session
+
+### listen
+
+- **listen**(`{ event: Callback }`): `Promise`\<[`RoomSession Events`][link-2]>
+
+Enables listening for events on this room session.
+
+#### Parameters
+
+<ParamField path="params" type="object" required>
+  Object containing the parameters of the method.
+</ParamField>
+
+<Indent>
+<ParamField path="topics" type="object[]">
+  List of topics to listen to.
+</ParamField>
+
+<ParamField path="EVENT" type="Callback" required>
+  The event to listen to. List of events can be found [here][link-2]. Example event: `onRoomStarted`.
+</ParamField>
+</Indent>
+
+#### Returns
+
+`Promise`\<[`RoomSession Events`][link-2]>
+
+Emits events for the specified event. See [RoomSession Events][link-2] for a list of valid events and their return types.
+
+#### Example
+
+In this example, we wait for a room ton start and then log the room's name. This example assumes that there is a [`RoomSession`][roomsession-41]
+already active and that members are joining the room.
+
+```javascript
+import { SignalWire } from "@signalwire/realtime-api";
+
+// Initialize the SignalWire client
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+// Access the video client from the main client
+const videoClient = client.video;
+
+// Setup listener for when a room starts
+await videoClient.listen({
+    onRoomStarted: async (roomsession) => {
+        console.log("Room Started", roomsession.displayName);
+    }
+  }
+);
+```

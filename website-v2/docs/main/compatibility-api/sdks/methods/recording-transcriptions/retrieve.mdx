@@ -1,0 +1,64 @@
+---
+slug: /compatibility-api/sdks/reference/recording-transcriptions/retrieve
+title: Retrieve
+sidebar_label: Retrieve
+toc_max_heading_level: 3
+---
+
+Use this endpoint for the Recording Transcriptions method to retrieve a single recording transcription.
+
+<EndpointSchemaSnippet endpoint="GET /Accounts/{AccountSid}/Transcriptions/{Sid}" />
+
+## Request examples
+
+<CodeBlocks>
+```javascript title="Node.js"
+const { RestClient } = require('@signalwire/compatibility-api')
+const client = RestClient('YourProjectID', 'YourAuthToken', { signalwireSpaceUrl: 'example.signalwire.com' })
+
+client.transcriptions('Sid')
+      .fetch()
+      .then(transcription => console.log(transcription.dateCreated))
+      .done();
+```
+```csharp
+using System;
+using System.Collections.Generic;
+using Twilio;
+using Twilio.Rest.Api.V2010.Account;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        TwilioClient.Init("YourProjectID", "YourAuthToken", new Dictionary<string, object> { ["signalwireSpaceUrl"] = "{SPACE}.signalwire.com" });
+
+        var transcription = TranscriptionResource.Fetch(
+            pathSid: "Sid"
+        );
+
+        Console.WriteLine(transcription.DateCreated);
+    }
+}
+```
+```python
+from signalwire.rest import Client as signalwire_client
+
+client = signalwire_client("YourProjectID", "YourAuthToken", signalwire_space_url = 'example.signalwire.com')
+
+transcription = client.transcriptions('Sid') \
+                      .fetch()
+
+print(transcription.date_created)
+```
+```ruby
+require 'signalwire/sdk'
+
+@client = Signalwire::REST::Client.new 'YourProjectID', 'YourAuthToken', signalwire_space_url: "example.signalwire.com"
+
+transcription = @client.transcriptions('Sid')
+                       .fetch
+
+puts transcription.date_created
+```
+</CodeBlocks>

@@ -1,0 +1,266 @@
+---
+title: "Cgi Mode"
+sidebar_label: "Cgi Mode"
+slug: /python/guides/cgi-mode
+toc_max_heading_level: 3
+---
+
+## CGI Mode
+
+Deploy agents as CGI scripts on traditional web servers like Apache or nginx. The SDK automatically detects CGI environments and handles requests appropriately.
+
+### CGI Overview
+
+CGI (Common Gateway Interface) allows web servers to execute scripts and return their output as HTTP responses.
+
+**Benefits:**
+- Works with shared hosting
+- Simple deployment - just upload files
+- No separate process management
+- Compatible with Apache, nginx
+
+**Drawbacks:**
+- New process per request (slower)
+- No persistent connections
+- Limited scalability
+
+### CGI Detection
+
+The SDK detects CGI mode via the `GATEWAY_INTERFACE` environment variable:
+
+```python
+## Automatic detection
+if os.getenv('GATEWAY_INTERFACE'):
+    # CGI mode detected
+    mode = 'cgi'
+```
+
+### Basic CGI Script
+
+```python
+#!/usr/bin/env python3
+## agent.py - Basic CGI agent script
+from signalwire_agents import AgentBase
+
+
+class MyAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="my-agent")
+        self.add_language("English", "en-US", "rime.spore")
+        self.prompt_add_section("Role", "You are a helpful assistant.")
+
+
+if __name__ == "__main__":
+    agent = MyAgent()
+    agent.run()  # Automatically detects CGI mode
+```
+
+Make it executable:
+
+```bash
+chmod +x agent.py
+```
+
+### CGI Request Flow
+
+<Frame caption="CGI Request Flow">
+  <img className="diagram" src={require("@image/agents-sdk-manual/07_05_cgi-mode_diagram1.webp").default} alt="CGI Request Flow." />
+</Frame>
+
+### Apache Configuration
+
+#### Enable CGI
+
+```apache
+## Enable CGI module
+LoadModule cgi_module modules/mod_cgi.so
+
+## Configure CGI directory
+<Directory "/var/www/cgi-bin">
+    Options +ExecCGI
+    AddHandler cgi-script .py
+    Require all granted
+</Directory>
+```
+
+#### Virtual Host Configuration
+
+```apache
+<VirtualHost *:443>
+    ServerName agent.example.com
+
+    SSLEngine on
+    SSLCertificateFile /etc/ssl/certs/agent.crt
+    SSLCertificateKeyFile /etc/ssl/private/agent.key
+
+    ScriptAlias / /var/www/cgi-bin/agent.py
+
+    <Directory "/var/www/cgi-bin">
+        Options +ExecCGI
+        SetHandler cgi-script
+        Require all granted
+    </Directory>
+
+    # Set environment variables
+    SetEnv SWML_BASIC_AUTH_USER "myuser"
+    SetEnv SWML_BASIC_AUTH_PASSWORD "mypassword"
+</VirtualHost>
+```
+
+### nginx Configuration
+
+nginx doesn't natively support CGI, but you can use FastCGI with `fcgiwrap`:
+
+```nginx
+server {
+    listen 443 ssl;
+    server_name agent.example.com;
+
+    ssl_certificate /etc/ssl/certs/agent.crt;
+    ssl_certificate_key /etc/ssl/private/agent.key;
+
+    location / {
+        fastcgi_pass unix:/var/run/fcgiwrap.socket;
+        fastcgi_param SCRIPT_FILENAME /var/www/cgi-bin/agent.py;
+        fastcgi_param GATEWAY_INTERFACE CGI/1.1;
+        fastcgi_param PATH_INFO $uri;
+        fastcgi_param SWML_BASIC_AUTH_USER "myuser";
+        fastcgi_param SWML_BASIC_AUTH_PASSWORD "mypassword";
+        include fastcgi_params;
+    }
+}
+```
+
+### CGI Host Configuration
+
+In CGI mode, the SDK needs to know the external hostname for generating URLs:
+
+```bash
+## Using swaig-test to simulate CGI mode
+swaig-test my_agent.py --simulate-serverless cgi --cgi-host agent.example.com
+```
+
+Or set environment variable:
+
+```apache
+SetEnv SWML_PROXY_URL_BASE "https://agent.example.com"
+```
+
+### Testing CGI Locally
+
+Use `swaig-test` to simulate CGI environment:
+
+```bash
+## Test SWML generation in CGI mode
+swaig-test my_agent.py --simulate-serverless cgi --dump-swml
+
+## With custom host
+swaig-test my_agent.py --simulate-serverless cgi --cgi-host mysite.com --dump-swml
+
+## Test a function
+swaig-test my_agent.py --simulate-serverless cgi --exec function_name --param value
+```
+
+### Authentication in CGI Mode
+
+The SDK checks basic auth in CGI mode:
+
+```python
+## Authentication is automatic when these are set
+## SWML_BASIC_AUTH_USER
+## SWML_BASIC_AUTH_PASSWORD
+
+## The SDK reads Authorization header and validates
+```
+
+If authentication fails, returns 401 with WWW-Authenticate header.
+
+### Directory Structure
+
+<Files>
+  <Folder name="/var/www/cgi-bin" defaultOpen>
+    <File name="agent.py" comment="Main CGI script" />
+    <File name="requirements.txt" comment="Dependencies" />
+    <Folder name="venv" comment="Virtual environment (optional)" />
+  </Folder>
+</Files>
+
+### Shared Hosting Deployment
+
+For shared hosting where you can't install system packages:
+
+```python
+#!/usr/bin/env python3
+## agent_shared.py - CGI agent for shared hosting
+import sys
+import os
+
+## Add local packages directory
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'packages'))
+
+from signalwire_agents import AgentBase
+
+
+class MyAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="my-agent")
+        self.add_language("English", "en-US", "rime.spore")
+
+
+if __name__ == "__main__":
+    agent = MyAgent()
+    agent.run()
+```
+
+Install packages locally:
+
+```bash
+pip install --target=./packages signalwire-agents
+```
+
+### CGI Best Practices
+
+#### Performance
+- Keep imports minimal - each request starts fresh
+- Consider FastCGI for better performance
+- Cache what you can (but remember process dies)
+
+#### Security
+- Set proper file permissions (750 or 755)
+- Don't expose .py files directly if possible
+- Use HTTPS always
+- Set auth credentials as environment variables
+
+#### Debugging
+- Check web server error logs
+- Verify shebang line (#!/usr/bin/env python3)
+- Test script from command line first
+- Ensure proper line endings (LF, not CRLF)
+
+### Common CGI Issues
+
+| Issue | Solution |
+|-------|----------|
+| 500 Internal Server Error | Check error logs, verify permissions |
+| Permission denied | `chmod +x agent.py` |
+| Module not found | Check `sys.path`, install dependencies |
+| Wrong Python version | Update shebang to correct Python |
+| Malformed headers | Ensure proper Content-Type output |
+| Timeout | Optimize code, increase server timeout |
+
+### Migration from CGI
+
+When you outgrow CGI:
+
+#### CGI → FastCGI
+Keep same code, use fcgiwrap or gunicorn. Better performance, persistent processes.
+
+#### CGI → Server Mode
+Same code works - just run differently (`python agent.py` instead of CGI). Add systemd service, nginx reverse proxy.
+
+#### CGI → Serverless
+Same code works with minor changes. Add Lambda handler wrapper. Deploy to AWS/GCP/Azure.
+
+
+
+

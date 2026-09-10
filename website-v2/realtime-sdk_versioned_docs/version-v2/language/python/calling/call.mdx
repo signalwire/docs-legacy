@@ -1,0 +1,1504 @@
+---
+title: Relay.Calling.Call
+slug: /python/reference/calling/call
+toc_max_heading_level: 3
+---
+
+[link-10]: #play_audio
+[link-11]: #play_silence
+[link-12]: #play_tts
+[link-13]: #play
+[link-14]: #ringtones
+[link-15]: #play_ringtone
+[link-16]: #prompt_audio
+[link-17]: #prompt_tts
+[link-18]: #prompt_ringtone
+[link-19]: #prompt
+[link-1]: #detect_answering_machine
+[link-20]: #record
+[link-21]: #send_digits
+[link-22]: #tap
+[link-23]: #wait_for
+[link-2]: #detect_answering_machine_async
+[link-3]: #connect
+[link-4]: #detect_digit
+[link-5]: #detect_fax
+[link-6]: #detect
+[link-7]: #fax_receive
+[link-8]: #fax_send
+[link-9]: #events
+[link]: #state-events
+[relay-calling-answerresult]: /docs/server-sdk/v2/python/reference/calling/results/answer
+[relay-calling-connectaction]: /docs/server-sdk/v2/python/reference/calling/actions/connect
+[relay-calling-connectresult]: /docs/server-sdk/v2/python/reference/calling/results/connect
+[relay-calling-detectaction]: /docs/server-sdk/v2/python/reference/calling/actions/detect
+[relay-calling-detectresult]: /docs/server-sdk/v2/python/reference/calling/results/detect
+[relay-calling-dialresult]: /docs/server-sdk/v2/python/reference/calling/results/dial
+[relay-calling-faxaction]: /docs/server-sdk/v2/python/reference/calling/actions/fax
+[relay-calling-faxresult]: /docs/server-sdk/v2/python/reference/calling/results/fax
+[relay-calling-hangupresult]: /docs/server-sdk/v2/python/reference/calling/results/hangup
+[relay-calling-playaction]: /docs/server-sdk/v2/python/reference/calling/actions/play
+[relay-calling-playresult]: /docs/server-sdk/v2/python/reference/calling/results/play
+[relay-calling-promptaction]: /docs/server-sdk/v2/python/reference/calling/actions/prompt
+[relay-calling-promptresult]: /docs/server-sdk/v2/python/reference/calling/results/prompt
+[relay-calling-recordaction]: /docs/server-sdk/v2/python/reference/calling/actions/record
+[relay-calling-recordresult]: /docs/server-sdk/v2/python/reference/calling/results/record
+[relay-calling-senddigitsaction]: /docs/server-sdk/v2/python/reference/calling/actions/send-digits
+[relay-calling-senddigitsresult]: /docs/server-sdk/v2/python/reference/calling/results/send-digits
+[relay-calling-tapaction]: /docs/server-sdk/v2/python/reference/calling/actions/tap
+[relay-calling-tapresult]: /docs/server-sdk/v2/python/reference/calling/results/tap
+
+## Relay.Calling.Call
+
+All calls in SignalWire have a common generic interface, `Call`. A `Call` is a connection between SignalWire and another device.
+
+## Properties
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `id` | `string` | The unique identifier of the call. |
+| `call_type` | `string` | The type of call. Only `phone` is currently supported. |
+| `from_number` | `string` | The phone number that the call is coming from. |
+| `to_number` | `string` | The phone number you are attempting to call. |
+| `timeout` | `number` | The seconds the call rings before being transferred to voicemail. |
+| `state` | `string` | The current state of the call. See [Relay.Calling.Call State Events][link] for all the possible call states. |
+| `prev_state` | `string` | The previous state of the call. |
+| `context` | `string` | The context the call belongs to. |
+| `active` | `boolean` | Whether the call is active. |
+| `ended` | `boolean` | Whether the call has ended. |
+| `answered` | `boolean` | Whether the call has been answered. |
+| `failed` | `boolean` | Whether the call has failed. |
+| `busy` | `boolean` | Whether the call was busy. |
+
+## Methods
+
+### amd
+
+Alias for [`detect_answering_machine`][link-1].
+
+### amd_async
+
+Alias for [`detect_answering_machine_async`][link-2].
+
+### answer
+
+Answer an inbound call.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`coroutine` - Coroutine that will return a [`Relay.Calling.AnswerResult`][relay-calling-answerresult] object.
+
+**Examples**
+
+Answer an inbound call and check if it was successful:
+
+```python
+result = await call.answer()
+if result.successful:
+  print('Call answered..')
+else:
+  print('Call failed or not answered.')
+```
+
+### connect
+
+Attempt to connect an existing call to a new outbound call and waits until one of the remote party picks the call or the connect fails.  
+This method involves complex nested parameters. You can connect to multiple devices in series, parallel, or any combination of both with creative use of the parameters. Series implies one device at a time, while parallel implies multiple devices at the same time.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `device_list` | `list` | **required** | List or nested list of _dict_ with the following structure:<br/>_Nested depends on whether to dial in serial or parallel._ |
+| `call_type` | `string` | **optional** | The device type. Only `phone` is currently supported and is the default. |
+| `from_number` | `string` | **optional** | The party the call is coming from. <br/>_If not provided, the SDK will use the `from_number` of the originator call.<br/>Must be a SignalWire number or SIP endpoint that you own._ |
+| `to_number` | `string` | **required** | The party you are attempting to connect with. |
+| `timeout` | `number` | **optional** | The time, in seconds, the call will ring before going to voicemail. |
+
+**Returns**
+
+`coroutine` - Coroutine that will return a [`Relay.Calling.ConnectResult`][relay-calling-connectresult] object.
+
+**Examples**
+
+Trying to connect a call by calling in series `+18991114444` and `+18991114445`:
+
+```python
+devices = [
+  { 'to_number': '+18991114444', 'timeout': 10 },
+  { 'to_number': '+18991114445', 'timeout': 20 }
+]
+result = await call.connect(device_list=devices)
+if result.successful:
+  # result.call is the remote leg connected with yours
+  remote_call = result.call
+```
+
+Combine serial and parallel calling. Call `+18991114443` first and - if it doesn't answer - try calling in parallel `+18991114444` and `+18991114445`. If none of the devices answer, continue the same process with `+18991114446` and `+18991114447`:
+
+```python
+devices = [
+  { 'to_number': '+18991114443', 'timeout': 30 },
+  [
+    { 'to_number': '+18991114444', 'timeout': 30 },
+    { 'to_number': '+18991114445', 'timeout': 20 }
+  ],
+  [
+    { 'to_number': '+18991114446', 'timeout': 30 },
+    { 'to_number': '+18991114447', 'timeout': 20 }
+  ]
+]
+result = await call.connect(device_list=devices)
+
+if result.successful:
+  # result.call is the remote leg connected with yours.
+  remote_call = result.call
+```
+
+### connect_async
+
+Asynchronous version of [`connect`][link-3]. It does not wait the connect to completes or fails but returns a [`Relay.Calling.ConnectAction`][relay-calling-connectaction] you can interact with.
+
+**Parameters**
+
+See [`connect`][link-3] for the parameter list.
+
+**Returns**
+
+`coroutine` - Coroutine that will return a [`Relay.Calling.ConnectAction`][relay-calling-connectaction] object.
+
+**Examples**
+
+Trying to connect a call by calling in series `+18991114444` and `+18991114445`:
+
+```python
+devices = [
+  { 'to_number': '+18991114444', 'timeout': 10 },
+  { 'to_number': '+18991114445', 'timeout': 20 }
+]
+action = await call.connect_async(device_list=devices)
+# .. do other important things while Relay try to connect your call..
+
+# .. check whether the action has completed
+if action.completed:
+  # Your call is now connected with a remote peer
+```
+
+### detect
+
+Start a detector on the call and waits until it has finished or failed.
+
+The `detect` method is a generic method for all types of detecting, see [`detect_answering_machine`][link-1], [`detect_digit`][link-4] or [`detect_fax`][link-5] for more specific usage.
+
+**Parameters**
+
+* To detect an answering machine:
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `detect_type` | `string` | **required** | `machine` |
+| `timeout` | `number` | **optional** | Number of seconds to run the detector.<br/>_Defaults to 30.0._ |
+| `wait_for_beep` | `boolean` | **optional** | Whether to wait until the AM is ready for voicemail delivery.<br/>_Defaults to false._ |
+| `initial_timeout` | `number` | **optional** | Number of seconds to wait for initial voice before giving up.<br/>_Defaults to 4.5._ |
+| `end_silence_timeout` | `number` | **optional** | Number of seconds to wait for voice to finish.<br/>_Defaults to 1.0._ |
+| `machine_voice_threshold` | `number` | **optional** | How many seconds of voice to decide is a _machine_.<br/>_Defaults to 1.25._ |
+| `machine_words_threshold` | `number` | **optional** | How many words to count to decide is a _machine_.<br/>_Defaults to 6._ |
+
+* To detect digits:
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `detect_type` | `string` | **required** | `digit` |
+| `timeout` | `number` | **optional** | Number of seconds to run the detector.<br/>_Defaults to 30.0._ |
+| `digits` | `string` | **optional** | The digits to detect.<br/>_Defaults to "0123456789#*"._ |
+
+* To detect a fax:
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `detect_type` | `string` | **required** | `fax` |
+| `timeout` | `number` | **optional** | Number of seconds to run the detector.<br/>_Defaults to 30.0._ |
+| `tone` | `string` | **optional** | The fax tone to detect: `CED` or `CNG`.<br/>_Defaults to "CED"._ |
+
+**Returns**
+
+`coroutine` - Coroutine that will return a [`Relay.Calling.DetectResult`][relay-calling-detectresult] object.
+
+**Examples**
+
+Detect a machine with custom parameters and timeout:
+
+```python
+result = await call.detect(detect_type='machine', timeout=45, initial_timeout=3)
+if result.successful:
+  print(f'Detector Result: {result.result}')
+```
+
+Detect a Fax setting timeout only:
+
+```python
+result = await call.detect(detect_type='fax', timeout=45)
+if result.successful:
+  print(f'Detector Result: {result.result}')
+```
+
+### detect_async
+
+Asynchronous version of [`detect`][link-6]. It does not wait the detector ends but returns a [`Relay.Calling.DetectAction`][relay-calling-detectaction] you can interact with.
+
+**Parameters**
+
+See [`detect`][link-6] for the parameter list.
+
+**Returns**
+
+`coroutine` - Coroutine that will return a [`Relay.Calling.DetectAction`][relay-calling-detectaction] object.
+
+**Examples**
+
+Detect all the digits using default parameters. Stop the action after 5 seconds:
+
+```python
+import asyncio # to use sleep
+
+action = await call.detect_async(detect_type='digit')
+# For demonstration purposes only..
+await asyncio.sleep(5)
+await action.stop()
+```
+
+### detect_answering_machine
+
+This is a helper function that refines the use of [`detect`][link-6]. The _coroutine_ will return a [`Relay.Calling.DetectResult`][relay-calling-detectresult] object as soon as the detector decided _who_ answered the call: `MACHINE`, `HUMAN` or `UNKNOWN`.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `timeout` | `number` | **optional** | Number of seconds to run the detector.<br/>_Defaults to 30.0._ |
+| `wait_for_beep` | `boolean` | **optional** | Whether to wait until the AM is ready for voicemail delivery.<br/>_Defaults to false._ |
+| `initial_timeout` | `number` | **optional** | Number of seconds to wait for initial voice before giving up.<br/>_Defaults to 4.5._ |
+| `end_silence_timeout` | `number` | **optional** | Number of seconds to wait for voice to finish.<br/>_Defaults to 1.0._ |
+| `machine_voice_threshold` | `number` | **optional** | How many seconds of voice to decide is a _machine_.<br/>_Defaults to 1.25._ |
+| `machine_words_threshold` | `number` | **optional** | How many words to count to decide is a _machine_.<br/>_Defaults to 6._ |
+
+**Returns**
+
+`coroutine` - Coroutine that will return a [`Relay.Calling.DetectResult`][relay-calling-detectresult] object.
+
+**Examples**
+
+Perform an AMD and wait until the _machine_ is ready:
+
+```python
+result = await call.detect_answering_machine(wait_for_beep=True)
+if result.successful:
+  print(f'AMD result: {result.result}') # MACHINE || HUMAN || UNKNOWN
+```
+
+### detect_answering_machine_async
+
+Asynchronous version of [`detect_answering_machine`][link-1]. It does not wait the detector ends but returns a [`Relay.Calling.DetectAction`][relay-calling-detectaction] you can interact with.
+
+**Parameters**
+
+See [`detect_answering_machine`][link-1] for the parameter list.
+
+**Returns**
+
+`coroutine` - Coroutine that will return a [`Relay.Calling.DetectAction`][relay-calling-detectaction] object.
+
+**Examples**
+
+Perform an asynchronous AMD on the call. Then stop the action if not completed yet:
+
+```python
+action = await call.detect_answering_machine_async()
+# Do other things while detector runs and then stop it...
+if action.completed:
+  detect_result = action.result.result # MACHINE || HUMAN || UNKNOWN
+  await action.stop()
+```
+
+### detect_digit
+
+This is a helper function that refines the use of [`detect`][link-6]. This simplifies detecting digits on a call.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `timeout` | `number` | **optional** | Number of seconds to run the detector.<br/>_Defaults to 30.0._ |
+| `digits` | `string` | **optional** | The digits to detect.<br/>_Defaults to "0123456789#*"._ |
+
+**Returns**
+
+`coroutine` - Coroutine that will return a [`Relay.Calling.DetectResult`][relay-calling-detectresult] object.
+
+**Examples**
+
+Detect digits and then write a log with the result:
+
+```python
+result = await call.detect_digit()
+if result.successful:
+  print(f'Digits detected: {result.result}')
+```
+
+### detect_digit_async
+
+Asynchronous version of [`detect_digit`][link-4]. It does not wait the detector ends but returns a [`Relay.Calling.DetectAction`][relay-calling-detectaction] you can interact with.
+
+**Parameters**
+
+See [`detect_digit`][link-4] for the parameter list.
+
+**Returns**
+
+`coroutine` - Coroutine that will return a [`Relay.Calling.DetectAction`][relay-calling-detectaction] object.
+
+**Examples**
+
+Detect only `1-3` digits. Stop the action after 5 seconds:
+
+```python
+import asyncio # to use sleep
+
+action = await call.detect_digit_async(digits='123')
+await asyncio.sleep(5)
+await action.stop()
+```
+
+### detect_fax
+
+This is a helper function that refines the use of [`detect`][link-6]. This simplifies detecting a `fax`.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `timeout` | `number` | **optional** | Number of seconds to run the detector.<br/>_Defaults to 30.0._ |
+| `tone` | `string` | **optional** | The fax tone to detect: `CED` or `CNG`.<br/>_Defaults to "CED"._ |
+
+**Returns**
+
+`coroutine` - Coroutine that will return a [`Relay.Calling.DetectResult`][relay-calling-detectresult] object.
+
+**Examples**
+
+Detect fax on the current call:
+
+```python
+result = await call.detect_fax()
+if result.successful:
+  # A fax has been detected!
+```
+
+### detect_fax_async
+
+Asynchronous version of [`detect_fax`][link-5]. It does not wait the detector ends but returns a [`Relay.Calling.DetectAction`][relay-calling-detectaction] you can interact with.
+
+**Parameters**
+
+See [`detect_fax`][link-5] for the parameter list.
+
+**Returns**
+
+`coroutine` - Coroutine that will return a [`Relay.Calling.DetectAction`][relay-calling-detectaction] object.
+
+**Examples**
+
+Detect fax on the current call. Stop the action after 5 seconds:
+
+```python
+import asyncio # to use sleep
+
+action = await call.detect_fax_async()
+await asyncio.sleep(5)
+await action.stop()
+```
+
+### dial
+
+This will start a call that was created with `new_call` and waits until the Call has been answered or hung up.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`coroutine` - Coroutine that will return a [`Relay.Calling.DialResult`][relay-calling-dialresult] object.
+
+**Examples**
+
+```python
+call = client.calling.new_call(from_number='+1XXXXXXXXXX', to_number='+1YYYYYYYYYY')
+result = await call.dial()
+if result.successful:
+  print('Call answered..')
+else:
+  print('Call failed or not answered.')
+```
+
+### fax_receive
+
+Prepare the call to receive an inbound fax. It waits until the fax has been received or failed.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`coroutine` - Coroutine that will return a [`Relay.Calling.FaxResult`][relay-calling-faxresult] object.
+
+**Examples**
+
+Receiving a fax on the call and grab URL and number of received pages from the [`FaxResult`][relay-calling-faxresult] object:
+
+```python
+result = await call.fax_receive()
+if result.successful:
+  url = result.document # URL location of the document
+  num_pages = result.pages
+```
+
+### fax_receive_async
+
+Asynchronous version of [`fax_receive`][link-7]. It does not wait the fax to be received but returns a [`Relay.Calling.FaxAction`][relay-calling-faxaction] you can interact with.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`coroutine` - Coroutine that will return a [`Relay.Calling.FaxAction`][relay-calling-faxaction] object.
+
+**Examples**
+
+Trying to receive a fax. Stop the attempt after 5 seconds:
+
+```python
+import asyncio # to use sleep
+
+action = await call.fax_receive_async()
+# For demonstration purposes only..
+await asyncio.sleep(5)
+await action.stop()
+```
+
+### fax_send
+
+Send a `Fax` through the call. It waits until the fax has been sent or failed.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `document` | `string` | **required** | Http(s) URL to the document to send.<br/>_PDF format only._ |
+| `identity` | `string` | **optional** | Identity to display on receiving fax.<br/>_Defaults to SignalWire DID._ |
+| `header` | `string` | **optional** | Custom string to add to header of each fax page.<br/>_Set to empty string to disable sending any header._ |
+
+**Returns**
+
+`coroutine` - Coroutine that will return a [`Relay.Calling.FaxResult`][relay-calling-faxresult] object.
+
+**Examples**
+
+Sending a fax on the call and grab URL and number of received pages from the [`FaxResult`][relay-calling-faxresult] object:
+
+```python
+result = await call.fax_send(url='https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', header='Custom Header')
+if result.successful:
+  url = result.document # URL location of the document
+  num_pages = result.pages
+```
+
+### fax_send_async
+
+Asynchronous version of [`fax_send`][link-8]. It does not wait the fax to be sent but returns a [`Relay.Calling.FaxAction`][relay-calling-faxaction] you can interact with.
+
+**Parameters**
+
+See [`fax_send`][link-8] for the parameter list.
+
+**Returns**
+
+`coroutine` - Coroutine that will return a [`Relay.Calling.FaxAction`][relay-calling-faxaction] object.
+
+**Examples**
+
+Trying to send a fax. Stop sending it after 5 seconds:
+
+```python
+import asyncio # to use sleep
+
+action = await call.fax_send_async(url='https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', header='Custom Header')
+# For demonstration purposes only..
+await asyncio.sleep(5)
+await action.stop()
+```
+
+### hangup
+
+Hangup the call.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`coroutine` - Coroutine that will return a [`Relay.Calling.HangupResult`][relay-calling-hangupresult] object.
+
+**Examples**
+
+Hangup a call and check if it was successful:
+
+```python
+result = await call.hangup()
+if result.successful:
+  print('Call hanged up..')
+```
+
+### on
+
+Attach an event handler for the `event`.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `event` | `string` | **required** | Event name. Full list of events [Relay.Calling.Call events][link-9] |
+| `callback` | `function` | **required** | Function to call when the event comes. |
+
+**Returns**
+
+`Relay.Calling.Call` - The call object itself.
+
+**Examples**
+
+Subscribe to the `answered` events for a given call:
+
+```python
+def on_answered():
+  # Call has been answered from the remote party!
+
+call.on('answered', on_answered)
+```
+
+### off
+
+Remove an event handler that were attached with `.on()`. If you don't pass a callback, all listeners for that `event` will be removed.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `event` | `string` | **required** | Event name. Full list of events [Relay.Calling.Call events][link-9] |
+| `callback` | `function` | **optional** | Function to remove. <br /> _Note: `callback` will be removed from the stack by reference so make sure to use the same reference in both `.on()` and `.off()` methods._ |
+
+**Returns**
+
+`Relay.Calling.Call` - The call object itself.
+
+**Examples**
+
+Subscribe to the call `ended` state change and then, remove the event handler:
+
+```python
+def on_ended():
+  pass
+
+call.on('ended', on_ended)
+
+# .. later
+call.off('ended', on_ended)
+```
+
+### play
+
+Play one or multiple media in a Call and waits until the playing has ended.  
+The `play` method is a generic method for all types of playing, see [`play_audio`][link-10], [`play_silence`][link-11] or [`play_tts`][link-12] for more specific usage.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `media_list` | `list` | **required** | List of media to play. See below for each type. |
+| `volume` | `float` | **optional** | Volume value between -40dB and +40dB where 0 is unchanged.<br/>_Default is `0`._ |
+
+* To play an audio file:
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `type` | `string` | **required** | `audio` |
+| `url` | `string` | **required** | Http(s) URL to `audio` resource to play. |
+
+* To play a text to speech string:
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `type` | `string` | **required** | `tts` |
+| `text` | `string` | **required** | TTS to play. |
+| `language` | `string` | **optional** | Default to `en-US`. |
+| `gender` | `string` | **optional** | `male` or `female`. Default to `female`. |
+
+* To play silence:
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `type` | `string` | **required** | `silence` |
+| `duration` | `number` | **required** | Seconds of silence to play. |
+
+**Returns**
+
+`coroutine` - Coroutine that will return a [`Relay.Calling.PlayResult`][relay-calling-playresult] object.
+
+**Examples**
+
+Play multiple media elements in the call:
+
+```python
+media_list = [
+  { 'type': 'tts', 'text': 'Listen this awesome file!' },
+  { 'type': 'audio', 'url': 'https://cdn.signalwire.com/default-music/welcome.mp3' },
+  { 'type': 'silence', 'duration': 5 },
+  { 'type': 'tts', 'text': 'Did you like it?' }
+]
+result = await call.play(media_list)
+```
+
+### play_async
+
+Asynchronous version of [`play`][link-13]. It does not wait the playing to completes but returns a [`Relay.Calling.PlayAction`][relay-calling-playaction] you can interact with.
+
+**Parameters**
+
+See [`play`][link-13] for the parameter list.
+
+**Returns**
+
+`coroutine` - Coroutine that will return a [`Relay.Calling.PlayAction`][relay-calling-playaction] object.
+
+**Examples**
+
+Play multiple media elements in the call and stop them after 5 seconds:
+
+```python
+import asyncio # to use sleep
+
+media_list = [
+  { 'type': 'tts', 'text': 'Listen this awesome file!' },
+  { 'type': 'audio', 'url': 'https://cdn.signalwire.com/default-music/welcome.mp3' },
+  { 'type': 'silence', 'duration': 5 },
+  { 'type': 'tts', 'text': 'Did you like it?' }
+]
+action = await call.play_async(media_list)
+await asyncio.sleep(5)
+await action.stop()
+```
+
+### play_audio
+
+This is a helper function that refines the use of [`play`][link-13]. This simplifies playing an audio file.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `url` | `string` | **required** | Http(s) URL to `audio` resource to play. |
+| `volume` | `float` | **optional** | Volume value between -40dB and +40dB where 0 is unchanged.<br/>_Default is `0`._ |
+
+**Returns**
+
+`coroutine` - Coroutine that will return a [`Relay.Calling.PlayResult`][relay-calling-playresult] object.
+
+**Examples**
+
+Play an Mp3 file:
+
+```python
+result = await call.play_audio('https://cdn.signalwire.com/default-music/welcome.mp3')
+```
+
+### play_audio_async
+
+Asynchronous version of [`play_audio`][link-10]. It does not wait the playing to completes but returns a [`Relay.Calling.PlayAction`][relay-calling-playaction] you can interact with.
+
+**Parameters**
+
+See [`play_audio`][link-10] for the parameter list.
+
+**Returns**
+
+`coroutine` - Coroutine that will return a [`Relay.Calling.PlayAction`][relay-calling-playaction] object.
+
+**Examples**
+
+Play an Mp3 file and stop it after 5 seconds:
+
+```python
+import asyncio # to use sleep
+
+action = await call.play_audio_async('https://cdn.signalwire.com/default-music/welcome.mp3')
+await asyncio.sleep(5)
+await action.stop()
+```
+
+### play_silence
+
+This is a helper function that refines the use of [`play`][link-13]. This simplifies playing silence.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `duration` | `number` | **required** | Seconds of silence to play. |
+
+**Returns**
+
+`coroutine` - Coroutine that will return a [`Relay.Calling.PlayResult`][relay-calling-playresult] object.
+
+**Examples**
+
+Play silence for 10 seconds:
+
+```python
+result = await call.play_silence(10)
+```
+
+### play_silence_async
+
+Asynchronous version of [`play_silence`][link-11]. It does not wait the playing to completes but returns a [`Relay.Calling.PlayAction`][relay-calling-playaction] you can interact with.
+
+**Parameters**
+
+See [`play_silence`][link-11] for the parameter list.
+
+**Returns**
+
+`coroutine` - Coroutine that will return a [`Relay.Calling.PlayAction`][relay-calling-playaction] object.
+
+**Examples**
+
+Play silence for 60 seconds then stop it after 5 seconds:
+
+```python
+import asyncio # to use sleep
+
+action = await call.play_silence_async(60)
+await asyncio.sleep(5)
+await action.stop()
+```
+
+### play_ringtone
+
+This is a helper function that refines the use of [`play`][link-13]. This simplifies playing TTS.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `name` | `string` | **required** | The name of the ringtone. See [ringtones][link-14] for the supported values. |
+| `duration` | `float` | **optional** | Duration of ringtone to play.<br/>_Default to 1 ringtone iteration._ |
+| `volume` | `float` | **optional** | Volume value between -40dB and +40dB where 0 is unchanged.<br/>_Default is `0`._ |
+
+**Returns**
+
+`coroutine` - Coroutine that will return a [`Relay.Calling.PlayResult`][relay-calling-playresult] object.
+
+**Examples**
+
+Play a single US ringtone:
+
+```python
+result = await call.play_ringtone(name='us')
+```
+
+### play_ringtone_async
+
+Asynchronous version of [`play_ringtone`][link-15]. It does not wait the playing to completes but returns a [`Relay.Calling.PlayAction`][relay-calling-playaction] you can interact with.
+
+**Parameters**
+
+See [`play_ringtone`][link-15] for the parameter list.
+
+**Returns**
+
+`coroutine` - Coroutine that will return a [`Relay.Calling.PlayAction`][relay-calling-playaction] object.
+
+**Examples**
+
+Play the US ringtone for 30 seconds but stop it after 5 seconds:
+
+```python
+import asyncio # to use sleep
+
+action = await call.play_ringtone_async(name='us', duration=30)
+# For demonstration purposes only..
+await asyncio.sleep(5)
+await action.stop()
+```
+
+### play_tts
+
+This is a helper function that refines the use of [`play`][link-13]. This simplifies playing TTS.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `text` | `string` | **required** | TTS to play. |
+| `language` | `string` | **optional** | Default to `en-US`. |
+| `gender` | `string` | **optional** | `male` or `female`. Default to `female`. |
+| `volume` | `float` | **optional** | Volume value between -40dB and +40dB where 0 is unchanged.<br/>_Default is `0`._ |
+
+**Returns**
+
+`coroutine` - Coroutine that will return a [`Relay.Calling.PlayResult`][relay-calling-playresult] object.
+
+**Examples**
+
+Play TTS:
+
+```python
+result = await call.play_tts(text='Welcome to SignalWire!', gender='male')
+```
+
+### play_tts_async
+
+Asynchronous version of [`play_tts`][link-12]. It does not wait the playing to completes but returns a [`Relay.Calling.PlayAction`][relay-calling-playaction] you can interact with.
+
+**Parameters**
+
+See [`play_tts`][link-12] for the parameter list.
+
+**Returns**
+
+`coroutine` - Coroutine that will return a [`Relay.Calling.PlayAction`][relay-calling-playaction] object.
+
+**Examples**
+
+Play TTS and stop it after 5 seconds:
+
+```python
+import asyncio # to use sleep
+
+action = await call.play_tts_async(text='Welcome to SignalWire!', gender='male')
+await asyncio.sleep(5)
+await action.stop()
+```
+
+### prompt
+
+Play one or multiple media while collecting user's input from the call at the same time, such as `digits` and `speech`.  
+It waits until the collection succeed or timeout is reached.  
+The `prompt` method is a generic method, see [`prompt_audio`][link-16], [`prompt_tts`][link-17] or [`prompt_ringtone`][link-18] for more specific usage.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `prompt_type` | `string` | **required** | `digits`, `speech` or `both`. |
+| `media_list` | `list` | **required** | List of media elements to play. See [`play`][link-13] parameters for the list structure. |
+| `initial_timeout` | `number` | **optional** | Initial timeout in seconds. <br/>_Default to 4 seconds._ |
+| `volume` | `number` | **optional** | Volume value between -40dB and +40dB where 0 is unchanged.<br/>_Default is `0`._ |
+
+* To collect digits:
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `digits_max` | `number` | **required** | Max digits to collect. |
+| `digits_terminators` | `string` | **optional** | DTMF digits that will end the recording. <br/>_Default not set._ |
+| `digits_timeout` | `number` | **optional** | Timeout in seconds between each digit. |
+
+* To collect speech:
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `end_silence_timeout` | `number` | **optional** | How much silence to wait for end of speech. <br/>_Default to 1 second._ |
+| `speech_timeout` | `number` | **optional** | Maximum time to collect speech. <br/>_Default to 60 seconds._ |
+| `speech_language` | `string` | **optional** | Language to detect. <br/>_Default to `en-US`._ |
+| `speech_hints` | `array` | **optional** | Array of expected phrases to detect. |
+
+**Returns**
+
+`coroutine` - Coroutine that will return a [`Relay.Calling.PromptResult`][relay-calling-promptresult] object.
+
+**Examples**
+
+Ask user to enter their PIN and collect the digits:
+
+```python
+media_list = [
+  { 'type': 'tts', 'text': 'Welcome at SignalWire. Please, enter your PIN and then # to proceed' }
+]
+result = await call.prompt(prompt_type='digits', media_list=media_list, digits_max=4, digits_terminators='#')
+if result.successful:
+  pin = result.result # pin entered by the user
+```
+
+### prompt_async
+
+Asynchronous version of [`prompt`][link-19]. It does not wait the collection to completes but returns a [`Relay.Calling.PromptAction`][relay-calling-promptaction] you can interact with.
+
+**Parameters**
+
+See [`prompt`][link-19] for the parameter list.
+
+**Returns**
+
+`coroutine` - Coroutine that will return a [`Relay.Calling.PromptAction`][relay-calling-promptaction] object.
+
+**Examples**
+
+Ask user to enter their PIN and collect the digits:
+
+```python
+media_list = [
+  { 'type': 'tts', 'text': 'Welcome at SignalWire. Please, enter your PIN and then # to proceed' }
+  { 'type': 'audio', 'url': 'https://cdn.signalwire.com/default-music/welcome.mp3' }
+]
+action = await call.prompt_async(prompt_type='digits', media_list=media_list, digits_max=4, digits_terminators='#')
+# .. do other important things while collecting user digits..
+
+if action.completed:
+  result = action.result # => [`PromptResult`][relay-calling-promptresult] object
+```
+
+### prompt_audio
+
+This is a helper function that refines the use of [`prompt`][link-19].  
+This function simplifies playing an audio file while collecting user's input from the call, such as `digits` and `speech`.
+
+**Parameters**
+
+You can set all the properties that [`prompt`][link-19] accepts replacing `media_list` with:
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `url` | `string` | **required** | Http(s) URL to `audio` resource to play. |
+
+The SDK will build the media_list for you.
+
+**Returns**
+
+`coroutine` - Coroutine that will return a [`Relay.Calling.PromptResult`][relay-calling-promptresult] object.
+
+**Examples**
+
+Collect user's digits while playing an Mp3 file:
+
+```python
+result = await call.prompt_audio(prompt_type='digits', url='https://cdn.signalwire.com/default-music/welcome.mp3', digits_max=4)
+if result.successful:
+  digits = result.result # digits entered by the user
+```
+
+### prompt_audio_async
+
+Asynchronous version of [`prompt_audio`][link-16]. It does not wait the collection to completes but returns a [`Relay.Calling.PromptAction`][relay-calling-promptaction] you can interact with.
+
+**Parameters**
+
+See [`prompt_audio`][link-16] for the parameter list.
+
+**Returns**
+
+`coroutine` - Coroutine that will return a [`Relay.Calling.PromptAction`][relay-calling-promptaction] object.
+
+**Examples**
+
+Ask user to enter their PIN and collect the digits:
+
+```python
+action = await call.prompt_audio_async(prompt_type='digits', url='https://cdn.signalwire.com/default-music/welcome.mp3', digits_max=4)
+# .. do other important things while collecting user digits..
+if action.completed:
+  result = action.result # => [`PromptResult`][relay-calling-promptresult] object
+```
+
+### prompt_ringtone
+
+This is a helper function that refines the use of [`prompt`][link-19].  
+This function simplifies playing TTS while collecting user's input from the call, such as `digits` and `speech`.
+
+**Parameters**
+
+You can set all the properties that [`prompt`][link-19] accepts replacing `media_list` with:
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `name` | `string` | **required** | The name of the ringtone. See [ringtones][link-14] for the supported values. |
+| `duration` | `number` | **optional** | Duration of ringtone to play.<br/>_Default to 1 ringtone iteration._ |
+
+The SDK will build the media_list for you.
+
+**Returns**
+
+`coroutine` - Coroutine that will return a [`Relay.Calling.PromptResult`][relay-calling-promptresult] object.
+
+**Examples**
+
+Play US ringtone for 30 seconds while collect digits:
+
+```python
+result = await call.prompt_ringtone(prompt_type='digits', name='us', duration=30, digits_max=4)
+if result.successful:
+  digits = result.result # digits entered by the user
+```
+
+### prompt_ringtone_async
+
+Asynchronous version of [`prompt_ringtone`][link-18]. It does not wait the collection to completes but returns a [`Relay.Calling.PromptAction`][relay-calling-promptaction] you can interact with.
+
+**Parameters**
+
+See [`prompt_ringtone`][link-18] for the parameter list.
+
+**Returns**
+
+`coroutine` - Coroutine that will return a [`Relay.Calling.PromptAction`][relay-calling-promptaction] object.
+
+**Examples**
+
+Play US ringtone for 30 seconds while collect digits in asynchronous:
+
+```python
+action = await call.prompt_ringtone_async(prompt_type='digits', name='us', duration=30, digits_max=4)
+# .. do other important things while collecting user digits..
+if action.completed:
+  result = action.result # => [`PromptResult`][relay-calling-promptresult] object
+```
+
+### prompt_tts
+
+This is a helper function that refines the use of [`prompt`][link-19].  
+This function simplifies playing TTS while collecting user's input from the call, such as `digits` and `speech`.
+
+**Parameters**
+
+You can set all the properties that [`prompt`][link-19] accepts replacing `media_list` with:
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `text` | `string` | **required** | Text-to-speech string to play. |
+| `language` | `string` | **optional** | Default to `en-US`. |
+| `gender` | `string` | **optional** | `male` or `female`. Default to `female`. |
+
+The SDK will build the media_list for you.
+
+**Returns**
+
+`coroutine` - Coroutine that will return a [`Relay.Calling.PromptResult`][relay-calling-promptresult] object.
+
+**Examples**
+
+Ask user to enter their PIN and collect the digits:
+
+```python
+result = await call.prompt_tts(prompt_type='digits', text='Please, enter your 3 digit PIN', digits_max=3)
+if result.successful:
+  pin = result.result # PIN entered by the user
+```
+
+### prompt_tts_async
+
+Asynchronous version of [`prompt_tts`][link-17]. It does not wait the collection to completes but returns a [`Relay.Calling.PromptAction`][relay-calling-promptaction] you can interact with.
+
+**Parameters**
+
+See [`prompt_tts`][link-17] for the parameter list.
+
+**Returns**
+
+`coroutine` - Coroutine that will return a [`Relay.Calling.PromptAction`][relay-calling-promptaction] object.
+
+**Examples**
+
+Ask user to enter their PIN and collect the digits:
+
+```python
+action = await call.prompt_tts_async(prompt_type='digits', text='Please, enter your 3 digit PIN', gender='male', digits_max=3)
+# .. do other important things while collecting user digits..
+if action.completed:
+  result = action.result # => [`PromptResult`][relay-calling-promptresult] object
+```
+
+### record
+
+Start recording the call and waits until the recording ends or fails.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `beep` | `boolean` | **optional** | Default to `false`. |
+| `stereo` | `boolean` | **optional** | Default to `false`. |
+| `record_format` | `string` | **optional** | `mp3` or `wav`. <br/>_Default `mp3`._ |
+| `direction` | `string` | **optional** | `listen`, `speak` or `both`. Default to `speak`. |
+| `initial_timeout` | `number` | **optional** | How long to wait in seconds until something is heard in the recording. Disable with `0`. <br/>_Default `5.0`._ |
+| `end_silence_timeout` | `number` | **optional** | How long to wait in seconds until caller has stopped speaking. Disable with `0`. <br/>_Default `1.0`._ |
+| `terminators` | `string` | **optional** | DTMF digits that will end the recording. <br/>_Default `#*`_. |
+
+**Returns**
+
+`coroutine` - Coroutine that will return a [`Relay.Calling.RecordResult`][relay-calling-recordresult] object.
+
+**Examples**
+
+Start recording audio in the call for both direction in stereo mode, if successful, grab `url`, `duration` and `size` from the [`RecordResult`][relay-calling-recordresult] object:
+
+```python
+result = await call.record(stereo=True, direction='both')
+if result.successful:
+  print(f'Url: {result.url}')
+  print(f'Duration: {result.duration}')
+  print(f'Size: {result.size}')
+```
+
+### record_async
+
+Asynchronous version of [`record`][link-20]. It does not wait the end of recording but returns a [`Relay.Calling.RecordAction`][relay-calling-recordaction] you can interact with.
+
+**Parameters**
+
+See [`record`][link-20] for the parameter list.
+
+**Returns**
+
+`coroutine` - Coroutine that will return a [`Relay.Calling.RecordAction`][relay-calling-recordaction] object.
+
+**Examples**
+
+Start recording audio in the call for both direction in stereo mode and stop it after 5 seconds:
+
+```python
+import asyncio # to use sleep
+
+action = await call.record_async(stereo=True, direction='both')
+await asyncio.sleep(5)
+await action.stop()
+```
+
+### send_digits
+
+This method sends DTMF digits to the other party on the call.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `digits` | `string` | **required** | String of DTMF digits to send. Allowed digits are `1234567890*#ABCD` and `wW` for short and long waits. If any invalid characters are present, the entire operation is rejected. |
+
+**Returns**
+
+`coroutine` - Coroutine that will return a [`Relay.Calling.SendDigitsResult`][relay-calling-senddigitsresult] object.
+
+**Examples**
+
+Send some digits:
+
+```python
+result = await call.send_digits('123')
+```
+
+### send_digits_async
+
+Asynchronous version of [`send_digits`][link-21]. It does not wait for the sending event to complete, and immediately returns a [`Relay.Calling.SendDigitsAction`][relay-calling-senddigitsaction] object you can interact with.
+
+**Parameters**
+
+See [`send_digits`][link-21] for the parameter list.
+
+**Returns**
+
+`coroutine` - Coroutine that will return a [`Relay.Calling.SendDigitsAction`][relay-calling-senddigitsaction]
+
+**Examples**
+
+Send some digits and stop the operation after 3 seconds:
+
+```python
+import asyncio # to use sleep
+
+action = await call.send_digits_async('1W2W3W4w5w6W7W8W9')
+
+await asyncio.sleep(3)
+await action.stop()
+```
+
+### tap
+
+Intercept call media and stream it to the specify endpoint. It waits until the end of the call.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `audio_direction` | `string` | **required** | `listen` what the caller hears, `speak` what the caller says or `both`. |
+| `target_type` | `string` | **required** | Protocol to use: `rtp` or `ws`, defaults to `rtp`. |
+| `target_ptime` | `number` | **optional** | Packetization time in ms. It will be the same as the tapped media if not set. |
+| `codec` | `string` | **optional** | Codec to use. It will be the same as the tapped media if not set. |
+
+* To `tap` through RTP:
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `target_addr` | `string` | **required** | RTP IP v4 address. |
+| `target_port` | `number` | **required** | RTP port. |
+
+**Returns**
+
+`coroutine` - Coroutine that will return a [`Relay.Calling.TapResult`][relay-calling-tapresult] object.
+
+**Examples**
+
+Tapping audio from the call, if successful, print both source and destination devices from the [`TapResult`][relay-calling-tapresult] object:
+
+```python
+result = await call.tap(audio_direction='listen', target_type='rtp', target_addr='192.168.1.1', target_port=1234)
+if result.successful:
+  # Print source and destination devices..
+  print(result.source_device)
+  print(result.destination_device)
+```
+
+### tap_async
+
+Asynchronous version of [`tap`][link-22]. It does not wait the end of tapping but returns a [`Relay.Calling.TapAction`][relay-calling-tapaction] you can interact with.
+
+**Parameters**
+
+See [`tap`][link-22] for the parameter list.
+
+**Returns**
+
+`coroutine` - Coroutine that will return a [`Relay.Calling.TapAction`][relay-calling-tapaction] object.
+
+**Examples**
+
+Tapping audio from the call and then stop it using the [`TapAction`][relay-calling-tapaction] object:
+
+```python
+import asyncio # to use sleep
+
+action = await call.tap_async(audio_direction='listen', target_type='rtp', target_addr='192.168.1.1', target_port=1234)
+# Do other things while tapping the media and then stop it..
+await asyncio.sleep(3)
+await action.stop()
+```
+
+### wait_for
+
+Wait for specific events on the Call or returns `false` if the Call ends without getting them.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `*events` | `list of strings` | **required** | One or more [Relay.Calling.Call state events][link] |
+
+**Returns**
+
+`coroutine` - Coroutine object that will be resolved with `true` or `false`.
+
+**Examples**
+
+Wait for `ending` or `ended` events:
+
+```python
+success = await call.waitFor('ending', 'ended')
+```
+
+### wait_for_answered
+
+This is a helper function that refines the use of [`wait_for`][link-23]. This simplifies waiting for the _answered_ state.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`coroutine` - Coroutine that will return `true` or `false`.
+
+**Examples**
+
+Wait for the `answered` event:
+
+```python
+success = await call.wait_for_answered()
+```
+
+### wait_for_ended
+
+This is a helper function that refines the use of [`wait_for`][link-23]. This simplifies waiting for the _ended_ state.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`coroutine` - Coroutine that will return `true` or `false`.
+
+**Examples**
+
+Wait for the `ended` event:
+
+```python
+success = await call.wait_for_ended()
+```
+
+### wait_for_ending
+
+This is a helper function that refines the use of [`wait_for`][link-23]. This simplifies waiting for the _ending_ state.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`coroutine` - Coroutine that will return `true` or `false`.
+
+**Examples**
+
+Wait for the `ending` event:
+
+```python
+success = await call.waitForEnding()
+```
+
+### wait_for_ringing
+
+This is a helper function that refines the use of [`wait_for`][link-23]. This simplifies waiting for the _ringing_ state.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`coroutine` - Coroutine that will return `true` or `false`.
+
+**Examples**
+
+Wait for `ending` or `ended` events:
+
+```python
+success = await call.wait_for_ringing()
+```
+
+### Events
+
+All these events can be used to track the calls lifecycle and instruct SignalWire on what to do for each different state.
+
+### State Events
+
+To track the state of a call.
+
+| Event | Description |
+| -------- | ----------- |
+| `stateChange` | Event dispatched when Call state changes. |
+| `created` | The call has been created in Relay. |
+| `ringing` | The call is ringing and has not yet been answered. |
+| `answered` | The call has been picked up. |
+| `ending` | The call is hanging up. |
+| `ended` | The call has ended. |
+
+### Connect Events
+
+To track the connect state of a call.
+
+| Event | Description |
+| -------- | ----------- |
+| `connect.stateChange` | Event dispatched when the Call `connect` state changes. |
+| `connect.connecting` | Currently calling the phone number(s) to connect. |
+| `connect.connected` | The calls are being connected together. |
+| `connect.failed` | The last call connection attempt failed. |
+| `connect.disconnected` | The call was either never connected or the last call connection completed. |
+
+### Play Events
+
+To track a playback state.
+
+| Event | Description |
+| -------- | ----------- |
+| `play.stateChange` | Event dispatched when the state of a `playing` changes. |
+| `play.playing` | A playback in playing on the call. |
+| `play.error` | A playback failed to start. |
+| `play.finished` | The playback has ended. |
+
+### Record Events
+
+To track a recording state.
+
+| Event | Description |
+| -------- | ----------- |
+| `record.stateChange` | Event dispatched when the state of a `recording` changes. |
+| `record.recording` | The call is being recorded. |
+| `record.no_input` | The recording failed due to _no input_. |
+| `record.finished` | The recording has ended. |
+
+### Prompt Events
+
+To track a prompt state.
+
+| Event | Description |
+| -------- | ----------- |
+| `prompt` | The prompt action on the call has ended. |
+
+### Fax Events
+
+To track a fax state.
+
+| Event | Description |
+| -------- | ----------- |
+| `fax.stateChange` | Event dispatched when the state of a `fax` changes. |
+| `fax.error` | Faxing failed. |
+| `fax.finished` | Faxing has finished. |
+| `fax.page` | A fax page has been sent or received. |
+
+### Detect Events
+
+To track a detector state.
+
+| Event | Description |
+| -------- | ----------- |
+| `detect.error` | The detector has failed. |
+| `detect.finished` | The detector has finished. |
+| `detect.update` | There is a notification from the detector (eg: a new DTMF). |
+
+### Tap Events
+
+To track a tapping state.
+
+| Event | Description |
+| -------- | ----------- |
+| `tap.tapping` | The tap action has started on the call. |
+| `tap.finished` | Tap has finished. |
+
+### Digits Events
+
+To track a _send digits_ action state.
+
+| Event | Description |
+| -------- | ----------- |
+| `sendDigits.finished` | Digits have been sent. |
+
+### Ringtones
+
+Here you can find all the accepted values for the ringtone to play, based on short country codes:
+
+| Event | Description |
+| -------- | ----------- |
+| `name` | _at, au, bg, br, be, ch, cl, cn, cz, de, dk, ee, es, fi, fr, gr, hu, il, in, it, lt, jp, mx, my, nl, no, nz, ph, pl, pt, ru, se, sg, th, uk, us, tw, ve, za_ |

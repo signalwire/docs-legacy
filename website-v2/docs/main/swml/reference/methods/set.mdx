@@ -1,0 +1,141 @@
+---
+title: set
+slug: /swml/reference/set
+description: Set script variables to the specified values.
+toc_max_heading_level: 3
+---
+
+Set script variables to the specified values. Variables set using `set` can be removed
+using [`unset`](/docs/swml/reference/unset).
+
+<ParamField path="set" type="object" required={true}>
+  An object that accepts user-defined key-value pairs.
+</ParamField>
+
+
+## **Variables**
+
+Any variable can be set by this method.
+
+## **Examples**
+
+### Setting variables
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - set:
+        num_var: 1
+    - play:
+        url: 'say: ${num_var}'
+    - set:
+        num_var: 2
+    - play:
+        url: 'say: ${num_var}'
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "set": {
+          "num_var": 1
+        }
+      },
+      {
+        "play": {
+          "url": "say: ${num_var}"
+        }
+      },
+      {
+        "set": {
+          "num_var": 2
+        }
+      },
+      {
+        "play": {
+          "url": "say: ${num_var}"
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+### Setting multiple variables
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - set:
+        items:
+          - drill bit
+          - drill
+        person: handyman
+        systems:
+          ventilation:
+            - inlet
+            - outlet
+            - fans
+          hr:
+            - lucy
+            - liam
+            - luke
+    - play:
+        url: 'say: The items ${items} will be used by ${person} to fix ${systems.ventilation}.'
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "set": {
+          "items": [
+            "drill bit",
+            "drill"
+          ],
+          "person": "handyman",
+          "systems": {
+            "ventilation": [
+              "inlet",
+              "outlet",
+              "fans"
+            ],
+            "hr": [
+              "lucy",
+              "liam",
+              "luke"
+            ]
+          }
+        }
+      },
+      {
+        "play": {
+          "url": "say: The items ${items} will be used by ${person} to fix ${systems.ventilation}."
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+## **See Also**
+
+- **[Variables and Expressions](/docs/swml/reference/variables)**: Complete reference for SWML variables, scopes, and syntax
+- **[unset](/docs/swml/reference/unset)**: Remove variables from the script

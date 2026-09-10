@@ -1,0 +1,20 @@
+---
+title: Relay.Calling.TapResult
+slug: /node/reference/calling/results/tap
+description: The result object that is returned when tapping a call.
+toc_max_heading_level: 3
+---
+
+[relay-event]: /docs/server-sdk/v2/node/reference/event
+[tap]: /docs/server-sdk/v2/node/reference/calling/call#tap
+This object returned from [`tap`][tap] method that represents the final result of a tapping.
+
+## Properties
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `successful` | `boolean` | Whether the tapping has completed successfully |
+| `event` | [`Relay.Event`][relay-event] | Last event that completed the operation |
+| `tap` | `object` | Object with payload for this action |
+| `sourceDevice` | `object` | Source device sending media |
+| `destinationDevice` | `object` | Destination device receiving media |

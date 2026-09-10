@@ -1,0 +1,504 @@
+---
+slug: /swml/reference/amazon-bedrock
+title: amazon_bedrock
+description: Create an Amazon Bedrock agent interaction.
+toc_max_heading_level: 3
+---
+
+[params]: /docs/swml/reference/amazon-bedrock/params
+[prompt]: /docs/swml/reference/amazon-bedrock/prompt
+[SWAIG]: /docs/swml/reference/amazon-bedrock/swaig
+[set_global_data action]: /docs/swml/reference/amazon-bedrock/swaig/functions/data-map#actions
+[Prompting Best Practices]: /docs/platform/ai/best-practices#crafting-the-initial-prompt-for-the-ai
+
+Create an Amazon Bedrock agent with a prompt. Since the text prompt is central to getting great results out of the AI,
+it is highly recommended that you also read the [Prompting Best Practices][Prompting Best Practices] guide.
+
+## **Properties**
+
+<ParamField path="amazon_bedrock" type="object" required={true}>
+  An object that accepts the following properties.
+</ParamField>
+
+<Indent>
+
+<ParamField path="amazon_bedrock.global_data" type="object">
+  A powerful and flexible environmental variable which can accept arbitrary data that is set initially in the SWML script or from the SWML [`set_global_data` action][set_global_data action]. This data can be referenced **globally**. All contained information can be accessed and expanded within the prompt - for example, by using a template string.
+</ParamField>
+
+<ParamField path="amazon_bedrock.params" type="object">
+  A JSON object containing [`parameters`][params] as key-value pairs.
+</ParamField>
+
+<ParamField path="amazon_bedrock.post_prompt" type="object">
+  The final set of instructions and configuration settings to send to the agent.
+  Accepts either a `text` string or a `pom` object array for structured prompts, plus optional tuning parameters.
+  See [post_prompt details](#post_prompt) below.
+</ParamField>
+
+<ParamField path="amazon_bedrock.post_prompt_url" type="string">
+  The URL to which to send status callbacks and reports. Authentication can also be set in the url in the format of `username:password@url`.
+  See [post_prompt_url callback](#post_prompt_url-callback) below.
+</ParamField>
+
+<ParamField path="amazon_bedrock.prompt" type="object" required={true}>
+  Establishes the initial set of instructions and settings to configure the agent.
+
+  See [`prompt`][prompt] for additional details.
+</ParamField>
+
+<ParamField path="amazon_bedrock.SWAIG" type="object">
+  An array of JSON objects to create user-defined functions/endpoints that can be executed during the dialogue.
+
+  See [`SWAIG`][SWAIG] for additional details.
+</ParamField>
+
+</Indent>
+
+## post_prompt
+
+The `post_prompt` object accepts either a plain text prompt or a structured POM prompt, plus optional tuning parameters.
+
+<Tabs>
+    <TabItem value="regular-prompt" label="Regular prompt">
+        <ParamField path="post_prompt.text" type="string" required={true}>
+          The main identity prompt for the AI. This prompt will be used to outline the agent's personality, role, and other characteristics.
+        </ParamField>
+
+        <ParamField path="post_prompt.temperature" type="number">
+          Controls the randomness of responses. Higher values (e.g., 0.8) make output more random and creative, while lower values (e.g., 0.2) make it more focused and deterministic. Range: 0.0 to 1.0.
+        </ParamField>
+
+        <ParamField path="post_prompt.top_p" type="number">
+          Controls diversity via nucleus sampling. Only tokens with cumulative probability up to top_p are considered. Lower values make output more focused. Range: 0.0 to 1.0.
+        </ParamField>
+
+        <ParamField path="post_prompt.confidence" type="number">
+          Minimum confidence threshold for AI responses. Responses below this threshold may be filtered or flagged. Range: 0.0 to 1.0.
+        </ParamField>
+
+        <ParamField path="post_prompt.presence_penalty" type="number">
+          Penalizes tokens based on whether they appear in the text so far. Positive values encourage the model to talk about new topics.
+        </ParamField>
+
+        <ParamField path="post_prompt.frequency_penalty" type="number">
+          Penalizes tokens based on their frequency in the text so far. Positive values decrease the likelihood of repeating the same line verbatim.
+        </ParamField>
+    </TabItem>
+    <TabItem value="pom-prompt" label="POM prompt">
+        <ParamField path="post_prompt.pom" type="object[]" required={true}>
+          An array of objects that defines the prompt object model (POM) for the AI. The POM is a structured data format for organizing and rendering a prompt for the AI agent. This prompt will be used to define the AI's personality, role, and other characteristics. See the [`POM technical reference`](/docs/swml/reference/amazon-bedrock/prompt) for more information.
+        </ParamField>
+
+        <ParamField path="post_prompt.temperature" type="number">
+          Controls the randomness of responses. Higher values (e.g., 0.8) make output more random and creative, while lower values (e.g., 0.2) make it more focused and deterministic. Range: 0.0 to 1.0.
+        </ParamField>
+
+        <ParamField path="post_prompt.top_p" type="number">
+          Controls diversity via nucleus sampling. Only tokens with cumulative probability up to top_p are considered. Lower values make output more focused. Range: 0.0 to 1.0.
+        </ParamField>
+
+        <ParamField path="post_prompt.confidence" type="number">
+          Minimum confidence threshold for AI responses. Responses below this threshold may be filtered or flagged. Range: 0.0 to 1.0.
+        </ParamField>
+
+        <ParamField path="post_prompt.presence_penalty" type="number">
+          Penalizes tokens based on whether they appear in the text so far. Positive values encourage the model to talk about new topics.
+        </ParamField>
+
+        <ParamField path="post_prompt.frequency_penalty" type="number">
+          Penalizes tokens based on their frequency in the text so far. Positive values decrease the likelihood of repeating the same line verbatim.
+        </ParamField>
+    </TabItem>
+</Tabs>
+
+## post_prompt_url callback
+
+SignalWire will make a request to the `post_prompt_url` with the following parameters:
+
+<ParamField path="action" type="string">
+  Action that prompted this request. The value will be "post_conversation".
+</ParamField>
+
+
+<ParamField path="ai_end_date" type="integer">
+  Timestamp indicating when the AI session ended.
+</ParamField>
+
+
+<ParamField path="ai_session_id" type="string">
+  A unique identifier for the AI session.
+</ParamField>
+
+
+<ParamField path="ai_start_date" type="integer">
+  Timestamp indicating when the AI session started.
+</ParamField>
+
+
+<ParamField path="app_name" type="string">
+  Name of the application that originated the request.
+</ParamField>
+
+
+<ParamField path="call_answer_date" type="integer">
+  Timestamp indicating when the call was answered.
+</ParamField>
+
+
+<ParamField path="call_end_date" type="integer">
+  Timestamp indicating when the call ended.
+</ParamField>
+
+
+<ParamField path="call_id" type="string">
+  ID of the call.
+</ParamField>
+
+
+<ParamField path="call_log" type="object">
+  The complete log of the call, as a JSON object.
+</ParamField>
+
+<Indent>
+<ParamField path="call_log.content" type="string">
+  Content of the call log entry.
+</ParamField>
+
+<ParamField path="call_log.role" type="string">
+  Role associated with the call log entry (e.g., "system", "assistant", "user").
+</ParamField>
+</Indent>
+
+
+<ParamField path="call_start_date" type="integer">
+  Timestamp indicating when the call started.
+</ParamField>
+
+
+<ParamField path="caller_id_name" type="string">
+  Name associated with the caller ID.
+</ParamField>
+
+
+<ParamField path="caller_id_num" type="string">
+  Number associated with the caller ID.
+</ParamField>
+
+
+<ParamField path="content_disposition" type="string">
+  Disposition of the content.
+</ParamField>
+
+
+<ParamField path="content_type" type="string">
+  Type of content. The value will be `text/swaig`.
+</ParamField>
+
+
+<ParamField path="conversation_id" type="string">
+  A unique identifier for the conversation thread, if configured via the AI parameters.
+</ParamField>
+
+
+<ParamField path="post_prompt_data" type="object">
+  The answer from the AI agent to the `post_prompt`. The object contains the three following fields.
+</ParamField>
+
+<Indent>
+<ParamField path="post_prompt_data.parsed" type="object">
+  If a JSON object is detected within the answer, it is parsed and provided here.
+</ParamField>
+
+<ParamField path="post_prompt_data.raw" type="string">
+  The raw data answer from the AI agent.
+</ParamField>
+
+<ParamField path="post_prompt_data.substituted" type="string">
+  The answer from the AI agent, excluding any JSON.
+</ParamField>
+</Indent>
+
+
+<ParamField path="project_id" type="string">
+  ID of the Project.
+</ParamField>
+
+
+<ParamField path="space_id" type="string">
+  ID of the Space.
+</ParamField>
+
+
+<ParamField path="SWMLVars" type="object">
+  A collection of variables related to SWML.
+</ParamField>
+
+
+<ParamField path="swaig_log" type="object">
+  A log related to SWAIG functions.
+</ParamField>
+
+
+<ParamField path="total_input_tokens" type="integer">
+  Represents the total number of input tokens.
+</ParamField>
+
+
+<ParamField path="total_output_tokens" type="integer">
+  Represents the total number of output tokens.
+</ParamField>
+
+
+<ParamField path="version" type="string">
+  Version number.
+</ParamField>
+
+
+### Post prompt callback request example
+
+Below is a json example of the callback request that is sent to the `post_prompt_url`:
+
+```json
+{
+  "total_output_tokens": 119,
+  "caller_id_name": "[CALLER_NAME]",
+  "SWMLVars": {
+    "ai_result": "success",
+    "answer_result": "success"
+  },
+  "call_start_date": 1694541295773508,
+  "project_id": "[PROJECT_ID]",
+  "call_log": [
+    {
+      "content": "[AI INITIAL PROMPT/INSTRUCTIONS]",
+      "role": "system"
+    },
+    {
+      "content": "[AI RESPONSE]",
+      "role": "assistant"
+    },
+    {
+      "content": "[USER RESPONSE]",
+      "role": "user"
+    }
+  ],
+  "ai_start_date": 1694541297950440,
+  "call_answer_date": 1694541296799504,
+  "version": "2.0",
+  "content_disposition": "Conversation Log",
+  "conversation_id": "[CONVERSATION_ID]",
+  "space_id": "[SPACE_ID]",
+  "app_name": "swml app",
+  "swaig_log": [
+    {
+      "post_data": {
+        "content_disposition": "SWAIG Function",
+        "conversation_id": "[CONVERSATION_ID]",
+        "space_id": "[SPACE_ID]",
+        "meta_data_token": "[META_DATA_TOKEN]",
+        "app_name": "swml app",
+        "meta_data": {},
+        "argument": {
+          "raw": "{\n  \"target\": \"[TRANSFER_TARGET]\"\n}",
+          "substituted": "",
+          "parsed": [
+            {
+              "target": "[TRANSFER_TARGET]"
+            }
+          ]
+        },
+        "call_id": "[CALL_ID]",
+        "content_type": "text/swaig",
+        "ai_session_id": "[AI_SESSION_ID]",
+        "caller_id_num": "[CALLER_NUMBER]",
+        "caller_id_name": "[CALLER_NAME]",
+        "project_id": "[PROJECT_ID]",
+        "purpose": "Use to transfer to a target",
+        "argument_desc": {
+          "type": "object",
+          "properties": {
+            "target": {
+              "description": "the target to transfer to",
+              "type": "string"
+            }
+          }
+        },
+        "function": "transfer",
+        "version": "2.0"
+      },
+      "command_name": "transfer",
+      "epoch_time": 1694541334,
+      "command_arg": "{\n  \"target\": \"[TRANSFER_TARGET]\"\n}",
+      "url": "https://example.com/here",
+      "post_response": {
+        "action": [
+          {
+            "say": "This is a say message!"
+          },
+          {
+            "SWML": {
+              "sections": {
+                "main": [
+                  {
+                    "connect": {
+                      "to": "+1XXXXXXXXXX"
+                    }
+                  }
+                ]
+              },
+              "version": "1.0.0"
+            }
+          },
+          {
+            "stop": true
+          }
+        ],
+        "response": "transferred to [TRANSFER_TARGET], the call has ended"
+      }
+    }
+  ],
+  "total_input_tokens": 5627,
+  "caller_id_num": "[CALLER_NUMBER]",
+  "call_id": "[CALL_ID]",
+  "call_end_date": 1694541335435503,
+  "content_type": "text/swaig",
+  "action": "post_conversation",
+  "post_prompt_data": {
+    "substituted": "[SUMMARY_MESSAGE_PLACEHOLDER]",
+    "parsed": [],
+    "raw": "[SUMMARY_MESSAGE_PLACEHOLDER]"
+  },
+  "ai_end_date": 1694541335425164,
+  "ai_session_id": "[AI_SESSION_ID]"
+}
+```
+
+### Responding to post prompt requests
+
+The response to the callback request should be a JSON object with the following parameters:
+
+```json
+{
+  "response": "ok"
+}
+```
+
+## Amazon Bedrock example
+
+The following example selects Bedrock's **Tiffany** voice using the [voice_id](/docs/swml/reference/amazon-bedrock/prompt) parameter in the prompt.
+It includes scaffolding for a [post_prompt_url](#properties)
+as well as several remote and inline functions using
+[SWAIG](/docs/swml/reference/amazon-bedrock/swaig).
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+---
+version: 1.0.0
+sections:
+  main:
+    - amazon_bedrock:
+        post_prompt_url: https://example.com/my-api
+        prompt:
+          voice_id: tiffany
+          text: |
+            You are a helpful assistant that can provide information to users about a destination.
+            At the start of the conversation, always ask the user for their name.
+            You can use the appropriate function to get the phone number, address,
+            or weather information.
+        post_prompt:
+          text: Summarize the conversation.
+        SWAIG:
+          includes:
+            - functions:
+                - get_phone_number
+                - get_address
+              url: https://example.com/functions
+          defaults:
+            web_hook_url: https://example.com/my-webhook
+          functions:
+            - function: get_weather
+              description: To determine what the current weather is in a provided location.
+              parameters:
+                properties:
+                  location:
+                    type: string
+                    description: The name of the city to find the weather from.
+                type: object
+            - function: summarize_conversation
+              description: Summarize the conversation.
+              parameters:
+                type: object
+                properties:
+                  name:
+                    type: string
+                    description: The name of the user.
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "amazon_bedrock": {
+          "post_prompt_url": "https://example.com/my-api",
+          "prompt": {
+            "voice_id": "tiffany",
+            "text": "You are a helpful assistant that can provide information to users about a destination.\nAt the start of the conversation, always ask the user for their name.\nYou can use the appropriate function to get the phone number, address,\nor weather information.\n"
+          },
+          "post_prompt": {
+            "text": "Summarize the conversation."
+          },
+          "SWAIG": {
+            "includes": [
+              {
+                "functions": [
+                  "get_phone_number",
+                  "get_address"
+                ],
+                "url": "https://example.com/functions"
+              }
+            ],
+            "defaults": {
+              "web_hook_url": "https://example.com/my-webhook"
+            },
+            "functions": [
+              {
+                "function": "get_weather",
+                "description": "To determine what the current weather is in a provided location.",
+                "parameters": {
+                  "properties": {
+                    "location": {
+                      "type": "string",
+                      "description": "The name of the city to find the weather from."
+                    }
+                  },
+                  "type": "object"
+                }
+              },
+              {
+                "function": "summarize_conversation",
+                "description": "Summarize the conversation.",
+                "parameters": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "description": "The name of the user."
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>

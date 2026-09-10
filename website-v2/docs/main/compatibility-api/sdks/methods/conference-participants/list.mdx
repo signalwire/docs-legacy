@@ -1,0 +1,74 @@
+---
+slug: /compatibility-api/sdks/reference/conference-participants/list
+title: List
+sidebar_label: List
+toc_max_heading_level: 3
+---
+
+Use this endpoint for the Conference Participants method to read all of the active participants that are associated with this conference call.
+This will be returned as a list of participants.
+
+<EndpointSchemaSnippet endpoint="GET /Accounts/{AccountSid}/Conferences/{ConferenceSid}/Participants" />
+
+<EndpointResponseSnippet endpoint="GET /Accounts/{AccountSid}/Conferences/{ConferenceSid}/Participants" />
+
+## Request examples
+
+<CodeBlocks>
+```javascript title="Node.js"
+const { RestClient } = require('@signalwire/compatibility-api')
+const client = RestClient('YourProjectID', 'YourAuthToken', { signalwireSpaceUrl: 'example.signalwire.com' })
+
+client.conferences('ConferenceSid')
+      .participants
+      .each(participants => console.log(participants.callSid));
+```
+```csharp
+using System;
+using System.Collections.Generic;
+using Twilio;
+using Twilio.Rest.Api.V2010.Account.Conference;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        TwilioClient.Init("YourProjectID", "YourAuthToken", new Dictionary<string, object> { ["signalwireSpaceUrl"] = "{SPACE}.signalwire.com" });
+
+        var participants = ParticipantResource.Read(
+            pathConferenceSid: "ConferenceSid"
+        );
+
+        foreach(var record in participants)
+        {
+           Console.WriteLine(record.CallSid);
+        }
+    }
+}
+```
+```python
+from signalwire.rest import Client as signalwire_client
+
+client = signalwire_client("YourProjectID", "YourAuthToken", signalwire_space_url = 'example.signalwire.com')
+
+participants = client.conferences('ConferenceSid') \
+                     .participants \
+                     .list()
+
+for record in participants:
+    print(record.call_sid)
+```
+```ruby
+require 'signalwire/sdk'
+
+@client = Signalwire::REST::Client.new 'YourProjectID', 'YourAuthToken', signalwire_space_url: "example.signalwire.com"
+
+participants = @client.conferences('ConferenceSid')
+                      .participants
+                      .list
+
+participants.each do |record|
+  puts record.call_sid
+end
+```
+</CodeBlocks>

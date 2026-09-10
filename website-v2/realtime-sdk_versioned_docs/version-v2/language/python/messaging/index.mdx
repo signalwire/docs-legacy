@@ -1,0 +1,42 @@
+---
+title: Relay.Messaging
+slug: /python/reference/messaging
+toc_max_heading_level: 3
+---
+
+[relay-messaging-sendresult]: /docs/server-sdk/v2/python/reference/messaging/send-result
+
+## Relay.Messaging
+
+This represents the API interface for the Messaging Relay Service. This object is used to make requests related to managing SMS and MMS messages.
+
+## Methods
+
+### send
+
+Send an outbound SMS or MMS message.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `context` | `string` | **required** | The context to receive inbound events. |
+| `from_number` | `string` | **required** | The phone number to place the message from. _Must be a SignalWire phone number or short code that you own._ |
+| `to_number` | `string` | **required** | The phone number to send to. |
+| `body` | `string` | **required** | The content of the message.<br /> _Optional if `media` is present._ |
+| `media` | `list` | **required** | List of URLs to send in the message. <br /> _Optional if `body` is present._ |
+| `tags` | `list` | **optional** | List of strings to tag the message with for searching in the UI. |
+
+**Returns**
+
+`coroutine` - Coroutine that will be fulfilled with a [`Relay.Messaging.SendResult`][relay-messaging-sendresult] object.
+
+**Examples**
+
+Send a message in the context _office_:
+
+```python
+result = await client.messaging.send(context='office', from_number='+1XXXXXXXXXX', to_number='+1YYYYYYYYYY', body='Welcome at SignalWire!')
+if result.successful:
+  print(f'Message ID: {result.message_id}')
+```

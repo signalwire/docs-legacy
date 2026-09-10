@@ -1,0 +1,52 @@
+---
+slug: /compatibility-api/sdks/reference/calls
+title: Calls
+sidebar_label: Calls
+toc_max_heading_level: 3
+---
+
+A call is a connection between SignalWire and another phone. 
+**Outbound calls** are made from SignalWire numbers to other phone numbers. 
+**Inbound calls** are made from other phone numbers to SignalWire numbers.
+
+## Properties
+
+<Schema type="Call" />
+
+## Example object
+
+<SchemaSnippet type="Call" title="The Call Object" />
+
+## `Status`
+
+The `status` attribute has the following values:
+
+|                                            Value |                                                       |
+| -----------------------------------------------: | ----------------------------------------------------- |
+|      `queued` | The call is ready and waiting in line.                |
+|     `ringing` | The call is ringing.                                  |
+| `in-progress` | The call was picked up and is in progress.            |
+|    `canceled` | The call was terminated when ringing or queued.       |
+|   `completed` | The call was picked up and terminated with no issues. |
+|        `busy` | The caller received a busy signal.                    |
+|      `failed` | The call was not completed because of a failure.      |
+
+## StatusCallback parameters
+
+<WebhookPayloadSnippet webhook="voiceStatusCallback" />
+
+## RecordingStatusCallback parameters
+
+In addition to the [standard request parameters](/docs/compatibility-api/cxml/reference/voice#request-parameters), the following are parameters passed back to your application when SignalWire makes a request to the `RecordingStatusCallback` URL.
+
+<WebhookPayloadSnippet webhook="recordingStatusCallback" />
+
+## `RecordingStatus`
+
+The `RecordingStatus` attribute has the following values:
+
+|                                            Value |                                                                   |
+| -----------------------------------------------: | ----------------------------------------------------------------- |
+| `in-progress` | The recording of the call has begun.                              |
+|   `completed` | The recording of the call is completed and ready to access.       |
+|      `failed` | The recording of the call is not accessible because of a failure. |

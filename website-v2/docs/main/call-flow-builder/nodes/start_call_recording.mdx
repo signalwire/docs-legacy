@@ -1,0 +1,38 @@
+---
+title: Start Call Recording
+description: Call Flow Builder node to start recording a call.
+slug: /call-flow-builder/reference/start-call-recording
+# image: "/assets/images/call-flow/nodes/start_recording.webp"
+---
+This node triggers background recording of both sides of the call. 
+The recording will automatically stop if the call is disconnected.
+To manually stop the recording, use the [Stop Call Recording](/docs/call-flow-builder/reference/stop-call-recording) node.
+
+
+## Node Settings
+
+<ParamField path="Recording Name" type="string">
+  The name of the recording file. The name is user-defined.<br /><br />**Default Value:** `Recording 1`
+</ParamField>
+
+<ParamField path="Stereo" type="boolean">
+  If enabled, the recording will be in stereo. If disabled, the recording will be in mono.<br /><br />**Default Value:** `toggled off`
+</ParamField>
+
+<ParamField path="Beep" type="boolean">
+  If enabled, a beep sound will be played at the beginning of the recording.<br /><br />**Default Value:** `toggled off`
+</ParamField>
+
+<ParamField path="Terminators" type="string">
+  The DTMF digits that will stop the recording. The recording will stop when any of the specified digits are pressed.<br /><br />**Default Value:** `None`
+</ParamField>
+
+<ParamField path="Format" type="string">
+  The format of the recording file. The available formats are `wav` and `mp3`.<br /><br />**Default Value:** `wav`
+</ParamField>
+
+## Example
+
+<Frame caption="A Call Flow that answers a call then starts a recording." ogImage>
+![A Call Flow that answers a call then starts a recording.](@image/call-flow/nodes/start_recording.webp)
+</Frame>

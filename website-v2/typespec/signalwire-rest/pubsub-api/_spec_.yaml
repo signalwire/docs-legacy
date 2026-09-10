@@ -1,0 +1,148 @@
+openapi: 3.0.3
+info:
+  version: 1.0.0
+  title: PubSub API
+  description: An API to use PubSub channels in your own application.
+  termsOfService: https://signalwire.com/legal/signalwire-cloud-agreement
+externalDocs:
+  url: https://developer.signalwire.com
+  description: Find more information about this and other SignalWire APIs.
+servers:
+  - url: https://{space_name}.signalwire.com/api/pubsub
+    variables:
+      space_name:
+        default: YOUR_SPACE
+        description: Your SignalWire Space's subdomain.
+security:
+  - basic_auth: []
+components:
+  securitySchemes:
+    basic_auth:
+      type: http
+      scheme: basic
+
+tags:
+  - name: Tokens
+  
+paths:
+  /tokens:
+    post:
+      operationId: create_token
+      summary: Generate a new PubSub Token
+      description: >
+        Generate a PubSub Token to be used to authenticate clients to the PubSub
+        Service.
+
+
+        #### Permissions
+
+        The API token must include the following scopes: _PubSub_.
+      tags:
+        - Tokens
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - type: object
+                  properties:
+                    ttl:
+                      type: integer
+                      description: >-
+                        The maximum time, in minutes, that the access token will
+                        be valid for. Between 1 and 43,200 (30 days).
+                      example: 15
+                    channels:
+                      type: object
+                      additionalProperties:
+                        type: object
+                        description: >-
+                          The key for this object represents the name of the
+                          channel. The inner properties specify its permissions.
+                        properties:
+                          read:
+                            type: boolean
+                            example: true
+                          write:
+                            type: boolean
+                            example: false
+                      description: >-
+                        Each channel with `write` and `read` objects with
+                        boolean as values. Max of 500 channels inside main
+                        `channels`. Either `read`, `write`, or both are required
+                        inside each channel and default to false. Each channel
+                        name can be up to 250 characters. Must be valid JSON.
+                      example:
+                        channel-a:
+                          read: true
+                          write: false
+                        channel-b:
+                          read: true
+                    member_id:
+                      type: string
+                      description: >-
+                        The unique identifier of the member. Up to 250
+                        characters. If not specified, a random UUID will be
+                        generated.
+                      example: John Doe
+                    state:
+                      type: object
+                      description: >-
+                        An arbitrary JSON object available to store stateful
+                        application information in. Must be valid JSON and have
+                        a maximum size of 2,000 characters.
+                      example:
+                        display_name: Joe
+                        an_array:
+                          - foo
+                          - bar
+                          - baz
+                  required:
+                    - ttl
+                    - channels
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    description: >-
+                      A PubSub Token to be used to authenticate clients to the
+                      PubSub Service.
+                    example: >-
+                      eyJ0eXAiOiJWUlQiLCJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE2MjIxMjAxMjMsI...wMCwicnNlIjo5MDB9-BqG-DqC5LhpsdMWEFjhVkTBpQ
+        '422':
+          description: Unprocessable Entity. You may have specified invalid parameters.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  type:
+                    type: string
+                  code:
+                    type: string
+                  message:
+                    type: string
+                  attribute:
+                    type: string
+                  url:
+                    type: string
+                    format: uri
+                required:
+                  - type
+                  - code
+                  - message
+                  - url
+                example:
+                  type: validation_error
+                  code: not_a_valid_json
+                  message: Permissions must be valid JSON
+                  attribute: permissions
+                  url: >-
+                    https://developer.signalwire.com/rest/overview/error-codes/#not_a_valid_json

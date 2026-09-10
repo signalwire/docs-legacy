@@ -1,0 +1,212 @@
+---
+title: Enqueue
+sidebar_label: Enqueue
+slug: /compatibility-api/cxml/reference/voice/enqueue
+sidebar_position: 1
+toc_max_heading_level: 3
+---
+
+The `<Enqueue>` verb places a call in a specified call queue. If the specified queue does not exist, a new queue will be created and the call will be placed into that new queue. Calls can be dequeued through the `<Dial>` verb or removed from the queue through the `<Leave>` verb.
+
+## Verb attributes
+
+<ParamField path="action" type="string">
+  The `action` attribute takes an absolute URL. When a call leaves the queue, a request to this URL is made. If a call is dequeued through the `<Leave>` verb, the URL is immediately requested. If the call has been bridged to another party via the `<Dial>` verb, then the HTTP request is made only after both parties have disconnected. If `action` is not provided, SignalWire will continue reading the next verb in the document. See [below](#enqueue_action) for specified request parameters.
+</ParamField>
+
+<ParamField path="method" type="string" default="POST">
+  Specifies whether the redirect is a `GET` or a `POST`.
+</ParamField>
+
+<ParamField path="waitUrl" type="string">
+  URL of the document to execute while the caller is in the queue. Default points to a playlist with classical music. waitUrl supports the following verbs: `<Play>`, `<Say>`, `<Pause>`, `<Hangup>`, `<Redirect>`, `<Leave>`, and `<Gather>`. See [below](#enqueue_waitUrl) for specified request parameters.
+</ParamField>
+
+<ParamField path="waitUrlMethod" type="string" default="POST">
+  Specifies whether the request to `waitUrl` is a `GET` or a `POST`.
+</ParamField>
+
+
+
+
+#### Request parameters for the `action` URL {#enqueue_action}
+
+The `action` request contains the [Standard Request Parameters](/docs/compatibility-api/cxml/reference/voice#request-parameters) as well as:
+
+<ParamField path="QueueResult" type="string">
+  The result of the queued call. See [below](#action_queueResult) for all possible values.
+</ParamField>
+
+<ParamField path="QueueSid" type="string">
+  The unique ID of the queue. Only available if a call is successfully placed into a queue.
+</ParamField>
+
+<ParamField path="QueueTime" type="string">
+  The time a call was waiting in a queue. Only available if a call is successfully placed into a queue.
+</ParamField>
+
+
+
+
+#### Values for parameter `QueueResult` {#action_queueResult}
+
+The parameter `QueueResult` has the following values:
+
+| Value | Description |
+|:------|:------------|
+| `bridged` | The call was bridged and removed from the queue. |
+| `bridging-in-progress` | SignalWire is instructed to bridge the call. |
+| `error` | An error occurred either through the `<Enqueue>` verb or through the document retrieved from the `waitUrl`. |
+| `hangup` | The caller hung up while still in the queue. |
+| `leave` | The caller left the queue through the `<Leave>` verb. |
+| `redirected` | The call was redirected out of the queue, through a REST API request, while the caller was in the queue. |
+| `redirected-from-bridged` | The queued and bridged session was transferred out. |
+| `queue-full` | The queue was full, so the placement into the queue was not accepted. |
+| `system-error` | SignalWire had a malfunction while placing a call into a queue. |
+
+
+
+
+#### Request parameters for `waitUrl` {#enqueue_waitUrl}
+
+The `waitUrl` request contains the [Standard Request Parameters](/docs/compatibility-api/cxml/reference/voice#request-parameters) as well as:
+
+<ParamField path="AvgQueueTime" type="integer">
+  The average time, in seconds, that callers have been waiting in a queue.
+</ParamField>
+
+<ParamField path="CurrentQueueSize" type="integer">
+  The current number of callers in a queue.
+</ParamField>
+
+<ParamField path="QueuePosition" type="integer">
+  The current position in the queue.
+</ParamField>
+
+<ParamField path="QueueSid" type="string">
+  The unique ID of the queue a caller is in.
+</ParamField>
+
+<ParamField path="QueueTime" type="integer">
+  The time a call was waiting in a queue.
+</ParamField>
+
+## Nouns
+
+The noun of an XML verb is nested within the verb upon which the verb acts. `<Enqueue>` has the following nouns:
+
+| Noun | Description |
+|:-----|:------------|
+| `plain text` | The name of a specific queue. |
+
+## Nesting
+
+No other verbs can be nested within `<Enqueue>` and you cannot nest <br /> `<Enqueue>` within any other verbs.
+
+## Examples
+
+### A simple enqueue
+
+<CodeBlocks>
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Enqueue waitUrl="https://example.com/hold-music.xml">support</Enqueue>
+</Response>
+```
+```javascript title="Node.js"
+const { RestClient } = require("@signalwire/compatibility-api");
+const response = new RestClient.LaML.VoiceResponse();
+
+response.enqueue({ waitUrl: "https://example.com/hold-music.xml" }, "support");
+console.log(response.toString());
+```
+```csharp
+using Twilio.TwiML;
+using System;
+
+
+class Example
+{
+    static void Main()
+    {
+        var response = new VoiceResponse();
+        response.Enqueue("support", waitUrl: new Uri("https://example.com/hold-music.xml"));
+
+        Console.WriteLine(response.ToString());;
+    }
+}
+```
+```python
+from signalwire.voice_response import VoiceResponse, Enqueue
+
+response = VoiceResponse()
+response.enqueue('support', wait_url='https://example.com/hold-music.xml')
+
+print(response)
+```
+```ruby
+require 'signalwire/sdk'
+
+response = Signalwire::Sdk::VoiceResponse.new do |response|
+  response.enqueue(name: 'support', wait_url: 'https://example.com/hold-music.xml')
+end
+
+puts response.to_s
+```
+</CodeBlocks>
+
+While a caller is in the queue, SignalWire retrieves the XML document 'hold-music.xml' and executes it.
+
+### Playing wait music
+
+<CodeBlocks>
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Play>http://your-application.com/classical.mp3</Play>
+</Response>
+```
+```javascript title="Node.js"
+const { RestClient } = require("@signalwire/compatibility-api");
+const response = new RestClient.LaML.VoiceResponse();
+
+response.play("http://your-application.com/classical.mp3");
+console.log(response.toString());
+```
+```csharp
+using Twilio.TwiML;
+using System;
+
+
+class Example
+{
+    static void Main()
+    {
+        var response = new VoiceResponse();
+        response.Play(new Uri("http://your-application.com/classical.mp3"));
+
+        Console.WriteLine(response.ToString());;
+    }
+}
+```
+```python
+from signalwire.voice_response import VoiceResponse, Play
+
+response = VoiceResponse()
+response.play('http://your-application.com/classical.mp3')
+
+print(response)
+```
+```ruby
+require 'signalwire/sdk'
+
+response = Signalwire::Sdk::VoiceResponse.new do |response|
+  response.play(url: 'http://your-application.com/classical.mp3')
+end
+
+puts response.to_s
+```
+</CodeBlocks>
+
+While callers in a queue are waiting, classical music is played.

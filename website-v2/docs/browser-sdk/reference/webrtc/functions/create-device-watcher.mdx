@@ -1,0 +1,54 @@
+---
+title: "createDeviceWatcher"
+slug: /js/reference/webrtc/create-device-watcher
+description: createDeviceWatcher function in the WebRTC namespace.
+toc_max_heading_level: 3
+---
+
+### createDeviceWatcher
+
+- `Const` **createDeviceWatcher**(`options?`): `Promise<EventEmitter<DeviceWatcherEvents, any>>`
+
+Asynchronously returns an event emitter that notifies changes in the devices. The possible events are:
+
+- `"added"`: A device has been added.
+- `"removed"`: A device has been removed.
+- `"updated"`: A device has been updated.
+- `"changed"`: Any of the previous events occurred.
+
+In all cases, your event handler gets as parameter an object `e` with the following keys:
+
+- `e.changes`: The changed devices. For `"added"`, `"removed"`, and `"updated"` event handlers, you only get the object associated to the respective event (i.e., only a list of added devices, removed devices, or updated devices). For `"changed"` event handlers, you get all three lists.
+- `e.devices`: The new list of devices.
+
+For device-specific helpers, see [createCameraDeviceWatcher](/docs/browser-sdk/js/reference/webrtc/create-camera-device-watcher), [createMicrophoneDeviceWatcher](/docs/browser-sdk/js/reference/webrtc/create-microphone-device-watcher), and [createSpeakerDeviceWatcher](/docs/browser-sdk/js/reference/webrtc/create-speaker-device-watcher).
+
+#### Parameters
+
+<ParamField path="options" type="CreateDeviceWatcherOptions">
+  If omitted, the event emitter is associated to all devices for which we have permission. Otherwise, pass an object `{ targets: string[] }`, where `targets` is a list of categories. Allowed categories are `"camera"`, `"microphone"`, and `"speaker"`.
+</ParamField>
+
+#### Returns
+
+`Promise<EventEmitter<DeviceWatcherEvents, any>>`
+
+#### Examples
+
+Creating an event listener on the `"changed"` event:
+
+```javascript
+await SignalWire.WebRTC.getUserMedia({ audio: true, video: false });
+h = await SignalWire.WebRTC.createDeviceWatcher();
+h.on("changed", (c) => console.log(c));
+```
+
+Getting notified only for audio input and output devices:
+
+```javascript
+h = await SignalWire.WebRTC.createDeviceWatcher({
+  targets: ["microphone", "speaker"],
+});
+h.on("changed", (c) => console.log(c));
+```
+

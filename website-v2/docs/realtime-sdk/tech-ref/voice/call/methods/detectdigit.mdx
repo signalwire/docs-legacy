@@ -1,0 +1,83 @@
+---
+title: "detectDigit"
+slug: /node/reference/voice/call/detect-digit
+description: detectDigit method for the Call class.
+toc_max_heading_level: 3
+---
+
+[calldetect-events]: /docs/server-sdk/node/reference/voice/call-detect#events
+[calldetect-onstarted]: /docs/server-sdk/node/reference/voice/call-detect#onstarted
+[calldetect]: /docs/server-sdk/node/reference/voice/call-detect
+[prompt]: /docs/server-sdk/node/reference/voice/call/prompt
+
+### detectDigit
+
+- **detectDigit**(`params?`): `Promise`\<[`CallDetect`][calldetect]>
+
+Detects when a digit is pressed in an audio stream. To gather digit input from a caller, please see [prompt][prompt].
+
+#### Parameters
+
+<ParamField path="params" type="object">
+  Object containing the parameters for digit detection.
+</ParamField>
+
+<Indent>
+<ParamField path="digits" type="string" default="0123456789#*">
+  The digits to detect.
+</ParamField>
+
+<ParamField path="timeout" type="number" default="30.0">
+  Number of seconds to run the detector for.
+</ParamField>
+
+<ParamField path="waitForBeep" type="boolean" default="false">
+  Whether to wait until the device is ready for voicemail delivery.
+</ParamField>
+
+<ParamField path="listen" type="object">
+  Callback to listen for events. List of detect events can be found [here][calldetect-events]. Example event: [`onStarted`][calldetect-onstarted].
+</ParamField>
+</Indent>
+
+#### Returns
+
+`Promise`\<[`CallDetect`][calldetect]>
+
+A promise that resolves to a [`CallDetect`][calldetect] object that you can use to
+view the current state and results of the `detect` session.
+
+#### Example
+
+In this example, we dial a phone number and wait for the digit detection to finish.
+Once the detection is finished, we log the result and then play a TTS message of the digit pressed and then hangup the call.
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+const voiceClient = client.voice;
+
+await voiceClient.listen({
+  topics: ["office"],
+  onCallReceived: async (call) => {
+
+    // Answer the call
+    call.answer();
+    await call.detectDigit({
+      listen: {
+        onStarted: () => console.log("Detection started!"),
+        onEnded: (detect) => console.log("Finished detecting digit", detect.result),
+        onUpdated: async (detect) => {
+          console.log("Updated detecting digit", detect.result)
+          // Stop the detection and play the digit pressed
+          detect.stop();
+          await call.playTTS({ text: `You pressed ${detect.result})` });
+          call.hangup();
+        }
+      }
+    }).onStarted();
+  }
+});
+```

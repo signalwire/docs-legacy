@@ -1,0 +1,450 @@
+---
+title: "Patterns"
+sidebar_label: "Patterns"
+slug: /python/reference/patterns
+toc_max_heading_level: 3
+---
+
+## Design Patterns
+
+Common architectural patterns and solutions for building SignalWire voice AI agents.
+
+### Overview
+
+| Pattern | Description |
+|---------|-------------|
+| Decorator Pattern | Add functions with `@agent.tool` decorator |
+| Class-Based Agent | Subclass AgentBase for reusable agents |
+| Multi-Agent Router | Route calls to specialized agents |
+| State Machine | Use contexts for multi-step workflows |
+| DataMap Integration | Serverless API integration |
+| Skill Composition | Combine built-in skills |
+| Dynamic Configuration | Runtime agent customization |
+
+### Decorator Pattern
+
+The simplest way to create an agent with functions:
+
+```python
+from signalwire_agents import AgentBase
+from signalwire_agents.core.function_result import SwaigFunctionResult
+
+agent = AgentBase(name="helper", route="/helper")
+agent.prompt_add_section("Role", "You help users with account information.")
+agent.add_language("English", "en-US", "rime.spore")
+
+@agent.tool(description="Look up account by ID")
+def lookup_account(account_id: str) -> SwaigFunctionResult:
+    # Lookup logic here
+    return SwaigFunctionResult(f"Account {account_id} found.")
+
+@agent.tool(description="Update account status")
+def update_status(account_id: str, status: str) -> SwaigFunctionResult:
+    # Update logic here
+    return SwaigFunctionResult(f"Account {account_id} updated to {status}.")
+
+if __name__ == "__main__":
+    agent.run()
+```
+
+### Class-Based Agent Pattern
+
+For reusable, shareable agent definitions:
+
+```python
+from signalwire_agents import AgentBase
+from signalwire_agents.core.function_result import SwaigFunctionResult
+
+class SupportAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="support", route="/support")
+        self.prompt_add_section("Role", "You are a technical support agent.")
+        self.prompt_add_section("Guidelines", """
+        - Be patient and helpful
+        - Gather issue details before troubleshooting
+        - Escalate complex issues to human support
+        """)
+        self.add_language("English", "en-US", "rime.spore")
+        self.add_skill("datetime")
+
+    @AgentBase.tool(description="Create support ticket")
+    def create_ticket(self, issue: str, priority: str = "normal") -> SwaigFunctionResult:
+        ticket_id = f"TKT-{id(self) % 10000:04d}"
+        return SwaigFunctionResult(f"Created ticket {ticket_id} for: {issue}")
+
+    @AgentBase.tool(description="Transfer to human support")
+    def transfer_to_human(self) -> SwaigFunctionResult:
+        return (
+            SwaigFunctionResult("Connecting you to a support representative.")
+            .connect("+15551234567", final=True)
+        )
+
+if __name__ == "__main__":
+    agent = SupportAgent()
+    agent.run()
+```
+
+### Multi-Agent Router Pattern
+
+Route calls to specialized agents based on intent:
+
+```python
+from signalwire_agents import AgentBase, AgentServer
+from signalwire_agents.core.function_result import SwaigFunctionResult
+
+
+class RouterAgent(AgentBase):
+    def __init__(self, base_url: str):
+        super().__init__(name="router", route="/")
+        self.base_url = base_url
+        self.prompt_add_section("Role", """
+        You are a receptionist. Determine what the caller needs and
+        route them to the appropriate department.
+        """)
+        self.prompt_add_section("Departments", """
+        - Sales: Product inquiries, pricing, purchases
+        - Support: Technical help, troubleshooting
+        - Billing: Payments, invoices, account issues
+        """)
+        self.add_language("English", "en-US", "rime.spore")
+
+    @AgentBase.tool(description="Transfer to sales department")
+    def transfer_sales(self) -> SwaigFunctionResult:
+        return (
+            SwaigFunctionResult("Transferring to sales.")
+            .connect(f"{self.base_url}/sales", final=True)
+        )
+
+    @AgentBase.tool(description="Transfer to support department")
+    def transfer_support(self) -> SwaigFunctionResult:
+        return (
+            SwaigFunctionResult("Transferring to support.")
+            .connect(f"{self.base_url}/support", final=True)
+        )
+
+
+if __name__ == "__main__":
+    server = AgentServer(host="0.0.0.0", port=8080)
+    server.register(RouterAgent("https://agent.example.com"))
+    server.run()
+```
+
+### State Machine Pattern (Contexts)
+
+Use contexts for structured multi-step workflows:
+
+```python
+from signalwire_agents import AgentBase
+from signalwire_agents.core.contexts import ContextBuilder
+from signalwire_agents.core.function_result import SwaigFunctionResult
+
+
+class VerificationAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="verify", route="/verify")
+        self.add_language("English", "en-US", "rime.spore")
+        self._setup_contexts()
+
+    def _setup_contexts(self):
+        ctx = ContextBuilder("verification")
+
+        ctx.add_step(
+            "greeting",
+            "Welcome the caller and ask for their account number.",
+            functions=["verify_account"],
+            valid_steps=["collect_info"]
+        )
+
+        ctx.add_step(
+            "collect_info",
+            "Verify the caller's identity by asking security questions.",
+            functions=["verify_security"],
+            valid_steps=["authenticated", "failed"]
+        )
+
+        ctx.add_step(
+            "authenticated",
+            "The caller is verified. Ask how you can help them today.",
+            functions=["check_balance", "transfer_funds", "end_call"],
+            valid_steps=["end"]
+        )
+
+        self.add_context(ctx.build(), default=True)
+
+    @AgentBase.tool(description="Verify account number")
+    def verify_account(self, account_number: str) -> SwaigFunctionResult:
+        return SwaigFunctionResult(f"Account {account_number} found.")
+
+    @AgentBase.tool(description="Check account balance")
+    def check_balance(self, account_id: str) -> SwaigFunctionResult:
+        return SwaigFunctionResult("Current balance is $1,234.56")
+```
+
+### DataMap Integration Pattern
+
+Use DataMap for serverless API integration:
+
+```python
+from signalwire_agents import AgentBase
+from signalwire_agents.core.data_map import DataMap
+
+agent = AgentBase(name="weather", route="/weather")
+agent.prompt_add_section("Role", "You provide weather information.")
+agent.add_language("English", "en-US", "rime.spore")
+
+## Define DataMap tool
+weather_map = DataMap(
+    name="get_weather",
+    description="Get current weather for a city"
+)
+
+weather_map.add_parameter("city", "string", "City name", required=True)
+
+weather_map.add_webhook(
+    url="https://api.weather.com/v1/current?q=${enc:args.city}&key=API_KEY",
+    method="GET",
+    output_map={
+        "response": "Weather in ${args.city}: ${response.temp}F, ${response.condition}"
+    },
+    error_map={
+        "response": "Could not retrieve weather for ${args.city}"
+    }
+)
+
+agent.add_data_map_tool(weather_map)
+
+if __name__ == "__main__":
+    agent.run()
+```
+
+### Skill Composition Pattern
+
+Combine multiple skills for comprehensive functionality:
+
+```python
+from signalwire_agents import AgentBase
+from signalwire_agents.core.function_result import SwaigFunctionResult
+
+agent = AgentBase(name="assistant", route="/assistant")
+agent.prompt_add_section("Role", """
+You are a comprehensive assistant that can:
+
+- Tell the current time and date
+- Search our knowledge base
+- Look up weather information
+""")
+agent.add_language("English", "en-US", "rime.spore")
+
+## Add built-in skills
+agent.add_skill("datetime")
+agent.add_skill("native_vector_search", {
+    "index_path": "./knowledge.swsearch",
+    "tool_name": "search_docs",
+    "tool_description": "Search documentation"
+})
+
+## Add custom function alongside skills
+@agent.tool(description="Escalate to human agent")
+def escalate(reason: str) -> SwaigFunctionResult:
+    return (
+        SwaigFunctionResult(f"Escalating: {reason}")
+        .connect("+15551234567", final=True)
+    )
+
+if __name__ == "__main__":
+    agent.run()
+```
+
+### Dynamic Configuration Pattern
+
+Configure agents dynamically at runtime:
+
+```python
+from signalwire_agents import AgentBase
+from signalwire_agents.core.function_result import SwaigFunctionResult
+from typing import Dict, Any
+
+
+class DynamicAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="dynamic", route="/dynamic")
+        self.add_language("English", "en-US", "rime.spore")
+        self.set_dynamic_config_callback(self.configure_from_call)
+
+    def configure_from_call(
+        self,
+        query_params: Dict[str, Any],
+        body_params: Dict[str, Any],
+        headers: Dict[str, str],
+        agent: 'AgentBase'
+    ) -> None:
+        # Get caller's phone number from body
+        caller = body_params.get("call", {}).get("from", "")
+
+        # Customize prompt based on caller
+        if caller.startswith("+1555"):
+            agent.prompt_add_section("Role", "You are a VIP support agent.")
+        else:
+            agent.prompt_add_section("Role", "You are a standard support agent.")
+
+        # Add caller info to global data
+        agent.set_global_data({"caller_number": caller})
+
+
+if __name__ == "__main__":
+    agent = DynamicAgent()
+    agent.run()
+```
+
+### Pattern Selection Guide
+
+| Scenario | Recommended Pattern |
+|----------|---------------------|
+| Quick prototype or simple agent | Decorator Pattern |
+| Reusable agent for sharing | Class-Based Agent |
+| Multiple specialized agents | Multi-Agent Router |
+| Step-by-step workflows | State Machine (Contexts) |
+| External API integration | DataMap Integration |
+| Feature-rich agent | Skill Composition |
+| Per-call customization | Dynamic Configuration |
+
+### Anti-Patterns to Avoid
+
+#### Prompt-Driven Logic (Don't Do This)
+
+```python
+# BAD: Business rules in prompts
+agent.prompt_add_section("Rules", """
+- Maximum order is $500
+- Apply 10% discount for orders over $100
+- Don't accept returns after 30 days
+""")
+```
+
+LLMs may ignore or misapply these rules. Instead, enforce in code:
+
+```python
+# GOOD: Business rules in code
+@agent.tool(description="Place an order")
+def place_order(amount: float) -> SwaigFunctionResult:
+    if amount > 500:
+        return SwaigFunctionResult("Orders are limited to $500.")
+    discount = 0.10 if amount > 100 else 0
+    final = amount * (1 - discount)
+    return SwaigFunctionResult(f"Order total: ${final:.2f}")
+```
+
+#### Monolithic Agents (Don't Do This)
+
+```python
+# BAD: One agent does everything
+class DoEverythingAgent(AgentBase):
+    # 50+ functions for sales, support, billing, HR...
+```
+
+Split into specialized agents:
+
+```python
+# GOOD: Specialized agents with router
+class SalesAgent(AgentBase): ...
+class SupportAgent(AgentBase): ...
+class RouterAgent(AgentBase):
+    # Routes to appropriate specialist
+```
+
+#### Stateless Functions (Don't Do This)
+
+```python
+# BAD: No state tracking
+@agent.tool(description="Add item to cart")
+def add_to_cart(item: str) -> SwaigFunctionResult:
+    return SwaigFunctionResult(f"Added {item}")
+    # Where does the cart live?
+```
+
+Use global_data for state:
+
+```python
+# GOOD: State in global_data
+@agent.tool(description="Add item to cart")
+def add_to_cart(item: str, args=None, raw_data=None) -> SwaigFunctionResult:
+    cart = raw_data.get("global_data", {}).get("cart", [])
+    cart.append(item)
+    return (
+        SwaigFunctionResult(f"Added {item}. Cart has {len(cart)} items.")
+        .update_global_data({"cart": cart})
+    )
+```
+
+### Production Patterns
+
+#### Graceful Error Handling
+
+```python
+@agent.tool(description="Look up account")
+def lookup_account(account_id: str) -> SwaigFunctionResult:
+    try:
+        account = database.get(account_id)
+        if not account:
+            return SwaigFunctionResult("I couldn't find that account. Can you verify the number?")
+        return SwaigFunctionResult(f"Account {account_id}: {account['status']}")
+    except DatabaseError:
+        return SwaigFunctionResult("I'm having trouble accessing accounts right now. Let me transfer you to someone who can help.")
+```
+
+#### Retry with Escalation
+
+```python
+MAX_VERIFICATION_ATTEMPTS = 3
+
+@agent.tool(description="Verify identity")
+def verify_identity(answer: str, args=None, raw_data=None) -> SwaigFunctionResult:
+    attempts = raw_data.get("global_data", {}).get("verify_attempts", 0) + 1
+
+    if verify_answer(answer):
+        return SwaigFunctionResult("Verified!").update_global_data({"verified": True})
+
+    if attempts >= MAX_VERIFICATION_ATTEMPTS:
+        return (
+            SwaigFunctionResult("Let me connect you to a representative.")
+            .connect("+15551234567", final=True)
+        )
+
+    return (
+        SwaigFunctionResult(f"That doesn't match. You have {MAX_VERIFICATION_ATTEMPTS - attempts} attempts left.")
+        .update_global_data({"verify_attempts": attempts})
+    )
+```
+
+#### Audit Trail Pattern
+
+```python
+import logging
+from datetime import datetime
+
+logger = logging.getLogger(__name__)
+
+@agent.tool(description="Process sensitive operation")
+def sensitive_operation(account_id: str, action: str, args=None, raw_data=None) -> SwaigFunctionResult:
+    call_id = raw_data.get("call_id", "unknown")
+    caller = raw_data.get("caller_id_number", "unknown")
+
+    # Log for audit
+    logger.info(f"AUDIT: call={call_id} caller={caller} account={account_id} action={action} time={datetime.utcnow().isoformat()}")
+
+    # Process action
+    result = perform_action(account_id, action)
+
+    return SwaigFunctionResult(f"Action completed: {result}")
+```
+
+### See Also
+
+| Topic | Reference |
+|-------|-----------|
+| Examples by feature | [Examples](/docs/agents-sdk/python/guides/by-feature) |
+| Code-driven architecture | [Examples by Complexity](/docs/agents-sdk/python/guides/by-complexity) - Expert section |
+| State management | [State Management](/docs/agents-sdk/python/guides/state-management) |
+| Multi-agent systems | [Multi-Agent Servers](/docs/agents-sdk/python/guides/multi-agent) |
+
+

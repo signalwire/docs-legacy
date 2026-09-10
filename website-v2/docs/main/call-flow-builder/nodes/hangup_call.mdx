@@ -1,0 +1,25 @@
+---
+title: Hang Up Call
+description: Call Flow Builder node to hang up a call.
+slug: /call-flow-builder/reference/hangup-call
+---
+The Hang Up Call node will disconnect a call and end the flow.
+
+<Note>
+
+This node is not strictly required, as calls will automatically end when the call reaches the end of a flow.
+
+</Note>
+
+The **Reason** parameter is used for logging purposes and does not change the behavior of the Hang Up Call node.
+
+<Frame caption="The Hangup Call node." ogImage>
+![The Hangup Call node.](@image/call-flow/nodes/hangup.webp)
+</Frame>
+
+
+## Node Settings
+
+<ParamField path="Reason" type="string">
+  The reason for hanging up the call. <br /> **Possible Values:** `Busy`, `Decline`, `Hang up` <br /> **Default Value:** `Busy`
+</ParamField>

@@ -1,0 +1,51 @@
+---
+title: "addDevice"
+slug: /js/reference/video/room-session/add-device
+description: addDevice method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+### addDevice
+
+- **addDevice**(`opts`): `Promise<RoomSessionDevice>` - See [RoomSessionDevice documentation](/docs/browser-sdk/js/reference/video/room-session-device) for more details.
+
+Adds a device to the room. Using this method, a user can stream multiple sources at the same time. If you need to add a camera device or a microphone device, you can alternatively use the more specific methods [addCamera](/docs/browser-sdk/js/reference/video/room-session/add-camera) and [addMicrophone](/docs/browser-sdk/js/reference/video/room-session/add-microphone).
+
+#### Parameters
+
+<ParamField path="opts" type="object">
+  Specify the constraints for the device. In addition, you can add the `autoJoin` key to specify whether the device should immediately join the room or joining will be performed manually later.
+</ParamField>
+
+<Indent>
+<ParamField path="audio" type="boolean | MediaTrackConstraints" required={false}>
+  Audio constraints.
+</ParamField>
+
+<ParamField path="autoJoin" type="boolean" required={false}>
+  Whether the device should automatically join the room. Default: `true`.
+</ParamField>
+
+<ParamField path="video" type="boolean | MediaTrackConstraints" required={false}>
+  Video constraints.
+</ParamField>
+</Indent>
+
+#### Returns
+
+`Promise<RoomSessionDevice>` - See [RoomSessionDevice documentation](/docs/browser-sdk/js/reference/video/room-session-device) for more details.
+
+#### Permissions
+
+- `room.self.additional_source`
+
+You need to specify the permissions when [creating the Video Room Token](/docs/apis/video/create-room-token) on the server side.
+
+#### Example
+
+Adding any of the microphone devices to the room (duplicate streams are possible):
+
+```javascript
+await roomSession.addDevice({ audio: true });
+```
+

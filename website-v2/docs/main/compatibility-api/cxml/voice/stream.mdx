@@ -1,0 +1,651 @@
+---
+title: Stream
+sidebar_label: Stream
+slug: /compatibility-api/cxml/reference/voice/stream
+sidebar_position: 1
+toc_max_heading_level: 3
+---
+
+[stream_start]: /docs/compatibility-api/rest/create-stream
+[stream_stop]: /docs/compatibility-api/rest/update-stream
+[conference_create]: /docs/compatibility-api/rest/create-conference-stream
+[conference_update]: /docs/compatibility-api/rest/update-conference-stream
+
+The `<Stream>` instruction makes it possible to send raw audio streams from a running phone call over WebSockets in near real time, to a specified URL. The audio frames themselves are base64 encoded, embedded in a json string, together with other information like sequence number and timestamp. The feature can be used with Speech-To-Text systems and others.
+
+## Attributes
+
+An example on how to use Stream:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+  <Start>
+     <Stream url="wss://your-application.com/audiostream" />
+  </Start>
+</Response>
+```
+
+This cXML will instruct Signalwire to make a copy of the audio frames of the current call and send them in near real-time over WebSocket to wss://your-application.com/audiostream.
+
+`<Stream>` will start the audio stream in an asynchronous manner; it will continue with the next cXML instruction at once. In case there is no instruction, Signalwire will disconnect the call.
+
+<CodeBlocks>
+```javascript title="Node.js"
+const { RestClient } = require("@signalwire/compatibility-api");
+const response = new RestClient.LaML.VoiceResponse();
+
+const start = response.start();
+start.stream({
+  name: "Example Audio Stream",
+  url: "wss://your-application.com/audiostream",
+});
+
+console.log(response.toString());
+```
+```csharp
+using System;
+using Twilio.TwiML;
+using Twilio.TwiML.Voice;
+
+
+class Example
+{
+    static void Main()
+    {
+        var response = new VoiceResponse();
+        var start = new Start();
+        start.Stream(name: "Example Audio Stream", url: "wss://your-application.com/audiostream");
+        response.Append(start);
+
+        Console.WriteLine(response.ToString());
+    }
+}
+```
+```python
+from signalwire.voice_response import Parameter, VoiceResponse, Start, Stream
+
+response = VoiceResponse()
+start = Start()
+stream = Stream(url='wss://your-application.com/audiostream')
+stream.parameter(name='FirstName', value='Jane')
+stream.parameter(name='LastName', value='Doe')
+start.append(stream)
+response.append(start)
+
+print(response)
+```
+```ruby
+require 'signalwire/sdk'
+
+response =  Signalwire::Sdk::VoiceResponse.new
+response.start do |start|
+    start.stream(url: 'wss://your-application.com/audiostream') do |stream|
+        stream.parameter(name: 'FirstName', value: 'Jane')
+        stream.parameter(name: 'LastName', value: 'Doe')
+    end
+end
+
+puts response
+```
+</CodeBlocks>
+
+<Tabs  groupId="Stream">
+<TabItem value="stream" label="Stream">
+
+<ParamField path="url" type="string" required={true}>
+  Absolute or relative URL. A WebSocket connection to the url will be established and audio will start flowing towards the Websocket server. The only supported protocol is `wss`. For security reasons `ws` is NOT supported.
+</ParamField>
+
+<ParamField path="authBearerToken" type="string">
+  An authentication Bearer token that can be supplied when starting a stream. The remote server can then authenticate the websocket connection request from the supplied token. More information can be found in the [WebSocket connection](#websocket-connection) section.
+</ParamField>
+
+<ParamField path="codec" type="string" default="PCMU@8000h">
+  Specifies the audio codec for the stream. See [Supported Codecs](#supported-codecs) for full list.
+</ParamField>
+
+<ParamField path="name" type="string">
+  Unique name for the Stream, per Call. It is used to stop a Stream by name.
+</ParamField>
+
+<ParamField path="realtime" type="boolean" default="false">
+  If `true`, and the stream is [`bidirectional`](/docs/compatibility-api/cxml/reference/voice/connect#bidirectional-media-stream), the stream offers a realtime experience to the call parties by managing packet delays and bursts. If `false`, the user benefits from buffered audio, which can be played out with delay.
+</ParamField>
+
+<ParamField path="statusCallback" type="string">
+  Absolute or relative URL. SignalWire will make a HTTP GET or POST request to this URL when a Stream is started, stopped or there is an error.
+</ParamField>
+
+<ParamField path="statusCallbackMethod" type="string" default="POST">
+  GET or POST. The type of HTTP request to use when requesting a statusCallback.
+</ParamField>
+
+<ParamField path="track" type="string" default="inbound_track">
+  This attribute can be one of: `inbound_track`, `outbound_track`, `both_tracks`. For `both_tracks` there will be both `inbound_track` and `outbound_track` events. If the stream is [`bidirectional`](/docs/compatibility-api/cxml/reference/voice/connect#bidirectional-media-stream), the only available attribute is `inbound_track`.
+</ParamField>
+
+<Tip title="Looking to use our REST APIs? ">
+
+You can utilize our REST API to both [start][stream_start] and [stop][stream_stop] streams.
+
+</Tip>
+
+</TabItem>
+
+<TabItem value="conference-stream" label="Conference Stream">
+
+<ParamField path="name" type="string" required={true}>
+  Unique name for the Stream, per Call. It is used to stop a Stream by name.
+</ParamField>
+
+<ParamField path="url" type="string" required={true}>
+  Absolute or relative URL. A WebSocket connection to the url will be established and audio will start flowing towards the Websocket server. The only supported protocol is `wss`. For security reasons `ws` is NOT supported.
+</ParamField>
+
+<ParamField path="bidir" type="boolean">
+  Defines if stream supports bidirectional communication.
+</ParamField>
+
+<ParamField path="codec" type="string" default="PCMU@8000h">
+  Specifies the audio codec for the stream. See [Supported Codecs](#supported-codecs) for full list.
+</ParamField>
+
+<ParamField path="realtime" type="boolean" default="false">
+  If `true`, and the stream is [`bidirectional`](/docs/compatibility-api/cxml/reference/voice/connect#bidirectional-media-stream), the stream offers a realtime experience to the call parties by managing packet delays and bursts. If `false`, the call parties benefit from buffered audio, which can be played out with delay.
+</ParamField>
+
+<ParamField path="statusCallback" type="string">
+  Absolute or relative URL. SignalWire will make a HTTP GET or POST request to this URL when a Stream is started, stopped or there is an error.
+</ParamField>
+
+<ParamField path="statusCallbackMethod" type="string" default="POST">
+  GET or POST. The type of HTTP request to use when requesting a statusCallback.
+</ParamField>
+
+<ParamField path="streamSslValidateCertificate" type="boolean" default="false">
+  Enable SSL certificate validation for the WebSocket connection.
+</ParamField>
+
+<ParamField path="streamStartConferenceOnEnter" type="boolean">
+  Controls if streaming begins automatically when joining a conference.
+</ParamField>
+
+<ParamField path="track" type="string" default="inbound_track">
+  This attribute can be one of: `inbound_track`, `outbound_track`, `both_tracks`. For `both_tracks` there will be both `inbound_track` and `outbound_track` events. If the stream is [`bidirectional`](/docs/compatibility-api/cxml/reference/voice/connect#bidirectional-media-stream), the only available attribute is `inbound_track`.
+</ParamField>
+
+<Tip title="Looking to use our REST APIs?">
+
+You can utilize our REST API to [create][conference_create] and [update][conference_update] your conference streams.
+
+</Tip>
+
+</TabItem>
+</Tabs>
+
+## `StatusCallback` parameters
+
+For a `statusCallback`, SignalWire will send a request with the following parameters:
+
+<ParamField path="AccountSid" type="string">
+  The unique ID of the Account this call is associated with.
+</ParamField>
+
+<ParamField path="CallSid" type="string">
+  A unique identifier for the call. May be used to later retrieve this message from the REST API.
+</ParamField>
+
+<ParamField path="ConferenceSid" type="string">
+  If the stream is part of a conference, the unique identifier for the conference.
+</ParamField>
+
+<ParamField path="StreamError" type="string">
+  If an error has occurred, this will contain a detailed error message. See [StreamError Values](#streamerror-values) for possible values.
+</ParamField>
+
+<ParamField path="StreamEvent" type="string">
+  One of `stream-started`, `stream-stopped`, or `stream-error`.
+</ParamField>
+
+<ParamField path="StreamName" type="string">
+  If defined, this is the unique name of the Stream. Defaults to the StreamSid.
+</ParamField>
+
+<ParamField path="StreamSid" type="string">
+  The unique identifier for this Stream.
+</ParamField>
+
+<ParamField path="StreamTrack" type="string">
+  The track configuration for this stream: `inbound_track`, `outbound_track`, or `both_tracks`.
+</ParamField>
+
+<ParamField path="Timestamp" type="string">
+  The time of the event in ISO 8601 format.
+</ParamField>
+
+<ParamField path="Unique-ID" type="string">
+  The unique call identifier.
+</ParamField>
+
+### StreamError values
+
+When `StreamEvent` is `stream-error`, the `StreamError` field will contain one of the following values:
+
+| Error Value | Meaning | Common Causes |
+| :---------- | :------ | :------------ |
+| `invalid_url` | Invalid WebSocket URL format | URL doesn't use `wss://` protocol |
+| `missing_url` | No URL provided | `url` attribute not specified |
+| `invalid_track` | Invalid track configuration | Track value not one of: `inbound_track`, `outbound_track`, `both_tracks` |
+| `codec_error` | Codec not supported or misconfigured | Requested codec not enabled for your account, or multi-channel audio requested (only mono is supported) |
+| `connection_refused` | Remote endpoint rejected connection | Your WebSocket server refused the connection |
+| `connection_refused_timeout_or_ssl_error` | Connection timeout or SSL failure | WebSocket server unreachable or SSL certificate issues |
+| `general_error` | Internal stream initialization failed | Internal error during stream setup - contact support with StreamSid |
+| `Duplicated stream ID` | Stream ID already in use | Conference already has a stream with this ID |
+| `Duplicated stream name` | Stream name already in use | Conference already has a stream with this name |
+
+## Supported codecs
+
+The `codec` attribute allows you to control the audio codec used for the stream. The following codecs are supported:
+
+| Codec Value | Sample Rates Available |
+| :---------- | :--------------------- |
+| `PCMU` (default) | `8000h` |
+| `L16` | `16000h`, `24000h` |
+
+**Codec Format Examples:**
+- `PCMU@8000h` (default if no codec specified)
+- `L16@24000h`
+- `L16@16000h`
+
+
+## WebSocket connection
+
+When establishing a stream, SignalWire initiates a WebSocket connection to your specified URL endpoint. The connection begins with an HTTP upgrade request containing the following headers:
+
+<ParamField path="Authorization" type="string">
+  Bearer token for authentication if `authBearerToken` attribute is provided (format: "Bearer token_here").
+</ParamField>
+
+<ParamField path="Connection" type="string">
+  Connection type for the upgrade (value: "Upgrade").
+</ParamField>
+
+<ParamField path="Host" type="string">
+  The destination server hosting the WebSocket endpoint (e.g., "example.com").
+</ParamField>
+
+<ParamField path="Sec-WebSocket-Key" type="string">
+  Base64-encoded random value used for the WebSocket handshake.
+</ParamField>
+
+<ParamField path="Sec-WebSocket-Version" type="string">
+  WebSocket protocol version (value: "13").
+</ParamField>
+
+<ParamField path="Upgrade" type="string">
+  Protocol upgrade request indicating a switch to WebSocket (value: "websocket").
+</ParamField>
+
+Once the WebSocket connection is established, SignalWire will send various events throughout the stream's lifecycle.
+These events are delivered as JSON-formatted WebSocket messages, each containing an `event` property that identifies the message type.
+
+SignalWire sends the following event types to your WebSocket server:
+- **[Connected](#connected-message)** - Initial handshake message confirming the connection
+- **[Start](#start-message)** - Stream metadata and configuration details
+- **[Media](#media-message)** - Audio data packets
+- **[DTMF](#dtmf-message)** - Touch-tone digit events
+- **[Mark](#mark-message)** - Audio playback completion acknowledgments (echoed back when you send a mark)
+- **[Stop](#stop-message)** - Stream termination notification
+
+When using bidirectional streams with `<Connect><Stream>`, you can also send messages to SignalWire:
+- **[Media](#send-a-media-message)** - Send audio data into the call
+- **[Mark](#send-a-mark-message)** - Request playback completion acknowledgment
+- **[Clear](#send-a-clear-message)** - Flush the audio buffer
+- **[DTMF](#send-a-dtmf-message)** - Inject DTMF tones into the call
+
+### Connected message
+
+SignalWire sends the Connected event immediately after establishing the WebSocket connection.
+This initial message outlines the communication protocol for all subsequent interactions.
+
+|         Property | Description                                                                         |
+| ---------------: | ----------------------------------------------------------------------- |
+|            event | The string value of `connected`.                                        |
+|         protocol | Defines the protocol for the WebSocket connection's lifetime. Value: `Call` |
+|          version | Semantic version of the protocol. Current version: `0.2.0`                                       |
+
+Example Connected message
+
+```json
+{
+  "event": "connected",
+  "protocol": "Call",
+  "version": "0.2.0"
+}
+```
+
+### Start message
+
+SignalWire delivers this message right after the `Connected` event, providing essential stream configuration details.
+This message appears only once when the stream initializes.
+
+|                            Property | Description                                                                                                                                         |
+| ----------------------------------: | --------------------------------------------------------------------------------------------------------------------------------------- |
+|                               event | The string value of `start`.                                                                                                           |
+|                      sequenceNumber | Message sequence tracking, starting from "1" and incrementing with each message.                                                                    |
+|                               start | Container holding stream configuration and metadata details.                                                                          |
+|                     start.streamSid | The unique identifier of the Stream.                                                                                                   |
+|                    start.accountSid | The Account identifier that created the Stream.                                                                                        |
+|                       start.callSid | Call session identifier where the stream originated.                                                                                   |
+|                        start.tracks | Array specifying which audio directions will be transmitted. Possible values: `["inbound"]`, `["outbound"]`, or `["inbound", "outbound"]`.             |
+|              start.customParameters | Object containing custom key-value pairs configured during stream creation. Only present when custom parameters are defined.                     |
+|                   start.mediaFormat | Configuration details for audio data formatting.                                                          |
+|          start.mediaFormat.encoding | Audio codec format. Possible values: `audio/x-mulaw` (PCMU), `audio/x-L16` (L16).                                 |
+|         start.mediaFormat.sampleRate| Audio sampling frequency in Hz. Possible values: 8000 (PCMU), 16000 (L16), or 24000 (L16).                                     |
+|          start.mediaFormat.channels | Audio channel count. Always 1 (mono). Multi-channel audio is not supported.                                      |
+
+Example Start message
+
+```json
+{
+  "event": "start",
+  "sequenceNumber": "1",
+  "start": {
+    "streamSid": "7d56cc11-536d-4a45-b4fb-ed3d55be843b",
+    "accountSid": "b08dacad-2f6c-4de1-93d6-cc732e0c69c5",
+    "callSid": "76ac3c36-56da-4a3e-a0d6-b5f8df6da9ad",
+    "tracks": [
+      "inbound"
+    ],
+    "customParameters": {},
+    "mediaFormat": {
+      "encoding": "audio/x-L16",
+      "sampleRate": 24000,
+      "channels": 1
+    }
+  }
+}
+```
+
+### Media message
+
+Media messages deliver the actual audio content from the call as it flows through the stream.
+
+|              Property | Description                                                                                                                                    |
+| --------------------: | ---------------------------------------------------------------------------------------------------------------------------------- |
+|                 event | The string value of `media`.                                                                                                      |
+|        sequenceNumber | Sequential message counter for ordering, starting at "1" and incrementing per transmission.                                           |
+|                 media | Container with audio data and associated metadata.                                                                                 |
+|           media.track | Audio track identifier. One of: `inbound` or `outbound`.                                                                                       |
+|           media.chunk | Chunk counter for this track. Starts at "1" and increments with each chunk.               |
+|       media.timestamp | Presentation timestamp in milliseconds from the start of the stream.                                                             |
+|         media.payload | Base64-encoded raw audio data.                                                                                                      |
+
+Example Media message
+
+```json
+{
+  "event": "media",
+  "sequenceNumber": "42",
+  "media": {
+    "track": "inbound",
+    "chunk": "1",
+    "timestamp": "0",
+    "payload": "<base64-encoded-audio>"
+  }
+}
+```
+
+### Stop message
+
+SignalWire transmits a stop message when the stream terminates or the associated call concludes.
+
+|         Property | Description                                                                                                                                    |
+| ---------------: | ---------------------------------------------------------------------------------------------------------------------------------- |
+|            event | The string value of `stop`.                                                                                                       |
+|   sequenceNumber | Message sequence counter.                                                                         |
+
+Example stop message
+
+```json
+{
+  "event": "stop",
+  "sequenceNumber": "999"
+}
+```
+
+### DTMF message
+
+SignalWire generates DTMF messages whenever touch-tone key presses are detected in the audio stream.
+
+|         Property | Description                                                                                                                                               |
+| ---------------: | --------------------------------------------------------------------------------------------------------------------------------------------- |
+|            event | Event type identifier set to `dtmf`.                                                                                                         |
+|   sequenceNumber | Message sequence counter.                                                          |
+|        streamSid | Stream identifier. Only included for bidirectional streams.                                                                                                 |
+|             dtmf | Container holding the detected touch-tone details.                                                                                           |
+|    dtmf.digit| The digit that was pressed. Values: 0-9, *, #, A-D.                                                                                           |
+|    dtmf.duration| Duration of the key press in milliseconds.                                                                                            |
+
+Example DTMF message
+
+```json
+{
+  "event": "dtmf",
+  "sequenceNumber": "123",
+  "streamSid": "7d56cc11-536d-4a45-b4fb-ed3d55be843b",
+  "dtmf": {
+    "digit": "5",
+    "duration": 2000
+  }
+}
+```
+
+### Mark message
+
+SignalWire delivers mark messages as acknowledgments for completed audio playback or cleared buffer operations. These responses match the mark identifiers from your earlier transmissions to SignalWire.
+
+|         Property | Description                                                                                        |
+| ---------------: | -------------------------------------------------------------------------------------- |
+|            event | Event type designation set to `mark`.                                                 |
+|        streamSid | Stream connection identifier. Only included for bidirectional streams.                                |
+|             mark | Container with the mark acknowledgment details.                                       |
+|        mark.name | The mark identifier echoed back from your original transmission.                     |
+
+Example Mark message
+
+```json
+{
+  "event": "mark",
+  "streamSid": "7d56cc11-536d-4a45-b4fb-ed3d55be843b",
+  "mark": {
+    "name": "my-custom-mark"
+  }
+}
+```
+
+## Sending WebSocket messages
+
+When you create a Stream within a `<Connect><Stream>` element, the connection becomes bidirectional. Your application can transmit WebSocket messages to SignalWire, enabling you to inject audio into the active call and manage the stream's behavior.
+
+The messages that your WebSocket server can send back to SignalWire are:
+
+- **[Media](#send-a-media-message)** - Send audio data back into the call
+- **[Mark](#send-a-mark-message)** - Track when audio playback completes
+- **[Clear](#send-a-clear-message)** - Interrupt buffered audio
+- **[DTMF](#send-a-dtmf-message)** - Inject DTMF tones into the call
+
+### Send a media message
+
+Transmitting audio to SignalWire requires constructing a valid media message with the correct structure.
+
+The payload encoding depends on the codec specified in your Stream configuration:
+
+- **Default (PCMU/mulaw)**: `audio/x-mulaw` with 8000 Hz sample rate
+- **L16@16000h**: Linear PCM with 16000 Hz sample rate
+- **L16@24000h**: Linear PCM with 24000 Hz sample rate
+
+All audio must be base64 encoded. SignalWire queues incoming media messages and plays them sequentially. To stop playback and clear the queue, transmit a clear message.
+
+<Warning title="Ensure your `media.payload` contains only raw audio data without file format headers. Including format headers will result in corrupted audio playback.">
+</Warning>
+
+|    Property | Description                                                                               |
+| ----------: | ----------------------------------------------------------------------------- |
+|       event | Specifies the message type. Set to `"media"` for audio data.                  |
+|   streamSid | Target stream identifier for audio playback                                   |
+|       media | Container object holding the audio payload                                    |
+| media.payload | Base64-encoded audio data (format varies by codec configuration)            |
+
+Example media message (payload abbreviated):
+
+```json
+{
+  "event": "media",
+  "streamSid": "c0c7d59b-df06-435e-afbc-9217ce318390",
+  "media": {
+    "payload": "a3242sa..."
+  }
+}
+```
+
+### Send a mark message
+
+Transmit a mark message following your media messages to receive confirmation when audio playback finishes. SignalWire responds with a matching mark identifier once the audio completes playing (or immediately if no audio is queued).
+
+You'll also receive mark confirmations when the audio queue is cleared via a clear message.
+
+|   Property | Description                                                                                    |
+| ---------: | ---------------------------------------------------------------------------------- |
+|      event | Message type identifier. Set to `"mark"` for completion tracking.                 |
+|  streamSid | Target stream identifier for the mark operation                                    |
+|       mark | Container object with mark details                                                 |
+| mark.name  | Custom identifier to track specific audio segments or playback events             |
+
+Example mark message:
+
+```json
+{
+ "event": "mark",
+ "streamSid": "c0c7d59b-df06-435e-afbc-9217ce318390",
+ "mark": {
+   "name": "my label"
+ }
+}
+```
+
+### Send a clear message
+
+Transmit a clear message to halt audio playback and flush the audio queue. This action triggers SignalWire to return any pending mark messages for the cleared audio segments.
+
+|   Property | Description                                                                          |
+| ---------: | ------------------------------------------------------------------------ |
+|      event | Message type identifier. Set to `"clear"` for audio interruption.       |
+|  streamSid | Target stream identifier where audio should be stopped.                  |
+
+Example clear message:
+
+```json
+{
+ "event": "clear",
+ "streamSid": "c0c7d59b-df06-435e-afbc-9217ce318390"
+}
+```
+
+### Send a DTMF message
+
+Transmit a DTMF message to inject touch-tone digits into the call. This allows you to programmatically send DTMF tones as if they were pressed on a keypad.
+
+|   Property | Description                                                                          |
+| ---------: | ------------------------------------------------------------------------ |
+|      event | Message type identifier. Set to `"dtmf"` for DTMF injection.            |
+|  streamSid | Target stream identifier where DTMF should be sent.                      |
+|       dtmf | Container object with DTMF details                                       |
+| dtmf.digit | The digit to send. Valid values: 0-9, *, #, A-D                         |
+
+Example DTMF message:
+
+```json
+{
+ "event": "dtmf",
+ "streamSid": "c0c7d59b-df06-435e-afbc-9217ce318390",
+ "dtmf": {
+   "digit": "5"
+ }
+}
+```
+
+## Examples
+
+### Conference stream
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+<Dial trim="do-not-trim">
+  <Conference beep="false" startConferenceOnEnter="true" trim="do-not-trim" streamUrl="wss://206.189.19.130:8765/">test
+    <Stream name="my_conference_stream"
+            url="wss://206.189.19.130:8765/"
+            streamStartConferenceOnEnter="true"
+            bidir="true">
+      <Parameter name="foo1" value="bar1"/>
+      <Parameter name="foo2" value="bar2"/>
+    </Stream>
+  </Conference>
+</Dial>
+</Response>
+```
+
+### Bidirectional stream
+
+The `<Stream>` instruction can allow you to receive audio into the call too. In
+this case, the stream must be bidirectional. The external service (e.g., an AI
+agent) will then be able to both hear the call _and_ play audio.
+
+To initialize a bidirectional stream, wrap the `<Stream>` instruction in [`<Connect>`](/docs/compatibility-api/cxml/reference/voice/connect) instead of `<Start>`.
+
+```xml
+<Connect>
+    <Stream url="wss://mystream.ngrok.io/audiostream" />
+</Connect>
+```
+
+### Starting and stopping streams
+
+It is possible to stop a stream at any time by name. For instance by naming the Stream "mystream", you can later use the unique name of "mystream" to stop the stream.
+
+```xml
+<Start>
+    <Stream name="mystream" url="wss://mystream.ngrok.io/audiostream" />
+</Start>
+```
+
+```xml
+<Stop>
+   <Stream name="mystream" />
+</Stop>
+```
+
+### Custom parameters
+
+To pass parameters towards the `wss` server, it is possible to include additional key value pairs. 
+This can be done by using the nested `<Parameter>` cXML noun. These parameters will be added to the `Start` message, as json.
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+   <Start>
+     <Stream url="wss://your-application.com/audiostream" >
+        <Parameter name="Cookie" value ="948f9938-299a-d43e-0df4-af3a7eccb0ac"/>
+        <Parameter name="Type" value ="SIP" />
+      </Stream>
+    </Start>
+</Response>
+```
+
+## Notes on usage
+
+- The url does not support query string parameters. To pass custom key value pairs to the WebSocket, make use of Custom Parameters instead.
+- There is a one to one mapping of a stream to a websocket connection, therefore there will be at most one call being streamed over a single websocket connection. Information will be provided so that you can handle multiple inbound connections and manage the association between the unique stream identifier (StreamSid) and the connection.
+- On any given call there are inbound and outbound tracks, `inbound` represents the audio Signalwire receives from the call, `outbound` represents the audio generated by Signalwire for the Call.

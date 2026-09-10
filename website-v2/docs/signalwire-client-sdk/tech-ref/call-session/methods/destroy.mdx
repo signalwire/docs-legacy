@@ -1,0 +1,131 @@
+---
+title: destroy
+slug: /call-session/destroy
+---
+
+Destroys the CallSession JavaScript object and cleans up local resources. This does not affect the server-side call or other participants.
+
+## Signature
+
+```typescript
+call.destroy(): void
+```
+
+## Parameters
+
+None
+
+## Returns
+
+**Type:** `void`
+
+## Examples
+
+### Basic Destroy
+
+```typescript
+call.destroy()
+console.log('CallSession object destroyed')
+```
+
+### Cleanup After Hangup
+
+```typescript
+// End the call
+await call.hangup()
+
+// Clean up the local object
+call.destroy()
+```
+
+### React useEffect Cleanup
+
+```typescript
+function CallComponent({ call }) {
+  useEffect(() => {
+    // Component mounted
+
+    // Cleanup on unmount
+    return () => {
+      if (call) {
+        call.destroy()
+      }
+    }
+  }, [call])
+
+  return <div>Call interface</div>
+}
+```
+
+### Single Page Application Cleanup
+
+```typescript
+// When navigating away from call page
+function navigateAway() {
+  if (currentCall) {
+    currentCall.hangup()
+    currentCall.destroy()
+    currentCall = null
+  }
+
+  router.navigate('/home')
+}
+```
+
+### Multiple Call Management
+
+```typescript
+class CallManager {
+  constructor() {
+    this.calls = []
+  }
+
+  addCall(call) {
+    this.calls.push(call)
+  }
+
+  async endCall(call) {
+    // End the call
+    await call.hangup()
+
+    // Clean up the object
+    call.destroy()
+
+    // Remove from list
+    this.calls = this.calls.filter(c => c !== call)
+  }
+
+  async destroyAll() {
+    for (const call of this.calls) {
+      await call.hangup()
+      call.destroy()
+    }
+    this.calls = []
+  }
+}
+```
+
+## Important Notes
+
+**Local Only**: This method only destroys the JavaScript object locally. It does not:
+- End the call on the server
+- Remove you from the call
+- Affect other participants
+- Stop WebRTC connections
+
+To end the call properly, use `hangup()` before calling `destroy()`.
+
+**Memory Cleanup**: Use this method to:
+- Clean up event listeners
+- Release local resources
+- Prevent memory leaks in long-running applications
+- Free up browser resources
+
+**Object Unusable After Destroy**: Once `destroy()` is called, the CallSession object cannot be used anymore. Any subsequent method calls will likely fail.
+
+**Automatic Cleanup**: In most cases, you don't need to manually call `destroy()`. The SDK automatically cleans up when:
+- The call ends via `hangup()`
+- The page unloads
+- The component unmounts (in framework integrations)
+
+Only call `destroy()` manually when you need explicit control over resource cleanup.

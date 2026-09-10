@@ -1,0 +1,110 @@
+---
+title: Call whisper
+slug: /swml/guides/call-whisper
+description: A guide that shows you how to perform a Call Whisper using SWML.
+x-custom:
+  tags:
+  - favorite
+  - sdk:swml
+  - product:voice
+---
+
+Call Whisper is a feature that allows you to play a message to the recipient of a call before connecting them to the caller.
+This feature is useful for informing the recipient about the nature of the call before they answer it.
+This guide shows you how to perform a Call Whisper using SWML to inform the recipient the number of the caller.
+
+## Setting up the SWML scripts
+
+To perform a Call Whisper using SWML, you need to create two 
+[SWML script resources](/docs/swml).
+ One will utilize the [`connect`](/docs/swml/reference/connect)
+method to connect the caller to the recipient, while the other will use the [`play`](/docs/swml/reference/play) method to play the Call Whisper message.
+
+### SWML Play Example
+
+This will be the SWML script that is fetched when a call is successfully connected.
+In this example, we will play a message that says "You got a call from [Caller ID]",
+where [Caller ID] is the phone number of the caller.This is done by using the `say:` command inside the
+[`play`](/docs/swml/reference/play) method and using the `${call.from}` variable to get the caller's phone number.
+
+**Example**
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - play:
+        url: 'say:You got a call from ${call.from}'
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "play": {
+          "url": "say:You got a call from ${call.from}"
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+---
+
+### SWML Connect Example
+
+Inside the [`connect`](/docs/swml/reference/connect) method, you can use the
+`confirm` parameter to specify the URL that will return the SWML script to play the Call Whisper message.
+The `from` parameter is used to specify the caller's phone number, which will be used in the Call Whisper message.
+Here we are using the `${call.from}` variable to get the caller's phone number from the initial call.
+The `to` parameter is used to specify the recipient's phone number. Please replace `+1XXXXXXXXXX` with the recipient's phone number and
+the `confirm` parameter with the URL of the SWML script that plays the Call Whisper message.
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+  - connect:
+      confirm: "https://your-space.signalwire.com/relay-bins/your-first-bin-url-goes-here"
+      from: "${call.from}"
+      to: "+1XXXXXXXXXX"
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "connect": {
+          "confirm": "https://your-space.signalwire.com/relay-bins/your-first-bin-url-goes-here",
+          "from": "${call.from}",
+          "to": "+1XXXXXXXXXX"
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+---
+
+## Conclusion
+
+After setting up your [SWML](/docs/swml) script resources, you can now use them to perform a Call Whisper.
+First assign the [connect example](#swml-connect-example) script to a SignalWire phone number.
+Now, when a call is made to that phone number, 
+the Call Whisper message will be played to the recipient before connecting them to the caller.

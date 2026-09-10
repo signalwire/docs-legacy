@@ -1,0 +1,133 @@
+---
+slug: /compatibility-api/sdks/reference/available-phone-numbers/search-local
+title: Local
+sidebar_label: Local
+toc_max_heading_level: 3
+---
+
+Use this endpoint for the AvailablePhoneNumbers method to search for available phone numbers that match your criteria.
+
+<EndpointSchemaSnippet endpoint="GET /Accounts/{AccountSid}/AvailablePhoneNumbers/{IsoCountry}/Local" />
+
+<EndpointResponseSnippet endpoint="GET /Accounts/{AccountSid}/AvailablePhoneNumbers/{IsoCountry}/Local" />
+
+## Request examples
+
+### Search for numbers within Washington State
+
+<CodeBlocks>
+```javascript title="Node.js"
+const { RestClient } = require('@signalwire/compatibility-api')
+const client = RestClient('YourProjectID', 'YourAuthToken', { signalwireSpaceUrl: 'example.signalwire.com' })
+
+client
+  .availablePhoneNumbers('US')
+  .local.list({
+    inRegion: 'WA',
+  })
+  .then(availablePhoneNumbers => {
+    console.log(availablePhoneNumbers);
+  });
+```
+```csharp
+using System;
+using System.Collections.Generic;
+using Twilio;
+using Twilio.Rest.Api.V2010.Account;
+using Twilio.Rest.Api.V2010.Account.AvailablePhoneNumberCountry;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        TwilioClient.Init("YourProjectID", "YourAuthToken", new Dictionary<string, object> { ["signalwireSpaceUrl"] = "{SPACE}.signalwire.com" });
+
+        var localAvailableNumbers = LocalResource.Read("US", inRegion: "WA");
+
+        Console.WriteLine(localAvailableNumbers);
+    }
+}
+```
+```python
+from signalwire.rest import Client as signalwire_client
+
+client = signalwire_client("YourProjectID", "YourAuthToken", signalwire_space_url = 'example.signalwire.com')
+
+numbers = client.available_phone_numbers("US") \
+                .local \
+                .list(in_region="WA")
+
+print(numbers)
+```
+```ruby
+require 'signalwire/sdk'
+
+@client = Signalwire::REST::Client.new 'YourProjectID', 'YourAuthToken', signalwire_space_url: "example.signalwire.com"
+
+@numbers = @client.api.available_phone_numbers('US').local
+                  .list(in_region: 'WA')
+
+puts @numbers
+```
+</CodeBlocks>
+
+### Find local numbers by number pattern
+
+Find all local numbers in the United States, with area code 510, that contain the pattern '555'.
+
+<CodeBlocks>
+```javascript title="Node.js"
+const { RestClient } = require('@signalwire/compatibility-api')
+const client = RestClient('YourProjectID', 'YourAuthToken', { signalwireSpaceUrl: 'example.signalwire.com' })
+
+client
+  .availablePhoneNumbers('US')
+  .local.list({
+    contains: '555',
+    areaCode: '510',
+  })
+  .then(availablePhoneNumbers => {
+    console.log(availablePhoneNumbers);
+  });
+```
+```csharp
+using System;
+using System.Collections.Generic;
+using Twilio;
+using Twilio.Rest.Api.V2010.Account;
+using Twilio.Rest.Api.V2010.Account.AvailablePhoneNumberCountry;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        TwilioClient.Init("YourProjectID", "YourAuthToken", new Dictionary<string, object> { ["signalwireSpaceUrl"] = "{SPACE}.signalwire.com" });
+
+        var localAvailableNumbers = LocalResource.Read("US", contains: "555", areaCode: 510);
+
+        Console.WriteLine(localAvailableNumbers);
+    }
+}
+```
+```python
+from signalwire.rest import Client as signalwire_client
+
+client = signalwire_client("YourProjectID", "YourAuthToken", signalwire_space_url = 'example.signalwire.com')
+
+numbers = client.available_phone_numbers("US") \
+                .local \
+                .list(contains="555", area_code="510")
+
+print(numbers)
+```
+```ruby
+require 'signalwire/sdk'
+
+@client = Signalwire::REST::Client.new 'YourProjectID', 'YourAuthToken', signalwire_space_url: "example.signalwire.com"
+
+@numbers = @client.api.available_phone_numbers('US').local
+                  .list(contains: '555', area_code: '510')
+
+puts @numbers
+```
+</CodeBlocks>

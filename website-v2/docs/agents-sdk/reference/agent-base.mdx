@@ -1,0 +1,556 @@
+---
+title: "Agent Base"
+sidebar_label: "Agent Base"
+slug: /python/reference/agent-base
+toc_max_heading_level: 3
+---
+
+# Reference
+
+Complete API reference for all SignalWire Agents SDK classes, methods, CLI tools, and configuration options.
+
+This chapter provides detailed reference documentation for the SignalWire Agents SDK.
+
+## Reference Overview
+
+### API Reference
+- **AgentBase** - Main agent class with all methods
+- **SWMLService** - Base service for SWML generation
+- **SwaigFunctionResult** - Function return values and actions
+- **DataMap** - Serverless REST API integration
+- **SkillBase** - Custom skill development
+- **ContextBuilder** - Multi-step workflows
+
+### CLI Tools
+- **swaig-test** - Test agents and functions locally
+- **sw-search** - Build and query search indexes
+- **sw-agent-init** - Create new agent projects
+
+### Configuration
+- **Environment Variables** - Runtime configuration
+- **Config Files** - YAML/JSON configuration
+- **SWML Schema** - Document structure reference
+
+## Quick Reference
+
+### Creating an Agent
+```python
+agent = AgentBase(name="my-agent", route="/agent")
+agent.add_language("English", "en-US", "rime.spore")
+agent.prompt_add_section("Role", "You are a helpful assistant.")
+agent.run()
+```
+
+### Defining a Function
+```python
+@agent.tool(description="Search for information")
+def search(query: str) -> SwaigFunctionResult:
+    return SwaigFunctionResult(f"Found results for: {query}")
+```
+
+### Returning Actions
+```python
+return SwaigFunctionResult("Transferring...").connect("+15551234567")
+return SwaigFunctionResult("Goodbye").hangup()
+return SwaigFunctionResult().update_global_data({"key": "value"})
+```
+
+## Import Patterns
+
+```python
+# Main imports
+from signalwire_agents import AgentBase
+from signalwire_agents.core.function_result import SwaigFunctionResult
+from signalwire_agents.core.data_map import DataMap
+
+# Prefab agents
+from signalwire_agents.prefabs import (
+    InfoGathererAgent,
+    FAQBotAgent,
+    SurveyAgent,
+    ReceptionistAgent,
+    ConciergeAgent
+)
+
+# Context/workflow system
+from signalwire_agents.core.contexts import ContextBuilder
+
+# Skill development
+from signalwire_agents.core.skill_base import SkillBase
+```
+
+## Chapter Contents
+
+| Section | Description |
+|---------|-------------|
+| [AgentBase API](/docs/agents-sdk/python/reference/agent-base) | Main agent class reference |
+| [SWMLService API](/docs/agents-sdk/python/reference/swml-service) | Base service class reference |
+| [SWAIG Function API](/docs/agents-sdk/python/reference/swaig-function) | Function definition reference |
+| [SwaigFunctionResult API](/docs/agents-sdk/python/reference/function-result) | Return value and actions reference |
+| [DataMap API](/docs/agents-sdk/python/reference/data-map) | Serverless API integration reference |
+| [SkillBase API](/docs/agents-sdk/python/reference/skill-base) | Custom skill development reference |
+| [ContextBuilder API](/docs/agents-sdk/python/reference/contexts) | Workflow system reference |
+| [swaig-test CLI](/docs/agents-sdk/python/reference/cli-swaig-test) | Testing tool reference |
+| [sw-search CLI](/docs/agents-sdk/python/reference/cli-sw-search) | Search tool reference |
+| [Environment Variables](/docs/agents-sdk/python/reference/environment-variables) | Environment configuration |
+| [Config Files](/docs/agents-sdk/python/reference/configuration) | File-based configuration |
+| [SWML Schema](/docs/agents-sdk/python/reference/swml-schema) | Document structure reference |
+
+## Class Definition
+
+```python
+from signalwire_agents import AgentBase
+
+class AgentBase(
+    AuthMixin,
+    WebMixin,
+    SWMLService,
+    PromptMixin,
+    ToolMixin,
+    SkillMixin,
+    AIConfigMixin,
+    ServerlessMixin,
+    StateMixin
+)
+```
+
+## Constructor
+
+```python
+AgentBase(
+    name: str,                              # Agent name/identifier (required)
+    route: str = "/",                       # HTTP route path
+    host: str = "0.0.0.0",                  # Host to bind
+    port: int = 3000,                       # Port to bind
+    basic_auth: Optional[Tuple[str, str]] = None,  # (username, password)
+    use_pom: bool = True,                   # Use POM for prompts
+    token_expiry_secs: int = 3600,          # Token expiration time
+    auto_answer: bool = True,               # Auto-answer calls
+    record_call: bool = False,              # Enable recording
+    record_format: str = "mp4",             # Recording format
+    record_stereo: bool = True,             # Stereo recording
+    default_webhook_url: Optional[str] = None,  # Default webhook URL
+    agent_id: Optional[str] = None,         # Unique agent ID
+    native_functions: Optional[List[str]] = None,  # Native function list
+    schema_path: Optional[str] = None,      # SWML schema path
+    suppress_logs: bool = False,            # Suppress structured logs
+    enable_post_prompt_override: bool = False,  # Enable post-prompt override
+    check_for_input_override: bool = False, # Enable input override
+    config_file: Optional[str] = None       # Path to config file
+)
+```
+
+## Constructor Parameters
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `name` | str | required | Agent identifier |
+| `route` | str | `"/"` | HTTP endpoint path |
+| `host` | str | `"0.0.0.0"` | Bind address |
+| `port` | int | `3000` | Bind port |
+| `basic_auth` | Tuple[str, str] | None | Auth credentials |
+| `use_pom` | bool | True | Use POM prompts |
+| `token_expiry_secs` | int | `3600` | Token TTL |
+| `auto_answer` | bool | True | Auto-answer calls |
+| `record_call` | bool | False | Record calls |
+| `record_format` | str | `"mp4"` | Recording format |
+| `record_stereo` | bool | True | Stereo recording |
+| `native_functions` | List[str] | None | Native functions |
+
+## Prompt Methods
+
+### prompt_add_section
+
+```python
+def prompt_add_section(
+    self,
+    section: str,              # Section title
+    body: str,                 # Section content
+    bullets: List[str] = None  # Optional bullet points
+) -> 'AgentBase'
+```
+
+Add a section to the agent's prompt.
+
+### prompt_add_text
+
+```python
+def prompt_add_text(
+    self,
+    text: str  # Text to add
+) -> 'AgentBase'
+```
+
+Add raw text to the prompt.
+
+### get_prompt
+
+```python
+def get_prompt(self) -> Union[str, List[Dict]]
+```
+
+Get the complete prompt. Returns POM structure if `use_pom=True`, otherwise plain text.
+
+## Language and Voice Methods
+
+### add_language
+
+```python
+def add_language(
+    self,
+    name: str,           # Language name (e.g., "English")
+    code: str,           # Language code (e.g., "en-US")
+    voice: str,          # Voice ID (e.g., "rime.spore")
+    speech_fillers: Optional[List[str]] = None,  # Filler words
+    function_fillers: Optional[List[str]] = None, # Processing phrases
+    language_order: int = 0  # Priority order
+) -> 'AgentBase'
+```
+
+Add a supported language with voice configuration.
+
+### set_voice
+
+```python
+def set_voice(
+    self,
+    voice: str  # Voice ID
+) -> 'AgentBase'
+```
+
+Set the default voice for the agent.
+
+## Tool Definition Methods
+
+### tool (decorator)
+
+```python
+@agent.tool(
+    name: str = None,           # Function name (default: function name)
+    description: str = "",      # Function description
+    secure: bool = False,       # Require token authentication
+    fillers: List[str] = None,  # Processing phrases
+    wait_file: str = None       # Audio file URL for hold
+)
+def my_function(args...) -> SwaigFunctionResult:
+    ...
+```
+
+Decorator to register a SWAIG function.
+
+### define_tool
+
+```python
+def define_tool(
+    self,
+    name: str,                          # Function name
+    description: str,                   # Function description
+    handler: Callable,                  # Function handler
+    parameters: Dict[str, Any] = None,  # Parameter schema
+    secure: bool = False,               # Require authentication
+    fillers: List[str] = None,          # Processing phrases
+    wait_file: str = None               # Hold audio URL
+) -> 'AgentBase'
+```
+
+Programmatically define a SWAIG function.
+
+## Skill Methods
+
+### add_skill
+
+```python
+def add_skill(
+    self,
+    skill_name: str,               # Skill identifier
+    params: Dict[str, Any] = None  # Skill configuration
+) -> 'AgentBase'
+```
+
+Add a skill to the agent.
+
+### list_available_skills
+
+```python
+def list_available_skills(self) -> List[str]
+```
+
+List all available skills.
+
+## AI Configuration Methods
+
+### set_params
+
+```python
+def set_params(
+    self,
+    params: Dict[str, Any]  # AI parameters
+) -> 'AgentBase'
+```
+
+Set AI model parameters (temperature, top_p, etc.).
+
+### add_hints
+
+```python
+def add_hints(
+    self,
+    hints: List[str]  # Speech recognition hints
+) -> 'AgentBase'
+```
+
+Add speech recognition hints.
+
+### add_pronounce
+
+```python
+def add_pronounce(
+    self,
+    patterns: List[Dict[str, str]]  # Pronunciation rules
+) -> 'AgentBase'
+```
+
+Add pronunciation rules.
+
+## State Methods
+
+### set_global_data
+
+```python
+def set_global_data(
+    self,
+    data: Dict[str, Any]  # Data to store
+) -> 'AgentBase'
+```
+
+Set initial global data for the agent session.
+
+## URL Methods
+
+### get_full_url
+
+```python
+def get_full_url(
+    self,
+    include_auth: bool = False  # Include credentials in URL
+) -> str
+```
+
+Get the full URL for the agent endpoint.
+
+### set_web_hook_url
+
+```python
+def set_web_hook_url(
+    self,
+    url: str  # Webhook URL
+) -> 'AgentBase'
+```
+
+Override the default webhook URL.
+
+### set_post_prompt_url
+
+```python
+def set_post_prompt_url(
+    self,
+    url: str  # Post-prompt URL
+) -> 'AgentBase'
+```
+
+Override the post-prompt summary URL.
+
+## Server Methods
+
+### run
+
+```python
+def run(
+    self,
+    host: str = None,  # Override host
+    port: int = None   # Override port
+) -> None
+```
+
+Start the development server.
+
+### get_app
+
+```python
+def get_app(self) -> FastAPI
+```
+
+Get the FastAPI application instance.
+
+## Serverless Methods
+
+### serverless_handler
+
+```python
+def serverless_handler(
+    self,
+    event: Dict[str, Any],  # Lambda event
+    context: Any            # Lambda context
+) -> Dict[str, Any]
+```
+
+Handle AWS Lambda invocations.
+
+### cloud_function_handler
+
+```python
+def cloud_function_handler(
+    self,
+    request  # Flask request
+) -> Response
+```
+
+Handle Google Cloud Function invocations.
+
+### azure_function_handler
+
+```python
+def azure_function_handler(
+    self,
+    req  # Azure HttpRequest
+) -> HttpResponse
+```
+
+Handle Azure Function invocations.
+
+## Callback Methods
+
+### on_summary
+
+```python
+def on_summary(
+    self,
+    summary: Optional[Dict[str, Any]],  # Summary data
+    raw_data: Optional[Dict[str, Any]] = None  # Raw POST data
+) -> None
+```
+
+Override to handle post-prompt summaries.
+
+### set_dynamic_config_callback
+
+```python
+def set_dynamic_config_callback(
+    self,
+    callback: Callable  # Config callback
+) -> 'AgentBase'
+```
+
+Set a callback for dynamic configuration.
+
+## SIP Routing Methods
+
+### enable_sip_routing
+
+```python
+def enable_sip_routing(
+    self,
+    auto_map: bool = True,  # Auto-map usernames
+    path: str = "/sip"      # Routing endpoint path
+) -> 'AgentBase'
+```
+
+Enable SIP-based routing.
+
+### register_sip_username
+
+```python
+def register_sip_username(
+    self,
+    sip_username: str  # SIP username
+) -> 'AgentBase'
+```
+
+Register a SIP username for routing.
+
+## Method Chaining
+
+All setter methods return `self` for method chaining:
+
+```python
+from signalwire_agents import AgentBase
+from signalwire_agents.core.function_result import SwaigFunctionResult
+
+agent = (
+    AgentBase(name="assistant", route="/assistant")
+    .add_language("English", "en-US", "rime.spore")
+    .add_hints(["SignalWire", "SWML", "SWAIG"])
+    .set_params({"temperature": 0.7})
+    .set_global_data({"user_tier": "standard"})
+)
+
+@agent.tool(description="Get help")
+def get_help(topic: str) -> SwaigFunctionResult:
+    return SwaigFunctionResult(f"Help for {topic}")
+
+if __name__ == "__main__":
+    agent.run()
+```
+
+## Class Attributes
+
+| Attribute | Type | Description |
+|-----------|------|-------------|
+| `PROMPT_SECTIONS` | List[Dict] | Declarative prompt sections |
+| `name` | str | Agent name |
+| `route` | str | HTTP route path |
+| `host` | str | Bind host |
+| `port` | int | Bind port |
+| `agent_id` | str | Unique agent identifier |
+| `pom` | PromptObject | POM instance (if use_pom=True) |
+| `skill_manager` | SkillManager | Skill manager instance |
+
+## See Also
+
+| Topic | Reference |
+|-------|-----------|
+| Creating prompts | [Prompts [Prompts & POM](/docs/agents-sdk/python/guides/prompts-pom) POM](/docs/agents-sdk/python/guides/prompts-pom) |
+| Voice configuration | [Voice [Voice & Language](/docs/agents-sdk/python/guides/voice-language) Language](/docs/agents-sdk/python/guides/voice-language) |
+| Function definitions | [SWAIG Function API](/docs/agents-sdk/python/reference/swaig-function) |
+| Function results | [SwaigFunctionResult API](/docs/agents-sdk/python/reference/function-result) |
+| Multi-step workflows | [ContextBuilder API](/docs/agents-sdk/python/reference/contexts) |
+| Testing agents | [swaig-test CLI](/docs/agents-sdk/python/reference/cli-swaig-test) |
+
+## Common Usage Patterns
+
+### Minimal Production Setup
+
+```python
+agent = AgentBase(
+    name="support",
+    route="/support",
+    basic_auth=("user", "pass"),  # Always use auth in production
+    record_call=True,             # Enable for compliance
+    record_stereo=True            # Separate channels for analysis
+)
+```
+
+### High-Volume Configuration
+
+```python
+agent = AgentBase(
+    name="ivr",
+    route="/ivr",
+    suppress_logs=True,           # Reduce logging overhead
+    token_expiry_secs=1800        # Shorter token lifetime
+)
+```
+
+### Development Configuration
+
+```python
+agent = AgentBase(
+    name="dev-agent",
+    route="/",
+    host="127.0.0.1",             # Localhost only
+    port=3000
+)
+# Test with: swaig-test agent.py --dump-swml
+```
+
+

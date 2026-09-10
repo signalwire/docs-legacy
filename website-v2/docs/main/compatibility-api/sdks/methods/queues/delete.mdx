@@ -1,0 +1,60 @@
+---
+slug: /compatibility-api/sdks/reference/queues/delete
+title: Delete
+sidebar_label: Delete
+toc_max_heading_level: 3
+---
+
+Use this endpoint for the Queues method to delete a single call queue.
+Only empty queues can be deleted.
+If the delete is successful, a 204 response, with no body, will be returned.
+
+<EndpointSchemaSnippet endpoint="DELETE /Accounts/{AccountSid}/Queues/{Sid}" selector="request" />
+
+## Request examples
+
+<CodeBlocks>
+```javascript title="Node.js"
+const { RestClient } = require('@signalwire/compatibility-api')
+const client = RestClient('YourProjectID', 'YourAuthToken', { signalwireSpaceUrl: 'example.signalwire.com' })
+
+client.queues('QueueSid')
+      .remove()
+      .then(queues => console.log(queues.sid))
+      .done();
+```
+```csharp
+using System;
+using System.Collections.Generic;
+using Twilio;
+using Twilio.Rest.Api.V2010.Account.Queue;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        TwilioClient.Init("YourProjectID", "YourAuthToken", new Dictionary<string, object> { ["signalwireSpaceUrl"] = "{SPACE}.signalwire.com" });
+
+        QueueResource.Delete(pathSid: "QueueSid");
+    }
+}
+```
+```python
+from signalwire.rest import Client as signalwire_client
+
+client = signalwire_client("YourProjectID", "YourAuthToken", signalwire_space_url = 'example.signalwire.com')
+
+client.queues('QueueSid').delete()
+```
+```ruby
+require 'signalwire/sdk'
+
+@client = Signalwire::REST::Client.new 'YourProjectID', 'YourAuthToken', signalwire_space_url: "example.signalwire.com"
+
+@client.queues('QueueSid').delete
+```
+</CodeBlocks>
+
+## Response
+
+A successful request returns a 204 status code with no body.

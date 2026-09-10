@@ -1,0 +1,90 @@
+# Lychee link checker configuration
+# https://lychee.cli.rs/configuration/
+
+# Verbose program output
+verbose = "error"
+
+# Accept these HTTP status codes as valid
+# 403 is included because many sites block automated requests (bot detection)
+accept = [200, 204, 301, 302, 307, 308, 403]
+
+# User agent for requests (full Chrome version to avoid bot detection)
+user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+
+# Don't show interactive progress bar while checking links.
+no_progress = false
+
+# Request timeout in seconds
+timeout = 30
+
+# Maximum number of retries per request
+max_retries = 3
+
+# Wait time between retries (seconds)
+retry_wait_time = 10
+
+# Maximum concurrent requests
+max_concurrency = 128
+
+# Don't check URL fragments/anchors — Docusaurus build already validates these
+include_fragments = false
+
+# Only test links with the given schemes
+scheme = ["https", "http"]
+
+# When links are available using HTTPS, treat HTTP links as errors.
+require_https = false
+
+# Remap /docs/ prefix to local build paths
+# Internal links in the built HTML use /docs/... but files live at build/...
+remap = [
+  "https://signalwire.com/docs/(.*) file://build/$1"
+]
+
+# Exclude patterns (regex)
+exclude = [
+  # Placeholder/example URLs
+  "^https://example\\.com",
+  "^https://github\\.com/owner/repo",
+  "github\\.com/your-org/",
+
+  # Government sites that block automated requests
+  "^https://(www\\.)?fcc\\.gov",
+
+  # Analytics and tracking
+  "^https://us\\.i\\.posthog\\.com",
+  "^https://c\\.vialoops\\.com",
+  "_vercel/(speed-)?insights/",
+
+  # Sites that block automated requests
+  "^https://(www\\.)?linkedin\\.com",
+  "^https://(www\\.)?twitter\\.com",
+  "^https://x\\.com",
+  "^https://www\\.npmjs\\.com",
+  "^https://cdn\\.simpleicons\\.org",
+  "^https://(www\\.)?ctia\\.org",
+  "^https://(www\\.)?pcre\\.org",
+
+  # GitHub URLs — high rate limiting, check separately
+  "^https://github\\.com/",
+
+  # Static assets (CSS, JS, fonts, images)
+  "\\.(css|js|woff2?|ttf|eot|svg|png|jpe?g|webp|gif|ico)([?#]|$)",
+
+  # Non-HTTP schemes
+  "^mailto:",
+  "^tel:",
+  "^javascript:",
+  "^#",
+
+  # SignalWire app URLs (require authentication)
+  "^https://my\\.signalwire\\.com",
+  "^https://signalwire\\.com/signin",
+  "^https://signalwire\\.com/signup",
+
+  # Localhost URLs used in examples
+  "^https?://localhost",
+  "^https?://127\\.0\\.0\\.1",
+  "^https?://your-space\\.signalwire\\.com",
+  "^https?://<"
+]

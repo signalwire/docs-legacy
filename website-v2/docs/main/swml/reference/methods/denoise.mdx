@@ -1,0 +1,59 @@
+---
+title: denoise
+slug: /swml/reference/denoise
+description: Start noise reduction.
+toc_max_heading_level: 3
+---
+
+Start noise reduction. You can stop it at any time using [`stop_denoise`](/docs/swml/reference/stop-denoise).
+
+<ParamField path="denoise" type="object" required={true}>
+  An empty object that accepts no parameters.
+</ParamField>
+
+
+## **Variables**
+
+Set by the method:
+
+- **denoise_result:** (out) `on` | `failed`
+
+## **Examples**
+
+### Start denoise
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - answer: {}
+    - denoise: {}
+    - play:
+        url: 'say: Denoising ${denoise_result}'
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "answer": {}
+      },
+      {
+        "denoise": {}
+      },
+      {
+        "play": {
+          "url": "say: Denoising ${denoise_result}"
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>

@@ -1,0 +1,164 @@
+---
+title: undeaf
+slug: /call-session/undeaf
+---
+
+import APIField from '@site/src/components/APIField';
+
+Unmutes incoming audio so you or another participant can hear others in the call again.
+
+## Signature
+
+```typescript
+undeaf(params?: MemberCommandParams): Promise<void>
+```
+
+## Parameters
+
+<APIField name="params" type="MemberCommandParams">
+  Configuration for the undeaf operation.
+</APIField>
+
+<APIField name="params.memberId" type="string" default="Your member ID">
+  Member to undeaf. Omit to undeaf yourself, provide specific ID to undeaf another member.
+</APIField>
+
+## Returns
+
+**Type:** `Promise<void>`
+
+## Permissions
+
+- **Undeaf yourself:** Requires `call.capabilities.self.deaf.off`
+- **Undeaf another member:** Requires `call.capabilities.member.deaf.off`
+
+## Events
+
+- `member.updated` - General member update event
+- `member.updated.deaf` - Specific event for deaf state change
+
+## Important Notes
+
+**Microphone Remains Muted:**
+
+When you call `undeaf()`, the microphone remains muted. You must manually call `audioUnmute()` to speak again.
+
+```typescript
+// Step 1: Resume hearing others
+await call.undeaf()
+console.log('You can hear others now')
+
+// Step 2: Manually unmute microphone to speak
+await call.audioUnmute()
+console.log('You can now hear and speak')
+```
+
+This is intentional - it gives you control over when you want to start speaking again.
+
+**Member Targeting:**
+
+The `memberId` parameter follows the standard member targeting pattern:
+- **No parameter** - Undeafs yourself
+- **Specific member ID** - Undeafs that member (requires permission)
+
+```typescript
+// Undeaf yourself
+await call.undeaf()
+
+// Undeaf a specific member
+await call.undeaf({ memberId: 'de550c0c-3fac-4efd-b06f-b5b8614b8966' })
+```
+
+**Resume Participation Workflow:**
+
+```typescript
+async function resumeFullParticipation() {
+  try {
+    // Step 1: Resume hearing
+    await call.undeaf()
+    console.log('Can hear others')
+
+    // Step 2: Resume speaking
+    await call.audioUnmute()
+    console.log('Can speak')
+
+    console.log('Fully rejoined the conversation')
+  } catch (error) {
+    console.error('Failed to resume participation:', error)
+  }
+}
+
+resumeFullParticipation()
+```
+
+## Examples
+
+### Undeaf yourself
+
+```typescript
+// Resume hearing other participants
+await call.undeaf()
+console.log('You can now hear other participants again')
+```
+
+### Undeaf another participant
+
+```typescript
+// Get the list of members
+const { members } = await call.getMembers()
+
+// Find a specific member
+const member = members.find(m => m.name === 'John Doe')
+
+if (member) {
+  // Undeaf that member (requires permission)
+  await call.undeaf({ memberId: member.id })
+  console.log(`${member.name} can now hear other participants`)
+}
+```
+
+### Resume full participation after being deaf
+
+```typescript
+// You were made deaf, now resume full participation
+await call.undeaf()  // Resume hearing others
+
+// Microphone is still muted from when you were made deaf
+await call.audioUnmute()  // Resume speaking
+
+console.log('You can now hear and speak in the call')
+```
+
+### With event listeners
+
+```typescript
+// Listen for undeaf events
+call.on('member.updated.deaf', (event) => {
+  if (!event.member.deaf) {
+    console.log(`Member ${event.member.id} can now hear others`)
+  }
+})
+
+// Undeaf yourself
+await call.undeaf()
+```
+
+### Check capabilities before undeafing
+
+```typescript
+// Check if you can undeaf yourself
+if (call.capabilities?.self.deaf.off) {
+  await call.undeaf()
+  console.log('Successfully undeaf yourself')
+} else {
+  console.log('You do not have permission to undeaf yourself')
+}
+
+// Check if you can undeaf other members
+if (call.capabilities?.member.deaf.off) {
+  await call.undeaf({ memberId: 'member-id' })
+  console.log('Successfully undeaf member')
+} else {
+  console.log('You do not have permission to undeaf other members')
+}
+```

@@ -1,0 +1,29 @@
+---
+title: "getRoomSessions"
+slug: /node/reference/video/client/get-room-sessions
+description: getRoomSessions method for the Video Client class.
+toc_max_heading_level: 3
+---
+
+[roomsession]: /docs/server-sdk/v3/node/reference/video/room-session
+
+### getRoomSessions
+
+- **getRoomSessions**(): `Promise<{roomSessions: RoomSession[] }>` - See [RoomSession][roomsession] for more details.
+
+Returns the currently active room sessions.
+
+#### Returns
+
+`Promise<{roomSessions: RoomSession[] }>` - See [RoomSession][roomsession] for more details.
+
+#### Example
+
+```typescript
+const video = new Video.Client({
+  project: "<project-id>",
+  token: "<project-token>",
+});
+
+const { roomSessions } = await video.getRoomSessions();
+```

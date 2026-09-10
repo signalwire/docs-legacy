@@ -1,0 +1,169 @@
+---
+title: SWAIG
+description: The SignalWire AI Gateway
+sidebar_label: Overview
+
+slug: /swml/guides/swaig
+sidebar_position: 0
+---
+
+SWAIG allows AI Agents to delegate tasks to your backend via HTTP POST. 
+Think of it like CGI (Common Gateway Interface) - where a web server hands off execution to an external program using raw query strings or form-encoded data  - but for AI Agents.
+With SWAIG, instead of messy query strings requiring tedious parsing and validation, you receive clean, structured JSON with context, arguments, and intent.
+
+SWAIG requests include rich context:
+* The function name (e.g., `"search_movie"`),
+* Parsed arguments in the structured `argument.parsed` field,
+* The full argument schema (`argument_desc`) to describe expected inputs
+* Session, caller, and project context so you can make smart decisions without additional lookups
+
+## Remote functions
+
+<Steps>
+
+### Accept a POST request
+
+When a SWAIG function is invoked by the AI Agent, your server receives a JSON payload containing:
+* The `function` name to be executed.
+* The structured arguments in `argument.parsed`.
+* Contextual metadata (caller ID, project ID, session ID, etc.).
+
+From this request, extract the function name and `argument.parsed`.
+
+<AccordionGroup>
+
+<Accordion title="Example SWAIG function">
+
+The following sample SWML creates the SWAIG function `search_movie`:
+
+```json
+{
+    "description": "Search for movies by title",
+    "function": "search_movie",
+    "parameters": {
+      "properties": {
+        "include_adult": {
+          "description": "Whether to include adult content",
+          "type": "boolean"
+        },
+        "language": {
+          "description": "Language of the results",
+          "type": "string"
+        },
+        "page": {
+          "description": "Page number for pagination",
+          "type": "integer"
+        },
+        "primary_release_year": {
+          "description": "Filter results by primary release year",
+          "type": "integer"
+        },
+        "query": {
+          "description": "The movie title to search for",
+          "type": "string"
+        },
+        "region": {
+          "description": "Specify a region to prioritize search results",
+          "type": "string"
+        },
+        "year": {
+          "description": "Filter results by release year",
+          "type": "integer"
+        }
+      },
+      "required": [],
+      "type": "object"
+    },
+    "web_hook_url": "https://username:password@moviebot.example.com/swaig"
+  }
+```
+
+</Accordion>
+
+<Accordion title="Example request sent to server" defaultOpen={true}>
+
+When your SWAIG function executes, SignalWire sends a request like the following to your server.
+
+```json
+{
+  "function": "search_movie",
+  "argument": {
+    "parsed": [
+      {
+        "query": "Pretty Woman"
+      }
+    ],
+    "raw": "{\"query\":\"Pretty Woman\"}"
+  },
+  "argument_desc": {
+    "properties": {
+      "query": { "type": "string", "description": "The movie title to search for" },
+      "year": { "type": "integer" }
+    },
+    "type": "object"
+  },
+  "ai_session_id": "c960da54-3f09-4de6-8c84-49c1fcca704c",
+  "caller_id_num": "+19184249378",
+  "project_id": "625ceaeb-b27c-46b9-9b69-9d62286588ec"
+}
+```
+
+</Accordion>
+
+</AccordionGroup>
+
+### Execute business logic
+
+On your server, perform the actions needed to generate the desired response using the extracted function name and arguments.
+
+In this case, our application retrieves information about a selected movie from an external API.
+
+### Return a `response` message
+
+The response can directly shape the AI Agent’s next moves using natural language and SWML instructions.
+
+In reply, your server should return a JSON object with the following:
+* **`response`** (string): A message in Markdown format used by the LLM in its reply.
+* **`action`** (array): Optional list of SWML-compatible objects that can execute commands, play media, set metadata, or return inline SWML.
+
+For example:
+
+<Accordion title="Response to SWAIG request" defaultOpen={true}>
+
+Note that this response includes both **response** and **action** sections.
+This means that our server has both updated the LLM's context with the requested information from an external API,
+***and*** handed off new call flow instructions in the form of valid SWML.
+
+```json
+{
+  "response": "**Pretty Woman** is a 1990 romantic comedy starring *Julia Roberts* as Vivian Ward, a spirited Hollywood escort, and *Richard Gere* as Edward Lewis, a wealthy businessman. Directed by Garry Marshall, the film tells the story of their unexpected romance that begins as a business deal and blossoms into a modern fairytale.  \nSet against the glitz of Los Angeles, the movie features iconic moments—like the Rodeo Drive shopping spree and a memorable opera night. It explores themes of class, love, transformation, and empowerment. Julia Roberts' performance won her a Golden Globe and an Oscar nomination. It's now considered one of the most iconic romantic comedies ever made.",
+  "action": [
+    {
+      "set_meta_data": {
+        "title": "Pretty Woman",
+        "release_year": 1990,
+        "genre": ["Romance", "Comedy"],
+        "lead_actors": ["Julia Roberts", "Richard Gere"]
+      }
+    },
+    {
+      "SWML": {
+        "version": "1.0.0",
+        "sections": {
+          "main": [
+            {
+              "play": {
+                "url": "https://cdn.signalwire.com/swml/pretty-woman-theme.mp3"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
+```
+
+</Accordion>
+
+</Steps>

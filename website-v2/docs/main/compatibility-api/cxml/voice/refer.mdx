@@ -1,0 +1,127 @@
+---
+title: Refer
+sidebar_label: Refer
+slug: /compatibility-api/cxml/reference/voice/refer
+sidebar_position: 1
+toc_max_heading_level: 3
+---
+
+The `<Refer>` verb transfers a SIP call in SignalWire to a transfer target using the SIP REFER method. This verb returns upon completion of transfer, on failure of transfer, on hangup, or on time out while waiting for NOTIFY. SignalWire will not hang up after `<Refer>` until all verbs have been processed.
+
+## Verb attributes
+
+<ParamField path="action" type="string">
+  The `action` attribute takes an absolute or relative URL. On completion of the transfer, a request to this URL is made. If `action` is not provided, SignalWire will continue reading the next verb in the document. See [below](#refer_action) for specified request parameters.
+</ParamField>
+
+<ParamField path="method" type="string" default="POST">
+  Specifies whether the action is a `GET` or a `POST`.
+</ParamField>
+
+
+
+
+#### Request parameters for the `action` URL {#refer_action}
+
+The `action` request contains the [Standard Request Parameters](/docs/compatibility-api/cxml/reference/voice#request-parameters) as well as:
+
+<ParamField path="NotifySipResponseCode" type="string">
+  The last response code reported by the SIP NOTIFY events. This is the code sent by the transfer target in response to the SIP INVITE method. This parameter will not reported if no SIP NOTIFY events are received.
+</ParamField>
+
+<ParamField path="ReferCallStatus" type="string">
+  The result of the transfer based on the reply to the SIP REFER method and the SIP NOTIFY events received afterwards. This parameter will not be reported if no SIP NOTIFY events are received. See [below](#action_referCallStatus) for all possible values.
+</ParamField>
+
+<ParamField path="ReferSipResponseCode" type="string">
+  The code received in response to the SIP REFER method. 202 when accepted.
+</ParamField>
+
+
+
+
+#### Values for the `ReferCallStatus` parameter {#action_referCallStatus}
+
+The parameter `ReferCallStatus` has the following values:
+
+| Value | Description |
+|:------|:------------|
+| `in-progress` | SIP REFER accepted and SignalWire received 200 via SIP NOTIFY. |
+| `busy` | SIP REFER accepted and SignalWire received 486 or 600 via SIP NOTIFY. |
+| `no-answer` | SIP REFER accepted and SignalWire received 487 via SIP NOTIFY. |
+| `canceled` | SIP REFER accepted, however the call ended before the transfer completed. |
+| `failed` | An error occurred through the `<Refer>` verb, an error received in response to SIP REFER, or a 4xx/5xx/6xx error was received via SIP NOTIFY. |
+
+## Nouns
+
+The noun of a cXML verb is nested within the verb upon which the verb acts. `<Refer>` has the following nouns:
+
+| Noun | Description |
+|:-----|:------------|
+| `<Sip>` | The SIP URI to which to transfer this call. |
+
+## Nesting
+
+No other verbs can be nested within `<Refer>` and you cannot nest `<Refer>` within any other verbs.
+
+## Examples
+
+### Transfer to SIP URI
+
+<CodeBlocks>
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Refer action="https://example.com/refer-completed.xml" method="GET"><Sip>sip:transfer-target@example.com</Sip></Refer>
+</Response>
+```
+```javascript title="Node.js"
+const { RestClient } = require("@signalwire/compatibility-api");
+const response = new RestClient.LaML.VoiceResponse();
+
+const refer = response.refer({
+  action: "https://example.com/refer-completed.xml",
+  method: "GET",
+});
+refer.sip("sip:transfer-target@example.com");
+console.log(response.toString());
+```
+```csharp
+using Twilio.TwiML;
+using System;
+
+
+class Example
+{
+    static void Main()
+    {
+        var response = new VoiceResponse();
+        var refer = response.Refer(action: new Uri("https://example.com/refer-completed.xml"), method: Twilio.Http.HttpMethod.Get);
+        refer.sip(new Uri("sip:transfer-target@example.com"));
+        response.append(refer);
+        Console.WriteLine(response.ToString());
+    }
+}
+```
+```python
+from signalwire.voice_response import VoiceResponse, Refer
+
+response = VoiceResponse()
+refer = response.refer(action='https://example.com/refer-completed.xml', method='GET')
+refer.sip('sip:transfer-target@example.com')
+response.append(refer)
+
+print(response)
+```
+```ruby
+require 'signalwire/sdk'
+
+response = Signalwire::Sdk::VoiceResponse.new do |response|
+  refer = response.refer(action: 'https://example.com/refer-completed.xml', method: 'GET') do |refer|
+    refer.sip('sip:transfer-target@example.com')
+  end
+end
+
+puts response.to_s
+```
+</CodeBlocks>

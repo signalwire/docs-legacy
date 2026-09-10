@@ -1,0 +1,484 @@
+---
+title: Say
+sidebar_label: Say
+slug: /compatibility-api/cxml/reference/voice/say
+sidebar_position: 1
+toc_max_heading_level: 3
+---
+
+The `<Say>` verb reads the supplied text back to the caller. It is useful for text that is difficult to pre-record. The gender and language in which the text will be read is customizable.
+
+## Verb attributes
+
+<ParamField path="language" type="string">
+  The attribute `language` allows you to specify the dialect (language and locale) of `voice`. See below for all language specifications.
+</ParamField>
+
+<ParamField path="loop" type="integer" default="1">
+  The attribute `loop` specifies the number of times a text is to be repeated. If `loop` is set to 0, the text will be continuously repeated until the call is terminated.
+</ParamField>
+
+<ParamField path="voice" type="string" default="woman">
+  The attribute `voice` supports: **man**, **woman**, **alice**, Amazon Polly voices by prefixing them with `Polly.`, Amazon Polly Neural voices by prefixing them with `Polly.` and ending them with `-Neural`, Google Cloud voices by prefixing them with `gcloud.`. Polly Neural and Google Wavenet voices are charged a premium price compared to Polly Standard and Google Standard voices. **alice** is deprecated and provided for backward compatibility. See below for language specifications on each of these voices.
+</ParamField>
+
+### Supported voices and languages
+
+The supported voices and languages can be found [here](/docs/platform/voice/tts).
+
+## Nouns
+
+The noun of a cXML verb is nested within the verb upon which the verb acts. `<Say>` has the following noun:
+
+| Noun | Description |
+|:-----|:------------|
+| `plain text` | The text that will be read to the caller. Limit: 4,096 unicode characters. |
+
+## Speech synthesis markup language (SSML)
+
+Speech Synthesis Markup Language (SSML) is an XML-based markup language that provides a standard way to mark up text for synthesized speech.
+
+SSML is usually wrapped within `<speak>` tags. But, when using SSML with the `<Say>` verb, you can ignore those `<speak>` tags. The rest of the SSML tags will be placed inside the `<Say>` verb.
+
+Below are the supported SSML tags. When using an Amazon Polly voice, please refer to https://docs.aws.amazon.com/polly/latest/dg/supportedtags.html instead.
+
+| Tag | Description |
+|:----|:------------|
+| `<break>` | A pause in speech. Set the length of the pause with the `time` attribute. Maximum pause time is **10s**. Include the unit `s` or `ms` when setting a `time`. The `strength` attribute can also be used for pauses. See [below](#strength) for possible values. |
+| `<emphasis>` | Emphasize words or phrases. This tag changes the rate and volume of speech. More emphasis generates louder and slower speech while less emphasis generates quieter and faster speech. Emphasis can be modified with the `level` attribute. See [below](#level) for possible values. |
+| `<lang>` | Specify another language for specific words or phrases. Set the language with the `xml:lang` attribute. Possible languages are: `en-US`, `en-GB`, `en-IN`, `en-AU`, `en-CA`, `de-DE`, `es-ES`, `it-IT`, `ja-JP`, `fr-FR` (English, German, Spanish, Italian, Japanese, French). |
+| `<p>` | Add a pause between paragraphs. |
+| `<phoneme>` | Phonetic pronunciation for specified words or phrases. Set the phonetic alphabet to use with the `alphabet` attribute. See [below](#alphabet) for possible values. In addition, you can use the `ph` attribute to set the phonetic pronunciation to speak. See [here](https://developer.amazon.com/docs/custom-skills/speech-synthesis-markup-language-ssml-reference.html#supported-symbols) for a list of supported symbols. |
+| `<prosody>` | Modify the [`volume`](#volume), [`pitch`](#pitch), and [`rate`](#rate) of the tagged speech. |
+| `<s>` | Add a pause between sentences. |
+| `<say-as>` | Describe how text should be interpreted. See [below](#interpret) for all the possible values of the `interpret-as` attribute of the `<say-as>` tag. |
+| `<sub>` | Pronounce the specified word or phrase as a different word or phrase. Specify the pronunciation to substitute with the `alias` attribute. |
+
+
+
+
+#### `strength` attribute {#strength}
+
+The `strength` attribute has the following values. Default is `medium`.
+
+| Value | Description |
+|:------|:------------|
+| `none` | No pause. Can be used to remove a pause that would normally occur. |
+| `x-weak` | No pause. |
+| `weak` | Treat adjacent words as if separated by a single comma. |
+| `medium` | Treat adjacent words as if separated by a single comma. |
+| `strong` | Sentence break. |
+| `x-strong` | Paragraph break. |
+
+
+
+
+#### `level` attribute {#level}
+
+The `level` attribute has the following values. Default is `moderate`.
+
+| Value | Description |
+|:------|:------------|
+| `strong` | Increase the volume and slow down the speaking rate. Speech is louder and slower. |
+| `moderate` | Increase the volume and slow down the speaking rate, but not as much as `strong`. |
+| `reduced` | Decrease the volume and speed up the speaking rate. Speech is softer and faster. |
+
+
+
+
+#### `alphabet` attribute {#alphabet}
+
+The `alphabet` attribute has the following values.
+
+| Value | Description |
+|:------|:------------|
+| `ipa` | The International Phonetic Alphabet (IPA). |
+| `x-sampa` | The Extended Speech Assessment Methods Phonetic Alphabet (X-SAMPA). |
+
+
+
+
+#### `volume` attribute {#volume}
+
+The `volume` attribute has the following values. Set the volume with one of the values below. Then, you can specify a percentage to increase or decrease the volume of the speech. See [here](https://developer.amazon.com/docs/custom-skills/speech-synthesis-markup-language-ssml-reference.html#prosody) for more information.
+
+| Value | Description |
+|:------|:------------|
+| `silent` | No volume. |
+| `x-soft` | Lowest volume. |
+| `soft` | Lower volume. |
+| `medium` | Normal volume. |
+| `loud` | Louder volume. |
+| `x-loud` | Loudest volume. |
+
+
+
+
+#### `pitch` attribute {#pitch}
+
+The `pitch` attribute has the following values. Set the pitch with one of the values below. Then, you can specify a percentage to increase or decrease the pitch of the speech. See [here](https://developer.amazon.com/docs/custom-skills/speech-synthesis-markup-language-ssml-reference.html#prosody) for more information.
+
+| Value | Description |
+|:------|:------------|
+| `x-low` | Lowest pitch. |
+| `low` | Lower pitch. |
+| `medium` | Normal pitch. |
+| `high` | Higher pitch. |
+| `x-high` | Highest pitch. |
+
+
+
+
+#### `rate` attribute {#rate}
+
+The `rate` attribute has the following values. Set the rate with one of the values below. Then, you can specify a percentage to increase or decrease the speed of the speech. See [here](https://developer.amazon.com/docs/custom-skills/speech-synthesis-markup-language-ssml-reference.html#prosody) for more information.
+
+| Value | Description |
+|:------|:------------|
+| `x-slow` | Slowest rate. |
+| `slow` | Slower rate. |
+| `medium` | Normal rate. |
+| `fast` | Faster rate. |
+| `x-fast` | Fastest rate. |
+
+
+
+
+#### `interpret-as` attribute {#interpret}
+
+The `interpret-as` attribute has the following values.
+
+| Value | Description |
+|:------|:------------|
+| `characters` | Spell out each letter. |
+| `spell-out` | Spell out each letter. |
+| `cardinal` | Interpret value as cardinal number. |
+| `number` | Interpret value as cardinal number. |
+| `ordinal` | Interpret value as ordinal number. |
+| `digits` | Spell each digit separately. |
+| `fraction` | Interpret value as fraction. |
+| `unit` | Interpret value as measurement. |
+| `date` | Interpret value as a date. Use `format` attribute to indicate format of date: `mdy`, `dmy`, `ymd`, `md`, `dm`, `ym`, `my`, `d`, `m`, `y`. |
+| `time` | Interpret as a duration of minutes and seconds. |
+| `telephone` | Interpret as telephone number. |
+| `address` | Interpret as part of a street address. |
+| `interjection` | Interpret as an interjection. |
+| `expletive` | "Bleep" out content in tag. |
+
+### Example
+
+```xml
+<Response>
+  <Say>
+    Welcome to SignalWire
+    <break strength="x-weak" time="100ms"/>
+    <emphasis level="moderate">Emphasized words</emphasis>
+    <p>Words in a paragraph</p>
+    <phoneme alphabet="x-sampa" ph="pÉªËˆkÉ‘Ën">Phonetic pronunciation</phoneme>
+    <prosody pitch="-10%" rate="85%" volume="-6dB">Words to speak</prosody>
+    <s>Words in a sentence.</s>
+    <say-as interpret-as="spell-out">Words</say-as>
+    <sub alias="alias">Words to be substituted</sub>
+  </Say>
+</Response>
+```
+
+Here is an example of how to use some of the SSML tags within the `Say` verb.
+
+## Nesting
+
+No other verbs can be nested within `<Say>`. However, `<Say>` can be nested within `<Gather>`.
+
+## Examples
+
+### A simple message to be read
+
+<CodeBlocks>
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+     <Say>Hello World.</Say>
+</Response>
+```
+
+```javascript title="Node.js"
+const { RestClient } = require("@signalwire/compatibility-api");
+const response = new RestClient.LaML.VoiceResponse();
+
+response.say("Hello World.");
+console.log(response.toString());
+```
+
+```csharp
+using Twilio.TwiML;
+using System;
+
+
+class Example
+{
+    static void Main()
+    {
+        var response = new VoiceResponse();
+        response.Say("Hello World.");
+
+        Console.WriteLine(response.ToString());;
+    }
+}
+```
+
+```python
+from signalwire.voice_response import VoiceResponse, Say
+
+response = VoiceResponse()
+response.say('Hello World.')
+
+print(response)
+```
+
+```ruby
+require 'signalwire/sdk'
+
+response = Signalwire::Sdk::VoiceResponse.new do |response|
+  response.say(message: 'Hello World.')
+end
+
+puts response.to_s
+```
+</CodeBlocks>
+
+'Hello World' will be read once in a male voice.
+
+### A simple message to be read using Amazon Polly voice
+
+<CodeBlocks>
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+     <Say voice="Polly.Joanna">Hello World.</Say>
+</Response>
+```
+
+```javascript title="Node.js"
+const { RestClient } = require("@signalwire/compatibility-api");
+const response = new RestClient.LaML.VoiceResponse();
+
+response.say({ voice: "Polly.Joanna" }, "Hello World.");
+console.log(response.toString());
+```
+
+```csharp
+using Twilio.TwiML;
+using System;
+
+
+class Example
+{
+    static void Main()
+    {
+        var response = new VoiceResponse();
+        response.Say("Hello World.", voice: "Polly.Joanna");
+
+        Console.WriteLine(response.ToString());;
+    }
+}
+```
+
+```python
+from signalwire.voice_response import VoiceResponse, Say
+
+response = VoiceResponse()
+response.say('Hello World.', voice='Polly.Joanna')
+
+print(response)
+```
+
+```ruby
+require 'signalwire/sdk'
+
+response = Signalwire::Sdk::VoiceResponse.new do |response|
+  response.say(voice: 'Polly.Joanna', message: 'Hello World.')
+end
+
+puts response.to_s
+```
+</CodeBlocks>
+
+'Hello World' will be read once using the Amazon Polly "Joanna" voice.
+
+### A simple message to be read using Amazon Polly Neural voice
+
+<CodeBlocks>
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+     <Say voice="Polly.Joanna-Neural">Hello World.</Say>
+</Response>
+```
+
+```javascript title="Node.js"
+const { RestClient } = require("@signalwire/compatibility-api");
+const response = new RestClient.LaML.VoiceResponse();
+
+response.say({ voice: "Polly.Joanna-Neural" }, "Hello World.");
+console.log(response.toString());
+```
+
+```csharp
+using Twilio.TwiML;
+using System;
+
+
+class Example
+{
+    static void Main()
+    {
+        var response = new VoiceResponse();
+        response.Say("Hello World.", voice: "Polly.Joanna-Neural");
+
+        Console.WriteLine(response.ToString());;
+    }
+}
+```
+
+```python
+from signalwire.voice_response import VoiceResponse, Say
+
+response = VoiceResponse()
+response.say('Hello World.', voice='Polly.Joanna-Neural')
+
+print(response)
+```
+
+```ruby
+require 'signalwire/sdk'
+
+response = Signalwire::Sdk::VoiceResponse.new do |response|
+  response.say(voice: 'Polly.Joanna-Neural', message: 'Hello World.')
+end
+
+puts response.to_s
+```
+</CodeBlocks>
+
+'Hello World' will be read once using the Amazon Polly "Joanna" Neural voice. Amazon Polly Neural voices are charged a premium price compared to Amazon Polly Standard voices.
+
+### A simple message to be read using Google Cloud text-to-speech voice
+
+<CodeBlocks>
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+     <Say voice="gcloud.en-US-Standard-A">Hello World.</Say>
+</Response>
+```
+
+```javascript title="Node.js"
+const { RestClient } = require("@signalwire/compatibility-api");
+const response = new RestClient.LaML.VoiceResponse();
+
+response.say({ voice: "gcloud.en-US-Standard-A" }, "Hello World.");
+console.log(response.toString());
+```
+
+```csharp
+using Twilio.TwiML;
+using System;
+
+
+class Example
+{
+    static void Main()
+    {
+        var response = new VoiceResponse();
+        response.Say("Hello World.", voice: "gcloud.en-US-Standard-A");
+
+        Console.WriteLine(response.ToString());;
+    }
+}
+```
+
+```python
+from signalwire.voice_response import VoiceResponse, Say
+
+response = VoiceResponse()
+response.say('Hello World.', voice='gcloud.en-US-Standard-A')
+
+print(response)
+```
+
+```ruby
+require 'signalwire/sdk'
+
+response = Signalwire::Sdk::VoiceResponse.new do |response|
+  response.say(voice: 'gcloud.en-US-Standard-A', message: 'Hello World.')
+end
+
+puts response.to_s
+```
+</CodeBlocks>
+
+'Hello World' will be read once using the Google Cloud text-to-speech en-US-Standard-A voice.
+
+### Repetition of a message in a foreign language
+
+<CodeBlocks>
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+     <Say voice="alice" language="fr-CA" loop="5">Bonjour.</Say>
+</Response>
+```
+
+```javascript title="Node.js"
+const { RestClient } = require("@signalwire/compatibility-api");
+const response = new RestClient.LaML.VoiceResponse();
+
+response.say({ voice: "alice", language: "fr-CA", loop: 5 }, "Bonjour.");
+console.log(response.toString());
+```
+
+```csharp
+using Twilio.TwiML;
+using System;
+
+
+class Example
+{
+    static void Main()
+    {
+        var response = new VoiceResponse();
+        response.Say("Bonjour.", voice: "alice", language: "fr-CA", loop: 5);
+
+        Console.WriteLine(response.ToString());;
+    }
+}
+```
+
+```python
+from signalwire.voice_response import VoiceResponse, Say
+
+response = VoiceResponse()
+response.say('Bonjour.', voice='alice', language='fr-CA', loop=5)
+
+print(response)
+```
+
+```ruby
+require 'signalwire/sdk'
+
+response = Signalwire::Sdk::VoiceResponse.new do |response|
+  response.say(message: 'Bonjour.', voice: 'alice', language: 'fr-CA', loop: 5)
+end
+
+puts response.to_s
+```
+</CodeBlocks>
+
+'Hello' will be repeated 5 times in Canadian French.
+
+## Notes on usage
+
+- There is a 4,096 Unicode character limit on the text
+- Numbers are spoken, or read, based on context. For example, '234' is read as "two hundred thirty-four", whereas '2 3 4' is read as "two three four".
+- Short pauses in spoken text are accomplished by inserting punctuations, i.e. commas and periods, in the written text. For longer pauses, place text in a separate `<Say>` verbs and place a `<Pause>` verb in between them.
+- Dates, times, money amounts, and abbreviations may not follow intuitive pronunciations. Test these situations to ensure they are pronounced to your liking.

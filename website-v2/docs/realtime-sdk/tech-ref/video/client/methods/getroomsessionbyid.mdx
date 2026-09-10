@@ -1,0 +1,47 @@
+---
+title: "getRoomSessionById"
+slug: /node/reference/video/client/get-room-session-by-id
+description: getRoomSessionById method for the Video Client class.
+toc_max_heading_level: 3
+---
+
+[roomsession]: /docs/server-sdk/node/reference/video/room-session
+
+### getRoomSessionById
+
+- **getRoomSessionById**(`id`): `Promise<{ roomSession: RoomSession }>`
+
+Returns a room session given its id. Only in-progress room sessions are currently returned.
+
+#### Parameters
+
+<ParamField path="id" type="string" required>
+  Id of the room session.
+</ParamField>
+
+#### Example
+
+In this example, we use the `getRoomSessions` method to get
+the currently active room sessions and then use the `getRoomSessionById` method to get the first room session's information.
+This example assumes that you have already active [`RoomSession`][roomsession].
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+const videoClient = client.video;
+
+const { roomSessions } = await videoClient.getRoomSessions();
+
+const room = await videoClient.getRoomSessionById(roomSessions[0].id);
+
+console.log(room.roomSession.displayName)
+```
+
+#### Returns
+
+`Promise<{ roomSession: RoomSession }>`
+
+A promise that resolves to a [`RoomSession`][roomsession] object
+that can be used to access the room session's information and methods.

@@ -1,0 +1,321 @@
+---
+title: SignalWire.Relay.Consumer
+slug: /dotnet/reference/consumer
+toc_max_heading_level: 3
+---
+
+[call]: /docs/server-sdk/v2/dotnet/reference/calling/call
+[index]: /docs/server-sdk/v2/dotnet/reference#contexts
+[message]: /docs/server-sdk/v2/dotnet/reference/messaging/message
+[relaytask]: /docs/server-sdk/v2/dotnet/reference/task
+A RELAY Consumer is a simple application framework that provides a shell for creating independent consumers of the RELAY SDK. RELAY Consumers abstract all the setup of connecting to RELAY and automatically dispatch workers to handle requests. Consumers will receive requests and delegate them to their own worker thread, allowing you to focus on your business logic without having to worry about multi-threading or blocking, everything just works. Think of RELAY Consumers like a background worker system for all your calling and messaging needs.
+
+## Creating Consumers
+
+A RELAY Consumer is a simple application framework, customized by specifying [contexts][index] and event handlers to respond to incoming events.
+
+A consumer has 2 required properties: `project`, `token`, and usually requires at least one `contexts` for incoming events. Project and Token are used to authenticate your Consumer to your SignalWire account. Contexts are a list of contexts you want this Consumer to listen for. [Learn more about RELAY Contexts][index].
+
+A consumer is created by inheriting the `Consumer` type, and then overriding the available methods. It is then executed by initializing and calling the `Run` method on it.
+
+You can optionally add code to the `Setup` method if you need to do any initialization work before processing messages. This is useful to do any one-off work that you wouldn't want to do for each and every event, such as setting up logging or connecting to a datastore.
+
+```csharp
+using SignalWire.Relay;
+using SignalWire.Relay.Calling;
+using System;
+using System.Collections.Generic;
+
+namespace Example
+{
+    internal class ExampleConsumer : Consumer
+    {
+        protected override void Setup()
+        {
+            Project = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX";
+            Token = "PTXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
+            Contexts = new List<string> { "test" };
+
+            // Do additional setup here
+        }
+
+        protected override void OnIncomingCall(Call call)
+        {
+            AnswerResult resultAnswer = call.Answer();
+            call.PlayTTS("Welcome to SignalWire!");
+            call.Hangup();
+        }
+    }
+
+    internal class Program
+    {
+        public static void Main()
+        {
+            new ExampleConsumer().Run();
+        }
+    }
+}
+```
+
+## Event Handlers
+
+Event handlers are where you will write most of your code. They are executed when your consumer receives a matching event for the contexts specified by your Consumer.
+
+### OnIncomingCall
+
+Executed when you receive an inbound call, passes in the inbound [`Call`][call] object.
+
+```csharp
+using SignalWire.Relay;
+using SignalWire.Relay.Calling;
+using System;
+using System.Collections.Generic;
+
+namespace Example
+{
+    internal class IncomingCallConsumer : Consumer
+    {
+        protected override void Setup()
+        {
+            Project = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX";
+            Token = "PTXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
+            Contexts = new List<string> { "test" };
+        }
+
+        protected override void OnIncomingCall(Call call)
+        {
+            AnswerResult resultAnswer = call.Answer();
+            call.PlayTTS("Welcome to SignalWire!");
+            call.Hangup();
+        }
+    }
+
+    internal class Program
+    {
+        public static void Main()
+        {
+            new IncomingCallConsumer().Run();
+        }
+    }
+}
+```
+
+### Ready
+
+Executed when the Consumer has connected and is ready to make RELAY requests.
+
+```csharp
+using SignalWire.Relay;
+using SignalWire.Relay.Messaging;
+using System;
+using System.Collections.Generic;
+
+namespace Example
+{
+    internal class ReadyConsumer : Consumer
+    {
+        protected override void Setup()
+        {
+            Project = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX";
+            Token = "PTXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
+            Contexts = new List<string> { "test" };
+        }
+
+        protected override void Ready(Client client)
+        {
+            Console.WriteLine("Client ready, sending message...");
+            SendResult result = client.Messaging.Send(
+                "incoming_context",
+                "+1XXXXXXXXXX",
+                "+1YYYYYYYYYY",
+                new SendSource("Hello from SignalWire!"));
+
+            if (result.Successful)
+            {
+                Console.WriteLine("Send was successful");
+            }
+        }
+    }
+
+    internal class Program
+    {
+        public static void Main()
+        {
+            new ReadyConsumer().Run();
+        }
+    }
+}
+```
+
+### OnTask
+
+Executed when a task is received, passes in the [`RelayTask`][relaytask] object.
+
+```csharp
+using SignalWire.Relay;
+using SignalWire.Relay.Messaging;
+using System;
+using System.Collections.Generic;
+
+namespace Example
+{
+    internal class TaskConsumer : Consumer
+    {
+        protected override void Setup()
+        {
+            Project = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX";
+            Token = "PTXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
+            Contexts = new List<string> { "test" };
+        }
+
+        protected override void OnTask(RelayTask task)
+        {
+            Console.WriteLine("Task successfully received for project ID {0} at {1} with message '{2}'", task.ProjectID, task.Timestamp, task.Message.ToString());
+        }
+    }
+
+    internal class Program
+    {
+        public static void Main()
+        {
+            new TaskConsumer().Run();
+        }
+    }
+}
+```
+
+### OnIncomingMessage
+
+Executed when you receive an inbound message, passes in the inbound [`Message`][message] object.
+
+```csharp
+using SignalWire.Relay;
+using SignalWire.Relay.Messaging;
+using System;
+using System.Collections.Generic;
+
+namespace Example
+{
+    internal class IncomingMessageConsumer : Consumer
+    {
+        protected override void Setup()
+        {
+            Project = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX";
+            Token = "PTXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
+            Contexts = new List<string> { "test" };
+        }
+
+        protected override void OnIncomingMessage(Message message)
+        {
+            if (message.Body?.StartsWith("Hello") == true) {
+                // ...
+            }
+        }
+    }
+
+    internal class Program
+    {
+        public static void Main()
+        {
+            new IncomingMessageConsumer().Run();
+        }
+    }
+}
+```
+
+### OnMessageStateChange
+
+Executed when a message state change event comes through. Passes in the [`Message`][message] object.
+
+```csharp
+using SignalWire.Relay;
+using SignalWire.Relay.Messaging;
+using System;
+using System.Collections.Generic;
+
+namespace Example
+{
+    internal class MessageStateChangeConsumer : Consumer
+    {
+        protected override void Setup()
+        {
+            Project = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX";
+            Token = "PTXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
+            Contexts = new List<string> { "test" };
+        }
+
+        protected override void OnMessageStateChange(Message message)
+        {
+            if (message.ID == "YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY") {
+                // ...
+            }
+        }
+    }
+
+    internal class Program
+    {
+        public static void Main()
+        {
+            new MessageStateChangeConsumer().Run();
+        }
+    }
+}
+```
+
+## Cleaning Up on Exit
+
+When a RELAY Consumer shuts down, you have the opportunity to clean up any resources held by the consumer. For example, you could close any open files, network connections, or send a notification to your monitoring service.
+
+Just implement a `Teardown` method in your consumer and it will be called during the shutdown procedure.
+
+```csharp
+using SignalWire.Relay;
+using SignalWire.Relay.Calling;
+using System;
+using System.Collections.Generic;
+
+namespace Example
+{
+    internal class TeardownConsumer : Consumer
+    {
+        protected override void Setup()
+        {
+            Project = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX";
+            Token = "PTXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
+            Contexts = new List<string> { "test" };
+        }
+
+        protected override void Teardown()
+        {
+            // Clean up any resources when exiting.
+        }
+
+        protected override void OnIncomingCall(Call call)
+        {
+            AnswerResult resultAnswer = call.Answer();
+            call.PlayTTS("Welcome to SignalWire!");
+            call.Hangup();
+        }
+    }
+
+    internal class Program
+    {
+        // Standard entry point for any C# application
+        public static void Main()
+        {
+            // Create and run the consumer, this will block until the consumer is stopped
+            new TeardownConsumer().Run();
+        }
+    }
+}
+```
+
+## Running Consumers
+
+Running a consumer is just like running any C# application, simply execute the program as a separate process and ensure you call `Run()` on the Consumer. The process will stay up until you shut it down.
+
+{/* ### Shutting Down Consumers
+
+In order to gracefully shut down a Relay Consumer process, send it the `SIGTERM` signal. Most process supervisors such as Runit, Docker and Kubernetes send this signal when shutting down a process, so using those systems will make things easier.
+ */}
+

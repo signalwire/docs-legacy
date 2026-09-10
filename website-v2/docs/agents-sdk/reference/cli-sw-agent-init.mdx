@@ -1,0 +1,339 @@
+---
+title: "sw-agent-init CLI"
+sidebar_label: "sw-agent-init CLI"
+slug: /python/reference/cli-sw-agent-init
+toc_max_heading_level: 3
+---
+
+## sw-agent-init CLI
+
+Interactive project generator for creating new SignalWire agent projects with customizable features.
+
+### Overview
+
+The `sw-agent-init` tool scaffolds new SignalWire agent projects with:
+
+- Pre-configured project structure
+- Agent class with example SWAIG tool
+- Environment configuration (.env files)
+- Optional debug webhooks for development
+- Test scaffolding with pytest
+- Virtual environment setup
+
+### Command Syntax
+
+```bash
+sw-agent-init [project_name] [options]
+```
+
+### Quick Reference
+
+| Command | Purpose |
+|---------|---------|
+| `sw-agent-init` | Interactive mode with prompts |
+| `sw-agent-init myagent` | Quick mode with defaults |
+| `sw-agent-init myagent --type full` | Full-featured project |
+| `sw-agent-init myagent -p aws` | AWS Lambda project |
+| `sw-agent-init myagent -p gcp` | Google Cloud Function project |
+| `sw-agent-init myagent -p azure` | Azure Function project |
+| `sw-agent-init myagent --no-venv` | Skip virtual environment |
+
+### Modes
+
+#### Interactive Mode
+
+Run without arguments for guided setup:
+
+```bash
+sw-agent-init
+```
+
+Interactive mode prompts for:
+
+1. Project name
+2. Project directory
+3. Agent type (basic or full)
+4. Feature selection
+5. SignalWire credentials
+6. Virtual environment creation
+
+#### Quick Mode
+
+Provide a project name for quick setup with defaults:
+
+```bash
+sw-agent-init myagent
+```
+
+Quick mode uses environment variables for credentials if available.
+
+### Options
+
+| Option | Description |
+|--------|-------------|
+| `--type basic` | Minimal agent with example tool (default) |
+| `--type full` | All features enabled |
+| `--platform, -p` | Target platform: `local`, `aws`, `gcp`, `azure` (default: `local`) |
+| `--region, -r` | Cloud region for serverless deployment |
+| `--no-venv` | Skip virtual environment creation |
+| `--dir PATH` | Parent directory for project |
+
+### Agent Types
+
+#### Basic Agent
+
+Minimal setup for getting started:
+
+- Single agent class
+- Example SWAIG tool
+- Test scaffolding
+- Environment configuration
+
+```bash
+sw-agent-init myagent --type basic
+```
+
+#### Full Agent
+
+All features enabled:
+
+- Debug webhooks (console output)
+- Post-prompt summary handling
+- Web UI with status page
+- Example SWAIG tool
+- Test scaffolding
+- Basic authentication
+
+```bash
+sw-agent-init myagent --type full
+```
+
+### Features
+
+Toggle features in interactive mode:
+
+| Feature | Description |
+|---------|-------------|
+| Debug webhooks | Real-time call data printed to console |
+| Post-prompt summary | Call summary handling after conversations |
+| Web UI | Static file serving with status page |
+| Example SWAIG tool | Sample `get_info` tool implementation |
+| Test scaffolding | pytest-based test suite |
+| Basic authentication | HTTP basic auth for SWML endpoints |
+
+### Platforms
+
+The `--platform` option generates platform-specific project structures:
+
+#### Local (Default)
+
+Standard Python server deployment:
+
+```bash
+sw-agent-init myagent
+# or explicitly:
+sw-agent-init myagent --platform local
+```
+
+#### AWS Lambda
+
+Generates AWS Lambda function structure with handler:
+
+```bash
+sw-agent-init myagent -p aws
+sw-agent-init myagent -p aws -r us-east-1
+```
+
+Generated structure includes:
+
+- `handler.py` - Lambda handler entry point
+- `template.yaml` - SAM template for deployment
+- Platform-specific requirements
+
+#### Google Cloud Functions
+
+Generates Google Cloud Function structure:
+
+```bash
+sw-agent-init myagent -p gcp
+sw-agent-init myagent -p gcp -r us-central1
+```
+
+Generated structure includes:
+
+- `main.py` - Cloud Function entry point
+- Platform-specific requirements
+
+#### Azure Functions
+
+Generates Azure Function structure:
+
+```bash
+sw-agent-init myagent -p azure
+sw-agent-init myagent -p azure -r eastus
+```
+
+Generated structure includes:
+
+- `function_app.py` - Azure Function entry point
+- `host.json` - Azure Functions host configuration
+- Platform-specific requirements
+
+### Generated Project Structure
+
+#### Local Platform
+
+<Files>
+  <Folder name="myagent" defaultOpen>
+    <Folder name="agents" defaultOpen>
+      <File name="__init__.py" />
+      <File name="main_agent.py" comment="Main agent implementation" />
+    </Folder>
+    <Folder name="skills">
+      <File name="__init__.py" comment="Reusable skills module" />
+    </Folder>
+    <Folder name="tests">
+      <File name="__init__.py" />
+      <File name="test_agent.py" comment="Test suite using swaig-test" />
+    </Folder>
+    <Folder name="web" comment="Static files (full type only)">
+      <File name="index.html" />
+    </Folder>
+    <File name="app.py" comment="Entry point" />
+    <File name=".env" comment="Environment configuration" />
+    <File name=".env.example" comment="Example configuration" />
+    <File name=".gitignore" />
+    <File name="requirements.txt" />
+    <File name="README.md" />
+  </Folder>
+</Files>
+
+#### Serverless Platforms
+
+Serverless projects include platform-specific entry points instead of `app.py`:
+
+| Platform | Entry Point | Additional Files |
+|----------|-------------|------------------|
+| AWS Lambda | `handler.py` | `template.yaml` |
+| GCP Cloud Functions | `main.py` | - |
+| Azure Functions | `function_app.py` | `host.json` |
+
+### Environment Variables
+
+The tool auto-detects SignalWire credentials from environment:
+
+| Variable | Description |
+|----------|-------------|
+| `SIGNALWIRE_SPACE_NAME` | Your SignalWire Space |
+| `SIGNALWIRE_PROJECT_ID` | Project identifier |
+| `SIGNALWIRE_TOKEN` | API token |
+
+### Examples
+
+#### Create Basic Agent
+
+```bash
+sw-agent-init support-bot
+cd support-bot
+source .venv/bin/activate
+python app.py
+```
+
+#### Create Full-Featured Agent
+
+```bash
+sw-agent-init customer-service --type full
+cd customer-service
+source .venv/bin/activate
+python app.py
+```
+
+#### Create Without Virtual Environment
+
+```bash
+sw-agent-init myagent --no-venv
+cd myagent
+pip install -r requirements.txt
+python app.py
+```
+
+#### Create in Specific Directory
+
+```bash
+sw-agent-init myagent --dir ~/projects
+cd ~/projects/myagent
+```
+
+#### Create AWS Lambda Project
+
+```bash
+sw-agent-init my-lambda-agent -p aws -r us-west-2
+cd my-lambda-agent
+# Deploy with SAM CLI
+sam build && sam deploy --guided
+```
+
+#### Create Google Cloud Function Project
+
+```bash
+sw-agent-init my-gcf-agent -p gcp -r us-central1
+cd my-gcf-agent
+# Deploy with gcloud
+gcloud functions deploy my-gcf-agent --runtime python311 --trigger-http
+```
+
+#### Create Azure Function Project
+
+```bash
+sw-agent-init my-azure-agent -p azure -r eastus
+cd my-azure-agent
+# Deploy with Azure CLI
+func azure functionapp publish <app-name>
+```
+
+### Running the Generated Agent
+
+After creation:
+
+```bash
+cd myagent
+source .venv/bin/activate  # If venv was created
+python app.py
+```
+
+Output:
+
+```
+SignalWire Agent Server
+SWML endpoint:  http://0.0.0.0:5000/swml
+SWAIG endpoint: http://0.0.0.0:5000/swml/swaig/
+```
+
+### Testing the Generated Agent
+
+Run the test suite:
+
+```bash
+cd myagent
+source .venv/bin/activate
+pytest tests/ -v
+```
+
+Or use swaig-test directly:
+
+```bash
+swaig-test agents/main_agent.py --dump-swml
+swaig-test agents/main_agent.py --list-tools
+swaig-test agents/main_agent.py --exec get_info --topic "SignalWire"
+```
+
+### Customizing the Agent
+
+Edit `agents/main_agent.py` to customize:
+
+- Prompts and personality
+- Voice and language settings
+- SWAIG tools and handlers
+- Debug and webhook configuration
+
+See the [Building Agents](/docs/agents-sdk/python/guides/agent-base) chapter for detailed guidance.

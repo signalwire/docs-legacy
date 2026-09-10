@@ -1,0 +1,44 @@
+---
+title: Denoise
+sidebar_label: Denoise
+slug: /compatibility-api/cxml/reference/voice/denoise
+sidebar_position: 1
+toc_max_heading_level: 3
+---
+
+The `<Denoise>` verb enables or disables noise reduction for call audio inbound to SignalWire. It
+reduces noise on calls before dialing into a conference or forwarding to another number.
+
+## Verb attributes
+
+This verb does not accept attributes.
+
+## Nesting
+
+No other verbs can be nested within `<Denoise>`.
+
+## Examples
+
+### Enable noise reduction
+
+This example illustrates enabling noise reduction on an inbound phone call prior to forwarding the call.
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Denoise>on</Denoise>
+    <Dial><Sip>sip:user@example.com;transport=udp</Sip></Dial>
+</Response>
+```
+
+### Disable noise reduction
+
+This example illustrates disabling noise reduction prior to recording and transcribing.
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Denoise>off</Denoise>
+    <Record timeout="5" transcribe="true"/>
+</Response>
+```

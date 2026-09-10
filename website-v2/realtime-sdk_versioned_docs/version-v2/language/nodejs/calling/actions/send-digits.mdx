@@ -1,0 +1,20 @@
+---
+title: Relay.Calling.SendDigitsAction
+slug: /node/reference/calling/actions/send-digits
+description: The Send Digits Action is used to send digits to a call.
+toc_max_heading_level: 3
+---
+
+[relay-calling-senddigitsresult]: /docs/server-sdk/v2/node/reference/calling/results/send-digits
+[senddigitsasync]: /docs/server-sdk/v2/node/reference/calling/call#senddigitsasync
+This object is returned by the [`sendDigitsAsync`][senddigitsasync] method and represents a _send digits_ action currently active on a call.
+
+## Properties
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `result` | [`Relay.Calling.SendDigitsResult`][relay-calling-senddigitsresult] | Final result of the action |
+| `state` | `string` | Current state of the action |
+| `completed` | `boolean` | Whether the action has finished |
+| `payload` | `object` | Payload sent to Relay to start the action |
+| `controlId` | `string` | UUID to identify the action |

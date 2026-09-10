@@ -1,0 +1,195 @@
+---
+title: cXML Specification
+sidebar_label: cXML Specification
+description: Learn about the specification defining cXML, the SignalWire language
+  used to define phone number messaging and calling behavior.
+slug: /compatibility-api/cxml
+sidebar_position: 1
+toc_max_heading_level: 3
+---
+
+SignalWire cXML (Compatibility XML) is an XML-based language for controlling voice calls, SMS/MMS messages, and faxes. It is fully compatible with Twilio's TwiML, allowing you to use existing TwiML documents with SignalWire without modification.
+
+## How cXML works
+
+When a call, message, or fax arrives at one of your SignalWire phone numbers, SignalWire makes an HTTP request to the webhook URL configured for that number. Your server responds with a cXML document containing instructions for how to handle the communication.
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+  <Say>Welcome to SignalWire!</Say>
+</Response>
+```
+
+SignalWire executes instructions in order from top to bottom. Outbound calls and messages work the same way: you provide a URL to a cXML document when initiating the call or message via the REST API.
+
+Multiple cXML documents can be chained together using redirect verbs, enabling complex application flows.
+
+## Channel types
+
+cXML supports three channel types, each with its own set of verbs:
+
+<CardGroup cols={3}>
+  <Card title="Voice" icon="phone" href="/docs/compatibility-api/cxml/reference/voice">
+    Control calls with `<Say>`, `<Play>`, `<Dial>`, `<Gather>`, `<Record>`, and more.
+  </Card>
+  <Card title="Messaging" icon="message" href="/docs/compatibility-api/cxml/reference/messaging">
+    Handle SMS/MMS with `<Message>` and `<Redirect>`.
+  </Card>
+  <Card title="Fax" icon="fax" href="/docs/compatibility-api/cxml/reference/fax">
+    Manage faxes with `<Receive>` and `<Reject>`.
+  </Card>
+</CardGroup>
+
+## Syntax
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+  <Say>Connecting you...</Say>
+  <Dial>
+    <Number>+15551234567</Number>
+  </Dial>
+</Response>
+```
+
+As the name suggests, SignalWire cXML is XML-based and consists of the following elements:
+
+- the **`<Response>`** element &#8212; the root tag defining the body of the XML document.
+- **verbs** &#8212; XML tags denoting actions that you want SignalWire to take. In the example above, `<Say>` and `<Dial>` are verbs.
+- **nouns** &#8212; the items for the actions specified in the associated verbs. In the example above, `<Number>` is a noun of the `<Dial>` verb.
+
+### Response element
+
+The root element of all SignalWire cXML documents is a `<Response>` tag. All verbs in a document must be nested within a single `<Response>` element, and each document can only have one.
+
+When an incoming SMS, MMS, or call to a SignalWire phone number is received, SignalWire will automatically respond with the proper SignalWire XML directions to handle those incoming messages. Even if no actions are required to handle these messages, a `<Response>` must be used. To receive incoming messaging without requiring further actions, respond with an empty response:
+
+<CodeBlocks>
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response></Response>
+```
+```javascript title="Node.js"
+const { RestClient } = require("@signalwire/compatibility-api");
+const response = new RestClient.LaML.VoiceResponse();
+```
+```csharp
+using Twilio.TwiML;
+using Twilio.TwiML.Voice;
+using System;
+
+class Example
+{
+    static void Main()
+    {
+        var response = new VoiceResponse();
+    }
+}
+```
+```python
+from signalwire.voice_response import VoiceResponse
+
+response = VoiceResponse()
+```
+```ruby
+require 'signalwire/sdk'
+
+response = Signalwire::Sdk::VoiceResponse.new
+
+puts response.to_s
+```
+</CodeBlocks>
+
+### Verbs
+
+A **verb** identifies the action to take.
+
+Verbs are executed sequentially, so one instruction must complete fully before the next one is executed. Some verbs have optional attributes that can override the flow of execution, allowing you to dynamically change what happens based on events within the call.
+
+All verbs are case-sensitive, so calling `<ThisAction>` is different from calling `<thisaction>`.
+
+Each channel type has its own set of available verbs. See the [Voice](/docs/compatibility-api/cxml/reference/voice#instructions), [Messaging](/docs/compatibility-api/cxml/reference/messaging#instructions), and [Fax](/docs/compatibility-api/cxml/reference/fax#instructions) overview pages for the complete list of verbs for each channel.
+
+### Nouns
+
+A **noun** is what the verb uses to complete its action.
+Placed inside a verb tag, it can be the text that is read in a call, or other XML elements that represent the target of the action, such as `<Conference>` or `<Number>`.
+
+Each verb has its own set of supported nouns. See the documentation for a specific verb for more details.
+
+An example of using a `<Conference>` noun within a `<Dial>` verb:
+
+<CodeBlocks>
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+  <Dial>
+    <Conference>my-example-conference</Conference>
+  </Dial>
+</Response>
+```
+```javascript title="Node.js"
+const { RestClient } = require("@signalwire/compatibility-api");
+const response = new RestClient.LaML.VoiceResponse();
+
+dial = response.dial();
+dial.conference("my-example-conference");
+console.log(response.toString());
+```
+```csharp
+using Twilio.TwiML;
+using Twilio.TwiML.Voice;
+using System;
+
+class Example
+{
+    static void Main()
+    {
+        var response = new VoiceResponse();
+        var dial = new Dial();
+        dial.Conference("my-example-conference");
+        response.Append(dial);
+
+        Console.WriteLine(response.ToString());
+    }
+}
+```
+```python
+from signalwire.voice_response import VoiceResponse, Dial, Conference
+
+response = VoiceResponse()
+dial = Dial()
+dial.conference('my-example-conference')
+response.append(dial)
+
+print(response)
+```
+```ruby
+require 'signalwire/sdk'
+
+response = Signalwire::Sdk::VoiceResponse.new do |response|
+  response.dial do |dial|
+    dial.conference('my-example-conference')
+  end
+end
+
+puts response.to_s
+```
+</CodeBlocks>
+
+## Data formats
+
+### Dates and times
+
+All dates and times in requests to and from SignalWire cXML API are UTC, and presented in RFC 2822 format.
+
+For example, the date and time of 8:01 AM CDT on July 23rd, 2018 is presented as: `Mon, 23 Jul 2018 13:01:00 +0000`
+
+### Phone numbers
+
+All phone numbers in requests to or from the SignalWire cXML API are in E.164 format, an unambiguous general format for specifying international phone numbers. Numbers in this format start with a plus sign ("+") and the country code.
+
+For example, a US-based phone number like `(555) 123-4567` would be formatted like: `+15551234567`.
+
+If a number cannot be represented in E.164 format, then SignalWire uses the raw Caller ID string that was received.

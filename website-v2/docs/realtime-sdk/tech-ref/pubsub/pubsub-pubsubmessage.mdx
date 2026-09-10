@@ -1,0 +1,59 @@
+---
+title: "PubSubMessage"
+keywords:
+  - SignalWire
+  - Realtime SDK
+  - Node.js
+  - PubSub message
+  - event message
+slug: /node/reference/pubsub/pubsub-message
+sidebar_label: PubSubMessage
+description: PubSubMessage object representing a message in a PubSub channel. Access message ID, content, channel, publisher ID, and metadata properties.
+toc_max_heading_level: 3
+---
+
+Represents a message in a PubSub context.
+
+
+## **Properties**
+
+<ParamField path="id" type="string" required>
+  The id of this message.
+</ParamField>
+
+<ParamField path="channel" type="string" required>
+  The channel in which this message was sent.
+</ParamField>
+
+<ParamField path="content" type="any" required>
+  The content of this message.
+</ParamField>
+
+<ParamField path="publishedAt" type="Date" required>
+  The date and time at which this message was published.
+</ParamField>
+
+<ParamField path="meta" type="any">
+  Any metadata associated to this message.
+</ParamField>
+
+## **Example**
+
+Listening for PubSub messages and accessing `PubSubMessage` properties:
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "your-project-id", token: "your-api-token" });
+
+await client.pubSub.listen({
+  channels: ["my-channel"],
+  onMessageReceived: (message) => {
+    console.log("Message ID:", message.id);
+    console.log("Channel:", message.channel);
+    console.log("Content:", message.content);
+    console.log("Published at:", message.publishedAt);
+    console.log("Metadata:", message.meta);
+  }
+});
+```

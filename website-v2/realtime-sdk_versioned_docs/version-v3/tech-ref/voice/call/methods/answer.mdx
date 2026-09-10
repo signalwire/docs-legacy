@@ -1,0 +1,31 @@
+---
+title: "answer"
+slug: /node/reference/voice/call/answer
+description: answer method for the Call class.
+toc_max_heading_level: 3
+---
+
+[call-19]: /docs/server-sdk/v3/node/reference/voice/call
+
+### answer
+
+- **answer**(): `Promise<Call>` - See [Call][call-19] for more details.
+
+Answers the incoming call.
+
+#### Returns
+
+`Promise<Call>` - See [Call][call-19] for more details.
+
+#### Example
+
+```js
+client.on("call.received", async (call) => {
+  try {
+    await call.answer();
+    console.log("Inbound call answered");
+  } catch (error) {
+    console.error("Error answering inbound call", error);
+  }
+});
+```

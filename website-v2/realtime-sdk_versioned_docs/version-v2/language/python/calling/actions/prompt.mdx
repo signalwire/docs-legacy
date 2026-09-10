@@ -1,0 +1,73 @@
+---
+title: Relay.Calling.PromptAction
+slug: /python/reference/calling/actions/prompt
+description: The Prompt Action is used to prompt a user for input.
+toc_max_heading_level: 3
+---
+
+[relay-calling-promptresult]: /docs/server-sdk/v2/python/reference/calling/results/prompt
+[relay-calling-promptvolumeresult]: /docs/server-sdk/v2/python/reference/calling/results/prompt-volume
+[relay-calling-stopresult]: /docs/server-sdk/v2/python/reference/calling/results/stop
+
+## Relay.Calling.PromptAction
+
+This object returned from one of _asynchronous_ prompt methods that represents a prompt attempt that is currently active on a call.
+
+### Properties
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `result` | [`Relay.Calling.PromptResult`][relay-calling-promptresult] | Final result of this prompt. |
+| `state` | string | Current state. |
+| `completed` | boolean | Whether the prompt attempt has finished. |
+| `payload` | dict | Payload sent to Relay to start prompt. |
+| `control_id` | string | UUID to identify the prompt. |
+
+### Methods
+
+#### stop
+
+Stop the action immediately.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`coroutine` - Coroutine that will return a [`Relay.Calling.StopResult`][relay-calling-stopresult] object.
+
+**Examples**
+
+> Ask user to enter a PIN and force-stop the action after 5 seconds.
+
+```python
+import asyncio # to use sleep
+
+action = await call.play_tts_async(text='Welcome to SignalWire!', gender='male')
+await asyncio.sleep(5)
+await action.stop()
+```
+
+#### volume
+
+Control the volume of the playback.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `volume` | number | **required** | Volume value between -40dB and +40dB where 0 is unchanged. |
+
+**Returns**
+
+`coroutine` - Coroutine that will return a [`Relay.Calling.PromptVolumeResult`][relay-calling-promptvolumeresult] object.
+
+**Examples**
+
+> Start the prompt and increase the playback volume.
+
+```python
+action = await call.play_tts_async(text='Please, enter your 3 digit PIN.', gender='male')
+volume_result = await action.volume(5.0)
+```

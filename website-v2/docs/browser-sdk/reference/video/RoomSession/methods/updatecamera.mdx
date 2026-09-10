@@ -1,0 +1,33 @@
+---
+title: "updateCamera"
+slug: /js/reference/video/room-session/update-camera
+description: updateCamera method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+### updateCamera
+
+- **updateCamera**(`constraints`): `Promise<void>`
+
+Replaces the current camera stream with the one coming from a different device.
+
+#### Parameters
+
+<ParamField path="constraints" type="MediaTrackConstraints">
+  Specify the constraints that the device should satisfy. See [MediaTrackConstraints](https://developer.mozilla.org/en-US/docs/Web/API/MediaTrackConstraints).
+</ParamField>
+
+#### Returns
+
+`Promise<void>`
+
+#### Example
+
+Replaces the current camera stream with the one coming from the specified deviceId:
+
+```javascript
+await roomSession.updateCamera({
+  deviceId: "/o4ZeWzroh+8q0Ds/CFfmn9XpqaHzmW3L/5ZBC22CRg=",
+});
+```
+

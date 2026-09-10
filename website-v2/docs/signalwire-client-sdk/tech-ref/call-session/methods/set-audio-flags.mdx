@@ -1,0 +1,166 @@
+---
+title: setAudioFlags
+slug: /call-session/setaudioflags
+---
+
+import APIField from '@site/src/components/APIField';
+
+Configures audio processing flags (echo cancellation, automatic gain control, noise suppression) for yourself or another participant.
+
+## Signature
+
+```typescript
+setAudioFlags(params: SetAudioFlagsParams): Promise<void>
+```
+
+## Parameters
+
+<APIField name="params" type="[SetAudioFlagsParams](../types#setaudioflagsparams)" required>
+  Audio processing configuration.
+</APIField>
+
+<APIField name="params.echoCancellation" type="boolean">
+  Enable/disable echo cancellation.
+</APIField>
+
+<APIField name="params.autoGain" type="boolean">
+  Enable/disable automatic gain control (AGC).
+</APIField>
+
+<APIField name="params.noiseSuppression" type="boolean">
+  Enable/disable noise suppression.
+</APIField>
+
+<APIField name="params.memberId" type="string" default="Your member ID">
+  Member to control. Omit to control yourself.
+</APIField>
+
+## Returns
+
+**Type:** `Promise<void>`
+
+## Important Notes
+
+**Audio Processing Features:**
+
+**Echo Cancellation** (`echoCancellation`)
+- Removes echo and feedback from audio
+- Essential for speakers/headphones that may cause audio feedback
+- **Recommended:** Enable in most scenarios
+- **Disable when:** Using headphones with no echo issues, or when audio quality degradation occurs
+
+**Automatic Gain Control** (`autoGain` / AGC)
+- Automatically adjusts microphone volume to maintain consistent levels
+- Normalizes quiet and loud speech
+- **Recommended:** Enable for users with varying speech volume
+- **Disable when:** Manual control of microphone volume is preferred, or in professional audio setups
+
+**Noise Suppression** (`noiseSuppression`)
+- Filters out background noise (keyboard typing, traffic, etc.)
+- Focuses on speech frequencies
+- **Recommended:** Enable in noisy environments
+- **Disable when:** In quiet environments or when high-fidelity audio is needed (music, etc.)
+
+**At Least One Flag Required:** You must specify at least one audio flag:
+
+```typescript
+// ✅ Valid - at least one flag specified
+await call.setAudioFlags({ echoCancellation: true })
+
+// ❌ Invalid - no flags specified
+await call.setAudioFlags({})  // Will fail
+
+// ✅ Valid - multiple flags
+await call.setAudioFlags({
+  echoCancellation: true,
+  noiseSuppression: false
+})
+```
+
+**Audio Quality vs Processing:**
+- **More processing** (all enabled): Better noise/echo handling, may introduce slight audio latency, potential audio quality reduction in some cases
+- **Less processing** (all disabled): Higher audio fidelity, lower latency, more susceptible to noise and echo
+
+**Real-time Updates:**
+- Changes take effect immediately
+- No need to restart audio streams
+- Can be adjusted dynamically during the call
+
+## Examples
+
+### Enable all audio processing features
+
+```typescript
+await call.setAudioFlags({
+  echoCancellation: true,
+  autoGain: true,
+  noiseSuppression: true
+})
+```
+
+### Configure individual features
+
+```typescript
+// Enable only echo cancellation
+await call.setAudioFlags({
+  echoCancellation: true
+})
+
+// Enable only noise suppression
+await call.setAudioFlags({
+  noiseSuppression: true
+})
+
+// Disable automatic gain control
+await call.setAudioFlags({
+  autoGain: false
+})
+```
+
+### Mix enabled and disabled features
+
+```typescript
+await call.setAudioFlags({
+  echoCancellation: true,
+  autoGain: false,
+  noiseSuppression: true
+})
+```
+
+### Configure another member's audio
+
+```typescript
+await call.setAudioFlags({
+  memberId: 'member-123',
+  autoGain: false
+})
+```
+
+### Environment-based audio configuration
+
+```typescript
+async function configureAudioForEnvironment(environment: 'quiet' | 'noisy' | 'echoey') {
+  if (environment === 'quiet') {
+    // Minimal processing for quiet environments
+    await call.setAudioFlags({
+      echoCancellation: false,
+      autoGain: false,
+      noiseSuppression: false
+    })
+  } else if (environment === 'noisy') {
+    // Aggressive noise suppression for noisy environments
+    await call.setAudioFlags({
+      echoCancellation: true,
+      autoGain: true,
+      noiseSuppression: true
+    })
+  } else if (environment === 'echoey') {
+    // Focus on echo cancellation
+    await call.setAudioFlags({
+      echoCancellation: true,
+      autoGain: false,
+      noiseSuppression: true
+    })
+  }
+}
+```

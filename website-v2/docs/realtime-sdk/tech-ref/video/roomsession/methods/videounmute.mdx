@@ -1,0 +1,78 @@
+---
+title: "videoUnmute"
+slug: /node/reference/video/room-session/video-unmute
+description: videoUnmute method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+[roomsession-41]: /docs/server-sdk/node/reference/video/room-session
+
+### videoUnmute
+
+- **videoUnmute**(`params`): `Promise<void>`
+
+Unmutes the video of a given member if it had been previously muted. Participants will start seeing the video stream again.
+
+#### Parameters
+
+<ParamField path="params" type="object">
+  Object containing the parameters of the method.
+</ParamField>
+
+<Indent>
+<ParamField path="memberId" type="string">
+  ID of the member to unmute.
+</ParamField>
+</Indent>
+
+#### Returns
+
+`Promise<void>`
+
+#### Example
+
+In this example, we wait for a room to start and then wait for a second member to join the room.
+When a second member joins the room, we mute the video of that member.
+After 5 seconds, we unmute the video of that member.
+This example assumes that there is a [`RoomSession`][roomsession-41]
+already active and that members are joining the room.
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+// Initialize the SignalWire client
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" });
+
+// Access video client from the main client
+const videoClient = client.video;
+
+// Setup listener for when a room starts
+await videoClient.listen({
+  onRoomStarted: async (roomSession) => {
+    console.log("Room started", roomSession.displayName);
+
+    await roomSession.listen({
+      onMemberJoined: (member) => {
+        console.log("Member joined", member.name);
+
+        // Video mute the member
+
+        roomSession.videoMute({
+          memberId: member.id,
+        })
+
+        setTimeout(() => {
+          console.log("Unmuting video for member", member.name)
+          // Video unmute the member
+          roomSession.videoUnmute({
+            memberId: member.id,
+          })
+        }, 5000)
+      },
+      onMemberUpdated: (member) => {
+        console.log("Member mute status updated", member.name, member.v);
+      },
+    });
+  }
+});
+```

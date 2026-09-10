@@ -1,0 +1,275 @@
+---
+title: "Installation"
+sidebar_label: "Installation"
+slug: /python/guides/installation
+toc_max_heading_level: 3
+---
+
+## Installation
+
+Install the SignalWire Agents SDK using pip and verify everything works correctly.
+
+### System Requirements
+
+| Requirement | Minimum | Recommended |
+|-------------|---------|-------------|
+| Python | 3.8+ | 3.10+ |
+| pip | 20.0+ | Latest |
+| OS | Linux, macOS, Windows | Any |
+| Memory | 512MB | 1GB+ |
+
+### Basic Installation
+
+Install the SDK from PyPI:
+
+```bash
+pip install signalwire-agents
+```
+
+This installs the core SDK with all essential features for building voice AI agents.
+
+### Verify Installation
+
+Confirm the installation was successful:
+
+```bash
+python -c "from signalwire_agents import AgentBase; print('SignalWire Agents SDK installed successfully!')"
+```
+
+You should see:
+
+```
+SignalWire Agents SDK installed successfully!
+```
+
+### Installation Extras
+
+The SDK provides optional extras for additional features:
+
+#### Search Capabilities
+
+```bash
+## Query-only (read .swsearch files) - ~400MB
+pip install "signalwire-agents[search-queryonly]"
+
+## Build indexes + vector search - ~500MB
+pip install "signalwire-agents[search]"
+
+## Full document processing (PDF, DOCX) - ~600MB
+pip install "signalwire-agents[search-full]"
+
+## NLP features (spaCy) - ~600MB
+pip install "signalwire-agents[search-nlp]"
+
+## All search features - ~700MB
+pip install "signalwire-agents[search-all]"
+```
+
+#### Database Support
+
+```bash
+## PostgreSQL vector database support
+pip install "signalwire-agents[pgvector]"
+```
+
+#### Development Dependencies
+
+```bash
+## All development tools (testing, linting)
+pip install "signalwire-agents[dev]"
+```
+
+### Installation from Source
+
+For development or to get the latest changes:
+
+```bash
+## Clone the repository
+git clone https://github.com/signalwire/signalwire-agents.git
+cd signalwire-agents
+
+## Create virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+## Install in development mode
+pip install -e .
+
+## Or with extras
+pip install -e ".[search,dev]"
+```
+
+### Virtual Environment Setup
+
+Always use a virtual environment to avoid conflicts:
+
+```bash
+## Create virtual environment
+python -m venv venv
+
+## Activate (Linux/macOS)
+source venv/bin/activate
+
+## Activate (Windows Command Prompt)
+venv\Scripts\activate
+
+## Activate (Windows PowerShell)
+venv\Scripts\Activate.ps1
+
+## Install the SDK
+pip install signalwire-agents
+
+## Verify activation (should show venv path)
+which python
+```
+
+### Quick Verification Script
+
+```python
+#!/usr/bin/env python3
+## verify_install.py - Verify SignalWire Agents SDK installation
+"""Verify SignalWire Agents SDK installation."""
+
+def main():
+    print("Checking SignalWire Agents SDK installation...\n")
+
+    # Check core import
+    try:
+        from signalwire_agents import AgentBase
+        print("[OK] Core SDK: AgentBase imported successfully")
+    except ImportError as e:
+        print(f"[FAIL] Core SDK: Failed to import AgentBase - {e}")
+        return False
+
+    # Check SWAIG function support
+    try:
+        from signalwire_agents import SwaigFunctionResult
+        print("[OK] SWAIG: SwaigFunctionResult imported successfully")
+    except ImportError as e:
+        print(f"[FAIL] SWAIG: Failed to import SwaigFunctionResult - {e}")
+        return False
+
+    # Check prefabs
+    try:
+        from signalwire_agents.prefabs import InfoGathererAgent
+        print("[OK] Prefabs: InfoGathererAgent imported successfully")
+    except ImportError as e:
+        print(f"[FAIL] Prefabs: Failed to import - {e}")
+
+    # Check search (optional)
+    try:
+        from signalwire_agents.search import SearchEngine
+        print("[OK] Search: SearchEngine available")
+    except ImportError:
+        print("[SKIP] Search: Not installed (optional)")
+
+    print("\n" + "="*50)
+    print("Installation verification complete!")
+    print("="*50)
+    return True
+
+
+if __name__ == "__main__":
+    main()
+```
+
+Run it:
+
+```bash
+python verify_install.py
+```
+
+Expected output:
+
+```
+Checking SignalWire Agents SDK installation...
+
+[OK] Core SDK: AgentBase imported successfully
+[OK] SWAIG: SwaigFunctionResult imported successfully
+[OK] Prefabs: InfoGathererAgent imported successfully
+[SKIP] Search: Not installed (optional)
+
+==================================================
+Installation verification complete!
+==================================================
+```
+
+### Troubleshooting
+
+#### Common Issues
+
+| Problem | Cause | Solution |
+|---------|-------|----------|
+| `ModuleNotFoundError: No module named 'signalwire_agents'` | Package not installed | Run `pip install signalwire-agents` |
+| `pip: command not found` | pip not in PATH | Use `python -m pip install signalwire-agents` |
+| Permission errors | Installing globally without sudo | Use virtual environment or `pip install --user` |
+| Old pip version | pip can't resolve dependencies | Run `pip install --upgrade pip` |
+| Conflicts with other packages | Dependency version mismatch | Use a fresh virtual environment |
+
+#### Python Version Check
+
+Ensure you have Python 3.8+:
+
+```bash
+python --version
+## or
+python3 --version
+```
+
+If you have multiple Python versions:
+
+```bash
+## Use specific version
+python3.10 -m venv venv
+source venv/bin/activate
+pip install signalwire-agents
+```
+
+#### Upgrade Existing Installation
+
+```bash
+pip install --upgrade signalwire-agents
+```
+
+#### Clean Reinstall
+
+```bash
+pip uninstall signalwire-agents
+pip cache purge
+pip install signalwire-agents
+```
+
+### CLI Tools
+
+The SDK includes command-line tools:
+
+| Tool | Purpose |
+|------|---------|
+| `swaig-test` | Test agents and functions locally |
+| `sw-search` | Build and query search indexes |
+| `sw-agent-init` | Create new agent projects |
+
+Verify CLI tools are available:
+
+```bash
+swaig-test --help
+sw-agent-init --help
+```
+
+### What Gets Installed
+
+The SDK installs these core dependencies:
+
+| Package | Purpose |
+|---------|---------|
+| `fastapi` | Web framework for serving SWML |
+| `uvicorn` | ASGI server for running the agent |
+| `pydantic` | Data validation and settings |
+| `structlog` | Structured logging |
+| `httpx` | HTTP client for API calls |
+
+### Next Steps
+
+Now that the SDK is installed, let's create your first agent.
+
+

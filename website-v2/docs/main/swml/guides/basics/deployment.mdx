@@ -1,0 +1,190 @@
+---
+slug: /swml/guides/deployment
+title: Deploy SWML from web servers
+description: Serve SWML scripts from web servers and RELAY applications
+x-custom:
+  tags:
+    - sdk:swml
+    - product:voice
+
+---
+
+SWML scripts can be served in multiple ways beyond the SignalWire Dashboard. This guide covers serving SWML from web servers and RELAY applications.
+
+<Info>
+For complete information about variables, the Call Object, and all variable scopes, see the [**Variables and Expressions**](/docs/swml/reference/variables) reference.
+</Info>
+
+## From a web server
+
+<Tip>
+This use case is described in detail in the [Handling Incoming Calls from Code](/docs/swml/guides/remote-server) guide.
+</Tip>
+
+In the phone number settings, when you check the "Use External URL for SWML Script handler?" option,
+you can set a Web URL that will serve the SWML script.
+Every time a call comes in (or some other designated event occurs),
+SignalWire sends a POST request to the URL using the standard [document-fetching webhook](/docs/swml#document-fetching-webhook) format.
+The request body contains the `call` object, `vars`, `params`, and `envs`. See the [document-fetching webhook reference](/docs/swml#document-fetching-webhook) for the full request body structure.
+
+### Understanding the POST Request
+
+The `vars` object and the `params` object will be empty for a new call.
+If you're executing a remote SWML script using the [`execute`](/docs/swml/reference/execute) or [`transfer`](/docs/swml/reference/execute) methods,
+the `vars` parameter has a list of the variables declared in the script so far.
+And the `params` object has the list of parameters explicitly set by the [`execute`](/docs/swml/reference/execute) or [`transfer`](/docs/swml/reference/execute) methods.
+
+You can also reference the properties of `call` and `params` objects during the script execution using the variable subtitution bracket like so:
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - play:
+        url: 'say:%{call.from}'
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "play": {
+          "url": "say:%{call.from}"
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+Further, consider the following SWML script:
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - play:
+        url: '%{params.file}'
+    - return: 1
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "play": {
+          "url": "%{params.file}"
+        }
+      },
+      {
+        "return": 1
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+It references `params.file` in it's [`play`](/docs/swml/reference/play) method.
+If this SWML was invoked as a response to a phone call, it would cause an error as the `params` object is empty.
+But if it was hosted on a server and called with the [`execute`](/docs/swml/reference/execute) or the [`transfer`](/docs/swml/reference/transfer) method,
+the `params` object is passed into the SWML.
+
+The SWML above can be invoked as follows:
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    execute:
+      dest: https://example.com/swml.yaml
+      params:
+        file: https://cdn.signalwire.com/swml/audio.mp3
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": {
+      "execute": {
+        "dest": "https://example.com/swml.yaml",
+        "params": {
+          "file": "https://cdn.signalwire.com/swml/audio.mp3"
+        }
+      }
+    }
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+## From a RELAY application
+
+You can also execute SWML from a RELAY application.
+The following is a snippet using the [RealTime API](/docs/server-sdk/node).
+
+```javascript
+const { Voice } = require("@signalwire/realtime-api");
+const script = `
+version: 1.0.0
+sections:
+  main:
+    - answer: {}
+    - execute:
+        dest: play_music
+        params:
+          to_play: 'https://cdn.signalwire.com/swml/April_Kisses.mp3'
+  play_music:
+    - play:
+        url: '%{params.to_play}'
+`;
+
+const client = new Voice.Client({
+  project: "<your project token>",
+  token: "<your project API key>",
+  topics: ["swml"],
+});
+
+client.on("call.received", async (call) => {
+  try {
+    await client.execute({
+      method: "calling.transfer",
+      params: {
+        node_id: call.nodeId,
+        call_id: call.callId,
+        dest: script,
+      },
+    });
+  } catch (error) {}
+});
+```
+
+In this snippet, we are registering an event for every time a call is received to any phone number in your project with the topic "swml".
+You can set the topics a number is subscribed to from the phone number settings page in the SignalWire Dashboard.
+Every time a call is received, the SWML script is executed using the `client.execute` method.
+
+## Next steps
+
+- **[Variables and Expressions](/docs/swml/reference/variables)**: Complete reference for SWML variables and the Call Object
+- **[Handle incoming calls from code](/docs/swml/guides/remote-server)**: Complete guide to serving SWML from web servers
+- **[SWML methods reference](/docs/swml/reference)**: Explore all available SWML methods
+
+- **[Getting started with SWML](/docs/swml)**: Learn the fundamentals

@@ -1,0 +1,60 @@
+---
+title: "MessagingSendResult"
+keywords:
+  - SignalWire
+  - Realtime SDK
+  - Node.js
+  - send result
+  - delivery status
+slug: /node/reference/messaging/messaging-send-result
+sidebar_label: MessagingSendResult
+description: MessagingSendResult object returned when sending SMS/MMS messages. Contains success/error codes, message IDs, and delivery status information.
+toc_max_heading_level: 3
+---
+
+## **Properties**
+
+<ParamField path="code" type="string" required>
+  Numeric error or success code.
+</ParamField>
+
+<ParamField path="message" type="string" required>
+  Error or success message.
+</ParamField>
+
+<ParamField path="messageId" type="string" required>
+  The unique identifier of the message.
+</ParamField>
+
+## **Example**
+
+Sending an SMS and handling the result:
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "your-project-id", token: "your-api-token" });
+
+const result = await client.messaging.send({
+  from: "+1xxxxxxxxxx",
+  to: "+1yyyyyyyyyy",
+  body: "Hello from SignalWire!"
+});
+
+console.log("Message ID:", result.messageId);
+console.log("Code:", result.code);
+console.log("Message:", result.message);
+```
+
+Sending an MMS with media:
+
+```js
+const result = await client.messaging.send({
+  from: "+1xxxxxxxxxx",
+  to: "+1yyyyyyyyyy",
+  body: "Check out this image!",
+  media: ["https://example.com/image.jpg"]
+});
+
+console.log("MMS sent with ID:", result.messageId);
+```

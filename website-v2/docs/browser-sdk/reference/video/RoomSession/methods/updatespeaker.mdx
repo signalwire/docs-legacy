@@ -1,0 +1,42 @@
+---
+title: "updateSpeaker"
+slug: /js/reference/video/room-session/update-speaker
+description: updateSpeaker method for the RoomSession class.
+toc_max_heading_level: 3
+---
+
+### updateSpeaker
+
+- **updateSpeaker**(`opts`): `Promise<undefined>`
+
+Replaces the current speaker with a different one.
+
+> 📘
+> Some browsers do not support output device selection. You can check by calling [WebRTC.supportsMediaOutput](/docs/browser-sdk/js/reference/webrtc/supports-media-output).
+
+#### Parameters
+
+<ParamField path="opts" type="object">
+  Object containing the parameters of the method.
+</ParamField>
+
+<Indent>
+<ParamField path="deviceId" type="string">
+  Id of the new speaker device.
+</ParamField>
+</Indent>
+
+#### Returns
+
+`Promise<undefined>`
+
+#### Example
+
+Replaces the current speaker:
+
+```javascript
+await roomSession.updateSpeaker({
+  deviceId: "/o4ZeWzroh+8q0Ds/CFfmn9XpqaHzmW3L/5ZBC22CRg=",
+});
+```
+

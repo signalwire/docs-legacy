@@ -1,0 +1,181 @@
+---
+title: Relay.Consumer
+slug: /go/reference/consumer
+toc_max_heading_level: 3
+---
+
+[link]: #creating-consumers
+[relay-calling-call]: /docs/server-sdk/v2/go/reference/calling/call
+[relay-client]: /docs/server-sdk/v2/go/reference/relay-client
+[message]: /docs/server-sdk/v2/go/reference/messaging/message
+
+## Relay.Consumer
+
+A RELAY Consumer is a Go object that runs Go routines in the background along side your application to handle calling and messaging events in realtime. RELAY Consumers abstract all the setup of connecting to RELAY and automatically dispatch workers to handle requests. Consumers will receive requests and delegate them to their own worker thread, allowing you to focus on your business logic without having to worry about multi-threading or blocking, everything just works. Think of RELAY Consumers like a background worker system for all your calling and messaging needs.
+
+## Creating Consumers
+
+A RELAY Consumer is an object, customized by specifying [contexts][link] and event handlers to respond to incoming events.
+
+A consumer has 2 required properties: `project`, `token`, and usually requires at least one `contexts` for incoming events. Project and Token are used to authenticate your Consumer to your SignalWire account. Contexts are a list of contexts you want this Consumer to listen for. [Learn more about RELAY Contexts][link].
+
+```go
+Contexts = append(Contexts, PContext)
+consumer := new(signalwire.Consumer)
+// setup the Client
+consumer.Setup(ProjectID, PTokenID, Contexts)
+// register callback
+ consumer.OnIncomingCall = MyOnIncomingCall
+ log.Info("Wait incoming call..")
+// start
+ if err := consumer.Run(); err != nil {
+	log.Errorf("Error occurred while starting Signalwire Consumer")
+}
+```
+
+## Initializing Consumers
+
+You can optionally add an `setup` method if you need to do any initialization work before processing messages. This is useful to do any one-off work that you wouldn't want to do for each and every event, such as setting up logging or connecting to a datastore.
+
+### Properties
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `client` | [`Relay.Client`][relay-client] | The underlying Relay client object. |
+
+## Event Handlers
+
+Event handlers are where you will write most of your code. They are executed when your consumer receives a matching event for the contexts specified by your Consumer.
+
+
+### onIncomingMessage
+
+Executed when you receive an inbound message, passes in the inbound [`Message`][message] object.
+
+
+```go
+func MyOnIncomingMessage(consumer *signalwire.Consumer, message *signalwire.MessageObj) {
+	// Handle incoming message
+}
+
+consumer.OnIncomingMessage = MyOnIncomingMessage
+```
+
+### onMessageStateChange
+
+Executed when the state of a message changes.
+
+
+```go
+func MyOnMessageStateChange(consumer *signalwire.Consumer, message *signalwire.MessageObj) {
+	// Handle message state change
+}
+
+consumer.OnMessageStateChange = MyOnMessageStateChange
+```
+
+### onTask
+
+Executed when a task is delivered to your Consumer.
+
+
+```go
+func MyOnTask(consumer *signalwire.Consumer, task signalwire.ParamsEventTaskingTask) {
+	// Handle task
+}
+
+consumer.OnTask = MyOnTask
+```
+
+### onReady
+
+Executed once your Consumer is connected to RELAY and the session has been established.
+
+
+```go
+func MyReady(consumer *signalwire.Consumer) {
+	resultDial := consumer.Client.Calling.DialPhone(fromNumber, toNumber)
+	if !resultDial.Successful {
+		if err := consumer.Stop(); err != nil {
+			log.Errorf("Error occurred while trying to stop Consumer")
+		}
+		
+		return
+	}
+}
+
+func main() {
+	consumer := new(signalwire.Consumer)
+	// setup the Client
+	consumer.Setup(PProjectID, PTokenID, Contexts)
+	// register callback
+	consumer.Ready = MyReady
+	// start
+	if err := consumer.Run(); err != nil {
+		log.Errorf("Error occurred while starting Signalwire Consumer")
+	}
+}
+
+```
+
+### onIncomingCall
+
+Executed when you receive an inbound call, passes in the inbound [`Call`][relay-calling-call] object.
+
+
+```go
+// MyOnIncomingCall - gets executed when we receive an incoming call
+func MyOnIncomingCall(consumer *signalwire.Consumer, call *signalwire.CallObj) {
+	resultAnswer := call.Answer()
+	if !resultAnswer.Successful {
+		if err := consumer.Stop(); err != nil {
+			log.Errorf("Error occurred while trying to stop Consumer")
+		}
+		 
+		return
+	}
+	 
+	log.Info("Playing audio on call..")
+	 
+	if _, err := call.PlayAudio("https://cdn.signalwire.com/default-music/welcome.mp3"); err != nil {
+		log.Errorf("Error occurred while trying to play audio")
+	}
+	if err := call.Hangup(); err != nil {
+		log.Errorf("Error occurred while trying to hangup call")
+	}
+	   
+	if err := consumer.Stop(); err != nil {
+		log.Errorf("Error occurred while trying to stop Consumer")
+	}
+}
+
+```
+
+## Cleaning Up on Exit
+
+When a RELAY Consumer shuts down, you have the opportunity to clean up any resources held by the consumer. For example, you could close any open files, network connections, or send a notification to your monitoring service.
+
+Implement an `Teardown` method in your consumer and it will be called during the shutdown procedure.
+
+```go
+func MyTeardown(consumer *signalwire.Consumer) {
+	file.Close()
+}
+consumer.Teardown = MyTeardown
+```
+
+## Running Consumers
+
+```go
+if err := consumer.Run(); err != nil {
+	og.Errorf("Error occurred while starting Signalwire Consumer")
+}
+```
+
+## Shutting Down Consumers
+
+```go
+if err := consumer.Stop(); err != nil {
+	log.Errorf("Error occurred while trying to stop Consumer")
+}
+```

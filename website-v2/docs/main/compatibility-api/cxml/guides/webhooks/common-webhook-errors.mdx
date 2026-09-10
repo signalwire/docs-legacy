@@ -1,0 +1,70 @@
+---
+title: Common webhook errors
+slug: /compatibility-api/guides/common-webhook-errors
+---
+
+Below are some examples of common errors that you might encounter when using webhooks. If you are unable to resolve your issue, you can always reach out to our Support Team and provide them with a [resource SID](/docs/platform/what-is-a-sid) so that they can locate the call/message record and offer assistance.
+
+## HTML retrieval error (error code 11200)
+
+HTML Retrieval Errors happen when there is a failure to retrieve the contents of the URL in your webhook. This indicates that SignalWire tried to reach your URL but did not receive a response before the connection timed out. Our current timeouts are 4.5 seconds for Connect and 5 seconds for Read, and we retry twice once the connection times out.
+
+SignalWire automatically retries HTTP retrieval requests. If it's an action type of webhook, SignalWire won't attempt a retry but will go to the fallback URL (on inbound calls, can specify an action URL and a fallback URL). If it's a status callback webhook, SignalWire will retry three times, and back off slightly between each attempt. So the second one will retry very quickly, and for the third retry, the system will wait a few seconds.
+
+If you only experienced this error temporarily only to see the same webhook work successfully later, your web server was likely temporarily unavailable or experiencing a network outage. If this issue is persisting, we recommend taking a look at your systems to verify there are no processes or queries taking too long to return.
+
+## Document parse error (error code 12100)
+
+The SignalWire Compatibility APIs and SignalWire Compatibility XML both require all documents to be properly formatted as XML in order for SignalWire to be able to read and parse them. If you receive a document parse error, something in your code is preventing SignalWire from parsing the XML document.
+
+If you are using the Compatibility API in any of our available SDKs, make sure that your code is returning proper XML. You can convert `response` to XML or for an easier method, convert `response` to string. For example, this is the Python SDK returning response as a string:
+
+```python
+@app.route('/open', methods=['GET', 'POST'])
+def inBusinessHours():
+    response = VoiceResponse()
+    dial = Dial(record='true')
+    dial.number('+12342556182')
+    response.append(dial)
+    return str(response)
+```
+
+This results in proper XML:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?><Response><Dial record="true"><Number>+12342556182</Number></Dial></Response>
+```
+
+You can also check the following:
+
+1. Make sure your root element is `<Response>`
+2. XML is case sensitive - make sure your elements are appropriately named.
+
+## Fatal protocol violation (error code 11251)
+
+This error occurs when SignalWire couldn't connect to the server the way it was intended/asked to. In most cases, the correct way to fix this is to switch to whichever protocol you did not originally use. **Usually**, this happens when you need to use HTTPS, but you used HTTP. However, it can happen the other way around as well. Double-check to make sure that you have spelled the protocol correctly and that the protocol you entered is supported.
+
+## Too many redirects (error code 111215)
+
+This error can occur when the request has been redirected too many times in a row and has been flagged for potentially being in a loop. SignalWire accepts and will follow up to 3 redirects for a webhook before throwing this error. If you get this error, double-check the logs and your code to make sure you have not forgotten to create a stop condition preventing an infinite loop.
+
+## 502 bad gateway (error code 11200)
+
+If you see a 502 Bad Gateway error, this may mean that SignalWire's internal server had trouble retrieving content from the website or was unable to access it. The request **must** contain a valid Content-Type. SignalWire may also have had problems resolving the DNS name to an IP address or issues with the network connection.
+
+1. Confirm that the URL that you used is not protected by any HTTP Authentication, making it impossible for SignalWire to reach it.
+2. Double check to make sure that your web server is up, responsive, and publicly accessible.
+3. Make sure your web server allows HTTP POST requests to static resources (if the URL refers to .xml or .html files)
+4. Check the ping times and packet loss between your web server and www.signalwire.com
+
+## XML response body exceeds size limit (error code 11750)
+
+This error indicates that the response body to SignalWire's request is larger than 64 kB. This can be caused if the XML that you are serving is larger than 64 kB or if you are serving non-XML content in your response (e.g. error message output).
+
+- Confirm that you are serving XML in your response to SignalWire's request.
+- Confirm that you are including the following header in your XML response: `<?xml version="1.0" encoding="UTF-8"?>`.
+- Limit your XML response to 64 kB or less.
+- If your XML includes a Play verb, check the encoding and MIME type to ensure they are supported.
+- Check that your XML is formatted properly.
+- Check to see if your application is throwing errors.
+- If you are trying to send a `200` response in a status callback, use an empty XML response `<Response/>`

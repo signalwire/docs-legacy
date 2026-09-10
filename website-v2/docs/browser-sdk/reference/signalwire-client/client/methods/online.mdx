@@ -1,0 +1,65 @@
+---
+title: "online"
+slug: /js/reference/signalwire/client/online
+description: online method for the SignalWire Client.
+toc_max_heading_level: 3
+---
+
+### online
+
+- **online**(`options`): `Promise<Call>`
+
+Set the client to be online so it can receive call invites via WebRTC. The call invites can be accepted or rejected as per user input.
+
+#### Parameters
+
+<ParamField path="options" type="object" required={true}>
+  Options object
+</ParamField>
+<Indent>
+  <ParamField path="options.incomingCallHandlers" type="IncomingCallHandlers">
+    Callback functions for when a call is received. See [IncomingCallHandlers](/docs/browser-sdk/js/reference/signalwire/client#incomingcallhandlers).
+  </ParamField>
+</Indent>
+
+#### Example
+
+```javascript
+// Receive calls using websocket notifications
+client.online({
+  incomingCallHandlers: {
+    all: __incomingCallHandler,
+  },
+});
+
+// Function to handle the incoming call notification and stores the invite
+window.__incomingCallHandler = (notification) => {
+  if (
+    !window.__invite ||
+    window.__invite.details.callID !== notification.invite.details.callID
+  ) {
+    // Store call invite
+    window.__invite = notification.invite;
+  }
+
+  // Trigger UI update here to convey the ringing state
+};
+
+// Function to answer the call
+window.answer = async () => {
+  // Accept the call invite
+  const call = await window.__invite.accept({
+    rootElement: document.getElementById("rootElement"),
+  });
+
+  // Trigger UI update here to convey the connected state
+};
+
+// Function to reject the call
+window.reject = async () => {
+  await window.__invite.reject();
+
+  // Trigger UI update here to convey the ready state
+};
+```
+

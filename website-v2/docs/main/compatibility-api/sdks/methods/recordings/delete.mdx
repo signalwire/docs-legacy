@@ -1,0 +1,59 @@
+---
+slug: /compatibility-api/sdks/reference/recordings/delete
+title: Delete
+sidebar_label: Delete
+toc_max_heading_level: 3
+---
+
+Use this endpoint for the Recordings method to delete a recording.
+If the deletion is successful, a 204 response, with no request body, will be returned.
+
+<EndpointSchemaSnippet endpoint="DELETE /Accounts/{AccountSid}/Recordings/{Sid}" selector="request" />
+
+## Request examples
+
+<CodeBlocks>
+```javascript title="Node.js"
+const { RestClient } = require('@signalwire/compatibility-api')
+const client = RestClient('YourProjectID', 'YourAuthToken', { signalwireSpaceUrl: 'example.signalwire.com' })
+
+client.recordings('Sid')
+      .remove()
+      .then(recording => console.log(recording.sid))
+      .done();
+```
+```csharp
+using System;
+using System.Collections.Generic;
+using Twilio;
+using Twilio.Rest.Api.V2010.Account;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        TwilioClient.Init("YourProjectID", "YourAuthToken", new Dictionary<string, object> { ["signalwireSpaceUrl"] = "{SPACE}.signalwire.com" });
+
+        RecordingResource.Delete(pathSid: "Sid");
+    }
+}
+```
+```python
+from signalwire.rest import Client as signalwire_client
+
+client = signalwire_client("YourProjectID", "YourAuthToken", signalwire_space_url = 'example.signalwire.com')
+
+client.recordings('Sid').delete()
+```
+```ruby
+require 'signalwire/sdk'
+
+@client = Signalwire::REST::Client.new 'YourProjectID', 'YourAuthToken', signalwire_space_url: "example.signalwire.com"
+
+@client.recordings('Sid').delete
+```
+</CodeBlocks>
+
+## Response
+
+A successful request returns a 204 status code with no body.

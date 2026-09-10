@@ -1,0 +1,31 @@
+---
+title: "on"
+slug: /node/reference/voice/call/on
+description: on method for the Call class.
+toc_max_heading_level: 3
+---
+
+
+### on
+
+- **on**(`event`, `fn`)
+
+Attaches an event handler to the specified event.
+
+#### Parameters
+
+| Name    | Type     | Description                                                                                    |
+| :------ | :------- | :--------------------------------------------------------------------------------------------- |
+| `event` | `string` | Name of the event. See [Events](/docs/server-sdk/v3/node/reference/voice/call/events) for the list of available events. |
+| `fn`    | Function | An event handler.                                                                              |
+
+#### Example
+
+In the below example, we are listening for the `call.state` event and logging the current call state to the console.
+This means this will be triggered every time the call state changes.
+
+```js
+call.on("call.state", (call) => {
+    console.log("call state changed:", call.state);
+});
+```

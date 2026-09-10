@@ -1,0 +1,67 @@
+---
+slug: /compatibility-api/sdks/reference/faxes/retrieve
+title: Retrieve
+sidebar_label: Retrieve
+toc_max_heading_level: 3
+---
+
+Use this endpoint for the Fax method to retrieve a single fax by its  [SID](/docs/platform/what-is-a-sid).
+
+<EndpointSchemaSnippet endpoint="GET /Accounts/{AccountSid}/Faxes/{Sid}" />
+
+<EndpointResponseSnippet endpoint="GET /Accounts/{AccountSid}/Faxes/{Sid}" />
+
+## Request examples
+
+<CodeBlocks>
+
+```javascript title="Node.js"
+const { RestClient } = require('@signalwire/compatibility-api')
+const client = RestClient('YourProjectID', 'YourAuthToken', { signalwireSpaceUrl: 'example.signalwire.com' })
+
+client.fax.faxes('FaxSid')
+          .fetch()
+          .then(fax => console.log(fax.to))
+          .done();
+```
+
+```csharp
+using System;
+using System.Collections.Generic;
+using Twilio;
+using Twilio.Rest.Fax.V1;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        TwilioClient.Init("YourProjectID", "YourAuthToken", new Dictionary<string, object> { ["signalwireSpaceUrl"] = "{SPACE}.signalwire.com" });
+
+        var fax = FaxResource.Fetch(pathSid: "FaxSid");
+
+        Console.WriteLine(fax.To);
+    }
+}
+```
+
+```python
+from signalwire.rest import Client as signalwire_client
+
+client = signalwire_client("YourProjectID", "YourAuthToken", signalwire_space_url = 'example.signalwire.com')
+
+fax = client.fax.faxes('FaxSid').fetch()
+
+print(fax.to)
+```
+
+```ruby
+require 'signalwire/sdk'
+
+@client = Signalwire::REST::Client.new 'YourProjectID', 'YourAuthToken', signalwire_space_url: "example.signalwire.com"
+
+fax = @client.fax.faxes('FaxSid').fetch
+
+puts fax.to
+```
+
+</CodeBlocks>

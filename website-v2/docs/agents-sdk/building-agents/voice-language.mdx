@@ -1,0 +1,419 @@
+---
+title: "Voices & Languages"
+sidebar_label: "Voices & Languages"
+sidebar_position: 4
+slug: /python/guides/voice-language
+toc_max_heading_level: 3
+description: Configure Text-to-Speech voices, languages, and pronunciation to create natural-sounding agents.
+---
+
+### Overview
+
+#### Language Configuration
+
+| Parameter | Description | Example |
+|-----------|-------------|---------|
+| `name` | Human-readable name | `"English"` |
+| `code` | Language code for STT | `"en-US"` |
+| `voice` | TTS voice identifier | `"rime.spore"` or `"elevenlabs.josh:eleven_turbo_v2_5"` |
+
+#### Fillers (Natural Speech)
+
+| Parameter | Description | Example |
+|-----------|-------------|---------|
+| `speech_fillers` | Used during natural conversation pauses | `["Um", "Well", "So"]` |
+| `function_fillers` | Used while executing a function | `["Let me check...", "One moment..."]` |
+
+### Adding a Language
+
+#### Basic Configuration
+
+```python
+from signalwire_agents import AgentBase
+
+
+class MyAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="my-agent")
+
+        # Basic language setup
+        self.add_language(
+            name="English",       # Display name
+            code="en-US",         # Language code for STT
+            voice="rime.spore"    # TTS voice
+        )
+```
+
+#### Voice Format
+
+The voice parameter uses the format `engine.voice:model` where model is optional:
+
+```python
+## Simple voice (engine.voice)
+self.add_language("English", "en-US", "rime.spore")
+
+## With model (engine.voice:model)
+self.add_language("English", "en-US", "elevenlabs.josh:eleven_turbo_v2_5")
+```
+
+### Available TTS Engines
+
+| Provider | Engine Code | Example Voice | Reference |
+|----------|-------------|---------------|-----------|
+| Amazon Polly | `amazon` | `amazon.Joanna-Neural` | [Voice IDs](/docs/platform/voice/tts/amazon-polly#usage) |
+| Cartesia | `cartesia` | `cartesia.a167e0f3-df7e-4d52-a9c3-f949145efdab` | [Voice IDs](/docs/platform/voice/tts/cartesia#usage) |
+| Deepgram | `deepgram` | `deepgram.aura-asteria-en` | [Voice IDs](/docs/platform/voice/tts/deepgram) |
+| ElevenLabs | `elevenlabs` | `elevenlabs.thomas` | [Voice IDs](/docs/platform/voice/tts/elevenlabs#usage) |
+| Google Cloud | `gcloud` | `gcloud.en-US-Casual-K` | [Voice IDs](/docs/platform/voice/tts/gcloud#usage) |
+| Microsoft Azure | `azure` | `azure.en-US-AvaNeural` | [Voice IDs](/docs/platform/voice/tts/azure#usage) |
+| OpenAI | `openai` | `openai.alloy` | [Voice IDs](/docs/platform/voice/tts/openai#voices) |
+| Rime | `rime` | `rime.luna:arcana` | [Voice IDs](/docs/platform/voice/tts/rime#voices) |
+
+### Filler Phrases
+
+Add natural pauses and filler words:
+
+```python
+self.add_language(
+    name="English",
+    code="en-US",
+    voice="rime.spore",
+    speech_fillers=[
+        "Um",
+        "Well",
+        "Let me think",
+        "So"
+    ],
+    function_fillers=[
+        "Let me check that for you",
+        "One moment please",
+        "I'm looking that up now",
+        "Bear with me"
+    ]
+)
+```
+
+**Speech fillers**: Used during natural conversation pauses
+
+**Function fillers**: Used while the AI is executing a function
+
+### Multi-Language Support
+
+Use `code="multi"` for automatic language detection and matching:
+
+```python
+class MultilingualAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="multilingual-agent")
+
+        # Multi-language support (auto-detects and matches caller's language)
+        self.add_language(
+            name="Multilingual",
+            code="multi",
+            voice="rime.spore"
+        )
+
+        self.prompt_add_section(
+            "Language",
+            "Automatically detect and match the caller's language without "
+            "prompting or asking them to verify. Respond naturally in whatever "
+            "language they speak."
+        )
+```
+
+The `multi` code supports: English, Spanish, French, German, Hindi, Russian, Portuguese, Japanese, Italian, and Dutch.
+
+**Note**: Speech recognition hints do not work when using `code="multi"`. If you need hints for specific terms, use individual language codes instead.
+
+For more control over individual languages with custom fillers:
+
+```python
+class CustomMultilingualAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="custom-multilingual")
+
+        # English (primary)
+        self.add_language(
+            name="English",
+            code="en-US",
+            voice="rime.spore",
+            speech_fillers=["Um", "Well", "So"],
+            function_fillers=["Let me check that"]
+        )
+
+        # Spanish
+        self.add_language(
+            name="Spanish",
+            code="es-MX",
+            voice="rime.luna",
+            speech_fillers=["Eh", "Pues", "Bueno"],
+            function_fillers=["Dejame verificar", "Un momento"]
+        )
+
+        # French
+        self.add_language(
+            name="French",
+            code="fr-FR",
+            voice="rime.claire",
+            speech_fillers=["Euh", "Alors", "Bon"],
+            function_fillers=["Laissez-moi verifier", "Un instant"]
+        )
+
+        self.prompt_add_section(
+            "Language",
+            "Automatically detect and match the caller's language without "
+            "prompting or asking them to verify."
+        )
+```
+
+### Pronunciation Rules
+
+Fix pronunciation of specific words:
+
+```python
+class AgentWithPronunciation(AgentBase):
+    def __init__(self):
+        super().__init__(name="pronunciation-agent")
+        self.add_language("English", "en-US", "rime.spore")
+
+        # Fix brand names
+        self.add_pronunciation(
+            replace="ACME",
+            with_text="Ack-me"
+        )
+
+        # Fix technical terms
+        self.add_pronunciation(
+            replace="SQL",
+            with_text="sequel"
+        )
+
+        # Case-insensitive matching
+        self.add_pronunciation(
+            replace="api",
+            with_text="A P I",
+            ignore_case=True
+        )
+
+        # Fix names
+        self.add_pronunciation(
+            replace="Nguyen",
+            with_text="win"
+        )
+```
+
+### Set Multiple Pronunciations
+
+```python
+## Set all pronunciations at once
+self.set_pronunciations([
+    {"replace": "ACME", "with": "Ack-me"},
+    {"replace": "SQL", "with": "sequel"},
+    {"replace": "API", "with": "A P I", "ignore_case": True},
+    {"replace": "CEO", "with": "C E O"},
+    {"replace": "ASAP", "with": "A sap"}
+])
+```
+
+### Voice Selection Guide
+
+Choosing the right TTS engine and voice significantly impacts caller experience. Consider these factors:
+
+#### Use Case Recommendations
+
+| Use Case | Recommended Voice Style |
+|----------|------------------------|
+| Customer Service | Warm, friendly (`rime.spore`) |
+| Technical Support | Clear, professional (`rime.marsh`) |
+| Sales | Energetic, persuasive (elevenlabs voices) |
+| Healthcare | Calm, reassuring |
+| Legal/Finance | Formal, authoritative |
+
+#### TTS Engine Comparison
+
+| Engine | Latency | Quality | Cost | Best For |
+|--------|---------|---------|------|----------|
+| **Rime** | Very fast | Good | Low | Production, low-latency needs |
+| **ElevenLabs** | Medium | Excellent | Higher | Premium experiences, emotion |
+| **Google Cloud** | Medium | Very good | Medium | Multilingual, SSML features |
+| **Amazon Polly** | Fast | Good | Low | AWS integration, Neural voices |
+| **OpenAI** | Medium | Excellent | Medium | Natural conversation style |
+| **Azure** | Medium | Very good | Medium | Microsoft ecosystem |
+| **Deepgram** | Fast | Good | Medium | Speech-focused applications |
+| **Cartesia** | Fast | Good | Medium | Specialized voices |
+
+#### Choosing an Engine
+
+**Prioritize latency (Rime, Polly, Deepgram):**
+
+- Interactive conversations where quick response matters
+- High-volume production systems
+- Cost-sensitive deployments
+
+**Prioritize quality (ElevenLabs, OpenAI):**
+
+- Premium customer experiences
+- Brand-sensitive applications
+- When voice quality directly impacts business outcomes
+
+**Prioritize features (Google Cloud, Azure):**
+
+- Need SSML for fine-grained control
+- Complex multilingual requirements
+- Specific enterprise integrations
+
+#### Testing and Evaluation Process
+
+Before selecting a voice for production:
+
+1. **Create test content** with domain-specific terms, company names, and typical phrases
+2. **Test multiple candidates** from your shortlisted engines
+3. **Evaluate each voice:**
+   - Pronunciation accuracy (especially brand names)
+   - Natural pacing and rhythm
+   - Emotional appropriateness
+   - Handling of numbers, dates, prices
+4. **Test with real users** if possible—internal team members or beta callers
+5. **Measure latency** in your deployment environment
+
+#### Voice Personality Considerations
+
+**Match voice to brand:**
+
+- Formal brands → authoritative, measured voices
+- Friendly brands → warm, conversational voices
+- Tech brands → clear, modern-sounding voices
+
+**Consider your audience:**
+
+- Older demographics may prefer clearer, slower voices
+- Technical audiences tolerate more complex terminology
+- Regional preferences may favor certain accents
+
+**Test edge cases:**
+
+- Long monologues (product descriptions)
+- Lists and numbers (order details, account numbers)
+- Emotional content (apologies, celebrations)
+
+### Dynamic Voice Selection
+
+Change voice based on context:
+
+```python
+class DynamicVoiceAgent(AgentBase):
+    DEPARTMENT_VOICES = {
+        "support": {"voice": "rime.spore", "name": "Alex"},
+        "sales": {"voice": "rime.marsh", "name": "Jordan"},
+        "billing": {"voice": "rime.coral", "name": "Morgan"}
+    }
+
+    def __init__(self):
+        super().__init__(name="dynamic-voice")
+
+    def on_swml_request(self, request_data=None, callback_path=None, request=None):
+        # Determine department from called number
+        call_data = (request_data or {}).get("call", {})
+        called_num = call_data.get("to", "")
+
+        if "555-1000" in called_num:
+            dept = "support"
+        elif "555-2000" in called_num:
+            dept = "sales"
+        else:
+            dept = "billing"
+
+        config = self.DEPARTMENT_VOICES[dept]
+
+        self.add_language("English", "en-US", config["voice"])
+
+        self.prompt_add_section(
+            "Role",
+            f"You are {config['name']}, a {dept} representative."
+        )
+```
+
+### Language Codes Reference
+
+Supported language codes:
+
+| Language | Codes |
+|----------|-------|
+| Multilingual | `multi` (English, Spanish, French, German, Hindi, Russian, Portuguese, Japanese, Italian, Dutch) |
+| Bulgarian | `bg` |
+| Czech | `cs` |
+| Danish | `da`, `da-DK` |
+| Dutch | `nl` |
+| English | `en`, `en-US`, `en-AU`, `en-GB`, `en-IN`, `en-NZ` |
+| Finnish | `fi` |
+| French | `fr`, `fr-CA` |
+| German | `de` |
+| Hindi | `hi` |
+| Hungarian | `hu` |
+| Indonesian | `id` |
+| Italian | `it` |
+| Japanese | `ja` |
+| Korean | `ko`, `ko-KR` |
+| Norwegian | `no` |
+| Polish | `pl` |
+| Portuguese | `pt`, `pt-BR`, `pt-PT` |
+| Russian | `ru` |
+| Spanish | `es`, `es-419` |
+| Swedish | `sv`, `sv-SE` |
+| Turkish | `tr` |
+| Ukrainian | `uk` |
+| Vietnamese | `vi` |
+
+### Complete Voice Configuration Example
+
+```python
+from signalwire_agents import AgentBase
+
+
+class FullyConfiguredVoiceAgent(AgentBase):
+    def __init__(self):
+        super().__init__(name="voice-configured")
+
+        # Primary language with all options
+        self.add_language(
+            name="English",
+            code="en-US",
+            voice="rime.spore",
+            speech_fillers=[
+                "Um",
+                "Well",
+                "Let me see",
+                "So"
+            ],
+            function_fillers=[
+                "Let me look that up for you",
+                "One moment while I check",
+                "I'm searching for that now",
+                "Just a second"
+            ]
+        )
+
+        # Secondary language
+        self.add_language(
+            name="Spanish",
+            code="es-MX",
+            voice="rime.luna",
+            speech_fillers=["Pues", "Bueno"],
+            function_fillers=["Un momento", "Dejame ver"]
+        )
+
+        # Pronunciation fixes
+        self.set_pronunciations([
+            {"replace": "ACME", "with": "Ack-me"},
+            {"replace": "www", "with": "dub dub dub"},
+            {"replace": ".com", "with": "dot com"},
+            {"replace": "@", "with": "at"}
+        ])
+
+        self.prompt_add_section(
+            "Role",
+            "You are a friendly customer service agent."
+        )
+```
+
+

@@ -1,0 +1,1705 @@
+---
+title: API Types
+slug: /types
+sidebar_position: 10 
+---
+
+
+Generated from TypeDoc JSON for @signalwire/client
+
+## Table of Contents
+
+- [Type Aliases](#type-aliases) (50)
+- [Enums](#enums) (1)
+- [Interfaces & Classes](#interfaces--classes) (87)
+
+## Type Aliases
+
+### Address
+
+**Type:** [GetAddressResponse](#getaddressresponse)
+
+### BaseConnectionOptions
+
+**Type:** [ConnectionOptions](#connectionoptions) & [BaseComponentOptions](#basecomponentoptions)
+
+### BaseConnectionState
+
+**Type:** `"active" | "answering" | "destroy" | "early" | "hangup" | "held" | "new" | "purge" | "recovering" | "requesting" | "ringing" | "trying"`
+
+### CallJoinedEventParams
+
+**Type:** \{ capabilities: [CallCapabilitiesContract](#callcapabilitiescontract) \} & Omit\<InternalCallJoinedEventParams, "capabilities"\>
+
+### CallSessionEventParams
+
+**Type:** [CallJoinedEventParams](#calljoinedeventparams) | [CallUpdatedEventParams](#callupdatedeventparams) | [CallLeftEventParams](#calllefteventparams) | [CallStateEventParams](#callstateeventparams) | [CallPlayEventParams](#callplayeventparams) | [CallConnectEventParams](#callconnecteventparams) | CallRoomEventParams
+
+### CallSessionEvents
+
+**Type:** `{ [k]: CallSessionEventsHandlerMap[k] }`
+
+### ClientEvents
+
+List of all the events the client can listen to.
+
+**Type:** Record\<[SessionEvents](#sessionevents), (params?: any) =\> void\>
+
+### ConversationChatMessage
+
+**Type:** Omit\<[ConversationMessage](#conversationmessage), "kind"\> & \{ text: string; user\_name: string \}
+
+### ConversationChatMessagesSubscribeResult
+
+**Type:** [ConversationSubscribeResult](#conversationsubscriberesult)
+
+### ConversationChatSubscribeCallback
+
+**Type:** `(event: ConversationChatEventParams) => unknown`
+
+### ConversationEvent
+
+**Type:** [ConversationMessageEvent](#conversationmessageevent)
+
+### ConversationEventParams
+
+**Type:** [ConversationMessageEventParams](#conversationmessageeventparams)
+
+### ConversationMessageEventName
+
+**Type:** "conversation.message"
+
+### ConversationSubscribeCallback
+
+**Type:** (event: [ConversationEventParams](#conversationeventparams)) =\> unknown
+
+### GetAddressesResponse
+
+**Type:** [PaginatedResponse](#paginatedresponse)\<[GetAddressResponse](#getaddressresponse)\>
+
+### GetAddressesResult
+
+**Type:** [PaginatedResult](#paginatedresult)\<[GetAddressResponse](#getaddressresponse)\>
+
+### GetAddressParams
+
+**Type:** [GetAddressByIdParams](#getaddressbyidparams) | [GetAddressByNameParams](#getaddressbynameparams)
+
+### GetAddressResult
+
+**Type:** [GetAddressResponse](#getaddressresponse)
+
+### GetClientParamsOptions
+
+**Type:** Omit\<[SignalWireClientParams](#signalwireclientparams), "host" | "token"\>
+
+### GetConversationChatMessageResult
+
+**Type:** [PaginatedResult](#paginatedresult)\<[ConversationChatMessage](#conversationchatmessage)\>
+
+### GetConversationMessagesResult
+
+**Type:** [PaginatedResult](#paginatedresult)\<[ConversationMessage](#conversationmessage)\>
+
+### GetConversationsResponse
+
+**Type:** [PaginatedResponse](#paginatedresponse)\<[ConversationResponse](#conversationresponse)\>
+
+### GetConversationsResult
+
+**Type:** [PaginatedResult](#paginatedresult)\<[ConversationContract](#conversationcontract)\>
+
+### GetMessagesResult
+
+**Type:** [PaginatedResult](#paginatedresult)\<[ConversationMessage](#conversationmessage)\>
+
+### GetSubscriberInfoResult
+
+**Type:** [GetSubscriberInfoResponse](#getsubscriberinforesponse)
+
+### HandlePushNotificationParams
+
+**Type:** PushNotificationPayload & \{ incomingCallHandler?: [IncomingCallHandler](#incomingcallhandler) \}
+
+### IncomingCallHandler
+
+**Type:** (notification: [IncomingCallNotification](#incomingcallnotification)) =\> void
+
+### IncomingInviteSource
+
+**Type:** `"websocket" | "pushNotification"`
+
+### InternalMemberEntity
+
+MemberEntity entity for internal usage (converted to snake\_case)
+
+**Type:** \{ \[K] as CamelToSnakeCase\<K\>: [MemberEntity](#memberentity)\[K] \}
+
+### InternalVideoLayout
+
+**Type:** \{ \[K] as CamelToSnakeCase\<K\>: [VideoLayout](#videolayout)\[K] \} & \{ layers: InternalVideoLayoutLayer\[] \}
+
+### JoinConversationResult
+
+**Type:** [JoinConversationResponse](#joinconversationresponse)
+
+### MemberEntity
+
+Member properties
+
+**Type:** `OnlyStateProperties<MemberContract>`
+
+### MemberEventParams
+
+**Type:** [MemberJoinedEventParams](#memberjoinedeventparams) | [MemberLeftEventParams](#memberlefteventparams) | [MemberUpdatedEventParams](#memberupdatedeventparams) | [MemberTalkingEventParams](#membertalkingeventparams)
+
+### OverlayMap
+
+**Type:** Map\<string, [UserOverlay](#useroverlay)\>
+
+### RegisterDeviceResult
+
+**Type:** [RegisterDeviceResponse](#registerdeviceresponse)
+
+### RegisterDeviceType
+
+**Type:** "iOS" | "Android" | "Desktop"
+
+### ResourceType
+
+**Type:** `"app" | "call" | "room" | "subscriber"`
+
+### RoomEventNames
+
+List of all the events a RoomObject can listen to
+
+**Type:** VideoRoomSessionEventNames | VideoMemberEventNames | VideoLayoutEventNames | VideoRecordingEventNames | VideoPlaybackEventNames | VideoStreamEventNames | [RTCTrackEventName](#rtctrackeventname)
+
+### RoomSessionObjectEvents
+
+**Type:** \{ \[k]: [RoomSessionObjectEventsHandlerMap](#roomsessionobjecteventshandlermap)\[k] \}
+
+### RoomSessionObjectEventsHandlerMap
+
+**Type:** Record\<VideoRoomDeviceEventNames, (params: DeviceUpdatedEventParams) =\> void\> & Record\<VideoLayoutEventNames, (params: VideoLayoutChangedEventParams) =\> void\> & Record\<Exclude\<VideoMemberEventNames, MemberUpdated | CoreMemberUpdatedEventNames | MemberListUpdated\>, (params: VideoMemberHandlerParams) =\> void\> & Record\<Extract\<VideoMemberEventNames, MemberUpdated | CoreMemberUpdatedEventNames\>, (params: VideoMemberUpdatedHandlerParams) =\> void\> & Record\<Extract\<VideoMemberEventNames, MemberListUpdated\>, (params: VideoMemberListUpdatedParams) =\> void\> & Record\<DeprecatedMemberUpdatableProps, (params: DeprecatedVideoMemberHandlerParams) =\> void\> & Record\<MemberTalkingEventNames, (params: VideoMemberTalkingEventParams) =\> void\> & Record\<Exclude\<VideoRoomSessionEventNames, RoomLeft | RoomJoined | RoomSubscribed\>, (params: VideoRoomEventParams) =\> void\> & Record\<RoomJoined | RoomSubscribed, (params: VideoRoomSubscribedEventParams) =\> void\> & Record\<RoomLeft, (params?: RoomLeftEventParams) =\> void\> & Record\<MediaEventNames, () =\> void\> & Record\<VideoRoomDeviceUpdatedEventNames, (params: DeviceUpdatedEventParams) =\> void\> & Record\<VideoRoomDeviceDisconnectedEventNames, (params: DeviceDisconnectedEventParams) =\> void\> & Record\<RoomAudienceCount, (params: VideoRoomAudienceCountEventParams) =\> void\> & Record\<[RTCTrackEventName](#rtctrackeventname), (event: RTCTrackEvent) =\> void\> & Record\<VideoRecordingEventNames, (recording: RoomSessionRecording) =\> void\> & Record\<VideoPlaybackEventNames, (recording: RoomSessionPlayback) =\> void\> & Record\<[BaseConnectionState](#baseconnectionstate), (params: RoomSession) =\> void\> & Record\<VideoStreamEventNames, (stream: RoomSessionStream) =\> void\>
+
+### RTCTrackEventName
+
+**Type:** "track"
+
+### SendConversationMessageResponse
+
+**Type:** unknown
+
+### SendConversationMessageResult
+
+**Type:** [SendConversationMessageResponse](#sendconversationmessageresponse)
+
+### SessionEvents
+
+**Type:** session.$\{[SessionStatus](#sessionstatus)\}
+
+### SessionStatus
+
+**Type:** `"unknown" | "idle" | "reconnecting" | "connected" | "disconnecting" | "disconnected" | "auth_error" | "expiring"`
+
+### SetAudioFlagsParams
+
+**Type:** `MemberCommandParams & AtLeastOne<{ autoGain?: boolean; echoCancellation?: boolean; noiseSuppression?: boolean }>`
+
+### SignalWireClient
+
+**Type:** [SignalWireContract](#signalwirecontract)
+
+### StartScreenShareOptions
+
+**Type:** unknown
+
+### VideoPosition
+
+Each video layout has a number of positions which members can be assigned to.
+This type enumerates all the available position names. Note that not all
+these position names may be available within a given layout.
+
+- `auto`: the position of the member in the layout is determined automatically.
+- `reserved-n`: the *n*-th reserved position in the layout (e.g. `reserved-3`).
+- `standard-n`: the *n*-th standard position in the layout (e.g. `standard-3`).
+- `off-canvas`: the member is hidden outside the layout.
+
+**Type:** ``"auto" | `reserved-${number}` | `standard-${number}` | "off-canvas" | "playback" | "full-screen"``
+
+### VideoPositions
+
+An object whose keys represent member IDs, and values are chosen from
+[VideoPosition](#videoposition). Instead of a member ID, in some contexts you can use
+the special keyword `self` if you don't know yet the ID of the member which
+is going to be created.
+
+For example:
+
+```js
+{
+  "1bf4d4fb-a3e4-4d46-80a8-3ebfdceb2a60": "reserved-1",
+  "e0c5be44-d6c7-438f-8cda-f859a1a0b1e7": "auto"
+}
+```
+
+Or:
+
+```js
+{
+  "self": "reserved-1"
+}
+```
+
+**Type:** Record\<string, [VideoPosition](#videoposition)\>
+
+## Enums
+
+### ProfileType
+
+Types of authentication profiles
+
+| Member    | Value | Description                                                                                                      |
+| --------- | ----- | ---------------------------------------------------------------------------------------------------------------- |
+| `DYNAMIC` |       | Dynamic profile that exists only in memory.&#xA;Used for shared resource access or temporary authentication.     |
+| `STATIC`  |       | Static profile with credentials that are persisted to storage.&#xA;Typically used for subscriber authentication. |
+
+## Interfaces & Classes
+
+### AddProfilesParams
+
+Parameters for adding profiles
+
+#### Properties
+
+| Property   | Type                                                                                          | Optional | Readonly | Description |
+| ---------- | --------------------------------------------------------------------------------------------- | -------- | -------- | ----------- |
+| `profiles` | Omit\<[Profile](#profile), "id" \| "createdAt" \| "updatedAt" \| "lastUsed" \| "addressId"\>\[] |          |          |             |
+
+### BaseComponentOptions
+
+#### Properties
+
+| Property      | Type                                                                                                                                                                                                 | Optional | Readonly | Description |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | -------- | ----------- |
+| `customSagas` | `CustomSaga<any>[]`                                                                                                                                                                                  | ✓        |          |             |
+| `store`       | \{ channels: InternalChannels; instanceMap: InstanceMap; runSaga: (saga: Saga, args: \{ instance: T; runSaga: any \}) =\> Task\<any\>; sessionEmitter: EventEmitter\<[ClientEvents](#clientevents), any\> \} |          |          |             |
+
+### CallCapabilitiesContract
+
+#### Properties
+
+| Property      | Type                                                          | Optional | Readonly | Description |
+| ------------- | ------------------------------------------------------------- | -------- | -------- | ----------- |
+| `device`      | boolean                                                       |          |          |             |
+| `end`         | boolean                                                       |          |          |             |
+| `lock`        | [CapabilityOnOffStateContract](#capabilityonoffstatecontract) |          |          |             |
+| `member`      | [MemberCapabilityContract](#membercapabilitycontract)         |          |          |             |
+| `screenshare` | boolean                                                       |          |          |             |
+| `self`        | [MemberCapabilityContract](#membercapabilitycontract)         |          |          |             |
+| `sendDigit`   | boolean                                                       |          |          |             |
+| `setLayout`   | boolean                                                       |          |          |             |
+| `vmutedHide`  | [CapabilityOnOffStateContract](#capabilityonoffstatecontract) |          |          |             |
+
+### CallConnectEventParams
+
+call.connect
+
+#### Properties
+
+| Property          | Type                                                       | Optional | Readonly | Description |
+| ----------------- | ---------------------------------------------------------- | -------- | -------- | ----------- |
+| `call_id`         | string                                                     |          |          |             |
+| `connect_state`   | CallConnectStates                                          |          |          |             |
+| `node_id`         | string                                                     |          |          |             |
+| `peer`            | `{ call_id: string; device: CallDevice; node_id: string }` | ✓        |          |             |
+| `room_session_id` | string                                                     |          |          |             |
+| `segment_id`      | string                                                     |          |          |             |
+
+### CallLayoutChangedEventParams
+
+layout.changed
+
+#### Properties
+
+| Property          | Type                                        | Optional | Readonly | Description |
+| ----------------- | ------------------------------------------- | -------- | -------- | ----------- |
+| `layout`          | [InternalVideoLayout](#internalvideolayout) |          |          |             |
+| `room_id`         | string                                      |          |          |             |
+| `room_session_id` | string                                      |          |          |             |
+
+### CallLeftEventParams
+
+call.left
+
+#### Properties
+
+| Property          | Type                      | Optional | Readonly | Description |
+| ----------------- | ------------------------- | -------- | -------- | ----------- |
+| `call_id`         | string                    |          |          |             |
+| `member_id`       | string                    |          |          |             |
+| `origin_call_id`  | string                    |          |          |             |
+| `reason`          | string                    |          |          |             |
+| `room_id`         | string                    |          |          |             |
+| `room_session`    | InternalCallSessionEntity |          |          |             |
+| `room_session_id` | string                    |          |          |             |
+
+### CallPlayEventParams
+
+call.play
+
+#### Properties
+
+| Property          | Type          | Optional | Readonly | Description |
+| ----------------- | ------------- | -------- | -------- | ----------- |
+| `call_id`         | string        |          |          |             |
+| `control_id`      | string        |          |          |             |
+| `node_id`         | string        |          |          |             |
+| `room_session_id` | string        |          |          |             |
+| `state`           | CallPlayState |          |          |             |
+
+### CallSession
+
+#### Properties
+
+| Property                | Type                                                           | Optional | Readonly | Description                                                                                                                   |
+| ----------------------- | -------------------------------------------------------------- | -------- | -------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `active`                | boolean                                                        |          | ✓        | Whether the connection is currently active                                                                                    |
+| `callId`                | string                                                         |          | ✓        | The underlying connection id - callId                                                                                         |
+| `cameraConstraints`     | null \| MediaTrackConstraints                                  |          | ✓        | The constraints applied to the video device, or null if not available                                                         |
+| `cameraId`              | null \| string                                                 |          | ✓        | The id of the video device, or null if not available                                                                          |
+| `cameraLabel`           | null \| string                                                 |          | ✓        | The label of the video device, or null if not available                                                                       |
+| `currentLayout`         | [InternalVideoLayout](#internalvideolayout)                    |          |          | The layout returned from the \`\`layout.changed\`\` event based on the current room layout                                    |
+| `currentLayoutEvent`    | [CallLayoutChangedEventParams](#calllayoutchangedeventparams)  |          |          | The \`\`layout.changed\`\` event based on the current room layout                                                             |
+| `currentPosition`       | undefined \| [VideoPosition](#videoposition)                   |          |          | The current position of the member returned from the \`\`layout.changed\`\` event                                             |
+| `getMemberOverlay`      | (memberId: string) =\> undefined \| [UserOverlay](#useroverlay) |          |          | Return the member overlay on top of the root element                                                                          |
+| `id`                    | string                                                         |          | ✓        | Unique id for this room session                                                                                               |
+| `leaveReason`           | `undefined \| "RECONNECTION_ATTEMPT_TIMEOUT"`                  |          | ✓        |                                                                                                                               |
+| `localAudioTrack`       | null \| MediaStreamTrack                                       |          | ✓        | Provides access to the local audio&#xA;[MediaStreamTrack](https://developer.mozilla.org/en-US/docs/Web/API/MediaStreamTrack). |
+| `localStream`           | undefined \| MediaStream                                       |          | ✓        | Provides access to the local [MediaStream](https://developer.mozilla.org/en-US/docs/Web/API/MediaStream)                      |
+| `localVideoOverlay`     | undefined \| [LocalVideoOverlay](#localvideooverlay)           |          |          | Local video overlay object that the SDK injects in the DOM element inside the MCU                                             |
+| `localVideoTrack`       | null \| MediaStreamTrack                                       |          | ✓        | Provides access to the local video&#xA;[MediaStreamTrack](https://developer.mozilla.org/en-US/docs/Web/API/MediaStreamTrack). |
+| `memberId`              | string                                                         |          | ✓        | The id of the current member within the room                                                                                  |
+| `microphoneConstraints` | null \| MediaTrackConstraints                                  |          | ✓        | The constraints applied to the audio input device, or null if not available                                                   |
+| `microphoneId`          | null \| string                                                 |          | ✓        | The id of the audio input device, or null if not available                                                                    |
+| `microphoneLabel`       | null \| string                                                 |          | ✓        | The label of the audio input device, or null if not available                                                                 |
+| `options`               | `Record<any, any>`                                             |          | ✓        | The BaseConnection options                                                                                                    |
+| `overlayMap`            | undefined \| [OverlayMap](#overlaymap)                         |          |          | A JS Map containing all the layers on top of the Root Element                                                                 |
+| `previewUrl`            | string                                                         | ✓        | ✓        | The preview\_url for the room. Only with "enable\_room\_previews: true" on Room configuration.                                |
+| `remoteStream`          | undefined \| MediaStream                                       |          | ✓        | Provides access to the remote [MediaStream](https://developer.mozilla.org/en-US/docs/Web/API/MediaStream)                     |
+| `roomId`                | string                                                         |          | ✓        | The unique identifier for the room                                                                                            |
+| `roomSessionId`         | string                                                         |          | ✓        | The unique identifier for the room session                                                                                    |
+| `screenShareList`       | [RoomSessionScreenShare](#roomsessionscreenshare)\[]           |          |          | List of screen share objects                                                                                                  |
+| `withAudio`             | boolean                                                        |          | ✓        | Indicates if there is any receiving audio                                                                                     |
+| `withVideo`             | boolean                                                        |          | ✓        | Indicates if there is any receiving video                                                                                     |
+
+#### Methods
+
+| Method                 | Signature                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Description |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------- |
+| `answer`               | `() => Promise<void>`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |             |
+| `audioMute`            | `(params?: MemberCommandParams) => Promise`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |             |
+| `audioUnmute`          | `(params?: MemberCommandParams) => Promise`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |             |
+| `deaf`                 | `(params?: MemberCommandParams) => Promise`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |             |
+| `destroy`              | `() => void`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |             |
+| `emit`                 | `(event: E, args: ArgumentMap<CallSessionEvents>[Extract<E, VideoRoomDeviceUpdatedEventNames \| VideoRoomDeviceDisconnectedEventNames \| "layout.changed" \| "member.joined" \| "member.left" \| "member.updated" \| "member.updated.visible" \| "member.updated.deaf" \| "member.updated.audioMuted" \| "member.updated.videoMuted" \| "member.updated.inputVolume" \| "member.updated.outputVolume" \| "member.updated.inputSensitivity" \| "member.talking" \| "memberList.updated" \| "room.subscribed" \| "room.updated" \| "room.joined" \| "room.left" \| MediaEventNames \| "track" \| BaseConnectionState \| "call.joined" \| "call.updated" \| "call.left" \| "call.state" \| "call.play" \| "call.connect" \| "call.room" \| "member.updated.handraised" \| "member.updated.echoCancellation" \| "member.updated.autoGain" \| "member.updated.noiseSuppression">]) => void`                                                                                         |             |
+| `end`                  | `(params?: MemberCommandParams) => Promise<void>`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |             |
+| `getLayouts`           | `() => Promise`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |             |
+| `getMembers`           | `() => Promise`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |             |
+| `hangup`               | `(id?: string) => Promise<void>`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |             |
+| `hold`                 | `() => Promise<void>`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |             |
+| `leave`                | `() => Promise<void>`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |             |
+| `lock`                 | `() => Promise`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |             |
+| `off`                  | (event: T, fn?: (args: ArgumentMap\<CallSessionEvents\>\[Extract\<T, VideoRoomDeviceUpdatedEventNames \| VideoRoomDeviceDisconnectedEventNames \| "layout.changed" \| "member.joined" \| "member.left" \| "member.updated" \| "member.updated.visible" \| "member.updated.deaf" \| "member.updated.audioMuted" \| "member.updated.videoMuted" \| "member.updated.inputVolume" \| "member.updated.outputVolume" \| "member.updated.inputSensitivity" \| "member.talking" \| "memberList.updated" \| "room.subscribed" \| "room.updated" \| "room.joined" \| "room.left" \| MediaEventNames \| "track" \| BaseConnectionState \| "call.joined" \| "call.updated" \| "call.left" \| "call.state" \| "call.play" \| "call.connect" \| "call.room" \| "member.updated.handraised" \| "member.updated.echoCancellation" \| "member.updated.autoGain" \| "member.updated.noiseSuppression"\>]) =\> void) =\> [EmitterContract](#emittercontract)\<[CallSessionEvents](#callsessionevents)\> |             |
+| `on`                   | (event: T, fn: (args: ArgumentMap\<CallSessionEvents\>\[Extract\<T, VideoRoomDeviceUpdatedEventNames \| VideoRoomDeviceDisconnectedEventNames \| "layout.changed" \| "member.joined" \| "member.left" \| "member.updated" \| "member.updated.visible" \| "member.updated.deaf" \| "member.updated.audioMuted" \| "member.updated.videoMuted" \| "member.updated.inputVolume" \| "member.updated.outputVolume" \| "member.updated.inputSensitivity" \| "member.talking" \| "memberList.updated" \| "room.subscribed" \| "room.updated" \| "room.joined" \| "room.left" \| MediaEventNames \| "track" \| BaseConnectionState \| "call.joined" \| "call.updated" \| "call.left" \| "call.state" \| "call.play" \| "call.connect" \| "call.room" \| "member.updated.handraised" \| "member.updated.echoCancellation" \| "member.updated.autoGain" \| "member.updated.noiseSuppression"\>]) =\> void) =\> [EmitterContract](#emittercontract)\<[CallSessionEvents](#callsessionevents)\>  |             |
+| `once`                 | (event: T, fn: (args: ArgumentMap\<CallSessionEvents\>\[Extract\<T, VideoRoomDeviceUpdatedEventNames \| VideoRoomDeviceDisconnectedEventNames \| "layout.changed" \| "member.joined" \| "member.left" \| "member.updated" \| "member.updated.visible" \| "member.updated.deaf" \| "member.updated.audioMuted" \| "member.updated.videoMuted" \| "member.updated.inputVolume" \| "member.updated.outputVolume" \| "member.updated.inputSensitivity" \| "member.talking" \| "memberList.updated" \| "room.subscribed" \| "room.updated" \| "room.joined" \| "room.left" \| MediaEventNames \| "track" \| BaseConnectionState \| "call.joined" \| "call.updated" \| "call.left" \| "call.state" \| "call.play" \| "call.connect" \| "call.room" \| "member.updated.handraised" \| "member.updated.echoCancellation" \| "member.updated.autoGain" \| "member.updated.noiseSuppression"\>]) =\> void) =\> [EmitterContract](#emittercontract)\<[CallSessionEvents](#callsessionevents)\>  |             |
+| `removeAllListeners`   | (event?: T) =\> [EmitterContract](#emittercontract)\<[CallSessionEvents](#callsessionevents)\>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |             |
+| `removeMember`         | `(params: Required<MemberCommandParams>) => Promise`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |             |
+| `restoreOutboundAudio` | `() => void`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |             |
+| `restoreOutboundVideo` | `() => void`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |             |
+| `sendDigits`           | `(dtmf: string) => Promise<void>`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |             |
+| `setAudioDirection`    | `(direction: UpdateMediaDirection) => Promise<void>`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |             |
+| `setAudioFlags`        | (params: [SetAudioFlagsParams](#setaudioflagsparams)) =\> Promise\<void\>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |             |
+| `setInputSensitivity`  | `(params: MemberCommandWithValueParams) => Promise`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |             |
+| `setInputVolume`       | `(params: MemberCommandWithVolumeParams) => Promise`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |             |
+| `setLayout`            | `(params: SetLayoutParams) => Promise`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |             |
+| `setLocalStream`       | `(stream: MediaStream) => Promise<MediaStream>`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |             |
+| `setOutputVolume`      | `(params: MemberCommandWithVolumeParams) => Promise`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |             |
+| `setPositions`         | `(params: SetPositionsParams) => Promise`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |             |
+| `setRaisedHand`        | `(params?: SetRaisedHandRoomParams) => Promise`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |             |
+| `setVideoDirection`    | `(direction: UpdateMediaDirection) => Promise<void>`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |             |
+| `start`                | `() => Promise<void>`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |             |
+| `startScreenShare`     | (opts?: [StartScreenShareOptions](#startscreenshareoptions)) =\> Promise\<[RoomSessionScreenShare](#roomsessionscreenshare)\>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |             |
+| `stopOutboundAudio`    | `() => void`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |             |
+| `stopOutboundVideo`    | `() => void`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |             |
+| `undeaf`               | `(params?: MemberCommandParams) => Promise`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |             |
+| `unhold`               | `() => Promise<void>`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |             |
+| `unlock`               | `() => Promise`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |             |
+| `updateCamera`         | `(constraints: MediaTrackConstraints) => Promise<void>`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |             |
+| `updateMedia`          | `(params: UpdateMediaParams) => Promise<void>`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |             |
+| `updateMicrophone`     | `(constraints: MediaTrackConstraints) => Promise<void>`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |             |
+| `updateSpeaker`        | `(opts: { deviceId: string }) => Promise<undefined>`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |             |
+| `videoMute`            | `(params?: MemberCommandParams) => Promise`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |             |
+| `videoUnmute`          | `(params?: MemberCommandParams) => Promise`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |             |
+
+### CallStateEventParams
+
+call.state
+
+#### Properties
+
+| Property          | Type          | Optional | Readonly | Description |
+| ----------------- | ------------- | -------- | -------- | ----------- |
+| `answer_time`     | number        |          |          |             |
+| `call_id`         | string        |          |          |             |
+| `call_state`      | CallStates    |          |          |             |
+| `device`          | CallDevice    |          |          |             |
+| `direction`       | CallDirection |          |          |             |
+| `end_time`        | number        |          |          |             |
+| `node_id`         | string        |          |          |             |
+| `room_session_id` | string        |          |          |             |
+| `segment_id`      | string        |          |          |             |
+| `start_time`      | number        |          |          |             |
+
+### CallUpdatedEventParams
+
+call.updated
+
+#### Properties
+
+| Property          | Type                      | Optional | Readonly | Description |
+| ----------------- | ------------------------- | -------- | -------- | ----------- |
+| `room_id`         | string                    |          |          |             |
+| `room_session`    | InternalCallSessionEntity |          |          |             |
+| `room_session_id` | string                    |          |          |             |
+
+### CapabilityOnOffStateContract
+
+#### Properties
+
+| Property | Type    | Optional | Readonly | Description |
+| -------- | ------- | -------- | -------- | ----------- |
+| `off`    | boolean |          |          |             |
+| `on`     | boolean |          |          |             |
+
+### ClientFactory
+
+Singleton factory for managing SignalWire client instances and authentication profiles.
+Provides a centralized way to create, manage, and dispose of client instances.
+
+#### Methods
+
+| Method              | Signature                                                                                                                                                                                                                                                 | Description |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
+| `addDynamicProfile` | (credentialsId: string, credentials: [SignalWireCredentials](#signalwirecredentials), addressId: string, addressDetails?: \{ channels?: number; displayName?: string; name: string; type: [ResourceType](#resourcetype) \}) =\> Promise\<[Profile](#profile)\> |             |
+| `addProfiles`       | (params: [AddProfilesParams](#addprofilesparams)) =\> Promise\<[Profile](#profile)\[]\>                                                                                                                                                                      |             |
+| `addStaticProfile`  | (credentialsId: string, credentials: [SignalWireCredentials](#signalwirecredentials), addressId: string, addressDetails?: \{ channels?: number; displayName?: string; name: string; type: [ResourceType](#resourcetype) \}) =\> Promise\<[Profile](#profile)\> |             |
+| `dispose`           | `() => Promise<void>`                                                                                                                                                                                                                                     |             |
+| `disposeClient`     | (params: [DisposeClientParams](#disposeclientparams)) =\> Promise\<void\>                                                                                                                                                                                   |             |
+| `getClient`         | (params: [GetClientParams](#getclientparams)) =\> Promise\<[GetClientResult](#getclientresult)\>                                                                                                                                                             |             |
+| `getInstance`       | () =\> [ClientFactory](#clientfactory)                                                                                                                                                                                                                     |             |
+| `getProfile`        | (profileId: string) =\> Promise\<null \| [Profile](#profile)\>                                                                                                                                                                                              |             |
+| `getStorageInfo`    | () =\> Promise\<null \| [StorageInfo](#storageinfo)\>                                                                                                                                                                                                       |             |
+| `init`              | (storage?: [SignalWireStorageContract](#signalwirestoragecontract)) =\> Promise\<void\>                                                                                                                                                                     |             |
+| `listActiveClients` | () =\> Promise\<[ManagedInstance](#managedinstance)\[]\>                                                                                                                                                                                                     |             |
+| `listProfiles`      | () =\> Promise\<[Profile](#profile)\[]\>                                                                                                                                                                                                                     |             |
+| `removeProfiles`    | (params: [RemoveProfilesParams](#removeprofilesparams)) =\> Promise\<string\[]\>                                                                                                                                                                            |             |
+
+### ClientFactoryContract
+
+Contract for the ClientFactory
+
+#### Methods
+
+| Method              | Signature                                                                                     | Description |
+| ------------------- | --------------------------------------------------------------------------------------------- | ----------- |
+| `addProfiles`       | (params: [AddProfilesParams](#addprofilesparams)) =\> Promise\<[Profile](#profile)\[]\>          |             |
+| `disposeClient`     | (params: [DisposeClientParams](#disposeclientparams)) =\> Promise\<void\>                       |             |
+| `getClient`         | (params: [GetClientParams](#getclientparams)) =\> Promise\<[GetClientResult](#getclientresult)\> |             |
+| `getProfile`        | (profileId: string) =\> Promise\<null \| [Profile](#profile)\>                                  |             |
+| `init`              | (storage?: [SignalWireStorageContract](#signalwirestoragecontract)) =\> Promise\<void\>         |             |
+| `listActiveClients` | () =\> Promise\<[ManagedInstance](#managedinstance)\[]\>                                         |             |
+| `listProfiles`      | () =\> Promise\<[Profile](#profile)\[]\>                                                         |             |
+| `removeProfiles`    | (params: [RemoveProfilesParams](#removeprofilesparams)) =\> Promise\<string\[]\>                |             |
+
+### ClientFactoryError
+
+Error types for ClientFactory operations
+
+#### Properties
+
+| Property  | Type                      | Optional | Readonly | Description |
+| --------- | ------------------------- | -------- | -------- | ----------- |
+| `code`    | string                    |          | ✓        |             |
+| `context` | `Record<string, unknown>` | ✓        | ✓        |             |
+
+### ConnectionOptions
+
+#### Properties
+
+| Property                    | Type                               | Optional | Readonly | Description                                                                                                                                                           |
+| --------------------------- | ---------------------------------- | -------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `additionalDevice`          | boolean                            | ✓        |          |                                                                                                                                                                       |
+| `attach`                    | boolean                            | ✓        |          |                                                                                                                                                                       |
+| `audio`                     | `boolean \| MediaTrackConstraints` | ✓        |          | Audio constraints to use when joining the room. Default: \`\`true\`\`.                                                                                                |
+| `autoApplyMediaParams`      | boolean                            | ✓        |          |                                                                                                                                                                       |
+| `callerName`                | string                             | ✓        |          |                                                                                                                                                                       |
+| `callerNumber`              | string                             | ✓        |          |                                                                                                                                                                       |
+| `camId`                     | string                             | ✓        |          |                                                                                                                                                                       |
+| `camLabel`                  | string                             | ✓        |          |                                                                                                                                                                       |
+| `connectionPoolSize`        | number                             | ✓        |          | Number of connections to maintain in the connection pool.&#xA;Set to 0 to disable connection pooling. Default: 3                                                      |
+| `destinationNumber`         | string                             | ✓        |          |                                                                                                                                                                       |
+| `disableUdpIceServers`      | boolean                            | ✓        |          | Disable ICE UDP transport policy                                                                                                                                      |
+| `enableConnectionPool`      | boolean                            | ✓        |          | Whether to enable connection pooling for faster call setup.&#xA;When enabled, maintains pre-warmed RTCPeerConnections with gathered ICE candidates.&#xA;Default: true |
+| `fromCallAddressId`         | string                             | ✓        |          |                                                                                                                                                                       |
+| `googleMaxBitrate`          | number                             | ✓        |          |                                                                                                                                                                       |
+| `googleMinBitrate`          | number                             | ✓        |          |                                                                                                                                                                       |
+| `googleStartBitrate`        | number                             | ✓        |          |                                                                                                                                                                       |
+| `iceCandidatePoolSize`      | number                             | ✓        |          | Size of the ICE candidate pool for reuse.&#xA;Allows ICE candidates to be reused when tracks are replaced.&#xA;Default: 10                                            |
+| `iceGatheringTimeout`       | number                             | ✓        |          |                                                                                                                                                                       |
+| `iceServers`                | RTCIceServer\[]                    | ✓        |          | List of ICE servers.                                                                                                                                                  |
+| `layout`                    | string                             | ✓        |          |                                                                                                                                                                       |
+| `localStream`               | MediaStream                        | ✓        |          |                                                                                                                                                                       |
+| `maxConnectionStateTimeout` | number                             | ✓        |          |                                                                                                                                                                       |
+| `maxIceGatheringTimeout`    | number                             | ✓        |          |                                                                                                                                                                       |
+| `micId`                     | string                             | ✓        |          |                                                                                                                                                                       |
+| `micLabel`                  | string                             | ✓        |          |                                                                                                                                                                       |
+| `msStreamsNumber`           | number                             | ✓        |          |                                                                                                                                                                       |
+| `negotiateAudio`            | boolean                            | ✓        |          |                                                                                                                                                                       |
+| `negotiateVideo`            | boolean                            | ✓        |          |                                                                                                                                                                       |
+| `nodeId`                    | string                             | ✓        |          |                                                                                                                                                                       |
+| `pingSupported`             | boolean                            | ✓        |          |                                                                                                                                                                       |
+| `positions`                 | [VideoPositions](#videopositions)  | ✓        |          |                                                                                                                                                                       |
+| `prevCallId`                | string                             | ✓        |          |                                                                                                                                                                       |
+| `profileId`                 | string                             | ✓        |          |                                                                                                                                                                       |
+| `recoverCall`               | boolean                            | ✓        |          |                                                                                                                                                                       |
+| `remoteCallerName`          | string                             | ✓        |          |                                                                                                                                                                       |
+| `remoteCallerNumber`        | string                             | ✓        |          |                                                                                                                                                                       |
+| `remoteSdp`                 | string                             | ✓        |          |                                                                                                                                                                       |
+| `remoteStream`              | MediaStream                        | ✓        |          |                                                                                                                                                                       |
+| `requestTimeout`            | number                             | ✓        |          |                                                                                                                                                                       |
+| `rtcPeerConfig`             | object                             | ✓        |          |                                                                                                                                                                       |
+| `screenShare`               | boolean                            | ✓        |          |                                                                                                                                                                       |
+| `sfu`                       | boolean                            | ✓        |          |                                                                                                                                                                       |
+| `shakenCheck`               | string                             | ✓        |          |                                                                                                                                                                       |
+| `shakenResult`              | string                             | ✓        |          |                                                                                                                                                                       |
+| `simulcast`                 | boolean                            | ✓        |          |                                                                                                                                                                       |
+| `speakerId`                 | string                             | ✓        |          | Id of the speaker device to use for audio output. If undefined, picks a default speaker.                                                                              |
+| `userVariables`             | object                             | ✓        |          |                                                                                                                                                                       |
+| `useStereo`                 | boolean                            | ✓        |          |                                                                                                                                                                       |
+| `video`                     | `boolean \| MediaTrackConstraints` | ✓        |          | Video constraints to use when joining the room. Default: \`\`true\`\`.                                                                                                |
+| `watchMediaPackets`         | boolean                            | ✓        |          |                                                                                                                                                                       |
+| `watchMediaPacketsTimeout`  | number                             | ✓        |          |                                                                                                                                                                       |
+
+### ConversationAPIGetMessagesParams
+
+#### Properties
+
+| Property   | Type   | Optional | Readonly | Description |
+| ---------- | ------ | -------- | -------- | ----------- |
+| `pageSize` | number | ✓        |          |             |
+
+### ConversationAPISendMessageParams
+
+Conversation API
+
+#### Properties
+
+| Property        | Type   | Optional | Readonly | Description |
+| --------------- | ------ | -------- | -------- | ----------- |
+| `fromAddressId` | string |          |          |             |
+| `text`          | string |          |          |             |
+
+### ConversationChatMessagesSubscribeParams
+
+#### Properties
+
+| Property    | Type                                                                    | Optional | Readonly | Description |
+| ----------- | ----------------------------------------------------------------------- | -------- | -------- | ----------- |
+| `groupId`   | string                                                                  |          |          |             |
+| `onMessage` | [ConversationChatSubscribeCallback](#conversationchatsubscribecallback) |          |          |             |
+
+### ConversationContract
+
+#### Properties
+
+| Property        | Type                      | Optional | Readonly | Description |
+| --------------- | ------------------------- | -------- | -------- | ----------- |
+| `createdAt`     | number                    |          | ✓        |             |
+| `fromAddressId` | string                    |          | ✓        |             |
+| `groupId`       | string                    |          | ✓        |             |
+| `lastMessageAt` | number                    |          | ✓        |             |
+| `metadata`      | `Record<string, unknown>` |          | ✓        |             |
+| `name`          | string                    |          | ✓        |             |
+
+#### Methods
+
+| Method        | Signature                                                                                                                                                       | Description |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
+| `getMessages` | (params?: [ConversationAPIGetMessagesParams](#conversationapigetmessagesparams)) =\> Promise\<[GetConversationMessagesResult](#getconversationmessagesresult)\>    |             |
+| `sendMessage` | (params: [ConversationAPISendMessageParams](#conversationapisendmessageparams)) =\> Promise\<[SendConversationMessageResponse](#sendconversationmessageresponse)\> |             |
+
+### ConversationMessage
+
+#### Properties
+
+| Property                 | Type                      | Optional | Readonly | Description |
+| ------------------------ | ------------------------- | -------- | -------- | ----------- |
+| `details`                | `Record<string, unknown>` |          |          |             |
+| `from_fabric_address_id` | string                    |          |          |             |
+| `group_id`               | string                    |          |          |             |
+| `id`                     | string                    |          |          |             |
+| `kind`                   | string                    | ✓        |          |             |
+| `metadata`               | `Record<string, unknown>` | ✓        |          |             |
+| `subtype`                | string                    |          |          |             |
+| `text`                   | string                    | ✓        |          |             |
+| `ts`                     | number                    |          |          |             |
+| `type`                   | string                    |          |          |             |
+
+### ConversationMessageEvent
+
+#### Properties
+
+| Property        | Type                                                              | Optional | Readonly | Description |
+| --------------- | ----------------------------------------------------------------- | -------- | -------- | ----------- |
+| `event_channel` | string                                                            |          |          |             |
+| `event_type`    | "conversation.message"                                            |          |          |             |
+| `params`        | [ConversationMessageEventParams](#conversationmessageeventparams) |          |          |             |
+| `timestamp`     | number                                                            |          |          |             |
+
+### ConversationMessageEventParams
+
+#### Properties
+
+| Property                 | Type                      | Optional | Readonly | Description |
+| ------------------------ | ------------------------- | -------- | -------- | ----------- |
+| `details`                | `Record<string, unknown>` |          |          |             |
+| `from_fabric_address_id` | string                    |          |          |             |
+| `group_id`               | string                    |          |          |             |
+| `hidden`                 | boolean                   |          |          |             |
+| `id`                     | string                    |          |          |             |
+| `kind`                   | string                    | ✓        |          |             |
+| `metadata`               | `Record<string, unknown>` |          |          |             |
+| `subtype`                | "chat" \| "update"        |          |          |             |
+| `text`                   | null \| string            |          |          |             |
+| `ts`                     | number                    |          |          |             |
+| `type`                   | string                    |          |          |             |
+| `user_name`              | string                    |          |          |             |
+
+### ConversationResponse
+
+#### Properties
+
+| Property                 | Type                      | Optional | Readonly | Description |
+| ------------------------ | ------------------------- | -------- | -------- | ----------- |
+| `created_at`             | number                    |          |          |             |
+| `from_fabric_address_id` | string                    |          |          |             |
+| `group_id`               | string                    |          |          |             |
+| `last_message_at`        | number                    |          |          |             |
+| `metadata`               | `Record<string, unknown>` |          |          |             |
+| `name`                   | string                    |          |          |             |
+
+### ConversationSubscribeResult
+
+#### Properties
+
+| Property      | Type         | Optional | Readonly | Description |
+| ------------- | ------------ | -------- | -------- | ----------- |
+| `unsubscribe` | `() => void` |          |          |             |
+
+### CoreRoomEventParams
+
+call.room
+
+#### Properties
+
+| Property          | Type   | Optional | Readonly | Description |
+| ----------------- | ------ | -------- | -------- | ----------- |
+| `call_id`         | string |          |          |             |
+| `joined_status`   | string |          |          |             |
+| `node_id`         | string |          |          |             |
+| `room_session_id` | string |          |          |             |
+| `segment_id`      | string |          |          |             |
+
+### CredentialExpiredError
+
+Error types for ClientFactory operations
+
+#### Properties
+
+| Property  | Type                      | Optional | Readonly | Description |
+| --------- | ------------------------- | -------- | -------- | ----------- |
+| `code`    | string                    |          | ✓        |             |
+| `context` | `Record<string, unknown>` | ✓        | ✓        |             |
+
+### CredentialRefreshError
+
+Error types for ClientFactory operations
+
+#### Properties
+
+| Property  | Type                      | Optional | Readonly | Description |
+| --------- | ------------------------- | -------- | -------- | ----------- |
+| `code`    | string                    |          | ✓        |             |
+| `context` | `Record<string, unknown>` | ✓        | ✓        |             |
+
+### DialParams
+
+#### Properties
+
+| Property                   | Type                               | Optional | Readonly | Description                                                                                                    |
+| -------------------------- | ---------------------------------- | -------- | -------- | -------------------------------------------------------------------------------------------------------------- |
+| `applyLocalVideoOverlay`   | boolean                            | ✓        |          | Whether to apply the local-overlay on top of your video. Default: \`\`true\`\`.                                |
+| `applyMemberOverlay`       | boolean                            | ✓        |          | Whether to apply an overlay on top of each member. Default: \`\`true\`\`.                                      |
+| `audio`                    | `boolean \| MediaTrackConstraints` | ✓        |          | Audio constraints to use when joining the room. Default: \`\`true\`\`.                                         |
+| `disableUdpIceServers`     | boolean                            | ✓        |          | Disable ICE UDP transport policy                                                                               |
+| `fromCallAddressId`        | string                             | ✓        |          | Call address ID matching one of the subscriber’s addresses to attribute conversation API events in the INVITE. |
+| `listen`                   | `Partial<CallListeners>`           | ✓        |          | Optional event listeners for the call session                                                                  |
+| `mirrorLocalVideoOverlay`  | boolean                            | ✓        |          | Whether to mirror the local video overlay. Default: \`\`false\`\`.                                             |
+| `negotiateAudio`           | boolean                            | ✓        |          | Negotiate the incoming audio from the RTC. Default: \`\`true\`\`.                                              |
+| `negotiateVideo`           | boolean                            | ✓        |          | Negotiate the incoming video from the RTC. Default: \`\`true\`\` for "video" channel.                          |
+| `nodeId`                   | string                             | ✓        |          |                                                                                                                |
+| `rootElement`              | null \| HTMLElement                | ✓        |          | HTML element in which to display the video stream                                                              |
+| `stopCameraWhileMuted`     | boolean                            | ✓        |          | Whether to stop the camera when the member is muted. Default: \`\`true\`\`.                                    |
+| `stopMicrophoneWhileMuted` | boolean                            | ✓        |          | Whether to stop the microphone when the member is muted. Default: \`\`true\`\`.                                |
+| `to`                       | string                             |          |          |                                                                                                                |
+| `userVariables`            | `Record<string, any>`              | ✓        |          | `User & UserAgent metadata`                                                                                    |
+| `video`                    | `boolean \| MediaTrackConstraints` | ✓        |          | Video constraints to use when joining the room. Default: \`\`true\`\` for "video" channel.                     |
+
+### DisposeClientParams
+
+Parameters for disposing a client instance
+
+#### Properties
+
+| Property     | Type   | Optional | Readonly | Description |
+| ------------ | ------ | -------- | -------- | ----------- |
+| `instanceId` | string |          |          |             |
+
+### EmitterContract
+
+#### Methods
+
+| Method               | Signature                                                                                          | Description |
+| -------------------- | -------------------------------------------------------------------------------------------------- | ----------- |
+| `emit`               | `(event: E, args: Parameters<EventListener<EventTypes, E>>) => void`                               |             |
+| `off`                | (event: T, fn?: EventListener\<EventTypes, T\>) =\> [EmitterContract](#emittercontract)\<EventTypes\> |             |
+| `on`                 | (event: T, fn: EventListener\<EventTypes, T\>) =\> [EmitterContract](#emittercontract)\<EventTypes\>  |             |
+| `once`               | (event: T, fn: EventListener\<EventTypes, T\>) =\> [EmitterContract](#emittercontract)\<EventTypes\>  |             |
+| `removeAllListeners` | (event?: T) =\> [EmitterContract](#emittercontract)\<EventTypes\>                                    |             |
+
+### GetAddressByIdParams
+
+#### Properties
+
+| Property | Type   | Optional | Readonly | Description |
+| -------- | ------ | -------- | -------- | ----------- |
+| `id`     | string |          |          |             |
+
+### GetAddressByNameParams
+
+#### Properties
+
+| Property | Type   | Optional | Readonly | Description |
+| -------- | ------ | -------- | -------- | ----------- |
+| `name`   | string |          |          |             |
+
+### GetAddressesParams
+
+#### Properties
+
+| Property      | Type                    | Optional | Readonly | Description |
+| ------------- | ----------------------- | -------- | -------- | ----------- |
+| `displayName` | string                  | ✓        |          |             |
+| `pageSize`    | number                  | ✓        |          |             |
+| `sortBy`      | "name" \| "created\_at" | ✓        |          |             |
+| `sortOrder`   | "asc" \| "desc"         | ✓        |          |             |
+| `type`        | string                  | ✓        |          |             |
+
+### GetAddressResponse
+
+#### Properties
+
+| Property       | Type                                                     | Optional | Readonly | Description |
+| -------------- | -------------------------------------------------------- | -------- | -------- | ----------- |
+| `channels`     | `{ audio?: string; messaging?: string; video?: string }` |          |          |             |
+| `cover_url`    | string                                                   | ✓        |          |             |
+| `created_at`   | string                                                   |          |          |             |
+| `display_name` | string                                                   |          |          |             |
+| `id`           | string                                                   |          |          |             |
+| `locked`       | boolean                                                  |          |          |             |
+| `name`         | string                                                   |          |          |             |
+| `preview_url`  | string                                                   | ✓        |          |             |
+| `resource_id`  | string                                                   |          |          |             |
+| `type`         | [ResourceType](#resourcetype)                            |          |          |             |
+
+### GetClientParams
+
+Parameters for getting a client instance
+
+#### Properties
+
+| Property    | Type                                              | Optional | Readonly | Description                                                                  |
+| ----------- | ------------------------------------------------- | -------- | -------- | ---------------------------------------------------------------------------- |
+| `addressId` | string                                            | ✓        |          | Address ID to find a suitable profile for. Used if profileId is not provided |
+| `options`   | [GetClientParamsOptions](#getclientparamsoptions) |          |          | Signalwire client options                                                    |
+| `profileId` | string                                            | ✓        |          | Profile ID to use for the client. Takes priority over addressId              |
+
+### GetClientResult
+
+Result from getting a client instance
+
+#### Properties
+
+| Property   | Type                                | Optional | Readonly | Description                              |
+| ---------- | ----------------------------------- | -------- | -------- | ---------------------------------------- |
+| `instance` | [ManagedInstance](#managedinstance) |          |          |                                          |
+| `isNew`    | boolean                             |          |          | Whether this is a newly created instance |
+
+### GetConversationChatMessageParams
+
+#### Properties
+
+| Property   | Type   | Optional | Readonly | Description |
+| ---------- | ------ | -------- | -------- | ----------- |
+| `groupId`  | string |          |          |             |
+| `pageSize` | number | ✓        |          |             |
+
+### GetConversationMessagesParams
+
+#### Properties
+
+| Property   | Type   | Optional | Readonly | Description |
+| ---------- | ------ | -------- | -------- | ----------- |
+| `groupId`  | string |          |          |             |
+| `pageSize` | number | ✓        |          |             |
+
+### GetConversationMessagesResponse
+
+#### Properties
+
+| Property | Type                                                              | Optional | Readonly | Description |
+| -------- | ----------------------------------------------------------------- | -------- | -------- | ----------- |
+| `data`   | [ConversationMessage](#conversationmessage)\[]                    |          |          |             |
+| `links`  | `{ first?: string; next?: string; prev?: string; self?: string }` |          |          |             |
+
+### GetConversationsParams
+
+#### Properties
+
+| Property   | Type   | Optional | Readonly | Description |
+| ---------- | ------ | -------- | -------- | ----------- |
+| `pageSize` | number | ✓        |          |             |
+
+### GetMessagesParams
+
+Conversation Messages
+
+#### Properties
+
+| Property   | Type   | Optional | Readonly | Description |
+| ---------- | ------ | -------- | -------- | ----------- |
+| `pageSize` | number | ✓        |          |             |
+
+### GetSubscriberInfoResponse
+
+#### Properties
+
+| Property                | Type                                         | Optional | Readonly | Description |
+| ----------------------- | -------------------------------------------- | -------- | -------- | ----------- |
+| `app_settings`          | `{ display_name: string; scopes: string[] }` | ✓        |          |             |
+| `company_name`          | string                                       | ✓        |          |             |
+| `country`               | string                                       | ✓        |          |             |
+| `display_name`          | string                                       | ✓        |          |             |
+| `email`                 | string                                       |          |          |             |
+| `fabric_addresses`      | [GetAddressResponse](#getaddressresponse)\[] |          |          |             |
+| `first_name`            | string                                       | ✓        |          |             |
+| `id`                    | string                                       |          |          |             |
+| `job_title`             | string                                       | ✓        |          |             |
+| `last_name`             | string                                       | ✓        |          |             |
+| `push_notification_key` | string                                       |          |          |             |
+| `region`                | string                                       | ✓        |          |             |
+| `time_zone`             | number                                       | ✓        |          |             |
+
+### HandlePushNotificationResult
+
+#### Properties
+
+| Property     | Type          | Optional | Readonly | Description |
+| ------------ | ------------- | -------- | -------- | ----------- |
+| `resultType` | "inboundCall" |          |          |             |
+
+### IncomingCallHandlers
+
+#### Properties
+
+| Property           | Type                                        | Optional | Readonly | Description |
+| ------------------ | ------------------------------------------- | -------- | -------- | ----------- |
+| `all`              | [IncomingCallHandler](#incomingcallhandler) | ✓        |          |             |
+| `pushNotification` | [IncomingCallHandler](#incomingcallhandler) | ✓        |          |             |
+| `websocket`        | [IncomingCallHandler](#incomingcallhandler) | ✓        |          |             |
+
+### IncomingCallNotification
+
+#### Properties
+
+| Property | Type                                                                                                                                     | Optional | Readonly | Description |
+| -------- | ---------------------------------------------------------------------------------------------------------------------------------------- | -------- | -------- | ----------- |
+| `invite` | \{ accept: (param: CallParams) =\> [CallSession](#callsession); details: [IncomingInvite](#incominginvite); reject: () =\> Promise\<void\> \} |          |          |             |
+
+### IncomingInvite
+
+#### Properties
+
+| Property            | Type   | Optional | Readonly | Description |
+| ------------------- | ------ | -------- | -------- | ----------- |
+| `callee_id_name`    | string |          |          |             |
+| `callee_id_number`  | string |          |          |             |
+| `caller_id_name`    | string |          |          |             |
+| `caller_id_number`  | string |          |          |             |
+| `callID`            | string |          |          |             |
+| `display_direction` | string |          |          |             |
+| `nodeId`            | string |          |          |             |
+| `sdp`               | string |          |          |             |
+
+### IncomingInviteWithSource
+
+#### Properties
+
+| Property            | Type                                          | Optional | Readonly | Description |
+| ------------------- | --------------------------------------------- | -------- | -------- | ----------- |
+| `callee_id_name`    | string                                        |          |          |             |
+| `callee_id_number`  | string                                        |          |          |             |
+| `caller_id_name`    | string                                        |          |          |             |
+| `caller_id_number`  | string                                        |          |          |             |
+| `callID`            | string                                        |          |          |             |
+| `display_direction` | string                                        |          |          |             |
+| `nodeId`            | string                                        |          |          |             |
+| `sdp`               | string                                        |          |          |             |
+| `source`            | [IncomingInviteSource](#incominginvitesource) |          |          |             |
+
+### InstanceInUseError
+
+Error types for ClientFactory operations
+
+#### Properties
+
+| Property  | Type                      | Optional | Readonly | Description |
+| --------- | ------------------------- | -------- | -------- | ----------- |
+| `code`    | string                    |          | ✓        |             |
+| `context` | `Record<string, unknown>` | ✓        | ✓        |             |
+
+### InstanceManager
+
+Manages the lifecycle of SignalWire client instances.
+Handles creation, disposal, and tracking of active instances.
+
+#### Methods
+
+| Method                 | Signature                                                                                                                                  | Description |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ----------- |
+| `createInstance`       | (profile: [Profile](#profile), options: [GetClientParamsOptions](#getclientparamsoptions)) =\> Promise\<[ManagedInstance](#managedinstance)\> |             |
+| `dispose`              | `() => Promise<void>`                                                                                                                      |             |
+| `disposeInstance`      | `(instanceId: string) => Promise<void>`                                                                                                    |             |
+| `getInstance`          | (instanceId: string) =\> Promise\<null \| [ManagedInstance](#managedinstance)\>                                                              |             |
+| `getInstanceByProfile` | (profileId: string) =\> Promise\<null \| [ManagedInstance](#managedinstance)\>                                                               |             |
+| `listInstances`        | () =\> Promise\<[ManagedInstance](#managedinstance)\[]\>                                                                                      |             |
+| `updateInstanceAccess` | `(instanceId: string) => Promise<void>`                                                                                                    |             |
+
+### InstanceManagerContract
+
+Contract for the InstanceManager
+
+#### Methods
+
+| Method                 | Signature                                                                                                                                  | Description |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ----------- |
+| `createInstance`       | (profile: [Profile](#profile), options: [GetClientParamsOptions](#getclientparamsoptions)) =\> Promise\<[ManagedInstance](#managedinstance)\> |             |
+| `disposeInstance`      | `(instanceId: string) => Promise<void>`                                                                                                    |             |
+| `getInstance`          | (instanceId: string) =\> Promise\<null \| [ManagedInstance](#managedinstance)\>                                                              |             |
+| `getInstanceByProfile` | (profileId: string) =\> Promise\<null \| [ManagedInstance](#managedinstance)\>                                                               |             |
+| `listInstances`        | () =\> Promise\<[ManagedInstance](#managedinstance)\[]\>                                                                                      |             |
+| `updateInstanceAccess` | `(instanceId: string) => Promise<void>`                                                                                                    |             |
+
+### InstanceNotFoundError
+
+Error types for ClientFactory operations
+
+#### Properties
+
+| Property  | Type                      | Optional | Readonly | Description |
+| --------- | ------------------------- | -------- | -------- | ----------- |
+| `code`    | string                    |          | ✓        |             |
+| `context` | `Record<string, unknown>` | ✓        | ✓        |             |
+
+### JoinConversationParams
+
+#### Properties
+
+| Property        | Type      | Optional | Readonly | Description |
+| --------------- | --------- | -------- | -------- | ----------- |
+| `addressIds`    | string\[] |          |          |             |
+| `fromAddressId` | string    |          |          |             |
+
+### JoinConversationResponse
+
+#### Properties
+
+| Property                 | Type      | Optional | Readonly | Description |
+| ------------------------ | --------- | -------- | -------- | ----------- |
+| `addressIds`             | string\[] |          |          |             |
+| `from_fabric_address_id` | string    |          |          |             |
+| `group_id`               | string    |          |          |             |
+
+### LocalStorageAdapter
+
+Browser-based storage adapter using localStorage and sessionStorage
+
+#### Methods
+
+| Method              | Signature                                                     | Description |
+| ------------------- | ------------------------------------------------------------- | ----------- |
+| `clear`             | `(prefix?: string) => Promise<void>`                          |             |
+| `clearSession`      | `(prefix?: string) => Promise<void>`                          |             |
+| `delete`            | `(key: string) => Promise<boolean>`                           |             |
+| `deleteMany`        | `(keys: string[]) => Promise<Map<string, boolean>>`           |             |
+| `deleteManySession` | `(keys: string[]) => Promise<Map<string, boolean>>`           |             |
+| `deleteSession`     | `(key: string) => Promise<boolean>`                           |             |
+| `get`               | `(key: string) => Promise<null \| T>`                         |             |
+| `getMany`           | `(keys: string[]) => Promise<Map<string, null \| T>>`         |             |
+| `getManySession`    | `(keys: string[]) => Promise<Map<string, null \| T>>`         |             |
+| `getSession`        | `(key: string) => Promise<null \| T>`                         |             |
+| `getStorageInfo`    | () =\> Promise\<[StorageInfo](#storageinfo)\>                    |             |
+| `has`               | `(key: string) => Promise<boolean>`                           |             |
+| `hasSession`        | `(key: string) => Promise<boolean>`                           |             |
+| `list`              | `(prefix?: string) => Promise<string[]>`                      |             |
+| `listSession`       | `(prefix?: string) => Promise<string[]>`                      |             |
+| `set`               | `(key: string, value: T) => Promise<void>`                    |             |
+| `setMany`           | `(entries: Map<string, T> \| [string, T][]) => Promise<void>` |             |
+| `setManySession`    | `(entries: Map<string, T> \| [string, T][]) => Promise<void>` |             |
+| `setSession`        | `(key: string, value: T) => Promise<void>`                    |             |
+
+### LocalVideoOverlay
+
+#### Properties
+
+| Property | Type   | Optional | Readonly | Description |
+| -------- | ------ | -------- | -------- | ----------- |
+| `id`     | string |          |          |             |
+
+#### Methods
+
+| Method            | Signature                       | Description |
+| ----------------- | ------------------------------- | ----------- |
+| `detachListeners` | `() => void`                    |             |
+| `hide`            | `() => void`                    |             |
+| `setMediaStream`  | `(stream: MediaStream) => void` |             |
+| `setMirror`       | `(mirror?: boolean) => void`    |             |
+| `show`            | `() => void`                    |             |
+
+### ManagedInstance
+
+Managed client instance information
+
+#### Properties
+
+| Property         | Type                                      | Optional | Readonly | Description                                     |
+| ---------------- | ----------------------------------------- | -------- | -------- | ----------------------------------------------- |
+| `client`         | [SignalWireContract](#signalwirecontract) |          |          | The actual SignalWire client instance           |
+| `createdAt`      | Date                                      |          |          | Timestamp when the instance was created         |
+| `id`             | string                                    |          |          | Unique identifier for the instance              |
+| `lastAccessedAt` | Date                                      |          |          | Timestamp when the instance was last accessed   |
+| `profileId`      | string                                    |          |          | Profile ID used to create this instance         |
+| `usageCount`     | number                                    |          |          | Number of times this instance has been accessed |
+
+### MemberCapabilityContract
+
+#### Properties
+
+| Property                | Type                                                          | Optional | Readonly | Description |
+| ----------------------- | ------------------------------------------------------------- | -------- | -------- | ----------- |
+| `audioFlags`            | boolean                                                       |          |          |             |
+| `deaf`                  | [CapabilityOnOffStateContract](#capabilityonoffstatecontract) |          |          |             |
+| `meta`                  | boolean                                                       |          |          |             |
+| `microphoneSensitivity` | boolean                                                       |          |          |             |
+| `microphoneVolume`      | boolean                                                       |          |          |             |
+| `muteAudio`             | [CapabilityOnOffStateContract](#capabilityonoffstatecontract) |          |          |             |
+| `muteVideo`             | [CapabilityOnOffStateContract](#capabilityonoffstatecontract) |          |          |             |
+| `position`              | boolean                                                       |          |          |             |
+| `raisehand`             | [CapabilityOnOffStateContract](#capabilityonoffstatecontract) |          |          |             |
+| `remove`                | boolean                                                       |          |          |             |
+| `speakerVolume`         | boolean                                                       |          |          |             |
+
+### MemberJoinedEventParams
+
+member.joined
+
+#### Properties
+
+| Property          | Type                                          | Optional | Readonly | Description |
+| ----------------- | --------------------------------------------- | -------- | -------- | ----------- |
+| `member`          | [InternalMemberEntity](#internalmemberentity) |          |          |             |
+| `room_id`         | string                                        |          |          |             |
+| `room_session_id` | string                                        |          |          |             |
+
+### MemberLeftEventParams
+
+member.left
+
+#### Properties
+
+| Property          | Type                                          | Optional | Readonly | Description |
+| ----------------- | --------------------------------------------- | -------- | -------- | ----------- |
+| `member`          | [InternalMemberEntity](#internalmemberentity) |          |          |             |
+| `reason`          | string                                        |          |          |             |
+| `room_id`         | string                                        |          |          |             |
+| `room_session_id` | string                                        |          |          |             |
+
+### MemberTalkingEventParams
+
+member.talking
+
+#### Properties
+
+| Property          | Type                                                       | Optional | Readonly | Description |
+| ----------------- | ---------------------------------------------------------- | -------- | -------- | ----------- |
+| `member`          | `{ member_id: string; node_id: string; talking: boolean }` |          |          |             |
+| `room_id`         | string                                                     |          |          |             |
+| `room_session_id` | string                                                     |          |          |             |
+
+### MemberUpdatedEventParams
+
+member.updated
+
+#### Properties
+
+| Property          | Type                        | Optional | Readonly | Description |
+| ----------------- | --------------------------- | -------- | -------- | ----------- |
+| `member`          | InternalMemberEntityUpdated |          |          |             |
+| `room_id`         | string                      |          |          |             |
+| `room_session_id` | string                      |          |          |             |
+
+### MicrophoneAnalyzer
+
+#### Methods
+
+| Method    | Signature    | Description |
+| --------- | ------------ | ----------- |
+| `destroy` | `() => void` |             |
+
+### OnlineParams
+
+#### Properties
+
+| Property               | Type                                          | Optional | Readonly | Description |
+| ---------------------- | --------------------------------------------- | -------- | -------- | ----------- |
+| `incomingCallHandlers` | [IncomingCallHandlers](#incomingcallhandlers) |          |          |             |
+
+### PaginatedResponse
+
+#### Properties
+
+| Property | Type                                                              | Optional | Readonly | Description |
+| -------- | ----------------------------------------------------------------- | -------- | -------- | ----------- |
+| `data`   | T\[]                                                              |          |          |             |
+| `links`  | `{ first?: string; next?: string; prev?: string; self?: string }` |          |          |             |
+
+### PaginatedResult
+
+#### Properties
+
+| Property  | Type    | Optional | Readonly | Description |
+| --------- | ------- | -------- | -------- | ----------- |
+| `data`    | T\[]    |          |          |             |
+| `hasNext` | boolean |          |          |             |
+| `hasPrev` | boolean |          |          |             |
+
+#### Methods
+
+| Method      | Signature                                                            | Description |
+| ----------- | -------------------------------------------------------------------- | ----------- |
+| `firstPage` | () =\> Promise\<undefined \| [PaginatedResult](#paginatedresult)\<T\>\> |             |
+| `nextPage`  | () =\> Promise\<undefined \| [PaginatedResult](#paginatedresult)\<T\>\> |             |
+| `prevPage`  | () =\> Promise\<undefined \| [PaginatedResult](#paginatedresult)\<T\>\> |             |
+| `self`      | () =\> Promise\<undefined \| [PaginatedResult](#paginatedresult)\<T\>\> |             |
+
+### Profile
+
+Authentication profile for SignalWire client instances
+
+#### Properties
+
+| Property         | Type                                                                                           | Optional | Readonly | Description |
+| ---------------- | ---------------------------------------------------------------------------------------------- | -------- | -------- | ----------- |
+| `addressDetails` | \{ channels?: number; displayName?: string; name: string; type: [ResourceType](#resourcetype) \} | ✓        |          |             |
+| `addressId`      | string                                                                                         |          |          |             |
+| `createdAt`      | number                                                                                         |          |          |             |
+| `credentials`    | [SignalWireCredentials](#signalwirecredentials)                                                |          |          |             |
+| `credentialsId`  | string                                                                                         |          |          |             |
+| `id`             | string                                                                                         |          |          |             |
+| `lastUsed`       | number                                                                                         | ✓        |          |             |
+| `type`           | [ProfileType](#profiletype)                                                                    |          |          |             |
+| `updatedAt`      | number                                                                                         |          |          |             |
+
+### ProfileExistsError
+
+Error types for ClientFactory operations
+
+#### Properties
+
+| Property  | Type                      | Optional | Readonly | Description |
+| --------- | ------------------------- | -------- | -------- | ----------- |
+| `code`    | string                    |          | ✓        |             |
+| `context` | `Record<string, unknown>` | ✓        | ✓        |             |
+
+### ProfileManager
+
+Manages authentication profiles for SignalWire client instances.
+Handles both persistent (static) and memory-only (dynamic) profiles.
+
+#### Methods
+
+| Method                      | Signature                                                                                                   | Description |
+| --------------------------- | ----------------------------------------------------------------------------------------------------------- | ----------- |
+| `addProfile`                | (profile: Omit\<[Profile](#profile), "id" \| "createdAt" \| "updatedAt" \| "lastUsed"\>) =\> Promise\<string\>  |             |
+| `cleanup`                   | `() => void`                                                                                                |             |
+| `createDynamicProfile`      | (parentProfile: [Profile](#profile), addressId: string) =\> Promise\<[Profile](#profile)\>                     |             |
+| `findProfileForAddress`     | (addressId: string) =\> Promise\<null \| [Profile](#profile)\>                                                |             |
+| `getProfile`                | (profileId: string) =\> Promise\<null \| [Profile](#profile)\>                                                |             |
+| `getProfilesByCredentialId` | (credentialId: string) =\> Promise\<[Profile](#profile)\[]\>                                                   |             |
+| `hasProfile`                | `(profileId: string) => Promise<boolean>`                                                                   |             |
+| `init`                      | (storage: [SignalWireStorageContract](#signalwirestoragecontract)) =\> Promise\<void\>                        |             |
+| `listProfiles`              | (type?: [ProfileType](#profiletype)) =\> Promise\<[Profile](#profile)\[]\>                                     |             |
+| `refreshCredentials`        | `(profileId: string) => Promise<void>`                                                                      |             |
+| `removeProfile`             | `(profileId: string) => Promise<boolean>`                                                                   |             |
+| `scheduleRefresh`           | (profile: [Profile](#profile)) =\> void                                                                      |             |
+| `updateProfile`             | (profileId: string, updates: Partial\<Omit\<[Profile](#profile), "id" \| "createdAt"\>\>) =\> Promise\<boolean\> |             |
+| `validateCredentials`       | `(profileId: string) => Promise<boolean>`                                                                   |             |
+
+### ProfileManagerContract
+
+Contract for the ProfileManager
+
+#### Methods
+
+| Method                      | Signature                                                                                                   | Description |
+| --------------------------- | ----------------------------------------------------------------------------------------------------------- | ----------- |
+| `addProfile`                | (profile: Omit\<[Profile](#profile), "id" \| "createdAt" \| "updatedAt" \| "lastUsed"\>) =\> Promise\<string\>  |             |
+| `createDynamicProfile`      | (parentProfile: [Profile](#profile), addressId: string) =\> Promise\<[Profile](#profile)\>                     |             |
+| `findProfileForAddress`     | (addressId: string) =\> Promise\<null \| [Profile](#profile)\>                                                |             |
+| `getProfile`                | (profileId: string) =\> Promise\<null \| [Profile](#profile)\>                                                |             |
+| `getProfilesByCredentialId` | (credentialId: string) =\> Promise\<[Profile](#profile)\[]\>                                                   |             |
+| `hasProfile`                | `(profileId: string) => Promise<boolean>`                                                                   |             |
+| `init`                      | (storage: [SignalWireStorageContract](#signalwirestoragecontract)) =\> Promise\<void\>                        |             |
+| `listProfiles`              | (type?: [ProfileType](#profiletype)) =\> Promise\<[Profile](#profile)\[]\>                                     |             |
+| `removeProfile`             | `(profileId: string) => Promise<boolean>`                                                                   |             |
+| `updateProfile`             | (profileId: string, updates: Partial\<Omit\<[Profile](#profile), "id" \| "createdAt"\>\>) =\> Promise\<boolean\> |             |
+
+### ProfileNotFoundError
+
+Error types for ClientFactory operations
+
+#### Properties
+
+| Property  | Type                      | Optional | Readonly | Description |
+| --------- | ------------------------- | -------- | -------- | ----------- |
+| `code`    | string                    |          | ✓        |             |
+| `context` | `Record<string, unknown>` | ✓        | ✓        |             |
+
+### ReattachParams
+
+#### Properties
+
+| Property                   | Type                               | Optional | Readonly | Description                                                                                                    |
+| -------------------------- | ---------------------------------- | -------- | -------- | -------------------------------------------------------------------------------------------------------------- |
+| `applyLocalVideoOverlay`   | boolean                            | ✓        |          | Whether to apply the local-overlay on top of your video. Default: \`\`true\`\`.                                |
+| `applyMemberOverlay`       | boolean                            | ✓        |          | Whether to apply an overlay on top of each member. Default: \`\`true\`\`.                                      |
+| `audio`                    | `boolean \| MediaTrackConstraints` | ✓        |          | Audio constraints to use when joining the room. Default: \`\`true\`\`.                                         |
+| `disableUdpIceServers`     | boolean                            | ✓        |          | Disable ICE UDP transport policy                                                                               |
+| `fromCallAddressId`        | string                             | ✓        |          | Call address ID matching one of the subscriber’s addresses to attribute conversation API events in the INVITE. |
+| `listen`                   | `Partial<CallListeners>`           | ✓        |          | Optional event listeners for the call session                                                                  |
+| `mirrorLocalVideoOverlay`  | boolean                            | ✓        |          | Whether to mirror the local video overlay. Default: \`\`false\`\`.                                             |
+| `negotiateAudio`           | boolean                            | ✓        |          | Negotiate the incoming audio from the RTC. Default: \`\`true\`\`.                                              |
+| `negotiateVideo`           | boolean                            | ✓        |          | Negotiate the incoming video from the RTC. Default: \`\`true\`\` for "video" channel.                          |
+| `nodeId`                   | string                             | ✓        |          |                                                                                                                |
+| `rootElement`              | null \| HTMLElement                | ✓        |          | HTML element in which to display the video stream                                                              |
+| `stopCameraWhileMuted`     | boolean                            | ✓        |          | Whether to stop the camera when the member is muted. Default: \`\`true\`\`.                                    |
+| `stopMicrophoneWhileMuted` | boolean                            | ✓        |          | Whether to stop the microphone when the member is muted. Default: \`\`true\`\`.                                |
+| `to`                       | string                             | ✓        |          |                                                                                                                |
+| `userVariables`            | `Record<string, any>`              | ✓        |          | `User & UserAgent metadata`                                                                                    |
+| `video`                    | `boolean \| MediaTrackConstraints` | ✓        |          | Video constraints to use when joining the room. Default: \`\`true\`\` for "video" channel.                     |
+
+### RegisterDeviceParams
+
+#### Properties
+
+| Property      | Type                                      | Optional | Readonly | Description |
+| ------------- | ----------------------------------------- | -------- | -------- | ----------- |
+| `deviceToken` | string                                    |          |          |             |
+| `deviceType`  | [RegisterDeviceType](#registerdevicetype) |          |          |             |
+
+### RegisterDeviceResponse
+
+#### Properties
+
+| Property                | Type                                      | Optional | Readonly | Description |
+| ----------------------- | ----------------------------------------- | -------- | -------- | ----------- |
+| `date_registered`       | Date                                      |          |          |             |
+| `device_name`           | string                                    | ✓        |          |             |
+| `device_token`          | string                                    |          |          |             |
+| `device_type`           | [RegisterDeviceType](#registerdevicetype) |          |          |             |
+| `id`                    | string                                    |          |          |             |
+| `push_notification_key` | string                                    |          |          |             |
+
+### RemoveProfilesParams
+
+Parameters for removing profiles
+
+#### Properties
+
+| Property     | Type      | Optional | Readonly | Description |
+| ------------ | --------- | -------- | -------- | ----------- |
+| `profileIds` | string\[] |          |          |             |
+
+### RoomSessionDevice
+
+#### Properties
+
+| Property                | Type                                                           | Optional | Readonly | Description                                                                                                                   |
+| ----------------------- | -------------------------------------------------------------- | -------- | -------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `active`                | boolean                                                        |          | ✓        | Whether the connection is currently active                                                                                    |
+| `callId`                | string                                                         |          | ✓        | The underlying connection id - callId                                                                                         |
+| `cameraConstraints`     | null \| MediaTrackConstraints                                  |          | ✓        | The constraints applied to the video device, or null if not available                                                         |
+| `cameraId`              | null \| string                                                 |          | ✓        | The id of the video device, or null if not available                                                                          |
+| `cameraLabel`           | null \| string                                                 |          | ✓        | The label of the video device, or null if not available                                                                       |
+| `id`                    | string                                                         |          | ✓        | Unique id for this room session                                                                                               |
+| `leaveReason`           | `undefined \| "RECONNECTION_ATTEMPT_TIMEOUT"`                  |          | ✓        |                                                                                                                               |
+| `localAudioTrack`       | null \| MediaStreamTrack                                       |          | ✓        | Provides access to the local audio&#xA;[MediaStreamTrack](https://developer.mozilla.org/en-US/docs/Web/API/MediaStreamTrack). |
+| `localStream`           | undefined \| MediaStream                                       |          | ✓        | Provides access to the local [MediaStream](https://developer.mozilla.org/en-US/docs/Web/API/MediaStream)                      |
+| `localVideoTrack`       | null \| MediaStreamTrack                                       |          | ✓        | Provides access to the local video&#xA;[MediaStreamTrack](https://developer.mozilla.org/en-US/docs/Web/API/MediaStreamTrack). |
+| `memberId`              | string                                                         |          | ✓        | The id of the current member within the room                                                                                  |
+| `microphoneConstraints` | null \| MediaTrackConstraints                                  |          | ✓        | The constraints applied to the audio input device, or null if not available                                                   |
+| `microphoneId`          | null \| string                                                 |          | ✓        | The id of the audio input device, or null if not available                                                                    |
+| `microphoneLabel`       | null \| string                                                 |          | ✓        | The label of the audio input device, or null if not available                                                                 |
+| `options`               | `Record<any, any>`                                             |          | ✓        | The BaseConnection options                                                                                                    |
+| `previewUrl`            | string                                                         | ✓        | ✓        | The preview\_url for the room. Only with "enable\_room\_previews: true" on Room configuration.                                |
+| `remoteStream`          | undefined \| MediaStream                                       |          | ✓        | Provides access to the remote [MediaStream](https://developer.mozilla.org/en-US/docs/Web/API/MediaStream)                     |
+| `roomId`                | string                                                         |          | ✓        | The unique identifier for the room                                                                                            |
+| `roomSessionId`         | string                                                         |          | ✓        | The unique identifier for the room session                                                                                    |
+| `runWorker`             | `(name: string, def: SDKWorkerDefinition<Hooks>) => Task<any>` |          |          |                                                                                                                               |
+| `withAudio`             | boolean                                                        |          | ✓        | Indicates if there is any receiving audio                                                                                     |
+| `withVideo`             | boolean                                                        |          | ✓        | Indicates if there is any receiving video                                                                                     |
+
+#### Methods
+
+| Method                 | Signature                                                                                                                                                                                                    | Description |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------- |
+| `audioMute`            | `() => Promise`                                                                                                                                                                                              |             |
+| `audioUnmute`          | `() => Promise`                                                                                                                                                                                              |             |
+| `emit`                 | `(event: E, args: ArgumentMap<RoomSessionDeviceEvents>[Extract<E, "room.left" \| MediaEventNames \| BaseConnectionState>]) => void`                                                                          |             |
+| `hold`                 | `() => Promise<void>`                                                                                                                                                                                        |             |
+| `join`                 | `() => Promise<void>`                                                                                                                                                                                        |             |
+| `leave`                | `() => Promise<void>`                                                                                                                                                                                        |             |
+| `off`                  | (event: T, fn?: (args: ArgumentMap\<RoomSessionDeviceEvents\>\[Extract\<T, "room.left" \| MediaEventNames \| BaseConnectionState\>]) =\> void) =\> [EmitterContract](#emittercontract)\<RoomSessionDeviceEvents\> |             |
+| `on`                   | (event: T, fn: (args: ArgumentMap\<RoomSessionDeviceEvents\>\[Extract\<T, "room.left" \| MediaEventNames \| BaseConnectionState\>]) =\> void) =\> [EmitterContract](#emittercontract)\<RoomSessionDeviceEvents\>  |             |
+| `once`                 | (event: T, fn: (args: ArgumentMap\<RoomSessionDeviceEvents\>\[Extract\<T, "room.left" \| MediaEventNames \| BaseConnectionState\>]) =\> void) =\> [EmitterContract](#emittercontract)\<RoomSessionDeviceEvents\>  |             |
+| `removeAllListeners`   | (event?: T) =\> [EmitterContract](#emittercontract)\<RoomSessionDeviceEvents\>                                                                                                                                 |             |
+| `restoreOutboundAudio` | `() => void`                                                                                                                                                                                                 |             |
+| `restoreOutboundVideo` | `() => void`                                                                                                                                                                                                 |             |
+| `sendDigits`           | `(dtmf: string) => Promise<void>`                                                                                                                                                                            |             |
+| `setAudioDirection`    | `(direction: UpdateMediaDirection) => Promise<void>`                                                                                                                                                         |             |
+| `setInputSensitivity`  | `(params: { value: number }) => Promise`                                                                                                                                                                     |             |
+| `setInputVolume`       | `(params: { volume: number }) => Promise`                                                                                                                                                                    |             |
+| `setLocalStream`       | `(stream: MediaStream) => Promise<MediaStream>`                                                                                                                                                              |             |
+| `setMicrophoneVolume`  | `(params: { volume: number }) => Promise`                                                                                                                                                                    |             |
+| `setVideoDirection`    | `(direction: UpdateMediaDirection) => Promise<void>`                                                                                                                                                         |             |
+| `stopOutboundAudio`    | `() => void`                                                                                                                                                                                                 |             |
+| `stopOutboundVideo`    | `() => void`                                                                                                                                                                                                 |             |
+| `unhold`               | `() => Promise<void>`                                                                                                                                                                                        |             |
+| `updateCamera`         | `(constraints: MediaTrackConstraints) => Promise<void>`                                                                                                                                                      |             |
+| `updateMedia`          | `(params: UpdateMediaParams) => Promise<void>`                                                                                                                                                               |             |
+| `updateMicrophone`     | `(constraints: MediaTrackConstraints) => Promise<void>`                                                                                                                                                      |             |
+| `videoMute`            | `() => Promise`                                                                                                                                                                                              |             |
+| `videoUnmute`          | `() => Promise`                                                                                                                                                                                              |             |
+
+### RoomSessionScreenShare
+
+#### Properties
+
+| Property                | Type                                                           | Optional | Readonly | Description                                                                                                                   |
+| ----------------------- | -------------------------------------------------------------- | -------- | -------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `active`                | boolean                                                        |          | ✓        | Whether the connection is currently active                                                                                    |
+| `callId`                | string                                                         |          | ✓        | The underlying connection id - callId                                                                                         |
+| `cameraConstraints`     | null \| MediaTrackConstraints                                  |          | ✓        | The constraints applied to the video device, or null if not available                                                         |
+| `cameraId`              | null \| string                                                 |          | ✓        | The id of the video device, or null if not available                                                                          |
+| `cameraLabel`           | null \| string                                                 |          | ✓        | The label of the video device, or null if not available                                                                       |
+| `id`                    | string                                                         |          | ✓        | Unique id for this room session                                                                                               |
+| `leaveReason`           | `undefined \| "RECONNECTION_ATTEMPT_TIMEOUT"`                  |          | ✓        |                                                                                                                               |
+| `localAudioTrack`       | null \| MediaStreamTrack                                       |          | ✓        | Provides access to the local audio&#xA;[MediaStreamTrack](https://developer.mozilla.org/en-US/docs/Web/API/MediaStreamTrack). |
+| `localStream`           | undefined \| MediaStream                                       |          | ✓        | Provides access to the local [MediaStream](https://developer.mozilla.org/en-US/docs/Web/API/MediaStream)                      |
+| `localVideoTrack`       | null \| MediaStreamTrack                                       |          | ✓        | Provides access to the local video&#xA;[MediaStreamTrack](https://developer.mozilla.org/en-US/docs/Web/API/MediaStreamTrack). |
+| `memberId`              | string                                                         |          | ✓        | The id of the current member within the room                                                                                  |
+| `microphoneConstraints` | null \| MediaTrackConstraints                                  |          | ✓        | The constraints applied to the audio input device, or null if not available                                                   |
+| `microphoneId`          | null \| string                                                 |          | ✓        | The id of the audio input device, or null if not available                                                                    |
+| `microphoneLabel`       | null \| string                                                 |          | ✓        | The label of the audio input device, or null if not available                                                                 |
+| `options`               | `Record<any, any>`                                             |          | ✓        | The BaseConnection options                                                                                                    |
+| `previewUrl`            | string                                                         | ✓        | ✓        | The preview\_url for the room. Only with "enable\_room\_previews: true" on Room configuration.                                |
+| `remoteStream`          | undefined \| MediaStream                                       |          | ✓        | Provides access to the remote [MediaStream](https://developer.mozilla.org/en-US/docs/Web/API/MediaStream)                     |
+| `roomId`                | string                                                         |          | ✓        | The unique identifier for the room                                                                                            |
+| `roomSessionId`         | string                                                         |          | ✓        | The unique identifier for the room session                                                                                    |
+| `runWorker`             | `(name: string, def: SDKWorkerDefinition<Hooks>) => Task<any>` |          |          |                                                                                                                               |
+| `withAudio`             | boolean                                                        |          | ✓        | Indicates if there is any receiving audio                                                                                     |
+| `withVideo`             | boolean                                                        |          | ✓        | Indicates if there is any receiving video                                                                                     |
+
+#### Methods
+
+| Method                 | Signature                                                                                                                                                                                                              | Description |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
+| `audioMute`            | `() => Promise`                                                                                                                                                                                                        |             |
+| `audioUnmute`          | `() => Promise`                                                                                                                                                                                                        |             |
+| `emit`                 | `(event: E, args: ArgumentMap<RoomSessionScreenShareEvents>[Extract<E, "room.left" \| MediaEventNames \| BaseConnectionState>]) => void`                                                                               |             |
+| `hold`                 | `() => Promise<void>`                                                                                                                                                                                                  |             |
+| `join`                 | `() => Promise<void>`                                                                                                                                                                                                  |             |
+| `leave`                | `() => Promise<void>`                                                                                                                                                                                                  |             |
+| `off`                  | (event: T, fn?: (args: ArgumentMap\<RoomSessionScreenShareEvents\>\[Extract\<T, "room.left" \| MediaEventNames \| BaseConnectionState\>]) =\> void) =\> [EmitterContract](#emittercontract)\<RoomSessionScreenShareEvents\> |             |
+| `on`                   | (event: T, fn: (args: ArgumentMap\<RoomSessionScreenShareEvents\>\[Extract\<T, "room.left" \| MediaEventNames \| BaseConnectionState\>]) =\> void) =\> [EmitterContract](#emittercontract)\<RoomSessionScreenShareEvents\>  |             |
+| `once`                 | (event: T, fn: (args: ArgumentMap\<RoomSessionScreenShareEvents\>\[Extract\<T, "room.left" \| MediaEventNames \| BaseConnectionState\>]) =\> void) =\> [EmitterContract](#emittercontract)\<RoomSessionScreenShareEvents\>  |             |
+| `removeAllListeners`   | (event?: T) =\> [EmitterContract](#emittercontract)\<RoomSessionScreenShareEvents\>                                                                                                                                      |             |
+| `restoreOutboundAudio` | `() => void`                                                                                                                                                                                                           |             |
+| `restoreOutboundVideo` | `() => void`                                                                                                                                                                                                           |             |
+| `sendDigits`           | `(dtmf: string) => Promise<void>`                                                                                                                                                                                      |             |
+| `setAudioDirection`    | `(direction: UpdateMediaDirection) => Promise<void>`                                                                                                                                                                   |             |
+| `setInputSensitivity`  | `(params: { value: number }) => Promise`                                                                                                                                                                               |             |
+| `setInputVolume`       | `(params: { volume: number }) => Promise`                                                                                                                                                                              |             |
+| `setLocalStream`       | `(stream: MediaStream) => Promise<MediaStream>`                                                                                                                                                                        |             |
+| `setMicrophoneVolume`  | `(params: { volume: number }) => Promise`                                                                                                                                                                              |             |
+| `setVideoDirection`    | `(direction: UpdateMediaDirection) => Promise<void>`                                                                                                                                                                   |             |
+| `stopOutboundAudio`    | `() => void`                                                                                                                                                                                                           |             |
+| `stopOutboundVideo`    | `() => void`                                                                                                                                                                                                           |             |
+| `unhold`               | `() => Promise<void>`                                                                                                                                                                                                  |             |
+| `updateCamera`         | `(constraints: MediaTrackConstraints) => Promise<void>`                                                                                                                                                                |             |
+| `updateMedia`          | `(params: UpdateMediaParams) => Promise<void>`                                                                                                                                                                         |             |
+| `updateMicrophone`     | `(constraints: MediaTrackConstraints) => Promise<void>`                                                                                                                                                                |             |
+| `videoMute`            | `() => Promise`                                                                                                                                                                                                        |             |
+| `videoUnmute`          | `() => Promise`                                                                                                                                                                                                        |             |
+
+### SendConversationMessageParams
+
+#### Properties
+
+| Property        | Type                      | Optional | Readonly | Description |
+| --------------- | ------------------------- | -------- | -------- | ----------- |
+| `details`       | `Record<string, unknown>` | ✓        |          |             |
+| `fromAddressId` | string                    |          |          |             |
+| `groupId`       | string                    |          |          |             |
+| `metadata`      | `Record<string, unknown>` | ✓        |          |             |
+| `text`          | string                    |          |          |             |
+
+### SignalWireClientParams
+
+#### Properties
+
+| Property                          | Type                                                            | Optional | Readonly | Description                                                                               |
+| --------------------------------- | --------------------------------------------------------------- | -------- | -------- | ----------------------------------------------------------------------------------------- |
+| `apiRequestRetriesDelay`          | number                                                          | ✓        |          | Initial retry delay                                                                       |
+| `apiRequestRetriesDelayIncrement` | number                                                          | ✓        |          | Increment step for each retry delay                                                       |
+| `contexts`                        | string\[]                                                       | ✓        |          |                                                                                           |
+| `debug`                           | `{ logWsTraffic?: boolean }`                                    | ✓        |          |                                                                                           |
+| `devTools`                        | boolean                                                         | ✓        |          |                                                                                           |
+| `host`                            | string                                                          | ✓        |          |                                                                                           |
+| `incomingCallHandlers`            | [IncomingCallHandlers](#incomingcallhandlers)                   | ✓        |          | Call back function to receive the incoming call                                           |
+| `instanceMap`                     | InstanceMap                                                     | ✓        |          |                                                                                           |
+| `logger`                          | SDKLogger                                                       | ✓        |          |                                                                                           |
+| `logLevel`                        | `"debug" \| "trace" \| "info" \| "warn" \| "error" \| "silent"` | ✓        |          | logging level                                                                             |
+| `maxApiRequestRetries`            | number                                                          | ✓        |          | Max API request retry, set to 0 disable retries                                           |
+| `profileId`                       | string                                                          | ✓        |          | Optional profileId ID for multi-instance support. Defaults to 'default'                   |
+| `project`                         | string                                                          | ✓        |          | SignalWire project id, e.g. \`\`a10d8a9f-2166-4e82-56ff-118bc3a4840f\`\`                  |
+| `rootElement`                     | null \| HTMLElement                                             | ✓        |          | HTML element in which to display the video stream                                         |
+| `sessionChannel`                  | SessionChannel                                                  | ✓        |          |                                                                                           |
+| `shouldDisconnect`                | `() => boolean`                                                 | ✓        |          |                                                                                           |
+| `storage`                         | [SignalWireStorageContract](#signalwirestoragecontract)         | ✓        |          | Optional storage implementation for persisting client data                                |
+| `token`                           | string                                                          |          |          | SignalWire project token, e.g. \`\`PT9e5660c101cd140a1c93a0197640a369cf5f16975a0079c9\`\` |
+| `topics`                          | string\[]                                                       | ✓        |          | An alias for contexts - Topics has more priority over contexts                            |
+| `userVariables`                   | `Record<string, any>`                                           | ✓        |          | `User & UserAgent metadata`                                                               |
+
+#### Methods
+
+| Method           | Signature               | Description |
+| ---------------- | ----------------------- | ----------- |
+| `onRefreshToken` | `() => Promise<string>` |             |
+
+### SignalWireContract
+
+#### Properties
+
+| Property       | Type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | Optional | Readonly | Description |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | -------- | ----------- |
+| `address`      | `Pick<HTTPClientContract, "getAddresses" \| "getAddress" \| "getMyAddresses">`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |          |          |             |
+| `chat`         | \{ getMessages: (params: [GetConversationChatMessageParams](#getconversationchatmessageparams)) =\> Promise\<[GetConversationChatMessageResult](#getconversationchatmessageresult)\>; join: (params: [JoinConversationParams](#joinconversationparams)) =\> Promise\<[JoinConversationResponse](#joinconversationresponse)\>; sendMessage: (params: [SendConversationMessageParams](#sendconversationmessageparams)) =\> Promise\<[SendConversationMessageResponse](#sendconversationmessageresponse)\>; subscribe: (params: [ConversationChatMessagesSubscribeParams](#conversationchatmessagessubscribeparams)) =\> Promise\<[ConversationSubscribeResult](#conversationsubscriberesult)\> \}                                                                                                                                                                                                                                                  |          |          |             |
+| `conversation` | \{ getConversationMessages: (params: [GetConversationMessagesParams](#getconversationmessagesparams)) =\> Promise\<[GetConversationMessagesResult](#getconversationmessagesresult)\>; getConversations: (params?: [GetConversationsParams](#getconversationsparams)) =\> Promise\<[GetConversationsResult](#getconversationsresult)\>; getMessages: (params?: [GetMessagesParams](#getmessagesparams)) =\> Promise\<[GetMessagesResult](#getmessagesresult)\>; join: (params: [JoinConversationParams](#joinconversationparams)) =\> Promise\<[JoinConversationResponse](#joinconversationresponse)\>; sendMessage: (params: [SendConversationMessageParams](#sendconversationmessageparams)) =\> Promise\<[SendConversationMessageResponse](#sendconversationmessageresponse)\>; subscribe: (callback: [ConversationSubscribeCallback](#conversationsubscribecallback)) =\> Promise\<[ConversationSubscribeResult](#conversationsubscriberesult)\> \} |          |          |             |
+
+#### Methods
+
+| Method                   | Signature                                                                                                                                         | Description |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
+| `dial`                   | (params: [DialParams](#dialparams)) =\> Promise\<[CallSession](#callsession)\>                                                                       |             |
+| `disconnect`             | `() => Promise<void>`                                                                                                                             |             |
+| `getSubscriberInfo`      | () =\> Promise\<[GetSubscriberInfoResponse](#getsubscriberinforesponse)\>                                                                            |             |
+| `handlePushNotification` | (params: [HandlePushNotificationParams](#handlepushnotificationparams)) =\> Promise\<[HandlePushNotificationResult](#handlepushnotificationresult)\> |             |
+| `offline`                | `() => Promise<void>`                                                                                                                             |             |
+| `online`                 | (incomingCallHandlers: [OnlineParams](#onlineparams)) =\> Promise\<void\>                                                                           |             |
+| `reattach`               | (params: [ReattachParams](#reattachparams)) =\> Promise\<[CallSession](#callsession)\>                                                               |             |
+| `registerDevice`         | (params: [RegisterDeviceParams](#registerdeviceparams)) =\> Promise\<[RegisterDeviceResponse](#registerdeviceresponse)\>                             |             |
+| `unregisterDevice`       | (params: [UnregisterDeviceParams](#unregisterdeviceparams)) =\> Promise\<void\>                                                                     |             |
+| `updateToken`            | `(token: string) => Promise<void>`                                                                                                                |             |
+
+### SignalWireCredentials
+
+Public type for authentication credentials
+
+#### Properties
+
+| Property                 | Type                  | Optional | Readonly | Description                                      |
+| ------------------------ | --------------------- | -------- | -------- | ------------------------------------------------ |
+| `host`                   | string                |          |          |                                                  |
+| `satRefreshPayload`      | `Record<string, any>` |          |          | Custom payload for refresh request               |
+| `satRefreshResultMapper` | RefreshMapper         |          |          | String identifier for predefined mapper function |
+| `satRefreshURL`          | string                |          |          | URL for refresh token endpoint                   |
+| `satToken`               | string                |          |          | The current SAT token                            |
+| `tokenExpiry`            | number                |          |          | Token expiry timestamp                           |
+
+### SignalWireStorageContract
+
+Contract for SignalWire storage implementations.
+Provides both persistent and session storage capabilities.
+
+#### Methods
+
+| Method              | Signature                                                               | Description |
+| ------------------- | ----------------------------------------------------------------------- | ----------- |
+| `clear`             | `(prefix?: string) => Promise<void>`                                    |             |
+| `clearSession`      | `(prefix?: string) => Promise<void>`                                    |             |
+| `delete`            | `(key: string) => Promise<boolean>`                                     |             |
+| `deleteMany`        | `(keys: string[]) => Promise<Map<string, boolean>>`                     |             |
+| `deleteManySession` | `(keys: string[]) => Promise<Map<string, boolean>>`                     |             |
+| `deleteSession`     | `(key: string) => Promise<boolean>`                                     |             |
+| `get`               | `(key: string) => Promise<null \| string>`                              |             |
+| `getMany`           | `(keys: string[]) => Promise<Map<string, null \| string>>`              |             |
+| `getManySession`    | `(keys: string[]) => Promise<Map<string, null \| string>>`              |             |
+| `getSession`        | `(key: string) => Promise<null \| string>`                              |             |
+| `getStorageInfo`    | () =\> Promise\<[StorageInfo](#storageinfo)\>                              |             |
+| `has`               | `(key: string) => Promise<boolean>`                                     |             |
+| `hasSession`        | `(key: string) => Promise<boolean>`                                     |             |
+| `list`              | `(prefix?: string) => Promise<string[]>`                                |             |
+| `listSession`       | `(prefix?: string) => Promise<string[]>`                                |             |
+| `set`               | `(key: string, value: string) => Promise<void>`                         |             |
+| `setMany`           | `(entries: Map<string, string> \| [string, string][]) => Promise<void>` |             |
+| `setManySession`    | `(entries: Map<string, string> \| [string, string][]) => Promise<void>` |             |
+| `setSession`        | `(key: string, value: string) => Promise<void>`                         |             |
+
+### StorageInfo
+
+Storage information about the underlying storage implementation
+
+#### Properties
+
+| Property       | Type                                                         | Optional | Readonly | Description |
+| -------------- | ------------------------------------------------------------ | -------- | -------- | ----------- |
+| `isAvailable`  | boolean                                                      |          |          |             |
+| `isPersistent` | boolean                                                      |          |          |             |
+| `quotaTotal`   | number                                                       | ✓        |          |             |
+| `quotaUsed`    | number                                                       | ✓        |          |             |
+| `type`         | `"localStorage" \| "sessionStorage" \| "memory" \| "custom"` |          |          |             |
+
+### StorageWrapper
+
+A wrapper that adds client-specific prefixing to any storage implementation.
+All keys are automatically prefixed with `swcf:${profileId}:` to ensure isolation
+between different client instances.
+
+#### Methods
+
+| Method              | Signature                                                               | Description |
+| ------------------- | ----------------------------------------------------------------------- | ----------- |
+| `clear`             | `(prefix?: string) => Promise<void>`                                    |             |
+| `clearSession`      | `(prefix?: string) => Promise<void>`                                    |             |
+| `delete`            | `(key: string) => Promise<boolean>`                                     |             |
+| `deleteMany`        | `(keys: string[]) => Promise<Map<string, boolean>>`                     |             |
+| `deleteManySession` | `(keys: string[]) => Promise<Map<string, boolean>>`                     |             |
+| `deleteSession`     | `(key: string) => Promise<boolean>`                                     |             |
+| `get`               | `(key: string) => Promise<null \| string>`                              |             |
+| `getMany`           | `(keys: string[]) => Promise<Map<string, null \| string>>`              |             |
+| `getManySession`    | `(keys: string[]) => Promise<Map<string, null \| string>>`              |             |
+| `getSession`        | `(key: string) => Promise<null \| string>`                              |             |
+| `getStorageInfo`    | () =\> Promise\<[StorageInfo](#storageinfo)\>                              |             |
+| `has`               | `(key: string) => Promise<boolean>`                                     |             |
+| `hasSession`        | `(key: string) => Promise<boolean>`                                     |             |
+| `list`              | `(prefix?: string) => Promise<string[]>`                                |             |
+| `listSession`       | `(prefix?: string) => Promise<string[]>`                                |             |
+| `set`               | `(key: string, value: string) => Promise<void>`                         |             |
+| `setMany`           | `(entries: Map<string, string> \| [string, string][]) => Promise<void>` |             |
+| `setManySession`    | `(entries: Map<string, string> \| [string, string][]) => Promise<void>` |             |
+| `setSession`        | `(key: string, value: string) => Promise<void>`                         |             |
+
+### UnregisterDeviceParams
+
+#### Properties
+
+| Property | Type   | Optional | Readonly | Description |
+| -------- | ------ | -------- | -------- | ----------- |
+| `id`     | string |          |          |             |
+
+### UserOptions
+
+#### Properties
+
+| Property         | Type                                                            | Optional | Readonly | Description                                                                               |
+| ---------------- | --------------------------------------------------------------- | -------- | -------- | ----------------------------------------------------------------------------------------- |
+| `contexts`       | string\[]                                                       | ✓        |          |                                                                                           |
+| `debug`          | `{ logWsTraffic?: boolean }`                                    | ✓        |          |                                                                                           |
+| `devTools`       | boolean                                                         | ✓        |          |                                                                                           |
+| `host`           | string                                                          | ✓        |          |                                                                                           |
+| `instanceMap`    | InstanceMap                                                     | ✓        |          |                                                                                           |
+| `logger`         | SDKLogger                                                       | ✓        |          |                                                                                           |
+| `logLevel`       | `"debug" \| "trace" \| "info" \| "warn" \| "error" \| "silent"` | ✓        |          | logging level                                                                             |
+| `profileId`      | string                                                          | ✓        |          |                                                                                           |
+| `project`        | string                                                          | ✓        |          | SignalWire project id, e.g. \`\`a10d8a9f-2166-4e82-56ff-118bc3a4840f\`\`                  |
+| `sessionChannel` | SessionChannel                                                  | ✓        |          |                                                                                           |
+| `token`          | string                                                          |          |          | SignalWire project token, e.g. \`\`PT9e5660c101cd140a1c93a0197640a369cf5f16975a0079c9\`\` |
+| `topics`         | string\[]                                                       | ✓        |          | An alias for contexts - Topics has more priority over contexts                            |
+
+#### Methods
+
+| Method           | Signature               | Description |
+| ---------------- | ----------------------- | ----------- |
+| `onRefreshToken` | `() => Promise<string>` |             |
+
+### UserOverlay
+
+#### Properties
+
+| Property | Type   | Optional | Readonly | Description |
+| -------- | ------ | -------- | -------- | ----------- |
+| `id`     | string |          |          |             |
+
+#### Methods
+
+| Method | Signature    | Description |
+| ------ | ------------ | ----------- |
+| `hide` | `() => void` |             |
+| `show` | `() => void` |             |
+
+### VideoLayout
+
+Base Interface for a VideoLayout entity
+
+#### Properties
+
+| Property        | Type                | Optional | Readonly | Description |
+| --------------- | ------------------- | -------- | -------- | ----------- |
+| `id`            | string              |          |          |             |
+| `layers`        | VideoLayoutLayer\[] |          |          |             |
+| `name`          | string              |          |          |             |
+| `roomId`        | string              |          |          |             |
+| `roomSessionId` | string              |          |          |             |

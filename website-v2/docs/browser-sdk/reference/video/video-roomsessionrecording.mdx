@@ -1,0 +1,70 @@
+---
+title: "RoomSessionRecording"
+sidebar_position: 5
+slug: /js/reference/video/room-session-recording
+toc_max_heading_level: 3
+---
+
+Represents a specific recording of a room session.
+
+## Properties
+
+<ParamField path="duration" type="number">
+  Duration, if available.
+</ParamField>
+
+<ParamField path="endedAt" type="Date">
+  End time, if available.
+</ParamField>
+
+<ParamField path="id" type="string" required={true}>
+  The unique id of this recording.
+</ParamField>
+
+<ParamField path="roomSessionId" type="string" required={true}>
+  The id of the room session associated to this recording.
+</ParamField>
+
+<ParamField path="startedAt" type="Date">
+  Start time, if available.
+</ParamField>
+
+<ParamField path="state" type='"recording" | "paused" | "completed"' required={true}>
+  Current state.
+</ParamField>
+
+## Methods
+
+### pause
+
+▸ **pause**(): `Promise<void>`
+
+Pauses the recording.
+
+#### Returns
+
+`Promise<void>`
+
+---
+
+### resume
+
+▸ **resume**(): `Promise<void>`
+
+Resumes the recording.
+
+#### Returns
+
+`Promise<void>`
+
+---
+
+### stop
+
+▸ **stop**(): `Promise<void>`
+
+Stops the recording.
+
+#### Returns
+
+`Promise<void>`

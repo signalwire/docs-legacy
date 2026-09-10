@@ -1,0 +1,25 @@
+/**
+ * Copyright (c) Facebook, Inc. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+.apiTable {
+  --row-highlight-color: #48f2;
+}
+
+.apiTable a {
+  color: var(--ifm-color-primary) !important;
+}
+
+.apiTableRow {
+  scroll-margin-top: calc(var(--ifm-navbar-height) + 0.5rem);
+}
+
+.apiTableRow:focus,
+.apiTableRow:active,
+.apiTableRow:hover {
+  background-color: var(--row-highlight-color);
+  cursor: pointer;
+}

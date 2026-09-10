@@ -1,0 +1,24 @@
+---
+title: ConnectAction
+slug: /dotnet/reference/calling/actions/connect
+description: The ConnectAction is used to connect a call to another call.
+toc_max_heading_level: 3
+---
+
+[call]: /docs/server-sdk/v2/dotnet/reference/calling/call#connectasync
+[signalwire-relay-calling-callconnectstate]: /docs/server-sdk/v2/dotnet/reference/calling/call-connect-state
+[signalwire-relay-calling-calldevice]: /docs/server-sdk/v2/dotnet/reference/calling/call-device
+[signalwire-relay-calling-connectresult]: /docs/server-sdk/v2/dotnet/reference/calling/results/connect
+
+# SignalWire.Relay.Calling.ConnectAction
+
+This object returned from [`ConnectAsync`][call] method that represents a connect operation that is currently active on a call.
+
+## Properties
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `Result` | [`SignalWire.Relay.Calling.ConnectResult`][signalwire-relay-calling-connectresult] | Final result of connecting. |
+| `State` | [`SignalWire.Relay.Calling.CallConnectState`][signalwire-relay-calling-callconnectstate] | Current state of the connect operation. |
+| `Completed` | bool | Whether the connection attempt has completed. |
+| `Payload` | List&lt;List&lt;[`SignalWire.Relay.Calling.CallDevice`][signalwire-relay-calling-calldevice]&gt;&gt; | Payload sent to Relay to start the connect. |

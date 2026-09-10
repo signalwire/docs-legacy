@@ -1,0 +1,527 @@
+---
+slug: /swml/guides/data-map
+title: Handle SWAIG function calls inline
+description: Learn how to use `data_map` in SWML SWAIG functions to process, transform, and utilize incoming data effectively.
+x-custom:
+  tags:
+    - sdk:swml
+    - product:ai
+    - product:voice
+---
+
+## Overview
+
+The [`data_map`](/docs/swml/guides/data-map) object is a crucial component of
+[SWAIG Functions](/docs/swml/reference/ai/swaig/functions) in the
+[`ai`](/docs/swml/reference/ai) SWML method.
+Data Maps are used to request, process, and transform incoming data, and trigger specific actions or responses, directly within the serverless context of your SWML Script.
+
+<Tip title="No server required">
+Data Maps enable some of the most powerful serverless capabilities of SWML Scripts.
+A `data_map` transforms the static JSON document in your SWML Script into a highly capable, dynamic application,
+removing the need to host a separate script to integrate with REST APIs to query, transform, and post data.
+</Tip>
+
+In particular, the `data_map` object facilitates a full range of input processing, interfacing with external APIs, and state management.
+The capabilities and use cases described in this guide include:
+
+- **Expressions:** Evaluate user input with powerful pattern matching
+- **Webhooks:** Integrate with external APIs to fetch data or push updates
+- **Outputs:**
+  - Feed information back to the AI Agent with **Responses**
+  - Comprehensively control the SWML Script and SWAIG function with **Actions**
+
+This guide also explains how to utilize stored variables in the context of Data Maps.
+
+---
+
+## Expressions
+
+[Expressions](/docs/swml/reference/ai/swaig/functions/data-map#expressions)
+in `data_map` are used to match patterns in incoming data. They help identify specific
+pieces of data passed from the user while interacting with the AI agent and trigger actions or
+responses based on the expression match.
+
+Expressions are particularly useful in scenarios where user inputs need to be dynamically evaluated and processed locally.
+By utilizing [Perl Compatible Regular Expressions (PCRE)](https://www.pcre.org/), `data_map` can effectively parse and handle a wide
+variety of inputs, enabling flexible and powerful data processing within your SWML scripts.
+Multiple expressions can be stated inside the [`data_map.expressions`](/docs/swml/reference/ai/swaig/functions/data-map#expressions) field.
+These expressions are evaluated in the order they are stated until one of the expressions has a matching pattern.
+
+Key points to note about expressions:
+
+- **Pattern Matching:** The pattern field uses regular expressions to identify specific data
+patterns in the input, allowing for sophisticated and granular control over input data processing.
+- **Dynamic Value Assignment:** The string field leverages placeholders to dynamically or statically set
+values based on the matched patterns, enabling real-time data processing.
+- **Conditional Actions and Responses:** The output section defines the actions and responses
+that are conditionally triggered based on the expression match, allowing for highly customized behavior in response to user inputs.
+- **Local Processing:** Expressions are capable of processing data locally within the SWML script.
+This removes the need to host a server to perform certain actions conditionally, based on user responses.
+
+### Example
+
+```json
+{
+  "data_map": {
+    "expressions": [
+      {
+        "pattern": "\\w+",
+        "string": "${meta_data.table.${lc:args.target}}",
+        "output": {}
+      },
+      {
+        "pattern": ".*",
+        "string": "${args.target}",
+        "output": {}
+      }
+    ]
+  }
+}
+```
+
+- **Pattern Matching:** The `pattern` field contains a [Perl Compatible Regular Expressions (PCRE)](https://www.pcre.org/) to match specific data in the input.
+  - In the example we have two expressions with different patterns. The `\w+` pattern matches any word characters, and the
+  `.*` pattern matches any character.
+    - The `\w+` pattern is used to match a specific target value, while the `.*` pattern is a catch-all for any input.
+
+- **String Field:** The `string` field allows you to dynamically or statically set values based on the matched pattern.
+  - In the example, `${meta_data.table.${lc:args.target}}` fetches the target from the `SWAIG.functions.<function>.meta_data` field.
+
+    ```json
+    {
+      "meta_data": {
+        "table": {
+          "support": "+1XXXXXXXXXX",
+          "sales": "+1YYYYYYYYY"
+        }
+      }
+    }
+    ```
+
+    It parses the `table` object and retrieves the target based on the `args.target` value. The `lc:`
+    function is used to convert the target to lowercase for case-insensitive matching.
+
+  - In this scenario, a valid target can be either `support` or `sales`.
+  - If the target is found in `meta_data.table`, the call is connected to the respective number.
+  - If the target is not found in `meta_data.table`, the `string` field returns empty and does not match the first expression object.
+This leads to matching the second expression, which is a catch-all for any `string` that returns any valid character.
+Since an empty string is a valid character, this causes a successful match.
+
+- **Output:** Based on the match, specific actions or responses can be triggered.
+This allows performing conditional tasks depending on the user's input. Each expression object contains its own output.
+
+---
+
+## Webhooks
+
+[Webhooks](/docs/swml/reference/ai/swaig/functions/data-map#webhooks)
+extend the capabilities of your SWML scripts by enabling communication with external systems.
+This can be essential for integrating with APIs, fetching real-time data, or pushing updates to external services.
+
+Key points to note about webhooks:
+- **External Interaction:** Webhooks enable your SWML scripts to make HTTP requests to external endpoints,
+facilitating integration with third-party services.
+- **Dynamic Requests:** The `url` field can include dynamic values, making it possible to construct
+requests based on the current state or input data.
+- **Method Specification:** The `method` field allows you to define the HTTP method (GET, POST, etc.)
+to be used for the request, providing flexibility in how data is sent or received.
+- **Response Handling:** The `output` section specifies how the response from the webhook should be processed,
+including actions to be taken and responses to be fed to the AI agent.
+
+### Example
+
+```json
+{
+  "data_map": {
+    "webhooks": [
+      {
+        "url": "https://icanhazdadjoke.com/search?term={lc:args.type}",
+        "method": "GET",
+        "output": {
+          "response": "Tell the user: ${array[0].results[0].joke}.",
+          "action": []
+        }
+      }
+    ]
+  }
+}
+```
+
+### Detailed Explanation
+
+- **URL Construction:** The `url` field specifies the endpoint to which the HTTP request should be made.
+  - In the example, `https://icanhazdadjoke.com/search?term={lc:args.type}` constructs the URL with a query parameter `term` based on the `args.type` value.
+    - The url `https://icanhazdadjoke.com/search` is used to fetch jokes based on the query parameter `term`.
+    - `args.target` is a  [`SWAIG.function`](/docs/swml/reference/ai/swaig/functions) argument that contains the target value passed by the user when interacting with the AI agent.
+  - The `lc:` function is used to convert the `args.type` value to lowercase for consistency.
+- **HTTP Method:** The `method` field defines the HTTP method to be used for the request.
+  - In the example, `GET` is used to fetch data from the specified URL.
+- **Webhook Response Handling:**  The `output` section specifies how the response from the webhook should be processed and if any actions should be taken.
+  - When making a request to the [`icanhazdadjoke`](https://icanhazdadjoke.com/) API, the response
+  contains an array of jokes that we can access and play back to the user.
+  - In the `output` section, the `response` field is used to tell the AI agent to relay the joke to the user.
+    - The `array[0].results[0].joke` syntax is used to access the first joke in the `results` array.
+
+  **Example Response:**
+  ```json
+  {
+    "current_page": 1,
+    "limit": 20,
+    "next_page": 1,
+    "previous_page": 1,
+    "results": [
+        {
+            "id": "qrHJ69M7hFd",
+            "joke": "What cheese can never be yours? Nacho cheese."
+        },
+        {
+            "id": "SSCQCdi39Ed",
+            "joke": "Did you hear about the cheese factory that exploded in France? There was nothing left but de Brie."
+        }
+    ],
+    "search_term": "Cheese",
+    "status": 200,
+    "total_jokes": 2,
+    "total_pages": 1
+  }
+  ```
+
+---
+
+## Outputs
+
+[Outputs](/docs/swml/reference/ai/swaig/functions/data-map#output) define the responses and actions that should be taken when an expression matches or a webhook request completes.
+This can include sending messages, triggering functions, or modifying variables.
+
+Outputs are the mechanisms through which your SWML script communicates and reacts to data.
+They enable the script to provide feedback to the user, execute actions, and modify the script's
+state based on input data and external interactions.
+
+<Tip title="Output levels">
+Outputs are most often used within Expressions or Webhooks.
+However, they can also be used as a top level object within a Data Map.
+</Tip>
+
+**Example:**
+
+```json
+{
+  "data_map": {
+    "expressions": [
+      {
+        "pattern": "\\w+",
+        "string": "${meta_data.table.${lc:args.target}}",
+        "output": {
+          "action": [
+            { "say": "Please stand by while I connect your call." },
+            {
+              "transfer": true,
+              "SWML": {
+                "version": "1.0.0",
+                "sections": {
+                  "main": [
+                    {
+                      "connect": {
+                        "to": "${meta_data.table.${lc:args.target}}"
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            { "stop": true }
+          ],
+          "response": "transferred, the call has ended."
+        }
+      }
+    ]
+  }
+}
+```
+<Warning>
+When passing a SWML object that includes a `connect` (or other method that transfers the call) in `output.action[]`, your script must be JSON, and `"transfer": true,` must be included before the SWML in the same action object. Refer to the example above.
+</Warning>
+### Responses
+
+Responses in `data_map` are used to provide feedback to the AI agent based on the user's input or external data.
+They can include messages, prompts, or other forms of communication to guide the user through the interaction.
+
+Key points to note about responses:
+- **Immediate Feedback:** Responses provide immediate feedback to the user based on the matched patterns or webhook responses,
+ensuring a seamless and interactive user experience.
+- **Dynamic Content:** Responses can include dynamic content, leveraging placeholders to incorporate real-time data into
+the messages sent to the user.
+
+**Example:**
+
+```json
+{
+  "data_map": {
+    "expressions": [
+      {
+        "pattern": ".*",
+        "string": "${args.target}",
+        "output": {
+          "response": "I'm sorry, I was unable to transfer your call to ${args.target} due to being an invalid destination."
+        }
+      }
+    ]
+  }
+}
+```
+
+##### Detailed Explanation
+
+- **Response Message:** The `response` field contains the message to be relayed to AI agent. This message
+can be instructive, informative, or conversational, depending on the context.
+  - In the example, `I'm sorry, I was unable to transfer your call to ${args.target} due to being an invalid destination.`
+  is the message that will be sent to the AI agent if the `args.target` is not found in the `meta_data.table` object.
+  This will cause the AI to inform the user that the transfer destination is invalid.
+  - The `${args.target}` placeholder is used to dynamically insert the target value provided by the user into the response message.
+
+### Actions
+
+[Actions](/docs/swml/reference/ai/swaig/functions/data-map#actions) in `data_map` define what should happen when the `swaig.function` executes and
+a specific expression matches or a webhook request completes.
+
+Actions can include triggering functions, modifying variables, controlling the flow of the
+current SWML script or even starting a new SWML script.
+
+Key points to note about actions:
+- **Operational Control:** Actions provide fine-grained control over the script's behavior, allowing
+for complex and dynamic interactions based on user inputs and external data.
+- **State Management:** Actions can be used to manage the state of various components within the SWML script,
+including an AI's context, functions, meta_data, playbacks, and more. The action can also
+
+**Example:**
+
+```json
+{
+  "data_map": {
+    "webhooks": [
+      {
+        "url": "https://icanhazdadjoke.com/search?term={lc:args.type}",
+        "method": "GET",
+        "output": {
+          "response": "Tell the user: ${array[0].results[0].joke}.",
+          "action": [
+            {
+              "toggle_functions": [
+                { "active": true, "function": "transfer" },
+                { "active": false, "function": "get_joke" }
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
+```
+
+##### Detailed Explanation
+
+- **Action Definition:** The `action` field specifies the actions to be taken based on the webhook response.
+  - In the example, the action is to toggle the `transfer` and `get_joke` functions based on the response from the webhook.
+    - The `transfer` function is activated (`active: true`) to enable the user to be transferred to the target department.
+    - The `get_joke` function is deactivated (`active: false`) to prevent further joke requests after the first one has been fulfilled.
+
+---
+
+## Variable scopes in data_map
+
+When working with `data_map`, you have access to several special variable scopes that are only available in SWAIG/AI contexts:
+
+- **`args`** - Function arguments passed to the SWAIG function
+- **`meta_data`** - Function-level metadata that persists across function calls
+- **`global_data`** - Application-wide data accessible across all functions
+- **`prompt_vars`** - Built-in template variables for call and AI session information
+
+For complete technical specifications, types, and properties, see the [SWAIG Variables Reference](/docs/swml/reference/ai/swaig/functions/data-map).
+
+For general SWML variable scopes like `call`, `params`, and `vars`, see the [Variables Reference](/docs/swml/reference/variables).
+
+---
+
+## Utilizing stored values
+
+When working with `data_map`, there are several ways to utilize stored values, such as `function.argument` (`args`),
+`function.meta_data`, and SWML variables (`vars`).
+
+### Function Arguments
+
+[SWAIG function](/docs/swml/reference/ai/swaig/functions) arguments are processed as
+`args` and can be accessed within the `data_map` section. These arguments are defined in the
+`functions` section of the SWAIG object. Initially, the value of the argument is empty, but
+as the user interacts with the AI, the value is updated based on the user's input.
+
+To access the value of a specific argument, use `${args.<argument_name>}`. For example, if
+the argument is named `target`, you can access its value using `${args.target}`.
+
+### Global Data & Function Meta Data
+
+Both `global_data` and `function.meta_data` are versatile environmental objects that can
+store arbitrary data. This data can be set initially in the SWML script or dynamically
+through the SWML [`set_global_data`](/docs/swml/reference/ai/swaig/functions/data-map#output)
+or [`set_meta_data`](/docs/swml/guides/set-meta-data) actions.
+
+- **`meta_data`**: Stores data specific to a particular function.
+- **`global_data`**: Accessible across all functions within the SWML script.
+
+#### Accessing Meta Data
+
+To access the value of a specific `meta_data` key, use `${meta_data.<key>}`. For example,
+if the key is `table`, you can access its value with `${meta_data.table}`.
+
+For `global_data`, access the value of a specific key using `${global_data.<key>}`.
+For example, if the key is `table`, you can access its value with `${global_data.table}`.
+
+If your `meta_data` or `global_data` is an object, you can access a specific property using
+`${meta_data.<key>.<property>}` or `${global_data.<key>.<property>}`. For example, if
+the key is `table` and the property is `support`, you can access its value with `${meta_data.table.support}`
+or `${global_data.table.support}`.
+
+### SWML Variables
+
+SWML variables (`vars`) store data created by a SWML [`request`](/docs/swml/reference/request)
+or [`set`](/docs/swml/reference/set) method.
+
+To access the value of a specific SWML variable, use `${vars.<variable_name>}`. For example,
+if the variable is `joke`, you can access its value with `${vars.joke}`.
+
+This structure helps efficiently manage and retrieve data within your SWML scripts, providing
+a clear and consistent way to handle environmental data and variables.
+
+---
+
+## Comprehensive example
+
+Below is a comprehensive example that incorporates all aspects of `data_map` and is ready to be used in a SWML script.
+
+<Tip title="Replace placeholders">
+Replace the following placeholders with actual values for this SWML script to work properly:
+
+- meta_data.table.support: `+1XXXXXXXXXX` - Phone number you want to transfer to for support.
+- meta_data.table.sales: `+1YYYYYYYYYY` - Phone number you want to transfer to for sales.
+- post_prompt_url: `https://example.site.com/summarize` - URL where the call summary will be sent.
+</Tip>
+
+```json
+{
+  "sections": {
+    "main": [
+      {
+        "ai": {
+          "prompt": {
+            "text": "Your name is Frank. You help transfer to the right department. Use the 'get_joke' function to get a joke.\n\n## Greetings\nGreet the user, and inform them that your name is Frank and you can help assist them in transferring the call to Support or Sales. However, let them know the only way to be transferred is to hear a joke.\n\n## Rules\n- A user cannot be transferred until they have asked for at least one joke throughout the call.\n- When a user is able to be transferred, use the 'transfer' function. Only provide one joke to the user.\n- If the user asks for more jokes after the first one, tell them you are no longer giving out jokes, but can help with transferring the call to a different department.\n\n## Steps to follow\n1. Greet the user.\n2. Tell them they can be transferred to either support or sales, but first they need to hear a joke.\n3. If the user asks for a joke, first ask what kind of joke they want to hear, then use the 'get_joke' function.\n  3.1. If the user doesn't want to hear a joke, tell them you can't transfer them until they hear a joke.\n  3.2. If the joke returned from the function is empty, tell the user you couldn't find a joke.\n  3.3. Do not make up a joke if the function returns empty.\n4. Tell the user the joke.\n  4.1. If the user asks for another joke, tell them you can't give them another joke, but you can transfer them to the right department.\n5. If the user asks to be transferred, use the 'transfer' function."
+          },
+          "post_prompt": "Summarize the call as a json object",
+          "post_prompt_url": "https://example.site.com/summarize",
+          "SWAIG": {
+            "functions": [
+              {
+                "function": "transfer",
+                "active": "false",
+                "description": "use to transfer to a target",
+                "parameters": {
+                  "type": "object",
+                  "properties": {
+                    "target": {
+                      "description": "the target to transfer to",
+                      "type": "string"
+                    }
+                  }
+                },
+                "data_map": {
+                  "expressions": [
+                    {
+                      "pattern": "\\w+",
+                      "string": "${meta_data.table.${lc:args.target}}",
+                      "output": {
+                        "action": [
+                          { "say": "Please stand by while I connect your call." },
+                          {
+                            "transfer": true,
+                            "SWML": {
+                              "version": "1.0.0",
+                              "sections": {
+                                "main": [
+                                  {
+                                    "connect": {
+                                      "to": "${meta_data.table.${lc:args.target}}"
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          },
+                          { "stop": true }
+                        ],
+                        "response": "transferred, the call has ended."
+                      }
+                    },
+                    {
+                      "pattern": ".*",
+                      "string": "${args.target}",
+                      "output": {
+                        "response": "I'm sorry, I was unable to transfer your call to ${args.target} due to being an invalid destination."
+                      }
+                    }
+                  ]
+                },
+                "meta_data": {
+                  "table": {
+                    "support": "+1XXXXXXXXXX",
+                    "sales": "+1YYYYYYYYYY"
+                  }
+                }
+              },
+              {
+                "function": "get_joke",
+                "description": "used to get a joke",
+                "parameters": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "description": "Type of joke to get"
+                    }
+                  }
+                },
+                "data_map": {
+                  "webhooks": [
+                    {
+                      "url": "https://icanhazdadjoke.com/search?term={lc:args.type}",
+                      "method": "GET",
+                      "output": {
+                        "response": "Tell the user: ${array[0].results[0].joke}.",
+                        "action": [
+                          {
+                            "toggle_functions": [
+                              { "active": true, "function": "transfer" },
+                              { "active": false, "function": "get_joke" }
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}
+```
+
+---
+
+## Key points
+- **Expressions** are used to match patterns and trigger actions or responses based on user input.
+- **Webhooks** are used to fetch data from external sources and integrate it into the SWML script.
+- **Outputs** define the responses and actions based on the matched patterns or fetched data.
+- **Stored Values** such as `args`, `meta_data`, and SWML variables can be accessed within the `data_map` section.

@@ -1,0 +1,76 @@
+---
+title: Caller ID & CNAM
+slug: /platform/voice/how-to-set-caller-id-or-cnam
+x-custom:
+  ported_from_readme: true
+  hideInGuideShowcase: true
+---
+
+
+## Caller ID vs. caller name
+
+The Caller Name (**CNAM**) is a feature that displays your Name or Company Name on the Caller ID display of the party you are calling. When it is set up, your Caller ID Name will display as text along with your Caller ID Number.
+
+The Caller ID is the actual phone number calling in, whereas the accompanying text that provides the identifying name for that number is called CNAM (a.k.a. “Caller Name”).
+
+When a phone call is made, the Caller ID (CLID) is routed to the destination’s carrier for delivery. The Caller Name (CNAM) text data is not sent out by the originating carrier, as they are separate services.  
+When the call arrives, the carrier for the destination end of the call will reference the inbound number against its local CNAM database. At this point, both a CLID number and CNAM text are usually delivered to the recipient’s (called party’s) phone when it rings through.
+
+## How to set CNAM for PSTN to PSTN calling
+
+<Info>
+
+CNAM is disallowed on toll-free numbers, the actual number is the only display option when creating calls. 
+
+CNAM only works on PSTN calling, not SIP to SIP calls. See Caller ID below to learn how to set a caller ID for SIP calls. 
+
+The carriers in Canada do not read from the National CNAM registry and therefore will not display any set CNAM when creating calls to Canadian numbers.
+
+</Info>
+
+To enable or modify a CNAM for a SignalWire phone number, please open a support ticket in your SignalWire Dashboard by clicking the **Help** icon in the upper right corner and clicking on **My Tickets** within the drop-down menu. 
+
+**In your ticket, be sure to include the following information:**
+
+- The phone number that needs a CNAM
+- Name to display for the CNAM
+
+The CNAM is limited to **15 characters**, **including spaces**, and it can take up to 48 hours for the update to reflect.
+
+
+<Warning title="Using company name or personal name">
+**If you would like to provide your company name or personal name on the caller ID**, you must provide a copy of ID for a personal name, or proof of company through documents with your name listed, for the company name on the caller ID.
+</Warning>
+
+## How to set caller ID name for SIP to SIP calls
+
+To display a caller ID on SIP to SIP calls, you need to add an additional setting for caller ID in your SIP endpoint. Set the **Caller ID** field within [SIP Endpoint settings](/docs/platform/voice) to display caller ID on SIP to SIP calls. If you choose to set the **Send As** field, that will display one of your purchased or verified numbers, but it will only show for calls to PSTN numbers. **Caller ID** is the only way to display the caller ID for SIP to SIP calls. 
+
+<Frame>
+
+![A screenshot of the New Sip Endpoint page, showing username, password, caller ID, and Send As fields](@image/dashboard/legacy/sip/new-endpoint.webp)
+
+</Frame>
+
+If you want to set the caller names by extension for SIP to SIP calls, that setting is within the PBX that you're using. For example, Asterisk requires that you set the Outbound Caller ID name option on the dialplan. Check the documentation for your PBX of choice to learn how to send this parameter! 
+
+## How to set caller ID for SIP to PSTN calls
+
+Within your SIP endpoint settings, set the **Send As** field to one of the verified or purchased numbers in your SignalWire account. This number is what will show when you call a PSTN number. If you do not set anything, a random number from your account will be displayed.
+
+## Verified caller ID
+
+A **verified caller ID** is a phone number you already own (such as your mobile or office landline) that has been verified with SignalWire. Verified numbers are not ported — your original provider continues to service them. SignalWire does not charge for the number itself, only for usage on the SignalWire network.
+
+<Warning>
+Verified caller ID numbers can **only** be used for placing outbound calls. They cannot receive inbound calls through SignalWire.
+</Warning>
+
+To verify a number:
+
+1. In the SignalWire Dashboard, click **Phone Numbers** in the sidebar.
+2. Click the **Verified** tab, then click **Verify a Phone Number**.
+3. Enter the phone number and click **Call Me**.
+4. Enter the verification code you receive and click **Verify**.
+
+Once verified, the number appears in your verified numbers list and can be used as the outbound caller ID on any SIP endpoint. To set a verified number as the default caller ID for all SIP endpoints, go to **SIP > SIP Settings** and select it under **Default Send As**. To set it for a specific endpoint, edit the endpoint and select it under **Send As**.

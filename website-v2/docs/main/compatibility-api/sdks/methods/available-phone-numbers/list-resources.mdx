@@ -1,0 +1,127 @@
+---
+slug: /compatibility-api/sdks/reference/available-phone-numbers/list-resources
+title: List Resources
+sidebar_label: List Resources
+toc_max_heading_level: 3
+---
+
+Use this endpoint for the AvailablePhoneNumbers method to return a list of URIs to phone number resources available to the account.
+The list is categorized by type (Local, Toll-Free, Mobile, etc) and ISO country.
+
+<EndpointSchemaSnippet endpoint="GET /Accounts/{AccountSid}/AvailablePhoneNumbers" />
+
+<EndpointResponseSnippet endpoint="GET /Accounts/{AccountSid}/AvailablePhoneNumbers" />
+
+## Request examples
+
+### List all resources
+
+<CodeBlocks>
+```javascript title="Node.js"
+const { RestClient } = require('@signalwire/compatibility-api')
+const client = RestClient('YourProjectID', 'YourAuthToken', { signalwireSpaceUrl: 'example.signalwire.com' })
+
+client
+  .availablePhoneNumbers()
+  .then(availablePhoneNumbers => {
+    console.log(availablePhoneNumbers);
+  });
+```
+```csharp
+using System;
+using System.Collections.Generic;
+using Twilio;
+using Twilio.Rest.Api.V2010.Account;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        TwilioClient.Init("YourProjectID", "YourAuthToken", new Dictionary<string, object> { ["signalwireSpaceUrl"] = "{SPACE}.signalwire.com" });
+
+        var availablePhoneNumbers = AvailablePhoneNumberCountryResource.Read();
+
+        Console.WriteLine(availablePhoneNumbers);
+    }
+}
+```
+```python
+from signalwire.rest import Client as signalwire_client
+
+client = signalwire_client("YourProjectID", "YourAuthToken", signalwire_space_url = 'example.signalwire.com')
+
+numbers = client.available_phone_numbers() \
+                .list()
+
+print(numbers)
+```
+```ruby
+require 'signalwire/sdk'
+
+@client = Signalwire::REST::Client.new 'YourProjectID', 'YourAuthToken', signalwire_space_url: "example.signalwire.com"
+
+@numbers = @client.api.available_phone_numbers()
+                  .list()
+
+puts @numbers
+```
+</CodeBlocks>
+
+### List resources in US
+
+This example returns a list of URIs to phone number resources available to the account in the US ISO country.
+The URIs are categorized by type (Local, Toll-Free, Mobile, etc).
+
+<CodeBlocks>
+```javascript title="Node.js"
+const { RestClient } = require('@signalwire/compatibility-api')
+const client = RestClient('YourProjectID', 'YourAuthToken', { signalwireSpaceUrl: 'example.signalwire.com' })
+
+client
+  .availablePhoneNumbers('US')
+  .fetch()
+  .then(availablePhoneNumbers => {
+    console.log(availablePhoneNumbers);
+  });
+```
+```csharp
+using System;
+using System.Collections.Generic;
+using Twilio;
+using Twilio.Rest.Api.V2010.Account;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        TwilioClient.Init("YourProjectID", "YourAuthToken", new Dictionary<string, object> { ["signalwireSpaceUrl"] = "{SPACE}.signalwire.com" });
+
+        var availablePhoneNumbers = AvailablePhoneNumberCountryResource.Fetch("US");
+
+        Console.WriteLine(availablePhoneNumbers);
+    }
+}
+```
+```python
+from signalwire.rest import Client as signalwire_client
+
+client = signalwire_client("YourProjectID", "YourAuthToken", signalwire_space_url = 'example.signalwire.com')
+
+numbers = client.available_phone_numbers("US") \
+                .fetch()
+
+print(numbers)
+```
+```ruby
+require 'signalwire/sdk'
+
+@client = Signalwire::REST::Client.new 'YourProjectID', 'YourAuthToken', signalwire_space_url: "example.signalwire.com"
+
+@numbers = @client.api.available_phone_numbers('US')
+                  .fetch()
+
+puts @numbers
+```
+</CodeBlocks>
+
+<EndpointResponseSnippet endpoint="GET /Accounts/{AccountSid}/AvailablePhoneNumbers/{IsoCountry}" />

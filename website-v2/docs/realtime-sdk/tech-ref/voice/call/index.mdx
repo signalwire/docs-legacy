@@ -1,0 +1,84 @@
+---
+title: "Call"
+slug: /node/reference/voice/call
+description: Voice Call reference for managing active phone calls.
+toc_max_heading_level: 3
+---
+
+[voice-client]: /docs/server-sdk/node/reference/voice/client
+[sipheader]: /docs/server-sdk/node/reference/voice/types#sipheader
+
+A Call object represents an active call. You can get instances of a Call object from a [Voice.Client][voice-client], by answering or initiating calls.
+
+#### Examples
+
+In this example, we are dialing a phone number and playing a TTS message.
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+const voiceClient = client.voice;
+
+const call = await voiceClient.dialPhone({
+  from: "+YYYYYYYYYY",
+  to: "+XXXXXXXXXX"
+});
+
+await call.playTTS({ text: "Welcome to SignalWire!" });
+```
+
+In this example, we are answering an incoming call, playing a TTS message and then hanging up.
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here" })
+
+const voiceClient = client.voice;
+
+await voiceClient.listen({
+    topics: ["topic"],
+    onCallReceived: async (call) => {
+        call.answer();
+        console.log("Call received", call.id);
+        await call.playTTS({ text: "Welcome to SignalWire!" });
+        call.hangup();
+    }
+});
+```
+
+## **Properties**
+
+<ParamField path="device" type="any">
+  The device configuration for this call.
+</ParamField>
+
+<ParamField path="direction" type='"inbound" | "outbound"'>
+  Whether you are making or receiving the call.
+</ParamField>
+
+<ParamField path="from" type="string">
+  The phone number that the call is coming from.
+</ParamField>
+
+<ParamField path="headers" type="SipHeader[]" optional>
+  Optional SIP headers for this call. See [`SipHeader`][sipheader].
+</ParamField>
+
+<ParamField path="id" type="string">
+  Unique ID for this voice call.
+</ParamField>
+
+<ParamField path="state" type='"created" | "ringing" | "answered" | "ending" | "ended"'>
+  The current state of the call.
+</ParamField>
+
+<ParamField path="to" type="string">
+  The phone number you are attempting to call.
+</ParamField>
+
+<ParamField path="type" type='"phone" | "sip"'>
+  The type of call. Only phone and sip are currently supported.
+</ParamField>

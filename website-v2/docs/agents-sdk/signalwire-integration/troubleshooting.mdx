@@ -1,0 +1,182 @@
+---
+title: "Troubleshooting"
+sidebar_label: "Troubleshooting"
+slug: /python/guides/troubleshooting
+toc_max_heading_level: 3
+---
+
+## Troubleshooting
+
+Common issues and solutions when integrating agents with SignalWire.
+
+### Connection Issues
+
+**Problem:** Call doesn't connect to agent
+
+**Check:**
+- Is the server running?
+- Is the URL correct in SignalWire?
+- Is HTTPS configured properly?
+- Is the firewall allowing connections?
+- Can you access the URL from browser?
+
+**Test:**
+```bash
+curl -X POST https://your-server.com/ -H "Content-Type: application/json"
+```
+
+### Authentication Errors
+
+**Problem:** 401 Unauthorized
+
+**Check:**
+- Is basic auth enabled on the server?
+- Are credentials in the URL correct?
+- Are credentials URL-encoded if special chars?
+
+**URL Format:**
+```
+https://username:password@your-server.com/
+```
+
+**Special characters in password need encoding:**
+
+| Character | Encoded |
+|-----------|---------|
+| `@` | `%40` |
+| `:` | `%3A` |
+| `/` | `%2F` |
+
+### SWML Errors
+
+**Problem:** Invalid SWML response
+
+**Verify with swaig-test:**
+```bash
+swaig-test my_agent.py --dump-swml --raw
+```
+
+**Common issues:**
+- Missing `"version": "1.0.0"`
+- Invalid JSON format
+- Missing required sections
+- Syntax errors in SWML verbs
+
+### No Speech Response
+
+**Problem:** Agent doesn't speak
+
+**Check:**
+- Is a language configured? `self.add_language("English", "en-US", "rime.spore")`
+- Is there a prompt? `self.prompt_add_section("Role", "You are...")`
+- Is the AI model specified? Check SWML output for `ai.params`
+
+### Function Not Called
+
+**Problem:** AI doesn't call your function
+
+**Check:**
+- Is the function registered? Run `swaig-test my_agent.py --list-tools`
+- Is the description clear? AI needs to understand when to use it
+- Is the prompt mentioning the capability? Example: "You can check the weather using get_weather"
+
+### Function Errors
+
+**Problem:** Function returns error
+
+**Test locally:**
+```bash
+swaig-test my_agent.py --exec function_name --param value
+```
+
+**Check:**
+- Are all required parameters provided?
+- Is the handler returning SwaigFunctionResult?
+- Are there exceptions in the handler?
+
+**Add error handling:**
+```python
+try:
+    result = do_something()
+    return SwaigFunctionResult(result)
+except Exception as e:
+    self.log.error(f"Error: {e}")
+    return SwaigFunctionResult("Sorry, an error occurred")
+```
+
+### SSL Certificate Issues
+
+**Problem:** SSL handshake failed
+
+**Check:**
+- Is certificate valid and not expired?
+- Is the full certificate chain provided?
+- Is the domain correct on the certificate?
+
+**Test:**
+```bash
+openssl s_client -connect your-server.com:443
+```
+
+For development, use ngrok (handles SSL automatically).
+
+### Timeout Issues
+
+**Problem:** Requests timing out
+
+**SWML Request Timeout:**
+- SignalWire waits ~5 seconds for SWML
+- Make sure server responds quickly
+
+**Function Timeout:**
+- SWAIG functions should complete in less than 30 seconds
+- Use async operations for slow tasks
+- Consider background processing for long tasks
+
+### Quick Diagnostic Steps
+
+| Issue | First Check | Command |
+|-------|-------------|---------|
+| Server down | Process running | `ps aux \| grep python` |
+| Bad URL | Test endpoint | `curl -X POST https://url/` |
+| Bad SWML | View output | `swaig-test agent.py --dump-swml` |
+| Function error | Execute directly | `swaig-test agent.py --exec func` |
+| Auth error | Check credentials | Verify URL format |
+
+### Getting Help
+
+If issues persist:
+
+1. Check SignalWire documentation
+2. Review call logs in dashboard
+3. Enable debug logging in your agent
+4. Contact SignalWire support
+
+### Common Error Messages
+
+| Error | Meaning | Solution |
+|-------|---------|----------|
+| "No route to host" | Server unreachable | Check network/firewall |
+| "Connection refused" | Server not listening | Start the server |
+| "Invalid SWML" | Bad response format | Check swaig-test output |
+| "Function not found" | Missing function | Register the function |
+| "Unauthorized" | Auth failed | Check credentials |
+
+### Logging for Debugging
+
+Enable detailed logging:
+
+```python
+import logging
+import structlog
+
+## Enable debug logging
+logging.basicConfig(level=logging.DEBUG)
+
+## The agent uses structlog
+structlog.configure(
+    wrapper_class=structlog.make_filtering_bound_logger(logging.DEBUG)
+)
+```
+
+

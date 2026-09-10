@@ -1,0 +1,237 @@
+---
+title: Relay.Calling.PromptAction
+slug: /php/reference/calling/actions/prompt
+description: The PromptAction object is returned when prompting the user for input on the call.
+toc_max_heading_level: 3
+---
+
+[relay-calling-promptresult]: /docs/server-sdk/v2/php/reference/calling/results/prompt
+[relay-calling-promptvolumeresult]: /docs/server-sdk/v2/php/reference/calling/results/prompt-volume
+[relay-calling-stopresult]: /docs/server-sdk/v2/php/reference/calling/results/stop
+
+This object returned from one of _asynchronous_ prompt methods that represents a prompt attempt that is currently active on a call.
+
+## Methods
+
+### getControlId
+
+Return the UUID to identify the prompt attempt.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`string` - UUID to identify the action.
+
+**Examples**
+
+Start the attempt and print the controlId.
+
+```php
+<?php
+
+$collect = [
+  'type' => 'digits',
+  'digits_max' => 3,
+  'initial_timeout' => 10,
+  'text' => 'Please, enter your 3 digits PIN'
+];
+$call->promptTTSAsync($collect)->done(function($action) {
+  echo $action->getControlId();
+});
+```
+
+### getPayload
+
+Return the payload sent to Relay to initiate the request. Useful to inspect what you sent to perform this action.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`Object` - Payload sent to Relay.
+
+**Examples**
+
+Start the attempt and print out the payload.
+
+```php
+<?php
+
+$collect = [
+  'type' => 'digits',
+  'digits_max' => 3,
+  'initial_timeout' => 10,
+  'text' => 'Please, enter your 3 digits PIN'
+];
+$call->promptTTSAsync($collect)->done(function($action) {
+  print_r($action->getPayload());
+});
+```
+
+### getResult
+
+Returns the final result of the prompt attempt.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+[`Relay.Calling.PromptResult`][relay-calling-promptresult] - Final result of the prompt attempt.
+
+**Examples**
+
+Start the attempt and grab the result when it's completed.
+
+```php
+<?php
+
+$collect = [
+  'type' => 'digits',
+  'digits_max' => 3,
+  'initial_timeout' => 10,
+  'text' => 'Please, enter your 3 digits PIN'
+];
+$call->promptTTSAsync($collect)->done(function($action) {
+  // .. later in the code since it's an async method
+  if ($action->isCompleted()) {
+    $result = $action->getResult();
+  }
+});
+```
+
+### getState
+
+Return the current state of the prompt attempt.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`string` - Current state of the prompt attempt.
+
+**Examples**
+
+Start the attempt and print the state.
+
+```php
+<?php
+
+$collect = [
+  'type' => 'digits',
+  'digits_max' => 3,
+  'initial_timeout' => 10,
+  'text' => 'Please, enter your 3 digits PIN'
+];
+$call->promptTTSAsync($collect)->done(function($action) {
+  echo $action->getState();
+});
+```
+
+### isCompleted
+
+Return `true` if the prompt attempt has finished, `false` otherwise.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`Boolean` - True/False accordingly to the state.
+
+**Examples**
+
+Start the attempt and check if it has finished.
+
+```php
+<?php
+
+$collect = [
+  'type' => 'digits',
+  'digits_max' => 3,
+  'initial_timeout' => 10,
+  'text' => 'Please, enter your 3 digits PIN'
+];
+$call->promptTTSAsync($collect)->done(function($action) {
+  if ($action->isCompleted()) {
+
+  }
+});
+```
+
+### stop
+
+Stop the action immediately.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`React\Promise\Promise` - Promise object that will be fulfilled with a [`Relay.Calling.StopResult`][relay-calling-stopresult] object.
+
+**Examples**
+
+Start the attempt and then stop it.
+
+```php
+<?php
+
+$collect = [
+  'type' => 'digits',
+  'digits_max' => 3,
+  'initial_timeout' => 10,
+  'text' => 'Please, enter your 3 digits PIN'
+];
+$call->promptTTSAsync($collect)->done(function($action) {
+  // For demonstration purposes only..
+  $action->stop()->done(function($stopResult) {
+
+  });
+});
+```
+
+### volume
+
+Control the volume of the playback.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `volume` | `number` | **required** | Volume value between -40dB and +40dB where 0 is unchanged. |
+
+**Returns**
+
+`React\Promise\Promise` - Promise object that will be fulfilled with a [`Relay.Calling.PromptVolumeResult`][relay-calling-promptvolumeresult] object.
+
+**Examples**
+
+Start the prompt and increase the playback volume.
+
+```php
+<?php
+
+$collect = [
+  'type' => 'digits',
+  'digits_max' => 3,
+  'initial_timeout' => 10,
+  'text' => 'Please, enter your 3 digits PIN'
+];
+$call->promptTTSAsync($collect)->done(function($action) {
+  // For demonstration purposes only..
+  $action->volume(5.0)->done(function($volumeResult) {
+
+  });
+});
+```

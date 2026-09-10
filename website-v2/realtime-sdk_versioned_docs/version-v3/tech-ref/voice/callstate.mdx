@@ -1,0 +1,42 @@
+---
+title: "CallState"
+slug: /node/reference/voice/call-state
+sidebar_label: CallState
+description: CallState event payload reference for tracking voice call state changes. Monitor call lifecycle from created through answered, ending, and ended states.
+toc_max_heading_level: 3
+---
+
+[voice-call-1]: /docs/server-sdk/v3/node/reference/voice/call/connect-phone
+[voice-call-2]: /docs/server-sdk/v3/node/reference/voice/call/connect-sip
+[voice-call-3]: /docs/server-sdk/v3/node/reference/voice/call/dial
+[voice-call]: /docs/server-sdk/v3/node/reference/voice/call/connect
+[voice-client-1]: /docs/server-sdk/v3/node/reference/voice/client/dial-sip
+[voice-client]: /docs/server-sdk/v3/node/reference/voice/client/dial-phone
+
+Payload for call state events that are triggered by the change in state of an active RELAY-controlled call. You can obtain instances of this state callback request by including a `call_state_url` parameter when starting a call with one of the following methods:
+
+- [`Call.connect`][voice-call]
+- [`Call.connectPhone`][voice-call-1]
+- [`Call.connectSip`][voice-call-2]
+- [`Call.dial`][voice-call-3]
+- [`Call.dialPhone`][voice-client]
+- [`Call.dialSip`][voice-client-1]
+
+#### Parameters
+
+| Name                | Type       | Description                                                                                                               |
+| :------------------ | :--------- | :------------------------------------------------------------------------------------------------------------------------ |
+| `event_type`        | `string`   | The value will be "calling.call.state".                                                                                   |
+| `event_channel`     | `string`   | ID for the event channel on which these room session's events are reported.                                               |
+| `timestamp`         | `number`   | Time of the event.                                                                                                        |
+| `space_id`          | `string`   | ID for the SignalWire Space associated with the call.                                                                     |
+| `project_id`        | `string`   | ID for the project associated with the call.                                                                              |
+| `params`            | `Object`   | Event-specific parameters. This object contains the following eight fields.                                               |
+| `params.node_id`    | `string`   | ID for the node this call is on.                                                                                          |
+| `params.call_id`    | `string`   | ID for the call.                                                                                                          |
+| `params.tag`        | `string[]` | Client data this call is tagged with. Optional.                                                                           |
+| `params.device`     | `object`   | Protocol-specific connection information including the device `type`, `from_number`, and `to_number`.                     |
+| `params.parent`     | `object`   | Information on the call that created this call including the parent `device_type`, `node_id`, and `call_id`. Optional.    |
+| `params.peer`       | `object`   | Information on the peer call this call is actively connected with including the peer `node_id` and `call_id`. Optional.   |
+| `params.call_state` | `string`   | The current state that triggered this event. Possible values are `created`, `ringing`, `answered`, `ending`, and `ended`. |
+| `params.created_by` | `string`   | The method associated with this call state change. Optional. Possible values are "dial", "connect", and "receive".        |

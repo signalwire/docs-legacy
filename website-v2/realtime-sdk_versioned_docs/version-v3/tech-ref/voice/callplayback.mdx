@@ -1,0 +1,181 @@
+---
+title: "CallPlayback"
+slug: /node/reference/voice/call-playback
+sidebar_label: CallPlayback
+description: CallPlayback object reference for playing audio, TTS, ringtones, and silence during voice calls. Control playback with pause, resume, and volume methods.
+toc_max_heading_level: 3
+---
+
+[callplayback-10]: /docs/server-sdk/v3/node/reference/voice/call-playback
+[link]: #ended
+[voice-call-1]: /docs/server-sdk/v3/node/reference/voice/call/play-audio
+[voice-call-2]: /docs/server-sdk/v3/node/reference/voice/call/play-ringtone
+[voice-call-3]: /docs/server-sdk/v3/node/reference/voice/call/play-silence
+[voice-call-4]: /docs/server-sdk/v3/node/reference/voice/call/play-tts
+[voice-call]: /docs/server-sdk/v3/node/reference/voice/call/play
+
+Represents a current or past playback in a call. You can obtain instances of this class by starting a Playback with one of the following methods:
+
+- [`Call.play`][voice-call]
+- [`Call.playAudio`][voice-call-1]
+- [`Call.playRingtone`][voice-call-2]
+- [`Call.playSilence`][voice-call-3]
+- [`Call.playTTS`][voice-call-4]
+
+#### Example
+
+Playing a text-to-speech message and waiting for it to end before proceeding to
+the next instructions.
+
+```js
+import { Voice } from "@signalwire/realtime-api";
+
+const client = new Voice.Client({
+  project: "<project-id>",
+  token: "<api-token>",
+  topics: ["office"],
+});
+
+const call = await client.dialPhone({
+  from: "+YYYYYYYYYY",
+  to: "+XXXXXXXXXX",
+});
+
+const playback = await call.playTTS({ text: "Welcome to SignalWire!" });
+await playback.ended();
+```
+
+## Properties
+
+### id
+
+The unique id for this playback.
+
+**Syntax:** `CallPlayback.id()`
+
+**Returns:** `string`
+
+## Methods
+
+### pause
+
+- **pause**(): `Promise<CallPlayback>` - See [CallPlayback][callplayback-10] for more details.
+
+Pauses the playback.
+
+#### Returns
+
+`Promise<CallPlayback>` - See [CallPlayback][callplayback-10] for more details.
+
+#### Example
+
+```js
+const playback = await call.playAudio({
+  url: "https://cdn.signalwire.com/default-music/welcome.mp3",
+});
+await playback.pause();
+```
+
+---
+
+### ended
+
+- **ended**(): `Promise<CallPlayback>` - See [CallPlayback][callplayback-10] for more details.
+
+Returns a promise that is resolved only after this playback finishes playing (or is stopped).
+
+#### Returns
+
+`Promise<CallPlayback>` - See [CallPlayback][callplayback-10] for more details.
+
+#### Example
+
+```js
+const playback = await call.playAudio({
+  url: "https://cdn.signalwire.com/default-music/welcome.mp3",
+});
+await playback.ended();
+```
+
+---
+
+### resume
+
+- **resume**(): `Promise<CallPlayback>` - See [CallPlayback][callplayback-10] for more details.
+
+Resumes the playback if it was paused.
+
+#### Returns
+
+`Promise<CallPlayback>` - See [CallPlayback][callplayback-10] for more details.
+
+#### Example
+
+```js
+const playback = await call.playAudio({
+  url: "https://cdn.signalwire.com/default-music/welcome.mp3",
+});
+await playback.resume();
+```
+
+---
+
+### setVolume
+
+- **setVolume**(`volume`): `Promise<CallPlayback>` - See [CallPlayback][callplayback-10] for more details.
+
+Changes the volume of the playback.
+
+#### Parameters
+
+| Name     | Type     | Description                           |
+|:---------|:---------|:--------------------------------------|
+| `volume` | `number` | Volume value between -40dB and +40dB. |
+
+#### Returns
+
+`Promise<CallPlayback>` - See [CallPlayback][callplayback-10] for more details.
+
+#### Example
+
+```js
+const playback = await call.playAudio({
+  url: "https://cdn.signalwire.com/default-music/welcome.mp3",
+});
+await playback.setVolume(-20);
+```
+
+---
+
+### stop
+
+- **stop**(): `Promise<CallPlayback>` - See [CallPlayback][callplayback-10] for more details.
+
+Stops the playback.
+
+#### Returns
+
+`Promise<CallPlayback>` - See [CallPlayback][callplayback-10] for more details.
+
+#### Example
+
+```js
+const playback = await call.playAudio({
+  url: "https://cdn.signalwire.com/default-music/welcome.mp3",
+});
+await playback.stop();
+```
+
+---
+
+### ~~waitForEnded~~
+
+- **waitForEnded**(): `Promise<CallPlayback>` - See [CallPlayback][callplayback-10] for more details.
+
+Returns a promise that is resolved only after this playback finishes playing (or is stopped).
+
+<Warning>
+
+This method is deprecated. See [ended][link] instead.
+
+</Warning>

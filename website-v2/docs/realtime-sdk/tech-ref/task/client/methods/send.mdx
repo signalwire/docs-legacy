@@ -1,0 +1,65 @@
+---
+title: "send"
+slug: /node/reference/task/client/send
+description: send method for the Client class.
+toc_max_heading_level: 3
+---
+
+[task-client]: /docs/server-sdk/node/reference/task/client
+
+### send
+
+- `Const` **send**(`params`): `Promise<void>`
+
+Send a job to your Task Client in a specific topic.
+
+#### Parameters
+
+<ParamField path="params" type="object" required>
+  Object containing the parameters of the method.
+</ParamField>
+
+<Indent>
+<ParamField path="topic" type="string | string[]" required>
+  Topic to send the task to. Previously known as `"context"` or `"contexts"`. Can also use `params.topics`.
+</ParamField>
+
+<ParamField path="message" type="Record<string, unknown>" required>
+  Message to send.
+</ParamField>
+
+<ParamField path="project" type="string">
+  SignalWire project id, e.g. `a10d8a9f-2166-4e82-56ff-118bc3a4840f`.
+</ParamField>
+
+<ParamField path="token" type="string">
+  SignalWire project token, e.g. `PT9e5660c101...a360079c9`.
+</ParamField>
+</Indent>
+
+#### Returns
+
+`Promise<void>`
+
+#### Example
+
+Sending a task with a message to then make an outbound Call. Please note that the call is _not_ performed automatically: your [Task.Client][task-client] gives you back your payload, which you should interpret by your own custom logic.
+
+```js
+import { SignalWire } from "@signalwire/realtime-api";
+
+const client = await SignalWire({ project: "ProjectID Here", token: "Token Here"})
+
+const clientTask = client.task
+
+const message = {
+  'action': 'call',
+  'from': '+1XXXXXXXXXX',
+  'to': '+1YYYYYYYYYY'
+}
+
+const taskSend = await clientTask.send({
+  topic: 'office',
+  message: message
+})
+```

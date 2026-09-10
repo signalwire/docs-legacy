@@ -1,0 +1,37 @@
+---
+title: "detectDigit"
+slug: /node/reference/voice/call/detect-digit
+description: detectDigit method for the Call class.
+toc_max_heading_level: 3
+---
+
+[calldetect-8]: /docs/server-sdk/v3/node/reference/voice/call-detect
+[link-5]: /docs/server-sdk/v3/node/reference/voice/call/prompt
+
+### detectDigit
+
+- **detectDigit**(`params?`): `Promise<CallDetect>` - See [CallDetect][calldetect-8] for more details.
+
+Detects when a digit is pressed in an audio stream. To gather digit input from a caller, please see [prompt][link-5].
+
+#### Parameters
+
+| Name                  | Type      | Description                                                                          |
+|:----------------------|:----------|:-------------------------------------------------------------------------------------|
+| `params?`             | `Object`  | -                                                                                    |
+| `params.digits?`      | `string`  | The digits to detect. Defaults to "0123456789#\*".                                   |
+| `params.timeout?`     | `number`  | Number of seconds to run the detector for. Defaults to 30.0.                         |
+| `params.waitForBeep?` | `boolean` | Whether to wait until the device is ready for voicemail delivery. Defaults to false. |
+
+#### Returns
+
+`Promise<CallDetect>` - See [CallDetect][calldetect-8] for more details.
+
+#### Example
+
+```js
+const detect = await call.detectDigit();
+const result = await detect.ended();
+
+console.log("Detect result:", result.type);
+```

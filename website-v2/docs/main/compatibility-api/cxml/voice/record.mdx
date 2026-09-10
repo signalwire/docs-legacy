@@ -1,0 +1,250 @@
+---
+title: Record
+sidebar_label: Record
+slug: /compatibility-api/cxml/reference/voice/record
+sidebar_position: 1
+toc_max_heading_level: 3
+---
+
+The `<Record>` verb creates an audio file with the caller's voice and returns the URL to you. Text transcriptions of these recorded calls can also be produced.
+
+Recordings remain stored indefinitely. To delete a recording, use the appropriate API call from the [Compatibility API](/docs/compatibility-api/rest/delete-recording).
+
+Any instructions placed after the `<Record>` verb will not be executed. To ensure additional instructions are processed, use the `action` attribute to specify a URL that SignalWire will request once the recording is complete.
+
+## Verb attributes
+
+<ParamField path="action" type="string">
+  The `action` attribute takes in an absolute or relative URL. SignalWire will make a `GET` or `POST` request to this URL when recording is completed. The current document's URL will be requested if no `action` is provided which can lead to unwanted looping behavior if you're not careful. See [below](#record_action) for specified request parameters.
+</ParamField>
+
+<ParamField path="finishOnKey" type="string">
+  The set of digits, (0-9, \*, #), that can end a recording.
+</ParamField>
+
+<ParamField path="maxLength" type="integer">
+  The maximum length, in seconds, of the recording. A value of zero means 3600 seconds.
+</ParamField>
+
+<ParamField path="method" type="string" default="POST">
+  The `method` attribute specifies whether the request to action is a `GET` or a `POST`. Valid values are `GET` or `POST`.
+</ParamField>
+
+<ParamField path="playBeep" type="boolean" default="true">
+  Whether or not a sound is played before the start of a recording.
+</ParamField>
+
+<ParamField path="recordingStatusCallback" type="string">
+  The `recordingStatusCallback` attribute takes in an absolute or relative URL. SignalWire will make a `GET` or `POST` request to this URL when recording is accessible. See [below](#record_recordingStatusCallback) for specified request parameters.
+</ParamField>
+
+<ParamField path="recordingStatusCallbackEvent" type="string" default="completed">
+  The different recording statuses. Possible values are `completed`, `in-progress`, and `absent`. To specify multiple events, separate with a space.
+</ParamField>
+
+<ParamField path="recordingStatusCallbackMethod" type="string" default="POST">
+  The type of HTTP request to use when requesting a `recordingStatusCallback`.
+</ParamField>
+
+<ParamField path="storageUrl" type="string">
+  The `storageUrl` attribute accepts an absolute URL as the destination to send a recording to, if you prefer to host your own recordings and bypass SignalWire storage.
+</ParamField>
+
+<ParamField path="storageUrlMethod" type="string" default="POST">
+  Specifies which HTTP verb to use when sending the recording to the `storageUrl`. Available values are: **POST** and **PUT**.
+</ParamField>
+
+<ParamField path="timeout" type="integer">
+  The `timeout` attribute specifies the number of seconds of silence that ends a recording.
+</ParamField>
+
+<ParamField path="transcribe" type="boolean" default="false">
+  The `transcribe` attribute identifies whether to produce a text transcription of the recording. There is an additional charge for this service, so is turned off by default.
+</ParamField>
+
+<ParamField path="transcribeCallback" type="string">
+  The ability to define a URL to which SignalWire will make a `POST` request to once the transcription is complete. See [below](#record_transcribeCallback) for specified request parameters.
+</ParamField>
+
+<ParamField path="trim" type="string" default="trim-silence">
+  Whether or not silence in the beginning and end of recordings are removed. Allowed values are `trim-silence` and `do-not-trim`.
+</ParamField>
+
+<Info title="the sound of silence">
+If no audio data is received, including when a caller is silent and `trim-silence` is enabled, SignalWire will not save a recording. 
+If you wish to save silence, be sure to set `trim="do-not-trim"`.
+
+Note also that SignalWire will trim leading and trailing silence from your audio files, causing the duration of calls to be less than the time spent recording.
+</Info>
+
+<Warning title="avoid looping">
+When recording finishes, including when no audio data is received, `<Record>` will always request its `action` URL and process the cXML instructions that are returned. 
+If no `action` URL is set, SignalWire will re-request the current cXML document's URL by default. 
+**This can lead to unwanted looping behavior**, so make sure to end the call using `action` as seen in the 
+[Recording a Voicemail example](#recording-a-voicemail).
+</Warning>
+
+#### Request parameters for `action` URL {#record_action}
+
+The `action` request contains the [Standard Request Parameters](/docs/compatibility-api/cxml/reference/voice#request-parameters) as well as:
+
+<ParamField path="Digits" type="string">
+  The buttons pressed to end a recording.
+</ParamField>
+
+<ParamField path="RecordingDuration" type="integer">
+  The duration, in seconds, of the audio recording.
+</ParamField>
+
+<ParamField path="RecordingUrl" type="string">
+  The URL of the recorded audio file.
+</ParamField>
+
+
+#### Request parameters for `recordingStatusCallback` {#record_recordingStatusCallback}
+
+<WebhookPayloadSnippet webhook="recordingStatusCallback" />
+
+
+#### Request parameters for `transcribeCallback` {#record_transcribeCallback}
+
+<WebhookPayloadSnippet webhook="transcriptionStatusCallback" />
+
+## Nesting
+
+No other verbs can be nested within `<Record>` and you cannot nest `<Record>` within any other verbs.
+
+## Examples
+
+### Recording a voicemail
+
+<CodeBlocks>
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Say>
+        Please leave a message at the beep.
+        Press the pound key when finished.
+    </Say>
+    <Record
+        action="http://your-application.com/handleRecording.php"
+        method="GET"
+        maxLength="15"
+        finishOnKey="#"
+        />
+</Response>
+```
+```javascript title="Node.js"
+const { RestClient } = require("@signalwire/compatibility-api");
+const response = new RestClient.LaML.VoiceResponse();
+
+response.say("Please leave a message at the beep. Press the pound key when finished.");
+response.record({
+  action: "http://your-application.com/handleRecording.php",
+  method: "GET",
+  maxLength: 15,
+  finishOnKey: "#",
+});
+console.log(response.toString());
+```
+```csharp
+using Twilio.TwiML;
+using Twilio.Http;
+using System;
+
+
+class Example
+{
+    static void Main()
+    {
+        var response = new VoiceResponse();
+        response.Say("Please leave a message at the beep. Press the pound key when finished.");
+        response.Record(action: new Uri("http://your-application.com/handleRecording.php"),
+            method: HttpMethod.Get, maxLength: 15, finishOnKey: "#");
+
+        Console.WriteLine(response.ToString());;
+    }
+}
+```
+```python
+from signalwire.voice_response import VoiceResponse, Record, Say
+
+response = VoiceResponse()
+response.say('Please leave a message at the beep. Press the pound key when finished.')
+response.record(action='http://your-application.com/handleRecording.php', method='GET', max_length=15, finish_on_key='#')
+
+print(response)
+```
+```ruby
+require 'signalwire/sdk'
+
+response = Signalwire::Sdk::VoiceResponse.new do |response|
+  response.say(message: 'Please leave a message at the beep. Press the pound key when finished.')
+  response.record(action: 'http://your-application.com/handleRecording.php', method: 'GET', max_length: 15, finish_on_key: '#')
+end
+
+puts response.to_s
+```
+</CodeBlocks>
+
+This prompt will play before the 'beep', asking the caller to leave a message. The caller can only leave a message that is 15s long.
+
+### Transcribing a recording
+
+<CodeBlocks>
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Record
+        transcribe="true"
+        transcribeCallback="http://your-application.com/handle_transcribe.php" />
+</Response>
+```
+```javascript title="Node.js"
+const { RestClient } = require("@signalwire/compatibility-api");
+const response = new RestClient.LaML.VoiceResponse();
+
+response.record({
+  transcribe: true,
+  transcribeCallback: "http://your-application.com/handle_transcribe.php",
+});
+console.log(response.toString());
+```
+```csharp
+using Twilio.TwiML;
+using System;
+
+
+class Example
+{
+    static void Main()
+    {
+        var response = new VoiceResponse();
+        response.Record(transcribe: true,
+            transcribeCallback: new Uri("http://your-application.com/handle_transcribe.php"));
+
+        Console.WriteLine(response.ToString());;
+    }
+}
+```
+```python
+from signalwire.voice_response import VoiceResponse, Record
+
+response = VoiceResponse()
+response.record(transcribe=True, transcribe_callback='http://your-application.com/handle_transcribe.php')
+
+print(response)
+```
+```ruby
+require 'signalwire/sdk'
+
+response = Signalwire::Sdk::VoiceResponse.new do |response|
+  response.record(transcribe: true, transcribe_callback: 'http://your-application.com/handle_transcribe.php')
+end
+
+puts response.to_s
+```
+</CodeBlocks>
+
+SignalWire will record the caller and transcribe the recording once it is complete. 
+Then, SignalWire will make a `POST` request to the `transcribeCallback` URL with the transcription as a parameter.

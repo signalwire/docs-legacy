@@ -1,0 +1,232 @@
+/**
+
+This file modifies some components to be branded in a SignalWire-specific branding.
+
+This includes gradients for Navbar and links.
+
+**/
+
+/* Neue Einstellung font-face */
+@use "neue-einstellung";
+
+/* SignalWire Custom CSS Variables */
+:root {
+  --sw-navbar-font-size: 0.875rem;  /* 14px - Custom navbar font size */
+  --sw-navbar-separator-height: 0.125rem;  /* 2px - Separator height for dropdowns */
+}
+
+/** Navbar **/
+.navbar {
+  font-size: var(--sw-navbar-font-size);
+}
+
+
+// Primary navbar when standalone (no secondary navbar) - gradient border
+.navbar--standalone {
+  box-shadow: none;
+  border-bottom: 0.2rem solid transparent;
+  border-image: var(--sw-horizontal-active-line-color) 1;
+}
+
+// Primary navbar when secondary navbar is present - subtle TOC border
+.navbar--with-secondary {
+  border-bottom: 1px solid var(--ifm-toc-border-color);
+  border-image: none;
+}
+
+// Secondary navbar - gradient border (SignalWire branding)
+.navbar--secondary {
+  box-shadow: none;
+  border-bottom: 0.2rem solid transparent;
+  border-image: var(--sw-horizontal-active-line-color) 1;
+}
+
+// Uncomment this selector to hide the 'external link' icons in the navbar
+//  .navbar__items a > svg {
+//    display: none;
+//  }
+
+  // Apply gradient to all navbar links EXCEPT dropdown items with descriptions
+  .navbar__items a:not(.dropdown-link-with-description),
+  .navbar__brand {
+    transition: color 100ms ease; // Smooth transition for text color
+
+    &:hover {
+      background: var(--sw-horizontal-active-line-color); // Gradient on hover
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent; // Makes the text show the gradient
+      background-clip: text;
+      transition: var(--ifm-transition-fast);
+    }
+  }
+
+  // Dropdown items with descriptions - hover state
+  .navbar__items .dropdown-link-with-description:hover {
+    background-color: var(--ifm-menu-color-background-hover);
+
+    .dropdown-item-label {
+      background: var(--sw-horizontal-active-line-color);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      display: inline-block;
+    }
+  }
+
+  // Dropdown items with descriptions - active state
+  .navbar__items .dropdown__link--active.dropdown-link-with-description {
+    .dropdown-item-label {
+      color: var(--ifm-menu-color-active);
+    }
+
+    .dropdown-item-description {
+      color: var(--ifm-font-color-base);
+      opacity: 0.7;
+    }
+  }
+
+
+// Apply same gradient effect to version badge dropdown items
+.version-badge-dropdown-container .dropdown__link {
+  transition: color 100ms ease;
+
+  &:hover {
+    background: var(--sw-horizontal-active-line-color);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    transition: var(--ifm-transition-fast);
+  }
+}
+
+.dropdown-separator {
+  background-color: var(--ifm-color-gray-100);
+  height: var(--sw-navbar-separator-height);
+  width: 100%;
+  margin: 0.4rem 0rem 0.4rem 0;
+}
+[data-theme="dark"] .dropdown-separator {
+  background-color: rgba(255, 255, 255, 0.2);
+  height: 1px;
+  width: 90%;
+  margin: 0.4rem auto;
+}
+
+.nav-dropdown-title {
+  // font-family: 'Neue Einstellung';
+  /* text-decoration: underline 3px #F72B73;
+  text-underline-offset: 7px; */
+  font-size: 1rem;
+  margin: 0rem 0rem 0rem 0rem;
+  padding: 0.25rem 1rem;
+  font-weight: 900;
+  color: --ifm-color-gray-800;
+}
+
+.dropdown__link {
+  border-radius: 0.25rem; /* Match Infima */
+  color: var(--ifm-dropdown-link-color);
+  display: block;
+  font-size: 0.875rem;
+  margin-top: 0.2rem; /* Match Infima */
+  padding: 0.25rem 0.5rem; /* Match Infima */
+  white-space: nowrap;
+
+  // Support for multi-line dropdown items with descriptions
+  &.dropdown-link-with-description {
+    white-space: normal; // Allow wrapping for descriptions
+    padding: 0.5rem 0.75rem; // Increase padding for better spacing
+    line-height: 1.4; // Better line height for multi-line content
+  }
+}
+
+.dropdown__menu {
+  border-radius: var(--ifm-global-radius); /* Match Infima: 0.4rem */
+  box-shadow: var(--ifm-global-shadow-md);
+  // border: 1px solid rgba(255, 255, 255, 0.2); /* Removed - not in Infima defaults */
+  min-width: 15rem; /* Keeping custom width (Infima default is 10rem) */
+  //opacity: 0;
+  padding: 0.5rem; /* Match Infima */
+  top: calc(100% - var(--ifm-navbar-item-padding-vertical) + 0.3rem); /* Match Infima */
+  transform: translateY(0rem);
+  //  visibility: hidden;
+  //  z-index: var(--ifm-z-index-dropdown);
+  transition-property: opacity, transform, visibility;
+  transition-duration: var(--ifm-transition-fast);
+  transition-timing-function: var(--ifm-transition-timing-default);
+}
+
+[data-theme="dark"] .footer {
+  background: none;
+  margin-top: calc(var(--ifm-spacing-vertical) * 2.5);
+}
+
+[data-theme="dark"] .medium-zoom-overlay {
+  background: var(--ifm-background-color) !important;
+}
+
+// The following animates the background of codeboxes in dark mode
+[data-theme="dark"] pre {
+  background: transparent !important;
+}
+
+[data-theme="dark"] .theme-code-block {
+  background: transparent !important;
+}
+
+[data-theme="dark"] [class^="codeBlockTitle_"] {
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.05) 0%,
+    rgba(0, 0, 50, 0.1) 100%
+  );
+}
+
+[data-theme="dark"] .prism-code {
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.05) 0%,
+    rgba(0, 0, 50, 0.1) 100%
+  ) !important;
+  border-radius: inherit;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  position: relative;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.08) 0%,
+      rgba(0, 0, 50, 0.15) 50%,
+      transparent 100%
+    );
+
+    // better gradient, but doesn't fade to transparency. so it doesn't work with horizontal scroll
+    // background: linear-gradient(
+    //   135deg,
+    //   rgba(255, 255, 255, 0.08) 0%,
+    //   rgba(0, 0, 50, 0.15) 100%, transparent 100%
+    // );
+
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+  }
+
+  &:hover::before {
+    opacity: 1;
+  }
+}

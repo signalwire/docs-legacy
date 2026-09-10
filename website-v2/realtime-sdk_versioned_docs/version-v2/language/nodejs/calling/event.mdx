@@ -1,0 +1,36 @@
+---
+title: Relay.Calling.Event
+slug: /node/reference/calling/event
+toc_max_heading_level: 3
+---
+This object represents Relay events that occur during calling operations.
+
+## Properties
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `name` | `string` | The event name |
+| `payload` | `object` | Raw JSON object of the Relay event |
+
+## Event Types
+
+Calling events include:
+
+- `calling.call.state` - Call state changes
+- `calling.call.connect` - Call connection events
+- `calling.call.receive` - Incoming call events
+- `calling.play.state` - Play operation state changes
+- `calling.record.state` - Record operation state changes
+- `calling.detect.state` - Detect operation state changes
+
+## Usage
+
+Events are typically accessed through result objects or event handlers in the calling system.
+
+```javascript
+// Example of accessing event information
+const result = await call.play({ url: 'audio.mp3' });
+const event = result.getEvent();
+console.log('Event name:', event.name);
+console.log('Event payload:', event.payload);
+```

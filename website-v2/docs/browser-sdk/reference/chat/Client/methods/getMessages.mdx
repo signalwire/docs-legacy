@@ -1,0 +1,57 @@
+---
+title: getMessages
+slug: /js/reference/chat/client/get-messages
+toc_max_heading_level: 3
+---
+
+- **getMessages**(`params`): `Promise<{ cursor: PagingCursor; messages: ChatMessageEntity[] }>`
+
+
+See [PagingCursor documentation](/docs/browser-sdk/js/reference/chat/client#paginationcursor) and [ChatMessageEntity documentation](/docs/browser-sdk/js/reference/chat/chat-message-entity) for more details.
+
+
+Returns the list of messages that were sent to the specified channel.
+
+## Parameters
+
+<ParamField path="params" type="object" required={true}>
+  Configuration object for getting messages
+</ParamField>
+<Indent>
+  <ParamField path="params.channel" type="string" required={true}>
+    Channel for which to retrieve the messages.
+  </ParamField>
+  <ParamField path="params.cursor" type="PagingCursor">
+    Cursor for pagination. See [PagingCursor](/docs/browser-sdk/js/reference/chat/client#paginationcursor) for more details.
+  </ParamField>
+</Indent>
+
+## Returns
+
+`Promise<{ cursor: PagingCursor; messages: ChatMessageEntity[] }>`
+
+
+See [PagingCursor documentation](/docs/browser-sdk/js/reference/chat/client#paginationcursor) and [ChatMessageEntity documentation](/docs/browser-sdk/js/reference/chat/chat-message-entity) for more details.
+
+
+## Example
+
+```js
+const m = await chatClient.getMessages({ channel: "chan1" });
+
+m.messages.length; // 23
+m.messages[0]; // the most recent message
+m.messages[0].member; // the sender
+m.messages[0].content; // the content
+m.messages[0].meta; // the metadata (if any)
+
+m.cursor.next; // if not null, there are more messages.
+
+// Get the next page using the cursor
+const next = await chatClient.getMessages({
+  channel: "chan1",
+  cursor: {
+    after: m.cursor.after,
+  },
+});
+```

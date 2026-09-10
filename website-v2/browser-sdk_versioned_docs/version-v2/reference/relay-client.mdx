@@ -1,0 +1,551 @@
+---
+title: RELAY Client
+availability: deprecated
+slug: /js/reference/relay-client
+toc_max_heading_level: 3
+---
+
+`Relay` client is the basic connection to RELAY, allowing you send commands to RELAY and setup handlers for inbound events.
+
+## Constructor
+
+Constructs a client object to interact with RELAY.
+
+**Parameters**
+
+| Name | Type | Required | Description |
+| -: | - | - | - |
+| `project` | `string` | <span className="required-arg">required</span> | Project ID from your SignalWire Space |
+| `token` | `string` | <span className="required-arg">required</span> | Json Web Token retrieved using Rest API. See [Generate a JWT](/docs/browser-sdk/v2/js#generate-a-jwt) for more information. |
+
+**Examples**
+
+> Create a Client to interact with the RELAY API.
+
+```javascript
+const client = new Relay({
+  project: 'my-project-id',
+  token: 'my-jwt',
+})
+
+client.on('signalwire.ready', (client) => {
+  // You are connected with Relay!
+})
+
+client.connect()
+```
+
+## Properties
+
+| Name | Type | Description |
+| - | - | - |
+| `connected` | `boolean` | `true` if the client has connected to RELAY. |
+| `expired` | `boolean` | `true` if the JWT has expired. |
+
+## Devices and Media Constraints
+
+You can configure the devices your `client` will use by default with these properties and methods:
+
+| Name | Type | Description |
+| - | - | - |
+| `devices` | `object` | All devices recognized by the client keyed by _kind_: `videoinput`, `audioinput` and `audiooutput`. |
+| `videoDevices` | `object` | **DEPRECATED:** Video devices recognized by the client. |
+| `audioInDevices` | `object` | **DEPRECATED:** Audio input devices recognized by the client. |
+| `audioOutDevices` | `object` | **DEPRECATED:** Audio output devices recognized by the client. |
+| `mediaConstraints` | `object` | Current audio/video constraints used by the client. |
+| `speaker` | `string` | Audio output device used by the client. |
+| `speaker` | `string` | Set the audio output device to use for the subsequent calls. |
+
+**Examples**
+
+> If present, use the first audio output device as default speaker.
+
+```javascript
+const speakerList = client.audioOutDevices.toArray()
+if (speakerList.length) {
+  client.speaker = speakerList[0].deviceId
+}
+```
+
+## Local and Remote Elements
+
+It is usual, in a WebRTC application, to display the _local_ and _remote_ videos in a video-call. In the case of an audio-only call you will need at least the `audio` element to play the media.
+
+| Name | Type | Description |
+| - | - | - |
+| `localElement` | `HTMLMediaElement` | Current element used by the client to display the **local** stream. |
+| `localElement` | `HTMLMediaElement`, `string` or `Function` | It accepts an `HTMLMediaElement`, the `ID` of the element as a `string` or a `Function` that returns an `HTMLMediaElement`. |
+| `remoteElement` | `HTMLMediaElement` | Current element used by the client to display the **remote** stream. |
+| `remoteElement` | `HTMLMediaElement`, `string` or `Function` | It accepts an `HTMLMediaElement`, the `ID` of the element as a `string` or a `Function` that returns an `HTMLMediaElement`. |
+
+> **Note:** the client will attach the streams to the proper element but will not change the `style` attribute. You can decide if you would like to display or hide the `HTMLMediaElement` following the application logic.<br/>Use the [callUpdate notification](/docs/browser-sdk/v2/js/reference/notification#callupdate) to detect call state changes and update the UI accordingly.
+
+## STUN/TURN Servers
+
+Through the `iceServers` you can set/retrieve the default ICE server configuration for all subsequent calls.
+
+| Name | Type | Description |
+| - | - | - |
+| `iceServers` | `RTCIceServers` | Current ICE servers used by the client. |
+| `iceServers` | `RTCIceServers[]` or `boolean` | `array` of ICE servers, `true` to use the default ones or `false` to not use STUN/TURN at all. |
+
+**Examples**
+
+> Use both STUN and TURN for the client.
+
+```javascript
+client.iceServers = [
+  {
+    urls: 'stun:stun.example.domain.com'
+  },
+  {
+    urls: 'turn:turn.example.domain.com',
+    username: '<turn-username>',
+    credential: '<turn-password>'
+  }
+]
+```
+
+## Methods
+
+### checkPermissions
+
+The first time a user visits your page, before access his microphone or webcam, the browser display a notification to the user. Use this method if you want to check you already have the permission to access them.
+
+**Parameters**
+
+| Name | Type | Required | Description |
+| -: | - | - | - |
+| `audio` | `boolean` | <span className="optional-arg">optional</span> | Whether to check permissions for the microphone.<br/> _Default to true_ |
+| `video` | `boolean` | <span className="optional-arg">optional</span> | Whether to check permissions for the webcam.<br/> _Default to true_ |
+
+**Returns**
+
+`Promise<boolean>` - A Promise object resolved with a boolean value.
+
+**Examples**
+
+> Check both audio and video permissions.
+
+```javascript
+// within an async function ..
+const success = await client.checkPermissions()
+if (success) {
+  // User gave the permission..
+} else {
+  // User didn't gave the permission..
+}
+```
+
+### connect
+
+Activates the connection to RELAY. Make sure you have attached the listeners you need before connecting the client, or you might miss some events.
+
+**Returns**
+
+`Promise<void>`
+
+**Examples**
+
+```javascript
+await client.connect()
+```
+
+### disconnect
+
+Disconnect the client from RELAY.
+
+**Returns**
+
+`void`
+
+**Examples**
+
+```javascript
+client.disconnect()
+```
+
+### disableMicrophone
+
+Disable the use of the `microphone` for the subsequent calls.
+
+### disableWebcam
+
+Disable the use of the `webcam` for the subsequent calls.
+
+### enableMicrophone
+
+Enable the use of the `microphone` for the subsequent calls.
+
+### enableWebcam
+
+Enable the use of the `webcam` for the subsequent calls.
+
+### getAudioInDevices
+
+Return all `audioinput` devices supported by the browser.
+
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`Promise<MediaDeviceInfo[]>` - A Promise object resolved with a list of [MediaDeviceInfo](https://developer.mozilla.org/en-US/docs/Web/API/MediaDeviceInfo).
+
+**Examples**
+
+> List microphones.
+
+```javascript
+// within an async function ..
+const devices = await client.getAudioInDevices()
+devices.forEach(device => {
+  console.log(device.kind + ': ' + device.label + ' id: ' + device.deviceId);
+})
+```
+
+### getAudioOutDevices
+
+Return all `audiooutput` devices supported by the browser.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`Promise<MediaDeviceInfo[]>` - A Promise object resolved with a list of [MediaDeviceInfo](https://developer.mozilla.org/en-US/docs/Web/API/MediaDeviceInfo).
+
+**Examples**
+
+> List speakers.
+
+```javascript
+// within an async function ..
+const devices = await client.getAudioOutDevices()
+devices.forEach(device => {
+  console.log(device.kind + ': ' + device.label + ' id: ' + device.deviceId);
+})
+```
+
+### getDeviceResolutions
+
+Return a list of supported resolutions for the given webcam (`deviceId`).
+
+
+**Parameters**
+
+| Name | Type | Required | Description |
+| -: | - | - | - |
+| `deviceId` | `string` | <span className="required-arg">required</span> | Device ID to be checked. |
+
+**Returns**
+
+`Promise<Array>` - A Promise object resolved with a list of supported resolutions.
+
+**Examples**
+
+> Check both audio and video permissions.
+
+```javascript
+// within an async function ..
+const resolutions = await client.getDeviceResolutions('d346d0f78627e3b808cdf0c2bc0b25b4539848ecf852ff03df5ac7545f4f5398')
+
+[
+  {
+    "resolution": "320x240",
+    "width": 320,
+    "height": 240
+  },
+  {
+    "resolution": "640x360",
+    "width": 640,
+    "height": 360
+  },
+  {
+    "resolution": "640x480",
+    "width": 640,
+    "height": 480
+  },
+  {
+    "resolution": "1280x720",
+    "width": 1280,
+    "height": 720
+  }
+]
+```
+
+### getDevices
+
+Return all devices supported by the browser.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`Promise<MediaDeviceInfo[]>` - A Promise object resolved with a list of [MediaDeviceInfo](https://developer.mozilla.org/en-US/docs/Web/API/MediaDeviceInfo).
+
+**Examples**
+
+> List all devices.
+
+```javascript
+// within an async function ..
+const devices = await client.getDevices()
+devices.forEach(device => {
+  console.log(device.kind + ': ' + device.label + ' id: ' + device.deviceId);
+})
+```
+
+### getVideoDevices
+
+Return all `videoinput` devices supported by the browser.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`Promise<MediaDeviceInfo[]>` - A Promise object resolved with a list of [MediaDeviceInfo](https://developer.mozilla.org/en-US/docs/Web/API/MediaDeviceInfo).
+
+**Examples**
+
+> List webcams.
+
+```javascript
+// within an async function ..
+const devices = await client.getVideoDevices()
+devices.forEach(device => {
+  console.log(device.kind + ': ' + device.label + ' id: ' + device.deviceId);
+})
+```
+
+### newCall
+
+Make a new outbound call.
+
+**Parameters**
+
+| Name | Type | Required | Description |
+| -: | - | - | - |
+| `options` | `object` | <span className="required-arg">required</span> | Object with the following properties: |
+| `destinationNumber` | `string` | <span className="required-arg">required</span> | Extension to dial. |
+| `callerNumber` | `string` | <span className="optional-arg">optional</span> | Number to use as the caller ID when dialling out to a phone number.<br />_Must be a SignalWire number that you own._ |
+| `id` | `string` | <span className="optional-arg">optional</span> | The identifier of the Call. |
+| `localStream` | `string` | <span className="optional-arg">optional</span> | If set, the Call will use this stream instead of retrieving a new one. Useful if you already have a MediaStream from a `canvas.captureStream()` or a screen share extension. |
+| `localElement` | `string` | <span className="optional-arg">optional</span> | Overrides client's default `localElement`. |
+| `remoteElement` | `string` | <span className="optional-arg">optional</span> | Overrides client's default `remoteElement`. |
+| `iceServers` | `RTCIceServers[]` | <span className="optional-arg">optional</span> | Overrides client's default `iceServers`. |
+| `audio` | `MediaStreamConstraints` | <span className="optional-arg">optional</span> | Overrides client's default `audio` constraints. |
+| `video` | `MediaStreamConstraints` | <span className="optional-arg">optional</span> | Overrides client's default `video` constraints. |
+| `useStereo` | `boolean` | <span className="optional-arg">optional</span> | Use stereo audio instead of mono. |
+| `micId` | `string` | <span className="optional-arg">optional</span> | `deviceId` to use as microphone. <br/>_Overrides the client's default one._ |
+| `camId` | `string` | <span className="optional-arg">optional</span> | `deviceId` to use as webcam. <br/>_Overrides the client's default one._ |
+| `speakerId` | `string` | <span className="optional-arg">optional</span> | `deviceId` to use as speaker. <br/>_Overrides the client's default one._ |
+| `onNotification` | `string` | <span className="optional-arg">optional</span> | Overrides client's default `signalwire.notification` handler for this Call. |
+
+**Returns**
+
+`Promise<Call>` - A Promise fulfilled with the new outbound Call object or rejected with the error.
+
+**Examples**
+
+> Make an outbound call to `+1 202-555-0122` using default values from the Client.
+
+```javascript
+// within an async function ..
+const options = { destinationNumber: '+12025550122' }
+const call = await client.newCall(options).catch(console.error)
+```
+
+### on
+
+Attach an event handler for a specific type of event.
+
+**Parameters**
+
+| Name | Type | Required | Description |
+| -: | - | - | - |
+| `event` | `string` | <span className="required-arg">required</span> | Event name. Full list of events [`Relay` Events](#events) |
+| `handler` | `function` | <span className="required-arg">required</span> | Function to call when the event comes. |
+
+**Returns**
+
+[`Relay`](#) - The client object itself.
+
+**Examples**
+
+> Subscribe to the `signalwire.ready` and `signalwire.error` events.
+
+```javascript
+client.on('signalwire.ready', (client) => {
+  // Your client is ready!
+}).on('signalwire.error', (error) => {
+  // Got an error...
+})
+```
+
+### off
+
+Remove an event handler that were attached with `.on()`. If no `handler` parameter is passed, all listeners for that `event` will be removed.
+
+**Parameters**
+
+| Name | Type | Required | Description |
+| -: | - | - | - |
+| `event` | `string` | <span className="required-arg">required</span> | Event name. Full list of events [`Relay` Events](#events) |
+| `handler` | `function` | <span className="optional-arg">optional</span> | Function to remove. <br /> _Note: `handler` will be removed from the stack by reference so make sure to use the same reference in both `.on()` and `.off()` methods._ |
+
+**Returns**
+
+[`Relay`](#) - The client object itself.
+
+**Examples**
+
+> Subscribe to the `signalwire.error` and then, remove the event handler.
+
+```javascript
+const errorHandler = (error) => {
+  // Log the error..
+}
+
+client.on('signalwire.error', errorHandler)
+
+// .. later
+client.off('signalwire.error', errorHandler)
+```
+
+### refreshDevices
+
+> **DEPRECATED:** Use [`getDevices`](#getdevices) instead.
+
+Refresh the devices and return a Promise fulfilled with the new `devices`.
+
+**Parameters**
+
+_None_
+
+**Returns**
+
+`Promise<devices>` - New devices object.
+
+**Examples**
+
+> Refresh client's devices with async/await syntax.
+
+```javascript
+// within an async function
+const devices = await client.refreshDevices()
+```
+
+#### refreshToken
+
+When the JWT is going to expire, the Client dispatch a notification with type `refreshToken` that allows you to refresh the token and keep your session alive.
+
+**Parameters**
+
+| Name | Type | Required | Description |
+| -: | - | - | - |
+| `token` | `string` | <span className="required-arg">required</span> | New JWT to keep your session alive. |
+
+**Returns**
+
+`Promise<void>`
+
+**Examples**
+
+> Listen for all notifications and, on `refreshToken`, fetch a new JWT from your backend and update the token on the client.
+
+```javascript
+client.on('signalwire.notification', function(notification) {
+  switch (notification.type) {
+
+    case 'refreshToken':
+      // Take a new token from your server...
+      xhrRequestToRefreshYourJWT().then(async (newToken) => {
+        await client.refreshToken(newToken).catch(console.error)
+      })
+    break
+
+  }
+})
+```
+
+### setAudioSettings
+
+You can set the default `audio` constraints for your client. See [here](https://developer.mozilla.org/en-US/docs/Web/API/MediaTrackConstraints#Properties_of_audio_tracks) for further details.
+
+> **Note:** It's a common behaviour, in WebRTC applications, to persist devices user's selection to then reuse them across visits.<br/>Due to a Webkit's security protocols, Safari generates random `deviceId` on each page load.<br/>To avoid this _issue_ you can specify two additional properties (`micId` and `micLabel`) in the `constraints` input parameter.<br/>The client will use these values to assure the microphone you want to use is available by matching both `id` and `label` with the device list retrieved from the browser.
+
+**Parameters**
+
+| Name | Type | Required | Description |
+| -: | - | - | - |
+| `constraints` | `MediaTrackConstraints` | <span className="required-arg">required</span> | `MediaTrackConstraints` object with the addition of `micId` and `micLabel`. |
+
+**Returns**
+
+`Promise<MediaTrackConstraints>` - Audio constraints applied to the client.
+
+**Examples**
+
+> Set microphone by `id` and `label` with the `echoCancellation` flag turned off.
+
+```javascript
+// within an async function
+const constraints = await client.setAudioSettings({
+  micId: '229d4c8838a2781e3668eb173fea2622b34fbf6a9deec19ee5caeb0916839520',
+  micLabel: 'Internal Microphone (Built-in)',
+  echoCancellation: false
+})
+```
+
+### setVideoSettings
+
+You can set the default `video` constraints for your client. See [here](https://developer.mozilla.org/en-US/docs/Web/API/MediaTrackConstraints#Properties_of_video_tracks) for further details.
+
+> **Note:** It's a common behaviour, in WebRTC applications, to persist devices user's selection to then reuse them across visits.<br/>Due to a Webkit's security protocols, Safari generates random `deviceId` on each page load.<br/>To avoid this _issue_ you can specify two additional properties (`camId` and `camLabel`) in the `constraints` input parameter.<br/>The client will use these values to assure the webcam you want to use is available by matching both `id` and `label` with the device list retrieved from the browser.
+
+
+**Parameters**
+
+| Name | Type | Required | Description |
+| -: | - | - | - |
+| `constraints` | `MediaTrackConstraints` | <span className="required-arg">required</span> | `MediaTrackConstraints` object with the addition of `camId` and `camLabel`. |
+
+**Returns**
+
+`Promise<MediaTrackConstraints>` - Video constraints applied to the client.
+
+**Examples**
+
+> Set webcam by `id` and `label` with 720p resolution.
+
+```javascript
+// within an async function
+const constraints = await client.setVideoSettings({
+  camId: '229d4c8838a2781e3668eb173fea2622b34fbf6a9deec19ee5caeb0916839520',
+  camLabel: 'Internal Webcam (Built-in)',
+  width: 1080,
+  height: 720
+})
+```
+
+## Events
+
+All available events you can attach a listener on.
+
+| Name | Description |
+| - | - |
+| `signalwire.ready` | The session has been established and all other methods can now be used. |
+| `signalwire.error` | There is an error dispatch at the session level. |
+| `signalwire.notification` | A notification from SignalWire. Notifications can refer to calls or session updates. |
+| `signalwire.socket.open` | The websocket is open. However, you have not yet been authenticated. |
+| `signalwire.socket.error` | The websocket gave an error. |
+| `signalwire.socket.message` | The client has received a message from the websocket. |
+| `signalwire.socket.close` | The websocket is closing. |

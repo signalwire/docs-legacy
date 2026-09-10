@@ -1,0 +1,205 @@
+---
+title: "CallCollect"
+slug: /node/reference/voice/call-collect
+sidebar_label: CallCollect
+description: CallCollect object reference for collecting user input during voice calls. Gather DTMF digits and speech input with configurable prompts and timeouts.
+toc_max_heading_level: 3
+---
+
+[callcollect-5]: /docs/server-sdk/v3/node/reference/voice/call-collect
+[link]: #type
+[voice-call]: /docs/server-sdk/v3/node/reference/voice/call/collect
+
+Represents a current or past collect session in a call. You can obtain instances of this class by starting at Collect with the following method:
+
+- [`Call.collect`][voice-call]
+
+#### Example
+
+Collecting a PIN with keypad input from the user, then waiting for a result before proceeding with the next instructions.
+
+```js
+import { Voice } from "@signalwire/realtime-api";
+
+const client = new Voice.Client({
+  project: "<project-id>",
+  token: "<api-token>",
+  topics: ["office"],
+});
+
+const call = await client.dialPhone({
+  from: "+YYYYYYYYYY",
+  to: "+XXXXXXXXXX",
+});
+
+// start Collect
+const collect = await call.collect({
+  digits: {
+    max: 5,
+    digitTimeout: 4,
+    terminators: "#*",
+  },
+});
+
+await call.playTTS({
+  text: "Please enter your PIN",
+});
+
+const { digits } = await collect.ended();
+
+console.log("PIN collected:", digits);
+```
+
+## Properties
+
+### confidence
+
+Confidence level for the speech recognition result (if [`type`][link] is `"speech"`), from 0 to 100. For example, `83.2`.
+
+**Syntax:** `CallCollect.confidence()`
+
+**Returns:** `number`
+
+---
+
+### digits
+
+The digits that have been collected (if [`type`][link] is `"digit"`). For example, `"12345"`.
+
+**Syntax:** `CallCollect.digits()`
+
+**Returns:** `string`
+
+---
+
+### id
+
+The unique id for this collect session.
+
+**Syntax:** `CallCollect.id()`
+
+**Returns:** `string`
+
+---
+
+### reason
+
+Alias for [`type`][link], in case of errors. Use this field to check the reason of the error.
+
+**Syntax:** `CallCollect.reason()`
+
+**Returns:** `"no_match"` | `"no_input"` | `"error"`
+
+---
+
+### terminator
+
+The terminator used to complete the collect (if [`type`][link] is `"digit"`). For example, `"#"`.
+
+**Syntax:** `CallCollect.terminator()`
+
+**Returns:** `string`
+
+---
+
+### text
+
+The text that has been collected (if [`type`][link] is `"speech"`). For example, `"hello who's there"`.
+
+**Syntax:** `CallCollect.text()`
+
+**Returns:** `string`
+
+---
+
+### type
+
+The type of this collect session.
+
+**Syntax:** `CallCollect.type()`
+
+**Returns:** `"error"` | `"no_input"` | `"no_match"` | `"digit"` | `"speech"`
+
+## Methods
+
+### ended
+
+- **ended**(): `Promise<CallCollect>` - See [CallCollect][callcollect-5] for more details.
+
+Returns a promise that is resolved only after this collect finishes (or is stopped).
+
+#### Returns
+
+`Promise<CallCollect>` - See [CallCollect][callcollect-5] for more details.
+
+#### Example
+
+```js
+const collect = await call.collect({
+  digits: {
+    max: 4,
+    digitTimeout: 10,
+    terminators: "#",
+  },
+  partialResults: true,
+  sendStartOfInput: true,
+});
+await collect.ended();
+```
+
+---
+
+### startInputTimers
+
+- **startInputTimers**(): `Promise<CallCollect>` - See [CallCollect][callcollect-5] for more details.
+
+Start the `initialTimeout` timer on an active collect.
+
+#### Returns
+
+`Promise<CallCollect>` - See [CallCollect][callcollect-5] for more details.
+
+#### Example
+
+```js
+const collect = await call.collect({
+  digits: {
+    max: 4,
+    digitTimeout: 10,
+    terminators: "#",
+  },
+  partialResults: true,
+  sendStartOfInput: true,
+  startInputTimers: false,
+});
+// You can add some logic before starting input timers.
+await collect.startInputTimers();
+```
+
+---
+
+### stop
+
+- **stop**(): `Promise<CallCollect>` - See [CallCollect][callcollect-5] for more details.
+
+Stops the collect session.
+
+#### Returns
+
+`Promise<CallCollect>` - See [CallCollect][callcollect-5] for more details.
+
+#### Example
+
+```js
+const collect = await call.collect({
+  speech: {
+    endSilenceTimeout: 2,
+    speechTimeout: 10,
+    language: "en-US",
+    hints: ["sales", "support", "representative"],
+  },
+  partialResults: true,
+  sendStartOfInput: true,
+});
+await collect.stop();
+```

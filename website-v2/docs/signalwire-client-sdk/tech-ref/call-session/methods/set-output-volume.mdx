@@ -1,0 +1,126 @@
+---
+title: setOutputVolume
+slug: /call-session/setoutputvolume
+---
+
+import APIField from '@site/src/components/APIField';
+
+Adjusts the speaker (output) volume level for yourself or another participant.
+
+## Signature
+
+```typescript
+setOutputVolume(params: MemberCommandWithVolumeParams): Promise<void>
+```
+
+## Parameters
+
+<APIField name="params" type="MemberCommandWithVolumeParams" required>
+  Volume configuration object.
+</APIField>
+
+<APIField name="params.volume" type="number" required>
+  Volume level in decibels (dB). Typically ranges from -50 to 50.
+</APIField>
+
+<APIField name="params.memberId" type="string" default="Your member ID">
+  Member to control. Omit to control your own speakers, provide specific ID to control another member.
+</APIField>
+
+## Returns
+
+**Type:** `Promise<void>`
+
+## Important Notes
+
+**Volume Range:**
+- Volume is specified in **decibels (dB)**
+- Typical range: **-50dB to +50dB**
+- `0dB` = default/neutral volume (no adjustment)
+- Negative values = reduce volume
+- Positive values = increase volume
+- Extreme values may cause audio distortion
+
+**Recommended ranges:**
+- For reduction: `-20dB to 0dB`
+- For boost: `0dB to +20dB`
+
+**Input vs Output Volume:**
+
+| Method | Effect | Use Case |
+|--------|--------|----------|
+| `setInputVolume()` | Adjusts **microphone volume** (how loud you sound to others) | Control how loud your microphone is |
+| `setOutputVolume()` | Adjusts **speaker volume** (how loud others sound to you) | Control how loud you hear others |
+
+```typescript
+// Make yourself quieter to others
+await call.setInputVolume({ volume: -10 })
+
+// Make others quieter to you
+await call.setOutputVolume({ volume: -10 })
+```
+
+**Volume Persistence:**
+- Volume settings persist for the duration of the call
+- Settings do not carry over to new calls
+- Each member's volume can be adjusted independently
+
+**Real-time Adjustment:**
+- Volume changes take effect immediately
+- No need to mute/unmute or restart audio streams
+- Can be called multiple times to fine-tune levels
+
+## Examples
+
+### Adjust your own speaker volume
+
+```typescript
+// Decrease your speaker volume by 10dB (others sound quieter to you)
+await call.setOutputVolume({ volume: -10 })
+
+// Increase your speaker volume by 10dB (others sound louder to you)
+await call.setOutputVolume({ volume: 10 })
+
+// Reset to default volume (0dB)
+await call.setOutputVolume({ volume: 0 })
+```
+
+### Adjust another member's speaker volume
+
+```typescript
+await call.setOutputVolume({
+  memberId: 'member-123',
+  volume: -10
+})
+```
+
+### Volume control UI
+
+```typescript
+// HTML: <input type="range" id="speakerVolume" min="-50" max="50" value="0">
+
+const volumeSlider = document.getElementById('speakerVolume') as HTMLInputElement
+
+volumeSlider.addEventListener('change', async (e) => {
+  const volume = parseInt(e.target.value)
+  await call.setOutputVolume({ volume })
+})
+```
+
+### User volume preferences
+
+```typescript
+const SPEAKER_VOLUME_KEY = 'speakerVolume'
+
+// Load saved preference
+const savedVolume = localStorage.getItem(SPEAKER_VOLUME_KEY)
+if (savedVolume) {
+  await call.setOutputVolume({ volume: parseInt(savedVolume) })
+}
+
+// Save preference when user adjusts volume
+async function setAndSaveVolume(volume: number) {
+  await call.setOutputVolume({ volume })
+  localStorage.setItem(SPEAKER_VOLUME_KEY, volume.toString())
+}
+```

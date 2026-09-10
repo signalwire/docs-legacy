@@ -1,0 +1,422 @@
+---
+title: join_conference
+slug: /swml/reference/join-conference
+description: Join an ad-hoc audio conference with RELAY and CXML calls.
+toc_max_heading_level: 3
+---
+
+[statuscallbacks]: #statuscallbacks
+
+Join an ad-hoc audio conference started on either the SignalWire or Compatibility API.
+This method allows you to connect the current call to a named conference where multiple participants can communicate simultaneously.
+
+## **Properties**
+
+<ParamField path="join_conference" type="object" required={true}>
+  An object that accepts the following properties.
+</ParamField>
+
+<Indent>
+
+<ParamField path="join_conference.name" type="string" required={true}>
+  Name of conference.
+</ParamField>
+
+
+<ParamField path="join_conference.muted" type="boolean" default="false">
+  Whether to join the conference in a muted state. If set to `true`, the participant will be muted upon joining.
+</ParamField>
+
+
+<ParamField path="join_conference.beep" type="string" default="true">
+  Sets the behavior of the beep sound when joining or leaving the conference.
+</ParamField>
+
+**Possible Values**: `true`, `false`, `onEnter`, `onExit`
+
+<ParamField path="join_conference.start_on_enter" type="boolean" default="true">
+  Starts the conference when the main participant joins. This means the start action will not wait on more participants to join before starting.
+</ParamField>
+
+
+<ParamField path="join_conference.end_on_exit" type="boolean" default="false">
+  Ends the conference when the main participant leaves. This means the end action will not wait on more participants to leave before ending.
+</ParamField>
+
+
+<ParamField path="join_conference.wait_url" type="string">
+  A URL to fetch SWML while waiting for the conference to start (before a `start_on_enter` participant joins). SignalWire sends a POST request with the standard [document-fetching webhook](/docs/swml#document-fetching-webhook) body. The response should be a SWML document containing audio to play (e.g., hold music). Default hold music will be played if not set.
+</ParamField>
+
+
+<ParamField path="join_conference.max_participants" type="integer" default="100000">
+  The maximum number of participants allowed in the conference. If the limit is reached, new participants will not be able to join.
+</ParamField>
+
+
+<ParamField path="join_conference.record" type="string" default="do-not-record">
+  Enables or disables recording of the conference.
+</ParamField>
+
+**Possible Values**: `do-not-record`, `record-from-start`
+
+<ParamField path="join_conference.region" type="string">
+  Specifies the geographical region where the conference will be hosted.
+</ParamField>
+
+
+<ParamField path="join_conference.trim" type="string" default="trim-silence">
+  If set to `trim-silence`, it will remove silence from the start of the recording. If set to `do-not-trim`, it will keep the silence.
+</ParamField>
+
+**Possible Values**: `trim-silence`, `do-not-trim`
+
+<ParamField path="join_conference.coach" type="string">
+  Coach accepts a [call SID](/docs/platform/what-is-a-sid) of a call that is currently connected to an in-progress conference. Specifying a call SID that does not exist or is no longer connected will result in a failure.
+</ParamField>
+
+
+<ParamField path="join_conference.status_callback_event" type="string">
+  The events to listen for and send to the status callback URL.
+</ParamField>
+
+**Possible Values**: `start`, `end`, `join`, `leave`, `mute`, `hold`, `modify`, `speaker`, `announcement`
+
+<ParamField path="join_conference.status_callback" type="string">
+  The URL to which status events will be sent. This URL must be publicly accessible and able to handle HTTP requests. Learn more about [status callbacks][statuscallbacks].
+</ParamField>
+
+
+<ParamField path="join_conference.status_callback_method" type="string" default="POST">
+  The HTTP method to use when sending status events to the status callback URL.
+</ParamField>
+
+**Possible Values**: `GET`, `POST`
+
+<ParamField path="join_conference.recording_status_callback" type="string">
+  The URL to which recording status events will be sent. This URL must be publicly accessible and able to handle HTTP requests. Learn more about [status callbacks][statuscallbacks].
+</ParamField>
+
+
+<ParamField path="join_conference.recording_status_callback_method" type="string" default="POST">
+  The HTTP method to use when sending recording status events to the recording status callback URL.
+</ParamField>
+
+**Possible Values**: `GET`, `POST`
+
+<ParamField path="join_conference.recording_status_callback_event" type="string">
+  The events to listen for and send to the recording status callback URL.
+</ParamField>
+
+**Possible Values**: `in-progress`, `completed`, `absent`
+
+<ParamField path="join_conference.result" type="object">
+  Allows the user to specify a custom action to be executed when the conference result is returned (typically when it has ended). The actions can a `switch` object or a `cond` array. The `switch` object allows for conditional execution based on the result of the conference, while the `cond` array allows for multiple conditions to be checked in sequence. If neither is provided, the default action will be to end the conference.
+</ParamField>
+
+</Indent>
+
+## **Variables**
+
+<ParamField path="join_conference_result" type="string">
+  The result of the conference join attempt. Possible values: `completed` (successfully joined and left the conference), `answered` (successfully joined the conference), `no-answer` (failed to join due to no answer), `failed` (failed to join due to an error), `canceled` (join attempt was canceled).
+</ParamField>
+
+
+<ParamField path="return_value" type="string">
+  Contains the same value as `join_conference_result` for use in conditional logic.
+</ParamField>
+
+
+## **StatusCallbacks**
+
+A POST request will be sent to `status_callback` with a JSON payload for events specified in `status_callback_event`. Both conference and recording events share the same `calling.conference` event type; the specific event is identified by `params.status`.
+
+<ParamField path="event_type" type="string">
+  The type of event. Always `calling.conference`.
+</ParamField>
+
+
+<ParamField path="event_channel" type="string">
+  The channel for the event, includes the SWML session ID.
+</ParamField>
+
+
+<ParamField path="timestamp" type="number">
+  Unix timestamp (float) when the event was generated.
+</ParamField>
+
+
+<ParamField path="project_id" type="string">
+  The project ID associated with the call.
+</ParamField>
+
+
+<ParamField path="space_id" type="string">
+  The Space ID associated with the call.
+</ParamField>
+
+
+<ParamField path="params" type="object">
+  An object containing conference-specific parameters.
+</ParamField>
+
+<Indent>
+
+<ParamField path="params.call_id" type="string">
+  The call ID of the participant.
+</ParamField>
+
+
+<ParamField path="params.name" type="string">
+  The name of the conference.
+</ParamField>
+
+
+<ParamField path="params.conference_id" type="string">
+  The unique ID of the conference.
+</ParamField>
+
+
+<ParamField path="params.status" type="string">
+  The conference event. **Valid values:** `conference-start`, `conference-end`, `participant-join`, `participant-leave`, `participant-mute`, `participant-unmute`, `participant-hold`, `participant-unhold`, `participant-speech-start`, `participant-speech-stop`, `participant-modify`, `record-start`, `record-pause`, `record-resume`, `record-stop`.
+</ParamField>
+
+
+<ParamField path="params.size" type="number">
+  The number of participants currently in the conference.
+</ParamField>
+
+
+<ParamField path="params.node_id" type="string">
+  The node identifier.
+</ParamField>
+
+
+<ParamField path="params.segment_id" type="string">
+  The segment ID for the call. Present when available.
+</ParamField>
+
+
+<ParamField path="params.region" type="string">
+  The geographical region of the conference.
+</ParamField>
+
+
+<ParamField path="params.tag" type="string">
+  The tag associated with the call. Present when set.
+</ParamField>
+
+
+<ParamField path="params.muted" type="boolean">
+  Whether the participant is muted. Present on participant events.
+</ParamField>
+
+
+<ParamField path="params.hold" type="boolean">
+  Whether the participant is on hold. Present on participant events.
+</ParamField>
+
+
+<ParamField path="params.start_on_join" type="boolean">
+  Whether the participant starts the conference on join.
+</ParamField>
+
+
+<ParamField path="params.end_on_leave" type="boolean">
+  Whether the participant ends the conference on leave.
+</ParamField>
+
+
+<ParamField path="params.coaching" type="boolean">
+  Whether the participant is in coaching mode. Present on participant events.
+</ParamField>
+
+
+<ParamField path="params.recording_url" type="string">
+  URL to the conference recording. Present on `conference-end` and `record-stop` events when a recording exists.
+</ParamField>
+
+
+<ParamField path="params.recording_file_size" type="number">
+  Recording file size in bytes. Present on `conference-end` and `record-stop` events.
+</ParamField>
+
+
+<ParamField path="params.recording_duration" type="number">
+  Recording duration in seconds. Present on `conference-end` and `record-stop` events.
+</ParamField>
+
+
+<ParamField path="params.reason_ended" type="string">
+  The reason the conference ended. Present on `conference-end` events.
+</ParamField>
+
+
+<ParamField path="params.call_id_ending_conf" type="string">
+  The call ID of the participant that ended the conference. Present on `conference-end` events.
+</ParamField>
+
+</Indent>
+
+#### Participant join event example
+
+```json
+{
+  "event_type": "calling.conference",
+  "event_channel": "swml:xxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+  "timestamp": 1640000000.123,
+  "project_id": "xxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+  "space_id": "xxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+  "params": {
+    "call_id": "xxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "name": "my_conference",
+    "conference_id": "xxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "status": "participant-join",
+    "size": 3,
+    "muted": false,
+    "hold": false,
+    "start_on_join": true,
+    "end_on_leave": false,
+    "coaching": false
+  }
+}
+```
+
+#### Conference end event example
+
+```json
+{
+  "event_type": "calling.conference",
+  "event_channel": "swml:xxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+  "timestamp": 1640000000.456,
+  "project_id": "xxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+  "space_id": "xxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+  "params": {
+    "call_id": "xxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "name": "my_conference",
+    "conference_id": "xxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "status": "conference-end",
+    "size": 0,
+    "reason_ended": "last-participant-left",
+    "call_id_ending_conf": "xxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "recording_url": "https://your-space.signalwire.com/api/v1/recordings/rec-uuid/download",
+    "recording_duration": 300,
+    "recording_file_size": 4800000
+  }
+}
+```
+
+---
+
+## **Examples**
+
+### Basic Conference Join
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - join_conference:
+        name: "team_meeting"
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "join_conference": {
+          "name": "team_meeting"
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+### Conference with Custom Settings
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - join_conference:
+        name: "team_meeting"
+        muted: false
+        beep: "onEnter"
+        start_on_enter: true
+        max_participants: 10
+        record: "record-from-start"
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "join_conference": {
+          "name": "team_meeting",
+          "muted": false,
+          "beep": "onEnter",
+          "start_on_enter": true,
+          "max_participants": 10,
+          "record": "record-from-start"
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>
+
+### Conference with Status Callbacks
+
+<CodeBlocks>
+<CodeBlock title="YAML">
+```yaml
+version: 1.0.0
+sections:
+  main:
+    - join_conference:
+        name: "support_call"
+        status_callback_event: "join"
+        status_callback: "https://example.com/conference-status"
+        status_callback_method: "POST"
+        recording_status_callback: "https://example.com/recording-status"
+        recording_status_callback_event: "completed"
+```
+</CodeBlock>
+<CodeBlock title="JSON">
+```json
+{
+  "version": "1.0.0",
+  "sections": {
+    "main": [
+      {
+        "join_conference": {
+          "name": "support_call",
+          "status_callback_event": "join",
+          "status_callback": "https://example.com/conference-status",
+          "status_callback_method": "POST",
+          "recording_status_callback": "https://example.com/recording-status",
+          "recording_status_callback_event": "completed"
+        }
+      }
+    ]
+  }
+}
+```
+</CodeBlock>
+</CodeBlocks>

@@ -1,0 +1,96 @@
+---
+title: "prompt"
+slug: /node/reference/voice/call/prompt
+description: prompt method for the Call class.
+toc_max_heading_level: 3
+---
+
+[callprompt-7]: /docs/server-sdk/v3/node/reference/voice/call-prompt
+[types-1]: /docs/server-sdk/v3/node/reference/voice/types#collectdigitsconfig
+[types-2]: /docs/server-sdk/v3/node/reference/voice/types#collectspeechconfig
+[voice-call-1]: /docs/server-sdk/v3/node/reference/voice/call/prompt-ringtone
+[voice-call-2]: /docs/server-sdk/v3/node/reference/voice/call/prompt-tts
+[voice-call]: /docs/server-sdk/v3/node/reference/voice/call/prompt-audio
+[voiceplaylist-4]: /docs/server-sdk/v3/node/reference/voice/playlist
+
+### prompt
+
+- **prompt**(`params`): `Promise<CallPrompt>` - See [CallPrompt][callprompt-7] for more details.
+
+Generic method to prompt the user for input. Please see [promptAudio][voice-call], [promptRingtone][voice-call-1], [promptTTS][voice-call-2] for the more specific methods.
+
+#### Parameters
+
+| Name                     | Type                                                     | Description                                                                                                                        |
+|:-------------------------|:---------------------------------------------------------|:-----------------------------------------------------------------------------------------------------------------------------------|
+| `params`                 | `Object`                                                 | -                                                                                                                                  |
+| `params.playlist`        | [`VoicePlaylist`][voiceplaylist-4]                   | A media playlist to play.                                                                                                          |
+| `params.digits?`         | [`CollectDigitsConfig`][types-1] | Configuration for collecting digits. You must either set this, or `speech`.                                                        |
+| `params.speech?`         | [`CollectSpeechConfig`][types-2] | Configuration for collecting speech. You must either set this, or `digits`. Pass an empty object to use the default configuration. |
+| `params.initialTimeout?` | `number`                                                 | Initial timeout in seconds. Default is 4 seconds.                                                                                  |
+
+#### Returns
+
+`Promise<CallPrompt>` - See [CallPrompt][callprompt-7] for more details.
+
+#### Examples
+
+Prompting for digits and waiting for a result:
+
+```js
+const prompt = await call.prompt({
+  playlist: new Voice.Playlist().add(
+    Voice.Playlist.TTS({ text: "Please enter your PIN" })
+  ),
+  digits: {
+    max: 5,
+    digitTimeout: 2,
+    terminators: "#*",
+  },
+});
+const { type, digits, terminator } = await prompt.ended();
+```
+
+Prompting for speech and waiting for a result:
+
+```js
+const prompt = await call.prompt({
+  // prettier-ignore
+  playlist: new Voice.Playlist().add(
+    Voice.Playlist.TTS({ text: "Please say your PIN" })
+  ),
+  speech: {
+    endSilenceTimeout: 1,
+    speechTimeout: 60,
+    language: "en-US",
+    hints: [],
+  },
+});
+
+const { type, speech } = await prompt.ended();
+```
+
+Prompting for speech and listening for results using the events:
+
+```js
+call.on("prompt.started", (p) => {
+  console.log("prompt.started", p.id);
+});
+call.on("prompt.updated", (p) => {
+  console.log("prompt.updated", p.id);
+});
+call.on("prompt.failed", (p) => {
+  console.log("prompt.failed", p.id, p.reason);
+});
+call.on("prompt.ended", (p) => {
+  console.log("prompt.ended", p.id, p.text);
+});
+
+const prompt = await call.prompt({
+  // prettier-ignore
+  playlist: new Voice.Playlist().add(
+    Voice.Playlist.TTS({ text: "Please say your PIN" })
+  ),
+  speech: {},
+});
+```
