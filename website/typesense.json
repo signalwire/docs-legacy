@@ -23,13 +23,13 @@
       "url": "https://developer.signalwire.com/compatibility-api/cxml",
       "selectors_key": "cxml-core",
       "tags": ["cxml", "core-guide"],
-      "priority": 1.0
+      "priority": 0.5
     },
     {
       "url": "https://developer.signalwire.com/compatibility-api",
       "selectors_key": "compatibility-api-core",
       "tags": ["compatibility-api", "core-guide"],
-      "priority": 1.0
+      "priority": 0.5
     },
     {
       "url": "https://developer.signalwire.com/voice",
